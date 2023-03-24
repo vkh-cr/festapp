@@ -9,8 +9,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2 # Only works with v2
-      - uses: subosito/flutter-action@v1
-      - uses: erickzanardo/flutter-gh-pages@v7
+      - uses: actions/checkout@v3
+      - uses: subosito/flutter-action@v2
         with:
-          baseHref: /av-app/
+          channel: 'stable'
+      - run: flutter pub get
+      - run: flutter test
+      - run: flutter build web --base-href "/av-app/"
