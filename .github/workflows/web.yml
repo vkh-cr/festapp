@@ -15,4 +15,4 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter test
-      - run: flutter build web --base-href "/av-app/"
+      - run: flutter build web --base-href /${{ github.event.repository.name }}/
