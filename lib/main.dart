@@ -83,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: SvgPicture.asset(
             width: 250,
             semanticsLabel: 'Absolventský Velehrad',
-            'images/avlogo.svg',
+            'assets/images/avlogo.svg',
           )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48.0),
