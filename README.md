@@ -19,6 +19,10 @@ Nadstavba:
 Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwWWI7HHs8Nh1jtiUrCaHa/App-First-draft?node-id=0%3A1&t=xkYTZ3Mz2eovnbQo-1)
 
 
+## Odkaz na live verzi aplikace
+
+[Odkaz](https://vkh-cr.github.io/av-app/#/)
+
 
 ## Vývoj aplikace
 
