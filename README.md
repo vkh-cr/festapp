@@ -1,14 +1,16 @@
 # Aplikace Absolventský Velehrad
 
 Repozitář pro vývoj aplikace AV -> mobilní aplikace pro účastníky a dobrovolníky Absolventského Velehradu.
+
 Základní funkce aplikace:
-- Personalizovaná aplikace -> přihlášení účastníka/dobrovolníka do aplikace. Účastník se může přihlásit do aplikace a tím získává možnost přihlásit se na programy a zobrazit si je.
+- Personalizovaná aplikace:
+  -  přihlášení účastníka/dobrovolníka do aplikace. Účastník se může přihlásit do aplikace a tím získává možnost přihlásit se na programy a zobrazit si je.
 - Obsah aplikace:
   - Program: zobrazení celého programu AV a programu, na který se účastník zaregistroval + možnost registrace na program
   - Ohlášky: oznámení/aktuality AV (pokud oznámení přijde, zobrazí se v záhlaví aplikace)
   - Mapa: důležitá místa AV, na kterých probíhá program
   - Info: základní informace o ubytování, stravování, důležitých kontaktech a obecně o programu
-  - Administrace: je možné zadat a vytvořit program, informace a oznámení
+  - Administrace: je možné zadat a vytvořit program, informace a oznámení, které se zobrazí uživatelům
 
 Nadstavba:
 - pro účastníka, který bude zároveň dobrovolník, bude aplikace obsahovat informace, které souvisí s jeho dobrovolnickou činností (např. vyznačené časové bloky v programu s jeho dobrovolnickou aktivitou; speciální oznámení pro dobrovolníky, apod.)
@@ -20,7 +22,7 @@ Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwW
 
 ## Odkaz na live verzi aplikace
 
-[Apliakce Absolventský Velehrad](https://vkh-cr.github.io/av-app/#/)
+[Aplikace Absolventský Velehrad](https://vkh-cr.github.io/av-app/#/)
 
 
 ## Vývoj aplikace
