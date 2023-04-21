@@ -1,5 +1,7 @@
+import 'package:av_app/pages/PlayingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   runApp(const MyApp());
@@ -108,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programmPressed,
+                    onPressed: _programPressed,
                     backgroundColor: primaryBlue1,
                     child: const Icon(Icons.calendar_month),
                   ),// <-- Icon
@@ -119,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programmPressed,
+                    onPressed: _programPressed,
                     backgroundColor: primaryYellow,
                     child: const Icon(Icons.newspaper),
                   ),// <-- Icon
@@ -130,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programmPressed,
+                    onPressed: _programPressed,
                     backgroundColor: primaryRed,
                     child: const Icon(Icons.map),
                   ),// <-- Icon
@@ -141,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programmPressed,
+                    onPressed: _infoPressed,
                     backgroundColor: primaryBlue2,
                     child: const Icon(Icons.info),
                   ),// <-- Icon
@@ -155,10 +157,13 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _programmPressed() {
-    ;
+  void _programPressed() {
+    Fluttertoast.showToast(msg: ("any button was pressed"));
   }
 
+  void _infoPressed(){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+  }
 
 }
 
