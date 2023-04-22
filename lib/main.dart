@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         fontFamily: 'RussoOne',
-        // secondaryHeaderColor: const Color(0xFFBA5D3F), colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch).copyWith(background: backgroundColor)
+        secondaryHeaderColor: const Color(0xFFBA5D3F), colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch).copyWith(background: backgroundColor)
       ),
       home: const MyHomePage(title: 'Absolventský Velehrad'),
     );
