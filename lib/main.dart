@@ -1,4 +1,5 @@
 import 'package:av_app/pages/PlayingPage.dart';
+import 'package:av_app/pages/MapPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+  class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -73,6 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       body: Column(
 
@@ -132,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programPressed,
+                    onPressed: _mapPressed,
                     backgroundColor: primaryRed,
                     child: const Icon(Icons.map),
                   ),// <-- Icon
@@ -163,6 +165,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _infoPressed(){
     Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+  }
+  void _mapPressed(){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const MapPage()));
   }
 
 }
