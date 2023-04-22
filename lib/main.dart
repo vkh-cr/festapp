@@ -3,10 +3,18 @@ import 'package:av_app/pages/PlayingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+
+  await Supabase.initialize(
+    url: 'https://jyghacisbuntbrshhhey.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
+  );
   runApp(const MyApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -47,22 +55,21 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  String futureProgram = "loading...";
+
+  @override
+  void initState() {
+    super.initState();
+    getFirstProgramTitle().then((fp) {
+      setState(() {
+        futureProgram = fp;
+      });
     });
   }
 
@@ -153,9 +160,22 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
         ),
-          )],
+          ),
+              Padding(
+          padding: const EdgeInsets.symmetric(vertical: 48.0),
+          child: Text(futureProgram))
+          ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<String> getFirstProgramTitle() async {
+    var programJson = await supabase
+        .from('events')
+        .select('title')
+        .limit(1)
+        .single();
+    return programJson['title'].toString();
   }
 
   void _programPressed() {
