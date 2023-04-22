@@ -1,5 +1,7 @@
+import 'package:av_app/pages/PlayingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -148,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programPressed,
+                    onPressed: _infoPressed,
                     backgroundColor: primaryBlue2,
                     child: const Icon(Icons.info),
                   ),// <-- Icon
@@ -176,9 +178,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _programPressed() {
-    ;
+    Fluttertoast.showToast(msg: ("any button was pressed"));
   }
 
+  void _infoPressed(){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+  }
 
 }
 
