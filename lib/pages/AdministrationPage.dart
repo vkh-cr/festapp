@@ -36,7 +36,11 @@ class _AdministrationPageState extends State<AdministrationPage> {
           field: "Field1",
           type: PlutoColumnType.text(),
           readOnly: true),
-        PlutoColumn(title: "Title2", field: "Field2", type: PlutoColumnType.text()),
+        PlutoColumn(
+          title: "Title2",
+          field: "Field2",
+          type: PlutoColumnType.text(),
+          readOnly: true),
       ]);
 
       informationData?.forEach((info){
@@ -53,14 +57,18 @@ class _AdministrationPageState extends State<AdministrationPage> {
       body: Container(
         padding: const EdgeInsets.all(30),
         child: PlutoGrid(
-            columns: columns,
-            rows: rows,
-            onChanged: (PlutoGridOnChangedEvent event) {
-              stateManager.notifyListeners();
-            },
-            onLoaded: (PlutoGridOnLoadedEvent event) {
-              stateManager = event.stateManager;
-            },
+          columns: columns,
+          rows: rows,
+          onChanged: (PlutoGridOnChangedEvent event) {
+            stateManager.notifyListeners();
+          },
+          onLoaded: (PlutoGridOnLoadedEvent event) {
+            stateManager = event.stateManager;
+          },
+          rowColorCallback: (rowContext){
+            // return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
+            return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
+          },
             createHeader: (stateManager) => AdministrationHeader(stateManager: stateManager),
         ),
       ),
@@ -78,6 +86,10 @@ class AdministrationHeader extends StatefulWidget {
 }
 
 class _AdministrationHeaderState extends State<AdministrationHeader>{
+
+  bool isAddButtonEnabled = true;
+  bool isSaveButtonVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -89,10 +101,19 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               ElevatedButton(
-                  onPressed: (_reloadDataAsync),
+                  onPressed: _reloadDataAsync,
                   child: const Text('Reload data')),
               ElevatedButton(
-                onPressed: _addRecord,
+                onPressed: isAddButtonEnabled ? _addRow : null,
+                child: const Text('Add record'),
+              ),
+              ElevatedButton(
+                style: isSaveButtonVisible ? null : ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                  foregroundColor: MaterialStateProperty.all(Colors.transparent),
+                  overlayColor: MaterialStateProperty.all(Colors.transparent),
+                ),
+                onPressed: _saveAddedRowAsync,
                 child: const Text('Add record'),
               ),
             ]
@@ -108,16 +129,32 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       plutoRows.add(PlutoRow(cells: {
         'Field1': PlutoCell(value: info.title),
         'Field2': PlutoCell(value: info.description),
-        }
+        },
+        checked: true
       ));
     });
     widget.stateManager.removeAllRows();
     widget.stateManager.appendRows(plutoRows);
+    widget.stateManager.rows.forEach((row) {row.setState(PlutoRowState.none);});
     Fluttertoast.showToast(msg: "DataReloaded");
   }
 
-  void _addRecord(){
+  void _addRow(){
+    setState(() {
+      isAddButtonEnabled = false;
+      isSaveButtonVisible = true;
+    });
+    widget.stateManager.prependNewRows();
+  }
 
-    Fluttertoast.showToast(msg: "Pressed");
+  void _saveAddedRowAsync() async{
+    var row = widget.stateManager.rows.first;
+    try{
+    var title = row.cells.values.firstWhere((cell) => cell.key == "title");
+    }catch(e){
+
+    }
+
+    // var infoData = new Information(title: row.cells, description: description)
   }
 }
