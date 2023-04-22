@@ -1,3 +1,4 @@
+import 'package:av_app/pages/AdministrationPage.dart';
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         fontFamily: 'RussoOne',
-        secondaryHeaderColor: const Color(0xFFBA5D3F), colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch).copyWith(background: backgroundColor)
+        // secondaryHeaderColor: const Color(0xFFBA5D3F), colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch).copyWith(background: backgroundColor)
       ),
       home: const MyHomePage(title: 'Absolventský Velehrad'),
     );
@@ -162,7 +163,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _infoPressed(){
-    Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const AdministrationPage()));
   }
 
 }
