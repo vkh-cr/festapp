@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'pages/LoginPage.dart';
 
 Future<void> main() async {
 
@@ -14,6 +17,10 @@ Future<void> main() async {
 }
 
 final supabase = Supabase.instance.client;
+final secureStorage = new FlutterSecureStorage();
+const REFRESH_TOKEN_KEY = 'refresh';
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -61,10 +68,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   String futureProgram = "loading...";
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    tryAuthUser();
     getFirstProgramTitle().then((fp) {
       setState(() {
         futureProgram = fp;
@@ -160,23 +169,26 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
         ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _loginPressed,
-                      backgroundColor: primaryBlue2,
-                      child: const Icon(Icons.login),
-                    ), // <-- Icon
-                    const Text("Přihlášení"), // <-- Text
-                  ],
-                ),
-              ],
+          Visibility(
+            visible: !isLoggedIn,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      MainPageButton(
+                        onPressed: _loginPressed,
+                        backgroundColor: primaryBlue2,
+                        child: const Icon(Icons.login),
+                      ), // <-- Icon
+                      const Text("Přihlášení"), // <-- Text
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
               Padding(
@@ -185,6 +197,23 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> tryAuthUser() async
+  {
+      if(!await secureStorage.containsKey(key: REFRESH_TOKEN_KEY))
+      {
+        return;
+      }
+      var refresh = await secureStorage.read(key: REFRESH_TOKEN_KEY);
+      var result = await supabase.auth.setSession(refresh.toString());
+      if(result.user != null)
+      {
+        setState(() {
+          isLoggedIn = true;
+        });
+        await secureStorage.write(key: REFRESH_TOKEN_KEY, value: supabase.auth.currentSession!.refreshToken.toString());
+      }
   }
 
   Future<String> getFirstProgramTitle() async {
