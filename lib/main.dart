@@ -1,3 +1,4 @@
+import 'package:av_app/ParseSpreadsheet.dart';
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
@@ -168,6 +169,20 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: const Icon(Icons.login),
                     ), // <-- Icon
                     const Text("Přihlášení"), // <-- Text
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    MainPageButton(
+                      onPressed: () async {
+                        var v = ParseRegistrationsSheet();
+                        v.parse();
+                      },
+                      backgroundColor: primaryBlue2,
+                      child: const Icon(Icons.login),
+                    ), // <-- Icon
+                    const Text("ParseSheet"), // <-- Text
                   ],
                 ),
               ],
