@@ -1,12 +1,19 @@
 import 'package:av_app/pages/PlayingPage.dart';
-import 'package:av_app/pages/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+Future<void> main() async {
+
+  await Supabase.initialize(
+    url: 'https://jyghacisbuntbrshhhey.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
+  );
   runApp(const MyApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -17,19 +24,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Absolventský Velehrad',
       theme: ThemeData(
-          // This is the theme of your application.
-          //
-          // Try running your application with "flutter run". You'll see the
-          // application has a blue toolbar. Then, without quitting the app, try
-          // changing the primarySwatch below to Colors.green and then invoke
-          // "hot reload" (press "r" in the console where you ran "flutter run",
-          // or simply save your changes to "hot reload" in a Flutter IDE).
-          // Notice that the counter didn't reset back to zero; the application
-          // is not restarted.
-          fontFamily: 'RussoOne',
-          secondaryHeaderColor: const Color(0xFFBA5D3F),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(background: backgroundColor)),
+        // This is the theme of your application.
+        //
+        // Try running your application with "flutter run". You'll see the
+        // application has a blue toolbar. Then, without quitting the app, try
+        // changing the primarySwatch below to Colors.green and then invoke
+        // "hot reload" (press "r" in the console where you ran "flutter run",
+        // or simply save your changes to "hot reload" in a Flutter IDE).
+        // Notice that the counter didn't reset back to zero; the application
+        // is not restarted.
+        fontFamily: 'RussoOne',
+        secondaryHeaderColor: const Color(0xFFBA5D3F), colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch).copyWith(background: backgroundColor)
+      ),
       home: const MyHomePage(title: 'Absolventský Velehrad'),
     );
   }
@@ -48,22 +54,21 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  String futureProgram = "loading...";
+
+  @override
+  void initState() {
+    super.initState();
+    getFirstProgramTitle().then((fp) {
+      setState(() {
+        futureProgram = fp;
+      });
     });
   }
 
@@ -77,82 +82,83 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       body: Column(
+
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
+        children: <Widget> [
           Padding(
               padding: const EdgeInsets.all(24.0),
               child: SvgPicture.asset(
-                width: 250,
-                semanticsLabel: 'Absolventský Velehrad',
-                'assets/images/avlogo.svg',
-              )),
+            width: 250,
+            semanticsLabel: 'Absolventský Velehrad',
+            'assets/images/avlogo.svg',
+          )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48.0),
             child: Row(
-              // Column is also a layout widget. It takes a list of children and
-              // arranges them vertically. By default, it sizes itself to fit its
-              // children horizontally, and tries to be as tall as its parent.
-              //
-              // Invoke "debug painting" (press "p" in the console, choose the
-              // "Toggle Debug Paint" action from the Flutter Inspector in Android
-              // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-              // to see the wireframe for each widget.
-              //
-              // Column has various properties to control how it sizes itself and
-              // how it positions its children. Here we use mainAxisAlignment to
-              // center the children vertically; the main axis here is the vertical
-              // axis because Columns are vertical (the cross axis would be
-              // horizontal).
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: primaryBlue1,
-                      child: const Icon(Icons.calendar_month),
-                    ), // <-- Icon
-                    const Text("Program"), // <-- Text
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: primaryYellow,
-                      child: const Icon(Icons.newspaper),
-                    ), // <-- Icon
-                    const Text("Ohlášky"), // <-- Text
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: primaryRed,
-                      child: const Icon(Icons.map),
-                    ), // <-- Icon
-                    const Text("Mapa"), // <-- Text
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _infoPressed,
-                      backgroundColor: primaryBlue2,
-                      child: const Icon(Icons.info),
-                    ), // <-- Icon
-                    const Text("Info"), // <-- Text
-                  ],
-                ),
-              ],
-            ),
+            // Column is also a layout widget. It takes a list of children and
+            // arranges them vertically. By default, it sizes itself to fit its
+            // children horizontally, and tries to be as tall as its parent.
+            //
+            // Invoke "debug painting" (press "p" in the console, choose the
+            // "Toggle Debug Paint" action from the Flutter Inspector in Android
+            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
+            // to see the wireframe for each widget.
+            //
+            // Column has various properties to control how it sizes itself and
+            // how it positions its children. Here we use mainAxisAlignment to
+            // center the children vertically; the main axis here is the vertical
+            // axis because Columns are vertical (the cross axis would be
+            // horizontal).
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  MainPageButton(
+                    onPressed: _programPressed,
+                    backgroundColor: primaryBlue1,
+                    child: const Icon(Icons.calendar_month),
+                  ),// <-- Icon
+                  const Text("Program"), // <-- Text
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  MainPageButton(
+                    onPressed: _programPressed,
+                    backgroundColor: primaryYellow,
+                    child: const Icon(Icons.newspaper),
+                  ),// <-- Icon
+                  const Text("Ohlášky"), // <-- Text
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  MainPageButton(
+                    onPressed: _programPressed,
+                    backgroundColor: primaryRed,
+                    child: const Icon(Icons.map),
+                  ),// <-- Icon
+                  const Text("Mapa"), // <-- Text
+                ],
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  MainPageButton(
+                    onPressed: _infoPressed,
+                    backgroundColor: primaryBlue2,
+                    child: const Icon(Icons.info),
+                  ),// <-- Icon
+                  const Text("Info"), // <-- Text
+                ],
+              ),
+            ],
+        ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48.0),
@@ -173,18 +179,29 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-        ],
+              Padding(
+          padding: const EdgeInsets.symmetric(vertical: 48.0),
+          child: Text(futureProgram))
+          ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<String> getFirstProgramTitle() async {
+    var programJson = await supabase
+        .from('events')
+        .select('title')
+        .limit(1)
+        .single();
+    return programJson['title'].toString();
   }
 
   void _programPressed() {
     Fluttertoast.showToast(msg: ("any button was pressed"));
   }
 
-  void _infoPressed() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+  void _infoPressed(){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
   }
 
   void _loginPressed() {
@@ -219,7 +236,9 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(16),
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: primaryRed,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
+    shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8))
+);
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -241,8 +260,7 @@ class MainPageButton extends StatelessWidget {
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle.copyWith(
-            backgroundColor: MaterialStateProperty.all(backgroundColor)),
+        style: mainPageButtonStyle.copyWith(backgroundColor: MaterialStateProperty.all(backgroundColor)),
         child: child,
       ),
     );
