@@ -1,7 +1,9 @@
+import 'package:av_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import '../models/Information.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockData{
 
@@ -32,21 +34,21 @@ class _AdministrationPageState extends State<AdministrationPage> {
     super.initState();
       columns.addAll([
         PlutoColumn(
-          title: "Title1",
-          field: "Field1",
+          title: "Nadpis",
+          field: Information.titleColumn,
           type: PlutoColumnType.text(),
           readOnly: true),
         PlutoColumn(
-          title: "Title2",
-          field: "Field2",
+          title: "Popis",
+          field: Information.descriptionColumn,
           type: PlutoColumnType.text(),
           readOnly: true),
       ]);
 
       informationData?.forEach((info){
         rows.add(PlutoRow(cells: {
-          'Field1': PlutoCell(value: info.title),
-          'Field2': PlutoCell(value: info.description),
+          Information.titleColumn : PlutoCell(value: info.title),
+          Information.descriptionColumn : PlutoCell(value: info.description),
         }));
       });
   }
@@ -127,8 +129,8 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
     final List<PlutoRow> plutoRows = [];
     informationData?.forEach((info) {
       plutoRows.add(PlutoRow(cells: {
-        'Field1': PlutoCell(value: info.title),
-        'Field2': PlutoCell(value: info.description),
+        Information.titleColumn : PlutoCell(value: info.title),
+        Information.descriptionColumn : PlutoCell(value: info.description),
         },
         checked: true
       ));
@@ -145,12 +147,32 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       isSaveButtonVisible = true;
     });
     widget.stateManager.prependNewRows();
+    widget.stateManager.columns.forEach((column) => column.readOnly = false);
   }
 
   void _saveAddedRowAsync() async{
     var row = widget.stateManager.rows.first;
+
+    Map<String, String> map = Map<String, String>();
+    row.cells.forEach((key, value) {
+      var a = value;
+      var b = value.valueForSorting;
+      var c = value;
+
+      map[key] = value.toString();
+    });
+
+    var data = [
+      map,
+    ];
+    const data2 = [
+      {"title" : "TitleFromFlutter", "description": "desc"},
+    ];
+
     try{
-    var title = row.cells.values.firstWhere((cell) => cell.key == "title");
+      var info = await supabase
+         .from("information")
+          .insert(data);
     }catch(e){
 
     }
