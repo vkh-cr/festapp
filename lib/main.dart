@@ -3,10 +3,25 @@ import 'package:av_app/pages/MapPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-void main() {
+import 'pages/LoginPage.dart';
+
+Future<void> main() async {
+
+  await Supabase.initialize(
+    url: 'https://jyghacisbuntbrshhhey.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
+  );
   runApp(const MyApp());
 }
+
+final supabase = Supabase.instance.client;
+final secureStorage = new FlutterSecureStorage();
+const REFRESH_TOKEN_KEY = 'refresh';
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -47,22 +62,23 @@ class MyApp extends StatelessWidget {
   // always marked "final".
 
   final String title;
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+  String futureProgram = "loading...";
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    tryAuthUser();
+    getFirstProgramTitle().then((fp) {
+      setState(() {
+        futureProgram = fp;
+      });
     });
   }
 
@@ -154,9 +170,61 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ],
         ),
-          )],
+          ),
+          Visibility(
+            visible: !isLoggedIn,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      MainPageButton(
+                        onPressed: _loginPressed,
+                        backgroundColor: primaryBlue2,
+                        child: const Icon(Icons.login),
+                      ), // <-- Icon
+                      const Text("Přihlášení"), // <-- Text
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+              Padding(
+          padding: const EdgeInsets.symmetric(vertical: 48.0),
+          child: Text(futureProgram))
+          ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> tryAuthUser() async
+  {
+      if(!await secureStorage.containsKey(key: REFRESH_TOKEN_KEY))
+      {
+        return;
+      }
+      var refresh = await secureStorage.read(key: REFRESH_TOKEN_KEY);
+      var result = await supabase.auth.setSession(refresh.toString());
+      if(result.user != null)
+      {
+        setState(() {
+          isLoggedIn = true;
+        });
+        await secureStorage.write(key: REFRESH_TOKEN_KEY, value: supabase.auth.currentSession!.refreshToken.toString());
+      }
+  }
+
+  Future<String> getFirstProgramTitle() async {
+    var programJson = await supabase
+        .from('events')
+        .select('title')
+        .limit(1)
+        .single();
+    return programJson['title'].toString();
   }
 
   void _programPressed() {
@@ -170,6 +238,10 @@ class _MyHomePageState extends State<MyHomePage> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => const MapPage()));
   }
 
+  void _loginPressed() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const LoginPage()));
+  }
 }
 
 MaterialColor primarySwatch = const MaterialColor(
