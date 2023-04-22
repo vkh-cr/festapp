@@ -10,21 +10,6 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-// class InsertUsername extends StatelessWidget {
-//   const InsertUsername({
-//     super.key,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       child: TextField(
-//           //keyboardType: TextInputType.number,
-//           ),
-//     );
-//   }
-//}
-
 class _LoginPageState extends State<LoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -100,7 +85,6 @@ class _LoginPageState extends State<LoginPage> {
                           password: _passwordController.text
                       );
                       await secureStorage.write(key: 'refresh', value: data.session!.refreshToken.toString());
-
                     }
                   },
                   child: const Text(
@@ -108,24 +92,6 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(color: Colors.white, fontSize: 25),
                   ),
                 ),
-              ),
-              const SizedBox(
-                height: 130,
-              ),
-              TextButton(
-                  onPressed: () {
-
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (_) => const SignUpPage()
-                    //     )
-                    // );
-
-                  },
-                  child: const Text('New User? Create Account')),
-              const SizedBox(
-                height: 30,
               ),
             ],
           ),
