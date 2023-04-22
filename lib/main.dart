@@ -7,10 +7,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
-
   await Supabase.initialize(
     url: 'https://jyghacisbuntbrshhhey.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
   runApp(const MyApp());
 }
@@ -62,7 +62,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   String futureProgram = "loading...";
 
   @override
@@ -99,7 +98,6 @@ class _MyHomePageState extends State<MyHomePage> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48.0),
             child: Row(
-<<<<<<< HEAD
               // Column is also a layout widget. It takes a list of children and
               // arranges them vertically. By default, it sizes itself to fit its
               // children horizontally, and tries to be as tall as its parent.
@@ -197,85 +195,13 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
         ],
-=======
-            // Column is also a layout widget. It takes a list of children and
-            // arranges them vertically. By default, it sizes itself to fit its
-            // children horizontally, and tries to be as tall as its parent.
-            //
-            // Invoke "debug painting" (press "p" in the console, choose the
-            // "Toggle Debug Paint" action from the Flutter Inspector in Android
-            // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-            // to see the wireframe for each widget.
-            //
-            // Column has various properties to control how it sizes itself and
-            // how it positions its children. Here we use mainAxisAlignment to
-            // center the children vertically; the main axis here is the vertical
-            // axis because Columns are vertical (the cross axis would be
-            // horizontal).
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  MainPageButton(
-                    onPressed: _programPressed,
-                    backgroundColor: primaryBlue1,
-                    child: const Icon(Icons.calendar_month),
-                  ),// <-- Icon
-                  const Text("Program"), // <-- Text
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  MainPageButton(
-                    onPressed: _programPressed,
-                    backgroundColor: primaryYellow,
-                    child: const Icon(Icons.newspaper),
-                  ),// <-- Icon
-                  const Text("Ohlášky"), // <-- Text
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  MainPageButton(
-                    onPressed: _programPressed,
-                    backgroundColor: primaryRed,
-                    child: const Icon(Icons.map),
-                  ),// <-- Icon
-                  const Text("Mapa"), // <-- Text
-                ],
-              ),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  MainPageButton(
-                    onPressed: _infoPressed,
-                    backgroundColor: primaryBlue2,
-                    child: const Icon(Icons.info),
-                  ),// <-- Icon
-                  const Text("Info"), // <-- Text
-                ],
-              ),
-            ],
-        ),
-          ),
-              Padding(
-          padding: const EdgeInsets.symmetric(vertical: 48.0),
-          child: Text(futureProgram))
-          ],
->>>>>>> main
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
   Future<String> getFirstProgramTitle() async {
-    var programJson = await supabase
-        .from('events')
-        .select('title')
-        .limit(1)
-        .single();
+    var programJson =
+        await supabase.from('events').select('title').limit(1).single();
     return programJson['title'].toString();
   }
 
