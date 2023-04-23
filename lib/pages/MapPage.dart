@@ -11,7 +11,7 @@ import '../main.dart';
 
 class MarkerWithText extends Marker {
   final String title;
-  final String shortDescription;
+  final String description;
 
   MarkerWithText({
     required LatLng point,
@@ -24,7 +24,7 @@ class MarkerWithText extends Marker {
     AlignmentGeometry? rotateAlignment,
     AnchorPos<dynamic>? anchorPos,
     required this.title,
-    required this.shortDescription,
+    required this.description,
   }) : super(
     point: point,
     builder: builder,
@@ -64,13 +64,7 @@ class _MapPageState extends State<MapPage> {
   Future<void> loadPlaces() async {
     var markers = await supabase
         .from('places')
-        .select('*');
-
-       // _markers = [
-       //   [LatLng(49.10343, 17.39380), const Icon(Icons.bed,color:Colors.red, size: 40), 'nazev1', 'popis1'],
-       //   [LatLng(49.10432, 17.39432), const Icon(Icons.location_on,color:Colors.blue, size: 40), 'nazev2', 'popis2'],
-       //   [LatLng(49.10374, 17.39598), const Icon(Icons.location_on,color:Colors.yellow, size: 40), 'nazev3', 'popis3']
-    //]
+        .select();
 
       var mappedMarkers = markers.map(
           (markerPosition) => MarkerWithText(
@@ -80,7 +74,7 @@ class _MapPageState extends State<MapPage> {
         builder: (_) => const Icon(Icons.location_on,color:Colors.red, size: 40),
         anchorPos: AnchorPos.align(AnchorAlign.top),
         title: markerPosition['title'].toString(),
-        shortDescription: markerPosition['description']?.toString()??"",
+        description: markerPosition['description']?.toString()??"",
       ),
     )
         .toList();
@@ -173,7 +167,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Text(
-              widget.marker.shortDescription,
+              widget.marker.description,
               style: const TextStyle(fontSize: 12.0),
             ),
           ],
