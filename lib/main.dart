@@ -1,8 +1,12 @@
 import 'package:av_app/pages/PlayingPage.dart';
+import 'package:av_app/pages/MapPage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+import 'pages/LoginPage.dart';
 
 Future<void> main() async {
 
@@ -14,6 +18,10 @@ Future<void> main() async {
 }
 
 final supabase = Supabase.instance.client;
+final secureStorage = new FlutterSecureStorage();
+const REFRESH_TOKEN_KEY = 'refresh';
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -41,7 +49,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+  class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -61,10 +69,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   String futureProgram = "loading...";
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    tryAuthUser();
     getFirstProgramTitle().then((fp) {
       setState(() {
         futureProgram = fp;
@@ -80,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
       body: Column(
 
@@ -139,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   MainPageButton(
-                    onPressed: _programPressed,
+                    onPressed: _mapPressed,
                     backgroundColor: primaryRed,
                     child: const Icon(Icons.map),
                   ),// <-- Icon
@@ -160,12 +171,51 @@ class _MyHomePageState extends State<MyHomePage> {
             ],
         ),
           ),
+          Visibility(
+            visible: !isLoggedIn,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 48.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      MainPageButton(
+                        onPressed: _loginPressed,
+                        backgroundColor: primaryBlue2,
+                        child: const Icon(Icons.login),
+                      ), // <-- Icon
+                      const Text("Přihlášení"), // <-- Text
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
               Padding(
           padding: const EdgeInsets.symmetric(vertical: 48.0),
           child: Text(futureProgram))
           ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> tryAuthUser() async
+  {
+      if(!await secureStorage.containsKey(key: REFRESH_TOKEN_KEY))
+      {
+        return;
+      }
+      var refresh = await secureStorage.read(key: REFRESH_TOKEN_KEY);
+      var result = await supabase.auth.setSession(refresh.toString());
+      if(result.user != null)
+      {
+        setState(() {
+          isLoggedIn = true;
+        });
+        await secureStorage.write(key: REFRESH_TOKEN_KEY, value: supabase.auth.currentSession!.refreshToken.toString());
+      }
   }
 
   Future<String> getFirstProgramTitle() async {
@@ -184,7 +234,14 @@ class _MyHomePageState extends State<MyHomePage> {
   void _infoPressed(){
     Navigator.push(context, MaterialPageRoute(builder: (context) => const PlayingPage()));
   }
+  void _mapPressed(){
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const MapPage()));
+  }
 
+  void _loginPressed() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const LoginPage()));
+  }
 }
 
 MaterialColor primarySwatch = const MaterialColor(
