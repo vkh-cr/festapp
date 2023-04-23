@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../main.dart';
+import '../services/DataService.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -80,11 +81,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      var data = await supabase.auth.signInWithPassword(
-                          email: _emailController.text,
-                          password: _passwordController.text
-                      );
-                      await secureStorage.write(key: 'refresh', value: data.session!.refreshToken.toString());
+                      await DataService.login(_emailController.text, _passwordController.text);
                     }
                   },
                   child: const Text(
