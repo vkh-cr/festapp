@@ -1,13 +1,9 @@
-import 'dart:js_util';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'dart:convert';
 
 import '../main.dart';
-
 
 class MarkerWithText extends Marker {
   final String title;
@@ -26,18 +22,17 @@ class MarkerWithText extends Marker {
     required this.title,
     required this.description,
   }) : super(
-    point: point,
-    builder: builder,
-    key: key,
-    width: width,
-    height: height,
-    rotate: rotate,
-    rotateOrigin: rotateOrigin,
-    rotateAlignment: rotateAlignment,
-    anchorPos: anchorPos,
-  );
+          point: point,
+          builder: builder,
+          key: key,
+          width: width,
+          height: height,
+          rotate: rotate,
+          rotateOrigin: rotateOrigin,
+          rotateAlignment: rotateAlignment,
+          anchorPos: anchorPos,
+        );
 }
-
 
 class MapPage extends StatefulWidget {
   static const route = 'MapPage';
@@ -55,32 +50,32 @@ class _MapPageState extends State<MapPage> {
   final PopupController _popupLayerController = PopupController();
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
-
     loadPlaces();
   }
 
   Future<void> loadPlaces() async {
-    var markers = await supabase
-        .from('places')
-        .select();
+    var markers = await supabase.from('places').select();
 
-      var mappedMarkers = markers.map(
+    var mappedMarkers = markers
+        .map(
           (markerPosition) => MarkerWithText(
-        point: LatLng(markerPosition['coordinates']['latLng']['lat'], markerPosition['coordinates']['latLng']['lng']),
-        width: 40,
-        height: 40,
-        builder: (_) => const Icon(Icons.location_on,color:Colors.red, size: 40),
-        anchorPos: AnchorPos.align(AnchorAlign.top),
-        title: markerPosition['title'].toString(),
-        description: markerPosition['description']?.toString()??"",
-      ),
-    )
+            point: LatLng(markerPosition['coordinates']['latLng']['lat'],
+                markerPosition['coordinates']['latLng']['lng']),
+            width: 40,
+            height: 40,
+            builder: (_) =>
+                const Icon(Icons.location_on, color: Colors.red, size: 40),
+            anchorPos: AnchorPos.align(AnchorAlign.top),
+            title: markerPosition['title'].toString(),
+            description: markerPosition['description']?.toString() ?? "",
+          ),
+        )
         .toList();
-      setState(() {
-        mappedMarkers.forEach( (m) =>_markers.add(m));
-      });
+    setState(() {
+      mappedMarkers.forEach((m) => _markers.add(m));
+    });
   }
 
   @override
@@ -89,7 +84,6 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: const Text('Mapa AV 2023'),
       ),
-     // drawer: buildDrawer(context, MapPage.route),
       body: FlutterMap(
         options: MapOptions(
           zoom: 16.5,
@@ -107,7 +101,7 @@ class _MapPageState extends State<MapPage> {
               popupController: _popupLayerController,
               markers: _markers,
               markerRotateAlignment:
-              PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
+                  PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
               popupBuilder: (BuildContext context, Marker marker) {
                 if (marker is MarkerWithText) {
                   return MapDescriptionPopup(marker);
@@ -132,18 +126,16 @@ class MapDescriptionPopup extends StatefulWidget {
 }
 
 class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
-
   @override
   Widget build(BuildContext context) {
     return Card(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            _cardDescription(context),
-          ],
-        ),
-      )
-    ;
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _cardDescription(context),
+        ],
+      ),
+    );
   }
 
   Widget _cardDescription(BuildContext context) {
@@ -176,4 +168,3 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
     );
   }
 }
-
