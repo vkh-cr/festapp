@@ -1,16 +1,16 @@
+import 'package:av_app/Helpers/DialogHelper.dart';
 import 'package:av_app/main.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import '../models/Information.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MockData{
 
   static Future<List<Information>> GetInformationAsync() async {
     return[
-      const Information(title: "first", description: "short"),
-      const Information(title: "second", description: "short"),
+      Information(title: "first", description: "short"),
+      Information(title: "second", description: "short"),
     ];
   }
 }
@@ -125,20 +125,30 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   }
 
   void _reloadDataAsync() async{
-    final informationData = await MockData.GetInformationAsync();
+    var information = await supabase
+      .from("information")
+      .select() ;
+
+    List<Information> informationData = [];
+    information.forEach((info) {
+      informationData.add(Information.fromDynamic(info));
+    });
+
     final List<PlutoRow> plutoRows = [];
-    informationData?.forEach((info) {
+    for (var info in informationData) {
       plutoRows.add(PlutoRow(cells: {
-        Information.titleColumn : PlutoCell(value: info.title),
-        Information.descriptionColumn : PlutoCell(value: info.description),
-        },
+      Information.titleColumn : PlutoCell(value: info.title),
+      Information.descriptionColumn : PlutoCell(value: info.description),
+      },
         checked: true
       ));
-    });
+    }
     widget.stateManager.removeAllRows();
     widget.stateManager.appendRows(plutoRows);
-    widget.stateManager.rows.forEach((row) {row.setState(PlutoRowState.none);});
-    Fluttertoast.showToast(msg: "DataReloaded");
+    for (var row in widget.stateManager.rows) {
+      row.setState(PlutoRowState.none);
+    }
+    Fluttertoast.showToast(msg: "Data reloaded");
   }
 
   void _addRow(){
@@ -147,36 +157,35 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       isSaveButtonVisible = true;
     });
     widget.stateManager.prependNewRows();
-    widget.stateManager.columns.forEach((column) => column.readOnly = false);
+    for (var column in widget.stateManager.columns) {
+      column.readOnly = false;
+    }
   }
 
   void _saveAddedRowAsync() async{
-    var row = widget.stateManager.rows.first;
-
-    Map<String, String> map = Map<String, String>();
-    row.cells.forEach((key, value) {
-      var a = value;
-      var b = value.valueForSorting;
-      var c = value;
-
-      map[key] = value.toString();
+    final row = widget.stateManager.rows.first;
+    if(widget.stateManager.currentCell?.row == row && widget.stateManager.isEditing)
+    {
+      await DialogHelper.showTitleTextButtonDialogAsync(context, "Chyba", "Před uložením zavřete aktuální buňku.");
+      return;
+    }
+    final map = Map<String, String>();
+    row.cells.forEach((key, val) {
+      map[key] = val?.valueForSorting?.toString() ?? "";
     });
-
-    var data = [
-      map,
-    ];
-    const data2 = [
-      {"title" : "TitleFromFlutter", "description": "desc"},
-    ];
+    var information = Information.fromMap((map));
+    var validationResult = information.Validate();
+    if(validationResult.hasError){
+      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", validationResult.errorMessage);
+      return;
+    }
 
     try{
       var info = await supabase
-         .from("information")
-          .insert(data);
-    }catch(e){
-
+        .from("information")
+        .insert([information.toInsertMap()]);
+    }catch(e) {
+      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
-
-    // var infoData = new Information(title: row.cells, description: description)
   }
 }
