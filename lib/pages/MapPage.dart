@@ -1,8 +1,12 @@
+import 'dart:js_util';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'dart:convert';
+
+import '../main.dart';
 
 
 class MarkerWithText extends Marker {
@@ -45,36 +49,44 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  late List<MarkerWithText> _markers;
+  List<MarkerWithText> _markers = [];
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
 
-    var _markers = await supabase
+    loadPlaces();
+  }
+
+  Future<void> loadPlaces() async {
+    var markers = await supabase
         .from('places')
         .select('*');
 
-    _markers = [
-      [LatLng(49.10343, 17.39380), const Icon(Icons.bed,color:Colors.red, size: 40), 'nazev1', 'popis1'],
-      [LatLng(49.10432, 17.39432), const Icon(Icons.location_on,color:Colors.blue, size: 40), 'nazev2', 'popis2'],
-      [LatLng(49.10374, 17.39598), const Icon(Icons.location_on,color:Colors.yellow, size: 40), 'nazev3', 'popis3']
-    ]
-        .map(
+       // _markers = [
+       //   [LatLng(49.10343, 17.39380), const Icon(Icons.bed,color:Colors.red, size: 40), 'nazev1', 'popis1'],
+       //   [LatLng(49.10432, 17.39432), const Icon(Icons.location_on,color:Colors.blue, size: 40), 'nazev2', 'popis2'],
+       //   [LatLng(49.10374, 17.39598), const Icon(Icons.location_on,color:Colors.yellow, size: 40), 'nazev3', 'popis3']
+    //]
+
+      var mappedMarkers = markers.map(
           (markerPosition) => MarkerWithText(
-        point: markerPosition[0] as LatLng,
+        point: LatLng(markerPosition['coordinates']['latLng']['lat'], markerPosition['coordinates']['latLng']['lng']),
         width: 40,
         height: 40,
-        builder: (_) => markerPosition[1] as Widget,
+        builder: (_) => const Icon(Icons.location_on,color:Colors.red, size: 40),
         anchorPos: AnchorPos.align(AnchorAlign.top),
-        title: markerPosition[2] as String,
-        shortDescription: markerPosition[3] as String
+        title: markerPosition['title'].toString(),
+        shortDescription: markerPosition['description']?.toString()??"",
       ),
     )
         .toList();
+      setState(() {
+        mappedMarkers.forEach( (m) =>_markers.add(m));
+      });
   }
 
   @override
