@@ -23,6 +23,24 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  bool isLoggedIn = false;
+
+  refreshSignedInStatus() {
+    DataService.tryAuthUser().then((loggedIn) {
+      print('refreshing');
+      setState(() {
+        isLoggedIn = loggedIn;
+      });
+
+      if (isLoggedIn) {
+        // Your navigation code
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) =>
+                const MyHomePage(title: 'Absolventský Velehrad')));
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,6 +90,9 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
+              const SizedBox(
+                height: 16,
+              ),
               Container(
                 height: 50,
                 width: 250,
@@ -81,7 +102,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      await DataService.login(_emailController.text, _passwordController.text);
+                      await DataService.login(
+                              _emailController.text, _passwordController.text)
+                          .then((value) => refreshSignedInStatus());
                     }
                   },
                   child: const Text(
