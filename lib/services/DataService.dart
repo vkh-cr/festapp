@@ -22,37 +22,41 @@ class DataService {
   // }
 
   static Future<String> getFirstProgramTitle() async {
-    var programJson = await _supabase
-        .from('events')
-        .select('title')
-        .limit(1)
-        .single();
+    var programJson =
+        await _supabase.from('events').select('title').limit(1).single();
     return programJson['title'].toString();
   }
 
-  static Future<bool> tryAuthUser() async
-  {
-    if(!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY))
-    {
+  static Future<bool> tryAuthUser() async {
+    if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
       return false;
     }
     var refresh = await _secureStorage.read(key: REFRESH_TOKEN_KEY);
     var result = await _supabase.auth.setSession(refresh.toString());
-    if(result.user != null)
-    {
-      await _secureStorage.write(key: REFRESH_TOKEN_KEY, value: _supabase.auth.currentSession!.refreshToken.toString());
+    if (result.user != null) {
+      await _secureStorage.write(
+          key: REFRESH_TOKEN_KEY,
+          value: _supabase.auth.currentSession!.refreshToken.toString());
       return true;
     }
     return false;
   }
 
-  static Future<void> login(String email, String password) async {
-    var data = await _supabase.auth.signInWithPassword(
-        email: email,
-        password: password
-    );
-    await _secureStorage.write(key: 'refresh', value: data.session!.refreshToken.toString());
+  static isLoggedIn() {
+    return _supabase.auth.currentSession != null;
   }
 
-  static Future<dynamic> getPlaces() async => await _supabase.from('places').select();
+  static Future<void> login(String email, String password) async {
+    var data = await _supabase.auth
+        .signInWithPassword(email: email, password: password);
+    await _secureStorage.write(
+        key: 'refresh', value: data.session!.refreshToken.toString());
+  }
+
+  static Future<void> logout() async {
+    await _supabase.auth.signOut();
+  }
+
+  static Future<dynamic> getPlaces() async =>
+      await _supabase.from('places').select();
 }
