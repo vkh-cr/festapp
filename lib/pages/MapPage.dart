@@ -1,9 +1,8 @@
+import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-
-import '../main.dart';
 
 class MarkerWithText extends Marker {
   final String title;
@@ -44,7 +43,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  List<MarkerWithText> _markers = [];
+  final List<MarkerWithText> _markers = [];
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -56,7 +55,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> loadPlaces() async {
-    var markers = await supabase.from('places').select();
+    var markers = await DataService.getPlaces();
 
     var mappedMarkers = markers
         .map(

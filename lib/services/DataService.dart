@@ -54,4 +54,5 @@ class DataService {
     await _secureStorage.write(key: 'refresh', value: data.session!.refreshToken.toString());
   }
 
+  static Future<dynamic> getPlaces() async => await _supabase.from('places').select();
 }
