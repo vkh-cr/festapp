@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -22,14 +24,6 @@ class _LoginPageState extends State<LoginPage> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
-  refreshSignedInStatus() {
-    DataService.tryAuthUser().then((loggedIn) {
-      if (loggedIn) {
-        _navigateToHomePage();
-      }
-    });
   }
 
   @override
@@ -95,7 +89,8 @@ class _LoginPageState extends State<LoginPage> {
                     if (_formKey.currentState!.validate()) {
                       await DataService.login(
                               _emailController.text, _passwordController.text)
-                          .then((value) => refreshSignedInStatus());
+                          .then(_showToast)
+                          .then(_refreshSignedInStatus);
                     }
                   },
                   child: const Text(
@@ -109,6 +104,18 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _refreshSignedInStatus(value) {
+    DataService.tryAuthUser().then((loggedIn) {
+      if (loggedIn) {
+        _navigateToHomePage();
+      }
+    });
+  }
+
+  void _showToast(value) {
+    Fluttertoast.showToast(msg: ("Successfully logged in!"));
   }
 
   void _navigateToHomePage() {
