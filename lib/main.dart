@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Absolventský Velehrad',
+      title: PageNames.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
           //
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: backgroundColor)),
-      home: const MyHomePage(title: 'Absolventský Velehrad'),
+      home: const MyHomePage(title: PageNames.HOME_PAGE),
     );
   }
 }

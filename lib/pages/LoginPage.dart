@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../main.dart';
 import '../services/DataService.dart';
+import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -23,20 +24,10 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  bool isLoggedIn = false;
-
   refreshSignedInStatus() {
     DataService.tryAuthUser().then((loggedIn) {
-      print('refreshing');
-      setState(() {
-        isLoggedIn = loggedIn;
-      });
-
-      if (isLoggedIn) {
-        // Your navigation code
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) =>
-                const MyHomePage(title: 'Absolventský Velehrad')));
+      if (loggedIn) {
+        _navigateToHomePage();
       }
     });
   }
@@ -118,5 +109,10 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _navigateToHomePage() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
   }
 }
