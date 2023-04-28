@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../main.dart';
 import '../services/DataService.dart';
+import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -72,6 +75,9 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
               ),
+              const SizedBox(
+                height: 16,
+              ),
               Container(
                 height: 50,
                 width: 250,
@@ -81,7 +87,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: TextButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      await DataService.login(_emailController.text, _passwordController.text);
+                      await DataService.login(
+                              _emailController.text, _passwordController.text)
+                          .then(_showToast)
+                          .then(_refreshSignedInStatus);
                     }
                   },
                   child: const Text(
@@ -95,5 +104,22 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
+  }
+
+  void _refreshSignedInStatus(value) {
+    DataService.tryAuthUser().then((loggedIn) {
+      if (loggedIn) {
+        _navigateToHomePage();
+      }
+    });
+  }
+
+  void _showToast(value) {
+    Fluttertoast.showToast(msg: ("Úspěšné přihlášení!"), timeInSecForIosWeb: 3);
+  }
+
+  void _navigateToHomePage() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
   }
 }
