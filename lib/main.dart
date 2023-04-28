@@ -194,7 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         backgroundColor: primaryBlue2,
                         child: Icon(Icons.logout),
                       ), // <-- Icon
-                      Text("Log out"), // <-- Text
+                      Text("Odhlásit se"), // <-- Text
                     ],
                   ),
                 ],
