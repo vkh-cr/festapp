@@ -50,11 +50,11 @@ class DataService {
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
-        key: 'refresh', value: data.session!.refreshToken.toString());
+        key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
   }
 
   static Future<void> logout() async {
-    _secureStorage.delete(key: 'refresh');
+    _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     await _supabase.auth.signOut();
   }
 
