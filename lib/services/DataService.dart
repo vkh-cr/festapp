@@ -54,6 +54,7 @@ class DataService {
   }
 
   static Future<void> logout() async {
+    _secureStorage.delete(key: 'refresh');
     await _supabase.auth.signOut();
   }
 

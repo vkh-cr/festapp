@@ -115,7 +115,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showToast(value) {
-    Fluttertoast.showToast(msg: ("Successfully logged in!"));
+    Fluttertoast.showToast(msg: ("Úspěšné přihlášení!"), timeInSecForIosWeb: 3);
   }
 
   void _navigateToHomePage() {
