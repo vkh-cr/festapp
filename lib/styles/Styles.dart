@@ -26,21 +26,21 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(16),
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: primaryRed,
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8))
-);
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
   final EdgeInsets margin;
   final Color backgroundColor;
+  final bool circular;
 
   const MainPageButton({
     Key? key,
     required this.onPressed,
     required this.child,
     this.backgroundColor = primaryRed,
+    this.circular = false,
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
   }) : super(key: key);
 
@@ -50,7 +50,10 @@ class MainPageButton extends StatelessWidget {
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle.copyWith(backgroundColor: MaterialStateProperty.all(backgroundColor)),
+        style: mainPageButtonStyle.copyWith(
+          backgroundColor: MaterialStateProperty.all(backgroundColor),
+          shape: circular ? MaterialStateProperty.all(CircleBorder()) : null,
+        ),
         child: child,
       ),
     );
