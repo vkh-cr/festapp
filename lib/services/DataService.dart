@@ -73,9 +73,11 @@ class DataService {
       .toList();
   }
 
-  static Future<dynamic> saveInformation(Information information) async {
-      return await _supabase
+  static Future<Information> saveInformation(Information information) async {
+      final response = await _supabase
           .from("information")
           .insert(information.toInsertMap());
+
+      return Information.fromDynamic(response);
   }
 }
