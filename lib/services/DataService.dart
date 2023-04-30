@@ -62,11 +62,15 @@ class DataService {
   static Future<dynamic> getPlaces() async =>
       await _supabase.from('places').select();
 
-  static Future<dynamic> getAllInformation() async {
-      return await _supabase
-          .from("information")
-          .select()
-          .order('created_at', ascending: false );
+  static Future<List<Information>> getAllInformation() async {
+    final response = await _supabase
+      .from("information")
+      .select()
+      .order('created_at', ascending: false );
+
+    return (response as List<dynamic>)
+      .map((n) => Information.fromDynamic(n))
+      .toList();
   }
 
   static Future<dynamic> saveInformation(Information information) async {
