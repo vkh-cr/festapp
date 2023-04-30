@@ -55,7 +55,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           },
           onLoaded: (PlutoGridOnLoadedEvent event) {
             stateManager = event.stateManager;
-            AdministrationPageHelper.reloadData(stateManager);
+            AdministrationPageHelper.reloadDataAsync(stateManager);
           },
           rowColorCallback: (rowContext){
             return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
@@ -114,7 +114,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   }
 
   void _reloadDataAsync() async{
-    await AdministrationPageHelper.reloadData(widget.stateManager);
+    await AdministrationPageHelper.reloadDataAsync(widget.stateManager);
     Fluttertoast.showToast(msg: "Data reloaded");
   }
 
@@ -158,7 +158,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
 }
 
 class AdministrationPageHelper{
-  static Future<List<PlutoRow>> getInformationRows() async {
+  static Future<List<PlutoRow>> getInformationRowsAsync() async {
     final informationList = await DataService.getAllInformation();
     return informationList
       .map((i) => PlutoRow(cells: {
@@ -170,8 +170,8 @@ class AdministrationPageHelper{
       .toList();
   }
 
-  static Future<void> reloadData(PlutoGridStateManager stateManager) async {
-    final rows = await AdministrationPageHelper.getInformationRows();
+  static Future<void> reloadDataAsync(PlutoGridStateManager stateManager) async {
+    final rows = await AdministrationPageHelper.getInformationRowsAsync();
 
     stateManager.removeAllRows();
     stateManager.appendRows(rows);
