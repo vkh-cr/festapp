@@ -40,9 +40,6 @@ class Information {
   }
 
   static Information fromDynamic(dynamic map) {
-    var a = map['id'];
-    var b = map['title'];
-    var c = map['description'];
     return Information(id: map[idColumn], title: map[titleColumn]!, description: map[descriptionColumn]!);
   }
 }
