@@ -1,5 +1,4 @@
 import 'package:av_app/Helpers/DialogHelper.dart';
-import 'package:av_app/main.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -25,6 +24,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
     super.initState();
       columns.addAll([
         PlutoColumn(
+            title: "Id",
+            field: Information.idColumn,
+            type: PlutoColumnType.number(),
+            readOnly: true,
+            hide: true),
+        PlutoColumn(
           title: "Nadpis",
           field: Information.titleColumn,
           type: PlutoColumnType.text(),
@@ -35,13 +40,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
           type: PlutoColumnType.text(),
           readOnly: true),
       ]);
-
-      informationData?.forEach((info){
-        rows.add(PlutoRow(cells: {
-          Information.titleColumn : PlutoCell(value: info.title),
-          Information.descriptionColumn : PlutoCell(value: info.description),
-        }));
-      });
   }
 
   @override
@@ -57,6 +55,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           },
           onLoaded: (PlutoGridOnLoadedEvent event) {
             stateManager = event.stateManager;
+            AdministrationPageHelper.reloadData(stateManager);
           },
           rowColorCallback: (rowContext){
             return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
@@ -115,22 +114,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   }
 
   void _reloadDataAsync() async{
-    var informationList = await DataService.getAllInformation();
-
-    final List<PlutoRow> plutoRows = [];
-    for (var info in informationList) {
-      plutoRows.add(PlutoRow(cells: {
-      Information.titleColumn : PlutoCell(value: info.title),
-      Information.descriptionColumn : PlutoCell(value: info.description),
-      },
-        checked: true
-      ));
-    }
-    widget.stateManager.removeAllRows();
-    widget.stateManager.appendRows(plutoRows);
-    for (var row in widget.stateManager.rows) {
-      row.setState(PlutoRowState.none);
-    }
+    await AdministrationPageHelper.reloadData(widget.stateManager);
     Fluttertoast.showToast(msg: "Data reloaded");
   }
 
@@ -169,6 +153,30 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       await DataService.saveInformation(information);
     }catch(e) {
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
+    }
+  }
+}
+
+class AdministrationPageHelper{
+  static Future<List<PlutoRow>> getInformationRows() async {
+    final informationList = await DataService.getAllInformation();
+    return informationList
+      .map((i) => PlutoRow(cells: {
+          Information.idColumn : PlutoCell(value: i.id),
+          Information.titleColumn : PlutoCell(value: i.title),
+          Information.descriptionColumn : PlutoCell(value: i.description),
+        },
+        checked: true))
+      .toList();
+  }
+
+  static Future<void> reloadData(PlutoGridStateManager stateManager) async {
+    final rows = await AdministrationPageHelper.getInformationRows();
+
+    stateManager.removeAllRows();
+    stateManager.appendRows(rows);
+    for (var row in stateManager.rows) {
+      row.setState(PlutoRowState.none);
     }
   }
 }
