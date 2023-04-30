@@ -5,16 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import '../models/Information.dart';
 
-class MockData{
-
-  static Future<List<Information>> GetInformationAsync() async {
-    return[
-      Information(title: "first", description: "short"),
-      Information(title: "second", description: "short"),
-    ];
-  }
-}
-
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({Key? key}) : super(key: key);
 
@@ -68,7 +58,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
             stateManager = event.stateManager;
           },
           rowColorCallback: (rowContext){
-            // return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
             return rowContext.row.state == PlutoRowState.added ? Colors.orange : Colors.transparent;
           },
             createHeader: (stateManager) => AdministrationHeader(stateManager: stateManager),
@@ -127,7 +116,8 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   void _reloadDataAsync() async{
     var information = await supabase
       .from("information")
-      .select() ;
+      .select()
+      .order('created_at', ascending: false );
 
     List<Information> informationData = [];
     information.forEach((info) {
@@ -169,10 +159,12 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       await DialogHelper.showTitleTextButtonDialogAsync(context, "Chyba", "Před uložením zavřete aktuální buňku.");
       return;
     }
-    final map = Map<String, String>();
+
+    final map = <String, String>{};
     row.cells.forEach((key, val) {
-      map[key] = val?.valueForSorting?.toString() ?? "";
+      map[key] = val.valueForSorting?.toString() ?? "";
     });
+
     var information = Information.fromMap((map));
     var validationResult = information.Validate();
     if(validationResult.hasError){
