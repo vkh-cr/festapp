@@ -115,15 +115,10 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   }
 
   void _reloadDataAsync() async{
-    var information = await DataService.getAllInformation();
-
-    List<Information> informationData = [];
-    information.forEach((info) {
-      informationData.add(Information.fromDynamic(info));
-    });
+    var informationList = await DataService.getAllInformation();
 
     final List<PlutoRow> plutoRows = [];
-    for (var info in informationData) {
+    for (var info in informationList) {
       plutoRows.add(PlutoRow(cells: {
       Information.titleColumn : PlutoCell(value: info.title),
       Information.descriptionColumn : PlutoCell(value: info.description),
