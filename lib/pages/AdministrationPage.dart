@@ -1,9 +1,10 @@
 import 'package:av_app/Helpers/DialogHelper.dart';
 import 'package:av_app/main.dart';
+import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import '../models/Information.dart';
+import '../Models/Information.dart';
 
 class AdministrationPage extends StatefulWidget {
   const AdministrationPage({Key? key}) : super(key: key);
@@ -114,10 +115,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
   }
 
   void _reloadDataAsync() async{
-    var information = await supabase
-      .from("information")
-      .select()
-      .order('created_at', ascending: false );
+    var information = await DataService.getAllInformation();
 
     List<Information> informationData = [];
     information.forEach((info) {
@@ -173,9 +171,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
     }
 
     try{
-      var info = await supabase
-        .from("information")
-        .insert([information.toInsertMap()]);
+      await DataService.saveInformation(information);
     }catch(e) {
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
