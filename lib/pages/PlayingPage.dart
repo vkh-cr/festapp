@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../services/ApiClient.dart';
+import '../services/DataService.dart';
 
 class PlayingPage extends StatefulWidget {
   const PlayingPage({Key? key}) : super(key: key);
@@ -45,13 +45,12 @@ class _PlayingPageState extends State<PlayingPage> {
 
 
   void _callApiPressed() async{
-    var client = ApiClient();
+    var client = DataService();
     try{
-      var helloWorldResponse = await client.getHelloWorld();
       setState(() {
-        infoText = helloWorldResponse.message;
+        infoText = "called";
       });
-      Fluttertoast.showToast(msg: helloWorldResponse.message);
+      Fluttertoast.showToast(msg: "called");
     }catch(e){
       Fluttertoast.showToast(msg: "Api call error");
     }
