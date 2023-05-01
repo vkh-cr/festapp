@@ -183,7 +183,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     MainPageButton(
                       onPressed: () async {
                         var v = ParseRegistrationsSheet();
-                        v.parse();
+                        //v.parse();
+                        v.insert(supabase);
                       },
                       backgroundColor: primaryBlue2,
                       child: const Icon(Icons.login),
