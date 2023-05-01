@@ -49,7 +49,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
             enableDropToResize: false,
             enableColumnDrag: false,
             enableContextMenu: false,
-            width: 60,
+            cellPadding: EdgeInsets.zero,
+            width: 40,
             renderer: (rendererContext) {
               return Row(
                 children: [
