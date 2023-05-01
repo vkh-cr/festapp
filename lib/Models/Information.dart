@@ -31,11 +31,10 @@ class Information {
     return {idColumn : id.toString(), titleColumn: title, descriptionColumn: description};
   }
 
-  static Information fromInsertMap(Map<String, String> map) {
-    return Information(title: map[titleColumn]!, description: map[descriptionColumn]!);
-  }
-
-  static Information fromMap(Map<String, String> map) {
+  static Information fromJson(Map<String, dynamic> map) {
+    if(map.containsKey(idColumn)){
+      return Information(id: map[idColumn]!, title: map[titleColumn]!, description: map[descriptionColumn]!);
+    }
     return Information(id: -1, title: map[titleColumn]!, description: map[descriptionColumn]!);
   }
 
