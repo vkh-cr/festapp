@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'dart:math';
+//import 'package:marker_icon';
 
 class MarkerWithText extends Marker {
   final String title;
@@ -54,18 +56,29 @@ class _MapPageState extends State<MapPage> {
     loadPlaces();
   }
 
+  Random random = Random();
+
+  double demorandom() {
+    return random.nextDouble() / 100;
+  }
+
+  Icon type2icon(String place_type) {
+    print(place_type);
+    return Icon(Icons.location_on, color: Colors.red, size: 40);
+  }
+
   Future<void> loadPlaces() async {
     var markers = await DataService.getPlaces();
 
     var mappedMarkers = markers
         .map(
           (markerPosition) => MarkerWithText(
-            point: LatLng(markerPosition['coordinates']['latLng']['lat'],
-                markerPosition['coordinates']['latLng']['lng']),
+            point: LatLng(
+                markerPosition['coordinates']['latLng']['lat'] + demorandom(),
+                markerPosition['coordinates']['latLng']['lng'] + demorandom()),
             width: 40,
             height: 40,
-            builder: (_) =>
-                const Icon(Icons.location_on, color: Colors.red, size: 40),
+            builder: (_) => type2icon(markerPosition["type"]),
             anchorPos: AnchorPos.align(AnchorAlign.top),
             title: markerPosition['title'].toString(),
             description: markerPosition['description']?.toString() ?? "",
