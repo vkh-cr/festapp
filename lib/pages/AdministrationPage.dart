@@ -142,13 +142,19 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
                 onPressed: isAddingState ? null : _addRow,
                 child: const Text('Přidat informaci'),
               ),
-              ElevatedButton(
-                onPressed: isAddingState ? _saveAddedRowAsync : null,
-                child: const Text('Uložit informaci'),
+              Visibility(
+                visible: isAddingState,
+                child: ElevatedButton(
+                  onPressed: isAddingState ? _saveAddedRowAsync : null,
+                  child: const Text('Uložit informaci'),
+                ),
               ),
-              ElevatedButton(
-                onPressed: isAddingState ? _cancelAddingRow : null,
-                child: const Text('Ukončit přidávání informace'),
+              Visibility(
+                visible: isAddingState,
+                child: ElevatedButton(
+                  onPressed: isAddingState ? _cancelAddingRow : null,
+                  child: const Text('Ukončit přidávání informace'),
+                ),
               ),
             ]
         ),
