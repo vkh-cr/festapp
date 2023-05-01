@@ -94,12 +94,19 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> _deleteSavedRowAsync(PlutoRow row, int informationId) async{
+    var result = await DialogHelper
+        .showConfirmationDialogAsync(context, "Potvrdit smazání", "Opravdu chcete smazat tento řádek?", "Ano", "Ne");
+
+    if(!result){
+      return;
+    }
+
     try{
       DataService.deleteInformation(informationId);
       stateManager.removeRows([row]);
       Fluttertoast.showToast(msg: "Deleted");
     }catch(e){
-      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se smazat data, zkuste to prosím znovu");
+      await DialogHelper.showInformationDialogAsync(context, "chyba", "Nepovedlo se smazat data, zkuste to prosím znovu");
     }
   }
 }
@@ -115,8 +122,6 @@ class AdministrationHeader extends StatefulWidget {
 
 class _AdministrationHeaderState extends State<AdministrationHeader>{
 
-  // bool isAddButtonEnabled = true;
-  // bool isSaveButtonVisible = false;
   bool isAddingState = false;
 
   @override
@@ -152,7 +157,8 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
 
   void _reloadDataAsync() async{
     await AdministrationPageHelper.reloadDataAsync(widget.stateManager);
-    Fluttertoast.showToast(msg: "Data reloaded");
+    AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, true);
+    Fluttertoast.showToast(msg: "Informace načteny");
   }
 
   void _addRow(){
@@ -167,23 +173,23 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
     final row = widget.stateManager.rows.first;
     if(widget.stateManager.currentCell?.row == row && widget.stateManager.isEditing)
     {
-      await DialogHelper.showTitleTextButtonDialogAsync(context, "Chyba", "Před uložením zavřete aktuální buňku.");
+      await DialogHelper.showInformationDialogAsync(context, "Chyba", "Před uložením zavřete aktuální buňku.");
       return;
     }
 
     var information = Information.fromJson(row.toJson());
     var validationResult = information.Validate();
     if(validationResult.hasError){
-      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", validationResult.errorMessage);
+      await DialogHelper.showInformationDialogAsync(context, "chyba", validationResult.errorMessage);
       return;
     }
 
     try{
       await DataService.saveInformation(information);
       Fluttertoast.showToast(msg: "Uloženo");
-      AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, true);
+      _reloadDataAsync();
     }catch(e) {
-      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
+      await DialogHelper.showInformationDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
   }
 
