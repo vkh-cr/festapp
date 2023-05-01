@@ -8,6 +8,7 @@ class Information {
   static const String idColumn = "id";
   static const String titleColumn = "title";
   static const String descriptionColumn = "description";
+  static const String informationTable = "information";
 
   Information({this.id = -1, required this.title, required this.description});
 

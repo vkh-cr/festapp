@@ -64,7 +64,7 @@ class DataService {
 
   static Future<List<Information>> getAllInformation() async {
     final response = await _supabase
-      .from("information")
+      .from(Information.informationTable)
       .select()
       .order('created_at', ascending: false );
 
@@ -75,7 +75,14 @@ class DataService {
 
   static Future<void> saveInformation(Information information) async {
       await _supabase
-          .from("information")
+          .from(Information.informationTable)
           .insert(information.toInsertMap());
+  }
+
+  static Future<void> deleteInformation(int informationId) async{
+    await _supabase
+        .from(Information.informationTable)
+        .delete()
+        .eq(Information.idColumn, informationId);
   }
 }

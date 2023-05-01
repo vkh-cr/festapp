@@ -39,19 +39,28 @@ class _AdministrationPageState extends State<AdministrationPage> {
           field: Information.descriptionColumn,
           type: PlutoColumnType.text(),
           readOnly: true),
-        // PlutoColumn(
-        //     title: "",
-        //     field: "delete",
-        //     type: PlutoColumnType.text(),
-        //     renderer: (rendererContext) {
-        //       return Row(
-        //         children: [
-        //           IconButton(
-        //               onPressed: _deleteRow,
-        //               icon: const Icon(Icons.delete_forever))
-        //         ],
-        //       );
-        //     })
+        PlutoColumn(
+            title: "",
+            field: "delete",
+            type: PlutoColumnType.text(),
+            readOnly: true,
+            enableFilterMenuItem: false,
+            enableSorting: false,
+            enableDropToResize: false,
+            enableColumnDrag: false,
+            enableContextMenu: false,
+            width: 60,
+            renderer: (rendererContext) {
+              return Row(
+                children: [
+                  IconButton(
+                      onPressed: () async{
+                        await _deleteRowAsync(rendererContext);
+                      },
+                      icon: const Icon(Icons.delete_forever))
+                ],
+              );
+            })
       ]);
   }
 
@@ -79,9 +88,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
     );
   }
 
-  void _deleteRow() async{
-    Fluttertoast.showToast(msg: "Deleted");
-    // PlutoColumnRendererContext rendererContext
+  Future<void> _deleteRowAsync(PlutoColumnRendererContext rendererContext) async{
+    try{
+      final informationId = rendererContext.row.cells[Information.idColumn]?.valueForSorting;
+      DataService.deleteInformation(informationId);
+      stateManager.removeRows([rendererContext.row]);
+      Fluttertoast.showToast(msg: "Deleted");
+    }catch(e){
+      await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se smazat data, zkuste to prosím znovu");
+    }
   }
 }
 
@@ -178,6 +193,7 @@ class AdministrationPageHelper{
           Information.idColumn : PlutoCell(value: i.id),
           Information.titleColumn : PlutoCell(value: i.title),
           Information.descriptionColumn : PlutoCell(value: i.description),
+          "delete" : PlutoCell(value: "delete")
         },
         checked: true))
       .toList();
