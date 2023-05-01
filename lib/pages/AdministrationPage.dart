@@ -39,6 +39,19 @@ class _AdministrationPageState extends State<AdministrationPage> {
           field: Information.descriptionColumn,
           type: PlutoColumnType.text(),
           readOnly: true),
+        // PlutoColumn(
+        //     title: "",
+        //     field: "delete",
+        //     type: PlutoColumnType.text(),
+        //     renderer: (rendererContext) {
+        //       return Row(
+        //         children: [
+        //           IconButton(
+        //               onPressed: _deleteRow,
+        //               icon: const Icon(Icons.delete_forever))
+        //         ],
+        //       );
+        //     })
       ]);
   }
 
@@ -64,6 +77,11 @@ class _AdministrationPageState extends State<AdministrationPage> {
         ),
       ),
     );
+  }
+
+  void _deleteRow() async{
+    Fluttertoast.showToast(msg: "Deleted");
+    // PlutoColumnRendererContext rendererContext
   }
 }
 
@@ -124,9 +142,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       isSaveButtonVisible = true;
     });
     widget.stateManager.prependNewRows();
-    for (var column in widget.stateManager.columns) {
-      column.readOnly = false;
-    }
+    AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, false);
   }
 
   void _saveAddedRowAsync() async{
@@ -137,12 +153,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       return;
     }
 
-    final map = <String, String>{};
-    row.cells.forEach((key, val) {
-      map[key] = val.valueForSorting?.toString() ?? "";
-    });
-
-    var information = Information.fromMap((map));
+    var information = Information.fromJson(row.toJson());
     var validationResult = information.Validate();
     if(validationResult.hasError){
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", validationResult.errorMessage);
@@ -151,6 +162,8 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
 
     try{
       await DataService.saveInformation(information);
+      Fluttertoast.showToast(msg: "Uloženo");
+      AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, true);
     }catch(e) {
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
@@ -177,6 +190,12 @@ class AdministrationPageHelper{
     stateManager.appendRows(rows);
     for (var row in stateManager.rows) {
       row.setState(PlutoRowState.none);
+    }
+  }
+
+  static void changeTableReadonlyAbility(PlutoGridStateManager stateManager, bool value){
+    for (var column in stateManager.columns) {
+      column.readOnly = value;
     }
   }
 }
