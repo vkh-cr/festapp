@@ -124,6 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               MainPageButton(
+                                size: Size(70, 70),
                                 circular: true,
                                 onPressed: _loginPressed,
                                 backgroundColor: primaryBlue2,
@@ -147,6 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
                               MainPageButton(
+                                size: Size(70, 70),
                                 circular: true,
                                 onPressed: _logout,
                                 backgroundColor: primaryBlue2,
