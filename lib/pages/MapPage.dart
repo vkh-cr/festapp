@@ -4,7 +4,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'dart:math';
-//import 'package:marker_icon';
 
 class MarkerWithText extends Marker {
   final String title;
@@ -59,12 +58,37 @@ class _MapPageState extends State<MapPage> {
   Random random = Random();
 
   double demorandom() {
+    // TODO: remove this function. It's a temporary fix because all the in the
+    // database have the same coordinates
+    // or uncomment:
+    // return 0;
     return random.nextDouble() / 100;
   }
 
-  Icon type2icon(String place_type) {
-    print(place_type);
-    return Icon(Icons.location_on, color: Colors.red, size: 40);
+  Map<String, Image> type2icon_map = {
+    // TODO: put the final versions of icons to assets/icons dir and rewrite
+    "kavárna, čajovna": const Image(image: AssetImage('icons/coffee-shop.png')),
+    "bankomat": const Image(image: AssetImage('icons/atm.png')),
+    "kostel, kaple": const Image(image: AssetImage('icons/chapel.png')),
+    "kostel": const Image(image: AssetImage('icons/chapel.png')),
+    "sport": const Image(image: AssetImage('icons/football.png')),
+// church - kostel/kaple
+// coffee - kavárna
+// wine - vinárna
+// reception - recepce
+// food - jídlo
+// sport - sport
+// accomodation - ubytování
+// cross - kříž
+// other - jiné'
+  };
+
+  Widget type2icon(String place_type) {
+    if (type2icon_map.containsKey(place_type)) {
+      return type2icon_map[place_type]!;
+    }
+
+    return const Icon(Icons.location_on);
   }
 
   Future<void> loadPlaces() async {
