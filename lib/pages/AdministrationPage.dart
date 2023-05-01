@@ -55,9 +55,14 @@ class _AdministrationPageState extends State<AdministrationPage> {
                 children: [
                   IconButton(
                       onPressed: () async{
-                        await _deleteRowAsync(rendererContext);
+                        final informationId = rendererContext.row.cells[Information.idColumn]?.valueForSorting;
+                        if (informationId == null){
+                          return;
+                        }
+                        await _deleteSavedRowAsync(rendererContext.row, informationId);
                       },
-                      icon: const Icon(Icons.delete_forever))
+                      icon: const Icon(Icons.delete_forever),
+                      color: (rendererContext.row.cells[Information.idColumn]?.valueForSorting != null) ? Colors.black : Colors.transparent)
                 ],
               );
             })
@@ -88,11 +93,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
     );
   }
 
-  Future<void> _deleteRowAsync(PlutoColumnRendererContext rendererContext) async{
+  Future<void> _deleteSavedRowAsync(PlutoRow row, int informationId) async{
     try{
-      final informationId = rendererContext.row.cells[Information.idColumn]?.valueForSorting;
       DataService.deleteInformation(informationId);
-      stateManager.removeRows([rendererContext.row]);
+      stateManager.removeRows([row]);
       Fluttertoast.showToast(msg: "Deleted");
     }catch(e){
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se smazat data, zkuste to prosím znovu");
@@ -111,8 +115,9 @@ class AdministrationHeader extends StatefulWidget {
 
 class _AdministrationHeaderState extends State<AdministrationHeader>{
 
-  bool isAddButtonEnabled = true;
-  bool isSaveButtonVisible = false;
+  // bool isAddButtonEnabled = true;
+  // bool isSaveButtonVisible = false;
+  bool isAddingState = false;
 
   @override
   Widget build(BuildContext context) {
@@ -126,19 +131,18 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
             children: [
               ElevatedButton(
                   onPressed: _reloadDataAsync,
-                  child: const Text('Reload data')),
+                  child: const Text('Znovu načíst informace')),
               ElevatedButton(
-                onPressed: isAddButtonEnabled ? _addRow : null,
-                child: const Text('Add record'),
+                onPressed: isAddingState ? null : _addRow,
+                child: const Text('Přidat informaci'),
               ),
               ElevatedButton(
-                style: isSaveButtonVisible ? null : ButtonStyle(
-                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  foregroundColor: MaterialStateProperty.all(Colors.transparent),
-                  overlayColor: MaterialStateProperty.all(Colors.transparent),
-                ),
-                onPressed: _saveAddedRowAsync,
-                child: const Text('Add record'),
+                onPressed: isAddingState ? _saveAddedRowAsync : null,
+                child: const Text('Uložit informaci'),
+              ),
+              ElevatedButton(
+                onPressed: isAddingState ? _cancelAddingRow : null,
+                child: const Text('Ukončit přidávání informace'),
               ),
             ]
         ),
@@ -153,8 +157,7 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
 
   void _addRow(){
     setState(() {
-      isAddButtonEnabled = false;
-      isSaveButtonVisible = true;
+      isAddingState = true;
     });
     widget.stateManager.prependNewRows();
     AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, false);
@@ -182,6 +185,15 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
     }catch(e) {
       await DialogHelper.showTitleTextButtonDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
+  }
+
+  void _cancelAddingRow(){
+    setState(() {
+      isAddingState = false;
+    });
+    final row = widget.stateManager.rows.first;
+    widget.stateManager.removeRows([row]);
+    AdministrationPageHelper.changeTableReadonlyAbility(widget.stateManager, true);
   }
 }
 
