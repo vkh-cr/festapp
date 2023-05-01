@@ -1,5 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import '../main.dart';
+import '../services/DataService.dart';
+import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -9,87 +15,111 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    //InsertUsername(),
-                    // Row(
-                    //   mainAxisAlignment: MainAxisAlignment.center,
-                    //   children: [TextFormField()],
-                    // ),
-                    // Dominik: tohle nefunguje
-                    //const MyCustomForm(),
-                    ElevatedButton(
-                        onPressed: _callApiPressed,
-                        child: const Text('Přihlásit')),
-                  ],
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text("Login Page"),
+      ),
+      body: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: <Widget>[
+              const SizedBox(
+                height: 200,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Email',
+                      hintText: 'Enter a valid email'),
+                  validator: (String? value) {
+                    if (value!.isEmpty || !value.contains('@')) {
+                      return 'Email is not valid';
+                    }
+                  },
                 ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 15.0, right: 15.0, top: 15, bottom: 0),
+                //padding: EdgeInsets.symmetric(horizontal: 15),
+                child: TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Password',
+                      hintText: 'Enter secure password'),
+                  validator: (String? value) {
+                    if (value!.isEmpty) {
+                      return 'Invalid password';
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              Container(
+                height: 50,
+                width: 250,
+                decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(20)),
+                child: TextButton(
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      await DataService.login(
+                              _emailController.text, _passwordController.text)
+                          .then(_showToast)
+                          .then(_refreshSignedInStatus);
+                    }
+                  },
+                  child: const Text(
+                    'Login',
+                    style: TextStyle(color: Colors.white, fontSize: 25),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const Padding(
-              padding: EdgeInsets.all(24.0), child: Text("Přihlášení"))
-        ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+        ),
+      ),
     );
   }
 
-  void _callApiPressed() async {}
-}
+  void _refreshSignedInStatus(value) {
+    DataService.tryAuthUser().then((loggedIn) {
+      if (loggedIn) {
+        _navigateToHomePage();
+      }
+    });
+  }
 
-// class InsertUsername extends StatelessWidget {
-//   const InsertUsername({
-//     super.key,
-//   });
+  void _showToast(value) {
+    Fluttertoast.showToast(msg: ("Úspěšné přihlášení!"), timeInSecForIosWeb: 3);
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       child: TextField(
-//           //keyboardType: TextInputType.number,
-//           ),
-//     );
-//   }
-//}
-
-class MyCustomForm extends StatelessWidget {
-  const MyCustomForm({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter a search term',
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-          child: TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Enter your username',
-            ),
-          ),
-        ),
-      ],
-    );
+  void _navigateToHomePage() {
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
   }
 }
