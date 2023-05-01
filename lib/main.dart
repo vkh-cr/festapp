@@ -105,10 +105,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SvgPicture.asset(
-                    width: 250,
+                    width: 80,
                     semanticsLabel: 'Absolventský Velehrad',
                     'assets/images/avlogo.svg',
                   ),
+                  Spacer(),
                   const SizedBox(
                     width: 16,
                   ),
