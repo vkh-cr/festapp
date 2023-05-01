@@ -34,6 +34,7 @@ class MainPageButton extends StatelessWidget {
   final EdgeInsets margin;
   final Color backgroundColor;
   final bool circular;
+  final Size size;
 
   const MainPageButton({
     Key? key,
@@ -41,6 +42,7 @@ class MainPageButton extends StatelessWidget {
     required this.child,
     this.backgroundColor = primaryRed,
     this.circular = false,
+    this.size = const Size(64, 50),
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
   }) : super(key: key);
 
@@ -53,6 +55,7 @@ class MainPageButton extends StatelessWidget {
         style: mainPageButtonStyle.copyWith(
           backgroundColor: MaterialStateProperty.all(backgroundColor),
           shape: circular ? MaterialStateProperty.all(CircleBorder()) : null,
+          minimumSize: MaterialStateProperty.all(size),
         ),
         child: child,
       ),
