@@ -12,14 +12,14 @@
             "type": "chrome",
             "url": "http://localhost:7357",
             "webRoot": "${workspaceFolder}",
-            "runtimeArgs": ["--disable-web-security"],
+          //  "runtimeArgs": ["--disable-web-security"],
         },
 
         {
             "name": "av-app",
             "request": "launch",
             "type": "dart",
-            "args": ["--web-port", "7357"]
+            //"args": ["--web-port", "7357"]
         },
         {
             "name": "av-app (profile mode)",
