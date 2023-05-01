@@ -4,6 +4,18 @@ from supabase import create_client, Client
 import pandas as pd
 import numpy as np
 
+
+if len(sys.argv) <= 1:
+	csvpath = '/Users/miakh/Downloads/DevCopyRegistraceMain - Data master.csv'
+else:
+	csvpath = sys.argv[1]
+
+if not os.path.isfile(csvpath):
+	print(f"Usage: 1) python3 {sys.argv[0]} csv_path , or 2) python3 {sys.argv[0]} . Then the csv must be on path {csvpath} .",file=sys.stderr)
+	sys.exit(1)
+
+print("using the csv file at ",csvpath,file=sys.stderr)
+
 url = "https://jyghacisbuntbrshhhey.supabase.co"
 key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg'
 Client = create_client(url, key)
@@ -14,22 +26,23 @@ Client = create_client(url, key)
 reg_id = {}
 for r in data:
 	i = r["id"]
-	reg = r['registration_number']
-	if reg in reg_id:
-		print(f"WARNING: registration_number {reg} is duplicated!!!",file=sys.stderr)
+	rid = r['Id']
+	if rid in reg_id:
+		print(f"WARNING: Id {rid} is duplicated!!!",file=sys.stderr)
 #		sys.exit(1)
-	reg_id[reg] = i
+	reg_id[rid] = i
 
-sheet = pd.read_csv(sys.argv[1])
+sheet = pd.read_csv(csvpath)
 
 s = sheet
 
 # když je prázdné číslo registrace, tak se řádek nepočítá
-s = s[~np.isnan(s["Číslo registrace"])]
+s = s[~np.isnan(s["Id"])]
 
 
 
 migrate_columns = [
+	("Id","Id"),
 	("email","E-mail"),
 	#("registration_number","Číslo registrace"),
 	("name","Jméno"),
@@ -44,7 +57,7 @@ migrate_columns = [
 def w(value, col):
 	if str(value) == "nan":
 		return None
-	if "phone" in col: # má to být text, ale končilo na .0 jako float
+	if "phone" in col or col == "Id": # má to být text, ale končilo na .0 jako float
 		return str(value).replace(".0","")
 	return str(value)
 
