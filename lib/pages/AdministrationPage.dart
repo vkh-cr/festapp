@@ -195,6 +195,9 @@ class _AdministrationHeaderState extends State<AdministrationHeader>{
       await DataService.saveInformation(information);
       Fluttertoast.showToast(msg: "Uloženo");
       _reloadDataAsync();
+      setState(() {
+        isAddingState = false;
+      });
     }catch(e) {
       await DialogHelper.showInformationDialogAsync(context, "chyba", "Nepovedlo se uložit data, zkuste to prosím znovu");
     }
