@@ -33,16 +33,12 @@ class MainPageButton extends StatelessWidget {
   final Widget child;
   final EdgeInsets margin;
   final Color backgroundColor;
-  final bool circular;
-  final Size size;
 
   const MainPageButton({
     Key? key,
     required this.onPressed,
     required this.child,
     this.backgroundColor = primaryRed,
-    this.circular = false,
-    this.size = const Size(64, 50),
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
   }) : super(key: key);
 
@@ -54,7 +50,38 @@ class MainPageButton extends StatelessWidget {
         onPressed: onPressed,
         style: mainPageButtonStyle.copyWith(
           backgroundColor: MaterialStateProperty.all(backgroundColor),
-          shape: circular ? MaterialStateProperty.all(CircleBorder()) : null,
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+class CircularButton extends MainPageButton {
+  final Size size;
+
+  const CircularButton({
+    Key? key,
+    required VoidCallback onPressed,
+    required Widget child,
+    backgroundColor = primaryRed,
+    this.size = const Size(70, 70),
+  }) : super(
+          key: key,
+          onPressed: onPressed,
+          child: child,
+          backgroundColor: backgroundColor,
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: mainPageButtonStyle.copyWith(
+          backgroundColor: MaterialStateProperty.all(this.backgroundColor),
+          shape: MaterialStateProperty.all(const CircleBorder()),
           minimumSize: MaterialStateProperty.all(size),
         ),
         child: child,
