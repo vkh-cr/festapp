@@ -109,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     semanticsLabel: 'Absolventský Velehrad',
                     'assets/images/avlogo.svg',
                   ),
-                  Spacer(),
+                  const Spacer(),
                   const SizedBox(
                     width: 16,
                   ),
@@ -123,9 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              MainPageButton(
-                                size: Size(70, 70),
-                                circular: true,
+                              CircularButton(
+                                size: const Size(70, 70),
                                 onPressed: _loginPressed,
                                 backgroundColor: primaryBlue2,
                                 child: const Icon(Icons.login),
@@ -147,14 +146,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              MainPageButton(
-                                size: Size(70, 70),
-                                circular: true,
+                              CircularButton(
+                                size: const Size(70, 70),
                                 onPressed: _logout,
                                 backgroundColor: primaryBlue2,
-                                child: Icon(Icons.account_circle_rounded),
+                                child: const Icon(Icons.account_circle_rounded),
                               ), // <-- Icon
-                              Text("Odhlásit se"), // <-- Text
+                              const Text("Odhlásit se"), // <-- Text
                             ],
                           ),
                         ],
