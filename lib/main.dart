@@ -95,15 +95,71 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      body: Column(
+        body: SafeArea(
+      child: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
               padding: const EdgeInsets.all(24.0),
-              child: SvgPicture.asset(
-                width: 250,
-                semanticsLabel: 'Absolventský Velehrad',
-                'assets/images/avlogo.svg',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SvgPicture.asset(
+                    width: 80,
+                    semanticsLabel: 'Absolventský Velehrad',
+                    'assets/images/avlogo.svg',
+                  ),
+                  const Spacer(),
+                  const SizedBox(
+                    width: 16,
+                  ),
+                  Visibility(
+                    visible: !isLoggedIn,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 48.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              CircularButton(
+                                size: const Size(70, 70),
+                                onPressed: _loginPressed,
+                                backgroundColor: primaryBlue2,
+                                child: const Icon(Icons.login),
+                              ), // <-- Icon
+                              const Text("Přihlášení"), // <-- Text
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: isLoggedIn,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 48.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              CircularButton(
+                                size: const Size(70, 70),
+                                onPressed: _logout,
+                                backgroundColor: primaryBlue2,
+                                child: const Icon(Icons.account_circle_rounded),
+                              ), // <-- Icon
+                              const Text("Odhlásit se"), // <-- Text
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 48.0),
@@ -157,56 +213,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Visibility(
-            visible: !isLoggedIn,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 48.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      MainPageButton(
-                        onPressed: _loginPressed,
-                        backgroundColor: primaryBlue2,
-                        child: const Icon(Icons.login),
-                      ), // <-- Icon
-                      const Text("Přihlášení"), // <-- Text
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Visibility(
-            visible: isLoggedIn,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 48.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      MainPageButton(
-                        onPressed: _logout,
-                        backgroundColor: primaryBlue2,
-                        child: Icon(Icons.logout),
-                      ), // <-- Icon
-                      Text("Odhlásit se"), // <-- Text
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 48.0),
               child: Text(futureProgram))
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+    ));
   }
 
   void _programPressed() {
