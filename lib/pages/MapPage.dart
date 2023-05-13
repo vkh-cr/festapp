@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'dart:math';
 
 class MarkerWithText extends Marker {
   final String title;
@@ -54,18 +55,54 @@ class _MapPageState extends State<MapPage> {
     loadPlaces();
   }
 
+  Random random = Random();
+
+  double demorandom() {
+    // TODO: remove this function. It's a temporary fix because all the in the
+    // database have the same coordinates
+    // or uncomment:
+    // return 0;
+    return random.nextDouble() / 100;
+  }
+
+  Map<String, Image> type2icon_map = {
+    // TODO: put the final versions of icons to assets/icons dir and rewrite
+    "kavárna, čajovna": const Image(image: AssetImage('icons/coffee-shop.png')),
+    "bankomat": const Image(image: AssetImage('icons/atm.png')),
+    "kostel, kaple": const Image(image: AssetImage('icons/chapel.png')),
+    "kostel": const Image(image: AssetImage('icons/chapel.png')),
+    "sport": const Image(image: AssetImage('icons/football.png')),
+// church - kostel/kaple
+// coffee - kavárna
+// wine - vinárna
+// reception - recepce
+// food - jídlo
+// sport - sport
+// accomodation - ubytování
+// cross - kříž
+// other - jiné'
+  };
+
+  Widget type2icon(String place_type) {
+    if (type2icon_map.containsKey(place_type)) {
+      return type2icon_map[place_type]!;
+    }
+
+    return const Icon(Icons.location_on);
+  }
+
   Future<void> loadPlaces() async {
     var markers = await DataService.getPlaces();
 
     var mappedMarkers = markers
         .map(
           (markerPosition) => MarkerWithText(
-            point: LatLng(markerPosition['coordinates']['latLng']['lat'],
-                markerPosition['coordinates']['latLng']['lng']),
+            point: LatLng(
+                markerPosition['coordinates']['latLng']['lat'] + demorandom(),
+                markerPosition['coordinates']['latLng']['lng'] + demorandom()),
             width: 40,
             height: 40,
-            builder: (_) =>
-                const Icon(Icons.location_on, color: Colors.red, size: 40),
+            builder: (_) => type2icon(markerPosition["type"]),
             anchorPos: AnchorPos.align(AnchorAlign.top),
             title: markerPosition['title'].toString(),
             description: markerPosition['description']?.toString() ?? "",
