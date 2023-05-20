@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
+import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -181,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     MainPageButton(
-                      onPressed: _programPressed,
+                      onPressed: _newsPressed,
                       backgroundColor: primaryYellow,
                       child: const Icon(Icons.newspaper),
                     ), // <-- Icon
@@ -223,6 +224,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _programPressed() {
     Fluttertoast.showToast(msg: ("any button was pressed"));
+  }
+
+  void _newsPressed() {
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => NewsPage()),
+  );
   }
 
   void _infoPressed() {
