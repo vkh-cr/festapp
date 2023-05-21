@@ -18,33 +18,37 @@ class _NewsPageState extends State<NewsPage> {
   TextEditingController _messageController = TextEditingController();
 
   void _showMessageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Zadejte zprávu'),
-          content: TextField(
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Zadejte zprávu'),
+        content: SingleChildScrollView(
+          child: TextField(
             controller: _messageController,
+            maxLines: null, 
+            keyboardType: TextInputType.multiline, 
             decoration: InputDecoration(hintText: 'Zpráva'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Storno'),
-            ),
-            TextButton(
-              onPressed: () {
-                String message = _messageController.text;
-                _sendMessage(message);
-                Navigator.pop(context);
-              },
-              child: Text('Odeslat'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Storno'),
+          ),
+          TextButton(
+            onPressed: () {
+              String message = _messageController.text;
+              _sendMessage(message);
+              Navigator.pop(context);
+            },
+            child: Text('Odeslat'),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   void _sendMessage(String message) {
     DateTime currentDate = DateTime.now();
@@ -100,5 +104,17 @@ class _NewsPageState extends State<NewsPage> {
 }
 
 String formatDate(DateTime date) {
-  return "${date.day}.${date.month}.${date.year}";
+  final weekdayNames = [
+    'pondělí',
+    'úterý',
+    'středa',
+    'čtvrtek',
+    'pátek',
+    'sobota',
+    'neděle',
+  ];
+
+  final weekday = weekdayNames[date.weekday - 1]; 
+
+  return "$weekday ${date.day}.${date.month}.${date.year}";
 }
