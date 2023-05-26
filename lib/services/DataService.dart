@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/responses/HelloWorldResponse.dart';
+import '../models/responses/UserData.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -56,6 +57,20 @@ class DataService {
   static Future<void> logout() async {
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     await _supabase.auth.signOut();
+  }
+
+  static String getUserEmail() {
+    return _supabase.auth.currentUser!.email.toString();
+  }
+
+  static Future<UserData> getUserById() async {
+    final result = await _supabase
+        .from('migrated_users')
+        .select()
+        .eq('email', _supabase.auth.currentUser!.email)
+        .limit(1)
+        .single();
+    return UserData.fromDynamic(result as dynamic);
   }
 
   static Future<dynamic> getPlaces() async =>

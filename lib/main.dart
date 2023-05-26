@@ -68,6 +68,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String futureProgram = "loading...";
+  String userName = "";
 
   bool isLoggedIn = false;
 
@@ -82,6 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
     DataService.getFirstProgramTitle().then((fp) {
       setState(() {
         futureProgram = fp;
+      });
+    });
+
+    DataService.getUserById().then((user) {
+      setState(() {
+        userName = user.name;
       });
     });
   }
@@ -152,7 +159,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 backgroundColor: primaryBlue2,
                                 child: const Icon(Icons.account_circle_rounded),
                               ), // <-- Icon
-                              const Text("Odhlásit se"), // <-- Text
+                              Text(userName), // <-- Text
                             ],
                           ),
                         ],
