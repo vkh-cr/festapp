@@ -124,7 +124,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _navigateToHomePage() {
-    Navigator.of(context).pop();
+    Navigator.pop(context);
   }
 
   void _logout() {
