@@ -70,7 +70,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String futureProgram = "loading...";
   bool isLoggedIn = DataService.isLoggedIn();
-  String userName = 'loading...;
+  String userName = 'loading...';
 
   @override
   void initState() {
