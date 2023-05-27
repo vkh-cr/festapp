@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    print(DataService.isLoggedIn());
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -249,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _profileButtonPressed() {
-    Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const UserPage()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const UserPage()));
   }
 }
