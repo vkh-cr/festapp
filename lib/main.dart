@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
+import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
 
-    DataService.getUserById().then((user) {
+    DataService.getCurrentUser().then((user) {
       setState(() {
         userName = user.name;
       });
@@ -155,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: <Widget>[
                               CircularButton(
                                 size: const Size(70, 70),
-                                onPressed: _logout,
+                                onPressed: _profileButtonPressed,
                                 backgroundColor: primaryBlue2,
                                 child: const Icon(Icons.account_circle_rounded),
                               ), // <-- Icon
@@ -247,10 +248,8 @@ class _MyHomePageState extends State<MyHomePage> {
         context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
-  void _logout() {
-    DataService.logout();
-    setState(() {
-      isLoggedIn = false;
-    });
+  void _profileButtonPressed() {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const UserPage()));
   }
 }

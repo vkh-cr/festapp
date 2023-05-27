@@ -1,10 +1,11 @@
 class UserData {
   final String email;
   final String name;
+  final String surname;
   final String sex;
   final String role;
   final String phone;
-  final String accommodation_type;
+  final String accommodationType;
 
   static const String idColumn = "id";
   static const String emailColumn = "email";
@@ -20,28 +21,20 @@ class UserData {
   UserData(
       {this.email = "",
       required this.name,
+      required this.surname,
       required this.sex,
       required this.role,
       required this.phone,
-      required this.accommodation_type});
+      required this.accommodationType});
 
   static UserData fromJson(Map<String, dynamic> map) {
-    if (map.containsKey(idColumn)) {
-      return UserData(
-        email: map[emailColumn]!,
-        name: map[nameColumn]!,
-        phone: map[phoneColumn]!,
-        role: map[roleColumn]!,
-        accommodation_type: map[accommodationTypeColumn]!,
-        sex: map[sexColumn]!,
-      );
-    }
     return UserData(
       email: map[emailColumn]!,
       name: map[nameColumn]!,
+      surname: map[surnameColumn]!,
       phone: map[phoneColumn]!,
       role: map[roleColumn]!,
-      accommodation_type: map[accommodationTypeColumn]!,
+      accommodationType: map[accommodationTypeColumn]!,
       sex: map[sexColumn]!,
     );
   }
@@ -50,9 +43,10 @@ class UserData {
     return UserData(
       email: map[emailColumn]!,
       name: map[nameColumn]!,
+      surname: map[surnameColumn]!,
       phone: map[phoneColumn]!,
       role: map[roleColumn]!,
-      accommodation_type: map[accommodationTypeColumn]!,
+      accommodationType: map[accommodationTypeColumn]!,
       sex: map[sexColumn]!,
     );
   }

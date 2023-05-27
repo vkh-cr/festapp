@@ -63,7 +63,7 @@ class DataService {
     return _supabase.auth.currentUser!.email.toString();
   }
 
-  static Future<UserData> getUserById() async {
+  static Future<UserData> getCurrentUser() async {
     final result = await _supabase
         .from('migrated_users')
         .select()
