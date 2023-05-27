@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -90,7 +88,8 @@ class _LoginPageState extends State<LoginPage> {
                       await DataService.login(
                               _emailController.text, _passwordController.text)
                           .then(_showToast)
-                          .then(_refreshSignedInStatus);
+                          .then(_refreshSignedInStatus)
+                          .catchError(_onError);
                     }
                   },
                   child: const Text(
@@ -121,5 +120,10 @@ class _LoginPageState extends State<LoginPage> {
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+  }
+
+  void _onError(err) {
+    Fluttertoast.showToast(
+        msg: ("Špatné přihlašovací údaje!"), timeInSecForIosWeb: 3);
   }
 }
