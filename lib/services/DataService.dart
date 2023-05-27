@@ -11,6 +11,16 @@ class DataService {
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
 
+  static UserData? _userData;
+
+  static void setUserData(UserData? userData) {
+    _userData = userData;
+  }
+
+  static UserData? getUserData() {
+    return _userData;
+  }
+
   //final String _baseUrl = "http://localhost:5001/";
   // Future<HelloWorldResponse> getHelloWorld() async{
   //   final url = Uri.parse("${_baseUrl}api/Test/hello/world");
@@ -57,20 +67,21 @@ class DataService {
   static Future<void> logout() async {
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     await _supabase.auth.signOut();
+    setUserData(null);
   }
 
   static String getUserEmail() {
     return _supabase.auth.currentUser!.email.toString();
   }
 
-  static Future<UserData> getCurrentUser() async {
+  static Future<void> getCurrentUserData() async {
     final result = await _supabase
         .from('migrated_users')
         .select()
         .eq('email', _supabase.auth.currentUser!.email)
         .limit(1)
         .single();
-    return UserData.fromDynamic(result as dynamic);
+    setUserData(UserData.fromDynamic(result as dynamic));
   }
 
   static Future<dynamic> getPlaces() async =>

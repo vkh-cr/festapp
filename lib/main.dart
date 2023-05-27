@@ -69,34 +69,26 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String futureProgram = "loading...";
-  String userName = "";
-
-  bool isLoggedIn = false;
+  bool isLoggedIn = DataService.isLoggedIn();
+  String userName = 'loading...;
 
   @override
   void initState() {
     super.initState();
-    DataService.tryAuthUser().then((loggedIn) {
-      setState(() {
-        isLoggedIn = loggedIn;
-      });
-    });
+    DataService.tryAuthUser();
     DataService.getFirstProgramTitle().then((fp) {
       setState(() {
         futureProgram = fp;
       });
     });
 
-    DataService.getCurrentUser().then((user) {
-      setState(() {
-        userName = user.name;
-      });
-    });
+    DataService.getCurrentUserData().then((value) => setState(() {
+          userName = DataService.getUserData()?.name ?? '';
+        }));
   }
 
   @override
   Widget build(BuildContext context) {
-    print(DataService.isLoggedIn());
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //

@@ -3,6 +3,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../services/DataService.dart';
 import '../models/responses/UserData.dart';
+import '../main.dart';
+import '../utils/constants.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -12,17 +14,7 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  UserData? userData;
-
-  @override
-  void initState() {
-    super.initState();
-    DataService.getCurrentUser().then((user) {
-      setState(() {
-        userData = user;
-      });
-    });
-  }
+  UserData? userData = DataService.getUserData();
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +116,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _navigateToHomePage() {
-    Navigator.pop(context);
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
   }
 
   void _logout() {
