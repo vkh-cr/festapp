@@ -5,8 +5,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class NewsMessage {
   final DateTime created_at;
   final String message;
+  final String created_by;
 
-  NewsMessage({required this.created_at, required this.message});
+  NewsMessage({
+    required this.created_at,
+    required this.message,
+    required this.created_by,
+  });
 }
 
 class NewsPage extends StatefulWidget {
@@ -16,8 +21,8 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   final List<NewsMessage> newsMessages = [];
-
   TextEditingController _messageController = TextEditingController();
+  TextEditingController _nameController = TextEditingController();
 
   void _showMessageDialog(BuildContext context) {
     showDialog(
@@ -26,11 +31,20 @@ class _NewsPageState extends State<NewsPage> {
         return AlertDialog(
           title: Text('Zadejte zprávu'),
           content: SingleChildScrollView(
-            child: TextField(
-              controller: _messageController,
-              maxLines: null,
-              keyboardType: TextInputType.multiline,
-              decoration: InputDecoration(hintText: 'Zpráva'),
+            child: Column(
+              children: [
+                TextField(
+                  controller: _messageController,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                  decoration: InputDecoration(hintText: 'Zpráva'),
+                ),
+                SizedBox(height: 8),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(hintText: 'Vaše jméno'),
+                ),
+              ],
             ),
           ),
           actions: [
@@ -41,7 +55,8 @@ class _NewsPageState extends State<NewsPage> {
             TextButton(
               onPressed: () async {
                 String message = _messageController.text;
-                await _sendMessage(message);
+                String createdBy = _nameController.text;
+                await _sendMessage(message, createdBy);
                 Navigator.pop(context);
               },
               child: Text('Odeslat'),
@@ -52,51 +67,60 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  Future<void> _sendMessage(String message) async {
-  DateTime currentDate = DateTime.now();
-  NewsMessage newMessage = NewsMessage (created_at: currentDate, message: message);
+  Future<void> _sendMessage(String message, String createdBy) async {
+    DateTime currentDate = DateTime.now();
+    NewsMessage newMessage = NewsMessage(
+      created_at: currentDate,
+      message: message,
+      created_by: createdBy,
+    );
 
-  final client = Supabase.instance.client;
-  final response = await client.from('news').insert([
-    {'created_at': currentDate.toIso8601String(), 'message': message}
-  ]).execute();
+    final client = Supabase.instance.client;
+    final response = await client.from('news').insert([
+      {
+        'created_at': currentDate.toIso8601String(),
+        'message': message,
+        'created_by': createdBy,
+      }
+    ]).execute();
 
-  if (response.status != 201) {
-    print('Chyba při vkládání zprávy');
-    return;
+    if (response.status != 201) {
+      print('Chyba při vkládání zprávy');
+      return;
+    }
+
+    setState(() {
+      newsMessages.insert(0, newMessage);
+    });
+    _messageController.clear();
+    _nameController.clear();
   }
-
-  setState(() {
-    newsMessages.insert(0, newMessage);
-  });
-  _messageController.clear();
-}
-
 
   Future<void> _loadNewsMessages() async {
-  final client = Supabase.instance.client;
-  final response = await client.from('news').select().order('created_at', ascending: false).execute();
+    final client = Supabase.instance.client;
+    final response =
+        await client.from('news').select().order('created_at', ascending: false).execute();
 
-  if (response.status != 200) {
-    print('Chyba při načítání zpráv');
-    return;
+    if (response.status != 200) {
+      print('Chyba při načítání zpráv');
+      return;
+    }
+
+    List<NewsMessage> loadedMessages = [];
+
+    for (var row in response.data as List<dynamic>) {
+      DateTime createdAt = DateTime.parse(row['created_at']);
+      String message = row['message'];
+      String createdBy = row['created_by']; // Získání jména odesílatele z databáze
+      NewsMessage newsMessage = NewsMessage(created_at: createdAt, message: message, created_by: createdBy);
+      loadedMessages.add(newsMessage);
+    }
+
+    setState(() {
+      newsMessages.clear();
+      newsMessages.addAll(loadedMessages);
+    });
   }
-
-  List<NewsMessage> loadedMessages = [];
-
-  for (var row in response.data as List<dynamic>) {
-    DateTime createdAt = DateTime.parse(row['created_at']);
-    String message = row['message'];
-    NewsMessage newsMessage = NewsMessage(created_at: createdAt, message: message);
-    loadedMessages.add(newsMessage);
-  }
-
-  setState(() {
-    newsMessages.clear();
-    newsMessages.addAll(loadedMessages);
-  });
-}
-
 
   @override
   void initState() {
@@ -124,7 +148,7 @@ class _NewsPageState extends State<NewsPage> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-                            if (index == 0 || !isSameDay)
+              if (index == 0 || !isSameDay)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   child: Text(
@@ -134,6 +158,7 @@ class _NewsPageState extends State<NewsPage> {
                 ),
               ListTile(
                 title: Text(message.message),
+                subtitle: Text('Odeslal: ${message.created_by}'), // Zobrazení jména odesílatele
               ),
               Divider(),
             ],
@@ -163,8 +188,3 @@ String formatDate(DateTime date) {
 
   return "$weekday ${date.day}.${date.month}.${date.year}";
 }
-
-
-
-
-
