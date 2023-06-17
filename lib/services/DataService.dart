@@ -60,4 +60,15 @@ class DataService {
 
   static Future<dynamic> getPlaces() async =>
       await _supabase.from('places').select();
+
+  static Future<dynamic> getEvents() async =>
+      await _supabase.from('events').select().order('start_time', ascending: true);
+
+  static Future<dynamic> getParticipantsPerEvent(int eventId) async {
+    var result = await _supabase
+        .from('event_users')
+        .select('id', const FetchOptions(count: CountOption.exact, head: true))
+        .eq("event", eventId);
+    return result.count;
+  }
 }
