@@ -12,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'pages/LoginPage.dart';
+import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
 
 Future<void> main() async {
@@ -224,7 +225,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _programPressed() {
-    Fluttertoast.showToast(msg: ("any button was pressed"));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const ProgramPage()));
   }
 
   void _newsPressed() {
