@@ -7,13 +7,13 @@ import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
+
+import 'package:intl/date_symbol_data_local.dart';
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
         isLoggedIn = loggedIn;
       });
     });
+    initializeDateFormatting();
     DataService.getFirstProgramTitle().then((fp) {
       setState(() {
         futureProgram = fp;
