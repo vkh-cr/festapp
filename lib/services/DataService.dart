@@ -1,9 +1,7 @@
-import 'dart:convert';
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../models/responses/HelloWorldResponse.dart';
+import '../models/ParticipantModel.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -46,6 +44,10 @@ class DataService {
     return _supabase.auth.currentSession != null;
   }
 
+  static String? currentUserEmail() {
+    return _supabase.auth.currentUser?.email;
+  }
+
   static Future<void> login(String email, String password) async {
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);
@@ -64,11 +66,94 @@ class DataService {
   static Future<dynamic> getEvents() async =>
       await _supabase.from('events').select().order('start_time', ascending: true);
 
-  static Future<dynamic> getParticipantsPerEvent(int eventId) async {
+  static Future<dynamic> getEvent(int eventId) async =>
+      await _supabase.from('events').select().eq("id", eventId).single();
+
+  static Future<dynamic> getParticipantsPerEvent(int eventId) => _supabase
+        .from('event_users')
+        .select("email, event, migrated_users(name, surname)")
+        .eq("event", eventId);
+
+  static Future<int> getParticipantsPerEventCount(int eventId) async {
     var result = await _supabase
         .from('event_users')
-        .select('id', const FetchOptions(count: CountOption.exact, head: true))
+        .select('*', const FetchOptions(count: CountOption.exact, head: true))
         .eq("event", eventId);
     return result.count;
   }
+
+  static Future<bool> isCurrentUserSignedToEvent(int eventId) async {
+    var result = await _supabase
+        .from('event_users')
+        .select('*', const FetchOptions(count: CountOption.exact, head: true))
+        .eq("event", eventId)
+        .eq("email", currentUserEmail());
+    return result.count>0;
+  }
+
+  static signInToEvent(int eventId, [String? email]) async {
+    var finalEmail =  email ?? _supabase.auth.currentUser?.email;
+    if(finalEmail == null)
+    {
+      throw Exception("User must be logged in.");
+    }
+
+    //check for max participants
+    var event = await getEvent(eventId);
+    var maxParticipants = event["max_participants"];
+    var currentParticipants = await getParticipantsPerEventCount(eventId);
+    if(maxParticipants<=currentParticipants)
+    {
+      ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
+      return;
+    }
+
+    await _supabase
+        .from('event_users')
+        .upsert({ "event": eventId, "email": finalEmail })
+        .select();
+
+    ToastHelper.Show("Přihlášen $finalEmail");
+  }
+
+  static signOutFromEvent(int eventId, [String? email]) async {
+    var finalEmail = email ?? _supabase.auth.currentUser?.email;
+    if(finalEmail == null)
+    {
+      throw Exception("User must be logged in.");
+    }
+    await _supabase
+        .from('event_users')
+        .delete()
+        .eq("event", eventId)
+        .eq("email", finalEmail);
+
+    ToastHelper.Show("Odhlášen $finalEmail");
+  }
+
+  static Future<List<ParticipantModel>> getAllUsers() async {
+    List<ParticipantModel> toReturn = [];
+    var result = await _supabase
+        .from("migrated_users")
+        .select("email, name, surname");
+    for(var p in result)
+    {
+      toReturn.add(ParticipantModel(p["email"], p["name"], p["surname"]));
+    }
+    return toReturn;
+  }
+
+  // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
+  //   List<ParticipantModel> toReturn = [];
+  //   var result = await _supabase
+  //       .from("migrated_users")
+  //       .select("email, name, surname")
+  //       .or('or(name.ilike.%$searchTerm%),or(surname.ilike.%$searchTerm%),or(email.ilike.%$searchTerm%)')
+  //       .limit(10);
+  //   for(var p in result)
+  //   {
+  //     toReturn.add(ParticipantModel(p["email"], p["name"], p["surname"]));
+  //   }
+  //   return toReturn;
+  // }
 }
