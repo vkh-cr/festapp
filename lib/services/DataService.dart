@@ -1,3 +1,4 @@
+import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -147,6 +148,30 @@ class DataService {
       toReturn.add(ParticipantModel(p["email"], p["name"], p["surname"]));
     }
     return toReturn;
+  }
+
+  static insertNewsMessage(String message) async {
+    await _supabase.from('news')
+        .insert({
+        'message': message
+        })
+        .select();
+    ToastHelper.Show("Zpráva byla odeslána!");
+  }
+
+  static Future<List<NewsMessage>> loadNewsMessages() async {
+    var messagesData = await _supabase.from('news').select('id, created_at, message, migrated_users(name, surname)');
+    List<NewsMessage> loadedMessages = [];
+
+    for (var row in messagesData) {
+      DateTime createdAt = DateTime.parse(row['created_at']);
+      String message = row['message'];
+      var fullName = row['migrated_users']['name'] + " " + row['migrated_users']['surname'];
+      NewsMessage newsMessage = NewsMessage(createdAt: createdAt, message: message, createdBy: fullName);
+      loadedMessages.add(newsMessage);
+    }
+    return loadedMessages;
+
   }
 
   // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
