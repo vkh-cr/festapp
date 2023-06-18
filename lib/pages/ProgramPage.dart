@@ -1,10 +1,9 @@
 import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
-import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:timelines/timelines.dart';
 
 import '../models/EventModel.dart';
+import '../widgets/ProgramTimeline.dart';
 
 class ProgramPage extends StatefulWidget {
   const ProgramPage({Key? key}) : super(key: key);
@@ -15,8 +14,6 @@ class ProgramPage extends StatefulWidget {
 
 class _ProgramPageState extends State<ProgramPage> {
   final List<EventModel> _events = [];
-  // https://flutterawesome.com/a-powerful-easy-to-use-timeline-package-for-flutter/
-
   @override
   void initState() {
     super.initState();
@@ -29,49 +26,7 @@ class _ProgramPageState extends State<ProgramPage> {
       appBar: AppBar(
         title: const Text('Program AV 2023'),
       ),
-      body: Timeline.tileBuilder(
-        theme: TimelineTheme.of(context).copyWith(
-          nodePosition: 0.3,
-          indicatorTheme: IndicatorTheme.of(context).copyWith(
-            color: primaryBlue1
-          ),
-          connectorTheme: ConnectorTheme.of(context).copyWith(
-            color: primaryBlue1,
-          thickness: 2),
-        ),
-        builder: TimelineTileBuilder.connected(
-          itemCount: _events.length,
-          contentsAlign: ContentsAlign.basic,
-          oppositeContentsBuilder: (_, index) {
-            final event = _events[index];
-            return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(event.startTimeString()),
-              );
-          },
-          contentsBuilder: (_, index) {
-            final event = _events[index];
-            //return Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})");
-            return TextButton(
-                onPressed: () => eventPressed(event.id),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.black, // Text Color
-                ),
-                child: Text(event.toString()));
-          },
-          indicatorBuilder: (_, index) {
-            final event = _events[index];
-            return OutlinedDotIndicator(color: primaryBlue1, borderWidth: event.isSignedIn ? 6:2);
-            },
-          connectorBuilder: (_,index,__) {
-            if(index == _events.length-1)
-              {
-                return const TransparentConnector();
-              }
-            return const SolidLineConnector();
-          },
-        ),
-      ),
+      body: ProgramTimeline(events: _events, onEventPressed: eventPressed),
     );
   }
 
