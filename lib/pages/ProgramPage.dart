@@ -1,29 +1,17 @@
+import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
+
+import '../models/EventModel.dart';
 
 class ProgramPage extends StatefulWidget {
   const ProgramPage({Key? key}) : super(key: key);
 
   @override
   _ProgramPageState createState() => _ProgramPageState();
-}
-
-class EventModel {
-  String startTime;
-
-  int? maxParticipants;
-
-  int id;
-  String currentParticipants = "-";
-
-  EventModel(this.id, this.title, this.startTime, this.isSignedIn, this.maxParticipants);
-
-  String title; // Declare instance variable x, initially null.
-  bool isSignedIn = false;
 }
 
 class _ProgramPageState extends State<ProgramPage> {
@@ -33,8 +21,7 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
-    loadEvents().whenComplete(() => loadEventParticipants());
-
+    loadEvents().whenComplete(() async => await loadEventParticipants());
   }
 
   @override
@@ -65,10 +52,13 @@ class _ProgramPageState extends State<ProgramPage> {
           },
           contentsBuilder: (_, index) {
             final event = _events[index];
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})"),
-            );
+            //return Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})");
+            return TextButton(
+                onPressed: () => eventPressed(event.id),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black, // Text Color
+                ),
+                child: Text(event.toString()));
           },
           indicatorBuilder: (_, index) {
             final event = _events[index];
@@ -87,12 +77,15 @@ class _ProgramPageState extends State<ProgramPage> {
   }
 
   Future<void> loadEventParticipants() async {
-      for (var e in _events)  {
-        if(e.maxParticipants != null)
+      for (var e in _events)
+      {
+        if(e.canSignIn())
         {
-          var participants = (await DataService.getParticipantsPerEvent(e.id)).toString();
+          var participants = await DataService.getParticipantsPerEventCount(e.id);
+          var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
           setState(() {
             e.currentParticipants = participants;
+            e.isSignedIn = isSignedCurrent;
           });
         }
       }
@@ -106,7 +99,12 @@ class _ProgramPageState extends State<ProgramPage> {
         final dateTimeString = DateFormat.Hm().format(dateTime);
         _events.add(EventModel(e["id"], e["title"], dateTimeString, false, e["max_participants"]));
       });
-      _events[1].isSignedIn = true;
     });
+  }
+
+  eventPressed(int id) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadEventParticipants());
+
   }
 }
