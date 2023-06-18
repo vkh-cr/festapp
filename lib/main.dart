@@ -5,10 +5,13 @@ import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
+import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'models/EventModel.dart';
+import 'pages/EventPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
@@ -70,7 +73,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String futureProgram = "loading...";
 
   bool isLoggedIn = false;
 
@@ -83,11 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
     initializeDateFormatting();
-    DataService.getFirstProgramTitle().then((fp) {
-      setState(() {
-        futureProgram = fp;
-      });
-    });
+    loadEvents().whenComplete(() async => await loadEventParticipants());
   }
 
   @override
@@ -165,8 +163,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               )),
+          Expanded(child: ProgramTabView(events: _events, onEventPressed: eventPressed)),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48.0),
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -217,9 +216,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Padding(
-              padding: const EdgeInsets.symmetric(vertical: 48.0),
-              child: Text(futureProgram))
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     ));
@@ -257,5 +253,35 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       isLoggedIn = false;
     });
+  }
+
+  final List<EventModel> _events = [];
+
+  Future<void> loadEventParticipants() async {
+    for (var e in _events)
+    {
+      if(e.canSignIn())
+      {
+        var participants = await DataService.getParticipantsPerEventCount(e.id);
+        var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
+        setState(() {
+          e.currentParticipants = participants;
+          e.isSignedIn = isSignedCurrent;
+        });
+      }
+    }
+  }
+
+  Future<void>  loadEvents() async {
+    var events = await DataService.getEvents();
+    _events.clear();
+    events.forEach((e) {
+      _events.add(EventModel.fromJson(e["id"], e));
+    });
+  }
+
+  eventPressed(int id) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadEventParticipants());
   }
 }

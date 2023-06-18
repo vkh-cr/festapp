@@ -1,9 +1,9 @@
 import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';
-import '../widgets/ProgramTimeline.dart';
 
 class ProgramPage extends StatefulWidget {
   const ProgramPage({Key? key}) : super(key: key);
@@ -13,7 +13,7 @@ class ProgramPage extends StatefulWidget {
 }
 
 class _ProgramPageState extends State<ProgramPage> {
-  final List<EventModel> _events = [];
+
   @override
   void initState() {
     super.initState();
@@ -26,9 +26,11 @@ class _ProgramPageState extends State<ProgramPage> {
       appBar: AppBar(
         title: const Text('Program AV 2023'),
       ),
-      body: ProgramTimeline(events: _events, onEventPressed: eventPressed),
+      body: Center(child: ProgramTabView(events: _events, onEventPressed: eventPressed))
     );
   }
+
+  final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
       for (var e in _events)
@@ -47,10 +49,9 @@ class _ProgramPageState extends State<ProgramPage> {
 
   Future<void>  loadEvents() async {
     var events = await DataService.getEvents();
-    setState(() {
-      events.forEach((e) {
-        _events.add(EventModel.fromJson(e["id"], e));
-      });
+    _events.clear();
+    events.forEach((e) {
+      _events.add(EventModel.fromJson(e["id"], e));
     });
   }
 

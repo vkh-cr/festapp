@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 class EventModel {
   String startTimeString() => DateFormat.Hm().format(startTime!);
-  String durationString() => startTime != null && endTime != null ? "${DateFormat("EEEE, MMM d, H:m", "cs").format(startTime!)} - ${DateFormat.Hm().format(endTime!)}" : "";
+  String durationString() => startTime != null && endTime != null ? "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime!)} - ${DateFormat.Hm().format(endTime!)}" : "";
 
   int? maxParticipants;
 
@@ -32,6 +32,6 @@ class EventModel {
 
   @override
   String toString() {
-    return (maxParticipants==null?title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
+    return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
   }
 }
