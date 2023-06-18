@@ -87,16 +87,19 @@ class _EventPageState extends State<EventPage> {
                   ),
                   ]),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              alignment: Alignment.topRight,
+              child: Text(_event.durationString()),
+            ),
+          ),
           Visibility(
               visible: !DataService.isLoggedIn(),
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text("Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci."),
               )),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(_event.durationString()),
-          ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(_event.description ?? ""),
