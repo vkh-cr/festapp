@@ -1,6 +1,7 @@
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
 
 class DataService {
@@ -99,10 +100,15 @@ class DataService {
     }
 
     //check for max participants
-    var event = await getEvent(eventId);
-    var maxParticipants = event["max_participants"];
+    var eventData = await getEvent(eventId);
+    var event = EventModel.fromJson(eventId, eventData);
+    if(event.startTime!.isBefore(DateTime.now()))
+    {
+      ToastHelper.Show("Nelze přihlásit! Událost už proběhla.");
+      return;
+    }
     var currentParticipants = await getParticipantsPerEventCount(eventId);
-    if(maxParticipants<=currentParticipants)
+    if(event.maxParticipants!<=currentParticipants)
     {
       ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
       return;
