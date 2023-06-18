@@ -2,7 +2,6 @@ import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
 
 import '../models/EventModel.dart';
@@ -47,7 +46,7 @@ class _ProgramPageState extends State<ProgramPage> {
             final event = _events[index];
             return Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(event.startTime),
+                child: Text(event.startTimeString()),
               );
           },
           contentsBuilder: (_, index) {
@@ -95,9 +94,7 @@ class _ProgramPageState extends State<ProgramPage> {
     var events = await DataService.getEvents();
     setState(() {
       events.forEach((e) {
-        final dateTime = DateTime.parse(e["start_time"]);
-        final dateTimeString = DateFormat.Hm().format(dateTime);
-        _events.add(EventModel(e["id"], e["title"], dateTimeString, false, e["max_participants"]));
+        _events.add(EventModel.fromJson(e["id"], e));
       });
     });
   }

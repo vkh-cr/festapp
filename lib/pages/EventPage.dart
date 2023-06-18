@@ -14,7 +14,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  final EventModel _event = EventModel(0, "", "", false, null);
+  EventModel _event = EventModel(0);
   List<ParticipantModel> _participants = [];
   List<ParticipantModel> _queriedParticipants = [];
   int eventId;
@@ -25,20 +25,6 @@ class _EventPageState extends State<EventPage> {
   void initState() {
     super.initState();
     loadData();
-  }
-
-  Future<void> loadData() async {
-    await loadEvent().whenComplete(loadParticipants);
-  }
-
-  Future<void> loadParticipants() async {
-    if(!DataService.isLoggedIn()){
-      return;
-    }
-    var participants = await DataService.getParticipantsPerEvent(eventId);
-    _participants = List.from(participants.map((par) => ParticipantModel(par["email"], par["migrated_users"]["name"], par["migrated_users"]["surname"])));
-    isLoadingParticipants = false;
-    setState(()=>{});
   }
 
   @override
@@ -109,6 +95,10 @@ class _EventPageState extends State<EventPage> {
               )),
           Padding(
             padding: const EdgeInsets.all(8.0),
+            child: Text(_event.durationString()),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
             child: Text(_event.description ?? ""),
           ),
           Visibility(
@@ -139,13 +129,25 @@ class _EventPageState extends State<EventPage> {
     return DataService.isLoggedIn() && !isLoadingParticipants && _event.canSignIn();
   }
 
+  Future<void> loadData() async {
+    await loadEvent().whenComplete(loadParticipants);
+  }
+
+  Future<void> loadParticipants() async {
+    if(!DataService.isLoggedIn()){
+      return;
+    }
+    var participants = await DataService.getParticipantsPerEvent(eventId);
+    _participants = List.from(participants.map((par) => ParticipantModel(par["email"], par["migrated_users"]["name"], par["migrated_users"]["surname"])));
+    isLoadingParticipants = false;
+    setState(()=>{});
+  }
+
   Future<void> loadEvent() async {
     var event = await DataService.getEvent(eventId);
     var currentParticipants = await DataService.getParticipantsPerEventCount(eventId);
     setState(() {
-      _event.title = event["title"];
-      _event.description = event["description"];
-      _event.maxParticipants = event["max_participants"];
+      _event = EventModel.fromJson(eventId, event);
       _event.currentParticipants = currentParticipants;
     });
   }
