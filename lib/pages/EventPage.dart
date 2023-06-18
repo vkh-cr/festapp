@@ -170,16 +170,16 @@ class _EventPageState extends State<EventPage> {
         content: Text("Chcete odhlásit účastníka $participant z $_event?"),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context, 'Ne'),
-            child: const Text('Ne'),
+            onPressed: () => Navigator.pop(context, 'Storno'),
+            child: const Text('Storno'),
           ),
           TextButton(
             onPressed: () async {
-              Navigator.pop(context, 'Ano');
+              Navigator.pop(context, 'Odhlásit');
               await DataService.signOutFromEvent(eventId, participant?.email);
               await loadData();
             },
-            child: const Text('Ano'),
+            child: const Text('Odhlásit'),
           ),
         ],
       ),

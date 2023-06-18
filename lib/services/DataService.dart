@@ -153,14 +153,15 @@ class DataService {
   static insertNewsMessage(String message) async {
     await _supabase.from('news')
         .insert({
-        'message': message
+          "message": message,
+          "created_by": currentUserEmail()
         })
         .select();
     ToastHelper.Show("Zpráva byla odeslána!");
   }
 
   static Future<List<NewsMessage>> loadNewsMessages() async {
-    var messagesData = await _supabase.from('news').select('id, created_at, message, migrated_users(name, surname)');
+    var messagesData = await _supabase.from('news').select('id, created_at, message, migrated_users(name, surname)').order("created_at");
     List<NewsMessage> loadedMessages = [];
 
     for (var row in messagesData) {
