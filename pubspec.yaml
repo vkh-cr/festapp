@@ -41,6 +41,10 @@ dependencies:
   flutter_map_marker_popup: ^4.0.2
   supabase_flutter: ^1.7.0
   flutter_secure_storage: ^8.0.0
+  timelines: ^0.1.0
+  intl: ^0.18.1
+  search_page: ^2.3.0
+  badges: ^3.1.1
 
 dev_dependencies:
   flutter_test:
