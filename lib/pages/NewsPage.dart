@@ -61,6 +61,7 @@ class _NewsPageState extends State<NewsPage> {
       newsMessages.clear();
       newsMessages.addAll(loadedMessages);
     });
+    DataService.setMessagesAsRead(newsMessages.first.id);
   }
 
   @override
@@ -87,21 +88,25 @@ class _NewsPageState extends State<NewsPage> {
               message.createdAt.day == previousMessage.createdAt.day;
 
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
+              if (index != 0 && !isSameDay)
+                const Divider(),
               if (index == 0 || !isSameDay)
-                Padding(
+                Container(
                   padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
+                  alignment: Alignment.topRight,
                   child: Text(
                     DateFormat("EEEE d.M.y", "cs").format(message.createdAt),
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: message.isRead?readTextStyle:unReadTextStyle,
                   ),
                 ),
               ListTile(
-                title: Text(message.message),
-                subtitle: Text('Odeslal: ${message.createdBy}'), // Zobrazení jména odesílatele
+                title: Text(message.message,
+                    style: message.isRead?readTextStyle:unReadTextStyle
+                ),
+                subtitle:
+                Text('Odeslal: ${message.createdBy}'), // Zobrazení jména odesílatele
               ),
-              const Divider(),
             ],
           );
         },
@@ -115,4 +120,7 @@ class _NewsPageState extends State<NewsPage> {
       ),
     );
   }
+  TextStyle unReadTextStyle = const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle readTextStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54);
+
 }

@@ -17,6 +17,7 @@ import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -85,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
     initializeDateFormatting();
-    loadEvents().whenComplete(() async => await loadEventParticipants());
+    loadData();
   }
 
   @override
@@ -183,10 +184,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    MainPageButton(
-                      onPressed: _newsPressed,
-                      backgroundColor: primaryYellow,
-                      child: const Icon(Icons.newspaper),
+                    badges.Badge(
+                      showBadge: showMessageCount(),
+                      badgeContent: SizedBox(
+                        width: 20, height: 20,
+                        child: Center(
+                          child: Text(messageCountString(), style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16
+                          )
+                      ),
+                    )
+                ),
+                      child: MainPageButton(
+                        onPressed: _newsPressed,
+                        backgroundColor: primaryYellow,
+                        child: const Icon(Icons.newspaper),
+                      ),
                     ), // <-- Icon
                     const Text("Ohlášky"), // <-- Text
                   ],
@@ -223,24 +237,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _programPressed() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ProgramPage()));
+        context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
   }
 
   void _newsPressed() {
     Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => NewsPage()),
-  );
+    MaterialPageRoute(builder: (context) => NewsPage())).then((value) => loadData());
   }
 
   void _infoPressed() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+        context, MaterialPageRoute(builder: (context) => const PlayingPage())).then((value) => loadData());
   }
 
   void _mapPressed() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const MapPage()));
+        context, MaterialPageRoute(builder: (context) => const MapPage())).then((value) => loadData());
   }
 
   void _loginPressed() {
@@ -282,6 +295,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
   eventPressed(int id) {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadEventParticipants());
+        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadData());
+  }
+
+  int messageCount = 0;
+  bool showMessageCount() => messageCount>0;
+  String messageCountString() => messageCount<100?messageCount.toString():"99";
+  void loadData() {
+      loadEvents()
+        .whenComplete(() async => await loadEventParticipants())
+        .whenComplete(() async {
+          if(!DataService.isLoggedIn())
+          {
+            return;
+          }
+          var count = await DataService.countNewMessages();
+
+          setState(() {
+            messageCount = count;
+          });
+        });
   }
 }
