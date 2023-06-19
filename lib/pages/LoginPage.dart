@@ -1,8 +1,5 @@
-import 'dart:async';
-
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
 import '../main.dart';
 import '../services/DataService.dart';
 import '../utils/constants.dart';
@@ -115,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showToast(value) {
-    Fluttertoast.showToast(msg: ("Úspěšné přihlášení!"), timeInSecForIosWeb: 3);
+    ToastHelper.Show("Úspěšné přihlášení!");
   }
 
   void _navigateToHomePage() {

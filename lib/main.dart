@@ -2,16 +2,22 @@ import 'dart:async';
 
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
+import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
+import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'models/EventModel.dart';
+import 'pages/EventPage.dart';
 import 'pages/LoginPage.dart';
+import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
+
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
   await Supabase.initialize(
@@ -19,6 +25,7 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
+
   runApp(const MyApp());
 }
 
@@ -67,7 +74,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String futureProgram = "loading...";
 
   bool isLoggedIn = false;
 
@@ -79,11 +85,8 @@ class _MyHomePageState extends State<MyHomePage> {
         isLoggedIn = loggedIn;
       });
     });
-    DataService.getFirstProgramTitle().then((fp) {
-      setState(() {
-        futureProgram = fp;
-      });
-    });
+    initializeDateFormatting();
+    loadData();
   }
 
   @override
@@ -161,8 +164,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                 ],
               )),
+          Expanded(child: ProgramTabView(events: _events, onEventPressed: eventPressed)),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48.0),
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -180,10 +184,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: primaryYellow,
-                      child: const Icon(Icons.newspaper),
+                    badges.Badge(
+                      showBadge: showMessageCount(),
+                      badgeContent: SizedBox(
+                        width: 20, height: 20,
+                        child: Center(
+                          child: Text(messageCountString(), style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16
+                          )
+                      ),
+                    )
+                ),
+                      child: MainPageButton(
+                        onPressed: _newsPressed,
+                        backgroundColor: primaryYellow,
+                        child: const Icon(Icons.newspaper),
+                      ),
                     ), // <-- Icon
                     const Text("Ohlášky"), // <-- Text
                   ],
@@ -213,26 +230,30 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
           ),
-          Padding(
-              padding: const EdgeInsets.symmetric(vertical: 48.0),
-              child: Text(futureProgram))
         ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     ));
   }
 
   void _programPressed() {
-    Fluttertoast.showToast(msg: ("any button was pressed"));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
+  }
+
+  void _newsPressed() {
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => NewsPage())).then((value) => loadData());
   }
 
   void _infoPressed() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const PlayingPage()));
+        context, MaterialPageRoute(builder: (context) => const PlayingPage())).then((value) => loadData());
   }
 
   void _mapPressed() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const MapPage()));
+        context, MaterialPageRoute(builder: (context) => const MapPage())).then((value) => loadData());
   }
 
   void _loginPressed() {
@@ -245,5 +266,54 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       isLoggedIn = false;
     });
+  }
+
+  final List<EventModel> _events = [];
+
+  Future<void> loadEventParticipants() async {
+    for (var e in _events)
+    {
+      if(e.canSignIn())
+      {
+        var participants = await DataService.getParticipantsPerEventCount(e.id);
+        var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
+        setState(() {
+          e.currentParticipants = participants;
+          e.isSignedIn = isSignedCurrent;
+        });
+      }
+    }
+  }
+
+  Future<void>  loadEvents() async {
+    var events = await DataService.getEvents();
+    _events.clear();
+    events.forEach((e) {
+      _events.add(EventModel.fromJson(e["id"], e));
+    });
+  }
+
+  eventPressed(int id) {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadData());
+  }
+
+  int messageCount = 0;
+  bool showMessageCount() => messageCount>0;
+  String messageCountString() => messageCount<100?messageCount.toString():"99";
+  void loadData() {
+      loadEvents()
+        .whenComplete(() async => await loadEventParticipants())
+        .whenComplete(() async {
+          if(!DataService.isLoggedIn())
+          {
+            return;
+          }
+          var count = await DataService.countNewMessages();
+
+          setState(() {
+            messageCount = count;
+          });
+        });
   }
 }
