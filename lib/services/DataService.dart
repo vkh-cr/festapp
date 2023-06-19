@@ -114,7 +114,6 @@ class DataService {
       ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
       return;
     }
-
     await _supabase
         .from('event_users')
         .upsert({ "event": eventId, "email": finalEmail })
@@ -160,7 +159,42 @@ class DataService {
     ToastHelper.Show("Zpráva byla odeslána!");
   }
 
+  static Future<int> countNewMessages() async {
+    int lastMessageId = await getLastReadMessage();
+    var result = await _supabase
+        .from('news')
+        .select('*', const FetchOptions(count: CountOption.exact, head: true))
+        .gt("id", lastMessageId);
+    return result.count;
+  }
+
+  static Future<int> getLastReadMessage() async {
+    int lastMessageId = 0;
+    var lastMessage = await _supabase.from("user_news").select("news_id").eq("user", currentUserEmail()).maybeSingle();
+    if(lastMessage != null)
+    {
+      lastMessageId = lastMessage["news_id"];
+    }
+    return lastMessageId;
+  }
+
+  static void setMessagesAsRead(int newsId) async {
+    if(currentUserEmail() == null)
+    {
+      return;
+    }
+    await _supabase
+        .from('user_news')
+        .upsert({ "user": currentUserEmail(), "news_id": newsId })
+        .select();
+  }
+
   static Future<List<NewsMessage>> loadNewsMessages() async {
+
+    int lastReadMessageId = 0;
+    if(isLoggedIn()){
+      lastReadMessageId = await getLastReadMessage();
+    }
     var messagesData = await _supabase.from('news').select('id, created_at, message, migrated_users(name, surname)').order("created_at");
     List<NewsMessage> loadedMessages = [];
 
@@ -168,11 +202,13 @@ class DataService {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
       var fullName = row['migrated_users']['name'] + " " + row['migrated_users']['surname'];
-      NewsMessage newsMessage = NewsMessage(createdAt: createdAt, message: message, createdBy: fullName);
+      NewsMessage newsMessage = NewsMessage(createdAt: createdAt, message: message, createdBy: fullName, id: row['id']);
+      if(isLoggedIn()){
+        newsMessage.isRead = lastReadMessageId>=newsMessage.id;
+      }
       loadedMessages.add(newsMessage);
     }
     return loadedMessages;
-
   }
 
   // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
