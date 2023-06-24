@@ -5,9 +5,16 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'dart:math';
 
+const double InitLat = 49.10353;
+const double InitLng = 17.39502;
+const double InitZoom = 16.5;
+
 class MarkerWithText extends Marker {
+  double? oldLat;
+  double? oldLng;
   final String title;
   final String description;
+  Function(MarkerWithText marker)? editAction;
 
   MarkerWithText({
     required LatLng point,
@@ -21,6 +28,7 @@ class MarkerWithText extends Marker {
     AnchorPos<dynamic>? anchorPos,
     required this.title,
     required this.description,
+    this.editAction
   }) : super(
           point: point,
           builder: builder,
@@ -45,6 +53,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
+  MarkerWithText? selectedMarker;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -106,11 +115,20 @@ class _MapPageState extends State<MapPage> {
             anchorPos: AnchorPos.align(AnchorAlign.top),
             title: markerPosition['title'].toString(),
             description: markerPosition['description']?.toString() ?? "",
+            editAction: runEditPositionMode,
           ),
         )
         .toList();
     setState(() {
       mappedMarkers.forEach((m) => _markers.add(m));
+    });
+  }
+
+  runEditPositionMode(MarkerWithText marker) {
+    marker.oldLat = marker.point.latitude;
+    marker.oldLng = marker.point.longitude;
+    setState(() {
+      selectedMarker = marker;
     });
   }
 
@@ -120,35 +138,80 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: const Text('Mapa AV 2023'),
       ),
-      body: FlutterMap(
-        options: MapOptions(
-          zoom: 16.5,
-          center: LatLng(49.10353, 17.39502),
-          onTap: (_, __) => _popupLayerController
-              .hideAllPopups(), // Hide popup when the map is tapped.
-        ),
+      body: Stack(
         children: [
-          TileLayer(
-            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            subdomains: const ['a', 'b', 'c'],
-          ),
-          PopupMarkerLayerWidget(
-            options: PopupMarkerLayerOptions(
-              popupController: _popupLayerController,
-              markers: _markers,
-              markerRotateAlignment:
-                  PopupMarkerLayerOptions.rotationAlignmentFor(AnchorAlign.top),
-              popupBuilder: (BuildContext context, Marker marker) {
-                if (marker is MarkerWithText) {
-                  return MapDescriptionPopup(marker);
-                }
-                return SizedBox.shrink();
-              },
+          FlutterMap(
+            options: MapOptions(
+              zoom: InitZoom,
+              maxZoom: 18,
+              center: LatLng(InitLat, InitLng),
+              onTap: (_, location) => onMapTap(location),
             ),
+            children: [
+              TileLayer(
+                urlTemplate:
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c'],
+              ),
+              PopupMarkerLayerWidget(
+                options: PopupMarkerLayerOptions(
+                  popupController: _popupLayerController,
+                  markers: _markers,
+                  markerRotateAlignment:
+                      PopupMarkerLayerOptions.rotationAlignmentFor(
+                          AnchorAlign.top),
+                  popupBuilder: (BuildContext context, Marker marker) {
+                    if (marker is MarkerWithText) {
+                      return MapDescriptionPopup(marker);
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
+              ),
+            ],
           ),
+          Visibility(
+            visible: selectedMarker != null,
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.white,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                          onPressed: cancelNewPosition, child: Text("Storno")),
+                      const Padding(padding: EdgeInsets.all(16.0)),
+                      ElevatedButton(
+                          onPressed: saveNewPosition, child: Text("Uložit pozici")),
+                    ],
+                  ),
+                ),
+                Expanded(child: Container()),
+              ],
+            ),
+          )
         ],
       ),
     );
+  }
+
+  onMapTap(LatLng pos) {
+    if (selectedMarker != null) {
+      selectedMarker!.point.latitude = pos.latitude;
+      selectedMarker!.point.longitude = pos.longitude;
+    }
+    _popupLayerController.hideAllPopups();
+  }
+
+  void saveNewPosition() {}
+
+  void cancelNewPosition() {
+    selectedMarker!.point.latitude = selectedMarker!.oldLat!;
+    selectedMarker!.point.longitude = selectedMarker!.oldLng!;
+    setState(() {
+      selectedMarker = null;
+    });
   }
 }
 
@@ -194,6 +257,11 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               ),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
+            Visibility(
+                visible: DataService.isLoggedIn(),
+                child: ElevatedButton(
+                    onPressed: changePositionPressed,
+                    child: const Text("Změnit polohu"))),
             Text(
               widget.marker.description,
               style: const TextStyle(fontSize: 12.0),
@@ -203,4 +271,6 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
       ),
     );
   }
+
+  void changePositionPressed() => widget.marker.editAction!(widget.marker);
 }

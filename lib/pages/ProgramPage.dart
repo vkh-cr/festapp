@@ -17,7 +17,7 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
-    loadEvents().whenComplete(() async => await loadEventParticipants());
+    DataService.loadEvents(_events).whenComplete(() async => await loadEventParticipants());
   }
 
   @override
@@ -45,14 +45,6 @@ class _ProgramPageState extends State<ProgramPage> {
           });
         }
       }
-  }
-
-  Future<void>  loadEvents() async {
-    var events = await DataService.getEvents();
-    _events.clear();
-    events.forEach((e) {
-      _events.add(EventModel.fromJson(e["id"], e));
-    });
   }
 
   eventPressed(int id) {
