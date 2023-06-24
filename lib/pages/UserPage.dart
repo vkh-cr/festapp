@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../services/DataService.dart';
-import '../models/responses/UserData.dart';
+import '../models/UserData.dart';
 import '../main.dart';
 import '../utils/constants.dart';
 
@@ -14,7 +14,7 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  UserData? userData = DataService.getUserData();
+  UserData? userData;
 
   @override
   Widget build(BuildContext context) {
@@ -29,15 +29,6 @@ class _UserPageState extends State<UserPage> {
           children: <Widget>[
             const SizedBox(
               height: 15,
-            ),
-            Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15),
-                child: Text(
-                  'Ahoj ${userData?.name}!',
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
             ),
             buildTextField('Jméno', userData?.name ?? ''),
             buildTextField('Příjmení', userData?.surname ?? ''),
@@ -91,6 +82,12 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
   Widget buildTextField(String labelText, String placeholder) {
     return Padding(
       padding: const EdgeInsets.all(15.0),
@@ -129,6 +126,13 @@ class _UserPageState extends State<UserPage> {
     Fluttertoast.showToast(
         msg: ("Not implemented redirection"), timeInSecForIosWeb: 3);
     // TODO: Redirect to admin page
+  }
+
+  Future<void> loadData() async {
+    var ud = await DataService.getCurrentUserData();
+    setState(() {
+      userData = ud;
+    });
   }
 }
 

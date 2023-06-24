@@ -122,7 +122,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onError(err) {
-    Fluttertoast.showToast(
-        msg: ("Špatné přihlašovací údaje!"), timeInSecForIosWeb: 3);
+    ToastHelper.Show("Špatné přihlašovací údaje!");
   }
 }

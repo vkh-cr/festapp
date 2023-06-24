@@ -27,17 +27,6 @@ class UserData {
       required this.phone,
       required this.accommodationType});
 
-  static UserData fromJson(Map<String, dynamic> map) {
-    return UserData(
-      email: map[emailColumn]!,
-      name: map[nameColumn]!,
-      surname: map[surnameColumn]!,
-      phone: map[phoneColumn]!,
-      role: map[roleColumn]!,
-      accommodationType: map[accommodationTypeColumn]!,
-      sex: map[sexColumn]!,
-    );
-  }
 
   static UserData fromDynamic(dynamic map) {
     return UserData(

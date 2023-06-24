@@ -77,15 +77,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  bool isLoggedIn = false;
-
+String userName = "";
   @override
   void initState() {
     super.initState();
     DataService.tryAuthUser().then((loggedIn) {
-      setState(() {
-        isLoggedIn = loggedIn;
-      });
+      setState(() {});
+      if(loggedIn)
+        {
+          loadUserData();
+        }
+
     });
     initializeDateFormatting();
     loadData();
@@ -119,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: 16,
                   ),
                   Visibility(
-                    visible: !isLoggedIn,
+                    visible: !DataService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 48.0),
                       child: Row(
@@ -142,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Visibility(
-                    visible: isLoggedIn,
+                    visible: DataService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 48.0),
                       child: Row(
@@ -308,4 +310,12 @@ class _MyHomePageState extends State<MyHomePage> {
         })
         .whenComplete(() async => await loadEventParticipants());
   }
-}
+
+  Future<void> loadUserData() async {
+      var currentUser = await DataService.getCurrentUserData();
+      setState(()=>
+      {
+        userName = currentUser.name
+      });
+    }
+  }
