@@ -2,6 +2,7 @@ import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/DataService.dart';
+import '../styles/Styles.dart';
 import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -79,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: primaryBlue1,
                     borderRadius: BorderRadius.circular(20)),
                 child: TextButton(
                   onPressed: () async {

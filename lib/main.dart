@@ -107,7 +107,7 @@ String userName = "";
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -117,60 +117,51 @@ String userName = "";
                     'assets/images/avlogo.svg',
                   ),
                   const Spacer(),
-                  const SizedBox(
-                    width: 16,
-                  ),
                   Visibility(
                     visible: !DataService.isLoggedIn(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              CircularButton(
-                                size: const Size(70, 70),
-                                onPressed: _loginPressed,
-                                backgroundColor: primaryBlue2,
-                                child: const Icon(Icons.login),
-                              ), // <-- Icon
-                              const Text("Přihlášení"), // <-- Text
-                            ],
-                          ),
-                        ],
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CircularButton(
+                              size: const Size(70, 70),
+                              onPressed: _loginPressed,
+                              backgroundColor: primaryBlue2,
+                              child: const Icon(Icons.login),
+                            ), // <-- Icon
+                            const Text("Přihlášení"), // <-- Text
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   Visibility(
                     visible: DataService.isLoggedIn(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              CircularButton(
-                                size: const Size(70, 70),
-                                onPressed: _profileButtonPressed,
-                                backgroundColor: primaryBlue2,
-                                child: const Icon(Icons.account_circle_rounded),
-                              ), // <-- Icon
-                              Text(userName), // <-- Text
-                            ],
-                          ),
-                        ],
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CircularButton(
+                              size: const Size(70, 70),
+                              onPressed: _profileButtonPressed,
+                              backgroundColor: primaryBlue2,
+                              child: const Icon(Icons.account_circle_rounded),
+                            ), // <-- Icon
+                            Text(userName), // <-- Text
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               )),
           Expanded(child: ProgramTabView(events: _events, onEventPressed: eventPressed)),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            padding: const EdgeInsets.only(bottom: 24.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

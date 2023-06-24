@@ -1,3 +1,4 @@
+import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -67,7 +68,7 @@ class _UserPageState extends State<UserPage> {
               height: 50,
               width: 250,
               decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+                  color: primaryBlue1, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () async => _logout(),
                 child: const Text(
