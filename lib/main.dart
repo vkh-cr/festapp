@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
+import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
@@ -76,15 +77,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  bool isLoggedIn = false;
-
+String userName = "";
   @override
   void initState() {
     super.initState();
     DataService.tryAuthUser().then((loggedIn) {
-      setState(() {
-        isLoggedIn = loggedIn;
-      });
+      setState(() {});
+      if(loggedIn)
+        {
+          loadUserData();
+        }
+
     });
     initializeDateFormatting();
     loadData();
@@ -104,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -114,60 +117,51 @@ class _MyHomePageState extends State<MyHomePage> {
                     'assets/images/avlogo.svg',
                   ),
                   const Spacer(),
-                  const SizedBox(
-                    width: 16,
-                  ),
                   Visibility(
-                    visible: !isLoggedIn,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              CircularButton(
-                                size: const Size(70, 70),
-                                onPressed: _loginPressed,
-                                backgroundColor: primaryBlue2,
-                                child: const Icon(Icons.login),
-                              ), // <-- Icon
-                              const Text("Přihlášení"), // <-- Text
-                            ],
-                          ),
-                        ],
-                      ),
+                    visible: !DataService.isLoggedIn(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CircularButton(
+                              size: const Size(70, 70),
+                              onPressed: _loginPressed,
+                              backgroundColor: primaryBlue2,
+                              child: const Icon(Icons.login),
+                            ), // <-- Icon
+                            const Text("Přihlášení"), // <-- Text
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   Visibility(
-                    visible: isLoggedIn,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 48.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              CircularButton(
-                                size: const Size(70, 70),
-                                onPressed: _logout,
-                                backgroundColor: primaryBlue2,
-                                child: const Icon(Icons.account_circle_rounded),
-                              ), // <-- Icon
-                              const Text("Odhlásit se"), // <-- Text
-                            ],
-                          ),
-                        ],
-                      ),
+                    visible: DataService.isLoggedIn(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            CircularButton(
+                              size: const Size(70, 70),
+                              onPressed: _profileButtonPressed,
+                              backgroundColor: primaryBlue2,
+                              child: const Icon(Icons.account_circle_rounded),
+                            ), // <-- Icon
+                            Text(userName), // <-- Text
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ],
               )),
           Expanded(child: ProgramTabView(events: _events, onEventPressed: eventPressed)),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            padding: const EdgeInsets.only(bottom: 24.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -262,11 +256,9 @@ class _MyHomePageState extends State<MyHomePage> {
         context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
-  void _logout() {
-    DataService.logout();
-    setState(() {
-      isLoggedIn = false;
-    });
+  void _profileButtonPressed() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const UserPage()));
   }
 
   final List<EventModel> _events = [];
@@ -309,4 +301,12 @@ class _MyHomePageState extends State<MyHomePage> {
         })
         .whenComplete(() async => await loadEventParticipants());
   }
-}
+
+  Future<void> loadUserData() async {
+      var currentUser = await DataService.getCurrentUserData();
+      setState(()=>
+      {
+        userName = currentUser.name
+      });
+    }
+  }

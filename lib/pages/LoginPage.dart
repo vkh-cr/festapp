@@ -2,6 +2,7 @@ import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/DataService.dart';
+import '../styles/Styles.dart';
 import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -79,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: primaryBlue1,
                     borderRadius: BorderRadius.circular(20)),
                 child: TextButton(
                   onPressed: () async {
@@ -87,7 +88,8 @@ class _LoginPageState extends State<LoginPage> {
                       await DataService.login(
                               _emailController.text, _passwordController.text)
                           .then(_showToast)
-                          .then(_refreshSignedInStatus);
+                          .then(_refreshSignedInStatus)
+                          .catchError(_onError);
                     }
                   },
                   child: const Text(
@@ -118,5 +120,9 @@ class _LoginPageState extends State<LoginPage> {
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+  }
+
+  void _onError(err) {
+    ToastHelper.Show("Špatné přihlašovací údaje!");
   }
 }

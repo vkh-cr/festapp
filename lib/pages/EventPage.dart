@@ -121,7 +121,7 @@ class _EventPageState extends State<EventPage> {
             ),
           ),
           Visibility(
-              visible: !DataService.isLoggedIn(),
+              visible: !DataService.isLoggedIn() && _event.canSignIn(),
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
