@@ -34,4 +34,13 @@ class EventModel {
   String toString() {
     return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
   }
+
+  copyFromEvent(EventModel event)
+  {
+    startTime = event.startTime;
+    endTime = event.endTime;
+    title = event.title;
+    description = event.description;
+    maxParticipants = event.maxParticipants;
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import 'package:collection/collection.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -209,6 +210,22 @@ class DataService {
       loadedMessages.add(newsMessage);
     }
     return loadedMessages;
+  }
+
+  static Future<void> loadEvents(List<EventModel> events) async {
+    var eventsData = await DataService.getEvents();
+    eventsData.forEach((e) {
+      var updatedEvent = EventModel.fromJson(e["id"], e);
+      var eventToChange = events.firstWhereOrNull((eve)=>eve.id == updatedEvent.id);
+      if(eventToChange != null)
+      {
+        eventToChange.copyFromEvent(updatedEvent);
+      }
+      else
+      {
+        events.add(updatedEvent);
+      }
+    });
   }
 
   // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
