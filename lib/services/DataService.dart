@@ -1,3 +1,5 @@
+import 'package:av_app/models/UserData.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/services/ToastHelper.dart';
@@ -62,13 +64,18 @@ class DataService {
     await _supabase.auth.signOut();
   }
 
-  static Future<void> getCurrentUserData() async {
-    return await _supabase
+  static Future<UserData> getCurrentUserData() async {
+    if(!isLoggedIn())
+    {
+      throw Exception("User must be logged in.");
+    }
+    var jsonUser = await _supabase
         .from('migrated_users')
         .select()
         .eq('email', _supabase.auth.currentUser!.email)
         .limit(1)
         .single();
+    return UserData.fromDynamic(jsonUser);
   }
 
   static Future<dynamic> getPlaces() async =>
