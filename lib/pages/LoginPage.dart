@@ -87,7 +87,8 @@ class _LoginPageState extends State<LoginPage> {
                       await DataService.login(
                               _emailController.text, _passwordController.text)
                           .then(_showToast)
-                          .then(_refreshSignedInStatus);
+                          .then(_refreshSignedInStatus)
+                          .catchError(_onError);
                     }
                   },
                   child: const Text(
@@ -118,5 +119,9 @@ class _LoginPageState extends State<LoginPage> {
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+  }
+
+  void _onError(err) {
+    ToastHelper.Show("Špatné přihlašovací údaje!");
   }
 }

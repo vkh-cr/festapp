@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:av_app/pages/PlayingPage.dart';
 import 'package:av_app/pages/MapPage.dart';
+import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/utils/constants.dart';
@@ -76,15 +77,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  bool isLoggedIn = false;
-
+String userName = "";
   @override
   void initState() {
     super.initState();
     DataService.tryAuthUser().then((loggedIn) {
-      setState(() {
-        isLoggedIn = loggedIn;
-      });
+      setState(() {});
+      if(loggedIn)
+        {
+          loadUserData();
+        }
+
     });
     initializeDateFormatting();
     loadData();
@@ -118,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     width: 16,
                   ),
                   Visibility(
-                    visible: !isLoggedIn,
+                    visible: !DataService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 48.0),
                       child: Row(
@@ -141,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                   Visibility(
-                    visible: isLoggedIn,
+                    visible: DataService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 48.0),
                       child: Row(
@@ -152,11 +155,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: <Widget>[
                               CircularButton(
                                 size: const Size(70, 70),
-                                onPressed: _logout,
+                                onPressed: _profileButtonPressed,
                                 backgroundColor: primaryBlue2,
                                 child: const Icon(Icons.account_circle_rounded),
                               ), // <-- Icon
-                              const Text("Odhlásit se"), // <-- Text
+                              Text(userName), // <-- Text
                             ],
                           ),
                         ],
@@ -262,11 +265,9 @@ class _MyHomePageState extends State<MyHomePage> {
         context, MaterialPageRoute(builder: (context) => const LoginPage()));
   }
 
-  void _logout() {
-    DataService.logout();
-    setState(() {
-      isLoggedIn = false;
-    });
+  void _profileButtonPressed() {
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const UserPage()));
   }
 
   final List<EventModel> _events = [];
@@ -309,4 +310,12 @@ class _MyHomePageState extends State<MyHomePage> {
         })
         .whenComplete(() async => await loadEventParticipants());
   }
-}
+
+  Future<void> loadUserData() async {
+      var currentUser = await DataService.getCurrentUserData();
+      setState(()=>
+      {
+        userName = currentUser.name
+      });
+    }
+  }

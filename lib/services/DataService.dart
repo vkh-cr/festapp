@@ -1,10 +1,11 @@
+import 'package:av_app/models/UserData.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/services/ToastHelper.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
-import 'package:collection/collection.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -61,6 +62,20 @@ class DataService {
   static Future<void> logout() async {
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     await _supabase.auth.signOut();
+  }
+
+  static Future<UserData> getCurrentUserData() async {
+    if(!isLoggedIn())
+    {
+      throw Exception("User must be logged in.");
+    }
+    var jsonUser = await _supabase
+        .from('migrated_users')
+        .select()
+        .eq('email', _supabase.auth.currentUser!.email)
+        .limit(1)
+        .single();
+    return UserData.fromDynamic(jsonUser);
   }
 
   static Future<dynamic> getPlaces() async =>
