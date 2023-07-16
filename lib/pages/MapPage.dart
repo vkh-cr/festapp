@@ -1,9 +1,16 @@
+import 'dart:convert';
+
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'dart:math';
+
+import '../models/EventModel.dart';
+import '../models/PlaceModel.dart';
 
 const double InitLat = 49.10353;
 const double InitLng = 17.39502;
@@ -12,13 +19,13 @@ const double InitZoom = 16.5;
 class MarkerWithText extends Marker {
   double? oldLat;
   double? oldLng;
-  final String title;
-  final String description;
+  final PlaceModel place;
   Function(MarkerWithText marker)? editAction;
 
   MarkerWithText({
     required LatLng point,
     required WidgetBuilder builder,
+    required this.place,
     Key? key,
     double width = 30.0,
     double height = 30.0,
@@ -26,8 +33,6 @@ class MarkerWithText extends Marker {
     Offset? rotateOrigin,
     AlignmentGeometry? rotateAlignment,
     AnchorPos<dynamic>? anchorPos,
-    required this.title,
-    required this.description,
     this.editAction
   }) : super(
           point: point,
@@ -53,7 +58,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
-  MarkerWithText? selectedMarker;
+  static MarkerWithText? selectedMarker;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -64,57 +69,57 @@ class _MapPageState extends State<MapPage> {
     loadPlaces();
   }
 
-  Random random = Random();
+  Map<String, String> type2icon_map = {
+    "atm": "atm.svg",
+    "church": "church.svg",
+    "coffee": "coffee.svg",
+    "wine": "wine.svg",
+    "beer": "beer.svg",
+    "reception": "card.svg",
+    "food": "food.svg",
+    "sport": "ball.svg",
+    "lecture": "speaker.svg",
+    "workshop": "church.svg",
+    "accommodation": "bed.svg",
+    "group": "conversation.svg",
+    "cross": "cross.svg",
 
-  double demorandom() {
-    // TODO: remove this function. It's a temporary fix because all the in the
-    // database have the same coordinates
-    // or uncomment:
-    // return 0;
-    return random.nextDouble() / 100;
-  }
-
-  Map<String, Image> type2icon_map = {
-    // TODO: put the final versions of icons to assets/icons dir and rewrite
-    "kavárna, čajovna": const Image(image: AssetImage('icons/coffee-shop.png')),
-    "bankomat": const Image(image: AssetImage('icons/atm.png')),
-    "kostel, kaple": const Image(image: AssetImage('icons/chapel.png')),
-    "kostel": const Image(image: AssetImage('icons/chapel.png')),
-    "sport": const Image(image: AssetImage('icons/football.png')),
-// church - kostel/kaple
-// coffee - kavárna
-// wine - vinárna
-// reception - recepce
-// food - jídlo
-// sport - sport
-// accomodation - ubytování
-// cross - kříž
-// other - jiné'
+//     atm - bankomat
+//     church - kostel/kaple
+//     coffee - kavárna
+//     wine - vinárna
+//     bear - pivo
+//     reception - recepce
+//     food - jídlo
+//     sport - sport
+//     lecture - přednáška
+//     workshop - workshop/volnočasovky
+//     accommodation - ubytování
+//     group - diskuzní skupinka
+//     garden - zahrada
+//     cross - kříž
   };
 
-  Widget type2icon(String place_type) {
-    if (type2icon_map.containsKey(place_type)) {
-      return type2icon_map[place_type]!;
+  Widget type2icon(String placeType) {
+    if (type2icon_map.containsKey(placeType)) {
+      return SvgPicture.asset("assets/images/map/${type2icon_map[placeType]!}");
     }
-
-    return const Icon(Icons.location_on);
+    return const Icon(Icons.location_pin, size: 42, color: primaryBlue1);
   }
 
   Future<void> loadPlaces() async {
-    var markers = await DataService.getPlaces();
-
-    var mappedMarkers = markers
+    var places = await DataService.getPlaces();
+    var mappedMarkers = places
         .map(
-          (markerPosition) => MarkerWithText(
+          (place) => MarkerWithText(
+            place: place,
             point: LatLng(
-                markerPosition['coordinates']['latLng']['lat'] + demorandom(),
-                markerPosition['coordinates']['latLng']['lng'] + demorandom()),
+                place.latLng['lat'],
+                place.latLng['lng']),
             width: 40,
             height: 40,
-            builder: (_) => type2icon(markerPosition["type"]),
+            builder: (_) => type2icon(place.type ?? ""),
             anchorPos: AnchorPos.align(AnchorAlign.top),
-            title: markerPosition['title'].toString(),
-            description: markerPosition['description']?.toString() ?? "",
             editAction: runEditPositionMode,
           ),
         )
@@ -164,7 +169,7 @@ class _MapPageState extends State<MapPage> {
                     if (marker is MarkerWithText) {
                       return MapDescriptionPopup(marker);
                     }
-                    return SizedBox.shrink();
+                    return const SizedBox.shrink();
                   },
                 ),
               ),
@@ -180,13 +185,17 @@ class _MapPageState extends State<MapPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                          onPressed: cancelNewPosition, child: Text("Storno")),
+                          onPressed: cancelNewPosition, child: const Text("Storno")),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       ElevatedButton(
-                          onPressed: saveNewPosition, child: Text("Uložit pozici")),
+                          onPressed: saveNewPosition, child: const Text("Uložit pozici")),
                     ],
                   ),
                 ),
+                Container(
+                  color: Colors.white,
+                  child:
+                  const Text("Pozici změníš klikem na mapu."),),
                 Expanded(child: Container()),
               ],
             ),
@@ -201,10 +210,17 @@ class _MapPageState extends State<MapPage> {
       selectedMarker!.point.latitude = pos.latitude;
       selectedMarker!.point.longitude = pos.longitude;
     }
-    _popupLayerController.hideAllPopups();
+    else {
+      _popupLayerController.hideAllPopups();
+    }
   }
 
-  void saveNewPosition() {}
+  Future<void> saveNewPosition() async {
+    await DataService.SaveLocation(selectedMarker!.place.placeId, selectedMarker!.point.latitude, selectedMarker!.point.longitude);
+    setState(() {
+      selectedMarker = null;
+    });
+  }
 
   void cancelNewPosition() {
     selectedMarker!.point.latitude = selectedMarker!.oldLat!;
@@ -248,7 +264,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              widget.marker.title,
+              widget.marker.place.title,
               overflow: TextOverflow.fade,
               softWrap: false,
               style: const TextStyle(
@@ -260,10 +276,10 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             Visibility(
                 visible: DataService.isLoggedIn(),
                 child: ElevatedButton(
-                    onPressed: changePositionPressed,
+                    onPressed: _MapPageState.selectedMarker != null ? null : changePositionPressed,
                     child: const Text("Změnit polohu"))),
             Text(
-              widget.marker.description,
+              widget.marker.place.description ?? "",
               style: const TextStyle(fontSize: 12.0),
             ),
           ],

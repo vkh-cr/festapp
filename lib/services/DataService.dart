@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:av_app/models/UserData.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/services/ToastHelper.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import '../models/PlaceModel.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -78,8 +82,10 @@ class DataService {
     return UserData.fromDynamic(jsonUser);
   }
 
-  static Future<dynamic> getPlaces() async =>
-      await _supabase.from('places').select();
+  static Future<List<PlaceModel>> getPlaces() async {
+    var data = await _supabase.from('places').select();
+    return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+  }
 
   static Future<dynamic> getEvents() async =>
       await _supabase.from('events').select().order('start_time', ascending: true);
@@ -206,7 +212,6 @@ class DataService {
   }
 
   static Future<List<NewsMessage>> loadNewsMessages() async {
-
     int lastReadMessageId = 0;
     if(isLoggedIn()){
       lastReadMessageId = await getLastReadMessage();
@@ -227,7 +232,7 @@ class DataService {
     return loadedMessages;
   }
 
-  static Future<void> loadEvents(List<EventModel> events) async {
+  static Future<void> updateEvents(List<EventModel> events) async {
     var eventsData = await DataService.getEvents();
     eventsData.forEach((e) {
       var updatedEvent = EventModel.fromJson(e["id"], e);
@@ -241,6 +246,14 @@ class DataService {
         events.add(updatedEvent);
       }
     });
+  }
+
+  static Future<void> SaveLocation(int placeId, double lat, double lng) async {
+    await _supabase
+        .from("places")
+        .update({ "coordinates": { "latLng" : { "lat":lat, "lng":lng }}})
+        .eq("place_id", placeId);
+    ToastHelper.Show("Pozice změněna!");
   }
 
   // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

@@ -17,7 +17,7 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
-    DataService.loadEvents(_events).whenComplete(() async => await loadEventParticipants());
+    DataService.updateEvents(_events).whenComplete(() async => await loadEventParticipants());
   }
 
   @override

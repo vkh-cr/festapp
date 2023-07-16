@@ -287,7 +287,7 @@ String userName = "";
   bool showMessageCount() => messageCount>0;
   String messageCountString() => messageCount<100?messageCount.toString():"99";
   void loadData() {
-    DataService.loadEvents(_events)
+    DataService.updateEvents(_events)
         .whenComplete(() async {
           if(!DataService.isLoggedIn())
           {
