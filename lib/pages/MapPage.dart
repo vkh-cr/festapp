@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'dart:math';
 
-import '../models/EventModel.dart';
 import '../models/PlaceModel.dart';
 
 const double InitLat = 49.10353;
@@ -83,28 +79,38 @@ class _MapPageState extends State<MapPage> {
     "accommodation": "bed.svg",
     "group": "conversation.svg",
     "cross": "cross.svg",
-
-//     atm - bankomat
-//     church - kostel/kaple
-//     coffee - kavárna
-//     wine - vinárna
-//     bear - pivo
-//     reception - recepce
-//     food - jídlo
-//     sport - sport
-//     lecture - přednáška
-//     workshop - workshop/volnočasovky
-//     accommodation - ubytování
-//     group - diskuzní skupinka
-//     garden - zahrada
-//     cross - kříž
   };
 
   Widget type2icon(String placeType) {
-    if (type2icon_map.containsKey(placeType)) {
-      return SvgPicture.asset("assets/images/map/${type2icon_map[placeType]!}");
+
+    SvgPicture? fill;
+    if (type2icon_map.containsKey(placeType))
+    {
+      fill = SvgPicture.asset("assets/images/map/${type2icon_map[placeType]!}", colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn), );
     }
-    return const Icon(Icons.location_pin, size: 42, color: primaryBlue1);
+    if(fill != null)
+      {
+        return Stack(children: [
+
+          const Icon(Icons.location_pin, size: 58, color: primaryBlue1),
+          Positioned(
+            top: 7.5,
+            left: 14.5,
+            child: Container(
+                width: 29.0,
+                height: 29.0,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                )),
+          ),
+          Positioned(
+            top: 12,
+            left: 19, width: 19, height: 19,
+            child: Container(alignment: Alignment.center, child: fill))]
+        );
+      }
+    return const Icon(Icons.location_pin, size: 36, color: primaryBlue1);
   }
 
   Future<void> loadPlaces() async {
@@ -116,8 +122,8 @@ class _MapPageState extends State<MapPage> {
             point: LatLng(
                 place.latLng['lat'],
                 place.latLng['lng']),
-            width: 40,
-            height: 40,
+            width: 60,
+            height: 60,
             builder: (_) => type2icon(place.type ?? ""),
             anchorPos: AnchorPos.align(AnchorAlign.top),
             editAction: runEditPositionMode,
