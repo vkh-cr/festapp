@@ -48,7 +48,7 @@ class _ProgramPageState extends State<ProgramPage> {
   }
 
   eventPressed(int id) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadEventParticipants());
+    Navigator.pushNamed(
+        context, EventPage.ROUTE, arguments: id).then((value) => loadEventParticipants());
   }
 }

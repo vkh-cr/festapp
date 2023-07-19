@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
         initialRoute: "/",
         routes: {
           MapPage.ROUTE: (context) => const MapPage(),
+          EventPage.ROUTE: (context) => const EventPage(),
         }
     );
   }
@@ -252,7 +253,7 @@ String userName = "";
 
   void _mapPressed() {
     Navigator.pushNamed(
-        context, MapPage.ROUTE, arguments: 1).then((value) => loadData());
+        context, MapPage.ROUTE).then((value) => loadData());
   }
 
   void _loginPressed() {
@@ -283,8 +284,8 @@ String userName = "";
   }
 
   eventPressed(int id) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => EventPage(eventId: id))).then((value) => loadData());
+    Navigator.pushNamed(
+        context, EventPage.ROUTE, arguments: id).then((value) => loadData());
   }
 
   int messageCount = 0;

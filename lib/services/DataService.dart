@@ -92,9 +92,13 @@ class DataService {
   static Future<dynamic> getEvents() async =>
       await _supabase.from('events').select().order('start_time', ascending: true);
 
-  static Future<dynamic> getEvent(int eventId) async =>
-      await _supabase.from('events').select().eq("id", eventId).single();
-
+  static Future<dynamic> getEvent(int eventId) async {
+    var data = await _supabase.from('events')
+        .select("id, title, start_time, end_time, max_participants, description, places(place_id, title)")
+        .eq("id", eventId)
+        .single();
+    return EventModel.fromJson(data);
+  }
   static Future<dynamic> getParticipantsPerEvent(int eventId) => _supabase
         .from('event_users')
         .select("email, event, migrated_users(name, surname)")
@@ -125,8 +129,7 @@ class DataService {
     }
 
     //check for max participants
-    var eventData = await getEvent(eventId);
-    var event = EventModel.fromJson(eventId, eventData);
+    var event = await getEvent(eventId);
     if(event.startTime!.isBefore(DateTime.now()))
     {
       ToastHelper.Show("Nelze přihlásit! Událost už proběhla.");
@@ -237,7 +240,7 @@ class DataService {
   static Future<void> updateEvents(List<EventModel> events) async {
     var eventsData = await DataService.getEvents();
     eventsData.forEach((e) {
-      var updatedEvent = EventModel.fromJson(e["id"], e);
+      var updatedEvent = EventModel.fromJson(e);
       var eventToChange = events.firstWhereOrNull((eve)=>eve.id == updatedEvent.id);
       if(eventToChange != null)
       {
