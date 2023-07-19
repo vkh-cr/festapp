@@ -184,6 +184,7 @@ class _MapPageState extends State<MapPage> {
           FlutterMap(
             mapController: mapController,
             options: MapOptions(
+                interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 zoom: InitZoom,
                 maxZoom: 18,
                 center: const LatLng(InitLat, InitLng),
