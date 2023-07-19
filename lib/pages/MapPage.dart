@@ -2,10 +2,10 @@ import 'package:av_app/services/DataService.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 
 import '../models/PlaceModel.dart';
 
@@ -58,7 +58,7 @@ class MarkerWithText extends Marker {
 }
 
 class MapPage extends StatefulWidget {
-  static const route = 'MapPage';
+  static const ROUTE = "/map";
 
   const MapPage({Key? key}) : super(key: key);
 
@@ -70,14 +70,17 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
+  String PageTitle = "Mapa AV 2023";
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
 
-  @override
-  void initState() {
-    super.initState();
-    loadPlaces();
+  late final MapController mapController = MapController();
+
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final placeId = ModalRoute.of(context)?.settings.arguments as int?;
+    loadPlaces(placeId);
   }
 
   Map<String, String> type2icon_map = {
@@ -129,8 +132,19 @@ class _MapPageState extends State<MapPage> {
     return const Icon(Icons.location_pin, size: 36, color: primaryBlue1);
   }
 
-  Future<void> loadPlaces() async {
-    var places = await DataService.getPlaces();
+  Future<void> loadPlaces([int? placeId]) async {
+    List<PlaceModel> places;
+    if (placeId != null) {
+      var place = await DataService.getPlace(placeId);
+      places = [place];
+      setState(() {
+        mapController.move(LatLng(place.latLng['lat'], place.latLng['lng']),
+            mapController.zoom);
+        PageTitle = place.title;
+      });
+    } else {
+      places = await DataService.getPlaces();
+    }
     var mappedMarkers = places
         .map(
           (place) => MarkerWithText(
@@ -163,11 +177,12 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mapa AV 2023'),
+        title: Text(PageTitle),
       ),
       body: Stack(
         children: [
           FlutterMap(
+            mapController: mapController,
             options: MapOptions(
                 zoom: InitZoom,
                 maxZoom: 18,

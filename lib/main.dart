@@ -5,7 +5,6 @@ import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
-import 'package:av_app/utils/constants.dart';
 import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -33,12 +32,11 @@ Future<void> main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: PageNames.HOME_PAGE,
+      title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
           //
@@ -53,12 +51,18 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: backgroundColor)),
-      home: const MyHomePage(title: PageNames.HOME_PAGE),
+        home: const MyHomePage(title: MyHomePage.HOME_PAGE),
+        initialRoute: "/",
+        routes: {
+          MapPage.ROUTE: (context) => const MapPage(),
+        }
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  static const HOME_PAGE = 'Absolventský Velehrad';
+
   const MyHomePage({super.key, required this.title});
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -247,8 +251,8 @@ String userName = "";
   }
 
   void _mapPressed() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const MapPage())).then((value) => loadData());
+    Navigator.pushNamed(
+        context, MapPage.ROUTE, arguments: 1).then((value) => loadData());
   }
 
   void _loginPressed() {
@@ -305,8 +309,7 @@ String userName = "";
   Future<void> loadUserData() async {
       var currentUser = await DataService.getCurrentUserData();
       setState(()=>
-      {
-        userName = currentUser.name
-      });
+      userName = currentUser.name
+      );
     }
   }

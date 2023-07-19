@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../services/DataService.dart';
 import '../models/UserData.dart';
 import '../main.dart';
-import '../utils/constants.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -115,7 +114,7 @@ class _UserPageState extends State<UserPage> {
 
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+        builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
   }
 
   void _logout() {
