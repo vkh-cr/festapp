@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import '../services/DataService.dart';
 import '../styles/Styles.dart';
-import '../utils/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -30,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Login Page"),
+        title: const Text("Přihlášení"),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -46,11 +45,10 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Email',
-                      hintText: 'Enter a valid email'),
+                      labelText: 'E-mail'),
                   validator: (String? value) {
                     if (value!.isEmpty || !value.contains('@')) {
-                      return 'Email is not valid';
+                      return 'E-mail není validní';
                     }
                   },
                 ),
@@ -64,11 +62,10 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: true,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Password',
-                      hintText: 'Enter secure password'),
+                      labelText: 'Heslo'),
                   validator: (String? value) {
                     if (value!.isEmpty) {
-                      return 'Invalid password';
+                      return 'Špatné heslo';
                     }
                   },
                 ),
@@ -93,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                     }
                   },
                   child: const Text(
-                    'Login',
+                    'Přihlásit se',
                     style: TextStyle(color: Colors.white, fontSize: 25),
                   ),
                 ),
@@ -119,7 +116,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+        builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
   }
 
   void _onError(err) {

@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:av_app/models/UserData.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/services/ToastHelper.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
@@ -85,6 +82,11 @@ class DataService {
   static Future<List<PlaceModel>> getPlaces() async {
     var data = await _supabase.from('places').select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+  }
+
+  static Future<PlaceModel> getPlace(int id) async {
+    var data = await _supabase.from('places').select().eq("place_id", id).single();
+    return PlaceModel.fromJson(data);
   }
 
   static Future<dynamic> getEvents() async =>
