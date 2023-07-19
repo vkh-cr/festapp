@@ -4,28 +4,28 @@ import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
-  final int eventId;
-  const EventPage({Key? key, required this.eventId}) : super(key: key);
+  static const ROUTE = "/event";
+  const EventPage({Key? key}) : super(key: key);
 
   @override
-  _EventPageState createState() => _EventPageState(eventId);
+  _EventPageState createState() => _EventPageState();
 }
 
 class _EventPageState extends State<EventPage> {
-  EventModel _event = EventModel(0);
+  EventModel _event = EventModel(id: 0);
   List<ParticipantModel> _participants = [];
   List<ParticipantModel> _queriedParticipants = [];
-  int eventId;
   bool isLoadingParticipants = true;
 
-  _EventPageState(this.eventId);
+  _EventPageState();
 
-  @override
-  void initState() {
-    super.initState();
-    loadData();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final id = ModalRoute.of(context)?.settings.arguments as int;
+    loadData(id);
   }
 
   @override
@@ -106,7 +106,7 @@ class _EventPageState extends State<EventPage> {
                                   ],
                                 ),
                               ),
-                            )).then((x) => loadData());
+                            )).then((x) => loadData(_event.id));
                       },
                       child: const Text("Přihlásit druhého")),
                 ),
@@ -126,6 +126,15 @@ class _EventPageState extends State<EventPage> {
                 padding: EdgeInsets.all(8.0),
                 child: Text(
                     "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci."),
+              )),
+          Visibility(
+              visible: _event.place != null,
+              child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  alignment: Alignment.topRight,
+                  child: TextButton(
+                      onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event.place!.placeId).then((value) => loadData(_event.id)),
+                      child: Text(_event.place?.title??""))
               )),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -167,15 +176,15 @@ class _EventPageState extends State<EventPage> {
         _event.canSignIn();
   }
 
-  Future<void> loadData() async {
-    await loadEvent().whenComplete(loadParticipants);
+  Future<void> loadData(int id) async {
+    await loadEvent(id).whenComplete(loadParticipants);
   }
 
   Future<void> loadParticipants() async {
     if (!DataService.isLoggedIn()) {
       return;
     }
-    var participants = await DataService.getParticipantsPerEvent(eventId);
+    var participants = await DataService.getParticipantsPerEvent(_event.id);
     _participants = List.from(participants.map((par) => ParticipantModel(
         par["email"],
         par["migrated_users"]["name"],
@@ -184,24 +193,24 @@ class _EventPageState extends State<EventPage> {
     setState(() => {});
   }
 
-  Future<void> loadEvent() async {
+  Future<void> loadEvent(int eventId) async {
     var event = await DataService.getEvent(eventId);
     var currentParticipants =
         await DataService.getParticipantsPerEventCount(eventId);
     setState(() {
-      _event = EventModel.fromJson(eventId, event);
+      _event = event;
       _event.currentParticipants = currentParticipants;
     });
   }
 
   Future<void> signIn([ParticipantModel? participant]) async {
-    await DataService.signInToEvent(eventId, participant?.email);
-    await loadData();
+    await DataService.signInToEvent(_event.id, participant?.email);
+    await loadData(_event.id);
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(eventId);
-    await loadData();
+    await DataService.signOutFromEvent(_event.id);
+    await loadData(_event.id);
   }
 
   Future<String?> signOutOther(ParticipantModel participant) {
@@ -218,8 +227,8 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(eventId, participant.email);
-              await loadData();
+              await DataService.signOutFromEvent(_event.id, participant.email);
+              await loadData(_event.id);
             },
             child: const Text('Odhlásit'),
           ),

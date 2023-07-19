@@ -5,13 +5,15 @@ class PlaceModel {
   String? description;
   String? type;
 
-  factory PlaceModel.fromJson(Map<String, dynamic> json) => PlaceModel(
-    latLng: json["coordinates"]["latLng"],
+  factory PlaceModel.fromJson(Map<String, dynamic> json) {
+    return PlaceModel(
+    latLng: json.containsKey("coordinates") ? json["coordinates"]["latLng"] : null,
     placeId: json["place_id"],
     title: json["title"],
-    description: json["description"],
-    type: json["type"]
+    description: json.containsKey("description") ? json["description"] : null,
+    type: json.containsKey("type") ? json["type"] : null,
   );
+  }
 
   PlaceModel({
     this.latLng,
