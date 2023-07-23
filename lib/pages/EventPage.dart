@@ -123,21 +123,21 @@ class _EventPageState extends State<EventPage> {
             ),
           ),
           Visibility(
-              visible: !DataService.isLoggedIn() && _event.canSignIn(),
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                    "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
-                style: TextStyle(color: attentionColor),),
-              )),
-          Visibility(
               visible: _event.place != null,
               child: Container(
                   padding: const EdgeInsets.all(8.0),
                   alignment: Alignment.topRight,
                   child: TextButton(
                       onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event.place!.placeId).then((value) => loadData(_event.id)),
-                      child: Text(_event.place?.title??""))
+                      child: Text("Místo: ${_event.place?.title??""}"))
+              )),
+          Visibility(
+              visible: !DataService.isLoggedIn() && _event.canSignIn(),
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
+                  style: TextStyle(color: attentionColor),),
               )),
           Visibility(
             visible: _event.description != null,
