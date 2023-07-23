@@ -21,6 +21,7 @@ const primaryBlue1 = Color(0xFF2C677B);
 const Color primaryRed = Color(0xFFBA5D3F);
 const primaryYellow = Color(0xFFE0B73B);
 const primaryBlue2 = Color(0xFF2A77A0);
+const attentionColor = Color(0xFF8B0000);
 
 ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(16),

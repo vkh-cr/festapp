@@ -57,6 +57,14 @@ class MyApp extends StatelessWidget {
           MapPage.ROUTE: (context) => const MapPage(),
           EventPage.ROUTE: (context) => const EventPage(),
           InfoPage.ROUTE: (context) => const InfoPage(),
+          UserPage.ROUTE: (context) {
+            if(!DataService.isLoggedIn())
+              {
+                return const LoginPage();
+              }
+            return const UserPage();
+          },
+          LoginPage.ROUTE: (context) => const LoginPage(),
         }
     );
   }
@@ -258,13 +266,13 @@ String userName = "";
   }
 
   void _loginPressed() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginPage()));
+    Navigator.pushNamed(
+        context, LoginPage.ROUTE).then((value) => loadData());
   }
 
   void _profileButtonPressed() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const UserPage()));
+    Navigator.pushNamed(
+        context, UserPage.ROUTE).then((value) => loadData());
   }
 
   final List<EventModel> _events = [];

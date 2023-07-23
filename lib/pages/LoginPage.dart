@@ -1,10 +1,10 @@
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
-import '../main.dart';
 import '../services/DataService.dart';
 import '../styles/Styles.dart';
 
 class LoginPage extends StatefulWidget {
+  static const ROUTE = "/login";
   const LoginPage({Key? key}) : super(key: key);
 
   @override
@@ -105,18 +105,13 @@ class _LoginPageState extends State<LoginPage> {
   void _refreshSignedInStatus(value) {
     DataService.tryAuthUser().then((loggedIn) {
       if (loggedIn) {
-        _navigateToHomePage();
+        Navigator.pop(context);
       }
     });
   }
 
   void _showToast(value) {
     ToastHelper.Show("Úspěšné přihlášení!");
-  }
-
-  void _navigateToHomePage() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
   }
 
   void _onError(err) {
