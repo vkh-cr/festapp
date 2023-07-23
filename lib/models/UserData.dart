@@ -1,3 +1,5 @@
+import 'package:av_app/models/PlaceModel.dart';
+
 class UserData {
   final String email;
   final String name;
@@ -6,6 +8,7 @@ class UserData {
   final String role;
   final String phone;
   final String accommodationType;
+  PlaceModel? place;
 
   static const String idColumn = "id";
   static const String emailColumn = "email";
@@ -28,7 +31,7 @@ class UserData {
       required this.accommodationType});
 
 
-  static UserData fromDynamic(dynamic map) {
+  static UserData fromJson(dynamic map) {
     return UserData(
       email: map[emailColumn]!,
       name: map[nameColumn]!,

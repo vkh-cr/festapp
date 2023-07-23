@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import '../services/DataService.dart';
 import '../models/UserData.dart';
 import '../main.dart';
+import 'MapPage.dart';
 
 class UserPage extends StatefulWidget {
   const UserPage({Key? key}) : super(key: key);
@@ -39,7 +40,20 @@ class _UserPageState extends State<UserPage> {
               visible: userData?.role == 'Organizer',
               child: buildTextField('Dobrovolnická oblast', ''),
             ),
-            buildTextField('Ubytování', userData?.accommodationType ?? ''),
+            Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                const Text("Ubytování"),
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: TextButton(
+                      onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.placeId),
+                      child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
+                )
+              ],),
+            ),
             const SizedBox(
               height: 16,
             ),
@@ -90,7 +104,7 @@ class _UserPageState extends State<UserPage> {
 
   Widget buildTextField(String labelText, String placeholder) {
     return Padding(
-      padding: const EdgeInsets.all(15.0),
+      padding: const EdgeInsets.all(12.0),
       child: TextField(
         readOnly: true,
         focusNode: AlwaysDisabledFocusNode(),
@@ -129,9 +143,11 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadData() async {
-    var ud = await DataService.getCurrentUserData();
+    var user = await DataService.getCurrentUserData();
+    user.place = await DataService.getUserAccommodation(user.accommodationType);
+
     setState(() {
-      userData = ud;
+      userData = user;
     });
   }
 }
