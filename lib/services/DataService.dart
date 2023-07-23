@@ -104,8 +104,10 @@ class DataService {
   }
 
   static Future<List<InformationModel>> getInformation() async {
-    var data = await _supabase.from('information').select();
-    return List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
+    var data = await _supabase.from("information").select();
+    var infoList = List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
+    infoList.sortBy((element) => element.title.toLowerCase());
+    return infoList;
   }
 
   static Future<dynamic> getEvents() async =>
