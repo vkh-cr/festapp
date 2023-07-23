@@ -8,7 +8,7 @@ class PlaceModel {
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
     latLng: json.containsKey("coordinates") ? json["coordinates"]["latLng"] : null,
-    placeId: json["place_id"],
+    placeId: json["id"],
     title: json["title"],
     description: json.containsKey("description") ? json["description"] : null,
     type: json.containsKey("type") ? json["type"] : null,

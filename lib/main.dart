@@ -119,7 +119,7 @@ String userName = "";
                   SvgPicture.asset(
                     width: 80,
                     semanticsLabel: 'Absolventský Velehrad',
-                    'assets/images/avlogo.svg',
+                    'assets/icons/avlogo.svg',
                   ),
                   const Spacer(),
                   Visibility(
