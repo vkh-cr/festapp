@@ -1,8 +1,7 @@
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-
 import '../models/InformationModel.dart';
+import '../widgets/HtmlDescriptionWidget.dart';
 
 class InfoPage extends StatefulWidget {
   static const ROUTE = "/info";
@@ -46,19 +45,7 @@ class _InfoPageState extends State<InfoPage> {
                 },
                 body: Padding(
                   padding: const EdgeInsetsDirectional.all(12),
-                  child: HtmlWidget(
-                    // the first parameter (`html`) is required
-                    item.description!,
-
-                    // select the render mode for HTML body
-                    // by default, a simple `Column` is rendered
-                    // consider using `ListView` or `SliverList` for better performance
-                    renderMode: RenderMode.column,
-
-                    // set the default styling for text
-                    textStyle: const TextStyle(fontSize: 14),
-
-                  ),
+                  child: HtmlDescriptionWidget(html: item.description!),
                 ),
                   isExpanded: item.isExpanded,
                   canTapOnHeader: true

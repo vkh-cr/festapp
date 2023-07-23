@@ -4,6 +4,8 @@ import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import '../styles/Styles.dart';
+import '../widgets/HtmlDescriptionWidget.dart';
 import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
@@ -125,7 +127,8 @@ class _EventPageState extends State<EventPage> {
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
-                    "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci."),
+                    "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
+                style: TextStyle(color: attentionColor),),
               )),
           Visibility(
               visible: _event.place != null,
@@ -136,9 +139,12 @@ class _EventPageState extends State<EventPage> {
                       onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event.place!.placeId).then((value) => loadData(_event.id)),
                       child: Text(_event.place?.title??""))
               )),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(_event.description ?? ""),
+          Visibility(
+            visible: _event.description != null,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: HtmlDescriptionWidget(html: _event.description??""),
+            ),
           ),
           Visibility(
               visible:
@@ -197,9 +203,9 @@ class _EventPageState extends State<EventPage> {
     var event = await DataService.getEvent(eventId);
     var currentParticipants =
         await DataService.getParticipantsPerEventCount(eventId);
+    _event = event;
+    _event.currentParticipants = currentParticipants;
     setState(() {
-      _event = event;
-      _event.currentParticipants = currentParticipants;
     });
   }
 

@@ -8,6 +8,7 @@ import '../main.dart';
 import 'MapPage.dart';
 
 class UserPage extends StatefulWidget {
+  static const ROUTE = "/user";
   const UserPage({Key? key}) : super(key: key);
 
   @override
@@ -96,9 +97,8 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     loadData();
   }
 
