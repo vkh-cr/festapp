@@ -76,7 +76,20 @@ class DataService {
         .eq('email', _supabase.auth.currentUser!.email)
         .limit(1)
         .single();
-    return UserData.fromDynamic(jsonUser);
+    return UserData.fromJson(jsonUser);
+  }
+
+  static Future<PlaceModel?> getUserAccommodation(String accommodationType) async
+  {
+    var data = await _supabase
+        .from('accommodation_places')
+        .select("places(id, title)")
+        .eq("accommodation_type", accommodationType)
+        .maybeSingle();
+    if(data==null){
+      return null;
+    }
+    return PlaceModel.fromJson(data["places"]);
   }
 
   static Future<List<PlaceModel>> getPlaces() async {

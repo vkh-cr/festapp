@@ -21,5 +21,4 @@ class PlaceModel {
     required this.title,
     required this.description,
     required this.type});
-
 }
