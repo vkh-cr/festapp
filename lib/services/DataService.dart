@@ -1,3 +1,4 @@
+import 'package:av_app/models/InformationModel.dart';
 import 'package:av_app/models/UserData.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -100,6 +101,11 @@ class DataService {
   static Future<PlaceModel> getPlace(int id) async {
     var data = await _supabase.from('places').select().eq("id", id).single();
     return PlaceModel.fromJson(data);
+  }
+
+  static Future<List<InformationModel>> getInformation() async {
+    var data = await _supabase.from('information').select();
+    return List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
   }
 
   static Future<dynamic> getEvents() async =>

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:av_app/pages/PlayingPage.dart';
+import 'package:av_app/pages/InfoPage.dart';
 import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
@@ -56,6 +56,7 @@ class MyApp extends StatelessWidget {
         routes: {
           MapPage.ROUTE: (context) => const MapPage(),
           EventPage.ROUTE: (context) => const EventPage(),
+          InfoPage.ROUTE: (context) => const InfoPage(),
         }
     );
   }
@@ -247,8 +248,8 @@ String userName = "";
   }
 
   void _infoPressed() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const PlayingPage())).then((value) => loadData());
+    Navigator.pushNamed(
+        context, InfoPage.ROUTE).then((value) => loadData());
   }
 
   void _mapPressed() {

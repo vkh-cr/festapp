@@ -49,6 +49,7 @@ dependencies:
   flutter_map_location_marker: ^7.0.2
   geolocator: ^9.0.2
   flutter_launcher_icons: ^0.13.1
+  flutter_widget_from_html: ^0.10.3
 
 dev_dependencies:
   flutter_test:
