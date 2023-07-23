@@ -48,6 +48,7 @@ dependencies:
   collection: ^1.17.0
   flutter_map_location_marker: ^7.0.2
   geolocator: ^9.0.2
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -75,7 +76,7 @@ flutter:
       fonts:
         - asset: fonts/RussoOne-Regular.ttf
   assets:
-    - assets/images/
+    - assets/icons/
     - assets/images/map/
   # To add assets to your application, add an assets section, like this:
   # assets:

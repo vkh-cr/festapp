@@ -85,7 +85,7 @@ class DataService {
   }
 
   static Future<PlaceModel> getPlace(int id) async {
-    var data = await _supabase.from('places').select().eq("place_id", id).single();
+    var data = await _supabase.from('places').select().eq("id", id).single();
     return PlaceModel.fromJson(data);
   }
 
@@ -94,7 +94,7 @@ class DataService {
 
   static Future<dynamic> getEvent(int eventId) async {
     var data = await _supabase.from('events')
-        .select("id, title, start_time, end_time, max_participants, description, places(place_id, title)")
+        .select("id, title, start_time, end_time, max_participants, description, places(id, title)")
         .eq("id", eventId)
         .single();
     return EventModel.fromJson(data);
@@ -135,18 +135,16 @@ class DataService {
       ToastHelper.Show("Nelze přihlásit! Událost už proběhla.");
       return;
     }
-    var currentParticipants = await getParticipantsPerEventCount(eventId);
-    if(event.maxParticipants!<=currentParticipants)
-    {
-      ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
-      return;
-    }
-    await _supabase
-        .from('event_users')
-        .upsert({ "event": eventId, "email": finalEmail })
-        .select();
 
-    ToastHelper.Show("Přihlášen $finalEmail");
+    bool signedIn = await _supabase
+    .rpc("upsert_event_user", params: {"event_id": eventId, "user_id": finalEmail} );
+
+    if(signedIn){
+      ToastHelper.Show("Přihlášen $finalEmail");
+    }
+    else{
+      ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
+    }
   }
 
   static signOutFromEvent(int eventId, [String? email]) async {
@@ -257,7 +255,7 @@ class DataService {
     await _supabase
         .from("places")
         .update({ "coordinates": { "latLng" : { "lat":lat, "lng":lng }}})
-        .eq("place_id", placeId);
+        .eq("id", placeId);
     ToastHelper.Show("Pozice změněna!");
   }
 
