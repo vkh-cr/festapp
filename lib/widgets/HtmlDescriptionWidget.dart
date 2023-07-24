@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
-  HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode});
+  HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode, super.textStyle});
 
   final BuildContext context;
 @override
@@ -20,6 +20,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
     super.onTapUrl?.call(url);
     return false;
   };
+
 }
 }
 
@@ -38,13 +39,16 @@ class _HtmlDescriptionWidgetState extends State<HtmlDescriptionWidget> {
   _HtmlDescriptionWidgetState(this.html);
   @override
   Widget build(BuildContext context) {
-    return HtmlWidget(
+    return HtmlWithAppLinksWidget(
       // the first parameter (`html`) is required
+      context,
         html,
         // select the render mode for HTML body
         // by default, a simple `Column` is rendered
         // consider using `ListView` or `SliverList` for better performance
         renderMode: RenderMode.column,
-  );
+      textStyle: const TextStyle(fontSize: 18),
+
+    );
     }
   }

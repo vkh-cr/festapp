@@ -297,13 +297,11 @@ class DataService {
     for (var row in messagesData) {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
-      var fullName = row['migrated_users']['name'] +
-          " " +
-          row['migrated_users']['surname'];
+      var name = row['migrated_users']['name'];
       NewsMessage newsMessage = NewsMessage(
           createdAt: createdAt,
           message: message,
-          createdBy: fullName,
+          createdBy: name,
           id: row['id']);
       if (isLoggedIn()) {
         newsMessage.isRead = lastReadMessageId >= newsMessage.id;
