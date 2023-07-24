@@ -17,7 +17,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  EventModel _event = EventModel(id: 0);
+  EventModel? _event;
   List<ParticipantModel> _participants = [];
   List<ParticipantModel> _queriedParticipants = [];
   bool isLoadingParticipants = true;
@@ -34,7 +34,7 @@ class _EventPageState extends State<EventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_event.toString()),
+        title: Text(_event==null?"událost":_event.toString()),
       ),
       body: Column(
         children: [
@@ -108,7 +108,7 @@ class _EventPageState extends State<EventPage> {
                                   ],
                                 ),
                               ),
-                            )).then((x) => loadData(_event.id));
+                            )).then((x) => loadData(_event!.id));
                       },
                       child: const Text("Přihlásit druhého")),
                 ),
@@ -119,20 +119,20 @@ class _EventPageState extends State<EventPage> {
             padding: const EdgeInsets.all(8.0),
             child: Container(
               alignment: Alignment.topRight,
-              child: Text(_event.durationString()),
+              child: Text(_event?.durationString()??""),
             ),
           ),
           Visibility(
-              visible: _event.place != null,
+              visible: _event?.place != null,
               child: Container(
                   padding: const EdgeInsets.all(8.0),
                   alignment: Alignment.topRight,
                   child: TextButton(
-                      onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event.place!.placeId).then((value) => loadData(_event.id)),
-                      child: Text("Místo: ${_event.place?.title??""}"))
+                      onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.placeId).then((value) => loadData(_event!.id)),
+                      child: Text("Místo: ${_event?.place?.title??""}"))
               )),
           Visibility(
-              visible: !DataService.isLoggedIn() && _event.canSignIn(),
+              visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
               child: const Padding(
                 padding: EdgeInsets.all(8.0),
                 child: Text(
@@ -140,15 +140,15 @@ class _EventPageState extends State<EventPage> {
                   style: TextStyle(color: attentionColor),),
               )),
           Visibility(
-            visible: _event.description != null,
+            visible: _event?.description != null,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: HtmlDescriptionWidget(html: _event.description??""),
+              child: HtmlDescriptionWidget(html: _event?.description??""),
             ),
           ),
           Visibility(
               visible:
-                  DataService.isLoggedIn() && _event.maxParticipants != null,
+                  DataService.isLoggedIn() && _event?.maxParticipants != null,
               child: Container(
                   alignment: Alignment.topLeft,
                   padding: const EdgeInsets.all(8.0),
@@ -179,18 +179,18 @@ class _EventPageState extends State<EventPage> {
   bool showLoginLogoutButton() {
     return DataService.isLoggedIn() &&
         !isLoadingParticipants &&
-        _event.canSignIn();
+        EventModel.canSignIn(_event);
   }
 
   Future<void> loadData(int id) async {
-    await loadEvent(id).whenComplete(loadParticipants);
+    await loadEvent(id).whenComplete(()=>loadParticipants(id));
   }
 
-  Future<void> loadParticipants() async {
+  Future<void> loadParticipants(int id) async {
     if (!DataService.isLoggedIn()) {
       return;
     }
-    var participants = await DataService.getParticipantsPerEvent(_event.id);
+    var participants = await DataService.getParticipantsPerEvent(id);
     _participants = List.from(participants.map((par) => ParticipantModel(
         par["email"],
         par["migrated_users"]["name"],
@@ -203,20 +203,19 @@ class _EventPageState extends State<EventPage> {
     var event = await DataService.getEvent(eventId);
     var currentParticipants =
         await DataService.getParticipantsPerEventCount(eventId);
+    event.currentParticipants = currentParticipants;
     _event = event;
-    _event.currentParticipants = currentParticipants;
-    setState(() {
-    });
+    setState(() {});
   }
 
   Future<void> signIn([ParticipantModel? participant]) async {
-    await DataService.signInToEvent(_event.id, participant?.email);
-    await loadData(_event.id);
+    await DataService.signInToEvent(_event!.id, participant?.email);
+    await loadData(_event!.id);
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event.id);
-    await loadData(_event.id);
+    await DataService.signOutFromEvent(_event!.id);
+    await loadData(_event!.id);
   }
 
   Future<String?> signOutOther(ParticipantModel participant) {
@@ -233,8 +232,8 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(_event.id, participant.email);
-              await loadData(_event.id);
+              await DataService.signOutFromEvent(_event!.id, participant.email);
+              await loadData(_event!.id);
             },
             child: const Text('Odhlásit'),
           ),
