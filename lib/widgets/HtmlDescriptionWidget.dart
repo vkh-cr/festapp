@@ -38,7 +38,7 @@ class _HtmlDescriptionWidgetState extends State<HtmlDescriptionWidget> {
   _HtmlDescriptionWidgetState(this.html);
   @override
   Widget build(BuildContext context) {
-    return HtmlWithAppLinksWidget(context,
+    return HtmlWidget(
       // the first parameter (`html`) is required
         html,
         // select the render mode for HTML body

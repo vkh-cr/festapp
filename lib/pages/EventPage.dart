@@ -1,9 +1,11 @@
+import 'package:av_app/pages/HtmlEditorPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
 import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
 import 'MapPage.dart';
@@ -113,6 +115,19 @@ class _EventPageState extends State<EventPage> {
                       child: const Text("Přihlásit druhého")),
                 ),
               ),
+              Visibility(
+                  visible: DataService.isLoggedIn(),
+                  child: ElevatedButton(
+                      onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
+                        if(value != null)
+                        {
+                          _event!.description = value as String;
+                          await DataService.updateEvent(_event!);
+                          ToastHelper.Show("Popis změněn!");
+                          Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
+                        }
+                      }),
+                      child: const Text("Upravit popis")))
             ]),
           ),
           Padding(
@@ -140,7 +155,7 @@ class _EventPageState extends State<EventPage> {
                   style: TextStyle(color: attentionColor),),
               )),
           Visibility(
-            visible: _event?.description != null,
+            visible: _event != null && _event?.description != null,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: HtmlDescriptionWidget(html: _event?.description??""),

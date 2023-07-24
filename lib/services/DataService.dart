@@ -210,6 +210,32 @@ class DataService {
     ToastHelper.Show("Odhlášen $finalEmail");
   }
 
+  static updateEvent(EventModel event) async {
+    if (!DataService.isLoggedIn()) {
+      return;
+    }
+    await _supabase.from('events').upsert({
+      "description": event.description,
+      "id": event.id,
+      "start_time": event.startTime.toIso8601String(),
+      "end_time": event.endTime.toIso8601String(),
+      "title": event.title,
+      "max_participants": event.maxParticipants,
+      "place": event.place?.placeId
+    }).select();
+  }
+
+  static updateInfo(InformationModel info) async {
+    if (!DataService.isLoggedIn()) {
+      return;
+    }
+    await _supabase.from('information').upsert({
+      "title": info.title,
+      "id": info.id,
+      "description": info.description
+    }).select();
+  }
+
   static Future<List<ParticipantModel>> getAllUsers() async {
     List<ParticipantModel> toReturn = [];
     var result =

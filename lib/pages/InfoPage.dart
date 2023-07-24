@@ -1,7 +1,9 @@
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
 import '../models/InformationModel.dart';
+import '../services/ToastHelper.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
+import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
   static const ROUTE = "/info";
@@ -43,9 +45,25 @@ class _InfoPageState extends State<InfoPage> {
                     title: Text(item.title),
                   );
                 },
-                body: Padding(
-                  padding: const EdgeInsetsDirectional.all(12),
-                  child: HtmlDescriptionWidget(html: item.description!),
+                body: Column(
+                  children: [
+                    Visibility(
+                        visible: DataService.isLoggedIn(),
+                        child: ElevatedButton(
+                            onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: item.description).then((value) async {
+                              if(value != null)
+                              {
+                                item.description = value as String;
+                                await DataService.updateInfo(item);
+                                ToastHelper.Show("Popis změněn!");
+                                Navigator.popAndPushNamed(context, InfoPage.ROUTE);
+                              }
+                            }),
+                            child: const Text("Upravit popis"))),
+                    Padding(
+                    padding: const EdgeInsetsDirectional.all(12),
+                    child: HtmlDescriptionWidget(html: item.description!),
+                  )],
                 ),
                   isExpanded: item.isExpanded,
                   canTapOnHeader: true
