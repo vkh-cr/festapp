@@ -13,6 +13,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models/EventModel.dart';
 import 'pages/EventPage.dart';
+import 'pages/HtmlEditorPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
@@ -65,6 +66,8 @@ class MyApp extends StatelessWidget {
             return const UserPage();
           },
           LoginPage.ROUTE: (context) => const LoginPage(),
+          HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
+
         }
     );
   }
