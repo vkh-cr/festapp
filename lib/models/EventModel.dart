@@ -3,8 +3,8 @@ import 'package:intl/intl.dart';
 
 class EventModel {
 
-  String startTimeString() => DateFormat.Hm().format(startTime!);
-  String durationString() => startTime != null && endTime != null ? "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime!)} - ${DateFormat.Hm().format(endTime!)}" : "";
+  String startTimeString() => DateFormat.Hm().format(startTime);
+  String durationString() => "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
   int? maxParticipants;
 
@@ -14,30 +14,30 @@ class EventModel {
   String? title = "událost";
   String? description = "";
   bool isSignedIn = false;
-  DateTime? startTime;
-  DateTime? endTime;
+  DateTime startTime;
+  DateTime endTime;
 
   EventModel({
-    this.startTime,
-    this.endTime,
+    required this.startTime,
+    required this.endTime,
     required this.id,
     this.title,
     this.description,
     this.maxParticipants,
     this.place});
 
-  factory EventModel.fromJson(Map<String, dynamic> fromJson) => EventModel(
-      startTime: DateTime.parse(fromJson["start_time"]),
-      endTime: DateTime.parse(fromJson["end_time"]),
-      id: fromJson["id"],
-      title: fromJson["title"],
-      description: fromJson["description"],
-      maxParticipants: fromJson["max_participants"],
-      place: fromJson.containsKey("places") && fromJson["places"] != null ? PlaceModel.fromJson(fromJson["places"]) : null
+  factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
+      startTime: DateTime.parse(json["start_time"]),
+      endTime: DateTime.parse(json["end_time"]),
+      id: json["id"],
+      title: json.containsKey("title") ? json["title"] : null,
+      description: json.containsKey("description") ? json["description"] : null,
+      maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
+      place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null
   );
 
   bool isFull() => currentParticipants !>= maxParticipants!;
-  bool canSignIn() => maxParticipants != null;
+  static bool canSignIn(EventModel? event) => event != null && event.maxParticipants != null;
 
   @override
   String toString() {

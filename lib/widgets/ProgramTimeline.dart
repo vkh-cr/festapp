@@ -58,7 +58,7 @@ import '../styles/Styles.dart';
           },
           indicatorBuilder: (_, index) {
             final event = events[index];
-            return event.canSignIn() ? OutlinedDotIndicator(color: primaryBlue1, borderWidth: event.isSignedIn ? 6:2) : Padding(padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5), child: DotIndicator(color: primaryBlue1, size: 8));
+            return EventModel.canSignIn(event) ? OutlinedDotIndicator(color: primaryBlue1, borderWidth: event.isSignedIn ? 6:2) : Padding(padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5), child: DotIndicator(color: primaryBlue1, size: 8));
           },
           connectorBuilder: (_,index,__) {
             if(index == events.length-1)

@@ -35,7 +35,7 @@ class _ProgramPageState extends State<ProgramPage> {
   Future<void> loadEventParticipants() async {
       for (var e in _events)
       {
-        if(e.canSignIn())
+        if(EventModel.canSignIn(e))
         {
           var participants = await DataService.getParticipantsPerEventCount(e.id);
           var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
