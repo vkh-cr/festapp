@@ -1,7 +1,10 @@
+import 'package:av_app/styles/Styles.dart';
+import 'package:av_app/widgets/HtmlDescriptionWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
 import '../services/DataService.dart';
+import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
   @override
@@ -9,45 +12,18 @@ class NewsPage extends StatefulWidget {
 }
 
 class _NewsPageState extends State<NewsPage> {
-  final List<NewsMessage> newsMessages = [];
+  List<NewsMessage> newsMessages = [];
   final TextEditingController _messageController = TextEditingController();
 
   void _showMessageDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Zadejte zprávu'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: [
-                TextField(
-                  controller: _messageController,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                  decoration: const InputDecoration(hintText: 'Zpráva'),
-                )
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Storno'),
-            ),
-            TextButton(
-              onPressed: () async {
-                String message = _messageController.text;
-                await sendMessage(message);
-                _messageController.clear();
-                Navigator.pop(context);
-              },
-              child: const Text('Odeslat'),
-            ),
-          ],
-        );
-      },
-    );
+    Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
+      if(value != null)
+      {
+        var message = value as String;
+        await sendMessage(message);
+        _messageController.clear();
+      }
+    });
   }
 
   Future<void> sendMessage(String message) async {
@@ -56,11 +32,14 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   Future<void> loadNewsMessages() async {
+    setState(() {
+      newsMessages = [];
+    });
     var loadedMessages = await DataService.loadNewsMessages();
     setState(() {
-      newsMessages.clear();
-      newsMessages.addAll(loadedMessages);
+      newsMessages = loadedMessages;
     });
+
     DataService.setMessagesAsRead(newsMessages.first.id);
   }
 
@@ -88,6 +67,7 @@ class _NewsPageState extends State<NewsPage> {
               message.createdAt.day == previousMessage.createdAt.day;
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               if (index != 0 && !isSameDay)
                 const Divider(),
@@ -100,12 +80,18 @@ class _NewsPageState extends State<NewsPage> {
                     style: message.isRead?readTextStyle:unReadTextStyle,
                   ),
                 ),
-              ListTile(
-                title: Text(message.message,
-                    style: message.isRead?readTextStyle:unReadTextStyle
+              Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy, style: message.isRead?readTextStyle:unReadTextStyle,)),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                child: Container(
+                  //color: Colors.white70,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: primaryBlue1.withOpacity(0.10)
+                  ),
+                  //color: Colors.white70,
+                  child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
                 ),
-                subtitle:
-                Text('Odeslal: ${message.createdBy}'), // Zobrazení jména odesílatele
               ),
             ],
           );

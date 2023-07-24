@@ -14,7 +14,8 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   String? _html;
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _html = ModalRoute.of(context)?.settings.arguments as String;
+    var args = ModalRoute.of(context)?.settings.arguments;
+    _html = args != null ?  args as String : null;
   }
 
   ///[controller] create a QuillEditorController to access the editor methods
@@ -25,21 +26,18 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   final customToolBarList = [
     ToolBarStyle.bold,
     ToolBarStyle.italic,
+    ToolBarStyle.underline,
+    ToolBarStyle.strike,
     ToolBarStyle.align,
-    ToolBarStyle.color,
-    ToolBarStyle.background,
-    ToolBarStyle.listBullet,
-    ToolBarStyle.listOrdered,
     ToolBarStyle.clean,
-    ToolBarStyle.addTable,
-    ToolBarStyle.editTable,
+    ToolBarStyle.link,
   ];
 
   final _toolbarColor = Colors.grey.shade200;
   final _backgroundColor = Colors.white70;
   final _toolbarIconColor = Colors.black87;
   final _editorTextStyle = const TextStyle(
-      fontSize: 18,
+      fontSize: 16,
       color: Colors.black,
       fontWeight: FontWeight.normal,
       fontFamily: 'Russo One');
@@ -55,7 +53,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
     });
     controller.onEditorLoaded(() {
       debugPrint('Editor Loaded :)');
-      setHtmlText(_html!);
+      setHtmlText(_html??"");
     });
     super.initState();
   }
@@ -86,6 +84,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
                 iconColor: _toolbarIconColor,
                 activeIconColor: Colors.greenAccent.shade400,
                 controller: controller,
+                toolBarConfig: customToolBarList,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 direction: Axis.vertical,
                 customButtons: [
