@@ -1,6 +1,6 @@
+import 'package:av_app/pages/ModelInformation.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
-import '../models/InformationModel.dart';
 import '../services/ToastHelper.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
 import 'HtmlEditorPage.dart';
@@ -17,6 +17,7 @@ class _InfoPageState extends State<InfoPage> {
   List<InformationModel>? _information;
   _InfoPageState();
 
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadData();
@@ -54,7 +55,7 @@ class _InfoPageState extends State<InfoPage> {
                               if(value != null)
                               {
                                 item.description = value as String;
-                                await DataService.updateInfo(item);
+                                await DataService.updateInformation(item);
                                 ToastHelper.Show("Popis změněn!");
                                 Navigator.popAndPushNamed(context, InfoPage.ROUTE);
                               }

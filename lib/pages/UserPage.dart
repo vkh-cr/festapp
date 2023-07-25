@@ -1,3 +1,4 @@
+import 'package:av_app/pages/AdministrationPage.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -50,7 +51,7 @@ class _UserPageState extends State<UserPage> {
                 Container(
                   alignment: Alignment.topLeft,
                   child: TextButton(
-                      onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.placeId),
+                      onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.id),
                       child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
                 )
               ],),
@@ -137,9 +138,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    Fluttertoast.showToast(
-        msg: ("Not implemented redirection"), timeInSecForIosWeb: 3);
-    // TODO: Redirect to admin page
+    Navigator.pushNamed(context, AdministrationPage.ROUTE);
   }
 
   Future<void> loadData() async {
