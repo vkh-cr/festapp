@@ -21,14 +21,13 @@ const primaryBlue1 = Color(0xFF2C677B);
 const Color primaryRed = Color(0xFFBA5D3F);
 const primaryYellow = Color(0xFFE0B73B);
 const primaryBlue2 = Color(0xFF2A77A0);
+const attentionColor = Color(0xFF8B0000);
 
 ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(16),
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: primaryRed,
-    shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8))
-);
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -50,7 +49,42 @@ class MainPageButton extends StatelessWidget {
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle.copyWith(backgroundColor: MaterialStateProperty.all(backgroundColor)),
+        style: mainPageButtonStyle.copyWith(
+          backgroundColor: MaterialStateProperty.all(backgroundColor),
+        ),
+        child: child,
+      ),
+    );
+  }
+}
+
+class CircularButton extends MainPageButton {
+  final Size size;
+
+  const CircularButton({
+    Key? key,
+    required VoidCallback onPressed,
+    required Widget child,
+    backgroundColor = primaryRed,
+    this.size = const Size(70, 70),
+  }) : super(
+          key: key,
+          onPressed: onPressed,
+          child: child,
+          backgroundColor: backgroundColor,
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: margin,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: mainPageButtonStyle.copyWith(
+          backgroundColor: MaterialStateProperty.all(this.backgroundColor),
+          shape: MaterialStateProperty.all(const CircleBorder()),
+          minimumSize: MaterialStateProperty.all(size),
+        ),
         child: child,
       ),
     );

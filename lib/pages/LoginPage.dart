@@ -1,13 +1,10 @@
-import 'dart:async';
-
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-
-import '../main.dart';
 import '../services/DataService.dart';
-import '../utils/constants.dart';
+import '../styles/Styles.dart';
 
 class LoginPage extends StatefulWidget {
+  static const ROUTE = "/login";
   const LoginPage({Key? key}) : super(key: key);
 
   @override
@@ -32,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Login Page"),
+        title: const Text("Přihlášení"),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -48,11 +45,10 @@ class _LoginPageState extends State<LoginPage> {
                   controller: _emailController,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Email',
-                      hintText: 'Enter a valid email'),
+                      labelText: 'E-mail'),
                   validator: (String? value) {
                     if (value!.isEmpty || !value.contains('@')) {
-                      return 'Email is not valid';
+                      return 'E-mail není validní';
                     }
                   },
                 ),
@@ -66,11 +62,10 @@ class _LoginPageState extends State<LoginPage> {
                   obscureText: true,
                   decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: 'Password',
-                      hintText: 'Enter secure password'),
+                      labelText: 'Heslo'),
                   validator: (String? value) {
                     if (value!.isEmpty) {
-                      return 'Invalid password';
+                      return 'Špatné heslo';
                     }
                   },
                 ),
@@ -82,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 50,
                 width: 250,
                 decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: primaryBlue1,
                     borderRadius: BorderRadius.circular(20)),
                 child: TextButton(
                   onPressed: () async {
@@ -90,11 +85,12 @@ class _LoginPageState extends State<LoginPage> {
                       await DataService.login(
                               _emailController.text, _passwordController.text)
                           .then(_showToast)
-                          .then(_refreshSignedInStatus);
+                          .then(_refreshSignedInStatus)
+                          .catchError(_onError);
                     }
                   },
                   child: const Text(
-                    'Login',
+                    'Přihlásit se',
                     style: TextStyle(color: Colors.white, fontSize: 25),
                   ),
                 ),
@@ -109,17 +105,16 @@ class _LoginPageState extends State<LoginPage> {
   void _refreshSignedInStatus(value) {
     DataService.tryAuthUser().then((loggedIn) {
       if (loggedIn) {
-        _navigateToHomePage();
+        Navigator.pop(context);
       }
     });
   }
 
   void _showToast(value) {
-    Fluttertoast.showToast(msg: ("Úspěšné přihlášení!"), timeInSecForIosWeb: 3);
+    ToastHelper.Show("Úspěšné přihlášení!");
   }
 
-  void _navigateToHomePage() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: PageNames.HOME_PAGE)));
+  void _onError(err) {
+    ToastHelper.Show("Špatné přihlašovací údaje!");
   }
 }
