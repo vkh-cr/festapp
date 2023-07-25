@@ -256,11 +256,11 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> saveNewPosition() async {
-    await DataService.SaveLocation(selectedMarker!.place.placeId,
+    await DataService.SaveLocation(selectedMarker!.place.id,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove = _markers
-        .firstWhere((m) => m.place.placeId == selectedMarker!.place.placeId);
+        .firstWhere((m) => m.place.id == selectedMarker!.place.id);
     //var newMarker = selectedMarker!.cloneWithNewPoint(selectedMarker!.point!);
     _markers.remove(markerToRemove);
     _markers.add(selectedMarker!);

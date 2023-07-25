@@ -1,7 +1,12 @@
 import 'package:av_app/models/PlaceModel.dart';
+import 'package:av_app/services/DataGridHelper.dart';
 import 'package:intl/intl.dart';
+import 'package:pluto_grid/pluto_grid.dart';
 
-class EventModel {
+import '../models/PlutoAbstract.dart';
+import '../services/DataService.dart';
+
+class EventModel extends IPlutoRowModel {
 
   String startTimeString() => DateFormat.Hm().format(startTime);
   String durationString() => "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime)} - ${DateFormat.Hm().format(endTime)}";
@@ -51,5 +56,59 @@ class EventModel {
     title = event.title;
     description = event.description;
     maxParticipants = event.maxParticipants;
+  }
+
+
+  static const String startDateColumn = "startDateColumn";
+  static const String startTimeColumn = "startTimeColumn";
+  static const String endDateColumn = "endDateColumn";
+  static const String endTimeColumn = "endTimeColumn";
+  static const String idColumn = "idColumn";
+  static const String titleColumn = "titleColumn";
+  static const String descriptionColumn = "descriptionColumn";
+  static const String maxParticipantsColumn = "maxParticipantsColumn";
+  static const String placeColumn = "placeColumn";
+
+
+  static EventModel fromPlutoJson(Map<String, dynamic> json) {
+    var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
+    var endTimeString = json[endDateColumn]+"-"+json[endTimeColumn];
+
+    var placeId = DataGridHelper.GetIdFromFormatted(json[placeColumn]);
+    var dateFormat = DateFormat("yyyy-MM-dd-HH:mm");
+    return EventModel(
+      startTime: dateFormat.parse(startTimeString),
+      endTime: dateFormat.parse(endTimeString),
+      id: json[idColumn],
+      title: json[titleColumn],
+      description: json[descriptionColumn],
+      maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+      place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
+    );
+  }
+
+  @override
+  PlutoRow toPlutoRow() {
+    return PlutoRow(cells: {
+      idColumn: PlutoCell(value: id),
+      titleColumn: PlutoCell(value: title),
+      descriptionColumn: PlutoCell(value: description),
+      startDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
+      startTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(startTime)),
+      endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
+      endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
+      maxParticipantsColumn: PlutoCell(value: maxParticipants),
+      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place.toString()),
+    });
+  }
+
+  @override
+  Future<void> deleteMethod() async {
+    await DataService.deleteEvent(this);
+  }
+
+  @override
+  Future<void> updateMethod() async {
+    await DataService.updateEvent(this);
   }
 }
