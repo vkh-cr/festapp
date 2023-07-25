@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:av_app/pages/AdministrationPage.dart';
 import 'package:av_app/pages/InfoPage.dart';
 import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/pages/UserPage.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
           },
           LoginPage.ROUTE: (context) => const LoginPage(),
           HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
+          AdministrationPage.ROUTE: (context) => const AdministrationPage(),
 
         }
     );

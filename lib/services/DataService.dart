@@ -1,4 +1,5 @@
-import 'package:av_app/models/InformationModel.dart';
+import 'package:av_app/pages/ModelInformation.dart';
+
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/models/UserData.dart';
 import 'package:av_app/services/ToastHelper.dart';
@@ -14,23 +15,6 @@ class DataService {
   static final _supabase = Supabase.instance.client;
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
-
-  //final String _baseUrl = "http://localhost:5001/";
-  // Future<HelloWorldResponse> getHelloWorld() async{
-  //   final url = Uri.parse("${_baseUrl}api/Test/hello/world");
-  //   final response = await http.get(url);
-  //   if (response.statusCode == 200) {
-  //     return HelloWorldResponse.fromJson((json.decode(response.body)));
-  //   } else{
-  //     throw Exception("status Code != 200");
-  //   }
-  // }
-
-  static Future<String> getFirstProgramTitle() async {
-    var programJson =
-        await _supabase.from('events').select('title').limit(1).single();
-    return programJson['title'].toString();
-  }
 
   static Future<bool> tryAuthUser() async {
     if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
@@ -111,10 +95,23 @@ class DataService {
     return infoList;
   }
 
-  static Future<dynamic> getEvents() async => await _supabase
+  static Future<List<EventModel>> getEvents() async {
+    var data = await _supabase
       .from('events')
       .select()
       .order('start_time', ascending: true);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getEventsWithPlaces() async {
+    var data = await _supabase
+        .from('events')
+        .select("id, title, start_time, end_time, max_participants, description, places(id, title)")
+        .order('start_time', ascending: true);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
 
   static Future<EventModel> getEvent(int eventId) async {
     var data = await _supabase
@@ -196,11 +193,24 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(int eventId, [String? email]) async {
-    var finalEmail = email ?? _supabase.auth.currentUser?.email;
-    if (finalEmail == null) {
+  static ensureUserIsLoggedIn(){
+    if(!DataService.isLoggedIn())
+    {
       throw Exception("User must be logged in.");
     }
+  }
+
+  static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com"];
+  static ensureCanDelete(){
+    if(!canDeleteListEmails.contains(currentUserEmail()))
+    {
+      throw Exception("You cannot delete.");
+    }
+  }
+
+  static signOutFromEvent(int eventId, [String? email]) async {
+    ensureUserIsLoggedIn();
+    var finalEmail = email ?? _supabase.auth.currentUser?.email;
     await _supabase
         .from('event_users')
         .delete()
@@ -221,12 +231,27 @@ class DataService {
       "end_time": event.endTime.toIso8601String(),
       "title": event.title,
       "max_participants": event.maxParticipants,
-      "place": event.place?.placeId
+      "place": event.place?.id
     }).select();
   }
 
-  static updateInfo(InformationModel info) async {
-    if (!DataService.isLoggedIn()) {
+  static Future<void> deleteEvent(EventModel data) async {
+    ensureUserIsLoggedIn();
+    ensureCanDelete();
+    await _supabase
+        .from('events')
+        .delete()
+        .eq("id", data.id);
+  }
+
+  static Future<void> updateInformation(InformationModel info) async {
+    ensureUserIsLoggedIn();
+    if(info.id == null)
+    {
+      await _supabase.from('information').insert({
+        "title": info.title,
+        "description": info.description
+      });
       return;
     }
     await _supabase.from('information').upsert({
@@ -234,6 +259,15 @@ class DataService {
       "id": info.id,
       "description": info.description
     }).select();
+  }
+
+  static Future<void> deleteInformation(InformationModel info) async {
+    ensureUserIsLoggedIn();
+    ensureCanDelete();
+    await _supabase
+        .from('information')
+        .delete()
+        .eq("id", info.id);
   }
 
   static Future<List<ParticipantModel>> getAllUsers() async {
@@ -313,16 +347,15 @@ class DataService {
 
   static Future<void> updateEvents(List<EventModel> events) async {
     var eventsData = await DataService.getEvents();
-    eventsData.forEach((e) {
-      var updatedEvent = EventModel.fromJson(e);
+    for (var e in eventsData) {
       var eventToChange =
-          events.firstWhereOrNull((eve) => eve.id == updatedEvent.id);
+          events.firstWhereOrNull((eve) => eve.id == e.id);
       if (eventToChange != null) {
-        eventToChange.copyFromEvent(updatedEvent);
+        eventToChange.copyFromEvent(e);
       } else {
-        events.add(updatedEvent);
+        events.add(e);
       }
-    });
+    }
   }
 
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {
