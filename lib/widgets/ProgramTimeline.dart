@@ -1,5 +1,4 @@
   import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:timelines/timelines.dart';
 
 import '../models/EventModel.dart';
@@ -18,15 +17,40 @@ import '../styles/Styles.dart';
 
   class _ProgramTimelineState extends State<ProgramTimeline> {
 
-    final List<EventModel> events;
+    final List<EventModel> allEvents;
     Function(int)? onEventPressed;
 
-  _ProgramTimelineState(this.events, this.onEventPressed);
+  _ProgramTimelineState(this.allEvents, this.onEventPressed);
 
 
     @override
     Widget build(BuildContext context) {
+      var morningEvents = allEvents.where((e) => e.startTime.hour <= 12).toList();
+      var afternoonEvents = allEvents.where((e) => e.startTime.hour > 12 && e.startTime.hour <= 18).toList();
+      var eveningEvents = allEvents.where((e) => e.startTime.hour>18).toList();
+      return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+        createTimeline(morningEvents),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(64, 18, 0, 12),
+          child: Text("Odpoledne", style: TextStyle(color: primaryBlue1),),
+        ),
+        createTimeline(afternoonEvents),
+        const Padding(
+          padding: EdgeInsets.fromLTRB(64, 18, 0, 12),
+          child: Text("Večer", style: TextStyle(color: primaryBlue1),),
+        ),
+        createTimeline(eveningEvents),
+      ],));
+    }
+
+    Timeline createTimeline(List<EventModel> events)
+    {
       return Timeline.tileBuilder(
+        shrinkWrap: true,
+        physics: ScrollPhysics(),
         theme: TimelineTheme.of(context).copyWith(
           nodePosition: 0.3,
           indicatorTheme: IndicatorTheme.of(context).copyWith(
@@ -61,10 +85,6 @@ import '../styles/Styles.dart';
             return EventModel.canSignIn(event) ? OutlinedDotIndicator(color: primaryBlue1, borderWidth: event.isSignedIn ? 6:2) : Padding(padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5), child: DotIndicator(color: primaryBlue1, size: 8));
           },
           connectorBuilder: (_,index,__) {
-            if(index == events.length-1)
-            {
-              return const TransparentConnector();
-            }
             return const SolidLineConnector();
           },
         ),
