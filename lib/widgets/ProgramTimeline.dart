@@ -36,20 +36,20 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         createTimeline(morningEvents),
         afternoonEvents.isNotEmpty
             ? const Padding(
-                padding: EdgeInsets.fromLTRB(64, 18, 0, 12),
+                padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Odpoledne",
-                  style: TextStyle(color: primaryBlue1),
+                  style: TextStyle(color: primaryBlue1, fontWeight: FontWeight.bold),
                 ),
               )
             : const SizedBox.shrink(),
         createTimeline(afternoonEvents),
         eveningEvents.isNotEmpty
             ? const Padding(
-                padding: EdgeInsets.fromLTRB(64, 18, 0, 12),
+                padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Večer",
-                  style: TextStyle(color: primaryBlue1),
+                  style: TextStyle(color: primaryBlue1, fontWeight: FontWeight.bold),
                 ),
               )
             : const SizedBox.shrink(),
@@ -63,7 +63,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       shrinkWrap: true,
       physics: ScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
-        nodePosition: 0.3,
+        nodePosition: 0.24,
         indicatorTheme:
             IndicatorTheme.of(context).copyWith(color: primaryBlue1),
         connectorTheme: ConnectorTheme.of(context)
