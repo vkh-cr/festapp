@@ -139,7 +139,7 @@ class _EventPageState extends State<EventPage> {
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
                   alignment: Alignment.topRight,
-                  child: Text(_event?.durationString()??""),
+                  child: Text(_event?.durationString()??"", style: normalTextStyle),
                 ),
               ),
               Visibility(
@@ -149,7 +149,7 @@ class _EventPageState extends State<EventPage> {
                       alignment: Alignment.topRight,
                       child: TextButton(
                           onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id)),
-                          child: Text("Místo: ${_event?.place?.title??""}"))
+                          child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
                   )),
               Visibility(
                   visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),

@@ -23,6 +23,8 @@ const primaryYellow = Color(0xFFE0B73B);
 const primaryBlue2 = Color(0xFF2A77A0);
 const attentionColor = Color(0xFF8B0000);
 
+TextStyle normalTextStyle = TextStyle(fontSize: 18);
+
 ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(16),
     tapTargetSize: MaterialTapTargetSize.padded,
