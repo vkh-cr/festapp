@@ -98,7 +98,7 @@ class DataService {
   static Future<List<EventModel>> getEvents() async {
     var data = await _supabase
       .from('events')
-      .select()
+      .select("id, title, start_time, end_time, max_participants")
       .order('start_time', ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));

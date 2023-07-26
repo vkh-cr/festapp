@@ -229,12 +229,28 @@ class _AdministrationPageState extends State<AdministrationPage> {
                           renderer: (rendererContext) {
                             return ElevatedButton(
                                 onPressed: () async{
-                                  var oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
-                                  Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
+                                  String? textToEdit;
+                                  String? oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
+                                  if(oldText!=null)
+                                  {
+                                    textToEdit = oldText;
+                                  }
+                                  if(textToEdit == null)
+                                  {
+                                    var eventId = rendererContext.row.cells[EventModel.idColumn]!.value;
+
+                                    if(eventId!=null)
+                                    {
+                                      var fullEvent = await DataService.getEvent(eventId);
+                                      textToEdit = fullEvent.description;
+                                    }
+                                  }
+
+                                  Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: textToEdit).then((value) async {
                                     if(value != null)
                                     {
                                       var newText = value as String;
-                                      if(newText!=oldText)
+                                      if(newText!=textToEdit)
                                       {
                                         rendererContext.row.cells[EventModel.descriptionColumn]?.value = newText;
                                         setState(() {
