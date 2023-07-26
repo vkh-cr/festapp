@@ -95,7 +95,7 @@ class DataService {
     return infoList;
   }
 
-  static Future<List<EventModel>> getEvents() async {
+  static Future<List<EventModel>> getEventsForTimeline() async {
     var data = await _supabase
       .from('events')
       .select("id, title, start_time, end_time, max_participants")
@@ -107,7 +107,7 @@ class DataService {
   static Future<List<EventModel>> getEventsWithPlaces() async {
     var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, places(id, title)")
+        .select("id, title, start_time, end_time, max_participants, split_for_men_women, places(id, title)")
         .order('start_time', ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -117,7 +117,7 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, description, places(id, title)")
+            "id, title, start_time, end_time, max_participants, split_for_men_women, description, places(id, title)")
         .eq("id", eventId)
         .single();
     return EventModel.fromJson(data);
@@ -231,7 +231,8 @@ class DataService {
       "end_time": event.endTime.toIso8601String(),
       "title": event.title,
       "max_participants": event.maxParticipants,
-      "place": event.place?.id
+      "place": event.place?.id,
+      "split_for_men_women": event.splitForMenWomen,
     }).select();
   }
 
@@ -346,7 +347,7 @@ class DataService {
   }
 
   static Future<void> updateEvents(List<EventModel> events) async {
-    var eventsData = await DataService.getEvents();
+    var eventsData = await DataService.getEventsForTimeline();
     for (var e in eventsData) {
       var eventToChange =
           events.firstWhereOrNull((eve) => eve.id == e.id);

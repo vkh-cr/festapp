@@ -19,6 +19,7 @@ class EventModel extends IPlutoRowModel {
   String? title = "událost";
   String? description = "";
   bool isSignedIn = false;
+  bool splitForMenWomen = false;
   DateTime startTime;
   DateTime endTime;
 
@@ -29,7 +30,8 @@ class EventModel extends IPlutoRowModel {
     this.title,
     this.description,
     this.maxParticipants,
-    this.place});
+    this.place,
+    required this.splitForMenWomen});
 
   factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
       startTime: DateTime.parse(json["start_time"]),
@@ -38,7 +40,8 @@ class EventModel extends IPlutoRowModel {
       title: json.containsKey("title") ? json["title"] : null,
       description: json.containsKey("description") ? json["description"] : null,
       maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
-      place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null
+      place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
+      splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
   );
 
   bool isFull() => currentParticipants !>= maxParticipants!;
@@ -68,6 +71,8 @@ class EventModel extends IPlutoRowModel {
   static const String descriptionColumn = "descriptionColumn";
   static const String maxParticipantsColumn = "maxParticipantsColumn";
   static const String placeColumn = "placeColumn";
+  static const String splitForMenWomenColumn = "splitForMenWomenColumn";
+
 
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
@@ -84,6 +89,7 @@ class EventModel extends IPlutoRowModel {
       description: json[descriptionColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
+      splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
     );
   }
 
@@ -99,6 +105,8 @@ class EventModel extends IPlutoRowModel {
       endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place.toString()),
+      splitForMenWomenColumn: PlutoCell(value: splitForMenWomen),
+
     });
   }
 

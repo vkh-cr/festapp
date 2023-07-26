@@ -215,6 +215,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         width: 70,
                       ),
                       PlutoColumn(
+                          title: "M/Ž 50/50",
+                          field: EventModel.splitForMenWomenColumn,
+                          type: PlutoColumnType.select(places),
+                          applyFormatterInEditing: true,
+                          enableEditingMode: false,
+                          width: 100,
+                          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                      ),
+                      PlutoColumn(
                         title: "Místo",
                         field: EventModel.placeColumn,
                         type: PlutoColumnType.select(places),
@@ -269,6 +278,5 @@ class _AdministrationPageState extends State<AdministrationPage> {
       ),
     );
   }
-
 
 }
