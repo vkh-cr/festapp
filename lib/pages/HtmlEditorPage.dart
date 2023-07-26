@@ -38,9 +38,8 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   final _toolbarIconColor = Colors.black87;
   final _editorTextStyle = const TextStyle(
       fontSize: 16,
-      color: Colors.black,
-      fontWeight: FontWeight.normal,
-      fontFamily: 'Russo One');
+      fontFamily: '"PT Sans", Calibri, Tahoma, sans-serif',
+  );
   final _hintTextStyle = const TextStyle(
       fontSize: 18, color: Colors.black12);
 
