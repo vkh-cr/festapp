@@ -78,6 +78,10 @@ flutter:
     - family: RussoOne
       fonts:
         - asset: fonts/RussoOne-Regular.ttf
+    - family: Futura
+      fonts:
+        - asset: fonts/Futura PT Book.ttf
+        - asset: fonts/Futura PT Medium.ttf
   assets:
     - assets/icons/
     - assets/images/map/
