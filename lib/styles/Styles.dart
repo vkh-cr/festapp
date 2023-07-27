@@ -68,7 +68,7 @@ class CircularButton extends MainPageButton {
     required VoidCallback onPressed,
     required Widget child,
     backgroundColor = primaryRed,
-    this.size = const Size(70, 70),
+    this.size = const Size(60, 60),
   }) : super(
           key: key,
           onPressed: onPressed,
