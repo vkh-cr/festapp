@@ -312,7 +312,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             Text(
               widget.marker.place.title,
               overflow: TextOverflow.fade,
-              softWrap: false,
+              softWrap: true,
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 14.0,
