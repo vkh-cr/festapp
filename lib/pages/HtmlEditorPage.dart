@@ -86,15 +86,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
                 toolBarConfig: customToolBarList,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 direction: Axis.vertical,
-                customButtons: [
-                  Container(
-                    width: 25,
-                    height: 25,
-                    decoration: BoxDecoration(
-                        color: _hasFocus ? Colors.green : Colors.grey,
-                        borderRadius: BorderRadius.circular(15)),
-                  ),
-                ],
+                customButtons: [],
               ),
             ),
             Flexible(
