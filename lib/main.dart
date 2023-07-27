@@ -10,7 +10,6 @@ import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:url_strategy/url_strategy.dart';
 
 
 import 'models/EventModel.dart';
@@ -19,7 +18,7 @@ import 'pages/HtmlEditorPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
-
+import 'configure_nonweb.dart' if (dart.library.html) 'configure_web.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:badges/badges.dart' as badges;
 
@@ -29,7 +28,7 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
-  setPathUrlStrategy();
+  configureApp();
   runApp(const MyApp());
 }
 
