@@ -316,6 +316,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
                           title: "E-mail",
                           field: UserInfoModel.emailColumn,
                           type: PlutoColumnType.text(),
+                          checkReadOnly: (row, cell) {
+                            final id = row.cells[UserInfoModel.idColumn]?.value as String?;
+                            return id != null && id.isNotEmpty;
+                            },
                           width: 200
                       ),
                       PlutoColumn(
