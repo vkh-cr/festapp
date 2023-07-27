@@ -1,3 +1,4 @@
+import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/pages/ModelInformation.dart';
 
 import 'package:av_app/models/NewsMessage.dart';
@@ -13,6 +14,7 @@ import '../models/PlaceModel.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
+
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
 
@@ -37,6 +39,11 @@ class DataService {
 
   static String? currentUserEmail() {
     return _supabase.auth.currentUser?.email;
+  }
+
+  static Future<String> createUser(String email, String password) async {
+    var data = await _supabase.auth.admin.createUser(AdminUserAttributes(email: email, password: password));
+    return data.user!.id;
   }
 
   static Future<void> login(String email, String password) async {
@@ -75,6 +82,28 @@ class DataService {
       return null;
     }
     return PlaceModel.fromJson(data["places"]);
+  }
+
+  static Future<List<UserInfoModel>> getUsers() async {
+    var data = await _supabase.from(UserInfoModel.userInfoTable).select();
+    return List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
+  }
+
+  static updateUser(UserInfoModel data) async {
+    if (!DataService.isLoggedIn()) {
+      return;
+    }
+    //todo change email individually
+    await _supabase.from(UserInfoModel.userInfoTable).upsert({
+      UserInfoModel.idColumn: data.id,
+      UserInfoModel.emailColumn: data.email,
+      UserInfoModel.nameColumn: data.name,
+      UserInfoModel.surnameColumn: data.surname,
+      UserInfoModel.sexColumn: data.sex,
+      UserInfoModel.roleColumn: data.role,
+      UserInfoModel.accommodationColumn: data.accommodation,
+      UserInfoModel.phoneColumn: data.phone,
+    });
   }
 
   static Future<List<PlaceModel>> getPlaces() async {

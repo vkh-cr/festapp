@@ -51,6 +51,9 @@ class InformationModel extends IPlutoRowModel {
     await DataService.updateInformation(this);
   }
 
+  @override
+  String toBasicString() => title;
+
   InformationModel({
     required this.id,
     required this.title,

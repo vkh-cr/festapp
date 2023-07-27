@@ -24,6 +24,5 @@ class PlaceModel {
     required this.description,
     required this.type});
 
-  @override
-  String toString() => "$id:$title";
+  String toPlutoSelectString() => "$id:$title";
 }

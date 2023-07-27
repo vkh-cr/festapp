@@ -11,7 +11,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
   final Future<List<T>> Function() loadData;
   final T Function(Map<String, dynamic>) fromPlutoJson;
 
-  SingleTableDataGrid(this.loadData, this.fromPlutoJson, this.columns);
+  SingleTableDataGrid(this.loadData, this.fromPlutoJson, {required this.columns});
 
   DataGrid() {
     return PlutoGrid(

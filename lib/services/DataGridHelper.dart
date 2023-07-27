@@ -13,6 +13,14 @@ class DataGridHelper
     return result;
   }
 
+  static String returnQuestionMarkOnInvalid(dynamic value, List<String> allValues) {
+    if(!allValues.contains(value))
+    {
+      return "???";
+    }
+    return value;
+  }
+
   static int? GetIdFromFormatted(String value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)
