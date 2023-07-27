@@ -20,6 +20,7 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
       localeText: PlutoGridLocaleText.czech(),
       style: PlutoGridStyleConfig(
         rowHeight: 36,
+        cellColorInReadOnlyState: Colors.white70
       ),
     );
   }
@@ -75,7 +76,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     if(deleteList.isNotEmpty)
     {
       var result = await DialogHelper.showConfirmationDialogAsync(context,
-          "Potvrdit smazání", "Opravdu chcete smazat:\n ${deleteList.map((value) => value.toString()).toList().join(",\n")}?",
+          "Potvrdit smazání", "Opravdu chcete smazat:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
           "Ano", "Ne");
       if(!result) {
         return;
@@ -84,7 +85,16 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
 
     for (var element in deleteList)
     {
-      await element.deleteMethod();
+      try
+      {
+        await element.deleteMethod();
+      }
+      catch(e)
+      {
+        ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+        return;
+      }
+      ToastHelper.Show("Smazáno: ${element.toBasicString()}");
     }
 
     var toUpsert = widget.stateManager.rows.where((element) => element.state == PlutoRowState.updated).toList();
@@ -92,10 +102,18 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         toUpsert.map((x) => fromPlutoJson(x.toJson())));
     for (var element in upsertList)
     {
-      await element.updateMethod();
+      try
+      {
+        await element.updateMethod();
+      }
+      catch(e)
+      {
+        ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+        return;
+      }
+      ToastHelper.Show("Uloženo: ${element.toBasicString()}");
     }
     await loadData(widget.stateManager);
-    ToastHelper.Show("Uloženo");
   }
 
   Future<void> _cancelChanges() async {

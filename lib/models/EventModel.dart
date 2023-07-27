@@ -104,7 +104,7 @@ class EventModel extends IPlutoRowModel {
       endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
       endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
-      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place.toString()),
+      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place!.toPlutoSelectString()),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen),
 
     });
@@ -119,4 +119,7 @@ class EventModel extends IPlutoRowModel {
   Future<void> updateMethod() async {
     await DataService.updateEvent(this);
   }
+
+  @override
+  String toBasicString() => "$title";
 }
