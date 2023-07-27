@@ -27,72 +27,74 @@ class _UserPageState extends State<UserPage> {
         centerTitle: true,
         title: const Text("Profil"),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(
-              height: 15,
-            ),
-            buildTextField('Jméno', userData?.name ?? ''),
-            buildTextField('Příjmení', userData?.surname ?? ''),
-            buildTextField('E-mail', userData?.email ?? ''),
-            buildTextField('Pohlaví', userData?.sex ?? ''),
-            buildTextField('Role', userData?.role ?? ''),
-            Visibility(
-              visible: userData?.role == 'Organizer',
-              child: buildTextField('Dobrovolnická oblast', ''),
-            ),
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                const Text("Ubytování"),
-                Container(
-                  alignment: Alignment.topLeft,
-                  child: TextButton(
-                      onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.id),
-                      child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
-                )
-              ],),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Visibility(
-              visible: userData?.role == 'Organizer',
-              child: Container(
-                height: 50,
-                width: 250,
-                decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 220, 226, 237),
-                    borderRadius: BorderRadius.circular(20)),
-                child: TextButton(
-                  onPressed: () async => _redirectToAdminPage(),
-                  child: const Text(
-                    'Administrace',
-                    style: TextStyle(color: Colors.black, fontSize: 25),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                const SizedBox(
+                  height: 15,
+                ),
+                buildTextField('Jméno', userData?.name ?? ''),
+                buildTextField('Příjmení', userData?.surname ?? ''),
+                buildTextField('E-mail', userData?.email ?? ''),
+                buildTextField('Pohlaví', userData?.sex ?? ''),
+                buildTextField('Role', userData?.role ?? ''),
+                Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                    const Text("Ubytování"),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: TextButton(
+                          onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.id),
+                          child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
+                    )
+                  ],),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                Visibility(
+                  visible: userData?.role == 'Organizer',
+                  child: Container(
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 220, 226, 237),
+                        borderRadius: BorderRadius.circular(20)),
+                    child: TextButton(
+                      onPressed: () async => _redirectToAdminPage(),
+                      child: const Text(
+                        'Administrace',
+                        style: TextStyle(color: Colors.black, fontSize: 25),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            Container(
-              height: 50,
-              width: 250,
-              decoration: BoxDecoration(
-                  color: primaryBlue1, borderRadius: BorderRadius.circular(20)),
-              child: TextButton(
-                onPressed: () async => _logout(),
-                child: const Text(
-                  'Odhlásit se',
-                  style: TextStyle(color: Colors.white, fontSize: 25),
+                const SizedBox(
+                  height: 16,
                 ),
-              ),
+                Container(
+                  height: 50,
+                  width: 250,
+                  decoration: BoxDecoration(
+                      color: primaryBlue1, borderRadius: BorderRadius.circular(20)),
+                  child: TextButton(
+                    onPressed: () async => _logout(),
+                    child: const Text(
+                      'Odhlásit se',
+                      style: TextStyle(color: Colors.white, fontSize: 25),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

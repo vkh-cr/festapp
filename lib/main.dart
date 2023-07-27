@@ -83,6 +83,7 @@ class MyApp extends StatelessWidget {
             }
             return const AdministrationPage();
           },
+          NewsPage.ROUTE: (context) => const NewsPage(),
         }
     );
   }
