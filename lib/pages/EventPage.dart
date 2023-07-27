@@ -167,7 +167,7 @@ class _EventPageState extends State<EventPage> {
                     visible: _event != null && _event?.description != null,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: HtmlDescriptionWidget(html: _event?.description??""),
+                      child: HtmlDescriptionWidget(html: _event?.description ?? ""),
                     ),
                   ),
                   Visibility(

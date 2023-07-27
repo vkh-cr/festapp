@@ -68,7 +68,7 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Upravit popis"))),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlDescriptionWidget(html: item.description!),
+                        child: HtmlDescriptionWidget(html: item.description ?? ""),
                       )],
                     ),
                       isExpanded: item.isExpanded,
