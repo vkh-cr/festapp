@@ -22,7 +22,7 @@ Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwW
 
 ## Odkaz na live verzi aplikace
 
-[Aplikace Absolventský Velehrad](https://vkh-cr.github.io/av-app/#/)
+[Aplikace Absolventský Velehrad](https://av23.cz)
 
 
 ## Vývoj aplikace
