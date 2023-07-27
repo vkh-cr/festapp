@@ -42,157 +42,163 @@ class _EventPageState extends State<EventPage> {
       appBar: AppBar(
         title: Text(_event==null?"událost":_event.toString()),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                Visibility(
-                    visible: showLoginLogoutButton() &&
-                        !_participants.any(
-                            (p) => DataService.currentUserEmail() == p.email),
-                    child: ElevatedButton(
-                        onPressed: () => signIn(),
-                        child: const Text("Přihlásit se"))),
-                Visibility(
-                    visible: showLoginLogoutButton() &&
-                        _participants.any(
-                            (p) => DataService.currentUserEmail() == p.email),
-                    child: ElevatedButton(
-                        onPressed: () => signOut(),
-                        child: const Text("Odhlásit se"))),
-                Visibility(
-                  visible: showLoginLogoutButton(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                        onPressed: () async {
-                          _queriedParticipants = await DataService.getAllUsers();
-                          _queriedParticipants.forEach((q) => {
-                                if (_participants.any((p) => p.email == q.email))
-                                  {q.isSignedIn = true}
-                              });
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                    Visibility(
+                        visible: showLoginLogoutButton() &&
+                            !_participants.any(
+                                (p) => DataService.currentUserEmail() == p.email),
+                        child: ElevatedButton(
+                            onPressed: () => signIn(),
+                            child: const Text("Přihlásit se"))),
+                    Visibility(
+                        visible: showLoginLogoutButton() &&
+                            _participants.any(
+                                (p) => DataService.currentUserEmail() == p.email),
+                        child: ElevatedButton(
+                            onPressed: () => signOut(),
+                            child: const Text("Odhlásit se"))),
+                    Visibility(
+                      visible: showLoginLogoutButton(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                            onPressed: () async {
+                              _queriedParticipants = await DataService.getAllUsers();
+                              _queriedParticipants.forEach((q) => {
+                                    if (_participants.any((p) => p.email == q.email))
+                                      {q.isSignedIn = true}
+                                  });
 
-                            // ignore: use_build_context_synchronously
-                            showSearch(
-                                context: context,
-                                delegate: SearchPage<ParticipantModel>(
-                                  showItemsOnEmpty: true,
-                                  items: _queriedParticipants,
-                                  searchLabel: 'Hledat účastníky',
-                                  suggestion: const Center(
-                                    child: Text(
-                                        "Najdi účastníka podle jména, příjmení nebo e-mailu."),
-                                  ),
-                                  failure: const Center(
-                                    child: Text("Nikdo nebyl nalezen."),
-                                  ),
-                                  filter: (person) => [
-                                    person.name,
-                                    person.surname,
-                                    person.email,
-                                  ],
-                                  builder: (person) => ListTile(
-                                    title: Text(person.name),
-                                    subtitle: Text(person.surname),
-                                    trailing: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Visibility(
-                                          visible: person.isSignedIn?true:false,
-                                          child: ElevatedButton(
-                                              onPressed: () => signOutOther(person),
-                                              child: const Text("Odhlásit")),
-                                        ),
-                                        Visibility(
-                                          visible: person.isSignedIn?false:true,
-                                          child: ElevatedButton(
-                                              onPressed: () => signIn(person),
-                                              child: const Text("Přihlásit")),
-                                        ),
-                                        Text(person.email),
+                                // ignore: use_build_context_synchronously
+                                showSearch(
+                                    context: context,
+                                    delegate: SearchPage<ParticipantModel>(
+                                      showItemsOnEmpty: true,
+                                      items: _queriedParticipants,
+                                      searchLabel: 'Hledat účastníky',
+                                      suggestion: const Center(
+                                        child: Text(
+                                            "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+                                      ),
+                                      failure: const Center(
+                                        child: Text("Nikdo nebyl nalezen."),
+                                      ),
+                                      filter: (person) => [
+                                        person.name,
+                                        person.surname,
+                                        person.email,
                                       ],
-                                    ),
-                                  ),
-                                )).then((x) => loadData(_event!.id));
-                          },
-                          child: const Text("Přihlásit druhého")),
+                                      builder: (person) => ListTile(
+                                        title: Text(person.name),
+                                        subtitle: Text(person.surname),
+                                        trailing: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            Visibility(
+                                              visible: person.isSignedIn?true:false,
+                                              child: ElevatedButton(
+                                                  onPressed: () => signOutOther(person),
+                                                  child: const Text("Odhlásit")),
+                                            ),
+                                            Visibility(
+                                              visible: person.isSignedIn?false:true,
+                                              child: ElevatedButton(
+                                                  onPressed: () => signIn(person),
+                                                  child: const Text("Přihlásit")),
+                                            ),
+                                            Text(person.email),
+                                          ],
+                                        ),
+                                      ),
+                                    )).then((x) => loadData(_event!.id));
+                              },
+                              child: const Text("Přihlásit druhého")),
+                        ),
+                      ),
+                      Visibility(
+                          visible: DataService.isLoggedIn(),
+                          child: ElevatedButton(
+                              onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
+                                if(value != null)
+                                {
+                                  _event!.description = value as String;
+                                  await DataService.updateEvent(_event!);
+                                  ToastHelper.Show("Popis změněn!");
+                                  Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
+                                }
+                              }),
+                              child: const Text("Upravit popis")))
+                    ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      alignment: Alignment.topRight,
+                      child: Text(_event?.durationString()??"", style: normalTextStyle),
                     ),
                   ),
                   Visibility(
-                      visible: DataService.isLoggedIn(),
-                      child: ElevatedButton(
-                          onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
-                            if(value != null)
-                            {
-                              _event!.description = value as String;
-                              await DataService.updateEvent(_event!);
-                              ToastHelper.Show("Popis změněn!");
-                              Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
-                            }
-                          }),
-                          child: const Text("Upravit popis")))
-                ]),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  alignment: Alignment.topRight,
-                  child: Text(_event?.durationString()??"", style: normalTextStyle),
-                ),
-              ),
-              Visibility(
-                  visible: _event?.place != null,
-                  child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                          onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id)),
-                          child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
-                  )),
-              Visibility(
-                  visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
-                      style: TextStyle(color: attentionColor),),
-                  )),
-              Visibility(
-                visible: _event != null && _event?.description != null,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: HtmlDescriptionWidget(html: _event?.description??""),
-                ),
-              ),
-              Visibility(
-                  visible:
-                      DataService.isLoggedIn() && _event?.maxParticipants != null,
-                  child: ExpansionTile(
-                    title: const Text("Přihlášeni:"),
-                    children: [ListView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.all(8),
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _participants.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              children: [
-                                IconButton(
-                                    onPressed: () => signOutOther(_participants[index]),
-                                    icon: const Icon(Icons.remove_circle_outline)),
-                                Text("${_participants[index]}"),
-                              ],
-                            ),
-                          );
-                        })],
+                      visible: _event?.place != null,
+                      child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          alignment: Alignment.topRight,
+                          child: TextButton(
+                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id)),
+                              child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
+                      )),
+                  Visibility(
+                      visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
+                          style: TextStyle(color: attentionColor),),
+                      )),
+                  Visibility(
+                    visible: _event != null && _event?.description != null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: HtmlDescriptionWidget(html: _event?.description??""),
+                    ),
                   ),
-              )
-            ],
+                  Visibility(
+                      visible:
+                          DataService.isLoggedIn() && _event?.maxParticipants != null,
+                      child: ExpansionTile(
+                        title: const Text("Přihlášeni:"),
+                        children: [ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(8),
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _participants.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                        onPressed: () => signOutOther(_participants[index]),
+                                        icon: const Icon(Icons.remove_circle_outline)),
+                                    Text("${_participants[index]}"),
+                                  ],
+                                ),
+                              );
+                            })],
+                      ),
+                  )
+                ],
+              ),
           ),
+        ),
       ),
     );
   }

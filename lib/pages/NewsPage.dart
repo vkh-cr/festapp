@@ -7,6 +7,8 @@ import '../services/DataService.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
+  static const ROUTE = "/news";
+  const NewsPage({Key? key}) : super(key: key);
   @override
   _NewsPageState createState() => _NewsPageState();
 }
@@ -55,47 +57,53 @@ class _NewsPageState extends State<NewsPage> {
       appBar: AppBar(
         title: const Text('Ohlášky'),
       ),
-      body: ListView.builder(
-        itemCount: newsMessages.length,
-        itemBuilder: (BuildContext context, int index) {
-          final message = newsMessages[index];
-          final previousMessage = index > 0 ? newsMessages[index - 1] : null;
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          child: ListView.builder(
+            itemCount: newsMessages.length,
+            itemBuilder: (BuildContext context, int index) {
+              final message = newsMessages[index];
+              final previousMessage = index > 0 ? newsMessages[index - 1] : null;
 
-          final isSameDay = previousMessage != null &&
-              message.createdAt.year == previousMessage.createdAt.year &&
-              message.createdAt.month == previousMessage.createdAt.month &&
-              message.createdAt.day == previousMessage.createdAt.day;
+              final isSameDay = previousMessage != null &&
+                  message.createdAt.year == previousMessage.createdAt.year &&
+                  message.createdAt.month == previousMessage.createdAt.month &&
+                  message.createdAt.day == previousMessage.createdAt.day;
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              if (index != 0 && !isSameDay)
-                const Divider(),
-              if (index == 0 || !isSameDay)
-                Container(
-                  padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
-                  alignment: Alignment.topRight,
-                  child: Text(
-                    DateFormat("EEEE d.M.y", "cs").format(message.createdAt),
-                    style: message.isRead?readTextStyle:unReadTextStyle,
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (index != 0 && !isSameDay)
+                    const Divider(),
+                  if (index == 0 || !isSameDay)
+                    Container(
+                      padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
+                      alignment: Alignment.topRight,
+                      child: Text(
+                        DateFormat("EEEE d.M.y", "cs").format(message.createdAt),
+                        style: message.isRead?readTextStyle:unReadTextStyle,
+                      ),
+                    ),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy, style: message.isRead?readTextStyle:unReadTextStyle,)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                    child: Container(
+                      //color: Colors.white70,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: primaryBlue1.withOpacity(0.10)
+                      ),
+                      //color: Colors.white70,
+                      child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
+                    ),
                   ),
-                ),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy, style: message.isRead?readTextStyle:unReadTextStyle,)),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                child: Container(
-                  //color: Colors.white70,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: primaryBlue1.withOpacity(0.10)
-                  ),
-                  //color: Colors.white70,
-                  child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
-                ),
-              ),
-            ],
-          );
-        },
+                ],
+              );
+            },
+          ),
+        ),
       ),
       floatingActionButton: Visibility(
         visible: DataService.isLoggedIn(),

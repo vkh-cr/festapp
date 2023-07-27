@@ -31,71 +31,77 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
         title: const Text("Přihlášení"),
       ),
-      body: SingleChildScrollView(
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: <Widget>[
-              const SizedBox(
-                height: 200,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                child: TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'E-mail'),
-                  validator: (String? value) {
-                    if (value!.isEmpty || !value.contains('@')) {
-                      return 'E-mail není validní';
-                    }
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 15.0, right: 15.0, top: 15, bottom: 0),
-                //padding: EdgeInsets.symmetric(horizontal: 15),
-                child: TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      labelText: 'Heslo'),
-                  validator: (String? value) {
-                    if (value!.isEmpty) {
-                      return 'Špatné heslo';
-                    }
-                  },
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              Container(
-                height: 50,
-                width: 250,
-                decoration: BoxDecoration(
-                    color: primaryBlue1,
-                    borderRadius: BorderRadius.circular(20)),
-                child: TextButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await DataService.login(
-                              _emailController.text, _passwordController.text)
-                          .then(_showToast)
-                          .then(_refreshSignedInStatus)
-                          .catchError(_onError);
-                    }
-                  },
-                  child: const Text(
-                    'Přihlásit se',
-                    style: TextStyle(color: Colors.white, fontSize: 25),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: <Widget>[
+                  const SizedBox(
+                    height: 200,
                   ),
-                ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'E-mail'),
+                      validator: (String? value) {
+                        if (value!.isEmpty || !value.contains('@')) {
+                          return 'E-mail není validní';
+                        }
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: 15.0, right: 15.0, top: 15, bottom: 0),
+                    //padding: EdgeInsets.symmetric(horizontal: 15),
+                    child: TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'Heslo'),
+                      validator: (String? value) {
+                        if (value!.isEmpty) {
+                          return 'Špatné heslo';
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Container(
+                    height: 50,
+                    width: 250,
+                    decoration: BoxDecoration(
+                        color: primaryBlue1,
+                        borderRadius: BorderRadius.circular(20)),
+                    child: TextButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          await DataService.login(
+                                  _emailController.text, _passwordController.text)
+                              .then(_showToast)
+                              .then(_refreshSignedInStatus)
+                              .catchError(_onError);
+                        }
+                      },
+                      child: const Text(
+                        'Přihlásit se',
+                        style: TextStyle(color: Colors.white, fontSize: 25),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
