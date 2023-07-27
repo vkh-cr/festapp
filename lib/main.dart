@@ -10,6 +10,7 @@ import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_strategy/url_strategy.dart';
 
 
 import 'models/EventModel.dart';
@@ -28,7 +29,7 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
-
+  setPathUrlStrategy();
   runApp(const MyApp());
 }
 
@@ -38,6 +39,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+        // builder: (context, child) {
+        //   final mediaQueryData = MediaQuery.of(context);
+        //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
+        //   return MediaQuery(
+        //     child: child!,
+        //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
+        //   );
+        // },
       title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
@@ -68,8 +77,13 @@ class MyApp extends StatelessWidget {
           },
           LoginPage.ROUTE: (context) => const LoginPage(),
           HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
-          AdministrationPage.ROUTE: (context) => const AdministrationPage(),
-
+          AdministrationPage.ROUTE: (context) {
+            if(!DataService.isLoggedIn())
+            {
+              return const LoginPage();
+            }
+            return const AdministrationPage();
+          },
         }
     );
   }
@@ -131,7 +145,7 @@ String userName = "";
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SvgPicture.asset(
-                    width: 80,
+                    width: 60,
                     semanticsLabel: 'Absolventský Velehrad',
                     'assets/icons/avlogo.svg',
                   ),
@@ -145,12 +159,11 @@ String userName = "";
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             CircularButton(
-                              size: const Size(70, 70),
                               onPressed: _loginPressed,
                               backgroundColor: primaryBlue2,
                               child: const Icon(Icons.login),
-                            ), // <-- Icon
-                            const Text("Přihlášení"), // <-- Text
+                            ),
+                            const Text("Přihlášení"),
                           ],
                         ),
                       ],
@@ -165,12 +178,11 @@ String userName = "";
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             CircularButton(
-                              size: const Size(70, 70),
                               onPressed: _profileButtonPressed,
                               backgroundColor: primaryBlue2,
                               child: const Icon(Icons.account_circle_rounded),
-                            ), // <-- Icon
-                            Text(userName), // <-- Text
+                            ),
+                            Text(userName),
                           ],
                         ),
                       ],
@@ -191,8 +203,8 @@ String userName = "";
                       onPressed: _programPressed,
                       backgroundColor: primaryBlue1,
                       child: const Icon(Icons.calendar_month),
-                    ), // <-- Icon
-                    const Text("Program"), // <-- Text
+                    ),
+                    const Text("Program"),
                   ],
                 ),
                 Column(
@@ -215,8 +227,8 @@ String userName = "";
                         backgroundColor: primaryYellow,
                         child: const Icon(Icons.newspaper),
                       ),
-                    ), // <-- Icon
-                    const Text("Ohlášky"), // <-- Text
+                    ),
+                    const Text("Ohlášky"),
                   ],
                 ),
                 Column(
@@ -226,8 +238,8 @@ String userName = "";
                       onPressed: _mapPressed,
                       backgroundColor: primaryRed,
                       child: const Icon(Icons.map),
-                    ), // <-- Icon
-                    const Text("Mapa"), // <-- Text
+                    ),
+                    const Text("Mapa"),
                   ],
                 ),
                 Column(
@@ -237,15 +249,15 @@ String userName = "";
                       onPressed: _infoPressed,
                       backgroundColor: primaryBlue2,
                       child: const Icon(Icons.info),
-                    ), // <-- Icon
-                    const Text("Info"), // <-- Text
+                    ),
+                    const Text("Info"),
                   ],
                 ),
               ],
             ),
           ),
         ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     ));
   }
 

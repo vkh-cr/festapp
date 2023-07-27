@@ -61,7 +61,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
   Timeline createTimeline(List<EventModel> events) {
     return Timeline.tileBuilder(
       shrinkWrap: true,
-      physics: ScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: 0.24,
         indicatorTheme:
@@ -85,9 +85,10 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           return TextButton(
               onPressed: () => onEventPressed!(event.id),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.black, // Text Color
+                foregroundColor: Colors.black,
+                alignment: Alignment.centerLeft// Text Color
               ),
-              child: Text(event.toString()));
+              child: Text(event.toString(),));
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
