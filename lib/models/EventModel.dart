@@ -115,6 +115,11 @@ class EventModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
+    var participants = await DataService.getParticipantsPerEvent(id!);
+    for(var p in participants)
+    {
+      await DataService.signOutFromEvent(id!, p.email);
+    }
     await DataService.deleteEvent(this);
   }
 

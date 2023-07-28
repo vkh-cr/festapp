@@ -165,10 +165,16 @@ class DataService {
     return EventModel.fromJson(data);
   }
 
-  static Future<dynamic> getParticipantsPerEvent(int eventId) => _supabase
+  static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
+    var data = await _supabase
       .from('event_users')
       .select("email, event, migrated_users(name, surname)")
       .eq("event", eventId);
+    return List<ParticipantModel>.from(data.map((par) => ParticipantModel(
+        par["email"],
+        par["migrated_users"]["name"],
+        par["migrated_users"]["surname"])));
+  }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
     var result = await _supabase

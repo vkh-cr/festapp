@@ -217,11 +217,7 @@ class _EventPageState extends State<EventPage> {
     if (!DataService.isLoggedIn()) {
       return;
     }
-    var participants = await DataService.getParticipantsPerEvent(id);
-    _participants = List.from(participants.map((par) => ParticipantModel(
-        par["email"],
-        par["migrated_users"]["name"],
-        par["migrated_users"]["surname"])));
+    _participants = await DataService.getParticipantsPerEvent(id);
     isLoadingParticipants = false;
     setState(() => {});
   }
