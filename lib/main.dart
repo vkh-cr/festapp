@@ -17,6 +17,7 @@ import 'pages/EventPage.dart';
 import 'pages/HtmlEditorPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
+import 'services/NavigationService.dart';
 import 'styles/Styles.dart';
 import 'configure_nonweb.dart' if (dart.library.html) 'configure_web.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
         //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
         //   );
         // },
+      navigatorKey: NavigationService.navigatorKey,
       title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
@@ -299,8 +301,8 @@ String userName = "";
     {
       if(EventModel.canSignIn(e))
       {
-        var participants = await DataService.getParticipantsPerEventCount(e.id);
-        var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
+        var participants = await DataService.getParticipantsPerEventCount(e.id!);
+        var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id!);
         setState(() {
           e.currentParticipants = participants;
           e.isSignedIn = isSignedCurrent;

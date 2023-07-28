@@ -233,6 +233,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     formatter: DataGridHelper.GetValueFromFormatted,
                   ),
                   PlutoColumn(
+                    field: EventModel.descriptionHiddenColumn,
+                    type: PlutoColumnType.text(),
+                    readOnly: true,
+                    hide: true,
+                    title: '',
+                  ),
+                  PlutoColumn(
                       width: 150,
                       title: "Popis",
                       field: EventModel.descriptionColumn,
@@ -241,7 +248,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         return ElevatedButton(
                             onPressed: () async{
                               String? textToEdit;
-                              String? oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
+                              String? oldText = rendererContext.row.cells[EventModel.descriptionHiddenColumn]?.value;
                               if(oldText!=null)
                               {
                                 textToEdit = oldText;
@@ -263,7 +270,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   var newText = value as String;
                                   if(newText!=textToEdit)
                                   {
-                                    rendererContext.row.cells[EventModel.descriptionColumn]?.value = newText;
+                                    rendererContext.row.cells[EventModel.descriptionHiddenColumn]?.value = newText;
                                     setState(() {
                                       rendererContext.row.setState(PlutoRowState.updated);
                                     });

@@ -37,8 +37,8 @@ class _ProgramPageState extends State<ProgramPage> {
       {
         if(EventModel.canSignIn(e))
         {
-          var participants = await DataService.getParticipantsPerEventCount(e.id);
-          var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id);
+          var participants = await DataService.getParticipantsPerEventCount(e.id!);
+          var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id!);
           setState(() {
             e.currentParticipants = participants;
             e.isSignedIn = isSignedCurrent;

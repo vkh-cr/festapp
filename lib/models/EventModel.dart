@@ -13,7 +13,7 @@ class EventModel extends IPlutoRowModel {
 
   int? maxParticipants;
 
-  final int id;
+  final int? id;
   PlaceModel? place;
   int? currentParticipants;
   String? title = "událost";
@@ -69,6 +69,8 @@ class EventModel extends IPlutoRowModel {
   static const String idColumn = "idColumn";
   static const String titleColumn = "titleColumn";
   static const String descriptionColumn = "descriptionColumn";
+  static const String descriptionHiddenColumn = "descriptionHiddenColumn";
+
   static const String maxParticipantsColumn = "maxParticipantsColumn";
   static const String placeColumn = "placeColumn";
   static const String splitForMenWomenColumn = "splitForMenWomenColumn";
@@ -84,9 +86,9 @@ class EventModel extends IPlutoRowModel {
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
-      id: json[idColumn],
+      id: json[idColumn] == 0 ? null : json[idColumn],
       title: json[titleColumn],
-      description: json[descriptionColumn],
+      description: json[descriptionHiddenColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
@@ -99,13 +101,14 @@ class EventModel extends IPlutoRowModel {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
       descriptionColumn: PlutoCell(value: description),
+      descriptionHiddenColumn: PlutoCell(value: description),
       startDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
       startTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(startTime)),
       endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
       endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place!.toPlutoSelectString()),
-      splitForMenWomenColumn: PlutoCell(value: splitForMenWomen),
+      splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
 
     });
   }

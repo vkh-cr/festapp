@@ -33,8 +33,9 @@ class DataGridHelper
   }
 
   static Widget checkBoxRenderer(rendererContext, void Function(Function() set) setState) {
+    var value = rendererContext.cell.value == "true" ? "true" : "false";
     return Checkbox(
-      value: bool.parse(rendererContext.cell.value.toString()),
+      value: bool.parse(value),
       onChanged: (bool? value) { setState(() {
         rendererContext.cell.value = value.toString();
         rendererContext.row.setState(PlutoRowState.updated);

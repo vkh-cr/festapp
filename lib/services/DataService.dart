@@ -3,6 +3,7 @@ import 'package:av_app/pages/ModelInformation.dart';
 
 import 'package:av_app/models/NewsMessage.dart';
 import 'package:av_app/models/UserData.dart';
+import 'package:av_app/services/DialogHelper.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -11,9 +12,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
 import '../models/PlaceModel.dart';
+import 'NavigationService.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
+  
+  static SupabaseClient? _supabaseAdmin;
+  static Future<SupabaseClient?> GetSupabaseAdminClient() async {
+    if(_supabaseAdmin != null)
+      {
+        return _supabaseAdmin;
+      }
+      var result = await DialogHelper.showStringInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
+    _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result!);
+    return _supabaseAdmin;
+  }
 
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
@@ -42,7 +55,7 @@ class DataService {
   }
 
   static Future<String> createUser(String email, String password) async {
-    var data = await _supabase.auth.admin.createUser(AdminUserAttributes(email: email, password: password));
+    var data = await (await GetSupabaseAdminClient())!.auth.admin.createUser(AdminUserAttributes(email: email, password: password, emailConfirm: true));
     return data.user!.id;
   }
 
@@ -253,16 +266,21 @@ class DataService {
     if (!DataService.isLoggedIn()) {
       return;
     }
-    await _supabase.from('events').upsert({
-      "description": event.description,
-      "id": event.id,
+    var upsertObj = {
       "start_time": event.startTime.toIso8601String(),
       "end_time": event.endTime.toIso8601String(),
       "title": event.title,
       "max_participants": event.maxParticipants,
       "place": event.place?.id,
       "split_for_men_women": event.splitForMenWomen,
-    }).select();
+    };
+    if(event.id!=null) {
+      upsertObj.addAll({"id": event.id});
+    }
+    if(event.description!=null) {
+      upsertObj.addAll({"description": event.description});
+    }
+    await _supabase.from('events').upsert(upsertObj).select();
   }
 
   static Future<void> deleteEvent(EventModel data) async {

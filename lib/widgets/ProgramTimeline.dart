@@ -83,7 +83,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           final event = events[index];
           //return Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})");
           return TextButton(
-              onPressed: () => onEventPressed!(event.id),
+              onPressed: () => onEventPressed!(event.id!),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.black,
                 alignment: Alignment.centerLeft// Text Color

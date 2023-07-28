@@ -119,7 +119,7 @@ class _EventPageState extends State<EventPage> {
                                           ],
                                         ),
                                       ),
-                                    )).then((x) => loadData(_event!.id));
+                                    )).then((x) => loadData(_event!.id!));
                               },
                               child: const Text("Přihlásit druhého")),
                         ),
@@ -152,7 +152,7 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.topRight,
                           child: TextButton(
-                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id)),
+                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id!)),
                               child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
@@ -236,13 +236,13 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signIn([ParticipantModel? participant]) async {
-    await DataService.signInToEvent(_event!.id, participant?.email);
-    await loadData(_event!.id);
+    await DataService.signInToEvent(_event!.id!, participant?.email);
+    await loadData(_event!.id!);
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event!.id);
-    await loadData(_event!.id);
+    await DataService.signOutFromEvent(_event!.id!);
+    await loadData(_event!.id!);
   }
 
   Future<String?> signOutOther(ParticipantModel participant) {
@@ -259,8 +259,8 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(_event!.id, participant.email);
-              await loadData(_event!.id);
+              await DataService.signOutFromEvent(_event!.id!, participant.email);
+              await loadData(_event!.id!);
             },
             child: const Text('Odhlásit'),
           ),
