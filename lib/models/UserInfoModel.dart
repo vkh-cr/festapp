@@ -26,6 +26,18 @@ class UserInfoModel extends IPlutoRowModel {
   static const String roleColumn = "role";
   static const String userInfoTable = "user_info";
 
+  static const migrateColumns =
+  {
+  idColumn:"Id",
+  emailColumn:"E-mail",
+  nameColumn:"Jméno",
+  surnameColumn:"Příjmení",
+  sexColumn:"Pohlaví",
+  accommodationColumn:"Varianta ubytování",
+  phoneColumn:"Telefon",
+  roleColumn:"Role",
+  };
+
   UserInfoModel({
     required this.id,
     required this.email,
@@ -80,13 +92,14 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
+    await DataService.deleteUser(id!);
   }
 
   @override
   Future<void> updateMethod() async {
     if(id == null)
     {
-      var newUserId = await DataService.createUser(email, "1");
+      var newUserId = await DataService.createUser(email);
       id = newUserId;
       ToastHelper.Show("Vytvořen: $email");
     }

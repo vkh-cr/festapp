@@ -121,6 +121,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onError(err) {
-    ToastHelper.Show("Špatné přihlašovací údaje!");
+    ToastHelper.Show("Špatné přihlašovací údaje!", severity: ToastSeverity.NotOk);
   }
 }

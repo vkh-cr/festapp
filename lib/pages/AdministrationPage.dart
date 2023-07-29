@@ -3,10 +3,13 @@ import 'package:av_app/models/PlaceModel.dart';
 import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/services/DataGridHelper.dart';
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/services/ImportHelper.dart';
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/EventModel.dart';
+import '../services/DialogHelper.dart';
 import 'HtmlEditorPage.dart';
 import 'ModelInformation.dart';
 
@@ -19,9 +22,9 @@ class AdministrationPage extends StatefulWidget {
 }
 
 class _AdministrationPageState extends State<AdministrationPage> {
-  List<InformationModel>? informationData;
   List<String> places = [];
   List<PlutoColumn> columns = [];
+  late SingleTableDataGrid<UserInfoModel> usersDataGrid;
 
   @override
   void didChangeDependencies() {
@@ -39,6 +42,103 @@ class _AdministrationPageState extends State<AdministrationPage> {
 
   @override
   Widget build(BuildContext context) {
+    usersDataGrid = SingleTableDataGrid<UserInfoModel>(
+        DataService.getUsers,
+        UserInfoModel.fromPlutoJson,
+        headerChildren: [
+          ElevatedButton(
+            onPressed: _import,
+            child: const Text('Import'),
+          ),
+          ElevatedButton(
+            onPressed: _generatePassword,
+            child: const Text('Generovat heslo'),
+          ),
+        ],
+        columns: [
+          PlutoColumn(
+              title: "",
+              field: "delete",
+              type: PlutoColumnType.text(),
+              readOnly: true,
+              enableRowChecked: true,
+              enableFilterMenuItem: false,
+              enableSorting: false,
+              enableDropToResize: false,
+              enableColumnDrag: false,
+              enableContextMenu: false,
+              cellPadding: EdgeInsets.zero,
+              width: 80,
+              renderer: (rendererContext) {
+                return IconButton(
+                    onPressed: () async{
+                      final id = rendererContext.row.cells[UserInfoModel.idColumn]?.value as String?;
+                      if (id?.isEmpty == true){
+                        rendererContext.stateManager.removeRows([rendererContext.row]);
+                        return;
+                      }
+                      setState(() {
+                        rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                      });
+                    },
+                    icon: const Icon(Icons.delete_forever));
+              }),
+          PlutoColumn(
+              title: "Id",
+              field: UserInfoModel.idColumn,
+              type: PlutoColumnType.text(),
+              readOnly: true,
+              width: 50),
+          PlutoColumn(
+              title: "E-mail",
+              field: UserInfoModel.emailColumn,
+              type: PlutoColumnType.text(),
+              checkReadOnly: (row, cell) {
+                final id = row.cells[UserInfoModel.idColumn]?.value as String?;
+                return id != null && id.isNotEmpty;
+              },
+              width: 200
+          ),
+          PlutoColumn(
+            title: "Jméno",
+            field: UserInfoModel.nameColumn,
+            type: PlutoColumnType.text(),
+            width: 200,
+          ),
+          PlutoColumn(
+            title: "Příjmení",
+            field: UserInfoModel.surnameColumn,
+            type: PlutoColumnType.text(),
+            width: 200,
+          ),
+          PlutoColumn(
+            title: "Telefon",
+            field: UserInfoModel.phoneColumn,
+            type: PlutoColumnType.text(),
+            width: 200,
+          ),
+          PlutoColumn(
+            title: "Ubytování",
+            field: UserInfoModel.accommodationColumn,
+            type: PlutoColumnType.text(),
+            readOnly: true,
+            width: 150,
+          ),
+          PlutoColumn(
+            title: "Pohlaví",
+            field: UserInfoModel.sexColumn,
+            type: PlutoColumnType.select(["male", "female"]),
+            formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, ["male", "female"]),
+            applyFormatterInEditing: true,
+            width: 100,
+          ),
+          PlutoColumn(
+            title: "Role",
+            field: UserInfoModel.roleColumn,
+            type: PlutoColumnType.text(),
+            width: 100,
+          )
+        ]);
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -76,75 +176,73 @@ class _AdministrationPageState extends State<AdministrationPage> {
         body: TabBarView(
           physics: const NeverScrollableScrollPhysics(),
           children: [
-            paddedContainer(
-                SingleTableDataGrid<InformationModel>(
-                    DataService.getInformation,
-                    InformationModel.fromPlutoJson,
-                    columns: [
-                      PlutoColumn(
-                          title: "",
-                          field: "delete",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          enableFilterMenuItem: false,
-                          enableSorting: false,
-                          enableDropToResize: false,
-                          enableColumnDrag: false,
-                          enableContextMenu: false,
-                          cellPadding: EdgeInsets.zero,
-                          width: 40,
-                          renderer: (rendererContext) {
-                            return IconButton(
-                                onPressed: () async{
-                                  final id = rendererContext.row.cells[InformationModel.idColumn]?.value as int?;
-                                  if (id == 0){
-                                    rendererContext.stateManager.removeRows([rendererContext.row]);
-                                    return;
+            SingleTableDataGrid<InformationModel>(
+                DataService.getInformation,
+                InformationModel.fromPlutoJson,
+                columns: [
+                  PlutoColumn(
+                      title: "",
+                      field: "delete",
+                      type: PlutoColumnType.text(),
+                      readOnly: true,
+                      enableFilterMenuItem: false,
+                      enableSorting: false,
+                      enableDropToResize: false,
+                      enableColumnDrag: false,
+                      enableContextMenu: false,
+                      cellPadding: EdgeInsets.zero,
+                      width: 40,
+                      renderer: (rendererContext) {
+                        return IconButton(
+                            onPressed: () async{
+                              final id = rendererContext.row.cells[InformationModel.idColumn]?.value as int?;
+                              if (id == 0){
+                                rendererContext.stateManager.removeRows([rendererContext.row]);
+                                return;
+                              }
+                              setState(() {
+                                rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                              });
+                            },
+                            icon: const Icon(Icons.delete_forever));
+                      }),
+                  PlutoColumn(
+                      title: "Id",
+                      field: InformationModel.idColumn,
+                      type: PlutoColumnType.number(),
+                      readOnly: true,
+                      width: 50),
+                  PlutoColumn(
+                      title: "Nadpis",
+                      field: InformationModel.titleColumn,
+                      type: PlutoColumnType.text()),
+                  PlutoColumn(
+                      width: 150,
+                      title: "Popis",
+                      field: InformationModel.descriptionColumn,
+                      type: PlutoColumnType.text(),
+                      renderer: (rendererContext) {
+                        return ElevatedButton(
+                            onPressed: () async{
+                              var oldText = rendererContext.row.cells[InformationModel.descriptionColumn]?.value;
+                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
+                                if(value != null)
+                                {
+                                  var newText = value as String;
+                                  if(newText!=oldText)
+                                  {
+                                    rendererContext.row.cells[InformationModel.descriptionColumn]?.value = newText;
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
                                   }
-                                  setState(() {
-                                    rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                  });
-                                },
-                                icon: const Icon(Icons.delete_forever));
-                          }),
-                      PlutoColumn(
-                          title: "Id",
-                          field: InformationModel.idColumn,
-                          type: PlutoColumnType.number(),
-                          readOnly: true,
-                          width: 50),
-                      PlutoColumn(
-                          title: "Nadpis",
-                          field: InformationModel.titleColumn,
-                          type: PlutoColumnType.text()),
-                      PlutoColumn(
-                          width: 150,
-                          title: "Popis",
-                          field: InformationModel.descriptionColumn,
-                          type: PlutoColumnType.text(),
-                          renderer: (rendererContext) {
-                            return ElevatedButton(
-                                onPressed: () async{
-                                  var oldText = rendererContext.row.cells[InformationModel.descriptionColumn]?.value;
-                                  Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
-                                    if(value != null)
-                                    {
-                                      var newText = value as String;
-                                      if(newText!=oldText)
-                                      {
-                                        rendererContext.row.cells[InformationModel.descriptionColumn]?.value = newText;
-                                        setState(() {
-                                          rendererContext.row.setState(PlutoRowState.updated);
-                                        });
-                                      }
-                                    }
-                                  });},
-                                child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
-                            );
-                          }),
-                    ]).DataGrid()),
-            paddedContainer(
-                SingleTableDataGrid<EventModel>(
+                                }
+                              });},
+                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                        );
+                      }),
+                ]).DataGrid(),
+            SingleTableDataGrid<EventModel>(
                 DataService.getEventsWithPlaces,
                 EventModel.fromPlutoJson,
                 columns: [
@@ -242,6 +340,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                       width: 150,
                       title: "Popis",
+                      enableFilterMenuItem: false,
+                      enableContextMenu: false,
+                      enableSorting: false,
                       field: EventModel.descriptionColumn,
                       type: PlutoColumnType.text(),
                       renderer: (rendererContext) {
@@ -280,106 +381,46 @@ class _AdministrationPageState extends State<AdministrationPage> {
                             child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
                         );
                       }),
-                ]).DataGrid()
-            ),
-            paddedContainer(
-                SingleTableDataGrid<UserInfoModel>(
-                    DataService.getUsers,
-                    UserInfoModel.fromPlutoJson,
-                    columns: [
-                      PlutoColumn(
-                          title: "",
-                          field: "delete",
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          enableFilterMenuItem: false,
-                          enableSorting: false,
-                          enableDropToResize: false,
-                          enableColumnDrag: false,
-                          enableContextMenu: false,
-                          cellPadding: EdgeInsets.zero,
-                          width: 40,
-                          renderer: (rendererContext) {
-                            return IconButton(
-                                onPressed: () async{
-                                  final id = rendererContext.row.cells[UserInfoModel.idColumn]?.value as String?;
-                                  if (id?.isEmpty == true){
-                                    rendererContext.stateManager.removeRows([rendererContext.row]);
-                                    return;
-                                  }
-                                  setState(() {
-                                    rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                  });
-                                },
-                                icon: const Icon(Icons.delete_forever));
-                          }),
-                      PlutoColumn(
-                          title: "Id",
-                          field: UserInfoModel.idColumn,
-                          type: PlutoColumnType.text(),
-                          readOnly: true,
-                          width: 50),
-                      PlutoColumn(
-                          title: "E-mail",
-                          field: UserInfoModel.emailColumn,
-                          type: PlutoColumnType.text(),
-                          checkReadOnly: (row, cell) {
-                            final id = row.cells[UserInfoModel.idColumn]?.value as String?;
-                            return id != null && id.isNotEmpty;
-                            },
-                          width: 200
-                      ),
-                      PlutoColumn(
-                        title: "Jméno",
-                        field: UserInfoModel.nameColumn,
-                        type: PlutoColumnType.text(),
-                        width: 200,
-                      ),
-                      PlutoColumn(
-                        title: "Příjmení",
-                        field: UserInfoModel.surnameColumn,
-                        type: PlutoColumnType.text(),
-                        width: 200,
-                      ),
-                      PlutoColumn(
-                        title: "Telefon",
-                        field: UserInfoModel.phoneColumn,
-                        type: PlutoColumnType.text(),
-                        width: 200,
-                      ),
-                      PlutoColumn(
-                        title: "Ubytování",
-                        field: UserInfoModel.accommodationColumn,
-                        type: PlutoColumnType.text(),
-                        readOnly: true,
-                        width: 150,
-                      ),
-                      PlutoColumn(
-                        title: "Pohlaví",
-                        field: UserInfoModel.sexColumn,
-                        type: PlutoColumnType.select(["male", "female"]),
-                        formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, ["male", "female"]),
-                        applyFormatterInEditing: true,
-                        width: 100,
-                      ),
-                      PlutoColumn(
-                        title: "Role",
-                        field: UserInfoModel.roleColumn,
-                        type: PlutoColumnType.text(),
-                        width: 100,
-                      )
-                    ]).DataGrid()
-            ),
+                ]).DataGrid(),
+            usersDataGrid.DataGrid()
           ]
         ),
       ),
     );
   }
 
-  Container paddedContainer(Widget? child) {
-    return Container(
-              padding: const EdgeInsets.all(12),
-              child: child,
-              );
+  Future<void> _import() async {
+    var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV", "Potvrdit", "Storno");
+    if(file==null) {
+      return;
+    }
+    var users = await ImportHelper.getUsersFromFile(file);
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Import uživatelů", "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Potvrdit");
+    if(!really)
+    {
+      return;
+    }
+    for(var u in users)
+    {
+      u.id = await DataService.getUserByEmail(u.email);
+      if(u.id == null)
+      {
+        u.id = await DataService.createUser(u.email);
+        ToastHelper.Show("Vytvořen ${u.email}");
+      }
+      await DataService.updateUser(u);
+      ToastHelper.Show("Upraven ${u.toBasicString()}");
+    }
+    await usersDataGrid.reloadData();
+  }
+
+  Future<void> _generatePassword() async {
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}): ${users.map((value) => value.toString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
+    if(!really)
+      {
+        return;
+      }
+
   }
 }

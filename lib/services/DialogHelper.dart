@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cross_file/cross_file.dart';
+
+import '../widgets/DropFile.dart';
 
 class DialogHelper{
 
@@ -29,8 +32,10 @@ class DialogHelper{
       BuildContext context,
       String titleMessage,
       String textMessage,
-      String confirmButtonMessage,
-      String cancelButtonMessage,
+  {
+    String confirmButtonMessage = "Ok",
+    String cancelButtonMessage = "Storno"
+}
       ) async {
     bool result = false;
     await showDialog(
@@ -38,7 +43,7 @@ class DialogHelper{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(titleMessage),
-            content: Text(textMessage),
+            content: SingleChildScrollView(child: Text(textMessage)),
             actions: [
               ElevatedButton(
                 child: Text(cancelButtonMessage),
@@ -105,5 +110,42 @@ class DialogHelper{
       },
     );
     return result;
+  }
+
+  static Future<XFile?>  dropFilesHere(
+      BuildContext context,
+      String titleMessage,
+      String confirmButtonMessage,
+      String cancelButtonMessage,
+      ) async {
+    XFile? filePath;
+    Widget dropFile = DropFile(onFilePathChanged: (f) => filePath = f);
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: SingleChildScrollView(
+            child: dropFile,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                filePath = null;
+                Navigator.pop(context);
+              },
+              child: Text(cancelButtonMessage),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+              },
+              child: Text(confirmButtonMessage),
+            ),
+          ],
+        );
+      },
+    );
+    return filePath;
   }
 }

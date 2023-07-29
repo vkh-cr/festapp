@@ -55,6 +55,8 @@ dependencies:
   quill_html_editor: ^2.2.2
   pluto_grid: ^7.0.2
   url_strategy: ^0.2.0
+  desktop_drop: ^0.4.1
+  csv: ^5.0.2
 
 dev_dependencies:
   flutter_test:

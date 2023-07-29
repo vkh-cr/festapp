@@ -18,14 +18,14 @@ class DataService {
   static final _supabase = Supabase.instance.client;
   
   static SupabaseClient? _supabaseAdmin;
-  static Future<SupabaseClient?> GetSupabaseAdminClient() async {
+  static Future<SupabaseClient> GetSupabaseAdminClient() async {
     if(_supabaseAdmin != null)
       {
-        return _supabaseAdmin;
+        return _supabaseAdmin!;
       }
       var result = await DialogHelper.showStringInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
     _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result!);
-    return _supabaseAdmin;
+    return _supabaseAdmin!;
   }
 
   static final _secureStorage = FlutterSecureStorage();
@@ -54,9 +54,33 @@ class DataService {
     return _supabase.auth.currentUser?.email;
   }
 
-  static Future<String> createUser(String email, String password) async {
-    var data = await (await GetSupabaseAdminClient())!.auth.admin.createUser(AdminUserAttributes(email: email, password: password, emailConfirm: true));
+  static Future<String> createUser(String email) async {
+    var data = await (await GetSupabaseAdminClient()).auth.admin.createUser(AdminUserAttributes(email: email, emailConfirm: true));
     return data.user!.id;
+  }
+
+  static Future<void> updateUserPassword(String uuid, String password) async {
+    (await GetSupabaseAdminClient()).auth.admin.updateUserById(uuid, attributes: AdminUserAttributes(password: password));
+  }
+
+  static Future<void> deleteUser(String uuid) async {
+    ensureCanDelete();
+    var adminClient = await GetSupabaseAdminClient();
+    await _supabase
+        .from(UserInfoModel.userInfoTable)
+        .delete()
+        .eq(UserInfoModel.idColumn, uuid);
+    adminClient.auth.admin.deleteUser(uuid);
+  }
+
+  static Future<String?> getUserByEmail(String email) async {
+    var data = await _supabase.rpc("get_user_id_by_email",
+        params: {"email": email.toLowerCase()}).maybeSingle();
+    if(data == null)
+    {
+      return null;
+    }
+    return data["id"];
   }
 
   static Future<void> login(String email, String password) async {
