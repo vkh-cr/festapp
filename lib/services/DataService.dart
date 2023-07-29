@@ -31,6 +31,16 @@ class DataService {
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
 
+  static Future<void> emailMailerSend(String recipient, String templateId, List<Map<String, String>> variables)
+  async {
+    await _supabase.rpc("send_email_mailersend",
+        params: {"message": {
+          "sender": "info@absolventskyvelehrad.cz",
+          "recipient": recipient,
+          "template_id": templateId
+        }, "subs": variables});
+  }
+
   static Future<bool> tryAuthUser() async {
     if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
       return false;
@@ -52,6 +62,10 @@ class DataService {
 
   static String? currentUserEmail() {
     return _supabase.auth.currentUser?.email;
+  }
+
+  static String currentUserId() {
+    return _supabase.auth.currentUser!.id;
   }
 
   static Future<String> createUser(String email) async {
@@ -124,6 +138,11 @@ class DataService {
   static Future<List<UserInfoModel>> getUsers() async {
     var data = await _supabase.from(UserInfoModel.userInfoTable).select();
     return List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
+  }
+
+  static Future<UserInfoModel> getUser(String id) async {
+    var data = await _supabase.from(UserInfoModel.userInfoTable).select().eq(UserData.idColumn, id).single();
+    return UserInfoModel.fromJson(data);
   }
 
   static updateUser(UserInfoModel data) async {

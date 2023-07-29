@@ -268,7 +268,7 @@ String userName = "";
         context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
   }
 
-  void _newsPressed() {
+  Future<void> _newsPressed() async {
     Navigator.push(
     context,
     MaterialPageRoute(builder: (context) => NewsPage())).then((value) => loadData());

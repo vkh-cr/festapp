@@ -1,5 +1,6 @@
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/DataService.dart';
 import '../styles/Styles.dart';
 
@@ -46,6 +47,7 @@ class _LoginPageState extends State<LoginPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     child: TextFormField(
+                      autofillHints: [AutofillHints.username],
                       controller: _emailController,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -63,6 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                     //padding: EdgeInsets.symmetric(horizontal: 15),
                     child: TextFormField(
                       controller: _passwordController,
+                      autofillHints: [AutofillHints.password],
                       obscureText: true,
                       decoration: const InputDecoration(
                           border: OutlineInputBorder(),
@@ -86,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: TextButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
+                          TextInput.finishAutofillContext();
                           await DataService.login(
                                   _emailController.text, _passwordController.text)
                               .then(_showToast)

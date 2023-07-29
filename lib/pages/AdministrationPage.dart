@@ -1,11 +1,15 @@
+import 'dart:math';
+
 import 'package:av_app/dataGrids/SingleTableDataGrid.dart';
 import 'package:av_app/models/PlaceModel.dart';
 import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/services/DataGridHelper.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/services/ImportHelper.dart';
+import 'package:av_app/services/MailerSendHelper.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/EventModel.dart';
@@ -390,7 +394,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> _import() async {
-    var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV", "Potvrdit", "Storno");
+    var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV tabulky", "Potvrdit", "Storno");
     if(file==null) {
       return;
     }
@@ -416,11 +420,21 @@ class _AdministrationPageState extends State<AdministrationPage> {
 
   Future<void> _generatePassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}): ${users.map((value) => value.toString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
+    users = users.where((element) => element.id != null).toList();
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
     if(!really)
-      {
-        return;
-      }
+    {
+      return;
+    }
 
+    var numberFormat = NumberFormat("####");
+    var random = Random();
+    for(var u in users)
+    {
+      var password = "23${numberFormat.format(random.nextInt(9999))}";
+      await DataService.updateUserPassword(u.id!, password);
+      ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
+      MailerSendHelper.sendPassword(u, password);
+    }
   }
 }
