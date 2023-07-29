@@ -360,7 +360,7 @@ class MailerSendHelper{
     "Maxmilián":"Maxmiliáne",
     "Metoděj":"Metoději",
     "Mihail":"Mihaile",
-    "Michael":"Michale",
+    "Michael":"Michaeli",
     "Michail":"Michaile",
     "Michal":"Míšo",
     "Mikhail":"Mikhaile",
