@@ -92,7 +92,7 @@ class DataService {
   }
 
   static Future<void> deleteUser(String uuid) async {
-    ensureCanDelete();
+    ensureCanDeleteCritical();
     var adminClient = await GetSupabaseAdminClient();
     await _supabase
         .from(UserInfoModel.userInfoTable)
@@ -316,7 +316,7 @@ class DataService {
   }
 
   static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com"];
-  static ensureCanDelete(){
+  static ensureCanDeleteCritical(){
     if(!canDeleteListEmails.contains(currentUserEmail()))
     {
       throw Exception("You cannot delete.");
@@ -356,7 +356,7 @@ class DataService {
 
   static Future<void> deleteEvent(EventModel data) async {
     ensureIsAdmin();
-    ensureCanDelete();
+    ensureCanDeleteCritical();
     await _supabase
         .from('events')
         .delete()
@@ -382,7 +382,7 @@ class DataService {
 
   static Future<void> deleteInformation(InformationModel info) async {
     ensureIsAdmin();
-    ensureCanDelete();
+    ensureCanDeleteCritical();
     await _supabase
         .from('information')
         .delete()
@@ -398,6 +398,19 @@ class DataService {
       toReturn.add(ParticipantModel(p[UserInfoModel.idColumn], p[UserInfoModel.emailColumn], p[UserInfoModel.nameColumn], p[UserInfoModel.surnameColumn]));
     }
     return toReturn;
+  }
+
+  static Future<void> deleteNewsMessage(NewsMessage message) async {
+    ensureIsAdmin();
+    await _supabase
+        .from('user_news')
+        .delete()
+        .eq("news_id", message.id);
+    await _supabase
+        .from('news')
+        .delete()
+        .eq("id", message.id);
+    ToastHelper.Show("Ohláška byla smazána.");
   }
 
   static insertNewsMessage(String message) async {

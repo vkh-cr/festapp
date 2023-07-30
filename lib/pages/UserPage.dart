@@ -1,5 +1,6 @@
 import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/pages/AdministrationPage.dart';
+import 'package:av_app/pages/LoginPage.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
@@ -102,6 +103,11 @@ class _UserPageState extends State<UserPage> {
 
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if(!DataService.isLoggedIn())
+    {
+      Navigator.pushNamed(
+          context, LoginPage.ROUTE);
+    }
     loadData();
   }
 

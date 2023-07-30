@@ -1,5 +1,6 @@
 import 'package:av_app/styles/Styles.dart';
 import 'package:av_app/widgets/HtmlDescriptionWidget.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
@@ -99,6 +100,23 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                       //color: Colors.white70,
                       child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
+                    )),
+                  Visibility(
+                    visible: DataService.isAdmin(),
+                    child: PopupMenuButton<String>(
+                      onSelected: (choice) async {
+                        await DataService.deleteNewsMessage(message);
+                        loadNewsMessages();
+                      },
+                      icon:  Icon(Icons.more_horiz),
+                      itemBuilder: (BuildContext context) {
+                        return {'Smazat'}.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                          );
+                        }).toList();
+                      },
                     ),
                   ),
                 ],

@@ -31,7 +31,10 @@ Future<void> main() async {
   );
   configureUrlFormat();
   initializeDateFormatting();
-  DataService.tryAuthUser().then((value) async => {if (value) {await DataService.loadCurrentUserData()}});
+  if(!DataService.isLoggedIn())
+  {
+    DataService.tryAuthUser().then((value) async => {if (value) {await DataService.loadCurrentUserData()}});
+  }
   runApp(const MyApp());
 }
 
@@ -71,22 +74,10 @@ class MyApp extends StatelessWidget {
           MapPage.ROUTE: (context) => const MapPage(),
           EventPage.ROUTE: (context) => const EventPage(),
           InfoPage.ROUTE: (context) => const InfoPage(),
-          UserPage.ROUTE: (context) {
-            if(!DataService.isLoggedIn())
-              {
-                return const LoginPage();
-              }
-            return const UserPage();
-          },
+          UserPage.ROUTE: (context) => const UserPage(),
           LoginPage.ROUTE: (context) => const LoginPage(),
           HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
-          AdministrationPage.ROUTE: (context) {
-            if(!DataService.isAdmin())
-            {
-              Navigator.pop(context);
-            }
-            return const AdministrationPage();
-          },
+          AdministrationPage.ROUTE: (context) => const AdministrationPage(),
           NewsPage.ROUTE: (context) => const NewsPage(),
         }
     );

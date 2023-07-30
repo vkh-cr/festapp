@@ -31,8 +31,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
   late SingleTableDataGrid<UserInfoModel> usersDataGrid;
 
   @override
-  void didChangeDependencies() {
+  Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+    await DataService.getCurrentUserInfo();
+    if(!DataService.isAdmin())
+    {
+      Navigator.pop(context);
+    }
     loadData();
   }
 
