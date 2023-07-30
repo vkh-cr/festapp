@@ -1,14 +1,14 @@
 -- Create a function to upsert record in event_user table
--- Check if event_table doesnt have more records with event than is in table event in column max_participants
+-- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
 -- If it is more return false, otherwise return true
 -- Make whole function transaction
 create
-or replace function upsert_event_user (event_id integer, user_id text) returns boolean language plpgsql as $$
+or replace function upsert_event_user (event_id integer, user_id uuid) returns boolean language plpgsql as $$
 declare
   i_max_participants integer;
   current_participants integer;
 begin
-  -- Check if event_table doesnt have more records with event than is in table event in column max_participants
+  -- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
   select max_participants from events where id = event_id into i_max_participants;
   select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
   if current_participants >= i_max_participants then
@@ -16,7 +16,7 @@ begin
     return false;
   else
     -- otherwise return true
-    insert into event_users (event, email) values (event_id, user_id);
+    insert into event_users (event, "user") values (event_id, user_id);
     return true;
   end if;
 end;

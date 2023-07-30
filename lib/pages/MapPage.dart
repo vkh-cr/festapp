@@ -320,7 +320,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
-                visible: DataService.isLoggedIn(),
+                visible: DataService.isAdmin(),
                 child: ElevatedButton(
                     onPressed: _MapPageState.selectedMarker != null
                         ? null

@@ -1,5 +1,6 @@
 class ParticipantModel {
-  ParticipantModel(this.email, this.name, this.surname);
+  ParticipantModel(this.id, this.email, this.name, this.surname);
+  String id;
   String email;
   String name;
   String surname;

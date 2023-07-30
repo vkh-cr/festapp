@@ -26,6 +26,7 @@ class _EventPageState extends State<EventPage> {
 
   _EventPageState();
 
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     var args = ModalRoute.of(context)?.settings.arguments;
@@ -67,7 +68,7 @@ class _EventPageState extends State<EventPage> {
                             onPressed: () => signOut(),
                             child: const Text("Odhlásit se"))),
                     Visibility(
-                      visible: showLoginLogoutButton(),
+                      visible: showLoginLogoutButton() && (DataService.isAdmin() || DataService.isReceptionAdmin()),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
@@ -125,7 +126,7 @@ class _EventPageState extends State<EventPage> {
                         ),
                       ),
                       Visibility(
-                          visible: DataService.isLoggedIn(),
+                          visible: DataService.isAdmin(),
                           child: ElevatedButton(
                               onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
                                 if(value != null)
@@ -172,7 +173,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible:
-                          DataService.isLoggedIn() && _event?.maxParticipants != null,
+                          DataService.isAdmin() && _event?.maxParticipants != null,
                       child: ExpansionTile(
                         title: const Text("Přihlášeni:"),
                         children: [ListView.builder(
@@ -232,7 +233,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signIn([ParticipantModel? participant]) async {
-    await DataService.signInToEvent(_event!.id!, participant?.email);
+    await DataService.signInToEvent(_event!.id!, participant);
     await loadData(_event!.id!);
   }
 
@@ -255,7 +256,7 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(_event!.id!, participant.email);
+              await DataService.signOutFromEvent(_event!.id!, participant);
               await loadData(_event!.id!);
             },
             child: const Text('Odhlásit'),

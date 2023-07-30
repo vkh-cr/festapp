@@ -14,6 +14,8 @@ class UserInfoModel extends IPlutoRowModel {
   String role;
   String? phone;
   String? accommodation;
+  bool isAdmin = false;
+  bool isReceptionAdmin = false;
   PlaceModel? accommodationModel;
 
   static const String idColumn = "id";
@@ -24,7 +26,13 @@ class UserInfoModel extends IPlutoRowModel {
   static const String accommodationColumn = "accommodation";
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
+  static const String isReceptionAdminColumn = "is_reception_admin";
+  static const String isAdminColumn = "is_admin";
+
   static const String userInfoTable = "user_info";
+
+  PlaceModel? place;
+
 
   static const migrateColumns =
   {
@@ -45,6 +53,8 @@ class UserInfoModel extends IPlutoRowModel {
     required this.surname,
     required this.sex,
     required this.role,
+    required this.isAdmin,
+    required this.isReceptionAdmin,
      this.phone,
      this.accommodation});
 
@@ -59,6 +69,8 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
+      isAdmin: json[isAdminColumn],
+      isReceptionAdmin: json[isReceptionAdminColumn],
     );
   }
 
@@ -72,6 +84,8 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
+      isAdmin: json[isAdminColumn] == "true" ? true : false,
+      isReceptionAdmin: json[isReceptionAdminColumn] == "true" ? true : false,
     );
   }
 
@@ -87,6 +101,9 @@ class UserInfoModel extends IPlutoRowModel {
       accommodationColumn: PlutoCell(
           value: accommodation ?? PlaceModel.WithouPlace),
       sexColumn: PlutoCell(value: sex),
+      isAdminColumn: PlutoCell(value: isAdmin.toString()),
+      isReceptionAdminColumn: PlutoCell(value: isReceptionAdmin.toString()),
+
     });
   }
 

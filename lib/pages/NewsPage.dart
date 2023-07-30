@@ -41,8 +41,10 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = loadedMessages;
     });
-
-    DataService.setMessagesAsRead(newsMessages.first.id);
+    if(DataService.isLoggedIn())
+    {
+      DataService.setMessagesAsRead(newsMessages.first.id);
+    }
   }
 
   @override
@@ -106,7 +108,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: DataService.isLoggedIn(),
+        visible: DataService.isAdmin(),
         child: FloatingActionButton(
           onPressed: () => _showMessageDialog(context),
           child: const Icon(Icons.add),

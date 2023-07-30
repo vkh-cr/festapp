@@ -29,7 +29,9 @@ Future<void> main() async {
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
-  configureApp();
+  configureUrlFormat();
+  initializeDateFormatting();
+  DataService.tryAuthUser().then((value) async => {if (value) {await DataService.loadCurrentUserData()}});
   runApp(const MyApp());
 }
 
@@ -79,9 +81,9 @@ class MyApp extends StatelessWidget {
           LoginPage.ROUTE: (context) => const LoginPage(),
           HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
           AdministrationPage.ROUTE: (context) {
-            if(!DataService.isLoggedIn())
+            if(!DataService.isAdmin())
             {
-              return const LoginPage();
+              Navigator.pop(context);
             }
             return const AdministrationPage();
           },
@@ -113,20 +115,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
 String userName = "";
-  @override
-  void initState() {
-    super.initState();
-    DataService.tryAuthUser().then((loggedIn) {
-      setState(() {});
-      if(loggedIn)
-        {
-          loadUserData();
-        }
 
-    });
-    initializeDateFormatting();
-    loadData();
-  }
+@override
+void didChangeDependencies() {
+  super.didChangeDependencies();
+  loadData();
+}
 
   @override
   Widget build(BuildContext context) {
@@ -269,9 +263,8 @@ String userName = "";
   }
 
   Future<void> _newsPressed() async {
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => NewsPage())).then((value) => loadData());
+    Navigator.pushNamed(
+        context, NewsPage.ROUTE).then((value) => loadData());
   }
 
   void _infoPressed() {
@@ -302,7 +295,7 @@ String userName = "";
       if(EventModel.canSignIn(e))
       {
         var participants = await DataService.getParticipantsPerEventCount(e.id!);
-        var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id!);
+        var isSignedCurrent = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
         setState(() {
           e.currentParticipants = participants;
           e.isSignedIn = isSignedCurrent;
@@ -316,10 +309,14 @@ String userName = "";
         context, EventPage.ROUTE, arguments: id).then((value) => loadData());
   }
 
-  int messageCount = 0;
-  bool showMessageCount() => messageCount>0;
-  String messageCountString() => messageCount<100?messageCount.toString():"99";
+  int _messageCount = 0;
+  bool showMessageCount() => _messageCount>0;
+  String messageCountString() => _messageCount<100?_messageCount.toString():"99";
   void loadData() {
+    if(DataService.isLoggedIn())
+    {
+      DataService.getCurrentUserInfo().then((value) => userName = value.name);
+    }
     DataService.updateEvents(_events)
         .whenComplete(() async {
           if(!DataService.isLoggedIn())
@@ -329,16 +326,9 @@ String userName = "";
           var count = await DataService.countNewMessages();
 
           setState(() {
-            messageCount = count;
+            _messageCount = count;
           });
         })
         .whenComplete(() async => await loadEventParticipants());
   }
-
-  Future<void> loadUserData() async {
-      var currentUser = await DataService.getCurrentUserData();
-      setState(()=>
-      userName = currentUser.name
-      );
-    }
-  }
+}

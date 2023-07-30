@@ -41,7 +41,7 @@ class DataService {
         }, "subs": variables});
   }
 
-  static Future<bool> tryAuthUser() async {
+  static Future<bool>   tryAuthUser() async {
     if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
       return false;
     }
@@ -66,6 +66,21 @@ class DataService {
 
   static String currentUserId() {
     return _supabase.auth.currentUser!.id;
+  }
+
+  static Future<UserInfoModel> getCurrentUserInfo() async {
+    if(_currentUser == null){
+      return await loadCurrentUserData();
+    }
+    return _currentUser!;
+  }
+
+  static bool isAdmin() {
+    return _currentUser != null && _currentUser!.isAdmin;
+  }
+
+  static bool isReceptionAdmin() {
+    return _currentUser != null && _currentUser!.isReceptionAdmin;
   }
 
   static Future<String> createUser(String email) async {
@@ -109,17 +124,16 @@ class DataService {
     await _supabase.auth.signOut();
   }
 
-  static Future<UserData> getCurrentUserData() async {
-    if (!isLoggedIn()) {
-      throw Exception("User must be logged in.");
-    }
+  static UserInfoModel? _currentUser;
+  static Future<UserInfoModel> loadCurrentUserData() async {
+    ensureUserIsLoggedIn();
     var jsonUser = await _supabase
-        .from('migrated_users')
+        .from(UserInfoModel.userInfoTable)
         .select()
-        .eq('email', _supabase.auth.currentUser!.email)
-        .limit(1)
+        .eq(UserInfoModel.idColumn, _supabase.auth.currentUser!.id)
         .single();
-    return UserData.fromJson(jsonUser);
+    _currentUser = UserInfoModel.fromJson(jsonUser);
+    return _currentUser!;
   }
 
   static Future<PlaceModel?> getUserAccommodation(
@@ -159,6 +173,9 @@ class DataService {
       UserInfoModel.roleColumn: data.role,
       UserInfoModel.accommodationColumn: data.accommodation,
       UserInfoModel.phoneColumn: data.phone,
+      UserInfoModel.isAdminColumn: data.isAdmin,
+      UserInfoModel.isReceptionAdminColumn: data.isReceptionAdmin,
+
     });
   }
 
@@ -211,12 +228,13 @@ class DataService {
   static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
       .from('event_users')
-      .select("email, event, migrated_users(name, surname)")
+      .select("user, event, user_info(email, name, surname)")
       .eq("event", eventId);
     return List<ParticipantModel>.from(data.map((par) => ParticipantModel(
-        par["email"],
-        par["migrated_users"]["name"],
-        par["migrated_users"]["surname"])));
+        par["user"],
+        par["user_info"]["email"],
+        par["user_info"]["name"],
+        par["user_info"]["surname"])));
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
@@ -227,39 +245,38 @@ class DataService {
     return result.count;
   }
 
-  static Future<List<EventModel>> getParticipantEventTimes(String email) async {
+  static Future<List<EventModel>> getParticipantEventTimes(String id) async {
     var data = await _supabase
         .from('event_users')
         .select("events(id, start_time, end_time)")
-        .eq("email", email);
+        .eq("user", id);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x["events"])));
   }
 
   static Future<bool> isCurrentUserSignedToEvent(int eventId) async {
+    ensureUserIsLoggedIn();
     var result = await _supabase
         .from('event_users')
         .select('*', const FetchOptions(count: CountOption.exact, head: true))
         .eq("event", eventId)
-        .eq("email", currentUserEmail());
+        .eq("user", currentUserId());
     return result.count > 0;
   }
 
-  static signInToEvent(int eventId, [String? email]) async {
-    var finalEmail = email ?? _supabase.auth.currentUser?.email;
-    if (finalEmail == null) {
-      throw Exception("User must be logged in.");
-    }
-
+  static signInToEvent(int eventId, [ParticipantModel? participant]) async {
+    ensureUserIsLoggedIn();
+    var finalId = participant?.id ?? currentUserId();
     //check for max participants
     var event = await getEvent(eventId);
+
     if (event.startTime.isBefore(DateTime.now())) {
       ToastHelper.Show("Nelze přihlásit! Událost už proběhla.");
       return;
     }
 
     //check for similar times
-    var userEvents = await getParticipantEventTimes(finalEmail);
+    var userEvents = await getParticipantEventTimes(finalId);
     for (var i = 0; i < userEvents.length; i++) {
       var e = userEvents[i];
       if (e.startTime.isBefore(event.endTime) &&
@@ -269,16 +286,16 @@ class DataService {
           e.startTime.isAtSameMomentAs(event.startTime) ||
           e.endTime.isAtSameMomentAs(event.endTime)) {
         ToastHelper.Show(
-            "Nelze přihlásit! $finalEmail je přihlášen na jiné události ve stejném čase.");
+            "Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na jiné události ve stejném čase.");
         return;
       }
     }
 
     bool signedIn = await _supabase.rpc("upsert_event_user",
-        params: {"event_id": eventId, "user_id": finalEmail});
+        params: {"event_id": eventId, "user_id": finalId});
 
     if (signedIn) {
-      ToastHelper.Show("Přihlášen $finalEmail");
+      ToastHelper.Show("Přihlášen ${participant ?? currentUserEmail()}");
     } else {
       ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
     }
@@ -291,6 +308,13 @@ class DataService {
     }
   }
 
+  static ensureIsAdmin(){
+    if(!DataService.isAdmin())
+    {
+      throw Exception("User must be admin.");
+    }
+  }
+
   static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com"];
   static ensureCanDelete(){
     if(!canDeleteListEmails.contains(currentUserEmail()))
@@ -299,22 +323,20 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(int eventId, [String? email]) async {
+  static signOutFromEvent(int eventId, [ParticipantModel? participant]) async {
     ensureUserIsLoggedIn();
-    var finalEmail = email ?? _supabase.auth.currentUser?.email;
+    var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
     await _supabase
         .from('event_users')
         .delete()
         .eq("event", eventId)
-        .eq("email", finalEmail);
+        .eq("user", finalId);
 
-    ToastHelper.Show("Odhlášen $finalEmail");
+    ToastHelper.Show("Odhlášen ${participant ?? currentUserEmail()}");
   }
 
   static updateEvent(EventModel event) async {
-    if (!DataService.isLoggedIn()) {
-      return;
-    }
+    ensureIsAdmin();
     var upsertObj = {
       "start_time": event.startTime.toIso8601String(),
       "end_time": event.endTime.toIso8601String(),
@@ -333,7 +355,7 @@ class DataService {
   }
 
   static Future<void> deleteEvent(EventModel data) async {
-    ensureUserIsLoggedIn();
+    ensureIsAdmin();
     ensureCanDelete();
     await _supabase
         .from('events')
@@ -342,7 +364,7 @@ class DataService {
   }
 
   static Future<void> updateInformation(InformationModel info) async {
-    ensureUserIsLoggedIn();
+    ensureIsAdmin();
     if(info.id == null)
     {
       await _supabase.from('information').insert({
@@ -359,7 +381,7 @@ class DataService {
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
-    ensureUserIsLoggedIn();
+    ensureIsAdmin();
     ensureCanDelete();
     await _supabase
         .from('information')
@@ -370,20 +392,23 @@ class DataService {
   static Future<List<ParticipantModel>> getAllUsers() async {
     List<ParticipantModel> toReturn = [];
     var result =
-        await _supabase.from("migrated_users").select("email, name, surname");
+        await _supabase.from(UserInfoModel.userInfoTable)
+            .select([UserInfoModel.idColumn, UserInfoModel.emailColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
     for (var p in result) {
-      toReturn.add(ParticipantModel(p["email"], p["name"], p["surname"]));
+      toReturn.add(ParticipantModel(p[UserInfoModel.idColumn], p[UserInfoModel.emailColumn], p[UserInfoModel.nameColumn], p[UserInfoModel.surnameColumn]));
     }
     return toReturn;
   }
 
   static insertNewsMessage(String message) async {
+    ensureIsAdmin();
     await _supabase.from('news').insert(
-        {"message": message, "created_by": currentUserEmail()}).select();
+        {"message": message, "created_by": currentUserId()}).select();
     ToastHelper.Show("Zpráva byla odeslána!");
   }
 
   static Future<int> countNewMessages() async {
+    ensureUserIsLoggedIn();
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
         .from('news')
@@ -393,11 +418,12 @@ class DataService {
   }
 
   static Future<int> getLastReadMessage() async {
+    ensureUserIsLoggedIn();
     int lastMessageId = 0;
     var lastMessage = await _supabase
         .from("user_news")
         .select("news_id")
-        .eq("user", currentUserEmail())
+        .eq("user", currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
       lastMessageId = lastMessage["news_id"];
@@ -406,12 +432,10 @@ class DataService {
   }
 
   static void setMessagesAsRead(int newsId) async {
-    if (currentUserEmail() == null) {
-      return;
-    }
+    ensureUserIsLoggedIn();
     await _supabase
         .from('user_news')
-        .upsert({"user": currentUserEmail(), "news_id": newsId}).select();
+        .upsert({"user": currentUserId(), "news_id": newsId}).select();
   }
 
   static Future<List<NewsMessage>> loadNewsMessages() async {
@@ -421,14 +445,14 @@ class DataService {
     }
     var messagesData = await _supabase
         .from('news')
-        .select('id, created_at, message, migrated_users(name, surname)')
+        .select('id, created_at, message, user_info(name, surname)')
         .order("created_at");
     List<NewsMessage> loadedMessages = [];
 
     for (var row in messagesData) {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
-      var name = row['migrated_users']['name'];
+      var name = row[UserInfoModel.userInfoTable] != null ? row['user_info']['name'] : "";
       NewsMessage newsMessage = NewsMessage(
           createdAt: createdAt,
           message: message,
@@ -456,6 +480,7 @@ class DataService {
   }
 
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {
+    ensureIsAdmin();
     await _supabase.from("places").update({
       "coordinates": {
         "latLng": {"lat": lat, "lng": lng}
@@ -467,7 +492,7 @@ class DataService {
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
 //   List<ParticipantModel> toReturn = [];
 //   var result = await _supabase
-//       .from("migrated_users")
+//       .from("user_info")
 //       .select("email, name, surname")
 //       .or('or(name.ilike.%$searchTerm%),or(surname.ilike.%$searchTerm%),or(email.ilike.%$searchTerm%)')
 //       .limit(10);

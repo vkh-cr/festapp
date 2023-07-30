@@ -54,7 +54,7 @@ class _InfoPageState extends State<InfoPage> {
                     body: Column(
                       children: [
                         Visibility(
-                            visible: DataService.isLoggedIn(),
+                            visible: DataService.isAdmin(),
                             child: ElevatedButton(
                                 onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: item.description).then((value) async {
                                   if(value != null)

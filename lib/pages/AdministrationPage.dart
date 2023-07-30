@@ -116,17 +116,17 @@ class _AdministrationPageState extends State<AdministrationPage> {
             width: 200,
           ),
           PlutoColumn(
-            title: "Telefon",
-            field: UserInfoModel.phoneColumn,
-            type: PlutoColumnType.text(),
-            width: 200,
-          ),
-          PlutoColumn(
             title: "Ubytování",
             field: UserInfoModel.accommodationColumn,
             type: PlutoColumnType.text(),
             readOnly: true,
             width: 150,
+          ),
+          PlutoColumn(
+            title: "Telefon",
+            field: UserInfoModel.phoneColumn,
+            type: PlutoColumnType.text(),
+            width: 200,
           ),
           PlutoColumn(
             title: "Pohlaví",
@@ -135,6 +135,24 @@ class _AdministrationPageState extends State<AdministrationPage> {
             formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, ["male", "female"]),
             applyFormatterInEditing: true,
             width: 100,
+          ),
+          PlutoColumn(
+            title: "Admin",
+            field: UserInfoModel.isAdminColumn,
+            type: PlutoColumnType.select([]),
+            applyFormatterInEditing: true,
+            enableEditingMode: false,
+            width: 100,
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+          ),
+          PlutoColumn(
+            title: "Recepční",
+            field: UserInfoModel.isReceptionAdminColumn,
+            type: PlutoColumnType.select([]),
+            applyFormatterInEditing: true,
+            enableEditingMode: false,
+            width: 100,
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
           ),
           PlutoColumn(
             title: "Role",

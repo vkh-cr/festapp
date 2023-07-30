@@ -1,10 +1,10 @@
+import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/pages/AdministrationPage.dart';
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:av_app/styles/Styles.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import '../services/DataService.dart';
-import '../models/UserData.dart';
 import '../main.dart';
 import 'MapPage.dart';
 
@@ -17,7 +17,7 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  UserData? userData;
+  UserInfoModel? userData;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 Visibility(
-                  visible: userData?.role == 'Organizer',
+                  visible: DataService.isAdmin(),
                   child: Container(
                     height: 50,
                     width: 250,
@@ -125,17 +125,13 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  void _showToast(value) {
-    Fluttertoast.showToast(msg: ("Úspěšné odhlášení!"), timeInSecForIosWeb: 3);
-  }
-
   void _navigateToHomePage() {
     Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
   }
 
   void _logout() {
-    DataService.logout().then(_showToast);
+    DataService.logout().then((v)=>ToastHelper.Show("Úspěšné odhlášení!"));
     _navigateToHomePage();
   }
 
@@ -144,12 +140,10 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadData() async {
-    var user = await DataService.getCurrentUserData();
-    user.place = await DataService.getUserAccommodation(user.accommodationType);
-
-    setState(() {
-      userData = user;
-    });
+    userData = await DataService.getCurrentUserInfo();
+    setState(() {});
+    userData!.place = await DataService.getUserAccommodation(userData!.accommodation!);
+    setState(() {});
   }
 }
 

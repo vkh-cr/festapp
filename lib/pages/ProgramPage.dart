@@ -33,18 +33,18 @@ class _ProgramPageState extends State<ProgramPage> {
   final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
-      for (var e in _events)
+    for (var e in _events)
+    {
+      if(EventModel.canSignIn(e))
       {
-        if(EventModel.canSignIn(e))
-        {
-          var participants = await DataService.getParticipantsPerEventCount(e.id!);
-          var isSignedCurrent = await DataService.isCurrentUserSignedToEvent(e.id!);
-          setState(() {
-            e.currentParticipants = participants;
-            e.isSignedIn = isSignedCurrent;
-          });
-        }
+        var participants = await DataService.getParticipantsPerEventCount(e.id!);
+        var isSignedCurrent = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
+        setState(() {
+          e.currentParticipants = participants;
+          e.isSignedIn = isSignedCurrent;
+        });
       }
+    }
   }
 
   eventPressed(int id) {
