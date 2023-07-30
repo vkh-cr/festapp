@@ -69,8 +69,8 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
-      isAdmin: json[isAdminColumn],
-      isReceptionAdmin: json[isReceptionAdminColumn],
+      isAdmin: json[isAdminColumn]??false,
+      isReceptionAdmin: json[isReceptionAdminColumn]??false,
     );
   }
 

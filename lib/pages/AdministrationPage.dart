@@ -417,13 +417,28 @@ class _AdministrationPageState extends State<AdministrationPage> {
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Import uživatelů", "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Potvrdit");
+
+    var really = await DialogHelper.showConfirmationDialogAsync(context,
+        "Import uživatelů",
+        "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}",
+        confirmButtonMessage: "Potvrdit");
+
+    bool importNewOnly = await DialogHelper.showConfirmationDialogAsync(context,
+        "Importovat pouze nové",
+        "Pouze uživatelé, kteří nejsou v tabulce.",
+        confirmButtonMessage: "Pouze nové", cancelButtonMessage: "Importovat všechny");
+
     if(!really)
     {
       return;
     }
+    var existingUsers = await DataService.getAllUsers();
     for(var u in users)
     {
+      if(importNewOnly && existingUsers.any((element) => element.email == u.email))
+      {
+        continue;
+      }
       u.id = await DataService.getUserByEmail(u.email);
       if(u.id == null)
       {
@@ -449,7 +464,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
     var random = Random();
     for(var u in users)
     {
-      var password = "23${numberFormat.format(random.nextInt(9999))}";
+      var password = "av${numberFormat.format(random.nextInt(9999))}";
       await DataService.updateUserPassword(u.id!, password);
       ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
       MailerSendHelper.sendPassword(u, password);
