@@ -40,7 +40,7 @@ class DataService {
         }, "subs": variables});
   }
 
-  static Future<bool>   tryAuthUser() async {
+  static Future<bool> tryAuthUser() async {
     if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
       return false;
     }

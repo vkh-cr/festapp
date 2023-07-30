@@ -125,4 +125,6 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   String toBasicString() => email;
+
+  String sexToCzech() => sex == "male" ? "Muž" : "Žena";
 }

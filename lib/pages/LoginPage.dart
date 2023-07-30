@@ -112,12 +112,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _refreshSignedInStatus(value) {
-    DataService.tryAuthUser().then((loggedIn) {
-      if (loggedIn) {
-        Navigator.pop(context);
-      }
-    });
+  Future<void> _refreshSignedInStatus(value) async {
+    var loggedIn = await DataService.tryAuthUser();
+    if(loggedIn)
+    {
+      Navigator.pop(context);
+    }
   }
 
   void _showToast(value) {

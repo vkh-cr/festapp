@@ -40,7 +40,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField('Jméno', userData?.name ?? ''),
                 buildTextField('Příjmení', userData?.surname ?? ''),
                 buildTextField('E-mail', userData?.email ?? ''),
-                buildTextField('Pohlaví', userData?.sex ?? ''),
+                buildTextField('Pohlaví', userData?.sexToCzech() ?? ''),
                 buildTextField('Role', userData?.role ?? ''),
                 Padding(
                   padding: EdgeInsets.all(12),
