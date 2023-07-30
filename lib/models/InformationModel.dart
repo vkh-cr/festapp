@@ -1,7 +1,7 @@
 import 'package:av_app/services/DataService.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../models/PlutoAbstract.dart';
+import 'PlutoAbstract.dart';
 
 
 class InformationModel extends IPlutoRowModel {

@@ -1,8 +1,7 @@
 import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/pages/ModelInformation.dart';
+import 'package:av_app/models/InformationModel.dart';
 
 import 'package:av_app/models/NewsMessage.dart';
-import 'package:av_app/models/UserData.dart';
 import 'package:av_app/services/DialogHelper.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
@@ -155,7 +154,7 @@ class DataService {
   }
 
   static Future<UserInfoModel> getUser(String id) async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable).select().eq(UserData.idColumn, id).single();
+    var data = await _supabase.from(UserInfoModel.userInfoTable).select().eq(UserInfoModel.idColumn, id).single();
     return UserInfoModel.fromJson(data);
   }
 

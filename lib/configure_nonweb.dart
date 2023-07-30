@@ -1,2 +1,2 @@
-void configureApp() {
+void configureUrlFormat() {
 }

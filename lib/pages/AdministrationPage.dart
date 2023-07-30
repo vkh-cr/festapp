@@ -15,7 +15,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
 import 'HtmlEditorPage.dart';
-import 'ModelInformation.dart';
+import '../models/InformationModel.dart';
 
 class AdministrationPage extends StatefulWidget {
   static const ROUTE = "/admin";
