@@ -25,7 +25,7 @@ class InformationModel extends IPlutoRowModel {
 
   static InformationModel fromPlutoJson(Map<String, dynamic> json) {
     return InformationModel(
-      id: json[idColumn],
+      id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       description: json[descriptionColumn],
     );

@@ -91,7 +91,7 @@ class EventModel extends IPlutoRowModel {
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
-      id: json[idColumn] == 0 ? null : json[idColumn],
+      id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       description: json[descriptionHiddenColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],

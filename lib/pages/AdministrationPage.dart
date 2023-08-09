@@ -223,7 +223,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         return IconButton(
                             onPressed: () async{
                               final id = rendererContext.row.cells[InformationModel.idColumn]?.value as int?;
-                              if (id == 0){
+                              if (id == -1){
                                 rendererContext.stateManager.removeRows([rendererContext.row]);
                                 return;
                               }
@@ -236,7 +236,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                       title: "Id",
                       field: InformationModel.idColumn,
-                      type: PlutoColumnType.number(),
+                      type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
                       width: 50),
                   PlutoColumn(
@@ -289,7 +289,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         return IconButton(
                             onPressed: () async{
                               final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                              if (id == 0){
+                              if (id == -1){
                                 rendererContext.stateManager.removeRows([rendererContext.row]);
                                 return;
                               }
@@ -302,7 +302,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                       title: "Id",
                       field: EventModel.idColumn,
-                      type: PlutoColumnType.number(),
+                      type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
                       width: 50),
                   PlutoColumn(
@@ -314,8 +314,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                     title: "Datum začátku",
                     field: EventModel.startDateColumn,
-                    type: PlutoColumnType.date(),
-                    width: 120,
+                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    width: 140,
                   ),
                   PlutoColumn(
                     title: "Začátek",
@@ -326,8 +326,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                     title: "Datum konce",
                     field: EventModel.endDateColumn,
-                    type: PlutoColumnType.date(),
-                    width: 120,
+                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    width: 140,
                   ),
                   PlutoColumn(
                     title: "Konec",
@@ -359,10 +359,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                   PlutoColumn(
                     field: EventModel.descriptionHiddenColumn,
-                    type: PlutoColumnType.text(),
+                    type: PlutoColumnType.text(defaultValue: ""),
                     readOnly: true,
                     hide: true,
-                    title: '',
+                    title: "",
                   ),
                   PlutoColumn(
                       width: 150,
@@ -371,7 +371,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       enableContextMenu: false,
                       enableSorting: false,
                       field: EventModel.descriptionColumn,
-                      type: PlutoColumnType.text(),
+                      type: PlutoColumnType.text(defaultValue: ""),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
