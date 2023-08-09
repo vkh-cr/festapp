@@ -321,7 +321,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     title: "Začátek",
                     field: EventModel.startTimeColumn,
                     type: PlutoColumnType.time(),
-                    width: 70,
+                    width: 100,
                   ),
                   PlutoColumn(
                     title: "Datum konce",
@@ -333,7 +333,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     title: "Konec",
                     field: EventModel.endTimeColumn,
                     type: PlutoColumnType.time(),
-                    width: 70,
+                    width: 100,
                   ),
                   PlutoColumn(
                     title: "Max",
