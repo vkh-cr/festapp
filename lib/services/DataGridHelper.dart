@@ -41,4 +41,9 @@ class DataGridHelper
         rendererContext.row.setState(PlutoRowState.updated);
       }); },
     );}
+
+  static Widget idRenderer(rendererContext) {
+    var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();
+    return Text(value);
+  }
 }

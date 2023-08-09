@@ -238,7 +238,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       field: InformationModel.idColumn,
                       type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
-                      width: 50),
+                      width: 50,
+                      renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),),
                   PlutoColumn(
                       title: "Nadpis",
                       field: InformationModel.titleColumn,
@@ -304,7 +305,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       field: EventModel.idColumn,
                       type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
-                      width: 50),
+                      width: 50,
+                      renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+                  ),
                   PlutoColumn(
                       title: "Nadpis",
                       field: EventModel.titleColumn,
