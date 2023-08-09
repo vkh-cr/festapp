@@ -8,7 +8,7 @@ import 'ProgramTimeline.dart';
   class ProgramTabView extends StatefulWidget {
     Function(int)? onEventPressed;
 
-    List<EventModel> events = [];
+    List<TimeLineItem> events = [];
 
    ProgramTabView({super.key, required this.events, this.onEventPressed});
 
@@ -18,11 +18,11 @@ import 'ProgramTimeline.dart';
 
   class _ProgramTabViewState extends State<ProgramTabView> {
 
-    final List<EventModel> events;
-    List<EventModel> events0 = [];
-    List<EventModel> events1 = [];
-    List<EventModel> events2 = [];
-    List<EventModel> events3 = [];
+    final List<TimeLineItem> events;
+    List<TimeLineItem> events0 = [];
+    List<TimeLineItem> events1 = [];
+    List<TimeLineItem> events2 = [];
+    List<TimeLineItem> events3 = [];
     Function(int)? onEventPressed;
 
   _ProgramTabViewState(this.events, this.onEventPressed);
@@ -31,13 +31,13 @@ import 'ProgramTimeline.dart';
     @override
     Widget build(BuildContext context) {
       events0.clear();
-      events0.addAll(events.where((element) => element.startTime?.weekday == DateTime.thursday));
+      events0.addAll(events.where((element) => element.startTime.weekday == DateTime.thursday));
       events1.clear();
-      events1.addAll(events.where((element) => element.startTime?.weekday == DateTime.friday));
+      events1.addAll(events.where((element) => element.startTime.weekday == DateTime.friday));
       events2.clear();
-      events2.addAll(events.where((element) => element.startTime?.weekday == DateTime.saturday));
+      events2.addAll(events.where((element) => element.startTime.weekday == DateTime.saturday));
       events3.clear();
-      events3.addAll(events.where((element) => element.startTime?.weekday == DateTime.sunday));
+      events3.addAll(events.where((element) => element.startTime.weekday == DateTime.sunday));
       return Container(
         constraints: BoxConstraints(maxWidth: 400),
         child: DefaultTabController(

@@ -202,8 +202,22 @@ class DataService {
       .from('events')
       .select("id, title, start_time, end_time, max_participants")
       .order('start_time', ascending: true);
-    return List<EventModel>.from(
+    var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
+    var groupData = await _supabase
+        .from('event_groups')
+        .select("event_child");
+
+    var groups = List.from(groupData.map((gd)=>gd["event_child"]));
+    List<EventModel> filtered = [];
+    for(var e in events)
+    {
+      if(!groups.contains(e.id))
+      {
+        filtered.add(e);
+      }
+    }
+    return filtered;
   }
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
@@ -219,10 +233,26 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, split_for_men_women, description, places(id, title)")
+            "id, title, start_time, end_time, max_participants, split_for_men_women, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
         .eq("id", eventId)
         .single();
-    return EventModel.fromJson(data);
+    var event = EventModel.fromJson(data);
+    if(event.childEventIds!.isNotEmpty)
+    {
+      var childEventsData = await _supabase
+          .from('events')
+          .select("id, title, start_time, end_time, max_participants")
+          .in_("id", event.childEventIds!)
+          .order('start_time', ascending: true);
+      event.childEvents = List<EventModel>.from(
+          childEventsData.map((x) => EventModel.fromJson(x)));
+      for(var e in event.childEvents)
+      {
+        e.currentParticipants = await getParticipantsPerEventCount(e.id!);
+        e.isSignedIn = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
+      }
+    }
+    return event;
   }
 
   static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
@@ -479,6 +509,7 @@ class DataService {
     return loadedMessages;
   }
 
+  //avoid loosing participant count by updating each event individually
   static Future<void> updateEvents(List<EventModel> events) async {
     var eventsData = await DataService.getEventsForTimeline();
     for (var e in eventsData) {

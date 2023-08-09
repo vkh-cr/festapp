@@ -8,6 +8,7 @@ import '../models/ParticipantModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
+import '../widgets/ProgramTimeline.dart';
 import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
@@ -172,6 +173,9 @@ class _EventPageState extends State<EventPage> {
                     ),
                   ),
                   Visibility(
+                      visible: _event?.childEvents.isNotEmpty == true,
+                      child: ProgramTimeline(events: _event == null ? [] : _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)).toList(), onEventPressed: _eventPressed, nodePosition: 0.4)),
+                  Visibility(
                       visible:
                           DataService.isAdmin() && _event?.maxParticipants != null,
                       child: ExpansionTile(
@@ -230,6 +234,11 @@ class _EventPageState extends State<EventPage> {
     event.currentParticipants = currentParticipants;
     _event = event;
     setState(() {});
+  }
+
+  _eventPressed(int id) {
+    Navigator.pushNamed(
+        context, EventPage.ROUTE, arguments: id).then((value) => loadData(_event!.id!));
   }
 
   Future<void> signIn([ParticipantModel? participant]) async {

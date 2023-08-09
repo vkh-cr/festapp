@@ -7,6 +7,7 @@ import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/widgets/ProgramTabView.dart';
+import 'package:av_app/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -177,7 +178,7 @@ void didChangeDependencies() {
                   ),
                 ],
               )),
-          Expanded(child: ProgramTabView(events: _events, onEventPressed: eventPressed)),
+          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed)),
           Padding(
             padding: const EdgeInsets.only(bottom: 24.0),
             child: Row(
@@ -278,6 +279,7 @@ void didChangeDependencies() {
         context, UserPage.ROUTE).then((value) => loadData());
   }
 
+  final List<TimeLineItem> _dots = [];
   final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
@@ -287,15 +289,18 @@ void didChangeDependencies() {
       {
         var participants = await DataService.getParticipantsPerEventCount(e.id!);
         var isSignedCurrent = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
+        var dot = _dots.singleWhere((element) => element.id == e.id!);
         setState(() {
           e.currentParticipants = participants;
+          dot.rightText = e.toString();
           e.isSignedIn = isSignedCurrent;
+          dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
         });
       }
     }
   }
 
-  eventPressed(int id) {
+  _eventPressed(int id) {
     Navigator.pushNamed(
         context, EventPage.ROUTE, arguments: id).then((value) => loadData());
   }
@@ -310,6 +315,8 @@ void didChangeDependencies() {
     }
     DataService.updateEvents(_events)
         .whenComplete(() async {
+          _dots.clear();
+          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
           if(!DataService.isLoggedIn())
           {
             return;

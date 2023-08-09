@@ -9,12 +9,15 @@ import '../services/DataService.dart';
 class EventModel extends IPlutoRowModel {
 
   String startTimeString() => DateFormat.Hm().format(startTime);
+  String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   String durationString() => "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
   int? maxParticipants;
 
   final int? id;
   PlaceModel? place;
+  List<EventModel> childEvents = [];
+  List<int>? childEventIds;
   int? currentParticipants;
   String? title = "událost";
   String? description = "";
@@ -31,6 +34,7 @@ class EventModel extends IPlutoRowModel {
     this.description,
     this.maxParticipants,
     this.place,
+    this.childEventIds,
     required this.splitForMenWomen});
 
   factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
@@ -42,6 +46,7 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
       place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
       splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
+      childEventIds: json.containsKey("event_groups") && json["event_groups"] != null ? List.from(json["event_groups"].map((x) => x["event_child"]) ) : [],
   );
 
   bool isFull() => currentParticipants !>= maxParticipants!;

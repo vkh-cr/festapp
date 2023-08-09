@@ -1,6 +1,7 @@
 import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/widgets/ProgramTabView.dart';
+import 'package:av_app/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';
@@ -17,7 +18,11 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
-    DataService.updateEvents(_events).whenComplete(() async => await loadEventParticipants());
+    DataService.updateEvents(_events).whenComplete(() async {
+      _dots.clear();
+      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+      await loadEventParticipants();
+    });
   }
 
   @override
@@ -26,11 +31,12 @@ class _ProgramPageState extends State<ProgramPage> {
       appBar: AppBar(
         title: const Text('Program AV 2023'),
       ),
-      body: Center(child: ProgramTabView(events: _events, onEventPressed: eventPressed))
+      body: Center(child: ProgramTabView(events: _dots, onEventPressed: eventPressed))
     );
   }
 
   final List<EventModel> _events = [];
+  final List<TimeLineItem> _dots = [];
 
   Future<void> loadEventParticipants() async {
     for (var e in _events)
@@ -39,9 +45,12 @@ class _ProgramPageState extends State<ProgramPage> {
       {
         var participants = await DataService.getParticipantsPerEventCount(e.id!);
         var isSignedCurrent = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
+        var dot = _dots.singleWhere((element) => element.id == e.id!);
         setState(() {
           e.currentParticipants = participants;
+          dot.rightText = e.toString();
           e.isSignedIn = isSignedCurrent;
+          dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
         });
       }
     }
