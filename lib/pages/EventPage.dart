@@ -133,7 +133,7 @@ class _EventPageState extends State<EventPage> {
                                 if(value != null)
                                 {
                                   _event!.description = value as String;
-                                  await DataService.updateEvent(_event!);
+                                  await DataService.updateEventDescription(_event!);
                                   ToastHelper.Show("Popis změněn!");
                                   Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
                                 }
@@ -174,7 +174,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible: _event?.childEvents.isNotEmpty == true,
-                      child: ProgramTimeline(events: _event == null ? [] : _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)).toList(), onEventPressed: _eventPressed, nodePosition: 0.4)),
+                      child: ProgramTimeline(events: _event == null ? [] : _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)).toList(), onEventPressed: _eventPressed, nodePosition: 0.3)),
                   Visibility(
                       visible:
                           DataService.isAdmin() && _event?.maxParticipants != null,

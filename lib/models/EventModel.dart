@@ -17,6 +17,8 @@ class EventModel extends IPlutoRowModel {
   final int? id;
   PlaceModel? place;
   List<EventModel> childEvents = [];
+
+  List<int>? parentEventIds;
   List<int>? childEventIds;
   int? currentParticipants;
   String? title = "událost";
@@ -35,9 +37,30 @@ class EventModel extends IPlutoRowModel {
     this.maxParticipants,
     this.place,
     this.childEventIds,
+    this.parentEventIds,
     required this.splitForMenWomen});
 
-  factory EventModel.fromJson(Map<String, dynamic> json) => EventModel(
+  factory EventModel.fromJson(Map<String, dynamic> json) {
+    var eventGroups = json.containsKey("event_groups") && json["event_groups"] != null ? json["event_groups"] : null;
+    List<int>? childEvents;
+    List<int>? parentEvents;
+    if(eventGroups != null)
+    {
+      for(var e in eventGroups)
+      {
+        if(e.containsKey("event_child"))
+        {
+          childEvents = childEvents ?? [];
+          childEvents.add(e["event_child"]);
+        }
+        if(e.containsKey("event_parent"))
+        {
+          parentEvents = parentEvents ?? [];
+          parentEvents.add(e["event_parent"]);
+        }
+      }
+    }
+    return EventModel(
       startTime: DateTime.parse(json["start_time"]),
       endTime: DateTime.parse(json["end_time"]),
       id: json["id"],
@@ -46,8 +69,10 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
       place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
       splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
-      childEventIds: json.containsKey("event_groups") && json["event_groups"] != null ? List.from(json["event_groups"].map((x) => x["event_child"]) ) : [],
+      childEventIds: childEvents,
+      parentEventIds: parentEvents,
   );
+  }
 
   bool isFull() => currentParticipants !>= maxParticipants!;
   static bool canSignIn(EventModel? event) => event != null && event.maxParticipants != null;
@@ -66,7 +91,6 @@ class EventModel extends IPlutoRowModel {
     maxParticipants = event.maxParticipants;
   }
 
-
   static const String startDateColumn = "startDateColumn";
   static const String startTimeColumn = "startTimeColumn";
   static const String endDateColumn = "endDateColumn";
@@ -75,12 +99,11 @@ class EventModel extends IPlutoRowModel {
   static const String titleColumn = "titleColumn";
   static const String descriptionColumn = "descriptionColumn";
   static const String descriptionHiddenColumn = "descriptionHiddenColumn";
+  static const String parentEventColumn = "parentEventColumn";
 
   static const String maxParticipantsColumn = "maxParticipantsColumn";
   static const String placeColumn = "placeColumn";
   static const String splitForMenWomenColumn = "splitForMenWomenColumn";
-
-
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
@@ -88,6 +111,13 @@ class EventModel extends IPlutoRowModel {
 
     var placeId = DataGridHelper.GetIdFromFormatted(json[placeColumn]);
     var dateFormat = DateFormat("yyyy-MM-dd-HH:mm");
+
+    List<int> parentEvents = [];
+    if(json[parentEventColumn].toString().trim().isNotEmpty)
+    {
+      parentEvents = json[parentEventColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
+    }
+
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
@@ -97,6 +127,7 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
+      parentEventIds: parentEvents
     );
   }
 
@@ -114,7 +145,7 @@ class EventModel extends IPlutoRowModel {
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place!.toPlutoSelectString()),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
-
+      parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??"")
     });
   }
 

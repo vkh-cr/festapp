@@ -285,20 +285,48 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       enableColumnDrag: false,
                       enableContextMenu: false,
                       cellPadding: EdgeInsets.zero,
-                      width: 40,
+                      width: 100,
                       renderer: (rendererContext) {
-                        return IconButton(
-                            onPressed: () async{
-                              final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                              if (id == -1){
-                                rendererContext.stateManager.removeRows([rendererContext.row]);
-                                return;
-                              }
-                              setState(() {
-                                rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                              });
-                            },
-                            icon: const Icon(Icons.delete_forever));
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              onPressed: () async{
+                                final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+                                if (id == -1){
+                                  rendererContext.stateManager.removeRows([rendererContext.row]);
+                                  return;
+                                }
+                                setState(() {
+                                  rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                                });
+                              },
+                              icon: const Icon(Icons.delete_forever)),
+                            IconButton(
+                                onPressed: () async{
+                                  var originRow = rendererContext.row;
+                                  var newRow = rendererContext.stateManager.getNewRows()[0];
+                                  newRow.cells[EventModel.idColumn]?.value = -1;
+                                  newRow.cells[EventModel.titleColumn]?.value = originRow.cells[EventModel.titleColumn]?.value;
+                                  newRow.cells[EventModel.startDateColumn]?.value = originRow.cells[EventModel.startDateColumn]?.value;
+                                  newRow.cells[EventModel.startTimeColumn]?.value = originRow.cells[EventModel.startTimeColumn]?.value;
+                                  newRow.cells[EventModel.endDateColumn]?.value = originRow.cells[EventModel.endDateColumn]?.value;
+                                  newRow.cells[EventModel.endTimeColumn]?.value = originRow.cells[EventModel.endTimeColumn]?.value;
+                                  newRow.cells[EventModel.maxParticipantsColumn]?.value = originRow.cells[EventModel.maxParticipantsColumn]?.value;
+                                  newRow.cells[EventModel.splitForMenWomenColumn]?.value = originRow.cells[EventModel.splitForMenWomenColumn]?.value;
+                                  newRow.cells[EventModel.placeColumn]?.value = originRow.cells[EventModel.placeColumn]?.value;
+                                  newRow.cells[EventModel.parentEventColumn]?.value = originRow.cells[EventModel.parentEventColumn]?.value;
+                                  newRow.cells[EventModel.descriptionHiddenColumn]?.value = originRow.cells[EventModel.descriptionHiddenColumn]?.value;
+                                  newRow.cells[EventModel.descriptionColumn]?.value = originRow.cells[EventModel.descriptionColumn]?.value;
+                                  var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
+                                  rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
+
+                                  setState(() {
+                                    newRow.setState(PlutoRowState.updated);
+                                  });
+                                },
+                                icon: const Icon(Icons.add)),]
+                        );
                       }),
                   PlutoColumn(
                       title: "Id",
@@ -411,6 +439,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                             child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
                         );
                       }),
+                      PlutoColumn(
+                          title: "Zobrazit v události",
+                          field: EventModel.parentEventColumn,
+                          type: PlutoColumnType.text(),
+                          width: 300
+                      ),
                 ]).DataGrid(),
             usersDataGrid.DataGrid()
           ]

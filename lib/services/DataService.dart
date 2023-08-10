@@ -223,7 +223,7 @@ class DataService {
   static Future<List<EventModel>> getEventsWithPlaces() async {
     var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, split_for_men_women, places(id, title)")
+        .select("id, title, start_time, end_time, max_participants, split_for_men_women, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
         .order('start_time', ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -237,7 +237,7 @@ class DataService {
         .eq("id", eventId)
         .single();
     var event = EventModel.fromJson(data);
-    if(event.childEventIds!.isNotEmpty)
+    if(event.childEventIds!=null)
     {
       var childEventsData = await _supabase
           .from('events')
@@ -365,6 +365,16 @@ class DataService {
     ToastHelper.Show("Odhlášen ${participant ?? currentUserEmail()}");
   }
 
+  static updateEventDescription(EventModel event)
+  async {
+    ensureIsAdmin();
+    var upsertObj = {"description": event.description};
+    if(event.id!=null) {
+      upsertObj.addAll({"id": event.id.toString()});
+    }
+    await _supabase.from('events').upsert(upsertObj).select().single();
+  }
+
   static updateEvent(EventModel event) async {
     ensureIsAdmin();
     var upsertObj = {
@@ -375,13 +385,34 @@ class DataService {
       "place": event.place?.id,
       "split_for_men_women": event.splitForMenWomen,
     };
-    if(event.id!=null) {
-      upsertObj.addAll({"id": event.id});
-    }
     if(event.description!=null) {
       upsertObj.addAll({"description": event.description});
     }
-    await _supabase.from('events').upsert(upsertObj).select();
+    dynamic eventData;
+    if(event.id!=null) {
+      upsertObj.addAll({"id": event.id});
+      eventData = await _supabase.from('events').update(upsertObj).eq("id", event.id).select().single();
+    }
+    else
+    {
+      eventData = await _supabase.from('events').insert(upsertObj).select().single();
+    }
+    var updatedEvent = EventModel.fromJson(eventData);
+
+    await _supabase
+        .from('event_groups')
+        .delete()
+        .eq('event_child', updatedEvent.id);
+
+    var insert = [];
+    for(var eParent in event.parentEventIds!)
+    {
+      insert.add({"event_child":updatedEvent.id, "event_parent":eParent});
+    }
+    await _supabase
+        .from('event_groups')
+        .insert(insert)
+        .select();
   }
 
   static Future<void> deleteEvent(EventModel data) async {
