@@ -20,6 +20,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
+  final List<TimeLineItem> _childDots = [];
   EventModel? _event;
   List<ParticipantModel> _participants = [];
   List<ParticipantModel> _queriedParticipants = [];
@@ -174,7 +175,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible: _event?.childEvents.isNotEmpty == true,
-                      child: ProgramTimeline(events: _event == null ? [] : _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)).toList(), onEventPressed: _eventPressed, nodePosition: 0.3)),
+                      child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)),
                   Visibility(
                       visible:
                           DataService.isAdmin() && _event?.maxParticipants != null,
@@ -233,6 +234,8 @@ class _EventPageState extends State<EventPage> {
         await DataService.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
     _event = event;
+    _childDots.clear();
+    _childDots.addAll(_event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
     setState(() {});
   }
 

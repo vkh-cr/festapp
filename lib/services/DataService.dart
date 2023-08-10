@@ -241,15 +241,23 @@ class DataService {
     {
       var childEventsData = await _supabase
           .from('events')
-          .select("id, title, start_time, end_time, max_participants")
+          .select("id, title, start_time, end_time, max_participants, event_users(count)")
           .in_("id", event.childEventIds!)
           .order('start_time', ascending: true);
+
       event.childEvents = List<EventModel>.from(
           childEventsData.map((x) => EventModel.fromJson(x)));
+
+      List<dynamic> currentUserStatePerEventData = await _supabase
+          .from('events')
+          .select("id, event_users!inner(count)")
+          .eq("event_users.user", currentUserId())
+          .in_("id", event.childEventIds!);
+
+      Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c["event_users"][0]["count"]>0).map((c)=>c["id"] as int).toSet();
       for(var e in event.childEvents)
       {
-        e.currentParticipants = await getParticipantsPerEventCount(e.id!);
-        e.isSignedIn = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
+        e.isSignedIn = userSignedInEvents.contains(e.id!) ? true : false;
       }
     }
     return event;

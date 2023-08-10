@@ -38,7 +38,8 @@ class EventModel extends IPlutoRowModel {
     this.place,
     this.childEventIds,
     this.parentEventIds,
-    required this.splitForMenWomen});
+    required this.splitForMenWomen,
+    this.currentParticipants});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey("event_groups") && json["event_groups"] != null ? json["event_groups"] : null;
@@ -71,6 +72,7 @@ class EventModel extends IPlutoRowModel {
       splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
+      currentParticipants: json.containsKey("event_users") ? json["event_users"][0]["count"] : null,
   );
   }
 
