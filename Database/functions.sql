@@ -11,10 +11,14 @@ declare
   event_group integer;
   exclusive_event_count integer;
   already_in_count integer;
+  current_men_participants integer;
+  current_women_participants integer;
+  b_split_for_men_women boolean;
+  is_current_user_male boolean;
 
 begin
 
-  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < '2023-08-17 07:00:00' then
+  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < '2023-08-10 07:00:00' then
     return 104;
   end if;
 
@@ -29,12 +33,27 @@ begin
     select count(*) from exclusive_events ee join event_users eu on ee.event = eu.event
     where ee."group" = event_group and eu."user" = user_id into exclusive_event_count;
     if exclusive_event_count > 0 then
-    return 102;
+      return 102;
     end if;
   end if;
 
   -- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
   select max_participants from events where id = event_id into i_max_participants;
+  select split_for_men_women from events where id = event_id into b_split_for_men_women;
+
+  if b_split_for_men_women then
+    select exists (select sex from user_info where id = user_id and sex = 'male') into is_current_user_male;
+    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = upsert_event_user.event_id and ei.sex = 'male' into current_men_participants;
+    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = upsert_event_user.event_id and ei.sex <> 'male' into current_women_participants;
+    if is_current_user_male and current_men_participants >= (i_max_participants / 2) then
+      return 105;
+    elsif not is_current_user_male and current_women_participants >= (i_max_participants / 2) then
+      return 106;
+    end if;
+  end if;
+
+  select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
+
   select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
   if current_participants >= i_max_participants then
     -- If it is more return false
