@@ -10,10 +10,10 @@ class InformationModel extends IPlutoRowModel {
   String? description;
   bool isExpanded = false;
 
-  static const String idColumn = "idColumn";
-  static const String titleColumn = "titleColumn";
-  static const String descriptionColumn = "descriptionColumn";
-  static const String informationTable = "informationTable";
+  static const String idColumn = "id";
+  static const String titleColumn = "title";
+  static const String descriptionColumn = "description";
+  static const String informationTable = "information";
 
   factory InformationModel.fromJson(Map<String, dynamic> json) {
     return InformationModel(

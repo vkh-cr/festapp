@@ -192,7 +192,7 @@ void didChangeDependencies() {
                       backgroundColor: primaryBlue1,
                       child: const Icon(Icons.calendar_month),
                     ),
-                    const Text("Program"),
+                    const Text("Můj program"),
                   ],
                 ),
                 Column(

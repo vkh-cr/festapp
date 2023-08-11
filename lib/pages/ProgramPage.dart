@@ -1,6 +1,5 @@
 import 'package:av_app/pages/EventPage.dart';
 import 'package:av_app/services/DataService.dart';
-import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:av_app/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +17,7 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
-    DataService.updateEvents(_events).whenComplete(() async {
+    DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
       _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
       await loadEventParticipants();
@@ -29,9 +28,9 @@ class _ProgramPageState extends State<ProgramPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Program AV 2023'),
+        title: const Text('Můj program'),
       ),
-      body: Center(child: ProgramTabView(events: _dots, onEventPressed: eventPressed))
+      body: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true,)
     );
   }
 

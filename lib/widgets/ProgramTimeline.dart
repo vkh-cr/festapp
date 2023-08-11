@@ -1,4 +1,6 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
 
 import '../models/EventModel.dart';
@@ -67,11 +69,13 @@ class ProgramTimeline extends StatefulWidget {
   List<TimeLineItem> events = [];
   double? nodePosition;
 
-  ProgramTimeline({super.key, required this.events, this.onEventPressed, this.nodePosition = 0.24});
+  bool? splitByDay;
+
+  ProgramTimeline({super.key, required this.events, this.onEventPressed, this.nodePosition = 0.24, this.splitByDay = false});
 
   @override
   _ProgramTimelineState createState() =>
-      _ProgramTimelineState(events, onEventPressed, nodePosition);
+      _ProgramTimelineState(events, onEventPressed, nodePosition, splitByDay);
 }
 
 class _ProgramTimelineState extends State<ProgramTimeline> {
@@ -79,11 +83,46 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
   Function(int)? onEventPressed;
 
   double? nodePosition;
+  bool? splitByDay;
 
-  _ProgramTimelineState(this.allEvents, this.onEventPressed, this.nodePosition);
+  _ProgramTimelineState(this.allEvents, this.onEventPressed, this.nodePosition, this.splitByDay);
 
   @override
   Widget build(BuildContext context) {
+    if(splitByDay!) {
+      var groupByDay = allEvents.groupListsBy((element) =>
+          DateFormat("EEEE d. MMMM ", "cs").format(element.startTime));
+      List<Widget> children = [];
+      for (var group in groupByDay.entries) {
+        children.add(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
+              child: Text(
+                group.key,
+                style: const TextStyle(
+                    color: primaryBlue1, fontWeight: FontWeight.bold),
+              ),));
+        children.add(createTimeline(group.value));
+      }
+
+      if (children.isEmpty)
+      {
+        children.add(const Center(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+                "Zde se zobrazí Tvoje přihlášené události.",
+                style: TextStyle(fontSize: 20),),
+          ),
+        ));
+      }
+      return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ));
+    }
+
     var morningEvents = allEvents.where((e) => e.startTime.hour <= 12).toList();
     var afternoonEvents = allEvents
         .where((e) => e.startTime.hour > 12 && e.startTime.hour <= 18)

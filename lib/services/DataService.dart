@@ -191,18 +191,30 @@ class DataService {
   }
 
   static Future<List<InformationModel>> getInformation() async {
-    var data = await _supabase.from("information").select();
+    var data = await _supabase.from(InformationModel.informationTable).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
     return infoList;
   }
 
-  static Future<List<EventModel>> getEventsForTimeline() async {
-    var data = await _supabase
-      .from('events')
-      .select("id, title, start_time, end_time, max_participants")
-      .order('start_time', ascending: true);
+  static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
+    dynamic data;
+    if(onlyForSignedIn)
+    {
+      data = await _supabase
+          .from('events')
+          .select("id, title, start_time, end_time, max_participants, event_users!inner(*)")
+          .eq("event_users.user", currentUserId())
+          .order('start_time', ascending: true);
+      return List<EventModel>.from(
+          data.map((x) => EventModel.fromJson(x)));
+    }
+    data = await _supabase
+        .from('events')
+        .select("id, title, start_time, end_time, max_participants")
+        .order('start_time', ascending: true);
+
     var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
     var groupData = await _supabase
@@ -604,8 +616,8 @@ class DataService {
   }
 
   //avoid loosing participant count by updating each event individually
-  static Future<void> updateEvents(List<EventModel> events) async {
-    var eventsData = await DataService.getEventsForTimeline();
+  static Future<void> updateEvents(List<EventModel> events, [bool onlyForSignedIn = false]) async {
+    var eventsData = await DataService.getEventsForTimeline(onlyForSignedIn);
     for (var e in eventsData) {
       var eventToChange =
           events.firstWhereOrNull((eve) => eve.id == e.id);
