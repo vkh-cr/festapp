@@ -4,6 +4,7 @@ import 'package:av_app/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';
+import '../styles/Styles.dart';
 
 class ProgramPage extends StatefulWidget {
   const ProgramPage({Key? key}) : super(key: key);
@@ -30,8 +31,12 @@ class _ProgramPageState extends State<ProgramPage> {
       appBar: AppBar(
         title: const Text('Můj program'),
       ),
-      body: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true,)
-    );
+      body: Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true,))
+    ));
   }
 
   final List<EventModel> _events = [];
