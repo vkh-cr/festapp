@@ -293,7 +293,8 @@ class DataService {
           .from('events')
           .select("id, title, start_time, end_time, max_participants, event_users(count)")
           .in_("id", event.childEventIds!)
-          .order('start_time', ascending: true);
+          .order('start_time', ascending: true)
+          .order('title', ascending: true);
 
       event.childEvents = List<EventModel>.from(
           childEventsData.map((x) => EventModel.fromJson(x)));
