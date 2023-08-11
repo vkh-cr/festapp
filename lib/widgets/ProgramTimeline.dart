@@ -25,7 +25,19 @@ class TimeLineItem{
 
   static DotType getIndicatorFromEvent(EventModel model)
   {
-    return EventModel.canSignIn(model) == false ? DotType.dot : model.isSignedIn ? DotType.closed : DotType.open;
+    if (EventModel.canSignIn(model) == false) {
+      return DotType.dot;
+    } else {
+      if (model.isSignedIn) {
+        return DotType.closed;
+      } else {
+        if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
+          {
+            return DotType.dot;
+          }
+        return DotType.open;
+      }
+    }
   }
   factory TimeLineItem.fromEventModel(EventModel model) {
     return TimeLineItem(
