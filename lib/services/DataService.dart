@@ -408,7 +408,7 @@ class DataService {
     }
   }
 
-  static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com"];
+  static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com", "anezkazavadilova@seznam.cz", "anezkazavadilova@seznam.cz", "milijany@seznam.cz"];
   static ensureCanDeleteCritical(){
     if(!canDeleteListEmails.contains(currentUserEmail()))
     {
@@ -457,10 +457,7 @@ class DataService {
   static updateEventAndParents(EventModel event) async {
 
     var updatedEvent = await updateEvent(event);
-    await _supabase
-        .from('event_groups')
-        .delete()
-        .eq('event_child', updatedEvent.id);
+    await removeEventFromEventGroups(updatedEvent);
 
     var insert = [];
     for(var eParent in event.parentEventIds!)
@@ -471,6 +468,13 @@ class DataService {
         .from('event_groups')
         .insert(insert)
         .select();
+  }
+
+  static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
+    await _supabase
+        .from('event_groups')
+        .delete()
+        .eq('event_child', updatedEvent.id);
   }
 
   static Future<void> deleteEvent(EventModel data) async {

@@ -158,6 +158,7 @@ class EventModel extends IPlutoRowModel {
     {
       await DataService.signOutFromEvent(id!, p);
     }
+    await DataService.removeEventFromEventGroups(this);
     await DataService.deleteEvent(this);
   }
 
