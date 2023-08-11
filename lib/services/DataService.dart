@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/EventModel.dart';
+import '../models/ExclusiveGroupModel.dart';
 import '../models/ParticipantModel.dart';
 import '../models/PlaceModel.dart';
 import 'NavigationService.dart';
@@ -229,6 +230,55 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
+  static Future<List<ExclusiveGroupModel>> getExclusiveGroups() async {
+    var data = await _supabase
+        .from(ExclusiveGroupModel.exclusiveGroupsTable)
+        .select("${ExclusiveGroupModel.idColumn}, ${ExclusiveGroupModel.titleColumn}, exclusive_events(event)");
+    return List<ExclusiveGroupModel>.from(
+        data.map((x) => ExclusiveGroupModel.fromJson(x)));
+  }
+
+  static updateExclusiveGroup(ExclusiveGroupModel model) async {
+    ensureIsAdmin();
+    var upsertObj = {
+      "title": model.title,
+    };
+
+    dynamic eventData;
+    if(model.id!=null) {
+      upsertObj.addAll({"id": model.id.toString()});
+      eventData = await _supabase.from(ExclusiveGroupModel.exclusiveGroupsTable).update(upsertObj).eq("id", model.id).select().single();
+    }
+    else
+    {
+      eventData = await _supabase.from(ExclusiveGroupModel.exclusiveGroupsTable).insert(upsertObj).select().single();
+    }
+    var updated = ExclusiveGroupModel.fromJson(eventData);
+
+    await _supabase
+        .from('exclusive_events')
+        .delete()
+        .eq('group', updated.id);
+
+    var insert = [];
+    for(var e in model.events!)
+    {
+      insert.add({"group":updated.id, "event":e});
+    }
+    await _supabase
+        .from('exclusive_events')
+        .insert(insert)
+        .select();
+  }
+
+  static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
+    ensureIsAdmin();
+    await _supabase
+        .from(ExclusiveGroupModel.exclusiveGroupsTable)
+        .delete()
+        .eq("id", data.id);
+  }
+
   static Future<EventModel> getEvent(int eventId) async {
     var data = await _supabase
         .from('events')
@@ -304,7 +354,7 @@ class DataService {
 
   static signInToEvent(int eventId, [ParticipantModel? participant]) async {
     ensureUserIsLoggedIn();
-    var finalId = participant?.id ?? currentUserId();
+    var userId = participant?.id ?? currentUserId();
     //check for max participants
     var event = await getEvent(eventId);
 
@@ -314,7 +364,7 @@ class DataService {
     }
 
     //check for similar times
-    var userEvents = await getParticipantEventTimes(finalId);
+    var userEvents = await getParticipantEventTimes(userId);
     for (var i = 0; i < userEvents.length; i++) {
       var e = userEvents[i];
       if (e.startTime.isBefore(event.endTime) &&
@@ -329,13 +379,18 @@ class DataService {
       }
     }
 
-    bool signedIn = await _supabase.rpc("upsert_event_user",
-        params: {"event_id": eventId, "user_id": finalId});
+    int result = await _supabase.rpc("upsert_event_user",
+        params: {"event_id": eventId, "user_id": userId});
 
-    if (signedIn) {
-      ToastHelper.Show("Přihlášen ${participant ?? currentUserEmail()}");
-    } else {
-      ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.");
+    switch(result)
+    {
+      case 100: ToastHelper.Show("Přihlášen ${participant ?? currentUserEmail()}"); return;
+      case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna."); return;
+      case 102: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na události tohoto typu."); return;
+      case 103: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} už je přihlášen."); return;
+      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat lze až od čtvrtku 17.8.2023 9:00."); return;
+      case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů."); return;
+      case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen."); return;
     }
   }
 

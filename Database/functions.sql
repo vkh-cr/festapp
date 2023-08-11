@@ -3,24 +3,57 @@
 -- If it is more return false, otherwise return true
 -- Make whole function transaction
 create
-or replace function upsert_event_user (event_id integer, user_id uuid) returns boolean language plpgsql as $$
+or replace function upsert_event_user (event_id integer, user_id uuid) returns integer language plpgsql as $$
 declare
   i_max_participants integer;
   current_participants integer;
+  event_group_count integer;
+  event_group integer;
+  exclusive_event_count integer;
+  already_in_count integer;
+
 begin
+
+  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < '2023-08-17 07:00:00' then
+    return 104;
+  end if;
+
+  select count(*) from event_users eu where eu.event = event_id and eu."user" = user_id into already_in_count;
+  if already_in_count > 0 then
+    return 103;
+  end if;
+
+  select count(*) from exclusive_events where event = event_id into event_group_count;
+  if event_group_count > 0 then
+    select "group" from exclusive_events where event = event_id into event_group;
+    select count(*) from exclusive_events ee join event_users eu on ee.event = eu.event
+    where ee."group" = event_group and eu."user" = user_id into exclusive_event_count;
+    if exclusive_event_count > 0 then
+    return 102;
+    end if;
+  end if;
+
   -- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
   select max_participants from events where id = event_id into i_max_participants;
   select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
   if current_participants >= i_max_participants then
     -- If it is more return false
-    return false;
+    return 101;
   else
     -- otherwise return true
     insert into event_users (event, "user") values (event_id, user_id);
-    return true;
+    return 100;
   end if;
 end;
 $$;
+
+--100 ok
+--101 full
+--102 exclusive already taken
+--103 already signed in
+--104 not time yet
+--105 enough male
+--106 enough female
 
 
 

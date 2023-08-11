@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:av_app/dataGrids/SingleTableDataGrid.dart';
+import 'package:av_app/models/ExclusiveGroupModel.dart';
 import 'package:av_app/models/PlaceModel.dart';
 import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/services/DataGridHelper.dart';
@@ -168,7 +169,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           )
         ]);
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
           appBar: AppBar(
           title: const Text("Admin"),
@@ -189,6 +190,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       children: [
                         Icon(Icons.calendar_month),
                         Padding(padding: EdgeInsets.all(12), child: Text("Události"))
+                      ]
+                  ),
+                  Row(
+                      children: [
+                        Icon(Icons.punch_clock_rounded),
+                        Padding(padding: EdgeInsets.all(12), child: Text("Exkluzivita"))
                       ]
                   ),
                   Row(
@@ -290,54 +297,54 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       width: 100,
                       renderer: (rendererContext) {
                         return Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              onPressed: () async{
-                                final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                                if (id == -1){
-                                  rendererContext.stateManager.removeRows([rendererContext.row]);
-                                  return;
-                                }
-                                setState(() {
-                                  rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                });
-                              },
-                              icon: const Icon(Icons.delete_forever)),
-                            IconButton(
-                                onPressed: () async{
-                                  var originRow = rendererContext.row;
-                                  var newRow = rendererContext.stateManager.getNewRows()[0];
-                                  newRow.cells[EventModel.idColumn]?.value = -1;
-                                  newRow.cells[EventModel.titleColumn]?.value = originRow.cells[EventModel.titleColumn]?.value;
-                                  newRow.cells[EventModel.startDateColumn]?.value = originRow.cells[EventModel.startDateColumn]?.value;
-                                  newRow.cells[EventModel.startTimeColumn]?.value = originRow.cells[EventModel.startTimeColumn]?.value;
-                                  newRow.cells[EventModel.endDateColumn]?.value = originRow.cells[EventModel.endDateColumn]?.value;
-                                  newRow.cells[EventModel.endTimeColumn]?.value = originRow.cells[EventModel.endTimeColumn]?.value;
-                                  newRow.cells[EventModel.maxParticipantsColumn]?.value = originRow.cells[EventModel.maxParticipantsColumn]?.value;
-                                  newRow.cells[EventModel.splitForMenWomenColumn]?.value = originRow.cells[EventModel.splitForMenWomenColumn]?.value;
-                                  newRow.cells[EventModel.placeColumn]?.value = originRow.cells[EventModel.placeColumn]?.value;
-                                  newRow.cells[EventModel.parentEventColumn]?.value = originRow.cells[EventModel.parentEventColumn]?.value;
-                                  newRow.cells[EventModel.descriptionHiddenColumn]?.value = originRow.cells[EventModel.descriptionHiddenColumn]?.value;
-                                  newRow.cells[EventModel.descriptionColumn]?.value = originRow.cells[EventModel.descriptionColumn]?.value;
-                                  var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
-                                  rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  onPressed: () async{
+                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+                                    if (id == -1){
+                                      rendererContext.stateManager.removeRows([rendererContext.row]);
+                                      return;
+                                    }
+                                    setState(() {
+                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_forever)),
+                              IconButton(
+                                  onPressed: () async{
+                                    var originRow = rendererContext.row;
+                                    var newRow = rendererContext.stateManager.getNewRows()[0];
+                                    newRow.cells[EventModel.idColumn]?.value = -1;
+                                    newRow.cells[EventModel.titleColumn]?.value = originRow.cells[EventModel.titleColumn]?.value;
+                                    newRow.cells[EventModel.startDateColumn]?.value = originRow.cells[EventModel.startDateColumn]?.value;
+                                    newRow.cells[EventModel.startTimeColumn]?.value = originRow.cells[EventModel.startTimeColumn]?.value;
+                                    newRow.cells[EventModel.endDateColumn]?.value = originRow.cells[EventModel.endDateColumn]?.value;
+                                    newRow.cells[EventModel.endTimeColumn]?.value = originRow.cells[EventModel.endTimeColumn]?.value;
+                                    newRow.cells[EventModel.maxParticipantsColumn]?.value = originRow.cells[EventModel.maxParticipantsColumn]?.value;
+                                    newRow.cells[EventModel.splitForMenWomenColumn]?.value = originRow.cells[EventModel.splitForMenWomenColumn]?.value;
+                                    newRow.cells[EventModel.placeColumn]?.value = originRow.cells[EventModel.placeColumn]?.value;
+                                    newRow.cells[EventModel.parentEventColumn]?.value = originRow.cells[EventModel.parentEventColumn]?.value;
+                                    newRow.cells[EventModel.descriptionHiddenColumn]?.value = originRow.cells[EventModel.descriptionHiddenColumn]?.value;
+                                    newRow.cells[EventModel.descriptionColumn]?.value = originRow.cells[EventModel.descriptionColumn]?.value;
+                                    var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
+                                    rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
 
-                                  setState(() {
-                                    newRow.setState(PlutoRowState.updated);
-                                  });
-                                },
-                                icon: const Icon(Icons.add)),]
+                                    setState(() {
+                                      newRow.setState(PlutoRowState.updated);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add)),]
                         );
                       }),
                   PlutoColumn(
-                      title: "Id",
-                      field: EventModel.idColumn,
-                      type: PlutoColumnType.number(defaultValue: -1),
-                      readOnly: true,
-                      enableEditingMode: false,
-                      width: 50,
-                      renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+                    title: "Id",
+                    field: EventModel.idColumn,
+                    type: PlutoColumnType.number(defaultValue: -1),
+                    readOnly: true,
+                    enableEditingMode: false,
+                    width: 50,
+                    renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
                   PlutoColumn(
                       title: "Nadpis",
@@ -442,12 +449,69 @@ class _AdministrationPageState extends State<AdministrationPage> {
                             child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
                         );
                       }),
-                      PlutoColumn(
-                          title: "Zobrazit v události",
-                          field: EventModel.parentEventColumn,
-                          type: PlutoColumnType.text(),
-                          width: 300
-                      ),
+                  PlutoColumn(
+                      title: "Zobrazit v události",
+                      field: EventModel.parentEventColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
+                ]).DataGrid(),
+            SingleTableDataGrid<ExclusiveGroupModel>(
+                DataService.getExclusiveGroups,
+                ExclusiveGroupModel.fromPlutoJson,
+                columns: [
+                  PlutoColumn(
+                      title: "",
+                      field: "delete",
+                      type: PlutoColumnType.text(),
+                      readOnly: true,
+                      enableFilterMenuItem: false,
+                      enableSorting: false,
+                      enableDropToResize: false,
+                      enableColumnDrag: false,
+                      enableContextMenu: false,
+                      cellPadding: EdgeInsets.zero,
+                      width: 100,
+                      renderer: (rendererContext) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  onPressed: () async{
+                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+                                    if (id == -1){
+                                      rendererContext.stateManager.removeRows([rendererContext.row]);
+                                      return;
+                                    }
+                                    setState(() {
+                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_forever)),
+                            ]
+                        );
+                      }),
+                  PlutoColumn(
+                    title: "Id",
+                    field: ExclusiveGroupModel.idColumn,
+                    type: PlutoColumnType.number(defaultValue: -1),
+                    readOnly: true,
+                    enableEditingMode: false,
+                    width: 50,
+                    renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+                  ),
+                  PlutoColumn(
+                      title: "Název skupiny",
+                      field: ExclusiveGroupModel.titleColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
+                  PlutoColumn(
+                      title: "události",
+                      field: ExclusiveGroupModel.eventsColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
                 ]).DataGrid(),
             usersDataGrid.DataGrid()
           ]
