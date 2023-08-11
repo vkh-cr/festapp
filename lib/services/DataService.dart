@@ -428,17 +428,8 @@ class DataService {
     ToastHelper.Show("Odhlášen ${participant ?? currentUserEmail()}");
   }
 
-  static updateEventDescription(EventModel event)
-  async {
-    ensureIsAdmin();
-    var upsertObj = {"description": event.description};
-    if(event.id!=null) {
-      upsertObj.addAll({"id": event.id.toString()});
-    }
-    await _supabase.from('events').upsert(upsertObj).select().single();
-  }
-
-  static updateEvent(EventModel event) async {
+  static Future<EventModel> updateEvent(EventModel event) async
+   {
     ensureIsAdmin();
     var upsertObj = {
       "start_time": event.startTime.toIso8601String(),
@@ -460,8 +451,12 @@ class DataService {
     {
       eventData = await _supabase.from('events').insert(upsertObj).select().single();
     }
-    var updatedEvent = EventModel.fromJson(eventData);
+    return EventModel.fromJson(eventData);
+  }
 
+  static updateEventAndParents(EventModel event) async {
+
+    var updatedEvent = await updateEvent(event);
     await _supabase
         .from('event_groups')
         .delete()

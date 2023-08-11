@@ -163,7 +163,7 @@ class EventModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateEvent(this);
+    await DataService.updateEventAndParents(this);
   }
 
   @override

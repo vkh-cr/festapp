@@ -134,7 +134,7 @@ class _EventPageState extends State<EventPage> {
                                 if(value != null)
                                 {
                                   _event!.description = value as String;
-                                  await DataService.updateEventDescription(_event!);
+                                  await DataService.updateEvent(_event!);
                                   ToastHelper.Show("Popis změněn!");
                                   Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
                                 }
