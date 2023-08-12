@@ -1,6 +1,6 @@
 class NewsMessage {
   final DateTime createdAt;
-  final String message;
+  String message;
   final String createdBy;
   final int id;
   bool isRead = false;

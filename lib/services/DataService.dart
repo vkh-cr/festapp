@@ -593,6 +593,15 @@ class DataService {
     ToastHelper.Show("Ohláška byla smazána.");
   }
 
+  static Future<void> updateNewsMessage(NewsMessage message) async {
+    ensureIsAdmin();
+    await _supabase
+        .from('news')
+        .update({"message":message.message})
+        .eq("id", message.id);
+    ToastHelper.Show("Ohláška byla změněna!.");
+  }
+
   static insertNewsMessage(String message) async {
     ensureIsAdmin();
     await _supabase.from('news').insert(
@@ -631,7 +640,7 @@ class DataService {
         .upsert({"user": currentUserId(), "news_id": newsId}).select();
   }
 
-  static Future<List<NewsMessage>> loadNewsMessages() async {
+  static Future<List<NewsMessage>> getNewsMessages() async {
     int lastReadMessageId = 0;
     if (isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();

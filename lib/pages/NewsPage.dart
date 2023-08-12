@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
 import '../services/DataService.dart';
+import '../services/ToastHelper.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
@@ -38,7 +39,7 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = [];
     });
-    var loadedMessages = await DataService.loadNewsMessages();
+    var loadedMessages = await DataService.getNewsMessages();
     setState(() {
       newsMessages = loadedMessages;
     });
@@ -103,20 +104,36 @@ class _NewsPageState extends State<NewsPage> {
                     )),
                   Visibility(
                     visible: DataService.isAdmin(),
-                    child: PopupMenuButton<String>(
+                    child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
-                        await DataService.deleteNewsMessage(message);
+                        if(choice == ContextMenuChoice.delete)
+                        {
+                          await DataService.deleteNewsMessage(message);
+                        }
+                        else{
+                          Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: message.message).then((value) async {
+                            if(value != null)
+                            {
+                              var newMessage = value as String;
+                              message.message = newMessage;
+                              await DataService.updateNewsMessage(message);
+                              Navigator.popAndPushNamed(context, NewsPage.ROUTE);
+                            }
+                          });
+                        }
                         loadNewsMessages();
                       },
-                      icon:  Icon(Icons.more_horiz),
-                      itemBuilder: (BuildContext context) {
-                        return {'Smazat'}.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                          );
-                        }).toList();
-                      },
+                      icon:  const Icon(Icons.more_horiz),
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
+                        const PopupMenuItem<ContextMenuChoice>(
+                        value: ContextMenuChoice.edit,
+                        child: Text("Editovat"),
+                        ),
+                        const PopupMenuItem<ContextMenuChoice>(
+                          value: ContextMenuChoice.delete,
+                          child: Text("Smazat"),
+                        )
+                      ],
                     ),
                   ),
                 ],
@@ -138,3 +155,5 @@ class _NewsPageState extends State<NewsPage> {
   TextStyle readTextStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54);
 
 }
+
+enum ContextMenuChoice { delete, edit }

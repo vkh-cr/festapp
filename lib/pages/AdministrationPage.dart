@@ -99,7 +99,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
               field: UserInfoModel.idColumn,
               type: PlutoColumnType.text(),
               readOnly: true,
-              enableEditingMode: false,
               width: 50),
           PlutoColumn(
               title: "E-mail",
@@ -247,7 +246,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       field: InformationModel.idColumn,
                       type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
-                      enableEditingMode: false,
                       width: 50,
                       renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),),
                   PlutoColumn(
@@ -343,7 +341,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     field: EventModel.idColumn,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
-                    enableEditingMode: false,
                     width: 50,
                     renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
