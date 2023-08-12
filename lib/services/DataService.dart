@@ -46,13 +46,20 @@ class DataService {
       return false;
     }
     var refresh = await _secureStorage.read(key: REFRESH_TOKEN_KEY);
-    var result = await _supabase.auth.setSession(refresh.toString());
-    if (result.user != null) {
-      await _secureStorage.write(
-          key: REFRESH_TOKEN_KEY,
-          value: _supabase.auth.currentSession!.refreshToken.toString());
-      return true;
+    try{
+      var result = await _supabase.auth.setSession(refresh.toString());
+      if (result.user != null) {
+        await _secureStorage.write(
+            key: REFRESH_TOKEN_KEY,
+            value: _supabase.auth.currentSession!.refreshToken.toString());
+        return true;
+      }
     }
+    catch(e)
+    {
+      //invalid refresh token
+    }
+
     return false;
   }
 
