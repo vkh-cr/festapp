@@ -91,7 +91,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
   Widget build(BuildContext context) {
     if(splitByDay!) {
       var groupByDay = allEvents.groupListsBy((element) =>
-          DateFormat("EEEE d. MMMM ", "cs").format(element.startTime));
+          buildDayFormat(element));
       List<Widget> children = [];
       for (var group in groupByDay.entries) {
         children.add(
@@ -155,6 +155,12 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         createTimeline(eveningEvents),
       ],
     ));
+  }
+
+  String buildDayFormat(TimeLineItem element) {
+    var result = DateFormat("EEEE d. MMMM ", "cs").format(element.startTime);
+    result = result[0].toUpperCase() + result.substring(1);
+    return result;
   }
 
   Timeline createTimeline(List<TimeLineItem> events) {
