@@ -186,11 +186,13 @@ class _MapPageState extends State<MapPage> {
             options: MapOptions(
                 interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 zoom: InitZoom,
-                maxZoom: 18,
+                maxZoom: 19,
+
                 center: const LatLng(InitLat, InitLng),
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(
+                maxZoom: 19,
                 urlTemplate:
                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                 subdomains: const ['a', 'b', 'c'],

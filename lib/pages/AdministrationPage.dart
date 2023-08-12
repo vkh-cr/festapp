@@ -510,7 +510,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       title: "události",
                       field: ExclusiveGroupModel.eventsColumn,
                       type: PlutoColumnType.text(),
-                      width: 300
+                      width: 500
                   ),
                 ]).DataGrid(),
             usersDataGrid.DataGrid()
