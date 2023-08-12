@@ -93,7 +93,7 @@ class _MapPageState extends State<MapPage> {
     "food": "food.svg",
     "sport": "ball.svg",
     "lecture": "speaker.svg",
-    "workshop": "church.svg",
+    "workshop": "tools.svg",
     "accommodation": "bed.svg",
     "group": "conversation.svg",
     "cross": "cross.svg",
