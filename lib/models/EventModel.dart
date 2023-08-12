@@ -39,7 +39,8 @@ class EventModel extends IPlutoRowModel {
     this.childEventIds,
     this.parentEventIds,
     required this.splitForMenWomen,
-    this.currentParticipants});
+    this.currentParticipants,
+    required this.isSignedIn});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey("event_groups") && json["event_groups"] != null ? json["event_groups"] : null;
@@ -70,9 +71,10 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
       place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
       splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
+      isSignedIn: json.containsKey("isSignedIn") ? json["isSignedIn"] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
-      currentParticipants: json.containsKey("event_users") ? json["event_users"][0]["count"] : null,
+      currentParticipants: json.containsKey("event_users") ? json["event_users"][0]["count"] : json.containsKey("currentParticipants") ? json["currentParticipants"] : null,
   );
   }
 
@@ -93,19 +95,19 @@ class EventModel extends IPlutoRowModel {
     maxParticipants = event.maxParticipants;
   }
 
-  static const String startDateColumn = "startDateColumn";
-  static const String startTimeColumn = "startTimeColumn";
-  static const String endDateColumn = "endDateColumn";
-  static const String endTimeColumn = "endTimeColumn";
-  static const String idColumn = "idColumn";
-  static const String titleColumn = "titleColumn";
-  static const String descriptionColumn = "descriptionColumn";
-  static const String descriptionHiddenColumn = "descriptionHiddenColumn";
-  static const String parentEventColumn = "parentEventColumn";
+  static const String startDateColumn = "startDate";
+  static const String startTimeColumn = "start_time";
+  static const String endDateColumn = "endDate";
+  static const String endTimeColumn = "end_time";
+  static const String idColumn = "id";
+  static const String titleColumn = "title";
+  static const String descriptionColumn = "description";
+  static const String descriptionHiddenColumn = "descriptionHidden";
+  static const String parentEventColumn = "parentEvent";
 
-  static const String maxParticipantsColumn = "maxParticipantsColumn";
-  static const String placeColumn = "placeColumn";
-  static const String splitForMenWomenColumn = "splitForMenWomenColumn";
+  static const String maxParticipantsColumn = "max_participants";
+  static const String placeColumn = "place";
+  static const String splitForMenWomenColumn = "split_for_men_women";
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
@@ -129,7 +131,8 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
-      parentEventIds: parentEvents
+      parentEventIds: parentEvents,
+      isSignedIn: false
     );
   }
 
@@ -169,4 +172,16 @@ class EventModel extends IPlutoRowModel {
 
   @override
   String toBasicString() => "$title";
+
+  Map toJson() =>
+  {
+    idColumn: id,
+    startTimeColumn: startTime.toIso8601String(),
+    endTimeColumn: endTime.toIso8601String(),
+    titleColumn: title,
+    descriptionColumn: description,
+    maxParticipantsColumn: maxParticipants,
+    "currentParticipants": currentParticipants,
+    "isSignedIn": isSignedIn,
+  };
 }

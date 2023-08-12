@@ -1,5 +1,7 @@
 import 'dart:async';
-
+import 'dart:convert';
+import 'package:av_app/services/StorageHelper.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:av_app/pages/AdministrationPage.dart';
 import 'package:av_app/pages/InfoPage.dart';
 import 'package:av_app/pages/MapPage.dart';
@@ -26,12 +28,14 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
+  configureUrlFormat();
+  await GetStorage.init();
+
   await Supabase.initialize(
     url: 'https://jyghacisbuntbrshhhey.supabase.co',
     anonKey:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
   );
-  configureUrlFormat();
   initializeDateFormatting();
   if(!DataService.isLoggedIn())
   {
@@ -289,7 +293,8 @@ void didChangeDependencies() {
   final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
-    await DataService.loadEventsParticipants(_events);
+    // update sign in status / current participants for events
+    await DataService.loadEventsParticipantsAndStatus(_events);
     for (var e in _events)
     {
         var dot = _dots.singleWhere((element) => element.id == e.id!);
@@ -300,6 +305,10 @@ void didChangeDependencies() {
           dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
         });
     }
+
+    //update offline
+    var encoded = jsonEncode(_events);
+    StorageHelper.Set("events", encoded);
   }
 
   _eventPressed(int id) {
@@ -311,10 +320,31 @@ void didChangeDependencies() {
   bool showMessageCount() => _messageCount>0;
   String messageCountString() => _messageCount<100?_messageCount.toString():"99";
   void loadData() {
+
+    //get data from offline
+    try
+    {
+      var eventData = StorageHelper.Get("events");
+      if(eventData!=null && _events.isEmpty)
+      {
+          var offlineEventsData = json.decode(eventData);
+          _events.addAll(List<EventModel>.from(offlineEventsData.map((o)=>EventModel.fromJson(o))));
+          _dots.clear();
+          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+          setState((){});
+      }
+    }
+    catch(e)
+    {
+      // make sure not to fail on start
+    }
+
     if(DataService.isLoggedIn())
     {
       DataService.getCurrentUserInfo().then((value) => userName = value.name);
     }
+
+    //load online data
     DataService.updateEvents(_events)
         .whenComplete(() async {
           _dots.clear();

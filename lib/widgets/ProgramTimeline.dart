@@ -41,6 +41,7 @@ class TimeLineItem{
       }
     }
   }
+
   factory TimeLineItem.fromEventModel(EventModel model) {
     return TimeLineItem(
     startTime: model.startTime,

@@ -43,7 +43,7 @@ class _ProgramPageState extends State<ProgramPage> {
   final List<TimeLineItem> _dots = [];
 
   Future<void> loadEventParticipants() async {
-    await DataService.loadEventsParticipants(_events);
+    await DataService.loadEventsParticipantsAndStatus(_events);
     for (var e in _events)
     {
       var dot = _dots.singleWhere((element) => element.id == e.id!);

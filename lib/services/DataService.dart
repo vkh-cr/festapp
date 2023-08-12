@@ -198,7 +198,7 @@ class DataService {
     return infoList;
   }
 
-  static Future<void> loadEventsParticipants(List<EventModel> events)
+  static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
   async {
     var data = await _supabase
         .from('events')
@@ -654,8 +654,8 @@ class DataService {
 
   //avoid loosing participant count by updating each event individually
   static Future<void> updateEvents(List<EventModel> events, [bool onlyForSignedIn = false]) async {
-    var eventsData = await DataService.getEventsForTimeline(onlyForSignedIn);
-    for (var e in eventsData) {
+    var updatedEvents = await DataService.getEventsForTimeline(onlyForSignedIn);
+    for (var e in updatedEvents) {
       var eventToChange =
           events.firstWhereOrNull((eve) => eve.id == e.id);
       if (eventToChange != null) {
@@ -664,6 +664,21 @@ class DataService {
         events.add(e);
       }
     }
+    var remove = events.where((d) => !updatedEvents.any((e)=>d.id == e.id)).toList();
+    for(var r in remove)
+    {
+      events.remove(r);
+    }
+
+    events.sort((a, b)
+    {
+      var cmp = a.startTime.compareTo(b.startTime);
+      if (cmp == 0)
+      {
+        cmp = a.title!.compareTo(b.title!);
+      }
+      return cmp;
+    });
   }
 
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {

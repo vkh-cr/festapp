@@ -38,6 +38,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
     if(!DataService.isAdmin())
     {
       Navigator.pop(context);
+      return;
     }
     loadData();
   }
