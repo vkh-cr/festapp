@@ -97,7 +97,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       for (var group in groupByDay.entries) {
         children.add(
             Padding(
-              padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
+              padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
               child: Text(
                 group.key,
                 style: const TextStyle(

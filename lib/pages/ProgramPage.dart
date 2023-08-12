@@ -35,7 +35,7 @@ class _ProgramPageState extends State<ProgramPage> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: appMaxWidth),
-            child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true, nodePosition: 0.35))
+            child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true, nodePosition: 0.3))
     ));
   }
 
