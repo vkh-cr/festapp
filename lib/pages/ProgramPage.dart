@@ -35,7 +35,7 @@ class _ProgramPageState extends State<ProgramPage> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: appMaxWidth),
-            child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true,))
+            child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true, nodePosition: 0.35))
     ));
   }
 
@@ -53,6 +53,7 @@ class _ProgramPageState extends State<ProgramPage> {
         setState(() {
           e.currentParticipants = participants;
           dot.rightText = e.toString();
+          dot.leftText = e.durationTimeString();
           e.isSignedIn = isSignedCurrent;
           dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
         });
