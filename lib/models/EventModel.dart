@@ -156,7 +156,7 @@ class EventModel extends IPlutoRowModel {
     var participants = await DataService.getParticipantsPerEvent(id!);
     for(var p in participants)
     {
-      await DataService.signOutFromEvent(id!, p);
+      await DataService.signOutFromEvent(this, p);
     }
     await DataService.removeEventFromEventGroups(this);
     await DataService.deleteEvent(this);

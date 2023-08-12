@@ -371,8 +371,8 @@ class DataService {
     //check for max participants
     var event = await getEvent(eventId);
 
-    if (event.startTime.isBefore(DateTime.now())) {
-      ToastHelper.Show("Nelze přihlásit! Událost už proběhla.");
+    if (event.endTime.isBefore(DateTime.now())) {
+      ToastHelper.Show("Nelze přihlásit! Událost už proběhla.", severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -387,7 +387,7 @@ class DataService {
           e.startTime.isAtSameMomentAs(event.startTime) ||
           e.endTime.isAtSameMomentAs(event.endTime)) {
         ToastHelper.Show(
-            "Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na jiné události ve stejném čase.");
+            "Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
         return;
       }
     }
@@ -398,12 +398,12 @@ class DataService {
     switch(result)
     {
       case 100: ToastHelper.Show("Přihlášen ${participant ?? currentUserEmail()}"); return;
-      case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna."); return;
-      case 102: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na události tohoto typu."); return;
-      case 103: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} už je přihlášen."); return;
-      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat lze až od čtvrtku 17.8.2023 9:00."); return;
-      case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů."); return;
-      case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen."); return;
+      case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.", severity: ToastSeverity.NotOk); return;
+      case 102: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na události tohoto typu.", severity: ToastSeverity.NotOk); return;
+      case 103: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} už je přihlášen.", severity: ToastSeverity.NotOk); return;
+      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat lze až od čtvrtku 17.8.2023 9:00.", severity: ToastSeverity.NotOk); return;
+      case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů.", severity: ToastSeverity.NotOk); return;
+      case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen.", severity: ToastSeverity.NotOk); return;
     }
   }
 
@@ -429,13 +429,20 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(int eventId, [ParticipantModel? participant]) async {
+  static signOutFromEvent(EventModel event, [ParticipantModel? participant]) async {
     ensureUserIsLoggedIn();
     var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
+
+    if(!isAdmin() && DateTime.now().isAfter(event.endTime))
+    {
+      ToastHelper.Show("Není možné se odhlásit z události, která už proběhla.", severity: ToastSeverity.NotOk);
+      return;
+    }
+
     await _supabase
         .from('event_users')
         .delete()
-        .eq("event", eventId)
+        .eq("event", event.id!)
         .eq("user", finalId);
 
     ToastHelper.Show("Odhlášen ${participant ?? currentUserEmail()}");

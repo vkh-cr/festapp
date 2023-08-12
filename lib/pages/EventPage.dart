@@ -250,7 +250,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event!.id!);
+    await DataService.signOutFromEvent(_event!);
     await loadData(_event!.id!);
   }
 
@@ -268,7 +268,7 @@ class _EventPageState extends State<EventPage> {
           TextButton(
             onPressed: () async {
               Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(_event!.id!, participant);
+              await DataService.signOutFromEvent(_event!, participant);
               await loadData(_event!.id!);
             },
             child: const Text('Odhlásit'),
