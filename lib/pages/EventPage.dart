@@ -175,7 +175,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible: _event?.childEvents.isNotEmpty == true,
-                      child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)),
+                      child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3))),
                   Visibility(
                       visible:
                           DataService.isAdmin() && _event?.maxParticipants != null,
