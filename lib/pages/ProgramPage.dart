@@ -43,21 +43,17 @@ class _ProgramPageState extends State<ProgramPage> {
   final List<TimeLineItem> _dots = [];
 
   Future<void> loadEventParticipants() async {
+    await DataService.loadEventsParticipants(_events);
     for (var e in _events)
     {
-      if(EventModel.canSignIn(e))
-      {
-        var participants = await DataService.getParticipantsPerEventCount(e.id!);
-        var isSignedCurrent = DataService.isLoggedIn() ? await DataService.isCurrentUserSignedToEvent(e.id!) : false;
-        var dot = _dots.singleWhere((element) => element.id == e.id!);
-        setState(() {
-          e.currentParticipants = participants;
-          dot.rightText = e.toString();
-          dot.leftText = e.durationTimeString();
-          e.isSignedIn = isSignedCurrent;
-          dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
-        });
-      }
+      var dot = _dots.singleWhere((element) => element.id == e.id!);
+      setState(() {
+        e.currentParticipants = e.currentParticipants;
+        dot.rightText = e.toString();
+        dot.leftText = e.durationTimeString();
+        e.isSignedIn = e.isSignedIn;
+        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+      });
     }
   }
 

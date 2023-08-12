@@ -62,8 +62,8 @@ class EventModel extends IPlutoRowModel {
       }
     }
     return EventModel(
-      startTime: DateTime.parse(json["start_time"]),
-      endTime: DateTime.parse(json["end_time"]),
+      startTime: json.containsKey("start_time") ? DateTime.parse(json["start_time"]) : DateTime.fromMicrosecondsSinceEpoch(0),
+      endTime: json.containsKey("end_time") ? DateTime.parse(json["end_time"]): DateTime.fromMicrosecondsSinceEpoch(0),
       id: json["id"],
       title: json.containsKey("title") ? json["title"] : null,
       description: json.containsKey("description") ? json["description"] : null,

@@ -198,6 +198,29 @@ class DataService {
     return infoList;
   }
 
+  static Future<void> loadEventsParticipants(List<EventModel> events)
+  async {
+    var data = await _supabase
+        .from('events')
+        .select("id, event_users(count)")
+        .in_("id", events.map((e)=>e.id).toList());
+
+    var eventList = List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+
+    if(isLoggedIn())
+    {
+      await loadIsCurrentUserSignedIn(eventList);
+    }
+
+    for(var e in events)
+    {
+      var eq = eventList.firstWhere((element) => element.id == e.id);
+      e.currentParticipants = eq.currentParticipants;
+      e.isSignedIn = eq.isSignedIn;
+    }
+  }
+
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
     dynamic data;
     if(onlyForSignedIn)
@@ -313,20 +336,24 @@ class DataService {
 
       if(isLoggedIn())
       {
-        List<dynamic> currentUserStatePerEventData = await _supabase
-            .from('events')
-            .select("id, event_users!inner(count)")
-            .eq("event_users.user", currentUserId())
-            .in_("id", event.childEventIds!);
-
-        Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c["event_users"][0]["count"]>0).map((c)=>c["id"] as int).toSet();
-        for(var e in event.childEvents)
-        {
-          e.isSignedIn = userSignedInEvents.contains(e.id!) ? true : false;
-        }
+        await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
     return event;
+  }
+
+  static Future<void> loadIsCurrentUserSignedIn(List<EventModel> events) async {
+    List<dynamic> currentUserStatePerEventData = await _supabase
+        .from('events')
+        .select("id, event_users!inner(count)")
+        .eq("event_users.user", currentUserId())
+        .in_("id", events.map((e) => e.id).toList());
+
+    Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c["event_users"][0]["count"]>0).map((c)=>c["id"] as int).toSet();
+    for(var e in events)
+    {
+      e.isSignedIn = userSignedInEvents.contains(e.id!) ? true : false;
+    }
   }
 
   static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
