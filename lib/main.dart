@@ -6,6 +6,7 @@ import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/pages/UserPage.dart';
 import 'package:av_app/pages/NewsPage.dart';
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/services/ToastHelper.dart';
 import 'package:av_app/widgets/ProgramTabView.dart';
 import 'package:av_app/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
@@ -250,6 +251,11 @@ void didChangeDependencies() {
   }
 
   void _programPressed() {
+  if(!DataService.isLoggedIn())
+    {
+      ToastHelper.Show("Pro zobrazení mého programu se přihlašte!");
+      return;
+    }
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
   }
