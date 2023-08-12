@@ -22,11 +22,11 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
     if(email.isEmpty){
       continue;
     }
-    var sex = fields[r][ImportHelper.getIndex(UserInfoModel.sexColumn, firstRow)].toString();
+    var sex = fields[r][ImportHelper.getIndex(UserInfoModel.sexColumn, firstRow)].toString().trim();
     if(sex.isEmpty){
       continue;
     }
-    var accomodation = fields[r][ImportHelper.getIndex(UserInfoModel.accommodationColumn, firstRow)].toString();
+    var accomodation = fields[r][ImportHelper.getIndex(UserInfoModel.accommodationColumn, firstRow)].toString().trim();
     if(accomodation.toLowerCase() == "storno")
     {
       continue;
@@ -34,12 +34,12 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
     sex = sex.trim().toLowerCase().startsWith("m") ? "male" : "female";
     var user = UserInfoModel.fromJson({
       UserInfoModel.idColumn:null,
-      UserInfoModel.emailColumn:email.toString(),
-      UserInfoModel.nameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.nameColumn, firstRow)].toString(),
-      UserInfoModel.surnameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.surnameColumn, firstRow)].toString(),
+      UserInfoModel.emailColumn:email,
+      UserInfoModel.nameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.nameColumn, firstRow)].toString().trim(),
+      UserInfoModel.surnameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.surnameColumn, firstRow)].toString().trim(),
       UserInfoModel.sexColumn:sex,
-      UserInfoModel.roleColumn:fields[r][ImportHelper.getIndex(UserInfoModel.roleColumn, firstRow)].toString(),
-      UserInfoModel.phoneColumn:fields[r][ImportHelper.getIndex(UserInfoModel.phoneColumn, firstRow)].toString(),
+      UserInfoModel.roleColumn:fields[r][ImportHelper.getIndex(UserInfoModel.roleColumn, firstRow)].toString().trim(),
+      UserInfoModel.phoneColumn:fields[r][ImportHelper.getIndex(UserInfoModel.phoneColumn, firstRow)].toString().trim(),
       UserInfoModel.accommodationColumn:accomodation,
     });
     userList.add(user);
