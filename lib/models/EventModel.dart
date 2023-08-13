@@ -25,6 +25,7 @@ class EventModel extends IPlutoRowModel {
   String? description = "";
   bool isSignedIn = false;
   bool splitForMenWomen = false;
+  bool isGroupEvent = false;
   DateTime startTime;
   DateTime endTime;
 
@@ -40,7 +41,8 @@ class EventModel extends IPlutoRowModel {
     this.parentEventIds,
     required this.splitForMenWomen,
     this.currentParticipants,
-    required this.isSignedIn});
+    required this.isSignedIn,
+    required this.isGroupEvent});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey("event_groups") && json["event_groups"] != null ? json["event_groups"] : null;
@@ -72,6 +74,7 @@ class EventModel extends IPlutoRowModel {
       place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
       splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
       isSignedIn: json.containsKey("isSignedIn") ? json["isSignedIn"] : false,
+      isGroupEvent: json.containsKey("is_group_event") ? json["is_group_event"] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
       currentParticipants: json.containsKey("event_users") ? json["event_users"][0]["count"] : json.containsKey("currentParticipants") ? json["currentParticipants"] : null,
@@ -93,6 +96,7 @@ class EventModel extends IPlutoRowModel {
     title = event.title;
     description = event.description;
     maxParticipants = event.maxParticipants;
+    isGroupEvent = event.isGroupEvent;
   }
 
   static const String startDateColumn = "startDate";
@@ -108,6 +112,8 @@ class EventModel extends IPlutoRowModel {
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
   static const String splitForMenWomenColumn = "split_for_men_women";
+  static const String isGroupEventColumn = "is_group_event";
+
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
@@ -132,7 +138,8 @@ class EventModel extends IPlutoRowModel {
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
       parentEventIds: parentEvents,
-      isSignedIn: false
+      isSignedIn: false,
+      isGroupEvent: json[isGroupEventColumn] == "true" ? true : false
     );
   }
 
@@ -150,6 +157,7 @@ class EventModel extends IPlutoRowModel {
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place!.toPlutoSelectString()),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
+      isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
       parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??"")
     });
   }
@@ -183,5 +191,6 @@ class EventModel extends IPlutoRowModel {
     maxParticipantsColumn: maxParticipants,
     "currentParticipants": currentParticipants,
     "isSignedIn": isSignedIn,
+    isGroupEventColumn: isGroupEvent,
   };
 }

@@ -1,3 +1,4 @@
+import 'package:av_app/services/DataService.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,19 +28,22 @@ class TimeLineItem{
 
   static DotType getIndicatorFromEvent(EventModel model)
   {
-    if (EventModel.canSignIn(model) == false) {
-      return DotType.dot;
-    } else {
       if (model.isSignedIn) {
         return DotType.closed;
-      } else {
-        if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
-          {
-            return DotType.dot;
-          }
+      }
+      else if(model.isGroupEvent && DataService.currentUserGroup() != null)
+      {
+        return DotType.closed;
+      }
+      else if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
+      {
+        return DotType.dot;
+      }
+      else if (EventModel.canSignIn(model))
+      {
         return DotType.open;
       }
-    }
+      return DotType.dot;
   }
 
   factory TimeLineItem.fromEventModel(EventModel model) {

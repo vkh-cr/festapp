@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:av_app/dataGrids/SingleTableDataGrid.dart';
 import 'package:av_app/models/ExclusiveGroupModel.dart';
 import 'package:av_app/models/PlaceModel.dart';
+import 'package:av_app/models/UserGroupInfoModel.dart';
 import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/services/DataGridHelper.dart';
 import 'package:av_app/services/DataService.dart';
@@ -12,6 +13,7 @@ import 'package:av_app/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
@@ -44,7 +46,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> loadData() async {
-    var placesRaws =  await DataService.getPlaces();
+    var placesRaws =  await DataService.getMapPlaces();
     var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouPlace);
     places = placesStrings;
@@ -169,7 +171,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           )
         ]);
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
           appBar: AppBar(
           title: const Text("Admin"),
@@ -196,6 +198,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       children: [
                         Icon(Icons.punch_clock_rounded),
                         Padding(padding: EdgeInsets.all(12), child: Text("Exkluzivita"))
+                      ]
+                  ),
+                  Row(
+                      children: [
+                        Icon(Icons.groups),
+                        Padding(padding: EdgeInsets.all(12), child: Text("Skupinky"))
                       ]
                   ),
                   Row(
@@ -390,6 +398,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
                   ),
                   PlutoColumn(
+                    title: "Skupinka",
+                    field: EventModel.isGroupEventColumn,
+                    type: PlutoColumnType.select(places),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                  ),
+                  PlutoColumn(
                     title: "Místo",
                     field: EventModel.placeColumn,
                     type: PlutoColumnType.select(places),
@@ -505,10 +522,207 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       width: 300
                   ),
                   PlutoColumn(
-                      title: "události",
+                      title: "Události",
                       field: ExclusiveGroupModel.eventsColumn,
                       type: PlutoColumnType.text(),
                       width: 500
+                  ),
+                ]).DataGrid(),
+            SingleTableDataGrid<UserGroupInfoModel>(
+                DataService.getUserGroupInfo,
+                UserGroupInfoModel.fromPlutoJson,
+                columns: [
+                  PlutoColumn(
+                      title: "",
+                      field: "delete",
+                      type: PlutoColumnType.text(),
+                      readOnly: true,
+                      enableFilterMenuItem: false,
+                      enableSorting: false,
+                      enableDropToResize: false,
+                      enableColumnDrag: false,
+                      enableContextMenu: false,
+                      cellPadding: EdgeInsets.zero,
+                      width: 100,
+                      renderer: (rendererContext) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  onPressed: () async{
+                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
+                                    if (id == -1){
+                                      rendererContext.stateManager.removeRows([rendererContext.row]);
+                                      return;
+                                    }
+                                    setState(() {
+                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_forever)),
+                            ]
+                        );
+                      }),
+                  PlutoColumn(
+                    title: "Id",
+                    field: UserGroupInfoModel.idColumn,
+                    type: PlutoColumnType.number(defaultValue: -1),
+                    readOnly: true,
+                    enableEditingMode: false,
+                    width: 50,
+                    renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+                  ),
+                  PlutoColumn(
+                      title: "Název skupinky",
+                      field: UserGroupInfoModel.titleColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
+                  PlutoColumn(
+                      title: "Vedoucí",
+                      field: UserGroupInfoModel.leaderColumn,
+                      type: PlutoColumnType.text(),
+                      enableEditingMode: false,
+                      width: 200,
+                      renderer: (rendererContext) {
+                        String? userName;
+                        var currentValue = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value;
+                        if(currentValue!=null && currentValue.toString().isNotEmpty)
+                        {
+                          var user = (rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value as UserInfoModel);
+                          userName = user.toString();
+                        }
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              IconButton(
+                                  onPressed: () async{
+                                    if(_allUsers.isEmpty)
+                                    {
+                                      _allUsers = await DataService.getAllUsersBasics();
+                                    }
+                                    showSearch(
+                                        context: context,
+                                        delegate: SearchPage<UserInfoModel>(
+                                          showItemsOnEmpty: true,
+                                          items: _allUsers,
+                                          searchLabel: 'Hledat účastníky',
+                                          suggestion: const Center(
+                                            child: Text(
+                                                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+                                          ),
+                                          failure: const Center(
+                                            child: Text("Nikdo nebyl nalezen."),
+                                          ),
+                                          filter: (person) => [
+                                            person.name,
+                                            person.surname,
+                                            person.email,
+                                          ],
+                                          builder: (person) => ListTile(
+                                            title: Text(person.name),
+                                            subtitle: Text(person.surname),
+                                            trailing: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: () {
+                                                      rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: const Text("Nastavit")),
+                                                Text(person.email),
+                                              ],
+                                            ),
+                                          ),
+                                        ));
+
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add_circle_rounded)),
+                              Text(userName??""),]
+                        );
+                      }
+                  ),
+                  PlutoColumn(
+                      title: "Účastníci",
+                      field: UserGroupInfoModel.participantsColumn,
+                      type: PlutoColumnType.text(),
+                      enableEditingMode: false,
+                      width: 1000,
+                      renderer: (rendererContext) {
+                        String? userNames;
+                        var currentValue = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value;
+                        if(currentValue!=null && currentValue.toString().isNotEmpty)
+                        {
+                          var participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>);
+                          userNames = participants.join(",");
+                        }
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+
+                              IconButton(
+                                  onPressed: () async{
+                                    if(_allUsers.isEmpty)
+                                    {
+                                      _allUsers = await DataService.getAllUsersBasics();
+                                    }
+                                    showSearch(
+                                        context: context,
+                                        delegate: SearchPage<UserInfoModel>(
+                                          showItemsOnEmpty: true,
+                                          items: _allUsers,
+                                          searchLabel: 'Hledat účastníky',
+                                          suggestion: const Center(
+                                            child: Text(
+                                                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+                                          ),
+                                          failure: const Center(
+                                            child: Text("Nikdo nebyl nalezen."),
+                                          ),
+                                          filter: (person) => [
+                                            person.name,
+                                            person.surname,
+                                            person.email,
+                                          ],
+                                          builder: (person) => ListTile(
+                                            title: Text(person.name),
+                                            subtitle: Text(person.surname),
+                                            trailing: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.end,
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: () {
+                                                      rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
+                                                      //Navigator.pop(context);
+                                                    },
+                                                    child: const Text("Přidat")),
+                                                Text(person.email),
+                                              ],
+                                            ),
+                                          ),
+                                        ));
+
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add_circle_rounded)),
+                              IconButton(
+                                  onPressed: () async{
+                                    (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>).clear();
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.remove_circle)),
+                              Text(userNames??""),]
+                        );
+                      }
+
                   ),
                 ]).DataGrid(),
             usersDataGrid.DataGrid()
@@ -517,7 +731,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
       ),
     );
   }
-
+  List<UserInfoModel> _allUsers = [];
   Future<void> _import() async {
     var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV tabulky", "Potvrdit", "Storno");
     if(file==null) {
@@ -539,7 +753,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
     {
       return;
     }
-    var existingUsers = await DataService.getAllUsers();
+    var existingUsers = await DataService.getAllUsersBasics();
     for(var u in users)
     {
       if(importNewOnly && existingUsers.any((element) => element.email == u.email))

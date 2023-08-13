@@ -48,10 +48,8 @@ class _ProgramPageState extends State<ProgramPage> {
     {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
-        e.currentParticipants = e.currentParticipants;
         dot.rightText = e.toString();
         dot.leftText = e.durationTimeString();
-        e.isSignedIn = e.isSignedIn;
         dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
       });
     }

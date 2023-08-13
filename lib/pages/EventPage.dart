@@ -75,7 +75,7 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
                             onPressed: () async {
-                              _queriedParticipants = await DataService.getAllUsers();
+                              _queriedParticipants = await DataService.getAllParticipants();
                               _queriedParticipants.forEach((q) => {
                                     if (_participants.any((p) => p.email == q.email))
                                       {q.isSignedIn = true}

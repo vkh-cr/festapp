@@ -1,4 +1,5 @@
 import 'package:av_app/models/PlaceModel.dart';
+import 'package:av_app/models/UserGroupInfoModel.dart';
 import 'package:av_app/services/ToastHelper.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -10,13 +11,14 @@ class UserInfoModel extends IPlutoRowModel {
   String email;
   String name;
   String surname;
-  String sex;
-  String role;
+  String? sex;
+  String? role;
   String? phone;
   String? accommodation;
-  bool isAdmin = false;
-  bool isReceptionAdmin = false;
+  bool? isAdmin = false;
+  bool? isReceptionAdmin = false;
   PlaceModel? accommodationModel;
+  UserGroupInfoModel? userGroup;
 
   static const String idColumn = "id";
   static const String emailColumn = "email";
@@ -51,10 +53,10 @@ class UserInfoModel extends IPlutoRowModel {
     required this.email,
     required this.name,
     required this.surname,
-    required this.sex,
-    required this.role,
-    required this.isAdmin,
-    required this.isReceptionAdmin,
+     this.sex,
+     this.role,
+     this.isAdmin,
+     this.isReceptionAdmin,
      this.phone,
      this.accommodation});
 
@@ -125,6 +127,12 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   String toBasicString() => email;
+
+  @override
+  String toString() => toFullNameString();
+
+  String toFullNameString() => "$name $surname";
+
 
   String sexToCzech() => sex == "male" ? "Muž" : "Žena";
 }

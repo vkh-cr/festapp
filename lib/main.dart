@@ -299,9 +299,7 @@ void didChangeDependencies() {
     {
         var dot = _dots.singleWhere((element) => element.id == e.id!);
         setState(() {
-          e.currentParticipants = e.currentParticipants;
           dot.rightText = e.toString();
-          e.isSignedIn = e.isSignedIn;
           dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
         });
     }

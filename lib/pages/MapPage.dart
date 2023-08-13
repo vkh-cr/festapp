@@ -143,7 +143,7 @@ class _MapPageState extends State<MapPage> {
         PageTitle = place.title;
       });
     } else {
-      places = await DataService.getPlaces();
+      places = await DataService.getMapPlaces();
     }
     var mappedMarkers = places
         .map(
