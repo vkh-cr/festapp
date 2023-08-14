@@ -285,6 +285,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
                             child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
                         );
                       }),
+                  PlutoColumn(
+                    title: "Schovat",
+                    field: InformationModel.isHiddenColumn,
+                    type: PlutoColumnType.select(places),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                  ),
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
                 DataService.getEventsWithPlaces,

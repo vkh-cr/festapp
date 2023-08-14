@@ -211,6 +211,17 @@ class DataService {
     return infoList;
   }
 
+  static Future<List<InformationModel>> getActiveInformation() async {
+    var data = await _supabase
+        .from(InformationModel.informationTable)
+        .select()
+        .eq(InformationModel.isHiddenColumn, false);
+    var infoList = List<InformationModel>.from(
+        data.map((x) => InformationModel.fromJson(x)));
+    infoList.sortBy((element) => element.title.toLowerCase());
+    return infoList;
+  }
+
   static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
   async {
     var data = await _supabase
@@ -643,16 +654,18 @@ class DataService {
     ensureIsAdmin();
     if(info.id == null)
     {
-      await _supabase.from('information').insert({
-        "title": info.title,
-        "description": info.description
+      await _supabase.from(InformationModel.informationTable).insert({
+        InformationModel.titleColumn: info.title,
+        InformationModel.descriptionColumn: info.description,
+        InformationModel.isHiddenColumn: info.isHidden
       });
       return;
     }
-    await _supabase.from('information').upsert({
-      "title": info.title,
-      "id": info.id,
-      "description": info.description
+    await _supabase.from(InformationModel.informationTable).upsert({
+      InformationModel.titleColumn: info.title,
+      InformationModel.idColumn: info.id,
+      InformationModel.descriptionColumn: info.description,
+      InformationModel.isHiddenColumn: info.isHidden
     }).select();
   }
 
@@ -660,9 +673,9 @@ class DataService {
     ensureIsAdmin();
     ensureCanDeleteCritical();
     await _supabase
-        .from('information')
+        .from(InformationModel.informationTable)
         .delete()
-        .eq("id", info.id);
+        .eq(InformationModel.idColumn, info.id);
   }
 
   static Future<List<ParticipantModel>> getAllParticipants() async {

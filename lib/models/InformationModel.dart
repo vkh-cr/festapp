@@ -8,18 +8,22 @@ class InformationModel extends IPlutoRowModel {
   int? id;
   String title;
   String? description;
+  bool isHidden;
+
   bool isExpanded = false;
 
   static const String idColumn = "id";
   static const String titleColumn = "title";
   static const String descriptionColumn = "description";
+  static const String isHiddenColumn = "is_hidden";
   static const String informationTable = "information";
 
   factory InformationModel.fromJson(Map<String, dynamic> json) {
     return InformationModel(
-      id: json["id"],
-      title: json["title"],
-      description: json.containsKey("description") ? json["description"] : null,
+      id: json[idColumn],
+      title: json[titleColumn],
+      description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
+      isHidden: json[isHiddenColumn],
     );
   }
 
@@ -28,6 +32,7 @@ class InformationModel extends IPlutoRowModel {
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       description: json[descriptionColumn],
+      isHidden: json[isHiddenColumn] == "true" ? true : false
     );
   }
 
@@ -37,7 +42,8 @@ class InformationModel extends IPlutoRowModel {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
-      descriptionColumn: PlutoCell(value: description)
+      descriptionColumn: PlutoCell(value: description),
+      isHiddenColumn: PlutoCell(value: isHidden.toString())
     });
   }
 
@@ -57,5 +63,6 @@ class InformationModel extends IPlutoRowModel {
   InformationModel({
     required this.id,
     required this.title,
-    required this.description});
+    required this.description,
+    required this.isHidden});
 }

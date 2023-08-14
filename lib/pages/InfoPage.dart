@@ -15,7 +15,7 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> {
-  List<InformationModel>? _information;
+  List<InformationModel>? _informationList;
   _InfoPageState();
 
   @override
@@ -37,14 +37,14 @@ class _InfoPageState extends State<InfoPage> {
           child: SingleChildScrollView(
             child: ExpansionPanelList(
               expansionCallback: (panelIndex, isExpanded) {
-                _information!.forEach((element) { element.isExpanded = false; });
-                _information![panelIndex].isExpanded = !isExpanded;
+                _informationList!.forEach((element) { element.isExpanded = false; });
+                _informationList![panelIndex].isExpanded = !isExpanded;
                 setState(() {
                 });
 
               },
               children:
-                _information == null ? [] : _information!.map<ExpansionPanel>((InformationModel item) {
+                _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
@@ -83,7 +83,7 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    _information = await DataService.getInformation();
+    _informationList = await DataService.getActiveInformation();
     setState(() {});
   }
 }
