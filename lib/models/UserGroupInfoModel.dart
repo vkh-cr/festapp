@@ -62,7 +62,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       leader: json[leaderColumn],
-      participants: json[participantsColumn]
+      participants: json[participantsColumn] == "" ? [] : json[participantsColumn]
     );
   }
 
@@ -81,7 +81,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    //await DataService.deleteExclusiveGroup(this);
+    await DataService.deleteUserGroupInfo(this);
   }
 
   @override

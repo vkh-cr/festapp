@@ -360,6 +360,14 @@ class DataService {
     }
   }
 
+  static deleteUserGroupInfo(UserGroupInfoModel model) async {
+    ensureIsAdmin();
+    await _supabase
+        .from(UserGroupInfoModel.userGroupInfoTable)
+        .delete()
+        .eq("id", model.id);
+  }
+
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
     ensureIsAdmin();
     var upsertObj = {
