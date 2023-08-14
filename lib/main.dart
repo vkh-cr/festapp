@@ -133,12 +133,12 @@ void didChangeDependencies() {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SvgPicture.asset(
-                    width: 60,
+                    width: 50,
                     semanticsLabel: 'Absolventský Velehrad',
                     'assets/icons/avlogo.svg',
                   ),
@@ -185,7 +185,7 @@ void didChangeDependencies() {
               )),
           Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed)),
           Padding(
-            padding: const EdgeInsets.only(bottom: 24.0),
+            padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[

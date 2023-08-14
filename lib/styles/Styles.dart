@@ -28,7 +28,10 @@ double appMaxWidth = 820;
 
 
 ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(8),
+    minimumSize: const Size(70, 50),
+
+    maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: primaryRed,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
@@ -70,7 +73,7 @@ class CircularButton extends MainPageButton {
     required VoidCallback onPressed,
     required Widget child,
     backgroundColor = primaryRed,
-    this.size = const Size(60, 60),
+    this.size = const Size(50, 50),
   }) : super(
           key: key,
           onPressed: onPressed,
