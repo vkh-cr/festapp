@@ -286,7 +286,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         );
                       }),
                   PlutoColumn(
-                    title: "Schovat",
+                    title: "Skrýt",
                     field: InformationModel.isHiddenColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -667,7 +667,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         if(currentValue!=null && currentValue.toString().isNotEmpty)
                         {
                           var participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>);
-                          userNames = participants.join(",");
+                          userNames = participants.join(", ");
                         }
                         return Row(
                             mainAxisAlignment: MainAxisAlignment.start,
