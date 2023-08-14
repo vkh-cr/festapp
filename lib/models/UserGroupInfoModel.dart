@@ -8,7 +8,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
   int? id;
   String title;
-  //String leaderId;
   UserInfoModel? leader;
   int? place;
   String? description;
@@ -17,7 +16,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
   UserGroupInfoModel({
     required this.id,
     required this.title,
-    //required this.leaderId,
     this.leader,
     this.description,
     this.place,
@@ -28,12 +26,10 @@ class UserGroupInfoModel extends IPlutoRowModel {
     return UserGroupInfoModel(
       id: json[idColumn],
       title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-      //leaderId: json.containsKey(leaderColumn) ? json[leaderColumn] : null,
       place: json.containsKey(placeColumn) ? json[placeColumn] : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
       leader: json.containsKey(userInfoTable) ? UserInfoModel.fromJson(json[userInfoTable]) : null,
       participants: json.containsKey(userGroupsTable) ? List<UserInfoModel>.from(json[userGroupsTable].map((e)=>UserInfoModel.fromJson(e["user_info"]))) : []
-      //required: json.containsKey(userGroupsTable) ? List<int>.from(json[userGroupsTable].map((e)=>e["user"])) : null,
   );
   }
 
@@ -51,13 +47,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {
-
-    // List<int> events = [];
-    // if(json[eventsColumn].toString().trim().isNotEmpty)
-    // {
-    //   events = json[eventsColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
-    // }
-
     return UserGroupInfoModel(
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
@@ -73,9 +62,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
       titleColumn: PlutoCell(value: title),
       leaderColumn: PlutoCell(value: leader),
       participantsColumn: PlutoCell(value: participants),
-      //titleColumn: PlutoCell(value: title),
-
-      //eventsColumn: PlutoCell(value: events?.map((e) => e.toString()).join(",")??"")
     });
   }
 
@@ -90,5 +76,5 @@ class UserGroupInfoModel extends IPlutoRowModel {
   }
 
   @override
-  String toBasicString() => "$title";
+  String toBasicString() => title;
 }
