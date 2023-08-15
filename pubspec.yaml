@@ -50,7 +50,6 @@ dependencies:
   collection: ^1.17.0
   flutter_map_location_marker: ^7.0.2
   geolocator: ^9.0.2
-  flutter_launcher_icons: ^0.13.1
   flutter_widget_from_html: ^0.10.3
   quill_html_editor: ^2.2.2
   pluto_grid: ^7.0.2
@@ -60,6 +59,7 @@ dependencies:
   get_storage:
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
