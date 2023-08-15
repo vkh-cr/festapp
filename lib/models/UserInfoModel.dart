@@ -8,9 +8,9 @@ import 'PlutoAbstract.dart';
 
 class UserInfoModel extends IPlutoRowModel {
   String? id;
-  String email;
-  String name;
-  String surname;
+  String? email;
+  String? name;
+  String? surname;
   String? sex;
   String? role;
   String? phone;
@@ -49,10 +49,10 @@ class UserInfoModel extends IPlutoRowModel {
   };
 
   UserInfoModel({
-    required this.id,
-    required this.email,
-    required this.name,
-    required this.surname,
+     this.id,
+     this.email,
+     this.name,
+     this.surname,
      this.sex,
      this.role,
      this.isAdmin,
@@ -118,7 +118,7 @@ class UserInfoModel extends IPlutoRowModel {
   Future<void> updateMethod() async {
     if(id == null)
     {
-      var newUserId = await DataService.createUser(email);
+      var newUserId = await DataService.createUser(email!);
       id = newUserId;
       ToastHelper.Show("Vytvořen: $email");
     }
@@ -126,7 +126,7 @@ class UserInfoModel extends IPlutoRowModel {
   }
 
   @override
-  String toBasicString() => email;
+  String toBasicString() => email??"";
 
   @override
   String toString() => toFullNameString();

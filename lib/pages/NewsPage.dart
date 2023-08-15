@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
 import '../services/DataService.dart';
-import '../services/ToastHelper.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
@@ -17,22 +16,16 @@ class NewsPage extends StatefulWidget {
 
 class _NewsPageState extends State<NewsPage> {
   List<NewsMessage> newsMessages = [];
-  final TextEditingController _messageController = TextEditingController();
 
   void _showMessageDialog(BuildContext context) {
     Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
       if(value != null)
       {
         var message = value as String;
-        await sendMessage(message);
-        _messageController.clear();
+        await DataService.insertNewsMessage(message);
+        await loadNewsMessages();
       }
     });
-  }
-
-  Future<void> sendMessage(String message) async {
-    await DataService.insertNewsMessage(message);
-    await loadNewsMessages();
   }
 
   Future<void> loadNewsMessages() async {
@@ -94,12 +87,10 @@ class _NewsPageState extends State<NewsPage> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     child: Container(
-                      //color: Colors.white70,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
                         color: primaryBlue1.withOpacity(0.10)
                       ),
-                      //color: Colors.white70,
                       child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
                     )),
                   Visibility(

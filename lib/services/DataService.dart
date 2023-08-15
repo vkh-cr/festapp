@@ -68,8 +68,16 @@ class DataService {
     return _supabase.auth.currentSession != null;
   }
 
-  static currentUserGroup() {
+  static UserGroupInfoModel? currentUserGroup() {
     return _currentUser?.userGroup;
+  }
+
+  static hasGroup() {
+    return _currentUser?.userGroup != null;
+  }
+
+  static isGroupLeader() {
+    return hasGroup() && _currentUser?.userGroup?.leader?.id == currentUserId();
   }
 
   static String? currentUserEmail() {
@@ -107,6 +115,10 @@ class DataService {
   static Future<void> deleteUser(String uuid) async {
     ensureCanDeleteCritical();
     var adminClient = await GetSupabaseAdminClient();
+    await _supabase
+        .from(UserGroupInfoModel.userGroupsTable)
+        .delete()
+        .eq("user", uuid);
     await _supabase
         .from(UserInfoModel.userInfoTable)
         .delete()
@@ -198,6 +210,12 @@ class DataService {
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
+  static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
+    var data = await _supabase.from(UserGroupInfoModel.userGroupInfoTable)
+        .select("${UserGroupInfoModel.titleColumn}, ${PlaceModel.placeTable}(*)");
+    return List<UserGroupInfoModel>.from(data.map((x) => UserGroupInfoModel.fromJson(x)));
+  }
+
   static Future<PlaceModel> getPlace(int id) async {
     var data = await _supabase.from('places').select().eq("id", id).single();
     return PlaceModel.fromJson(data);
@@ -256,7 +274,7 @@ class DataService {
           .order('start_time', ascending: true);
 
       //join group events
-      if(currentUserGroup()!=null)
+      if(hasGroup())
       {
         var data2 = await _supabase
             .from('events')
@@ -302,18 +320,37 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroupInfo() async {
+  static Future<List<UserGroupInfoModel>> getUserGroupInfoList() async {
     var data = await _supabase
         .from(UserGroupInfoModel.userGroupInfoTable)
         .select(
         "${UserGroupInfoModel.idColumn},"
         "${UserGroupInfoModel.titleColumn},"
         "user_info!leader(id, name, surname, email),"
-        "${UserGroupInfoModel.placeColumn},"
+        "${PlaceModel.placeTable}(*),"
         "${UserGroupInfoModel.descriptionColumn},"
         "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email))");
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
+  }
+
+  static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
+    var data = await _supabase
+        .from(UserGroupInfoModel.userGroupInfoTable)
+        .select(
+        "${UserGroupInfoModel.idColumn},"
+            "${UserGroupInfoModel.titleColumn},"
+            "user_info!leader(id, name, surname, email),"
+            "${PlaceModel.placeTable}(*),"
+            "${UserGroupInfoModel.descriptionColumn},"
+            "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email))")
+    .eq(UserGroupInfoModel.idColumn, id)
+    .maybeSingle();
+    if(data==null)
+    {
+      return null;
+    }
+    return UserGroupInfoModel.fromJson(data);
   }
 
   static Future<List<ExclusiveGroupModel>> getExclusiveGroups() async {
@@ -325,7 +362,11 @@ class DataService {
   }
 
   static updateUserGroupInfo(UserGroupInfoModel model) async {
-    ensureIsAdmin();
+    if(!(isAdmin() || model.leader!.id == currentUserId()))
+    {
+      ToastHelper.Show("Must be leader or admin to change the group.", severity: ToastSeverity.NotOk);
+      return;
+    }
     if(model.leader == null)
     {
       throw Exception("Cannot save group without leader");
@@ -335,17 +376,24 @@ class DataService {
       UserGroupInfoModel.leaderColumn: model.leader!.id,
     };
 
+    if(model.description != null)
+    {
+      upsertObj.addAll({UserGroupInfoModel.descriptionColumn: model.description});
+    }
+    if(model.place != null)
+    {
+      upsertObj.addAll({UserGroupInfoModel.placeColumn: model.place!.id.toString()});
+    }
     dynamic eventData;
     if(model.id!=null) {
       upsertObj.addAll({"id": model.id.toString()});
-      eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).update(upsertObj).eq("id", model.id).select().single();
+      eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).upsert(upsertObj).eq("id", model.id).select().single();
     }
     else
     {
       eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);
-
 
     await _supabase
         .from(UserGroupInfoModel.userGroupsTable)
@@ -363,9 +411,17 @@ class DataService {
   static deleteUserGroupInfo(UserGroupInfoModel model) async {
     ensureIsAdmin();
     await _supabase
+        .from(UserGroupInfoModel.userGroupsTable)
+        .delete()
+        .eq("group", model.id);
+    await _supabase
         .from(UserGroupInfoModel.userGroupInfoTable)
         .delete()
         .eq("id", model.id);
+    await _supabase
+        .from(PlaceModel.placeTable)
+        .delete()
+        .eq("id", model.place!.id);
   }
 
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
@@ -413,7 +469,7 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, split_for_men_women, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
+            "id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
         .eq("id", eventId)
         .single();
     var event = EventModel.fromJson(data);
@@ -455,7 +511,7 @@ class DataService {
     UserGroupInfoModel? id;
     var partOfGroup = await _supabase
     .from(UserGroupInfoModel.userGroupInfoTable)
-    .select("id, title")
+    .select("id, title, user_info!leader(id), places(id)")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
     .maybeSingle();
     if(partOfGroup!=null)
@@ -658,6 +714,30 @@ class DataService {
         .eq("id", data.id);
   }
 
+  static Future<PlaceModel> updatePlace(PlaceModel model) async {
+    ensureIsAdmin();
+    if(model.id == null)
+    {
+      var data = await _supabase.from(PlaceModel.placeTable).insert({
+        PlaceModel.titleColumn: model.title,
+        PlaceModel.descriptionColumn: model.description,
+        PlaceModel.isHiddenColumn: model.isHidden,
+        PlaceModel.coordinatesColumn: {"latLng" : model.latLng},
+        PlaceModel.typeColumn: model.type,
+      }).select().single();
+      return PlaceModel.fromJson(data);
+    }
+    var data = await _supabase.from(PlaceModel.placeTable).upsert({
+      PlaceModel.idColumn: model.id,
+      PlaceModel.titleColumn: model.title,
+      PlaceModel.descriptionColumn: model.description,
+      PlaceModel.isHiddenColumn: model.isHidden,
+      PlaceModel.coordinatesColumn: {"latLng" : model.latLng},
+      PlaceModel.typeColumn: model.type,
+    }).select().single();
+    return PlaceModel.fromJson(data);
+  }
+
   static Future<void> updateInformation(InformationModel info) async {
     ensureIsAdmin();
     if(info.id == null)
@@ -810,6 +890,15 @@ class DataService {
       events.remove(r);
     }
 
+    //rewrite group names for group events
+    for(var e in events)
+    {
+      if(e.isGroupEvent && hasGroup())
+      {
+        e.title = currentUserGroup()!.title;
+      }
+    }
+
     events.sort((a, b)
     {
       var cmp = a.startTime.compareTo(b.startTime);
@@ -822,7 +911,11 @@ class DataService {
   }
 
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {
-    ensureIsAdmin();
+    if(!(DataService.isAdmin() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
+    {
+      ToastHelper.Show("You do have no rights to change this position.", severity: ToastSeverity.NotOk);
+      return;
+    }
     await _supabase.from("places").update({
       "coordinates": {
         "latLng": {"lat": lat, "lng": lng}

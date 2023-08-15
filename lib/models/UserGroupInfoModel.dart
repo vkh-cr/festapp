@@ -2,6 +2,7 @@ import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/PlutoAbstract.dart';
 import '../services/DataService.dart';
+import 'PlaceModel.dart';
 import 'UserInfoModel.dart';
 
 class UserGroupInfoModel extends IPlutoRowModel {
@@ -9,24 +10,30 @@ class UserGroupInfoModel extends IPlutoRowModel {
   int? id;
   String title;
   UserInfoModel? leader;
-  int? place;
+  PlaceModel? place;
+  int? placeId;
+  String? leaderId;
   String? description;
   List<UserInfoModel> participants;
 
   UserGroupInfoModel({
     required this.id,
     required this.title,
+    this.leaderId,
     this.leader,
     this.description,
     this.place,
+    this.placeId,
     required this.participants,
     });
 
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
       id: json[idColumn],
+      leaderId: json.containsKey(leaderColumn) ? json[leaderColumn] : null,
       title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-      place: json.containsKey(placeColumn) ? json[placeColumn] : null,
+      placeId: json.containsKey(placeColumn) ? json[placeColumn] : null,
+      place: json.containsKey(PlaceModel.placeTable) && json[PlaceModel.placeTable] != null ? PlaceModel.fromJson(json[PlaceModel.placeTable]) : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
       leader: json.containsKey(userInfoTable) ? UserInfoModel.fromJson(json[userInfoTable]) : null,
       participants: json.containsKey(userGroupsTable) ? List<UserInfoModel>.from(json[userGroupsTable].map((e)=>UserInfoModel.fromJson(e["user_info"]))) : []
@@ -47,11 +54,14 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {
+    var model = json[UserGroupInfoModel.descriptionColumn] as UserGroupInfoModel?;
     return UserGroupInfoModel(
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       leader: json[leaderColumn],
-      participants: json[participantsColumn] == "" ? [] : json[participantsColumn]
+      description: model?.description,
+      participants: json[participantsColumn] == "" ? [] : json[participantsColumn],
+      place: (json[placeColumn] as UserGroupInfoModel).place
     );
   }
 
@@ -61,6 +71,8 @@ class UserGroupInfoModel extends IPlutoRowModel {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
       leaderColumn: PlutoCell(value: leader),
+      descriptionColumn: PlutoCell(value: this),
+      placeColumn: PlutoCell(value: this),
       participantsColumn: PlutoCell(value: participants),
     });
   }

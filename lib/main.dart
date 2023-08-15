@@ -39,7 +39,7 @@ Future<void> main() async {
   initializeDateFormatting();
   if(!DataService.isLoggedIn())
   {
-    DataService.tryAuthUser().then((value) async => {if (value) {await DataService.loadCurrentUserData()}});
+    DataService.tryAuthUser();
   }
   runApp(const MyApp());
 }
@@ -317,7 +317,7 @@ void didChangeDependencies() {
   int _messageCount = 0;
   bool showMessageCount() => _messageCount>0;
   String messageCountString() => _messageCount<100?_messageCount.toString():"99";
-  void loadData() {
+  Future<void> loadData() async {
 
     //get data from offline
     try
@@ -339,11 +339,11 @@ void didChangeDependencies() {
 
     if(DataService.isLoggedIn())
     {
-      DataService.getCurrentUserInfo().then((value) => userName = value.name);
+      await DataService.getCurrentUserInfo().then((value) => userName = value.name!);
     }
 
     //load online data
-    DataService.updateEvents(_events)
+    await DataService.updateEvents(_events)
         .whenComplete(() async {
           _dots.clear();
           _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));

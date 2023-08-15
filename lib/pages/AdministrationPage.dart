@@ -5,6 +5,7 @@ import 'package:av_app/models/ExclusiveGroupModel.dart';
 import 'package:av_app/models/PlaceModel.dart';
 import 'package:av_app/models/UserGroupInfoModel.dart';
 import 'package:av_app/models/UserInfoModel.dart';
+import 'package:av_app/pages/MapPage.dart';
 import 'package:av_app/services/DataGridHelper.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:av_app/services/ImportHelper.dart';
@@ -538,7 +539,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
-                DataService.getUserGroupInfo,
+                DataService.getUserGroupInfoList,
                 UserGroupInfoModel.fromPlutoJson,
                 columns: [
                   PlutoColumn(
@@ -585,7 +586,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       title: "Název skupinky",
                       field: UserGroupInfoModel.titleColumn,
                       type: PlutoColumnType.text(),
-                      width: 300
+                      width: 200
                   ),
                   PlutoColumn(
                       title: "Vedoucí",
@@ -629,8 +630,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                             person.email,
                                           ],
                                           builder: (person) => ListTile(
-                                            title: Text(person.name),
-                                            subtitle: Text(person.surname),
+                                            title: Text(person.name!),
+                                            subtitle: Text(person.surname!),
                                             trailing: Column(
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
@@ -640,7 +641,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                                       Navigator.pop(context);
                                                     },
                                                     child: const Text("Nastavit")),
-                                                Text(person.email),
+                                                Text(person.email!),
                                               ],
                                             ),
                                           ),
@@ -658,7 +659,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                       title: "Účastníci",
                       field: UserGroupInfoModel.participantsColumn,
-                      type: PlutoColumnType.text(),
+                      type: PlutoColumnType.text(defaultValue: <UserInfoModel>[]),
                       enableEditingMode: false,
                       width: 1000,
                       renderer: (rendererContext) {
@@ -698,8 +699,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                             person.email,
                                           ],
                                           builder: (person) => ListTile(
-                                            title: Text(person.name),
-                                            subtitle: Text(person.surname),
+                                            title: Text(person.name!),
+                                            subtitle: Text(person.surname!),
                                             trailing: Column(
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
@@ -709,7 +710,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                                       //Navigator.pop(context);
                                                     },
                                                     child: const Text("Přidat")),
-                                                Text(person.email),
+                                                Text(person.email!),
                                               ],
                                             ),
                                           ),
@@ -731,8 +732,75 @@ class _AdministrationPageState extends State<AdministrationPage> {
                               Text(userNames??""),]
                         );
                       }
-
                   ),
+                  PlutoColumn(
+                      width: 150,
+                      title: "Popis",
+                      enableFilterMenuItem: false,
+                      enableContextMenu: false,
+                      enableSorting: false,
+                      field: UserGroupInfoModel.descriptionColumn,
+                      type: PlutoColumnType.text(defaultValue: null),
+                      renderer: (rendererContext) {
+                        return ElevatedButton(
+                            onPressed: () async{
+                              var id = rendererContext.row.cells[UserGroupInfoModel.idColumn]?.value as int;
+                              if(id==-1)
+                              {
+                                ToastHelper.Show("Pro úpravu popisu skupinku nejdřív ulož!");
+                                return;
+                              }
+                              var model = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]?.value as UserGroupInfoModel;
+                              String? oldText = model.description;
+                              String? textToEdit = "";
+                              textToEdit = oldText;
+                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: textToEdit).then((value) async {
+                                if(value != null)
+                                {
+                                  var newText = value as String;
+                                  if(newText!=textToEdit)
+                                  {
+                                    var model = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]?.value as UserGroupInfoModel?;
+                                    model?.description = newText;
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
+                                  }
+                                }
+                              });},
+                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                        );
+                      }),
+                  PlutoColumn(
+                      width: 150,
+                      title: "Místo",
+                      enableFilterMenuItem: false,
+                      enableContextMenu: false,
+                      enableSorting: false,
+                      field: UserGroupInfoModel.placeColumn,
+                      type: PlutoColumnType.text(defaultValue: null),
+                      renderer: (rendererContext) {
+                        return ElevatedButton(
+                            onPressed: () async {
+                              var id = rendererContext.row.cells[UserGroupInfoModel.idColumn]?.value as int;
+                              if(id==-1)
+                              {
+                                ToastHelper.Show("Pro výběr místa skupinku nejdřív ulož!");
+                                return;
+                              }
+
+                              var model = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as UserGroupInfoModel;
+                              model.place ??= PlaceModel(id: null, title: model.title, description: "", type: "group", isHidden: true, latLng: PlaceModel.DefaultPosition);
+                              if(model.place!.id == null)
+                              {
+                                model.place = await DataService.updatePlace(model.place!);
+                                await DataService.updateUserGroupInfo(model);
+                              }
+                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: model.place!.id);
+                            },
+                            child: const Row(children: [Icon(Icons.location_pin), Padding(padding: EdgeInsets.all(6), child: Text("Vybrat")) ])
+                        );
+                      }),
                 ]).DataGrid(),
             usersDataGrid.DataGrid()
           ]
@@ -769,10 +837,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
       {
         continue;
       }
-      u.id = await DataService.getUserByEmail(u.email);
+      u.id = await DataService.getUserByEmail(u.email!);
       if(u.id == null)
       {
-        u.id = await DataService.createUser(u.email);
+        u.id = await DataService.createUser(u.email!);
         ToastHelper.Show("Vytvořen ${u.email}");
       }
       await DataService.updateUser(u);

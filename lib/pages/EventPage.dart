@@ -5,6 +5,7 @@ import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../models/ParticipantModel.dart';
+import '../models/UserGroupInfoModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
@@ -22,6 +23,8 @@ class EventPage extends StatefulWidget {
 class _EventPageState extends State<EventPage> {
   final List<TimeLineItem> _childDots = [];
   EventModel? _event;
+  UserGroupInfoModel? _groupInfoModel;
+
   List<ParticipantModel> _participants = [];
   List<ParticipantModel> _queriedParticipants = [];
   bool isLoadingParticipants = true;
@@ -128,13 +131,22 @@ class _EventPageState extends State<EventPage> {
                         ),
                       ),
                       Visibility(
-                          visible: DataService.isAdmin(),
+                          visible: DataService.isAdmin() || DataService.isGroupLeader(),
                           child: ElevatedButton(
                               onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
                                 if(value != null)
                                 {
-                                  _event!.description = value as String;
-                                  await DataService.updateEvent(_event!);
+                                  var changed = value as String;
+                                  if(_groupInfoModel!=null)
+                                  {
+                                    _groupInfoModel!.description = changed;
+                                    await DataService.updateUserGroupInfo(_groupInfoModel!);
+                                  }
+                                  else{
+                                    _event!.description = changed;
+                                    await DataService.updateEvent(_event!);
+                                  }
+
                                   ToastHelper.Show("Popis změněn!");
                                   Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
                                 }
@@ -200,7 +212,38 @@ class _EventPageState extends State<EventPage> {
                               );
                             })],
                       ),
-                  )
+                  ),
+                  Visibility(
+                  visible: DataService.hasGroup() && _groupInfoModel != null,
+                  child: ExpansionTile(
+                    title: Text(_groupInfoModel?.title ?? ""),
+                    children: [Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            ),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                            child: Text("Moderátor: ${_groupInfoModel?.leader!.name}", style: normalTextStyle)),
+                        Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                            child: Text("Členové skupinky:", style: normalTextStyle)),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(8),
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _groupInfoModel?.participants.length??0,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                              child: Text("${_groupInfoModel?.participants[index].name}", style: normalTextStyle),
+                            );
+                          })
+                      ],
+                    )],
+                  ),
+                )
                 ],
               ),
           ),
@@ -216,7 +259,8 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadData(int id) async {
-    await loadEvent(id).whenComplete(()=>loadParticipants(id));
+    await loadEvent(id);
+    await loadParticipants(id);
   }
 
   Future<void> loadParticipants(int id) async {
@@ -230,6 +274,24 @@ class _EventPageState extends State<EventPage> {
 
   Future<void> loadEvent(int eventId) async {
     var event = await DataService.getEvent(eventId);
+
+    if(event.isGroupEvent && DataService.hasGroup())
+    {
+      var group = await DataService.getUserGroupInfo(DataService.currentUserGroup()!.id!);
+      if(group == null)
+      {
+        Navigator.pop(context);
+        return;
+      }
+      event.description = group.description;
+      event.title = group.title;
+      event.place = group.place;
+      _groupInfoModel = group;
+      _event = event;
+      setState(() {});
+      return;
+    }
+
     var currentParticipants =
         await DataService.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;

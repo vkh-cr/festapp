@@ -5,17 +5,17 @@ import 'package:av_app/services/ToastHelper.dart';
 class MailerSendHelper{
   static void sendPassword(UserInfoModel recipient, String password) async {
     var passwordVar = {"var":"password", "value":password};
-    var emailVar = {"var":"email", "value":recipient.email};
+    var emailVar = {"var":"email", "value":recipient.email!};
     var variables = [passwordVar, emailVar];
     variables.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email, "jy7zpl9nqe545vx6", variables);
+    await DataService.emailMailerSend(recipient.email!, "jy7zpl9nqe545vx6", variables);
     ToastHelper.Show("Email byl odeslán uživateli: ${recipient.email}");
   }
 
   static List<Map<String, String>> _getSalutationPresalutation(UserInfoModel user)
   {
     var presalutation = {"var":"presalutation", "value":user.sex == "male" ? "Milý": "Milá"};
-    var salutation = {"var":"salutation", "value":_getVocation(user.name)};
+    var salutation = {"var":"salutation", "value":_getVocation(user.name!)};
     return [presalutation, salutation];
   }
 

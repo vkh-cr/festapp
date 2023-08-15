@@ -80,7 +80,7 @@ class _MapPageState extends State<MapPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final placeId = ModalRoute.of(context)?.settings.arguments as int?;
-    loadPlaces(placeId);
+    loadPlaces(placeId: placeId);
   }
 
   Map<String, String> type2icon_map = {
@@ -132,17 +132,31 @@ class _MapPageState extends State<MapPage> {
     return const Icon(Icons.location_pin, size: 36, color: primaryBlue1);
   }
 
-  Future<void> loadPlaces([int? placeId]) async {
-    List<PlaceModel> places;
-    if (placeId != null) {
+  Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
+
+    _markers.clear();
+    List<PlaceModel> places = [];
+    if (placeId != null && !loadOtherGroups) {
       var place = await DataService.getPlace(placeId);
       places = [place];
       setState(() {
         mapController.move(LatLng(place.latLng['lat'], place.latLng['lng']),
             mapController.zoom);
-        PageTitle = place.title;
+        PageTitle = place.title!;
       });
-    } else {
+    }
+    else if (loadOtherGroups)
+    {
+      var groups = await DataService.getGroupsWithPlaces();
+      for (var element in groups) {
+        if(element.place == null) {
+          continue;
+        }
+        element.place!.title = element.title;
+        places.add(element.place!);
+      }
+    }
+    else {
       places = await DataService.getMapPlaces();
     }
     var mappedMarkers = places
@@ -228,6 +242,10 @@ class _MapPageState extends State<MapPage> {
                           child: const Text("Storno")),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       ElevatedButton(
+                          onPressed: showAllGroups,
+                          child: const Text("Zobrazit skupinky")),
+                      const Padding(padding: EdgeInsets.all(16.0)),
+                      ElevatedButton(
                           onPressed: saveNewPosition,
                           child: const Text("Uložit pozici")),
                     ],
@@ -258,7 +276,7 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> saveNewPosition() async {
-    await DataService.SaveLocation(selectedMarker!.place.id,
+    await DataService.SaveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove = _markers
@@ -267,6 +285,7 @@ class _MapPageState extends State<MapPage> {
     _markers.remove(markerToRemove);
     _markers.add(selectedMarker!);
 
+    _popupLayerController.hideAllPopups();
     setState(() {
       selectedMarker = null;
     });
@@ -276,6 +295,10 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       selectedMarker = null;
     });
+  }
+  void showAllGroups() {
+    loadPlaces(loadOtherGroups: true);
+    cancelNewPosition();
   }
 }
 
@@ -312,7 +335,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              widget.marker.place.title,
+              widget.marker.place.title!,
               overflow: TextOverflow.fade,
               softWrap: true,
               style: const TextStyle(
@@ -322,7 +345,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
-                visible: DataService.isAdmin(),
+                visible: DataService.isAdmin() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == widget.marker.place.id),
                 child: ElevatedButton(
                     onPressed: _MapPageState.selectedMarker != null
                         ? null
