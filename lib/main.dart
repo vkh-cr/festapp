@@ -50,6 +50,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
         // builder: (context, child) {
         //   final mediaQueryData = MediaQuery.of(context);
         //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
