@@ -135,4 +135,15 @@ class UserInfoModel extends IPlutoRowModel {
 
 
   String sexToCzech() => sex == "male" ? "Muž" : "Žena";
+
+  bool importedEquals(UserInfoModel u) {
+    return 
+        u.email == email
+        && u.name == name 
+        && u.surname == surname 
+        && u.accommodation == accommodation
+        && u.role == role
+        && u.phone == phone
+        && u.sex == sex;
+  }
 }

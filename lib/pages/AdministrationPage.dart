@@ -11,6 +11,7 @@ import 'package:av_app/services/DataService.dart';
 import 'package:av_app/services/ImportHelper.dart';
 import 'package:av_app/services/MailerSendHelper.dart';
 import 'package:av_app/services/ToastHelper.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
@@ -657,17 +658,18 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       }
                   ),
                   PlutoColumn(
-                      title: "Účastníci",
+                      title: "Členové skupinky",
                       field: UserGroupInfoModel.participantsColumn,
                       type: PlutoColumnType.text(defaultValue: <UserInfoModel>[]),
                       enableEditingMode: false,
                       width: 1000,
                       renderer: (rendererContext) {
                         String? userNames;
+                        List<UserInfoModel> participants = [];
                         var currentValue = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value;
                         if(currentValue!=null && currentValue.toString().isNotEmpty)
                         {
-                          var participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>);
+                          participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>);
                           userNames = participants.join(", ");
                         }
                         return Row(
@@ -729,7 +731,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     });
                                   },
                                   icon: const Icon(Icons.remove_circle)),
-                              Text(userNames??""),]
+                              Text("(${participants.length}) $userNames"),]
                         );
                       }
                   ),
@@ -815,37 +817,63 @@ class _AdministrationPageState extends State<AdministrationPage> {
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
+    var addOrUpdateUsers = users.where((element) => element.accommodation!.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element.accommodation!.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Import uživatelů",
         "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}",
         confirmButtonMessage: "Potvrdit");
 
-    bool importNewOnly = await DialogHelper.showConfirmationDialogAsync(context,
-        "Importovat pouze nové",
-        "Pouze uživatelé, kteří nejsou v tabulce.",
-        confirmButtonMessage: "Pouze nové", cancelButtonMessage: "Importovat všechny");
-
     if(!really)
     {
       return;
     }
-    var existingUsers = await DataService.getAllUsersBasics();
-    for(var u in users)
+
+    var existingUsers = await DataService.getUsers();
+    for(var u in addOrUpdateUsers)
     {
-      if(importNewOnly && existingUsers.any((element) => element.email == u.email))
-      {
-        continue;
-      }
-      u.id = await DataService.getUserByEmail(u.email!);
-      if(u.id == null)
-      {
+      var existing = existingUsers.firstWhereOrNull((element) => element.email == u.email);
+      if(existing == null) {
         u.id = await DataService.createUser(u.email!);
         ToastHelper.Show("Vytvořen ${u.email}");
+      }
+      else if(existing.importedEquals(u)) {
+        continue;
+      }
+      else{
+        u.id = existing.id;
       }
       await DataService.updateUser(u);
       ToastHelper.Show("Upraven ${u.toBasicString()}");
     }
+
+    List<UserInfoModel> toBeDeleted = [];
+    for(var u in deleteUsers)
+    {
+      var existing = existingUsers.firstWhereOrNull((element) => element.email == u.email);
+      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element.email == u.email);
+
+      if(existing != null && duplicated == null) {
+        toBeDeleted.add(existing);
+      }
+    }
+
+    if(toBeDeleted.isNotEmpty) {
+      var reallyDelete = await DialogHelper.showConfirmationDialogAsync(context,
+          "Vymazání uživatelů",
+          "Tito uživatelé byli stornování, přesto stále existují v systému aplikace. Chcete je vymazat?\n"
+           "Uživatelé (${toBeDeleted.length}):\n${toBeDeleted.map((value) => value.toBasicString()).toList().join(",\n")}",
+          confirmButtonMessage: "Potvrdit");
+
+      if(reallyDelete) {
+        toBeDeleted.forEach((existing) async {
+          await DataService.deleteUser(existing.id!);
+          ToastHelper.Show("Smazán ${existing.toBasicString()}");
+        });
+      }
+    }
+
     await usersDataGrid.reloadData();
   }
 
