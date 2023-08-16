@@ -136,6 +136,12 @@ class DataService {
     return data["id"];
   }
 
+  static Future<String?> getLastTimeSignIn(String id) async {
+    var data = await _supabase.rpc("get_last_sign_in_at",
+        params: {"user_id": id});
+    return data;
+  }
+
   static Future<void> login(String email, String password) async {
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);

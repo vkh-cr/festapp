@@ -890,10 +890,17 @@ class _AdministrationPageState extends State<AdministrationPage> {
     var random = Random();
     for(var u in users)
     {
-      var password = "av${numberFormat.format(random.nextInt(9999))}";
+      // ignore already signed users
+      // var time = await DataService.getLastTimeSignIn(u.id!);
+      // if(time!=null)
+      // {
+      //   continue;
+      // }
+      var password = "av${numberFormat.format((random.nextInt(8999)+1000))}";
       await DataService.updateUserPassword(u.id!, password);
       ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
       MailerSendHelper.sendPassword(u, password);
+      await Future.delayed(const Duration(milliseconds: 500));
     }
   }
 }
