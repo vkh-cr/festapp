@@ -258,7 +258,7 @@ void didChangeDependencies() {
   void _programPressed() {
   if(!DataService.isLoggedIn())
     {
-      ToastHelper.Show("Pro zobrazení mého programu se přihlašte!");
+      ToastHelper.Show("Pro zobrazení mého programu se přihlaš!");
       return;
     }
     Navigator.push(
@@ -348,8 +348,7 @@ void didChangeDependencies() {
         .whenComplete(() async {
           _dots.clear();
           _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          if(!DataService.isLoggedIn())
-          {
+          if(!DataService.isLoggedIn()) {
             return;
           }
           var count = await DataService.countNewMessages();

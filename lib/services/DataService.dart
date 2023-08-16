@@ -162,6 +162,15 @@ class DataService {
     return _currentUser!;
   }
 
+  static String gText(String male, String female)
+  {
+    if(_currentUser?.sex != "male")
+    {
+      return female;
+    }
+    return male;
+  }
+
   static Future<PlaceModel?> getUserAccommodation(
       String accommodationType) async {
     var data = await _supabase
@@ -593,8 +602,15 @@ class DataService {
               e.endTime.isAfter(event.startTime) ||
           e.startTime.isAtSameMomentAs(event.startTime) ||
           e.endTime.isAtSameMomentAs(event.endTime)) {
-        ToastHelper.Show(
-            "Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+        if(participant == null) {
+          ToastHelper.Show(
+              "Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+        }
+        else{
+          ToastHelper.Show(
+              "Nelze přihlásit! $participant je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+        }
+
         return;
       }
     }
@@ -604,11 +620,35 @@ class DataService {
 
     switch(result)
     {
-      case 100: ToastHelper.Show("Přihlášen ${participant ?? currentUserEmail()}"); return;
+      case 100: {
+        if(participant == null) {
+          ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("přihlášen", "přihlášena")}.");
+        }
+        else{
+          ToastHelper.Show("Přihlášen $participant.");
+        }
+        return;
+      }
       case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.", severity: ToastSeverity.NotOk); return;
-      case 102: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} je přihlášen na události tohoto typu.", severity: ToastSeverity.NotOk); return;
-      case 103: ToastHelper.Show("Nelze přihlásit! ${participant ?? currentUserEmail()} už je přihlášen.", severity: ToastSeverity.NotOk); return;
-      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat lze až od čtvrtku 17.8.2023 9:00.", severity: ToastSeverity.NotOk); return;
+      case 102: {
+        if(participant == null) {
+          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na události tohoto typu.", severity: ToastSeverity.NotOk);
+        }
+        else{
+          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen na události tohoto typu.", severity: ToastSeverity.NotOk);
+        }
+        return;
+      }
+      case 103: {
+        if(participant == null) {
+          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")}.", severity: ToastSeverity.NotOk); return;
+        }
+        else{
+          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen.", severity: ToastSeverity.NotOk);
+        }
+        return;
+      }
+      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat se můžeš až od čtvrtku 17.8.2023 9:00.", severity: ToastSeverity.NotOk); return;
       case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů.", severity: ToastSeverity.NotOk); return;
       case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen.", severity: ToastSeverity.NotOk); return;
     }
@@ -652,7 +692,12 @@ class DataService {
         .eq("event", event.id!)
         .eq("user", finalId);
 
-    ToastHelper.Show("Odhlášen ${participant ?? currentUserEmail()}");
+    if(participant == null) {
+      ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}.", severity: ToastSeverity.NotOk); return;
+    }
+    else{
+      ToastHelper.Show("Odhlášen $participant.", severity: ToastSeverity.NotOk);
+    }
   }
 
   static Future<EventModel> updateEvent(EventModel event) async
