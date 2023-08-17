@@ -241,6 +241,7 @@ class DataService {
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
+    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
     return infoList;
   }
 
@@ -252,6 +253,7 @@ class DataService {
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
+    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
     return infoList;
   }
 
@@ -796,7 +798,8 @@ class DataService {
       await _supabase.from(InformationModel.informationTable).insert({
         InformationModel.titleColumn: info.title,
         InformationModel.descriptionColumn: info.description,
-        InformationModel.isHiddenColumn: info.isHidden
+        InformationModel.isHiddenColumn: info.isHidden,
+        InformationModel.orderColumn: info.order
       });
       return;
     }
@@ -804,7 +807,8 @@ class DataService {
       InformationModel.titleColumn: info.title,
       InformationModel.idColumn: info.id,
       InformationModel.descriptionColumn: info.description,
-      InformationModel.isHiddenColumn: info.isHidden
+      InformationModel.isHiddenColumn: info.isHidden,
+      InformationModel.orderColumn: info.order
     }).select();
   }
 

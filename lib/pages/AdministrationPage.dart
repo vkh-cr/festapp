@@ -288,6 +288,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         );
                       }),
                   PlutoColumn(
+                    title: "Pořadí",
+                    field: InformationModel.orderColumn,
+                    type: PlutoColumnType.number(defaultValue: null),
+                    applyFormatterInEditing: true,
+                    width: 100,
+                  ),
+                  PlutoColumn(
                     title: "Skrýt",
                     field: InformationModel.isHiddenColumn,
                     type: PlutoColumnType.select(places),
