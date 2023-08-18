@@ -712,7 +712,7 @@ class DataService {
       ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}.", severity: ToastSeverity.NotOk); return;
     }
     else{
-      ToastHelper.Show("Odhlášen $participant.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("Odhlášen $participant.");
     }
   }
 
