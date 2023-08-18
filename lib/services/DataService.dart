@@ -120,6 +120,14 @@ class DataService {
         .delete()
         .eq("user", uuid);
     await _supabase
+        .from("event_users")
+        .delete()
+        .eq("user", uuid);
+    await _supabase
+        .from("user_news")
+        .delete()
+        .eq("user", uuid);
+    await _supabase
         .from(UserInfoModel.userInfoTable)
         .delete()
         .eq(UserInfoModel.idColumn, uuid);
