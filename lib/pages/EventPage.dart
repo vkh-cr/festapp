@@ -1,6 +1,7 @@
 import 'package:av_app/pages/HtmlEditorPage.dart';
 import 'package:av_app/services/DataService.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
@@ -192,7 +193,11 @@ class _EventPageState extends State<EventPage> {
                       visible:
                           DataService.isAdmin() && _event?.maxParticipants != null,
                       child: ExpansionTile(
-                        title: const Text("Přihlášeni:"),
+                        title:  Row(children: [IconButton(onPressed: () async
+                        {
+                          await Clipboard.setData(ClipboardData(text: _participants.join("\n")));
+                          ToastHelper.Show("Přihlášeni byli zkopírováni do schránky.");
+                        }, icon: const Icon(Icons.copy)), const Text("Přihlášeni:")]),
                         children: [ListView.builder(
                             shrinkWrap: true,
                             padding: const EdgeInsets.all(8),

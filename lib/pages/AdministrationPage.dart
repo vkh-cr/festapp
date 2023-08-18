@@ -838,21 +838,55 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
 
     var existingUsers = await DataService.getUsers();
+
+    List<UserInfoModel> toBeCreated = [];
+    List<UserInfoModel> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u.email);
+      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u.email!.toLowerCase());
       if(existing == null) {
-        u.id = await DataService.createUser(u.email!);
-        ToastHelper.Show("Vytvořen ${u.email}");
+        toBeCreated.add(u);
+        continue;
       }
       else if(existing.importedEquals(u)) {
         continue;
       }
       else{
         u.id = existing.id;
+        toBeUpdated.add(u);
       }
-      await DataService.updateUser(u);
-      ToastHelper.Show("Upraven ${u.toBasicString()}");
+    }
+
+    if(toBeCreated.isNotEmpty) {
+      var really = await DialogHelper.showConfirmationDialogAsync(context,
+          "Vytvoření uživatelů",
+          "Tito uživatelé jsou noví. Chcete je vytvořit?\n"
+              "Uživatelé (${toBeCreated.length}):\n${toBeCreated.map((value) => value.toBasicString()).toList().join(",\n")}",
+          confirmButtonMessage: "Potvrdit");
+
+      if(really) {
+        toBeCreated.forEach((u) async {
+          u.id = await DataService.createUser(u.email!);
+          await DataService.updateUser(u);
+          await _generateAndUpdatePasswordFromUser(u, true);
+          ToastHelper.Show("Vytvořen ${u.email} a odeslán e-mail s vygenerovaným heslem.");
+        });
+      }
+    }
+
+    if(toBeUpdated.isNotEmpty) {
+      var really = await DialogHelper.showConfirmationDialogAsync(context,
+          "Úprava uživatelů",
+          "Tito uživatelé byli upraveni. Chcete aktualizovat údaje?\n"
+              "Uživatelé (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value.toBasicString()).toList().join(",\n")}",
+          confirmButtonMessage: "Potvrdit");
+
+      if(really) {
+        toBeUpdated.forEach((u) async {
+          await DataService.updateUser(u);
+          ToastHelper.Show("Upraven ${u.toBasicString()}.");
+        });
+      }
     }
 
     List<UserInfoModel> toBeDeleted = [];
@@ -884,6 +918,28 @@ class _AdministrationPageState extends State<AdministrationPage> {
     await usersDataGrid.reloadData();
   }
 
+  Future<void> _generateAndUpdatePasswordFromUser(UserInfoModel u, bool ignoreIfAlreadySignedIn)
+  async {
+    //ignore already signed users
+    if(ignoreIfAlreadySignedIn)
+    {
+      var time = await DataService.getLastTimeSignIn(u.id!);
+      if(time!=null)
+      {
+        ToastHelper.Show("Uživateli ${u.email} nebylo změněno heslo, protože už se s ním přihlásil.");
+        return;
+      }
+    }
+
+    var password = "av${numberFormat.format((random.nextInt(8999)+1000))}";
+    await DataService.updateUserPassword(u.id!, password);
+    ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
+    MailerSendHelper.sendPassword(u, password);
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+  var random = Random();
+  var numberFormat = NumberFormat("####");
+
   Future<void> _generatePassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
@@ -893,21 +949,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
       return;
     }
 
-    var numberFormat = NumberFormat("####");
-    var random = Random();
     for(var u in users)
     {
-      // ignore already signed users
-      // var time = await DataService.getLastTimeSignIn(u.id!);
-      // if(time!=null)
-      // {
-      //   continue;
-      // }
-      var password = "av${numberFormat.format((random.nextInt(8999)+1000))}";
-      await DataService.updateUserPassword(u.id!, password);
-      ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
-      MailerSendHelper.sendPassword(u, password);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await _generateAndUpdatePasswordFromUser(u, true);
     }
   }
 }

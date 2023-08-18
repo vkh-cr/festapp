@@ -1,4 +1,4 @@
-class ParticipantModel {
+class  ParticipantModel {
   ParticipantModel(this.id, this.email, this.name, this.surname);
   String id;
   String email;

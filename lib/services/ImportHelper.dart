@@ -18,7 +18,7 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
   var firstRow = fields[0].map((e) => e.toString()).toList();
   for(int r = 1; r < fields.length; r++)
   {
-    var email = fields[r][ImportHelper.getIndex(UserInfoModel.emailColumn, firstRow)].toString().trim();
+    var email = fields[r][ImportHelper.getIndex(UserInfoModel.emailColumn, firstRow)].toString().trim().toLowerCase();
     if(email.isEmpty){
       continue;
     }
