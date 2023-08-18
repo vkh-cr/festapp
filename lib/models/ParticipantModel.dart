@@ -9,4 +9,8 @@ class  ParticipantModel {
   String toString() {
     return "$name $surname";
   }
+
+  String shortNameToString() {
+    return "$name ${surname.isNotEmpty ? "${surname[0]}." : "noSurname"}";
+  }
 }

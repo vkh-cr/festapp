@@ -195,7 +195,7 @@ class _EventPageState extends State<EventPage> {
                       child: ExpansionTile(
                         title:  Row(children: [IconButton(onPressed: () async
                         {
-                          await Clipboard.setData(ClipboardData(text: _participants.join("\n")));
+                          await Clipboard.setData(ClipboardData(text: _participants.map((e) => e.shortNameToString()).join("\n")));
                           ToastHelper.Show("Přihlášeni byli zkopírováni do schránky.");
                         }, icon: const Icon(Icons.copy)), const Text("Přihlášeni:")]),
                         children: [ListView.builder(
