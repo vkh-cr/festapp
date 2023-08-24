@@ -41,7 +41,7 @@ dependencies:
   flutter_map: ^5.0.0
   latlong2: ^0.9.0
   flutter_map_marker_popup: ^5.2.0
-  supabase_flutter: ^1.7.0
+  supabase_flutter: ^1.10.14
   flutter_secure_storage: ^8.0.0
   timelines: ^0.1.0
   intl: ^0.18.1
