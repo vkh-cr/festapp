@@ -16,7 +16,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - run: flutter build web --base-href /
+      - run: flutter build web --web-renderer canvaskit --release --base-href /
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
