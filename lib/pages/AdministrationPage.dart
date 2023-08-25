@@ -645,7 +645,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                               children: [
                                                 ElevatedButton(
                                                     onPressed: () {
-                                                      rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
+                                                      setState(() {
+                                                        rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
+                                                      });
                                                       Navigator.pop(context);
                                                     },
                                                     child: const Text("Nastavit")),
@@ -715,8 +717,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                               children: [
                                                 ElevatedButton(
                                                     onPressed: () {
-                                                      rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
-                                                      //Navigator.pop(context);
+                                                      setState(() {
+                                                        rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
+                                                      });
                                                     },
                                                     child: const Text("Přidat")),
                                                 Text(person.email!),

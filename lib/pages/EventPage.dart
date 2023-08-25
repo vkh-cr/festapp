@@ -132,7 +132,8 @@ class _EventPageState extends State<EventPage> {
                         ),
                       ),
                       Visibility(
-                          visible: DataService.isAdmin() || DataService.isGroupLeader(),
+                          visible: DataService.isAdmin() ||
+                              (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
                               onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
                                 if(value != null)

@@ -535,7 +535,7 @@ class DataService {
   }
 
   static Future<UserGroupInfoModel?> getCurrentUserGroup() async {
-    UserGroupInfoModel? id;
+    UserGroupInfoModel? group;
     var partOfGroup = await _supabase
     .from(UserGroupInfoModel.userGroupInfoTable)
     .select("id, title, user_info!leader(id), places(id)")
@@ -543,9 +543,9 @@ class DataService {
     .maybeSingle();
     if(partOfGroup!=null)
     {
-      id = UserGroupInfoModel.fromJson(partOfGroup);
+      group = UserGroupInfoModel.fromJson(partOfGroup);
     }
-    if(id==null)
+    if(group==null)
     {
       partOfGroup = await _supabase
           .from(UserGroupInfoModel.userGroupsTable)
@@ -554,10 +554,10 @@ class DataService {
           .maybeSingle();
       if(partOfGroup!=null)
       {
-        id = UserGroupInfoModel.fromJson(partOfGroup[UserGroupInfoModel.userGroupInfoTable]);
+        group = UserGroupInfoModel.fromJson(partOfGroup[UserGroupInfoModel.userGroupInfoTable]);
       }
     }
-    return id;
+    return group;
   }
 
   static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
