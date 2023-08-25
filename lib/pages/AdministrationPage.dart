@@ -619,47 +619,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     {
                                       _allUsers = await DataService.getAllUsersBasics();
                                     }
-                                    showSearch(
-                                        context: context,
-                                        delegate: SearchPage<UserInfoModel>(
-                                          showItemsOnEmpty: true,
-                                          items: _allUsers,
-                                          searchLabel: 'Hledat účastníky',
-                                          suggestion: const Center(
-                                            child: Text(
-                                                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
-                                          ),
-                                          failure: const Center(
-                                            child: Text("Nikdo nebyl nalezen."),
-                                          ),
-                                          filter: (person) => [
-                                            person.name,
-                                            person.surname,
-                                            person.email,
-                                          ],
-                                          builder: (person) => ListTile(
-                                            title: Text(person.name!),
-                                            subtitle: Text(person.surname!),
-                                            trailing: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: [
-                                                ElevatedButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
-                                                      });
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text("Nastavit")),
-                                                Text(person.email!),
-                                              ],
-                                            ),
-                                          ),
-                                        ));
-
+                                    chooseUser(context, (person) =>
                                     setState(() {
+                                      rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
                                       rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                      Navigator.pop(context);
+                                    }), "Nastavit");
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               Text(userName??""),]
@@ -691,46 +656,11 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     {
                                       _allUsers = await DataService.getAllUsersBasics();
                                     }
-                                    showSearch(
-                                        context: context,
-                                        delegate: SearchPage<UserInfoModel>(
-                                          showItemsOnEmpty: true,
-                                          items: _allUsers,
-                                          searchLabel: 'Hledat účastníky',
-                                          suggestion: const Center(
-                                            child: Text(
-                                                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
-                                          ),
-                                          failure: const Center(
-                                            child: Text("Nikdo nebyl nalezen."),
-                                          ),
-                                          filter: (person) => [
-                                            person.name,
-                                            person.surname,
-                                            person.email,
-                                          ],
-                                          builder: (person) => ListTile(
-                                            title: Text(person.name!),
-                                            subtitle: Text(person.surname!),
-                                            trailing: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.end,
-                                              children: [
-                                                ElevatedButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
-                                                      });
-                                                    },
-                                                    child: const Text("Přidat")),
-                                                Text(person.email!),
-                                              ],
-                                            ),
-                                          ),
-                                        ));
-
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    chooseUser(context, (person) =>
+                                        setState(() {
+                                          rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
+                                          rendererContext.row.setState(PlutoRowState.updated);
+                                        }), "Přidat");
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               IconButton(
@@ -820,6 +750,44 @@ class _AdministrationPageState extends State<AdministrationPage> {
       ),
     );
   }
+
+  void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), String setText) {
+     showSearch(
+          context: context,
+          delegate: SearchPage<UserInfoModel>(
+            showItemsOnEmpty: true,
+            items: _allUsers,
+            searchLabel: 'Hledat účastníky',
+            suggestion: const Center(
+              child: Text(
+                  "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+            ),
+            failure: const Center(
+              child: Text("Nikdo nebyl nalezen."),
+            ),
+            filter: (person) => [
+              person.name,
+              person.surname,
+              person.email,
+            ],
+            builder: (person) => ListTile(
+              title: Text(person.name!),
+              subtitle: Text(person.surname!),
+              trailing: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                      onPressed: () {
+                        onPressedAction(person);
+                      },
+                      child: Text(setText)),
+                  Text(person.email!),
+                ],
+              ),
+            ),
+          ));
+  }
+
   List<UserInfoModel> _allUsers = [];
   Future<void> _import() async {
     var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV tabulky", "Potvrdit", "Storno");
