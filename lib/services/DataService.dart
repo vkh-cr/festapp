@@ -296,7 +296,8 @@ class DataService {
           .from('events')
           .select("id, title, start_time, end_time, max_participants, is_group_event, event_users!inner(*)")
           .eq("event_users.user", currentUserId())
-          .order('start_time', ascending: true);
+          .order('start_time', ascending: true)
+          .order('max_participants', ascending: false);
 
       //join group events
       if(hasGroup())
@@ -316,7 +317,8 @@ class DataService {
     data = await _supabase
         .from('events')
         .select("id, title, start_time, end_time, max_participants, is_group_event")
-        .order('start_time', ascending: true);
+        .order('start_time', ascending: true)
+        .order('max_participants', ascending: false);
 
     var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -965,6 +967,10 @@ class DataService {
     events.sort((a, b)
     {
       var cmp = a.startTime.compareTo(b.startTime);
+      if (cmp == 0)
+      {
+        cmp = b.maxParticipantsNumber().compareTo(a.maxParticipantsNumber());
+      }
       if (cmp == 0)
       {
         cmp = a.title!.compareTo(b.title!);

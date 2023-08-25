@@ -13,6 +13,7 @@ class EventModel extends IPlutoRowModel {
   String durationString() => "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
   int? maxParticipants;
+  int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
   final int? id;
   PlaceModel? place;
