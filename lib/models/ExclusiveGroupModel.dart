@@ -17,9 +17,9 @@ class ExclusiveGroupModel extends IPlutoRowModel {
 
   factory ExclusiveGroupModel.fromJson(Map<String, dynamic> json) {
     return ExclusiveGroupModel(
-      id: json["id"],
-      title: json.containsKey("title") ? json["title"] : null,
-      events: json.containsKey("exclusive_events") ? List<int>.from(json["exclusive_events"].map((e)=>e["event"])) : null,
+      id: json[idColumn],
+      title: json.containsKey(titleColumn) ? json[titleColumn] : null,
+      events: json.containsKey(exclusiveEventsTable) ? List<int>.from(json[exclusiveEventsTable].map((e)=>e["event"])) : null,
   );
   }
 
@@ -28,6 +28,7 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   static const String titleColumn = "title";
   static const String eventsColumn = "events";
   static const String exclusiveGroupsTable = "exclusive_groups";
+  static const String exclusiveEventsTable = "exclusive_events";
 
 
   static ExclusiveGroupModel fromPlutoJson(Map<String, dynamic> json) {
