@@ -25,12 +25,12 @@ class PlaceModel {
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
-    latLng: json.containsKey("coordinates") ? json["coordinates"]["latLng"] : null,
-    id: json["id"],
-    title: json.containsKey("title") ? json["title"] : null,
-    description: json.containsKey("description") ? json["description"] : null,
-    type: json.containsKey("type") ? json["type"] : null,
-    isHidden: json.containsKey("is_hidden") ? json["is_hidden"] : false,
+    latLng: json.containsKey(coordinatesColumn) ? json[coordinatesColumn]["latLng"] : null,
+    id: json[idColumn],
+    title: json.containsKey(titleColumn) ? json[titleColumn] : null,
+    description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
+    type: json.containsKey(typeColumn) ? json[typeColumn] : null,
+    isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
   );
   }
 
