@@ -118,11 +118,8 @@ class EventModel extends IPlutoRowModel {
   static const String eventChildColumn = "event_child";
   static const String eventParentColumn = "event_parent";
 
-
-
   static const String splitForMenWomenColumn = "split_for_men_women";
   static const String isGroupEventColumn = "is_group_event";
-
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
