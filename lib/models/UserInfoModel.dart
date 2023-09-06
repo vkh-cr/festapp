@@ -105,7 +105,6 @@ class UserInfoModel extends IPlutoRowModel {
       sexColumn: PlutoCell(value: sex),
       isAdminColumn: PlutoCell(value: isAdmin.toString()),
       isReceptionAdminColumn: PlutoCell(value: isReceptionAdmin.toString()),
-
     });
   }
 
@@ -132,6 +131,12 @@ class UserInfoModel extends IPlutoRowModel {
   String toString() => toFullNameString();
 
   String toFullNameString() => "$name $surname";
+
+  String shortNameToString() {
+    return "$name ${(surname!=null && surname!.isNotEmpty) ? "${surname![0]}." : "-"}";
+  }
+
+  bool isSignedIn = false;
 
 
   String sexToCzech() => sex == "male" ? "Muž" : "Žena";

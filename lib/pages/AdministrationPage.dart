@@ -15,7 +15,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
@@ -619,12 +618,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     {
                                       _allUsers = await DataService.getAllUsersBasics();
                                     }
-                                    chooseUser(context, (person) =>
+                                    DialogHelper.chooseUser(context, (person) =>
                                     setState(() {
                                       rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
                                       rendererContext.row.setState(PlutoRowState.updated);
                                       Navigator.pop(context);
-                                    }), "Nastavit");
+                                    }), _allUsers, "Nastavit");
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               Text(userName??""),]
@@ -656,11 +655,11 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     {
                                       _allUsers = await DataService.getAllUsersBasics();
                                     }
-                                    chooseUser(context, (person) =>
+                                    DialogHelper.chooseUser(context, (person) =>
                                         setState(() {
                                           rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
                                           rendererContext.row.setState(PlutoRowState.updated);
-                                        }), "Přidat");
+                                        }), _allUsers, "Přidat");
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               IconButton(
@@ -749,43 +748,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
         ),
       ),
     );
-  }
-
-  void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), String setText) {
-     showSearch(
-          context: context,
-          delegate: SearchPage<UserInfoModel>(
-            showItemsOnEmpty: true,
-            items: _allUsers,
-            searchLabel: 'Hledat účastníky',
-            suggestion: const Center(
-              child: Text(
-                  "Najdi účastníka podle jména, příjmení nebo e-mailu."),
-            ),
-            failure: const Center(
-              child: Text("Nikdo nebyl nalezen."),
-            ),
-            filter: (person) => [
-              person.name,
-              person.surname,
-              person.email,
-            ],
-            builder: (person) => ListTile(
-              title: Text(person.name!),
-              subtitle: Text(person.surname!),
-              trailing: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        onPressedAction(person);
-                      },
-                      child: Text(setText)),
-                  Text(person.email!),
-                ],
-              ),
-            ),
-          ));
   }
 
   List<UserInfoModel> _allUsers = [];

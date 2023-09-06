@@ -11,7 +11,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
-import '../models/ParticipantModel.dart';
 import '../models/PlaceModel.dart';
 import 'NavigationService.dart';
 
@@ -560,16 +559,12 @@ class DataService {
     return group;
   }
 
-  static Future<List<ParticipantModel>> getParticipantsPerEvent(int eventId) async {
+  static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
       .from('event_users')
       .select("user, event, user_info(email, name, surname)")
       .eq("event", eventId);
-    return List<ParticipantModel>.from(data.map((par) => ParticipantModel(
-        par["user"],
-        par["user_info"]["email"],
-        par["user_info"]["name"],
-        par["user_info"]["surname"])));
+    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par["user_info"])));
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
@@ -599,7 +594,7 @@ class DataService {
     return result.count > 0;
   }
 
-  static signInToEvent(int eventId, [ParticipantModel? participant]) async {
+  static signInToEvent(int eventId, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
     var userId = participant?.id ?? currentUserId();
     //check for max participants
@@ -628,7 +623,6 @@ class DataService {
           ToastHelper.Show(
               "Nelze přihlásit! $participant je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
         }
-
         return;
       }
     }
@@ -694,7 +688,7 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(EventModel event, [ParticipantModel? participant]) async {
+  static signOutFromEvent(EventModel event, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
     var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
 
@@ -829,17 +823,6 @@ class DataService {
         .from(InformationModel.informationTable)
         .delete()
         .eq(InformationModel.idColumn, info.id);
-  }
-
-  static Future<List<ParticipantModel>> getAllParticipants() async {
-    List<ParticipantModel> toReturn = [];
-    var result =
-        await _supabase.from(UserInfoModel.userInfoTable)
-            .select([UserInfoModel.idColumn, UserInfoModel.emailColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
-    for (var p in result) {
-      toReturn.add(ParticipantModel(p[UserInfoModel.idColumn], p[UserInfoModel.emailColumn], p[UserInfoModel.nameColumn], p[UserInfoModel.surnameColumn]));
-    }
-    return toReturn;
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {

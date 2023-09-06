@@ -1,11 +1,11 @@
+import 'package:av_app/models/UserInfoModel.dart';
 import 'package:av_app/pages/HtmlEditorPage.dart';
 import 'package:av_app/services/DataService.dart';
+import 'package:av_app/services/DialogHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:search_page/search_page.dart';
 
 import '../models/EventModel.dart';
-import '../models/ParticipantModel.dart';
 import '../models/UserGroupInfoModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
@@ -26,8 +26,8 @@ class _EventPageState extends State<EventPage> {
   EventModel? _event;
   UserGroupInfoModel? _groupInfoModel;
 
-  List<ParticipantModel> _participants = [];
-  List<ParticipantModel> _queriedParticipants = [];
+  List<UserInfoModel> _participants = [];
+  List<UserInfoModel> _queriedParticipants = [];
   bool isLoadingParticipants = true;
 
   _EventPageState();
@@ -79,54 +79,17 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
                             onPressed: () async {
-                              _queriedParticipants = await DataService.getAllParticipants();
+                              _queriedParticipants = await DataService.getAllUsersBasics();
                               _queriedParticipants.forEach((q) => {
                                     if (_participants.any((p) => p.email == q.email))
                                       {q.isSignedIn = true}
                                   });
 
                                 // ignore: use_build_context_synchronously
-                                showSearch(
-                                    context: context,
-                                    delegate: SearchPage<ParticipantModel>(
-                                      showItemsOnEmpty: true,
-                                      items: _queriedParticipants,
-                                      searchLabel: 'Hledat účastníky',
-                                      suggestion: const Center(
-                                        child: Text(
-                                            "Najdi účastníka podle jména, příjmení nebo e-mailu."),
-                                      ),
-                                      failure: const Center(
-                                        child: Text("Nikdo nebyl nalezen."),
-                                      ),
-                                      filter: (person) => [
-                                        person.name,
-                                        person.surname,
-                                        person.email,
-                                      ],
-                                      builder: (person) => ListTile(
-                                        title: Text(person.name),
-                                        subtitle: Text(person.surname),
-                                        trailing: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            Visibility(
-                                              visible: person.isSignedIn?true:false,
-                                              child: ElevatedButton(
-                                                  onPressed: () => signOutOther(person),
-                                                  child: const Text("Odhlásit")),
-                                            ),
-                                            Visibility(
-                                              visible: person.isSignedIn?false:true,
-                                              child: ElevatedButton(
-                                                  onPressed: () => signIn(person),
-                                                  child: const Text("Přihlásit")),
-                                            ),
-                                            Text(person.email),
-                                          ],
-                                        ),
-                                      ),
-                                    )).then((x) => loadData(_event!.id!));
+                              DialogHelper.chooseUser(context, (person) async {
+                                await signIn(person);
+                                await loadData(_event!.id!);
+                              }, _participants, "Přihlásit");
                               },
                               child: const Text("Přihlásit druhého")),
                         ),
@@ -312,7 +275,7 @@ class _EventPageState extends State<EventPage> {
         context, EventPage.ROUTE, arguments: id).then((value) => loadData(_event!.id!));
   }
 
-  Future<void> signIn([ParticipantModel? participant]) async {
+  Future<void> signIn([UserInfoModel? participant]) async {
     await DataService.signInToEvent(_event!.id!, participant);
     await loadData(_event!.id!);
   }
@@ -322,7 +285,7 @@ class _EventPageState extends State<EventPage> {
     await loadData(_event!.id!);
   }
 
-  Future<String?> signOutOther(ParticipantModel participant) {
+  Future<String?> signOutOther(UserInfoModel participant) {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(

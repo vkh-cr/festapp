@@ -1,9 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:search_page/search_page.dart';
 
+import '../models/UserInfoModel.dart';
 import '../widgets/DropFile.dart';
 
 class DialogHelper{
+
+  static void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> _allUsers, String setText) {
+    showSearch(
+        context: context,
+        delegate: SearchPage<UserInfoModel>(
+          showItemsOnEmpty: true,
+          items: _allUsers,
+          searchLabel: 'Hledat účastníky',
+          suggestion: const Center(
+            child: Text(
+                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+          ),
+          failure: const Center(
+            child: Text("Nikdo nebyl nalezen."),
+          ),
+          filter: (person) => [
+            person.name,
+            person.surname,
+            person.email,
+          ],
+          builder: (person) => ListTile(
+            title: Text(person.name!),
+            subtitle: Text(person.surname!),
+            trailing: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      onPressedAction(person);
+                    },
+                    child: Text(setText)),
+                Text(person.email!),
+              ],
+            ),
+          ),
+        ));
+  }
+
 
   static Future<void> showInformationDialogAsync(
       BuildContext context,
