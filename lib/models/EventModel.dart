@@ -46,39 +46,39 @@ class EventModel extends IPlutoRowModel {
     required this.isGroupEvent});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
-    var eventGroups = json.containsKey("event_groups") && json["event_groups"] != null ? json["event_groups"] : null;
+    var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
     List<int>? childEvents;
     List<int>? parentEvents;
     if(eventGroups != null)
     {
       for(var e in eventGroups)
       {
-        if(e.containsKey("event_child"))
+        if(e.containsKey(eventChildColumn))
         {
           childEvents = childEvents ?? [];
-          childEvents.add(e["event_child"]);
+          childEvents.add(e[eventChildColumn]);
         }
-        if(e.containsKey("event_parent"))
+        if(e.containsKey(eventParentColumn))
         {
           parentEvents = parentEvents ?? [];
-          parentEvents.add(e["event_parent"]);
+          parentEvents.add(e[eventParentColumn]);
         }
       }
     }
     return EventModel(
-      startTime: json.containsKey("start_time") ? DateTime.parse(json["start_time"]) : DateTime.fromMicrosecondsSinceEpoch(0),
-      endTime: json.containsKey("end_time") ? DateTime.parse(json["end_time"]): DateTime.fromMicrosecondsSinceEpoch(0),
-      id: json["id"],
-      title: json.containsKey("title") ? json["title"] : null,
-      description: json.containsKey("description") ? json["description"] : null,
-      maxParticipants: json.containsKey("max_participants") ? json["max_participants"] : null,
-      place: json.containsKey("places") && json["places"] != null ? PlaceModel.fromJson(json["places"]) : null,
-      splitForMenWomen: json.containsKey("split_for_men_women") ? json["split_for_men_women"] : false,
+      startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
+      endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
+      id: json[idColumn],
+      title: json.containsKey(titleColumn) ? json[titleColumn] : null,
+      description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
+      maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
+      place: json.containsKey(placesTable) && json[placesTable] != null ? PlaceModel.fromJson(json[placesTable]) : null,
+      splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey("isSignedIn") ? json["isSignedIn"] : false,
-      isGroupEvent: json.containsKey("is_group_event") ? json["is_group_event"] : false,
+      isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
-      currentParticipants: json.containsKey("event_users") ? json["event_users"][0]["count"] : json.containsKey("currentParticipants") ? json["currentParticipants"] : null,
+      currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey("currentParticipants") ? json["currentParticipants"] : null,
   );
   }
 
@@ -112,6 +112,14 @@ class EventModel extends IPlutoRowModel {
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
+  static const String placesTable = "places";
+  static const String eventUsersTable = "event_users";
+  static const String eventGroupsTable = "event_groups";
+  static const String eventChildColumn = "event_child";
+  static const String eventParentColumn = "event_parent";
+
+
+
   static const String splitForMenWomenColumn = "split_for_men_women";
   static const String isGroupEventColumn = "is_group_event";
 
