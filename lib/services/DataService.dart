@@ -849,7 +849,7 @@ class DataService {
         data.map((x) => UserInfoModel.fromJson(x)));
   }
 
-  static Future<void> deleteNewsMessage(NewsMessage message) async {
+  static Future<void> deleteNewsMessage(NewsModel message) async {
     ensureIsAdmin();
     await _supabase
         .from('user_news')
@@ -862,7 +862,7 @@ class DataService {
     ToastHelper.Show("Ohláška byla smazána.");
   }
 
-  static Future<void> updateNewsMessage(NewsMessage message) async {
+  static Future<void> updateNewsMessage(NewsModel message) async {
     ensureIsAdmin();
     await _supabase
         .from('news')
@@ -909,7 +909,7 @@ class DataService {
         .upsert({"user": currentUserId(), "news_id": newsId}).select();
   }
 
-  static Future<List<NewsMessage>> getNewsMessages() async {
+  static Future<List<NewsModel>> getNewsMessages() async {
     int lastReadMessageId = 0;
     if (isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
@@ -918,13 +918,13 @@ class DataService {
         .from('news')
         .select('id, created_at, message, user_info(name, surname)')
         .order("created_at");
-    List<NewsMessage> loadedMessages = [];
+    List<NewsModel> loadedMessages = [];
 
     for (var row in messagesData) {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
       var name = row[UserInfoModel.userInfoTable] != null ? row['user_info']['name'] : "";
-      NewsMessage newsMessage = NewsMessage(
+      NewsModel newsMessage = NewsModel(
           createdAt: createdAt,
           message: message,
           createdBy: name,

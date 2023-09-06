@@ -15,7 +15,7 @@ class NewsPage extends StatefulWidget {
 }
 
 class _NewsPageState extends State<NewsPage> {
-  List<NewsMessage> newsMessages = [];
+  List<NewsModel> newsMessages = [];
 
   void _showMessageDialog(BuildContext context) {
     Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
