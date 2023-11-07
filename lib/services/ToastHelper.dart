@@ -1,4 +1,4 @@
-import 'package:av_app/styles/Styles.dart';
+import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 

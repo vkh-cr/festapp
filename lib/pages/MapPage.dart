@@ -1,5 +1,6 @@
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/styles/Styles.dart';
+import 'package:avapp/configuration.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -8,10 +9,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/PlaceModel.dart';
-
-const double InitLat = 49.10353;
-const double InitLng = 17.39502;
-const double InitZoom = 17;
 
 class MarkerWithText extends Marker {
   LatLng? oldPoint;
@@ -70,7 +67,7 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
-  String PageTitle = "Mapa AV 2023";
+  String PageTitle = configuration.map_page;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -199,10 +196,10 @@ class _MapPageState extends State<MapPage> {
             mapController: mapController,
             options: MapOptions(
                 interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-                zoom: InitZoom,
+                zoom: DataService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
 
-                center: const LatLng(InitLat, InitLng),
+                center: LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]),
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(

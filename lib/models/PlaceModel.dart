@@ -17,11 +17,6 @@ class PlaceModel {
 
   static const String placeTable = "places";
 
-  static const dynamic DefaultPosition =  {
-      "lat": 49.10380239685228,
-      "lng": 17.394781916404032
-    };
-
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(

@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:av_app/services/StorageHelper.dart';
+import 'package:avapp/configuration.dart';
+import 'package:avapp/services/StorageHelper.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:av_app/pages/AdministrationPage.dart';
-import 'package:av_app/pages/InfoPage.dart';
-import 'package:av_app/pages/MapPage.dart';
-import 'package:av_app/pages/UserPage.dart';
-import 'package:av_app/pages/NewsPage.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/services/ToastHelper.dart';
-import 'package:av_app/widgets/ProgramTabView.dart';
-import 'package:av_app/widgets/ProgramTimeline.dart';
+import 'package:avapp/pages/AdministrationPage.dart';
+import 'package:avapp/pages/InfoPage.dart';
+import 'package:avapp/pages/MapPage.dart';
+import 'package:avapp/pages/UserPage.dart';
+import 'package:avapp/pages/NewsPage.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/widgets/ProgramTabView.dart';
+import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -32,15 +33,15 @@ Future<void> main() async {
   await GetStorage.init();
 
   await Supabase.initialize(
-    url: 'https://jyghacisbuntbrshhhey.supabase.co',
-    anonKey:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg',
+    url: configuration.supabase_url,
+    anonKey: configuration.anon_key,
   );
   initializeDateFormatting();
   if(!DataService.isLoggedIn())
   {
     DataService.tryAuthUser();
   }
+  await DataService.loadOrInitGlobalSettings();
   runApp(const MyApp());
 }
 
@@ -92,7 +93,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  static const HOME_PAGE = 'Absolventský Velehrad';
+  static const HOME_PAGE = configuration.home_page;
 
   const MyHomePage({super.key, required this.title});
 

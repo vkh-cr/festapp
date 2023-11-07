@@ -1,6 +1,6 @@
-import 'package:av_app/models/InformationModel.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/styles/Styles.dart';
+import 'package:avapp/models/InformationModel.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import '../services/ToastHelper.dart';
 import '../widgets/HtmlDescriptionWidget.dart';

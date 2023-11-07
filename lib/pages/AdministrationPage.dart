@@ -1,16 +1,17 @@
 import 'dart:math';
 
-import 'package:av_app/dataGrids/SingleTableDataGrid.dart';
-import 'package:av_app/models/ExclusiveGroupModel.dart';
-import 'package:av_app/models/PlaceModel.dart';
-import 'package:av_app/models/UserGroupInfoModel.dart';
-import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/pages/MapPage.dart';
-import 'package:av_app/services/DataGridHelper.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/services/ImportHelper.dart';
-import 'package:av_app/services/MailerSendHelper.dart';
-import 'package:av_app/services/ToastHelper.dart';
+import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
+import 'package:avapp/models/ExclusiveGroupModel.dart';
+import 'package:avapp/models/GlobalSettingsModel.dart';
+import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:avapp/models/UserInfoModel.dart';
+import 'package:avapp/pages/MapPage.dart';
+import 'package:avapp/services/DataGridHelper.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/ImportHelper.dart';
+import 'package:avapp/services/MailerSendHelper.dart';
+import 'package:avapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -212,7 +213,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         Icon(Icons.people),
                         Padding(padding: EdgeInsets.all(12), child: Text("Uživatelé"))
                       ]
-                  )
+                  ),
+                  // Row(
+                  //     children: [
+                  //       Icon(Icons.settings),
+                  //       Padding(padding: EdgeInsets.all(12), child: Text("Nastavení"))
+                  //     ]
+                  // )
                 ]
               ),
             ),
@@ -731,7 +738,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                               }
 
                               var model = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as UserGroupInfoModel;
-                              model.place ??= PlaceModel(id: null, title: model.title, description: "", type: "group", isHidden: true, latLng: PlaceModel.DefaultPosition);
+                              model.place ??= PlaceModel(id: null, title: model.title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
                               if(model.place!.id == null)
                               {
                                 model.place = await DataService.updatePlace(model.place!);
@@ -743,7 +750,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         );
                       }),
                 ]).DataGrid(),
-            usersDataGrid.DataGrid()
+            usersDataGrid.DataGrid(),
+
           ]
         ),
       ),

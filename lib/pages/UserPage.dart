@@ -1,8 +1,8 @@
-import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/pages/AdministrationPage.dart';
-import 'package:av_app/pages/LoginPage.dart';
-import 'package:av_app/services/ToastHelper.dart';
-import 'package:av_app/styles/Styles.dart';
+import 'package:avapp/models/UserInfoModel.dart';
+import 'package:avapp/pages/AdministrationPage.dart';
+import 'package:avapp/pages/LoginPage.dart';
+import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 
 import '../services/DataService.dart';

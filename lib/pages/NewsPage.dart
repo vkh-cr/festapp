@@ -1,5 +1,5 @@
-import 'package:av_app/styles/Styles.dart';
-import 'package:av_app/widgets/HtmlDescriptionWidget.dart';
+import 'package:avapp/styles/Styles.dart';
+import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';

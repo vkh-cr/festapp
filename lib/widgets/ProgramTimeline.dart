@@ -1,4 +1,4 @@
-import 'package:av_app/services/DataService.dart';
+import 'package:avapp/services/DataService.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -130,9 +130,9 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
 
     var morningEvents = allEvents.where((e) => e.startTime.hour <= 12).toList();
     var afternoonEvents = allEvents
-        .where((e) => e.startTime.hour > 12 && e.startTime.hour <= 18)
+        .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
         .toList();
-    var eveningEvents = allEvents.where((e) => e.startTime.hour > 18).toList();
+    var eveningEvents = allEvents.where((e) => e.startTime.hour >= 18).toList();
     return SingleChildScrollView(
         child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

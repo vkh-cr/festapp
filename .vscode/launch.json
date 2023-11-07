@@ -6,18 +6,18 @@
     "configurations": [
 
         {
-            "name": "av-app",
+            "name": "avapp",
             "request": "launch",
             "type": "dart",
         },
         {
-            "name": "av-app (profile mode)",
+            "name": "avapp (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "av-app (release mode)",
+            "name": "avapp (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

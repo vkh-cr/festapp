@@ -1,7 +1,8 @@
-  import 'package:flutter/material.dart';
+  import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
-import '../models/EventModel.dart';
 import '../styles/Styles.dart';
 import 'ProgramTimeline.dart';
 
@@ -18,11 +19,8 @@ import 'ProgramTimeline.dart';
 
   class _ProgramTabViewState extends State<ProgramTabView> {
 
+    Map<int, List<TimeLineItem>> eventsMap = {};
     final List<TimeLineItem> events;
-    List<TimeLineItem> events0 = [];
-    List<TimeLineItem> events1 = [];
-    List<TimeLineItem> events2 = [];
-    List<TimeLineItem> events3 = [];
     Function(int)? onEventPressed;
 
   _ProgramTabViewState(this.events, this.onEventPressed);
@@ -30,40 +28,30 @@ import 'ProgramTimeline.dart';
 
     @override
     Widget build(BuildContext context) {
-      events0.clear();
-      events0.addAll(events.where((element) => element.startTime.weekday == DateTime.thursday));
-      events1.clear();
-      events1.addAll(events.where((element) => element.startTime.weekday == DateTime.friday));
-      events2.clear();
-      events2.addAll(events.where((element) => element.startTime.weekday == DateTime.saturday));
-      events3.clear();
-      events3.addAll(events.where((element) => element.startTime.weekday == DateTime.sunday));
+
+      eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
       return Container(
-        constraints: BoxConstraints(maxWidth: 400),
+        constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTabController(
           initialIndex: getInitialIndex(),
-          length: 4,
+          length: eventsMap.length,
           child: Scaffold(
-            appBar: const TabBar(
+            appBar: TabBar(
               unselectedLabelColor: Colors.grey,
               labelColor: primaryBlue2,
               indicatorColor: primaryBlue2,
               indicatorWeight: 3.0,
               indicatorSize: TabBarIndicatorSize.label,
-              indicatorPadding: EdgeInsets.symmetric(vertical: 12.0),
+              indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
               tabs: [
-                Tab(child: Text("čtvrtek")),
-                Tab(child: Text("pátek")),
-                Tab(child: Text("sobota")),
-                Tab(child: Text("neděle"))
+                  for(var e in eventsMap.keys)
+                    Tab(child: Text(indexToDay(e)))
               ],
             ),
             body: TabBarView(
               children: [
-                ProgramTimeline(events: events0, onEventPressed: onEventPressed),
-                ProgramTimeline(events: events1, onEventPressed: onEventPressed),
-                ProgramTimeline(events: events2, onEventPressed: onEventPressed),
-                ProgramTimeline(events: events3, onEventPressed: onEventPressed),
+                for(var e in eventsMap.values)
+                  ProgramTimeline(events: e, onEventPressed: onEventPressed)
               ],
             ),
           ),
@@ -74,11 +62,16 @@ import 'ProgramTimeline.dart';
   getInitialIndex() {
       switch(DateTime.now().weekday)
       {
-        case DateTime.thursday: return 0;
-        case DateTime.friday: return 1;
-        case DateTime.saturday: return 2;
-        case DateTime.sunday: return 3;
+        case DateTime.saturday: return 0;
+        case DateTime.sunday: return 1;
         default: return 0;
       }
   }
+  static String indexToDay(int index)
+  {
+    var now = DateTime.now();
+    var d = now.subtract(Duration(days: now.weekday - index));
+    return DateFormat("EEEE", "cs").format(d);
+  }
+
   }

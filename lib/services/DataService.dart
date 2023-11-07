@@ -1,10 +1,11 @@
-import 'package:av_app/models/UserGroupInfoModel.dart';
-import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/models/InformationModel.dart';
+import 'package:avapp/models/GlobalSettingsModel.dart';
+import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:avapp/models/UserInfoModel.dart';
+import 'package:avapp/models/InformationModel.dart';
 
-import 'package:av_app/models/NewsMessage.dart';
-import 'package:av_app/services/DialogHelper.dart';
-import 'package:av_app/services/ToastHelper.dart';
+import 'package:avapp/models/NewsMessage.dart';
+import 'package:avapp/services/DialogHelper.dart';
+import 'package:avapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -59,7 +60,6 @@ class DataService {
     {
       //invalid refresh token
     }
-
     return false;
   }
 
@@ -85,6 +85,29 @@ class DataService {
 
   static String currentUserId() {
     return _supabase.auth.currentUser!.id;
+  }
+
+  static GlobalSettingsModel? globalSettingsModel;
+
+  static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
+    GlobalSettingsModel toReturn;
+    var data = await _supabase
+        .from(GlobalSettingsModel.globalSettingsTable)
+        .select()
+        .maybeSingle();
+
+    if(data == null)
+    {
+      await _supabase
+          .from(GlobalSettingsModel.globalSettingsTable)
+          .insert(GlobalSettingsModel.DefaultSettings.toJson());
+        toReturn = GlobalSettingsModel.DefaultSettings;
+    }
+    else{
+      toReturn = GlobalSettingsModel.fromJson(data);
+    }
+    globalSettingsModel = toReturn;
+    return toReturn;
   }
 
   static Future<UserInfoModel> getCurrentUserInfo() async {
@@ -308,7 +331,6 @@ class DataService {
             .order('start_time', ascending: true);
         data.addAll(data2);
       }
-
 
       return List<EventModel>.from(
           data.map((x) => EventModel.fromJson(x)));

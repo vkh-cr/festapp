@@ -1,6 +1,6 @@
-import 'package:av_app/pages/EventPage.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/widgets/ProgramTimeline.dart';
+import 'package:avapp/pages/EventPage.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';

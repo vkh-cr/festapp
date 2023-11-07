@@ -1,6 +1,6 @@
-import 'package:av_app/models/PlaceModel.dart';
-import 'package:av_app/models/UserGroupInfoModel.dart';
-import 'package:av_app/services/ToastHelper.dart';
+import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:avapp/services/ToastHelper.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../services/DataService.dart';

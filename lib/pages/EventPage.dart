@@ -1,7 +1,7 @@
-import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/pages/HtmlEditorPage.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/services/DialogHelper.dart';
+import 'package:avapp/models/UserInfoModel.dart';
+import 'package:avapp/pages/HtmlEditorPage.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/DialogHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

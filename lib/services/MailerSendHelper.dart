@@ -1,6 +1,6 @@
-import 'package:av_app/models/UserInfoModel.dart';
-import 'package:av_app/services/DataService.dart';
-import 'package:av_app/services/ToastHelper.dart';
+import 'package:avapp/models/UserInfoModel.dart';
+import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/ToastHelper.dart';
 
 class MailerSendHelper{
   static void sendPassword(UserInfoModel recipient, String password) async {

@@ -1,5 +1,5 @@
-import 'package:av_app/models/PlaceModel.dart';
-import 'package:av_app/services/DataGridHelper.dart';
+import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/services/DataGridHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
