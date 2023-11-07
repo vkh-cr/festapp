@@ -36,7 +36,7 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = loadedMessages;
     });
-    if(DataService.isLoggedIn())
+    if(DataService.isLoggedIn() && newsMessages.isNotEmpty)
     {
       DataService.setMessagesAsRead(newsMessages.first.id);
     }
