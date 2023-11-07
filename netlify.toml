@@ -1,0 +1,11 @@
+[[plugins]]
+
+package = "netlify-plugin-flutter"
+
+[plugins.inputs]
+channel = "stable"
+
+[build]
+
+command = "flutter build web --web-renderer canvaskit --release"
+publish = "build/web"
