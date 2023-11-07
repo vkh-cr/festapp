@@ -41,6 +41,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
     await DataService.getCurrentUserInfo();
     if(!DataService.isAdmin())
     {
+      //
       Navigator.pop(context);
       return;
     }
