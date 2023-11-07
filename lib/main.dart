@@ -140,9 +140,9 @@ void didChangeDependencies() {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SvgPicture.asset(
-                    width: 50,
-                    semanticsLabel: 'Absolventský Velehrad',
-                    'assets/icons/avlogo.svg',
+                    width: 100,
+                    semanticsLabel: 'Fotofest',
+                    'assets/icons/cavlogo_full.svg',
                   ),
                   const Spacer(),
                   Visibility(
