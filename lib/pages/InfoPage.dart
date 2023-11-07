@@ -37,8 +37,8 @@ class _InfoPageState extends State<InfoPage> {
           child: SingleChildScrollView(
             child: ExpansionPanelList(
               expansionCallback: (panelIndex, isExpanded) {
-                _informationList!.forEach((element) { element.isExpanded = false; });
-                _informationList![panelIndex].isExpanded = !isExpanded;
+                for (var element in _informationList!) { element.isExpanded = false; }
+                _informationList![panelIndex].isExpanded = isExpanded;
                 setState(() {
                 });
 
