@@ -1,4 +1,5 @@
 import 'package:avapp/styles/Styles.dart';
+import 'package:avapp/config.dart';
 import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -89,7 +90,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: primaryBlue1.withOpacity(0.10)
+                        color: configuration.color1.withOpacity(0.10)
                       ),
                       child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
                     )),

@@ -3,9 +3,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
+import 'package:avapp/config.dart';
 
 import '../models/EventModel.dart';
-import '../styles/Styles.dart';
 
 enum DotType {
   dot, open, closed
@@ -105,7 +105,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
               child: Text(
                 group.key,
                 style: const TextStyle(
-                    color: primaryBlue1, fontWeight: FontWeight.bold),
+                    color: configuration.color1, fontWeight: FontWeight.bold),
               ),));
         children.add(createTimeline(group.value));
       }
@@ -143,7 +143,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
                 padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Odpoledne",
-                  style: TextStyle(color: primaryBlue1, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: configuration.color1, fontWeight: FontWeight.bold),
                 ),
               )
             : const SizedBox.shrink(),
@@ -153,7 +153,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
                 padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Večer",
-                  style: TextStyle(color: primaryBlue1, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: configuration.color1, fontWeight: FontWeight.bold),
                 ),
               )
             : const SizedBox.shrink(),
@@ -175,9 +175,9 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: primaryBlue1),
+            IndicatorTheme.of(context).copyWith(color: configuration.color1),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: primaryBlue1, thickness: 2),
+            .copyWith(color: configuration.color1, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -204,10 +204,10 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: primaryBlue1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+                  color: configuration.color1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
               : const Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: primaryBlue1, size: 8));
+                  child: DotIndicator(color: configuration.color1, size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

@@ -4,6 +4,7 @@ import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:avapp/config.dart';
 
 import '../models/EventModel.dart';
 import '../models/UserGroupInfoModel.dart';
@@ -141,7 +142,7 @@ class _EventPageState extends State<EventPage> {
                         padding: EdgeInsets.all(8.0),
                         child: Text(
                           "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
-                          style: TextStyle(color: attentionColor),),
+                          style: TextStyle(color: configuration.attentionColor),),
                       )),
                   Visibility(
                     visible: _event != null && _event?.description != null,

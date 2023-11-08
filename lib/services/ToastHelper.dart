@@ -1,4 +1,4 @@
-import 'package:avapp/styles/Styles.dart';
+import 'package:avapp/config.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -8,7 +8,7 @@ enum ToastSeverity{
 class ToastHelper {
   static void Show(String value, {ToastSeverity severity = ToastSeverity.Ok}) {
 
-    Color color = primaryBlue1;
+    Color color = configuration.color1;
     String webColor = "#2C677B";
     if(severity!=ToastSeverity.Ok)
     {

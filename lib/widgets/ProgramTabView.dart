@@ -1,9 +1,9 @@
-  import 'package:collection/collection.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:avapp/config.dart';
 
-import '../styles/Styles.dart';
 import 'ProgramTimeline.dart';
 
   class ProgramTabView extends StatefulWidget {
@@ -38,8 +38,8 @@ import 'ProgramTimeline.dart';
           child: Scaffold(
             appBar: TabBar(
               unselectedLabelColor: Colors.grey,
-              labelColor: primaryBlue2,
-              indicatorColor: primaryBlue2,
+              labelColor: configuration.color4,
+              indicatorColor: configuration.color4,
               indicatorWeight: 3.0,
               indicatorSize: TabBarIndicatorSize.label,
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -60,13 +60,14 @@ import 'ProgramTimeline.dart';
     }
 
   getInitialIndex() {
-      switch(DateTime.now().weekday)
+      var index = eventsMap.keys.toList().indexOf(DateTime.now().weekday);
+      if(index == -1)
       {
-        case DateTime.saturday: return 0;
-        case DateTime.sunday: return 1;
-        default: return 0;
+        return 0;
       }
+      return index;
   }
+
   static String indexToDay(int index)
   {
     var now = DateTime.now();

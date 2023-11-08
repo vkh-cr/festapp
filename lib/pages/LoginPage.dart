@@ -1,8 +1,10 @@
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:avapp/config.dart';
 import '../services/DataService.dart';
 import '../styles/Styles.dart';
+
 
 class LoginPage extends StatefulWidget {
   static const ROUTE = "/login";
@@ -87,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       width: 250,
                       decoration: BoxDecoration(
-                          color: primaryBlue1,
+                          color: configuration.color1,
                           borderRadius: BorderRadius.circular(20)),
                       child: TextButton(
                         onPressed: () async {

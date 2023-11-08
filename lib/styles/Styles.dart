@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:avapp/config.dart';
 
 MaterialColor primarySwatch = const MaterialColor(
   0xFF2C677B,
@@ -16,13 +17,6 @@ MaterialColor primarySwatch = const MaterialColor(
   },
 );
 
-const backgroundColor = Color(0xFFD3D3D3);
-const primaryBlue1 = Color(0xFF2C677B);
-const Color primaryRed = Color(0xFFBA5D3F);
-const primaryYellow = Color(0xFFE0B73B);
-const primaryBlue2 = Color(0xFF2A77A0);
-const attentionColor = Color(0xFF8B0000);
-
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
@@ -33,7 +27,7 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
 
     maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
-    backgroundColor: primaryRed,
+    backgroundColor: configuration.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
@@ -46,7 +40,7 @@ class MainPageButton extends StatelessWidget {
     Key? key,
     required this.onPressed,
     required this.child,
-    this.backgroundColor = primaryRed,
+    this.backgroundColor = configuration.color2,
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
   }) : super(key: key);
 
@@ -72,7 +66,7 @@ class CircularButton extends MainPageButton {
     Key? key,
     required VoidCallback onPressed,
     required Widget child,
-    backgroundColor = primaryRed,
+    backgroundColor = configuration.color2,
     this.size = const Size(50, 50),
   }) : super(
           key: key,
@@ -88,7 +82,7 @@ class CircularButton extends MainPageButton {
       child: ElevatedButton(
         onPressed: onPressed,
         style: mainPageButtonStyle.copyWith(
-          backgroundColor: MaterialStateProperty.all(this.backgroundColor),
+          backgroundColor: MaterialStateProperty.all(backgroundColor),
           shape: MaterialStateProperty.all(const CircleBorder()),
           minimumSize: MaterialStateProperty.all(size),
         ),
