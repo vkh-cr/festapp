@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:avapp/configuration.dart';
+import 'package:avapp/config.dart';
 import 'package:avapp/services/StorageHelper.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Futura',
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(background: backgroundColor)),
+              .copyWith(background: configuration.backgroundColor)),
         home: const MyHomePage(title: MyHomePage.HOME_PAGE),
         initialRoute: "/",
         routes: {
@@ -155,7 +155,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: primaryBlue2,
+                              backgroundColor: configuration.color4,
                               child: const Icon(Icons.login),
                             ),
                             const Text("Přihlášení"),
@@ -174,7 +174,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _profileButtonPressed,
-                              backgroundColor: primaryBlue2,
+                              backgroundColor: configuration.color4,
                               child: const Icon(Icons.account_circle_rounded),
                             ),
                             Text(userName),
@@ -196,7 +196,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _programPressed,
-                      backgroundColor: primaryBlue1,
+                      backgroundColor: configuration.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
                     const Text("Můj program"),
@@ -219,7 +219,7 @@ void didChangeDependencies() {
                 ),
                       child: MainPageButton(
                         onPressed: _newsPressed,
-                        backgroundColor: primaryYellow,
+                        backgroundColor: configuration.color3,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
@@ -231,7 +231,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _mapPressed,
-                      backgroundColor: primaryRed,
+                      backgroundColor: configuration.color2,
                       child: const Icon(Icons.map),
                     ),
                     const Text("Mapa"),
@@ -242,7 +242,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _infoPressed,
-                      backgroundColor: primaryBlue2,
+                      backgroundColor: configuration.color4,
                       child: const Icon(Icons.info),
                     ),
                     const Text("Info"),

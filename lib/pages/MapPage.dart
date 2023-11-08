@@ -1,6 +1,5 @@
-import 'package:avapp/configuration.dart';
+import 'package:avapp/config.dart';
 import 'package:avapp/services/DataService.dart';
-import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -106,7 +105,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (fill != null) {
       return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: primaryBlue1),
+        const Icon(Icons.location_pin, size: 58, color: configuration.color1),
         Positioned(
           top: 7.5,
           left: 14.5,
@@ -126,7 +125,7 @@ class _MapPageState extends State<MapPage> {
             child: Container(alignment: Alignment.center, child: fill))
       ]);
     }
-    return const Icon(Icons.location_pin, size: 36, color: primaryBlue1);
+    return const Icon(Icons.location_pin, size: 36, color: configuration.color1);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
