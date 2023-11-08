@@ -8,7 +8,7 @@ enum ToastSeverity{
 class ToastHelper {
   static void Show(String value, {ToastSeverity severity = ToastSeverity.Ok}) {
 
-    Color color = configuration.color1;
+    Color color = config.color1;
     String webColor = "#2C677B";
     if(severity!=ToastSeverity.Ok)
     {

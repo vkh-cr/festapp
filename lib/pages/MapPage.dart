@@ -66,7 +66,7 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
-  String PageTitle = configuration.map_page;
+  String PageTitle = config.map_page;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -105,7 +105,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (fill != null) {
       return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: configuration.color1),
+        const Icon(Icons.location_pin, size: 58, color: config.color1),
         Positioned(
           top: 7.5,
           left: 14.5,
@@ -125,7 +125,7 @@ class _MapPageState extends State<MapPage> {
             child: Container(alignment: Alignment.center, child: fill))
       ]);
     }
-    return const Icon(Icons.location_pin, size: 36, color: configuration.color1);
+    return const Icon(Icons.location_pin, size: 36, color: config.color1);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
