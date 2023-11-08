@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.avapp">
    <application
-        android:label="AV 2023"
+        android:label="FotoFest"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
