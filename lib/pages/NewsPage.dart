@@ -90,7 +90,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: configuration.color1.withOpacity(0.10)
+                        color: config.color1.withOpacity(0.10)
                       ),
                       child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
                     )),

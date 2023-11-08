@@ -33,8 +33,8 @@ Future<void> main() async {
   await GetStorage.init();
 
   await Supabase.initialize(
-    url: configuration.supabase_url,
-    anonKey: configuration.anon_key,
+    url: config.supabase_url,
+    anonKey: config.anon_key,
   );
   initializeDateFormatting();
   if(!DataService.isLoggedIn())
@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Futura',
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(background: configuration.backgroundColor)),
+              .copyWith(background: config.backgroundColor)),
         home: const MyHomePage(title: MyHomePage.HOME_PAGE),
         initialRoute: "/",
         routes: {
@@ -93,7 +93,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  static const HOME_PAGE = configuration.home_page;
+  static const HOME_PAGE = config.home_page;
 
   const MyHomePage({super.key, required this.title});
 
@@ -155,7 +155,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: configuration.color4,
+                              backgroundColor: config.color4,
                               child: const Icon(Icons.login),
                             ),
                             const Text("Přihlášení"),
@@ -174,7 +174,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _profileButtonPressed,
-                              backgroundColor: configuration.color4,
+                              backgroundColor: config.color4,
                               child: const Icon(Icons.account_circle_rounded),
                             ),
                             Text(userName),
@@ -196,7 +196,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _programPressed,
-                      backgroundColor: configuration.color1,
+                      backgroundColor: config.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
                     const Text("Můj program"),
@@ -219,7 +219,7 @@ void didChangeDependencies() {
                 ),
                       child: MainPageButton(
                         onPressed: _newsPressed,
-                        backgroundColor: configuration.color3,
+                        backgroundColor: config.color3,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
@@ -231,7 +231,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _mapPressed,
-                      backgroundColor: configuration.color2,
+                      backgroundColor: config.color2,
                       child: const Icon(Icons.map),
                     ),
                     const Text("Mapa"),
@@ -242,7 +242,7 @@ void didChangeDependencies() {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _infoPressed,
-                      backgroundColor: configuration.color4,
+                      backgroundColor: config.color4,
                       child: const Icon(Icons.info),
                     ),
                     const Text("Info"),

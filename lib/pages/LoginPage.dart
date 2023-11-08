@@ -89,7 +89,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       width: 250,
                       decoration: BoxDecoration(
-                          color: configuration.color1,
+                          color: config.color1,
                           borderRadius: BorderRadius.circular(20)),
                       child: TextButton(
                         onPressed: () async {
