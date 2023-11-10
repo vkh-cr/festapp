@@ -161,7 +161,7 @@ class EventModel extends IPlutoRowModel {
       endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
       endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
-      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouPlace : place!.toPlutoSelectString()),
+      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouValue : place!.toPlutoSelectString()),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
       isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
       parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??"")

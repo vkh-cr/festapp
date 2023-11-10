@@ -251,7 +251,12 @@ class DataService {
   }
 
   static Future<List<PlaceModel>> getMapPlaces() async {
-    var data = await _supabase.from('places').select().eq("is_hidden", false);
+    var data = await _supabase.from(PlaceModel.placeTable).select().eq(PlaceModel.isHiddenColumn, false);
+    return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+  }
+
+  static Future<List<PlaceModel>> getPlaces() async {
+    var data = await _supabase.from(PlaceModel.placeTable).select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
@@ -262,7 +267,29 @@ class DataService {
   }
 
   static Future<PlaceModel> getPlace(int id) async {
-    var data = await _supabase.from('places').select().eq("id", id).single();
+    var data = await _supabase.from(PlaceModel.placeTable).select().eq("id", id).single();
+    return PlaceModel.fromJson(data);
+  }
+
+  static Future<void> deletePlace(PlaceModel placeModel) async {
+    ensureIsAdmin();
+    ensureCanDeleteCritical();
+    await _supabase.from(PlaceModel.placeTable).delete().eq("id", placeModel.id);
+  }
+
+  static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
+  {
+    ensureIsAdmin();
+    var json = placeModel.toJson();
+    Map<String, dynamic> data;
+    if(placeModel.id!=null) {
+      data = await _supabase.from(PlaceModel.placeTable).update(json).eq("id", placeModel.id).select().single();
+    }
+    else
+    {
+      json.remove(PlaceModel.idColumn);
+      data = await _supabase.from(PlaceModel.placeTable).insert(json).select().single();
+    }
     return PlaceModel.fromJson(data);
   }
 
@@ -791,30 +818,6 @@ class DataService {
         .from('events')
         .delete()
         .eq("id", data.id);
-  }
-
-  static Future<PlaceModel> updatePlace(PlaceModel model) async {
-    ensureIsAdmin();
-    if(model.id == null)
-    {
-      var data = await _supabase.from(PlaceModel.placeTable).insert({
-        PlaceModel.titleColumn: model.title,
-        PlaceModel.descriptionColumn: model.description,
-        PlaceModel.isHiddenColumn: model.isHidden,
-        PlaceModel.coordinatesColumn: {"latLng" : model.latLng},
-        PlaceModel.typeColumn: model.type,
-      }).select().single();
-      return PlaceModel.fromJson(data);
-    }
-    var data = await _supabase.from(PlaceModel.placeTable).upsert({
-      PlaceModel.idColumn: model.id,
-      PlaceModel.titleColumn: model.title,
-      PlaceModel.descriptionColumn: model.description,
-      PlaceModel.isHiddenColumn: model.isHidden,
-      PlaceModel.coordinatesColumn: {"latLng" : model.latLng},
-      PlaceModel.typeColumn: model.type,
-    }).select().single();
-    return PlaceModel.fromJson(data);
   }
 
   static Future<void> updateInformation(InformationModel info) async {

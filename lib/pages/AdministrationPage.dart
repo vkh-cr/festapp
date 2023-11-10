@@ -11,6 +11,7 @@ import 'package:avapp/services/DataGridHelper.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/ImportHelper.dart';
 import 'package:avapp/services/MailerSendHelper.dart';
+import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class AdministrationPage extends StatefulWidget {
 class _AdministrationPageState extends State<AdministrationPage> {
   List<String> places = [];
   List<PlutoColumn> columns = [];
+  List<String> mapIcons = [];
   late SingleTableDataGrid<UserInfoModel> usersDataGrid;
 
   @override
@@ -50,8 +52,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> loadData() async {
     var placesRaws =  await DataService.getMapPlaces();
     var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
-    placesStrings.add(PlaceModel.WithouPlace);
+    placesStrings.add(PlaceModel.WithouValue);
     places = placesStrings;
+
+    mapIcons = MapIconHelper.type2Icon.keys.toList();
+    mapIcons.add(PlaceModel.WithouValue);
+
     setState(() {});
   }
 
@@ -173,7 +179,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           )
         ]);
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
           appBar: AppBar(
           title: const Text("Admin"),
@@ -194,6 +200,12 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       children: [
                         Icon(Icons.calendar_month),
                         Padding(padding: EdgeInsets.all(12), child: Text("Události"))
+                      ]
+                  ),
+                  Row(
+                      children: [
+                        Icon(Icons.pin_drop),
+                        Padding(padding: EdgeInsets.all(12), child: Text("Místa"))
                       ]
                   ),
                   Row(
@@ -494,6 +506,121 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
+                ]).DataGrid(),
+            SingleTableDataGrid<PlaceModel>(
+                DataService.getPlaces,
+                PlaceModel.fromPlutoJson,
+                columns: [
+                  PlutoColumn(
+                      title: "",
+                      field: "delete",
+                      type: PlutoColumnType.text(),
+                      readOnly: true,
+                      enableFilterMenuItem: false,
+                      enableSorting: false,
+                      enableDropToResize: false,
+                      enableColumnDrag: false,
+                      enableContextMenu: false,
+                      cellPadding: EdgeInsets.zero,
+                      width: 100,
+                      renderer: (rendererContext) {
+                        return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  onPressed: () async{
+                                    final id = rendererContext.row.cells[PlaceModel.idColumn]?.value as int?;
+                                    if (id == -1){
+                                      rendererContext.stateManager.removeRows([rendererContext.row]);
+                                      return;
+                                    }
+                                    setState(() {
+                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.delete_forever)),
+                              IconButton(
+                                  onPressed: () async{
+                                    var originRow = rendererContext.row;
+                                    var newRow = rendererContext.stateManager.getNewRows()[0];
+                                    newRow.cells[PlaceModel.idColumn]?.value = -1;
+                                    newRow.cells[PlaceModel.titleColumn]?.value = originRow.cells[PlaceModel.titleColumn]?.value;
+                                    newRow.cells[PlaceModel.descriptionColumn]?.value = originRow.cells[PlaceModel.descriptionColumn]?.value;
+                                    newRow.cells[PlaceModel.coordinatesColumn]?.value = originRow.cells[PlaceModel.coordinatesColumn]?.value;
+                                    newRow.cells[PlaceModel.typeColumn]?.value = originRow.cells[PlaceModel.typeColumn]?.value;
+                                    newRow.cells[PlaceModel.isHiddenColumn]?.value = originRow.cells[PlaceModel.isHiddenColumn]?.value;
+                                    var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
+                                    rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
+
+                                    setState(() {
+                                      newRow.setState(PlutoRowState.updated);
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add)),]
+                        );
+                      }),
+                  PlutoColumn(
+                    title: "Id",
+                    field: PlaceModel.idColumn,
+                    type: PlutoColumnType.number(defaultValue: -1),
+                    readOnly: true,
+                    width: 50,
+                    renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+                  ),
+                  PlutoColumn(
+                      title: "Nadpis",
+                      field: PlaceModel.titleColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
+                  PlutoColumn(
+                      title: "Popis",
+                      field: PlaceModel.descriptionColumn,
+                      type: PlutoColumnType.text(),
+                      width: 300
+                  ),
+                  PlutoColumn(
+                    title: "Ikonka",
+                    field: PlaceModel.typeColumn,
+                    type: PlutoColumnType.select(mapIcons),
+                    applyFormatterInEditing: false,
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
+                    //formatter: DataGridHelper.GetValueFromFormatted,
+                  ),
+                  PlutoColumn(
+                    title: "Skryté",
+                    field: PlaceModel.isHiddenColumn,
+                    type: PlutoColumnType.select(places),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                  ),
+                  PlutoColumn(
+                      width: 150,
+                      title: "Pozice na mapě",
+                      enableFilterMenuItem: false,
+                      enableContextMenu: false,
+                      enableSorting: false,
+                      field: PlaceModel.coordinatesColumn,
+                      type: PlutoColumnType.text(),
+                      renderer: (rendererContext) {
+                        return ElevatedButton(
+                            onPressed: () async{
+                              var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
+                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: placeModel).then((value) async {
+                                  if(value != null)
+                                  {
+                                    rendererContext.row.cells[PlaceModel.coordinatesColumn]?.value = value;
+                                    setState(() {
+                                      rendererContext.row.setState(PlutoRowState.updated);
+                                    });
+                                  }
+                                 });
+                              },
+                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                        );
+                      }),
                 ]).DataGrid(),
             SingleTableDataGrid<ExclusiveGroupModel>(
                 DataService.getExclusiveGroups,

@@ -1,5 +1,6 @@
 import 'package:avapp/config.dart';
 import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -67,6 +68,7 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
   String PageTitle = config.map_page;
+  bool isOnlyEditMode = false;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
@@ -75,31 +77,27 @@ class _MapPageState extends State<MapPage> {
 
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final placeId = ModalRoute.of(context)?.settings.arguments as int?;
-    loadPlaces(placeId: placeId);
+    //reset static values
+    selectedMarker = null;
+
+    final placeModel = ModalRoute.of(context)?.settings.arguments as PlaceModel?;
+    if(placeModel == null || placeModel.latLng == null) {
+      loadPlaces(placeId: placeModel?.id);
+    }
+    else{
+      PageTitle = placeModel.title ?? config.map_page;
+      addPlacesToMap([placeModel]);
+      runEditPositionMode(_markers.single);
+      isOnlyEditMode = true;
+    }
   }
 
-  Map<String, String> type2icon_map = {
-    "atm": "atm.svg",
-    "church": "church.svg",
-    "coffee": "coffee.svg",
-    "wine": "wine.svg",
-    "beer": "beer.svg",
-    "reception": "card.svg",
-    "food": "food.svg",
-    "sport": "ball.svg",
-    "lecture": "speaker.svg",
-    "workshop": "tools.svg",
-    "accommodation": "bed.svg",
-    "group": "conversation.svg",
-    "cross": "cross.svg",
-  };
-
-  Widget type2icon(String placeType) {
+  Widget type2icon(String? placeType) {
     SvgPicture? fill;
-    if (type2icon_map.containsKey(placeType)) {
+    var iconLink = MapIconHelper.getIconAddress(placeType);
+    if (iconLink != null) {
       fill = SvgPicture.asset(
-        "assets/images/map/${type2icon_map[placeType]!}",
+        iconLink,
         colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
       );
     }
@@ -155,6 +153,10 @@ class _MapPageState extends State<MapPage> {
     else {
       places = await DataService.getMapPlaces();
     }
+    addPlacesToMap(places);
+  }
+
+  void addPlacesToMap(List<PlaceModel> places) {
     var mappedMarkers = places
         .map(
           (place) => MarkerWithText(
@@ -162,7 +164,7 @@ class _MapPageState extends State<MapPage> {
             point: LatLng(place.latLng['lat'], place.latLng['lng']),
             width: 60,
             height: 60,
-            builder: (_) => type2icon(place.type ?? ""),
+            builder: (_) => type2icon(place.type),
             anchorPos: AnchorPos.align(AnchorAlign.top),
             editAction: runEditPositionMode,
           ),
@@ -237,9 +239,12 @@ class _MapPageState extends State<MapPage> {
                           onPressed: cancelNewPosition,
                           child: const Text("Storno")),
                       const Padding(padding: EdgeInsets.all(16.0)),
-                      ElevatedButton(
-                          onPressed: showAllGroups,
-                          child: const Text("Zobrazit skupinky")),
+                      Visibility(
+                        visible: !isOnlyEditMode,
+                        child: ElevatedButton(
+                            onPressed: showAllGroups,
+                            child: const Text("Zobrazit skupinky")),
+                      ),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       ElevatedButton(
                           onPressed: saveNewPosition,
@@ -272,6 +277,11 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> saveNewPosition() async {
+    if(isOnlyEditMode)
+    {
+      Navigator.pop(context, {"lat": selectedMarker!.point.latitude, "lng": selectedMarker!.point.longitude});
+      return;
+    }
     await DataService.SaveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
@@ -288,6 +298,11 @@ class _MapPageState extends State<MapPage> {
   }
 
   void cancelNewPosition() {
+    if(isOnlyEditMode)
+    {
+      Navigator.pop(context);
+      return;
+    }
     setState(() {
       selectedMarker = null;
     });

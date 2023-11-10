@@ -98,10 +98,10 @@ class UserInfoModel extends IPlutoRowModel {
       emailColumn: PlutoCell(value: email),
       nameColumn: PlutoCell(value: name),
       surnameColumn: PlutoCell(value: surname),
-      phoneColumn: PlutoCell(value: phone ?? PlaceModel.WithouPlace),
+      phoneColumn: PlutoCell(value: phone ?? PlaceModel.WithouValue),
       roleColumn: PlutoCell(value: role),
       accommodationColumn: PlutoCell(
-          value: accommodation ?? PlaceModel.WithouPlace),
+          value: accommodation ?? PlaceModel.WithouValue),
       sexColumn: PlutoCell(value: sex),
       isAdminColumn: PlutoCell(value: isAdmin.toString()),
       isReceptionAdminColumn: PlutoCell(value: isReceptionAdmin.toString()),

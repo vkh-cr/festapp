@@ -133,7 +133,7 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.topRight,
                           child: TextButton(
-                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place!.id).then((value) => loadData(_event!.id!)),
+                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place).then((value) => loadData(_event!.id!)),
                               child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
