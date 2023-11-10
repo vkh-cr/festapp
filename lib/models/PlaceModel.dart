@@ -1,4 +1,9 @@
-class PlaceModel {
+import 'package:avapp/services/DataService.dart';
+import 'package:pluto_grid/pluto_grid.dart';
+
+import 'PlutoAbstract.dart';
+
+class PlaceModel extends IPlutoRowModel {
   dynamic latLng;
   int? id;
   String? title;
@@ -6,7 +11,7 @@ class PlaceModel {
   String? type;
   bool isHidden = false;
 
-  static const String WithouPlace = "---";
+  static const String WithouValue = "---";
 
   static const String idColumn = "id";
   static const String titleColumn = "title";
@@ -29,6 +34,27 @@ class PlaceModel {
   );
   }
 
+  static PlaceModel fromPlutoJson(Map<String, dynamic> json) {
+    return PlaceModel(
+      latLng: json[coordinatesColumn],
+      id: json[idColumn] == -1 ? null : json[idColumn],
+      title: json[titleColumn],
+      description: json[descriptionColumn].isEmpty ? null : json[descriptionColumn],
+      type: json[typeColumn] == WithouValue ? null : json[typeColumn],
+      isHidden: json[isHiddenColumn] == "true" ? true : false,
+    );
+  }
+
+  Map toJson() =>
+  {
+    idColumn: id,
+    titleColumn: title,
+    coordinatesColumn: {"latLng" : latLng },
+    descriptionColumn: description,
+    typeColumn: type,
+    isHiddenColumn: isHidden
+  };
+
   PlaceModel({
     this.latLng,
     required this.id,
@@ -38,4 +64,31 @@ class PlaceModel {
     this.isHidden = false});
 
   String toPlutoSelectString() => "$id:$title";
+
+  @override
+  Future<void> deleteMethod() async {
+    await DataService.deletePlace(this);
+  }
+
+  @override
+  String toBasicString() {
+    return title.toString();
+  }
+
+  @override
+  PlutoRow toPlutoRow() {
+    return PlutoRow(cells: {
+      idColumn: PlutoCell(value: id),
+      titleColumn: PlutoCell(value: title),
+      descriptionColumn: PlutoCell(value: description ?? ""),
+      coordinatesColumn: PlutoCell(value: latLng),
+      typeColumn: PlutoCell(value: type ?? WithouValue),
+      isHiddenColumn: PlutoCell(value: isHidden),
+    });
+  }
+
+  @override
+  Future<void> updateMethod() async {
+    await DataService.updatePlace(this);
+  }
 }

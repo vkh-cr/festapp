@@ -1,4 +1,7 @@
+import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 class DataGridHelper
@@ -41,6 +44,25 @@ class DataGridHelper
         rendererContext.row.setState(PlutoRowState.updated);
       }); },
     );}
+
+  static Widget mapIconRenderer(rendererContext, void Function(Function() set) setState) {
+    String? value = rendererContext.cell.value;
+
+      var iconLink = MapIconHelper.getIconAddress(value);
+      if(iconLink != null)
+      {
+        var svgIcon = SizedBox(
+          width: 20,
+          height: 20,
+          child: SvgPicture.asset(
+            iconLink,
+            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          ),
+        );
+        return Row(children: [svgIcon, const SizedBox(width: 12,),Text(value!)],);
+      }
+      return const Text(PlaceModel.WithouValue);
+    }
 
   static Widget idRenderer(rendererContext) {
     var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();
