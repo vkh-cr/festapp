@@ -83,7 +83,7 @@ class PlaceModel extends IPlutoRowModel {
       descriptionColumn: PlutoCell(value: description ?? ""),
       coordinatesColumn: PlutoCell(value: latLng),
       typeColumn: PlutoCell(value: type ?? WithouValue),
-      isHiddenColumn: PlutoCell(value: isHidden),
+      isHiddenColumn: PlutoCell(value: isHidden.toString()),
     });
   }
 
