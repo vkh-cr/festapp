@@ -18,7 +18,7 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
   var firstRow = fields[0].map((e) => e.toString()).toList();
   for(int r = 1; r < fields.length; r++)
   {
-    var email = fields[r][ImportHelper.getIndex(UserInfoModel.emailColumn, firstRow)].toString().trim().toLowerCase();
+    var email = fields[r][ImportHelper.getIndex(UserInfoModel.emailReadonlyColumn, firstRow)].toString().trim().toLowerCase();
     if(email.isEmpty){
       continue;
     }
@@ -31,7 +31,7 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
     sex = sex.trim().toLowerCase().startsWith("m") ? "male" : "female";
     var user = UserInfoModel.fromJson({
       UserInfoModel.idColumn:null,
-      UserInfoModel.emailColumn:email,
+      UserInfoModel.emailReadonlyColumn:email,
       UserInfoModel.nameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.nameColumn, firstRow)].toString().trim(),
       UserInfoModel.surnameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.surnameColumn, firstRow)].toString().trim(),
       UserInfoModel.sexColumn:sex,

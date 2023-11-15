@@ -75,7 +75,7 @@ class _EventPageState extends State<EventPage> {
                             onPressed: () => signOut(),
                             child: const Text("Odhlásit se"))),
                     Visibility(
-                      visible: showLoginLogoutButton() && (DataService.isAdmin() || DataService.isReceptionAdmin()),
+                      visible: showLoginLogoutButton() && (DataService.isEditor()),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
@@ -96,7 +96,7 @@ class _EventPageState extends State<EventPage> {
                         ),
                       ),
                       Visibility(
-                          visible: DataService.isAdmin() ||
+                          visible: DataService.isEditor() ||
                               (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
                               onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
@@ -156,7 +156,7 @@ class _EventPageState extends State<EventPage> {
                       child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3))),
                   Visibility(
                       visible:
-                          DataService.isAdmin() && _event?.maxParticipants != null,
+                          DataService.isEditor() && _event?.maxParticipants != null,
                       child: ExpansionTile(
                         title:  Row(children: [IconButton(onPressed: () async
                         {

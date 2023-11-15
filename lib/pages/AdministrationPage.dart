@@ -41,7 +41,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     await DataService.getCurrentUserInfo();
-    if(!DataService.isAdmin())
+    if(!DataService.isEditor())
     {
       Navigator.pop(context);
       return;
@@ -112,7 +112,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
               width: 50),
           PlutoColumn(
               title: "E-mail",
-              field: UserInfoModel.emailColumn,
+              field: UserInfoModel.emailReadonlyColumn,
               type: PlutoColumnType.text(),
               checkReadOnly: (row, cell) {
                 final id = row.cells[UserInfoModel.idColumn]?.value as String?;
@@ -155,7 +155,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
           ),
           PlutoColumn(
             title: "Admin",
-            field: UserInfoModel.isAdminColumn,
+            field: UserInfoModel.isAdminReadOnlyColumn,
             type: PlutoColumnType.select([]),
             applyFormatterInEditing: true,
             enableEditingMode: false,
@@ -163,8 +163,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
             renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
           ),
           PlutoColumn(
-            title: "Recepční",
-            field: UserInfoModel.isReceptionAdminColumn,
+            title: "Editor",
+            field: UserInfoModel.isEditorReadOnlyColumn,
             type: PlutoColumnType.select([]),
             applyFormatterInEditing: true,
             enableEditingMode: false,
