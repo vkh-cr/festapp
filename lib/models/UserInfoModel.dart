@@ -16,22 +16,23 @@ class UserInfoModel extends IPlutoRowModel {
   String? phone;
   String? accommodation;
   bool? isAdmin = false;
-  bool? isReceptionAdmin = false;
+  bool? isEditor = false;
   PlaceModel? accommodationModel;
   UserGroupInfoModel? userGroup;
 
   static const String idColumn = "id";
-  static const String emailColumn = "email";
+  static const String emailReadonlyColumn = "email_readonly";
   static const String nameColumn = "name";
   static const String surnameColumn = "surname";
   static const String sexColumn = "sex";
   static const String accommodationColumn = "accommodation";
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
-  static const String isReceptionAdminColumn = "is_reception_admin";
-  static const String isAdminColumn = "is_admin";
+  static const String isEditorReadOnlyColumn = "is_editor_readonly";
+  static const String isAdminReadOnlyColumn = "is_admin_readonly";
 
   static const String userInfoTable = "user_info";
+  static const String userInfoPublicTable = "user_info_public";
 
   PlaceModel? place;
 
@@ -39,7 +40,7 @@ class UserInfoModel extends IPlutoRowModel {
   static const migrateColumns =
   {
   idColumn:"Id",
-  emailColumn:"E-mail",
+  emailReadonlyColumn:"E-mail",
   nameColumn:"Jméno",
   surnameColumn:"Příjmení",
   sexColumn:"Pohlaví",
@@ -56,7 +57,7 @@ class UserInfoModel extends IPlutoRowModel {
      this.sex,
      this.role,
      this.isAdmin,
-     this.isReceptionAdmin,
+     this.isEditor,
      this.phone,
      this.accommodation});
 
@@ -64,30 +65,32 @@ class UserInfoModel extends IPlutoRowModel {
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn],
-      email: json[emailColumn],
+      //todo remove backward compatibility
+      email: json[emailReadonlyColumn]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
       phone: json[phoneColumn],
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
-      isAdmin: json[isAdminColumn]??false,
-      isReceptionAdmin: json[isReceptionAdminColumn]??false,
+      //todo remove backward compatibility
+      isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"]??false,
+      isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"]??false,
     );
   }
 
   static UserInfoModel fromPlutoJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
-      email: json[emailColumn],
+      email: json[emailReadonlyColumn],
       name: json[nameColumn],
       surname: json[surnameColumn],
       phone: json[phoneColumn],
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
-      isAdmin: json[isAdminColumn] == "true" ? true : false,
-      isReceptionAdmin: json[isReceptionAdminColumn] == "true" ? true : false,
+      isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
+      isEditor: json[isEditorReadOnlyColumn] == "true" ? true : false,
     );
   }
 
@@ -95,7 +98,7 @@ class UserInfoModel extends IPlutoRowModel {
   PlutoRow toPlutoRow() {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
-      emailColumn: PlutoCell(value: email),
+      emailReadonlyColumn: PlutoCell(value: email),
       nameColumn: PlutoCell(value: name),
       surnameColumn: PlutoCell(value: surname),
       phoneColumn: PlutoCell(value: phone ?? PlaceModel.WithouValue),
@@ -103,8 +106,8 @@ class UserInfoModel extends IPlutoRowModel {
       accommodationColumn: PlutoCell(
           value: accommodation ?? PlaceModel.WithouValue),
       sexColumn: PlutoCell(value: sex),
-      isAdminColumn: PlutoCell(value: isAdmin.toString()),
-      isReceptionAdminColumn: PlutoCell(value: isReceptionAdmin.toString()),
+      isAdminReadOnlyColumn: PlutoCell(value: isAdmin.toString()),
+      isEditorReadOnlyColumn: PlutoCell(value: isEditor.toString()),
     });
   }
 

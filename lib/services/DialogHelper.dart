@@ -105,7 +105,7 @@ class DialogHelper{
     return result;
   }
 
-  static Future<String?> showStringInputDialog(
+  static Future<String?> showPasswordInputDialog(
       BuildContext context,
       String titleMessage,
       String hint,
@@ -124,8 +124,7 @@ class DialogHelper{
               children: [
                 TextField(
                   controller: _messageController,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
+                  obscureText: true,
                   decoration: InputDecoration(hintText: hint),
                   onChanged: (str){ result = str;},
                 )

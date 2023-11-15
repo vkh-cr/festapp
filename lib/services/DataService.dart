@@ -21,10 +21,10 @@ class DataService {
   static SupabaseClient? _supabaseAdmin;
   static Future<SupabaseClient> GetSupabaseAdminClient() async {
     if(_supabaseAdmin != null)
-      {
-        return _supabaseAdmin!;
-      }
-      var result = await DialogHelper.showStringInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
+    {
+      return _supabaseAdmin!;
+    }
+    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
     _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result!);
     return _supabaseAdmin!;
   }
@@ -40,6 +40,10 @@ class DataService {
           "recipient": recipient,
           "template_id": templateId
         }, "subs": variables});
+  }
+
+  static refreshSession() async {
+    await _supabase.auth.refreshSession();
   }
 
   static Future<bool> tryAuthUser() async {
@@ -118,11 +122,17 @@ class DataService {
   }
 
   static bool isAdmin() {
-    return _currentUser != null && _currentUser!.isAdmin!;
+    var containsAdminField = _supabase.auth.currentUser?.appMetadata.containsKey("is_admin");
+    return containsAdminField != null && _supabase.auth.currentUser!.appMetadata["is_admin"] == true;
+  }
+
+  static bool isEditor() {
+    var containsAdminField = _supabase.auth.currentUser?.appMetadata.containsKey("is_editor");
+    return containsAdminField != null && _supabase.auth.currentUser!.appMetadata["is_editor"] == true;
   }
 
   static bool isReceptionAdmin() {
-    return _currentUser != null && _currentUser!.isReceptionAdmin!;
+    return _currentUser != null && _currentUser!.isEditor!;
   }
 
   static Future<String> createUser(String email) async {
@@ -135,7 +145,6 @@ class DataService {
   }
 
   static Future<void> deleteUser(String uuid) async {
-    ensureCanDeleteCritical();
     var adminClient = await GetSupabaseAdminClient();
     await _supabase
         .from(UserGroupInfoModel.userGroupsTable)
@@ -235,19 +244,46 @@ class DataService {
       return;
     }
     //todo change email individually
+    if(!DataService.isAdmin())
+    {
+      await refreshSession();
+      if(!DataService.isAdmin())
+      {
+        var errorText = "Je potřeba vyššího oprávnění. Změny na uživateli ${data.email} nemohly být uloženy.";
+        throw Exception(errorText);
+      }
+    }
+    await _supabase.rpc("set_claim",
+        params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
+
+    await _supabase.rpc("set_claim",
+        params: {"uid": data.id, "claim": "is_admin", "value": data.isAdmin});
+
+
+    if(data.isAdmin! && !data.isEditor!)
+    {
+      data.isEditor = true;
+      await _supabase.rpc("set_claim",
+          params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
+    }
+
     await _supabase.from(UserInfoModel.userInfoTable).upsert({
       UserInfoModel.idColumn: data.id,
-      UserInfoModel.emailColumn: data.email,
+      UserInfoModel.emailReadonlyColumn: data.email,
       UserInfoModel.nameColumn: data.name,
       UserInfoModel.surnameColumn: data.surname,
       UserInfoModel.sexColumn: data.sex,
       UserInfoModel.roleColumn: data.role,
       UserInfoModel.accommodationColumn: data.accommodation,
       UserInfoModel.phoneColumn: data.phone,
-      UserInfoModel.isAdminColumn: data.isAdmin,
-      UserInfoModel.isReceptionAdminColumn: data.isReceptionAdmin,
-
+      UserInfoModel.isAdminReadOnlyColumn: data.isAdmin,
+      UserInfoModel.isEditorReadOnlyColumn: data.isEditor,
     });
+
+    if(data.id == currentUserId())
+    {
+      await refreshSession();
+    }
   }
 
   static Future<List<PlaceModel>> getMapPlaces() async {
@@ -272,14 +308,11 @@ class DataService {
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
-    ensureIsAdmin();
-    ensureCanDeleteCritical();
     await _supabase.from(PlaceModel.placeTable).delete().eq("id", placeModel.id);
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
   {
-    ensureIsAdmin();
     var json = placeModel.toJson();
     Map<String, dynamic> data;
     if(placeModel.id!=null) {
@@ -401,10 +434,10 @@ class DataService {
         .select(
         "${UserGroupInfoModel.idColumn},"
         "${UserGroupInfoModel.titleColumn},"
-        "user_info!leader(id, name, surname, email),"
+        "user_info!leader(id, name, surname, email_readonly),"
         "${PlaceModel.placeTable}(*),"
         "${UserGroupInfoModel.descriptionColumn},"
-        "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email))");
+        "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))");
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
@@ -415,10 +448,10 @@ class DataService {
         .select(
         "${UserGroupInfoModel.idColumn},"
             "${UserGroupInfoModel.titleColumn},"
-            "user_info!leader(id, name, surname, email),"
+            "user_info!leader(id, name, surname, email_readonly),"
             "${PlaceModel.placeTable}(*),"
             "${UserGroupInfoModel.descriptionColumn},"
-            "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email))")
+            "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))")
     .eq(UserGroupInfoModel.idColumn, id)
     .maybeSingle();
     if(data==null)
@@ -484,7 +517,6 @@ class DataService {
   }
 
   static deleteUserGroupInfo(UserGroupInfoModel model) async {
-    ensureIsAdmin();
     await _supabase
         .from(UserGroupInfoModel.userGroupsTable)
         .delete()
@@ -500,7 +532,6 @@ class DataService {
   }
 
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
-    ensureIsAdmin();
     var upsertObj = {
       "title": model.title,
     };
@@ -533,7 +564,6 @@ class DataService {
   }
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
-    ensureIsAdmin();
     await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .delete()
@@ -722,21 +752,6 @@ class DataService {
     }
   }
 
-  static ensureIsAdmin(){
-    if(!DataService.isAdmin())
-    {
-      throw Exception("User must be admin.");
-    }
-  }
-
-  static var canDeleteListEmails = ["bujnmi@gmail.com", "konarovae@gmail.com", "anezkazavadilova@seznam.cz", "anezkazavadilova@seznam.cz", "milijany@seznam.cz"];
-  static ensureCanDeleteCritical(){
-    if(!canDeleteListEmails.contains(currentUserEmail()))
-    {
-      throw Exception("You cannot delete.");
-    }
-  }
-
   static signOutFromEvent(EventModel event, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
     var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
@@ -763,7 +778,6 @@ class DataService {
 
   static Future<EventModel> updateEvent(EventModel event) async
    {
-    ensureIsAdmin();
     var upsertObj = {
       "start_time": event.startTime.toIso8601String(),
       "end_time": event.endTime.toIso8601String(),
@@ -812,8 +826,6 @@ class DataService {
   }
 
   static Future<void> deleteEvent(EventModel data) async {
-    ensureIsAdmin();
-    ensureCanDeleteCritical();
     await _supabase
         .from('events')
         .delete()
@@ -821,7 +833,6 @@ class DataService {
   }
 
   static Future<void> updateInformation(InformationModel info) async {
-    ensureIsAdmin();
     if(info.id == null)
     {
       await _supabase.from(InformationModel.informationTable).insert({
@@ -842,8 +853,6 @@ class DataService {
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
-    ensureIsAdmin();
-    ensureCanDeleteCritical();
     await _supabase
         .from(InformationModel.informationTable)
         .delete()
@@ -852,13 +861,12 @@ class DataService {
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
     var data = await _supabase.from(UserInfoModel.userInfoTable)
-        .select([UserInfoModel.idColumn, UserInfoModel.emailColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
+        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
   }
 
   static Future<void> deleteNewsMessage(NewsModel message) async {
-    ensureIsAdmin();
     await _supabase
         .from('user_news')
         .delete()
@@ -871,7 +879,6 @@ class DataService {
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
-    ensureIsAdmin();
     await _supabase
         .from('news')
         .update({"message":message.message})
@@ -880,7 +887,6 @@ class DataService {
   }
 
   static insertNewsMessage(String message) async {
-    ensureIsAdmin();
     await _supabase.from('news').insert(
         {"message": message, "created_by": currentUserId()}).select();
     ToastHelper.Show("Zpráva byla odeslána!");
@@ -924,14 +930,14 @@ class DataService {
     }
     var messagesData = await _supabase
         .from('news')
-        .select('id, created_at, message, user_info(name, surname)')
+        .select('id, created_at, message, user_info_public(name, surname)')
         .order("created_at");
     List<NewsModel> loadedMessages = [];
 
     for (var row in messagesData) {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
-      var name = row[UserInfoModel.userInfoTable] != null ? row['user_info']['name'] : "";
+      var name = row[UserInfoModel.userInfoPublicTable] != null ? row['user_info_public']['name'] : "";
       NewsModel newsMessage = NewsModel(
           createdAt: createdAt,
           message: message,
@@ -988,7 +994,7 @@ class DataService {
   }
 
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {
-    if(!(DataService.isAdmin() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
+    if(!(DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
       ToastHelper.Show("You do have no rights to change this position.", severity: ToastSeverity.NotOk);
       return;

@@ -53,7 +53,7 @@ class _UserPageState extends State<UserPage> {
                     Container(
                       alignment: Alignment.topLeft,
                       child: TextButton(
-                          onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place!.id),
+                          onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place),
                           child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
                     )
                   ],),
@@ -62,7 +62,7 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 Visibility(
-                  visible: DataService.isAdmin(),
+                  visible: DataService.isEditor(),
                   child: Container(
                     height: 50,
                     width: 250,

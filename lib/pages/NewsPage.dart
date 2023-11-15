@@ -95,7 +95,7 @@ class _NewsPageState extends State<NewsPage> {
                       child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
                     )),
                   Visibility(
-                    visible: DataService.isAdmin(),
+                    visible: DataService.isEditor(),
                     child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
                         if(choice == ContextMenuChoice.delete)
@@ -135,7 +135,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: DataService.isAdmin(),
+        visible: DataService.isEditor(),
         child: FloatingActionButton(
           onPressed: () => _showMessageDialog(context),
           child: const Icon(Icons.add),
