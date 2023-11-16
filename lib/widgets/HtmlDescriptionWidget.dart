@@ -47,7 +47,7 @@ class _HtmlDescriptionWidgetState extends State<HtmlDescriptionWidget> {
         // by default, a simple `Column` is rendered
         // consider using `ListView` or `SliverList` for better performance
         renderMode: RenderMode.column,
-      textStyle: const TextStyle(fontSize: 18, fontFamily: "Futura"),
+      textStyle: const TextStyle(fontSize: 18, fontFamily: "Montserrat"),
 
     );
     }

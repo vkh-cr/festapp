@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
           // or simply save your changes to "hot reload" in a Flutter IDE).
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
-          fontFamily: 'Futura',
+          fontFamily: 'Montserrat',
           useMaterial3: false,
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
@@ -136,14 +136,14 @@ void didChangeDependencies() {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+              padding: const EdgeInsets.fromLTRB(24, 0, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   SvgPicture.asset(
-                    width: 50,
+                    width: 200,
                     semanticsLabel: 'Absolventský Velehrad',
-                    'assets/icons/avlogo.svg',
+                    'assets/icons/biscuplogo.svg',
                   ),
                   const Spacer(),
                   Visibility(
@@ -156,7 +156,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: config.color4,
+                              backgroundColor: config.color1,
                               child: const Icon(Icons.login),
                             ),
                             const Text("Přihlášení"),

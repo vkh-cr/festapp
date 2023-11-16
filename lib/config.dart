@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class config {
-  static const String supabase_url = 'https://jyghacisbuntbrshhhey.supabase.co';
-  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg';
-  static const String home_page = 'Absolventský Velehrad';
-  static const String map_page = 'Mapa AV 2023';
+  static const String supabase_url = 'https://hncyhpgunboyzsafjtqs.supabase.co';
+  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuY3locGd1bmJveXpzYWZqdHFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5NjM4NDcsImV4cCI6MjAxNTUzOTg0N30.BEPwUcGIjev-ux-tVDNkbjiKjWHRdeEJuD8IIpv-8Qo';
+  static const String home_page = 'BISCUP';
+  static const String map_page = 'Mapa BISCUP 2023';
 
-  static const primaryColor = 0xFF2C677B;
+  static const primaryColor = 0xFF1C6758;
   static const backgroundColor = Color(0xFFD3D3D3);
   static const color1 = Color(primaryColor);
-  static const color2 = Color(0xFFBA5D3F);
-  static const color3 = Color(0xFFE0B73B);
-  static const color4 = Color(0xFF2A77A0);
+  static const color2 = Color(0xFFD6CDA4);
+  static const color3 = Color(0xFFEEF2E6);
+  static const color4 = Color(0xFF3D8361);
   static const attentionColor = Color(0xFF8B0000);
 }

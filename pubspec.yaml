@@ -81,13 +81,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: RussoOne
+    - family: Montserrat
       fonts:
-        - asset: fonts/RussoOne-Regular.ttf
-    - family: Futura
-      fonts:
-        - asset: fonts/Futura PT Book.ttf
-        - asset: fonts/Futura PT Medium.ttf
+        - asset: fonts/Montserrat-Medium.ttf
   assets:
     - assets/icons/
     - assets/images/map/
