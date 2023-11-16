@@ -50,8 +50,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> loadData() async {
-    var placesRaws =  await DataService.getMapPlaces();
-    var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
+    var mapPlaces =  await DataService.getMapPlaces();
+    var placesStrings = mapPlaces.map((p)=>p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouValue);
     places = placesStrings;
 
