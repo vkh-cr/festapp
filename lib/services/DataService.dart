@@ -641,9 +641,9 @@ class DataService {
   static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
       .from('event_users')
-      .select("user, event, user_info(email, name, surname)")
+      .select("user, event, user_info_public(*)")
       .eq("event", eventId);
-    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par["user_info"])));
+    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par["user_info_public"])));
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
