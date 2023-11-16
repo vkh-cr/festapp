@@ -74,6 +74,7 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           fontFamily: 'Futura',
           useMaterial3: false,
+          scaffoldBackgroundColor: config.backgroundColor,
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: config.backgroundColor)),

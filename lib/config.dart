@@ -7,7 +7,7 @@ class config {
   static const String map_page = 'Mapa AV 2023';
 
   static const primaryColor = 0xFF2C677B;
-  static const backgroundColor = Color(0xFFD3D3D3);
+  static const backgroundColor = Color(0xFFFFFFFF);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFFBA5D3F);
   static const color3 = Color(0xFFE0B73B);
