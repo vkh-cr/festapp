@@ -63,14 +63,14 @@ class _EventPageState extends State<EventPage> {
                     Visibility(
                         visible: showLoginLogoutButton() &&
                             !_participants.any(
-                                (p) => DataService.currentUserEmail() == p.email),
+                                (p) => DataService.currentUserId() == p.id),
                         child: ElevatedButton(
                             onPressed: () => signIn(),
                             child: const Text("Přihlásit se"))),
                     Visibility(
                         visible: showLoginLogoutButton() &&
                             _participants.any(
-                                (p) => DataService.currentUserEmail() == p.email),
+                                (p) => DataService.currentUserId() == p.id),
                         child: ElevatedButton(
                             onPressed: () => signOut(),
                             child: const Text("Odhlásit se"))),
@@ -82,7 +82,7 @@ class _EventPageState extends State<EventPage> {
                             onPressed: () async {
                               _queriedParticipants = await DataService.getAllUsersBasics();
                               _queriedParticipants.forEach((q) => {
-                                    if (_participants.any((p) => p.email == q.email))
+                                    if (_participants.any((p) => p.id == q.id))
                                       {q.isSignedIn = true}
                                   });
 

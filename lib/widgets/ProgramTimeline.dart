@@ -1,4 +1,5 @@
 import 'package:avapp/services/DataService.dart';
+import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -104,8 +105,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
               padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
               child: Text(
                 group.key,
-                style: const TextStyle(
-                    color: config.color1, fontWeight: FontWeight.bold),
+                style: timeLineSplitTextStyle,
               ),));
         children.add(createTimeline(group.value));
       }
@@ -139,21 +139,21 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       children: [
         createTimeline(morningEvents),
         afternoonEvents.isNotEmpty
-            ? const Padding(
-                padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Odpoledne",
-                  style: TextStyle(color: config.color1, fontWeight: FontWeight.bold),
+                  style: timeLineSplitTextStyle,
                 ),
               )
             : const SizedBox.shrink(),
         createTimeline(afternoonEvents),
         eveningEvents.isNotEmpty
-            ? const Padding(
-                padding: EdgeInsets.fromLTRB(48, 18, 0, 12),
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
                 child: Text(
                   "Večer",
-                  style: TextStyle(color: config.color1, fontWeight: FontWeight.bold),
+                  style: timeLineSplitTextStyle,
                 ),
               )
             : const SizedBox.shrink(),
@@ -186,7 +186,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           final event = events[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(event.leftText),
+            child: Text(event.leftText, style: timeLineSmallTextStyle,),
           );
         },
         contentsBuilder: (_, index) {
@@ -198,7 +198,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
                 foregroundColor: Colors.black,
                 alignment: Alignment.centerLeft// Text Color
               ),
-              child: Text(event.rightText));
+              child: Text(event.rightText, style: timeLineSmallTextStyle,));
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
