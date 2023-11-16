@@ -313,14 +313,14 @@ void didChangeDependencies() {
 
   _eventPressed(int id) {
     Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadData());
+        context, EventPage.ROUTE, arguments: id).then((value) => loadEventParticipants()).then((value) => loadData(false));
   }
 
   int _messageCount = 0;
   bool showMessageCount() => _messageCount>0;
   String messageCountString() => _messageCount<100?_messageCount.toString():"99";
-  Future<void> loadData() async {
-
+  Future<void> loadData([bool reloadEventParticipants = true]) async {
+    
     //get data from offline
     try
     {
@@ -328,10 +328,11 @@ void didChangeDependencies() {
       if(eventData!=null && _events.isEmpty)
       {
           var offlineEventsData = json.decode(eventData);
-          _events.addAll(List<EventModel>.from(offlineEventsData.map((o)=>EventModel.fromJson(o))));
-          _dots.clear();
-          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          setState((){});
+          setState((){
+            _events.addAll(List<EventModel>.from(offlineEventsData.map((o)=>EventModel.fromJson(o))));
+            _dots.clear();
+            _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+          });
       }
     }
     catch(e)
@@ -357,7 +358,10 @@ void didChangeDependencies() {
           setState(() {
             _messageCount = count;
           });
-        })
-        .whenComplete(() async => await loadEventParticipants());
+        });
+    if(reloadEventParticipants)
+    {
+      loadEventParticipants();
+    }
   }
 }
