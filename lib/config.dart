@@ -7,10 +7,10 @@ class config {
   static const String map_page = 'Mapa BISCUP 2023';
 
   static const primaryColor = 0xFF1C6758;
-  static const backgroundColor = Color(0xFFD3D3D3);
+  static const backgroundColor = Color(0xFFF5F5F5);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFFD6CDA4);
-  static const color3 = Color(0xFFEEF2E6);
-  static const color4 = Color(0xFF3D8361);
+  static const color3 = Color(0xFF3D8361);
+  static const color4 = Color(0xFF115448);
   static const attentionColor = Color(0xFF8B0000);
 }
