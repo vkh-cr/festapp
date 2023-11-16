@@ -149,8 +149,12 @@ class _UserPageState extends State<UserPage> {
   Future<void> loadData() async {
     userData = await DataService.getCurrentUserInfo();
     setState(() {});
-    userData!.place = await DataService.getUserAccommodation(userData!.accommodation!);
-    setState(() {});
+    if(userData!.accommodation != null)
+    {
+      userData!.place = await DataService.getUserAccommodation(userData!.accommodation!);
+      setState(() {});
+    }
+
   }
 }
 
