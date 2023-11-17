@@ -141,7 +141,7 @@ class _EventPageState extends State<EventPage> {
                       child: const Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Text(
-                          "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlašte do aplikace, případně využijte možnosti přihlásit se na recepci.",
+                          "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlaš do aplikace.",
                           style: TextStyle(color: config.attentionColor),),
                       )),
                   Visibility(

@@ -20,7 +20,7 @@ class GlobalSettingsModel {
     return GlobalSettingsModel(
       id: json[idColumn],
       defaultMapLocation: json[jsonColumn][defaultMapLocationCode],
-      defaultMapZoom: json[jsonColumn][defaultMapZoomCode]
+      defaultMapZoom: json[jsonColumn][defaultMapZoomCode].toDouble()
     );
   }
 

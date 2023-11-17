@@ -7,7 +7,7 @@ class config {
   static const String map_page = 'Mapa FotoFestu 2023';
 
   static const primaryColor = 0xFF122640;
-  static const backgroundColor = Color(0xFFF2C572);
+  static const backgroundColor = Color(0xFFFFFFFF);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFFBF8641);
   static const color3 = Color(0xFF593E25);

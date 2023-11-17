@@ -85,6 +85,10 @@ class _MapPageState extends State<MapPage> {
       loadPlaces(placeId: placeModel?.id);
     }
     else{
+      if(placeModel.latLng.toString().isEmpty)
+      {
+        placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
+      }
       PageTitle = placeModel.title ?? config.map_page;
       addPlacesToMap([placeModel]);
       runEditPositionMode(_markers.single);
