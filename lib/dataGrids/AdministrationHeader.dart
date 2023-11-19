@@ -1,3 +1,4 @@
+import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -7,15 +8,15 @@ import '../services/ToastHelper.dart';
 
 class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   final PlutoGridStateManager stateManager;
-
+  final SingleTableDataGrid dataGrid;
   final List<Widget>? headerChildren;
 
-  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren}) : super(key: key);
+  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, required this.dataGrid}) : super(key: key);
 
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   @override
-  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, headerChildren: headerChildren);
+  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren);
 
   static PlutoGridConfiguration defaultPlutoGridConfiguration() {
     return const PlutoGridConfiguration(
@@ -32,10 +33,11 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
 
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
+  final SingleTableDataGrid dataGrid;
   List<Widget>? headerChildren = [];
   List<Widget> allChildren = [];
 
-  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, {this.headerChildren});
+  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren});
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +75,13 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     var newRow = widget.stateManager.getNewRows();
     widget.stateManager.prependRows(newRow);
     for (var value in newRow) {
-      value.setState(PlutoRowState.updated);
+      dataGrid.newRows.add(value);
     }
   }
 
   void _saveChanges() async{
-    var toDelete = widget.stateManager.rows.where((element) => element.state == PlutoRowState.added).toList();
+    var toDelete = dataGrid.deletedRows.toList();
+    dataGrid.updatedRows.removeAll(toDelete);
     var deleteList = List<T>.from(
         toDelete.map((x) => fromPlutoJson(x.toJson())));
     if(deleteList.isNotEmpty)
@@ -105,7 +108,8 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
       ToastHelper.Show("Smazáno: ${element.toBasicString()}");
     }
 
-    var toUpsert = widget.stateManager.rows.where((element) => element.state == PlutoRowState.updated).toList();
+    var toUpsert = dataGrid.updatedRows.toList();
+    toUpsert.addAll(dataGrid.newRows);
     var upsertList = List<T>.from(
         toUpsert.map((x) => fromPlutoJson(x.toJson())));
     for (var element in upsertList)

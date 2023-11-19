@@ -66,6 +66,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
     usersDataGrid = SingleTableDataGrid<UserInfoModel>(
         DataService.getUsers,
         UserInfoModel.fromPlutoJson,
+        DataGridFirstColumn.deleteAndCheck,
+        UserInfoModel.idColumn,
         headerChildren: [
           ElevatedButton(
             onPressed: _import,
@@ -77,33 +79,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
           ),
         ],
         columns: [
-          PlutoColumn(
-              title: "",
-              field: "delete",
-              type: PlutoColumnType.text(),
-              readOnly: true,
-              enableRowChecked: true,
-              enableFilterMenuItem: false,
-              enableSorting: false,
-              enableDropToResize: false,
-              enableColumnDrag: false,
-              enableContextMenu: false,
-              cellPadding: EdgeInsets.zero,
-              width: 80,
-              renderer: (rendererContext) {
-                return IconButton(
-                    onPressed: () async{
-                      final id = rendererContext.row.cells[UserInfoModel.idColumn]?.value as String?;
-                      if (id?.isEmpty == true){
-                        rendererContext.stateManager.removeRows([rendererContext.row]);
-                        return;
-                      }
-                      setState(() {
-                        rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                      });
-                    },
-                    icon: const Icon(Icons.delete_forever));
-              }),
           PlutoColumn(
               title: "Id",
               field: UserInfoModel.idColumn,
@@ -242,33 +217,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
             SingleTableDataGrid<InformationModel>(
                 DataService.getInformation,
                 InformationModel.fromPlutoJson,
+                DataGridFirstColumn.deleteAndDuplicate,
+                InformationModel.idColumn,
                 columns: [
-                  PlutoColumn(
-                      title: "",
-                      field: "delete",
-                      type: PlutoColumnType.text(),
-                      readOnly: true,
-                      enableFilterMenuItem: false,
-                      enableSorting: false,
-                      enableDropToResize: false,
-                      enableColumnDrag: false,
-                      enableContextMenu: false,
-                      cellPadding: EdgeInsets.zero,
-                      width: 40,
-                      renderer: (rendererContext) {
-                        return IconButton(
-                            onPressed: () async{
-                              final id = rendererContext.row.cells[InformationModel.idColumn]?.value as int?;
-                              if (id == -1){
-                                rendererContext.stateManager.removeRows([rendererContext.row]);
-                                return;
-                              }
-                              setState(() {
-                                rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                              });
-                            },
-                            icon: const Icon(Icons.delete_forever));
-                      }),
                   PlutoColumn(
                       title: "Id",
                       field: InformationModel.idColumn,
@@ -325,61 +276,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
             SingleTableDataGrid<EventModel>(
                 DataService.getEventsWithPlaces,
                 EventModel.fromPlutoJson,
+                DataGridFirstColumn.deleteAndDuplicate,
+                EventModel.idColumn,
                 columns: [
-                  PlutoColumn(
-                      title: "",
-                      field: "delete",
-                      type: PlutoColumnType.text(),
-                      readOnly: true,
-                      enableFilterMenuItem: false,
-                      enableSorting: false,
-                      enableDropToResize: false,
-                      enableColumnDrag: false,
-                      enableContextMenu: false,
-                      cellPadding: EdgeInsets.zero,
-                      width: 100,
-                      renderer: (rendererContext) {
-                        return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                  onPressed: () async{
-                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                                    if (id == -1){
-                                      rendererContext.stateManager.removeRows([rendererContext.row]);
-                                      return;
-                                    }
-                                    setState(() {
-                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.delete_forever)),
-                              IconButton(
-                                  onPressed: () async{
-                                    var originRow = rendererContext.row;
-                                    var newRow = rendererContext.stateManager.getNewRows()[0];
-                                    newRow.cells[EventModel.idColumn]?.value = -1;
-                                    newRow.cells[EventModel.titleColumn]?.value = originRow.cells[EventModel.titleColumn]?.value;
-                                    newRow.cells[EventModel.startDateColumn]?.value = originRow.cells[EventModel.startDateColumn]?.value;
-                                    newRow.cells[EventModel.startTimeColumn]?.value = originRow.cells[EventModel.startTimeColumn]?.value;
-                                    newRow.cells[EventModel.endDateColumn]?.value = originRow.cells[EventModel.endDateColumn]?.value;
-                                    newRow.cells[EventModel.endTimeColumn]?.value = originRow.cells[EventModel.endTimeColumn]?.value;
-                                    newRow.cells[EventModel.maxParticipantsColumn]?.value = originRow.cells[EventModel.maxParticipantsColumn]?.value;
-                                    newRow.cells[EventModel.splitForMenWomenColumn]?.value = originRow.cells[EventModel.splitForMenWomenColumn]?.value;
-                                    newRow.cells[EventModel.placeColumn]?.value = originRow.cells[EventModel.placeColumn]?.value;
-                                    newRow.cells[EventModel.parentEventColumn]?.value = originRow.cells[EventModel.parentEventColumn]?.value;
-                                    newRow.cells[EventModel.descriptionHiddenColumn]?.value = originRow.cells[EventModel.descriptionHiddenColumn]?.value;
-                                    newRow.cells[EventModel.descriptionColumn]?.value = originRow.cells[EventModel.descriptionColumn]?.value;
-                                    var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
-                                    rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
-
-                                    setState(() {
-                                      newRow.setState(PlutoRowState.updated);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.add)),]
-                        );
-                      }),
                   PlutoColumn(
                     title: "Id",
                     field: EventModel.idColumn,
@@ -510,55 +409,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
             SingleTableDataGrid<PlaceModel>(
                 DataService.getPlaces,
                 PlaceModel.fromPlutoJson,
+                DataGridFirstColumn.deleteAndDuplicate,
+                PlaceModel.idColumn,
                 columns: [
-                  PlutoColumn(
-                      title: "",
-                      field: "delete",
-                      type: PlutoColumnType.text(),
-                      readOnly: true,
-                      enableFilterMenuItem: false,
-                      enableSorting: false,
-                      enableDropToResize: false,
-                      enableColumnDrag: false,
-                      enableContextMenu: false,
-                      cellPadding: EdgeInsets.zero,
-                      width: 100,
-                      renderer: (rendererContext) {
-                        return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                  onPressed: () async{
-                                    final id = rendererContext.row.cells[PlaceModel.idColumn]?.value as int?;
-                                    if (id == -1){
-                                      rendererContext.stateManager.removeRows([rendererContext.row]);
-                                      return;
-                                    }
-                                    setState(() {
-                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.delete_forever)),
-                              IconButton(
-                                  onPressed: () async{
-                                    var originRow = rendererContext.row;
-                                    var newRow = rendererContext.stateManager.getNewRows()[0];
-                                    newRow.cells[PlaceModel.idColumn]?.value = -1;
-                                    newRow.cells[PlaceModel.titleColumn]?.value = originRow.cells[PlaceModel.titleColumn]?.value;
-                                    newRow.cells[PlaceModel.descriptionColumn]?.value = originRow.cells[PlaceModel.descriptionColumn]?.value;
-                                    newRow.cells[PlaceModel.coordinatesColumn]?.value = originRow.cells[PlaceModel.coordinatesColumn]?.value;
-                                    newRow.cells[PlaceModel.typeColumn]?.value = originRow.cells[PlaceModel.typeColumn]?.value;
-                                    newRow.cells[PlaceModel.isHiddenColumn]?.value = originRow.cells[PlaceModel.isHiddenColumn]?.value;
-                                    var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
-                                    rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
-
-                                    setState(() {
-                                      newRow.setState(PlutoRowState.updated);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.add)),]
-                        );
-                      }),
                   PlutoColumn(
                     title: "Id",
                     field: PlaceModel.idColumn,
@@ -625,38 +478,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
             SingleTableDataGrid<ExclusiveGroupModel>(
                 DataService.getExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
+                DataGridFirstColumn.delete,
+                ExclusiveGroupModel.idColumn,
                 columns: [
-                  PlutoColumn(
-                      title: "",
-                      field: "delete",
-                      type: PlutoColumnType.text(),
-                      readOnly: true,
-                      enableFilterMenuItem: false,
-                      enableSorting: false,
-                      enableDropToResize: false,
-                      enableColumnDrag: false,
-                      enableContextMenu: false,
-                      cellPadding: EdgeInsets.zero,
-                      width: 100,
-                      renderer: (rendererContext) {
-                        return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                  onPressed: () async{
-                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                                    if (id == -1){
-                                      rendererContext.stateManager.removeRows([rendererContext.row]);
-                                      return;
-                                    }
-                                    setState(() {
-                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.delete_forever)),
-                            ]
-                        );
-                      }),
                   PlutoColumn(
                     title: "Id",
                     field: ExclusiveGroupModel.idColumn,
@@ -682,38 +506,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
             SingleTableDataGrid<UserGroupInfoModel>(
                 DataService.getUserGroupInfoList,
                 UserGroupInfoModel.fromPlutoJson,
+                DataGridFirstColumn.delete,
+                UserGroupInfoModel.idColumn,
                 columns: [
-                  PlutoColumn(
-                      title: "",
-                      field: "delete",
-                      type: PlutoColumnType.text(),
-                      readOnly: true,
-                      enableFilterMenuItem: false,
-                      enableSorting: false,
-                      enableDropToResize: false,
-                      enableColumnDrag: false,
-                      enableContextMenu: false,
-                      cellPadding: EdgeInsets.zero,
-                      width: 100,
-                      renderer: (rendererContext) {
-                        return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                  onPressed: () async{
-                                    final id = rendererContext.row.cells[EventModel.idColumn]?.value as int?;
-                                    if (id == -1){
-                                      rendererContext.stateManager.removeRows([rendererContext.row]);
-                                      return;
-                                    }
-                                    setState(() {
-                                      rendererContext.row.setState(rendererContext.row.state == PlutoRowState.none ? PlutoRowState.added : PlutoRowState.none);
-                                    });
-                                  },
-                                  icon: const Icon(Icons.delete_forever)),
-                            ]
-                        );
-                      }),
                   PlutoColumn(
                     title: "Id",
                     field: UserGroupInfoModel.idColumn,
