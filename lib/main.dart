@@ -116,7 +116,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
 String userName = "";
-int redrawTabKey = 0;
 
 @override
 void didChangeDependencies() {
@@ -188,7 +187,7 @@ void didChangeDependencies() {
                   ),
                 ],
               )),
-          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed, key: ValueKey<int>(redrawTabKey),)),
+          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed,)),
           Padding(
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
@@ -309,7 +308,6 @@ void didChangeDependencies() {
         });
     }
 
-    redrawTabKey++;
     //update offline
     var encoded = jsonEncode(_events);
     StorageHelper.Set("events", encoded);
