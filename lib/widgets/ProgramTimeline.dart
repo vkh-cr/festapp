@@ -133,33 +133,32 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
         .toList();
     var eveningEvents = allEvents.where((e) => e.startTime.hour >= 18).toList();
-    return SingleChildScrollView(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        createTimeline(morningEvents),
-        afternoonEvents.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
-                child: Text(
-                  "Odpoledne",
-                  style: timeLineSplitTextStyle,
-                ),
-              )
-            : const SizedBox.shrink(),
-        createTimeline(afternoonEvents),
-        eveningEvents.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
-                child: Text(
-                  "Večer",
-                  style: timeLineSplitTextStyle,
-                ),
-              )
-            : const SizedBox.shrink(),
-        createTimeline(eveningEvents),
-      ],
-    ));
+    return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+    createTimeline(morningEvents),
+    afternoonEvents.isNotEmpty
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
+            child: Text(
+              "Odpoledne",
+              style: timeLineSplitTextStyle,
+            ),
+          )
+        : const SizedBox.shrink(),
+    createTimeline(afternoonEvents),
+    eveningEvents.isNotEmpty
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
+            child: Text(
+              "Večer",
+              style: timeLineSplitTextStyle,
+            ),
+          )
+        : const SizedBox.shrink(),
+    createTimeline(eveningEvents),
+          ],
+        );
   }
 
   String buildDayFormat(TimeLineItem element) {

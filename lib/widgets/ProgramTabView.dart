@@ -30,7 +30,14 @@ import 'ProgramTimeline.dart';
     @override
     Widget build(BuildContext context) {
 
+      List<Widget> programLineChildren = [];
+
       eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
+      for(var e in eventsMap.values)
+      {
+        var timeline = ProgramTimeline(events: e, onEventPressed: onEventPressed, key: UniqueKey(),);
+        programLineChildren.add(SingleChildScrollView(child: timeline));
+      }
       return Container(
         constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTabController(
@@ -50,10 +57,7 @@ import 'ProgramTimeline.dart';
               ],
             ),
             body: TabBarView(
-              children: [
-                for(var e in eventsMap.values)
-                  ProgramTimeline(events: e, onEventPressed: onEventPressed)
-              ],
+              children: programLineChildren,
             ),
           ),
         ),
