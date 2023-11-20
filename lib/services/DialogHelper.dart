@@ -1,6 +1,8 @@
+import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:search_page/search_page.dart';
+import 'package:select_dialog/select_dialog.dart';
 
 import '../models/UserInfoModel.dart';
 import '../widgets/DropFile.dart';
@@ -37,7 +39,7 @@ class DialogHelper{
                       onPressedAction(person);
                     },
                     child: Text(setText)),
-                Text(person.email!),
+                Text(person.email??""),
               ],
             ),
           ),
@@ -103,6 +105,39 @@ class DialogHelper{
           );
         });
     return result;
+  }
+
+  static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
+      BuildContext context,
+      List<UserGroupInfoModel> userGroups,
+      ) async {
+    UserGroupInfoModel? selectedGroup;
+    await SelectDialog.showModal<UserGroupInfoModel>(
+      context,
+      label: "Přidat do skupiny",
+      items: userGroups,
+      searchBoxDecoration: const InputDecoration(hintText: "Hledat"),
+      selectedValue: selectedGroup,
+      itemBuilder:
+          (BuildContext context, UserGroupInfoModel item, bool isSelected) {
+        return Container(
+          decoration: !isSelected
+              ? null
+              : BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.white,
+            border: Border.all(
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          child: TextButton(onPressed: null, child: Text(item.title),),
+        );
+      },
+      onChange: (selected) {
+        selectedGroup = selected;
+      },
+    );
+    return selectedGroup;
   }
 
   static Future<String?> showPasswordInputDialog(
