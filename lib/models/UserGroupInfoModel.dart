@@ -14,7 +14,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
   int? placeId;
   String? leaderId;
   String? description;
-  List<UserInfoModel> participants;
+  Set<UserInfoModel> participants;
 
   UserGroupInfoModel({
     required this.id,
@@ -35,8 +35,8 @@ class UserGroupInfoModel extends IPlutoRowModel {
       placeId: json.containsKey(placeColumn) ? json[placeColumn] : null,
       place: json.containsKey(PlaceModel.placeTable) && json[PlaceModel.placeTable] != null ? PlaceModel.fromJson(json[PlaceModel.placeTable]) : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
-      leader: json.containsKey(userInfoTable) ? UserInfoModel.fromJson(json[userInfoTable]) : null,
-      participants: json.containsKey(userGroupsTable) ? List<UserInfoModel>.from(json[userGroupsTable].map((e)=>UserInfoModel.fromJson(e["user_info"]))) : []
+      leader: json[userInfoTable] != null ? UserInfoModel.fromJson(json[userInfoTable]) : null,
+      participants: json.containsKey(userGroupsTable) ? Set<UserInfoModel>.from(json[userGroupsTable].map((e)=>UserInfoModel.fromJson(e["user_info"]))) : {}
   );
   }
 
@@ -58,10 +58,10 @@ class UserGroupInfoModel extends IPlutoRowModel {
     return UserGroupInfoModel(
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
-      leader: json[leaderColumn],
+      leader: json[leaderColumn] == "" ? null : json[leaderColumn],
       description: model?.description,
       participants: json[participantsColumn] == "" ? [] : json[participantsColumn],
-      place: (json[placeColumn] as UserGroupInfoModel).place
+      place: (json[placeColumn] as PlaceModel?)
     );
   }
 
@@ -72,7 +72,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       titleColumn: PlutoCell(value: title),
       leaderColumn: PlutoCell(value: leader),
       descriptionColumn: PlutoCell(value: this),
-      placeColumn: PlutoCell(value: this),
+      placeColumn: PlutoCell(value: place),
       participantsColumn: PlutoCell(value: participants),
     });
   }

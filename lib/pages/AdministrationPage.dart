@@ -77,6 +77,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
             onPressed: _generatePassword,
             child: const Text('Generovat heslo'),
           ),
+          ElevatedButton(
+            onPressed: _addToGroup,
+            child: const Text('Přidat do skupiny'),
+          ),
         ],
         columns: [
           PlutoColumn(
@@ -135,7 +139,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn),
           ),
           PlutoColumn(
             title: "Editor",
@@ -144,7 +148,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn),
           ),
           PlutoColumn(
             title: "Role",
@@ -246,10 +250,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   var newText = value as String;
                                   if(newText!=oldText)
                                   {
-                                    rendererContext.row.cells[InformationModel.descriptionColumn]?.value = newText;
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    var cell = rendererContext.row.cells[InformationModel.descriptionColumn]!;
+                                    rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
                               });},
@@ -270,7 +272,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, InformationModel.isHiddenColumn),
                   ),
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
@@ -330,7 +332,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
                   ),
                   PlutoColumn(
                     title: "Skupinka",
@@ -339,7 +341,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
                   ),
                   PlutoColumn(
                     title: "Místo",
@@ -390,9 +392,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   if(newText!=textToEdit)
                                   {
                                     rendererContext.row.cells[EventModel.descriptionHiddenColumn]?.value = newText;
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    var cell = rendererContext.row.cells[EventModel.descriptionColumn]!;
+                                    rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   }
                                 }
                               });},
@@ -436,9 +437,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     title: "Ikonka",
                     field: PlaceModel.typeColumn,
                     type: PlutoColumnType.select(mapIcons),
-                    applyFormatterInEditing: false,
                     renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
-                    //formatter: DataGridHelper.GetValueFromFormatted,
                   ),
                   PlutoColumn(
                     title: "Skryté",
@@ -447,7 +446,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, PlaceModel.isHiddenColumn),
                   ),
                   PlutoColumn(
                       width: 150,
@@ -459,15 +458,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       type: PlutoColumnType.text(),
                       renderer: (rendererContext) {
                         return ElevatedButton(
-                            onPressed: () async{
+                            onPressed: () async {
                               var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
                               Navigator.pushNamed(context, MapPage.ROUTE, arguments: placeModel).then((value) async {
                                   if(value != null)
                                   {
-                                    rendererContext.row.cells[PlaceModel.coordinatesColumn]?.value = value;
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    var cell = rendererContext.row.cells[PlaceModel.coordinatesColumn]!;
+                                    rendererContext.stateManager.changeCellValue(cell, value, force: true);
                                   }
                                  });
                               },
@@ -550,7 +547,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     DialogHelper.chooseUser(context, (person) =>
                                     setState(() {
                                       rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
-                                      rendererContext.row.setState(PlutoRowState.updated);
+                                      var cell = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]!;
+                                      rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                       Navigator.pop(context);
                                     }), _allUsers, "Nastavit");
                                   },
@@ -562,16 +560,16 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                       title: "Členové skupinky",
                       field: UserGroupInfoModel.participantsColumn,
-                      type: PlutoColumnType.text(defaultValue: <UserInfoModel>[]),
+                      type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
                       enableEditingMode: false,
                       width: 1000,
                       renderer: (rendererContext) {
                         String? userNames;
-                        List<UserInfoModel> participants = [];
+                        Set<UserInfoModel> participants = {};
                         var currentValue = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value;
                         if(currentValue!=null && currentValue.toString().isNotEmpty)
                         {
-                          participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>);
+                          participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as Set<UserInfoModel>);
                           userNames = participants.join(", ");
                         }
                         return Row(
@@ -587,16 +585,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                     DialogHelper.chooseUser(context, (person) =>
                                         setState(() {
                                           rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
-                                          rendererContext.row.setState(PlutoRowState.updated);
+                                          var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
+                                          rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                         }), _allUsers, "Přidat");
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               IconButton(
                                   onPressed: () async{
-                                    (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as List<UserInfoModel>).clear();
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
+                                    rendererContext.stateManager.changeCellValue(cell, <UserInfoModel>{}, force: true);
                                   },
                                   icon: const Icon(Icons.remove_circle)),
                               Text("(${participants.length}) $userNames"),]
@@ -652,21 +649,18 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async {
-                              var id = rendererContext.row.cells[UserGroupInfoModel.idColumn]?.value as int;
-                              if(id==-1)
-                              {
-                                ToastHelper.Show("Pro výběr místa skupinku nejdřív ulož!");
-                                return;
-                              }
+                              var title = rendererContext.row.cells[UserGroupInfoModel.titleColumn]?.value;
+                              var placeModel = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as PlaceModel?;
+                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
 
-                              var model = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as UserGroupInfoModel;
-                              model.place ??= PlaceModel(id: null, title: model.title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
-                              if(model.place!.id == null)
-                              {
-                                model.place = await DataService.updatePlace(model.place!);
-                                await DataService.updateUserGroupInfo(model);
-                              }
-                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: model.place!.id);
+                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: placeModel).then((value) async {
+                                if(value != null)
+                                {
+                                  placeModel!.latLng = value;
+                                  var cell = rendererContext.row.cells[UserGroupInfoModel.placeColumn]!;
+                                  rendererContext.stateManager.changeCellValue(cell, placeModel, force: true);
+                                }
+                              });
                             },
                             child: const Row(children: [Icon(Icons.location_pin), Padding(padding: EdgeInsets.all(6), child: Text("Vybrat")) ])
                         );
@@ -816,5 +810,19 @@ class _AdministrationPageState extends State<AdministrationPage> {
     {
       await _generateAndUpdatePasswordFromUser(u, true);
     }
+  }
+
+  Future<void> _addToGroup() async {
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.id != null).toList();
+    var allGroups = await DataService.getUserGroupInfoList();
+    var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
+    if(chosenGroup == null)
+    {
+      return;
+    }
+    chosenGroup.participants.addAll(users);
+    await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants);
+    ToastHelper.Show("${chosenGroup.title} byla změněna.");
   }
 }

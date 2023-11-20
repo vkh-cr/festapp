@@ -195,7 +195,7 @@ class _EventPageState extends State<EventPage> {
                             ),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                            child: Text("Moderátor: ${_groupInfoModel?.leader!.name}", style: normalTextStyle)),
+                            child: Text("Moderátor: ${_groupInfoModel?.leader?.name??""}", style: normalTextStyle)),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
                             child: Text("Členové skupinky:", style: normalTextStyle)),
@@ -207,7 +207,7 @@ class _EventPageState extends State<EventPage> {
                           itemBuilder: (BuildContext context, int index) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                              child: Text("${_groupInfoModel?.participants[index].name}", style: normalTextStyle),
+                              child: Text("${_groupInfoModel?.participants.toList()[index].name}", style: normalTextStyle),
                             );
                           })
                       ],
