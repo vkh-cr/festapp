@@ -153,7 +153,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible: _event?.childEvents.isNotEmpty == true,
-                      child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3))),
+                      child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: SingleChildScrollView(child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)))),
                   Visibility(
                       visible:
                           DataService.isEditor() && _event?.maxParticipants != null,
