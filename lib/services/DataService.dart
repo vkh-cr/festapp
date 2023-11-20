@@ -475,13 +475,10 @@ class DataService {
       ToastHelper.Show("Must be leader or admin to change the group.", severity: ToastSeverity.NotOk);
       return;
     }
-    if(model.leader == null)
-    {
-      throw Exception("Cannot save group without leader");
-    }
+
     var upsertObj = {
       UserGroupInfoModel.titleColumn: model.title,
-      UserGroupInfoModel.leaderColumn: model.leader!.id,
+      UserGroupInfoModel.leaderColumn: model.leader?.id,
     };
 
     if(model.description != null)
@@ -490,6 +487,7 @@ class DataService {
     }
     if(model.place != null)
     {
+      model.place = await DataService.updatePlace(model.place!);
       upsertObj.addAll({UserGroupInfoModel.placeColumn: model.place!.id.toString()});
     }
     dynamic eventData;
@@ -502,17 +500,20 @@ class DataService {
       eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);
+    await updateUserGroupParticipants(updated, model.participants);
+  }
 
+  static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
     await _supabase
         .from(UserGroupInfoModel.userGroupsTable)
         .delete()
-        .eq("group", updated.id);
+        .eq("group", group.id);
 
-    for(var p in model.participants)
+    for(var p in participants)
     {
       await _supabase
           .from(UserGroupInfoModel.userGroupsTable)
-          .insert({"group":updated.id, "user":p.id});
+          .insert({"group":group.id, "user":p.id});
     }
   }
 
@@ -769,7 +770,7 @@ class DataService {
         .eq("user", finalId);
 
     if(participant == null) {
-      ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}.", severity: ToastSeverity.NotOk); return;
+      ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}."); return;
     }
     else{
       ToastHelper.Show("Odhlášen $participant.");

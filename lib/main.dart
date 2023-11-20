@@ -116,6 +116,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
 String userName = "";
+int redrawTabKey = 0;
 
 @override
 void didChangeDependencies() {
@@ -187,7 +188,7 @@ void didChangeDependencies() {
                   ),
                 ],
               )),
-          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed)),
+          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed, key: ValueKey<int>(redrawTabKey),)),
           Padding(
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
@@ -308,6 +309,7 @@ void didChangeDependencies() {
         });
     }
 
+    redrawTabKey++;
     //update offline
     var encoded = jsonEncode(_events);
     StorageHelper.Set("events", encoded);
@@ -315,13 +317,13 @@ void didChangeDependencies() {
 
   _eventPressed(int id) {
     Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadEventParticipants()).then((value) => loadData(false));
+        context, EventPage.ROUTE, arguments: id).then((value) => loadData());
   }
 
   int _messageCount = 0;
   bool showMessageCount() => _messageCount>0;
   String messageCountString() => _messageCount<100?_messageCount.toString():"99";
-  Future<void> loadData([bool reloadEventParticipants = true]) async {
+  Future<void> loadData() async {
     
     //get data from offline
     try
@@ -361,9 +363,7 @@ void didChangeDependencies() {
             _messageCount = count;
           });
         });
-    if(reloadEventParticipants)
-    {
-      loadEventParticipants();
-    }
+
+    loadEventParticipants();
   }
 }

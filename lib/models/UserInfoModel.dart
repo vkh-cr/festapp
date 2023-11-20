@@ -154,4 +154,17 @@ class UserInfoModel extends IPlutoRowModel {
         && u.phone == phone
         && u.sex == sex;
   }
+
+  @override
+  int get hashCode {
+    return id.hashCode;
+  }
+
+  @override bool operator ==(Object other) {
+    if(other is UserInfoModel)
+    {
+      return id == other.id;
+    }
+    return false;
+  }
 }

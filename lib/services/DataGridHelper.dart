@@ -2,7 +2,6 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pluto_grid/pluto_grid.dart';
 
 class DataGridHelper
 {
@@ -35,14 +34,15 @@ class DataGridHelper
     return res;
   }
 
-  static Widget checkBoxRenderer(rendererContext, void Function(Function() set) setState) {
+  static Widget checkBoxRenderer(rendererContext, String idString) {
     var value = rendererContext.cell.value == "true" ? "true" : "false";
     return Checkbox(
       value: bool.parse(value),
-      onChanged: (bool? value) { setState(() {
+      onChanged: (bool? value) {
+        var cell = rendererContext.row.cells[idString]!;
+        rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
         rendererContext.cell.value = value.toString();
-        rendererContext.row.setState(PlutoRowState.updated);
-      }); },
+        },
     );}
 
   static Widget mapIconRenderer(rendererContext, void Function(Function() set) setState) {
