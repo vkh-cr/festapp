@@ -1,6 +1,8 @@
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/config.dart';
+
 
 class MailerSendHelper{
   static void sendPassword(UserInfoModel recipient, String password) async {
@@ -8,15 +10,17 @@ class MailerSendHelper{
     var emailVar = {"var":"email", "value":recipient.email!};
     var variables = [passwordVar, emailVar];
     variables.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email!, "jy7zpl9nqe545vx6", variables);
-    ToastHelper.Show("Email byl odeslán uživateli: ${recipient.email}");
+    await DataService.emailMailerSend(recipient.email!, config.welcomeEmailTemplate, variables);
+    ToastHelper.Show("Email s přístupovými údaji byl odeslán uživateli: ${recipient.email}");
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
   static List<Map<String, String>> _getSalutationPresalutation(UserInfoModel user)
   {
     var presalutation = {"var":"presalutation", "value":user.sex == "male" ? "Milý": "Milá"};
+    var register = {"var":"register", "value":user.sex == "male" ? "registroval": "registrovala"};
     var salutation = {"var":"salutation", "value":_getVocation(user.name!)};
-    return [presalutation, salutation];
+    return [presalutation, salutation, register];
   }
 
   static String _getVocation(String name){
@@ -1031,6 +1035,7 @@ class MailerSendHelper{
     "Marianna":"Marianno",
     "Marianne":"Marianne",
     "Marie":"Maruško",
+    "Marie-Anna":"Maruško",
     "Mariia":"Mariio",
     "Marija":"Marijo",
     "Marika":"Mariko",
