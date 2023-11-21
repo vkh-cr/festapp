@@ -13,4 +13,9 @@ class config {
   static const color3 = Color(0xFF593E25);
   static const color4 = Color(0xFF1B3659);
   static const attentionColor = Color(0xFF8B0000);
+
+  static const bool isServiceRoleSafety = true;
+
+  static const String generatedPasswordPrefix = "av";
+  static const String welcomeEmailTemplate = "jy7zpl9nqe545vx6";
 }

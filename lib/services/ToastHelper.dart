@@ -9,7 +9,8 @@ class ToastHelper {
   static void Show(String value, {ToastSeverity severity = ToastSeverity.Ok}) {
 
     Color color = config.color1;
-    String webColor = "#2C677B";
+    var hexCode = '#${color.value.toRadixString(16).substring(2, 8)}';
+    String webColor = hexCode;
     if(severity!=ToastSeverity.Ok)
     {
       color = Colors.red;

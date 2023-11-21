@@ -41,7 +41,9 @@ Future<void> main() async {
   {
     DataService.tryAuthUser();
   }
-  await DataService.loadOrInitGlobalSettings();
+  try {
+    DataService.loadOrInitGlobalSettings();
+  } catch(e) {}
   runApp(const MyApp());
 }
 
