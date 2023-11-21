@@ -6,9 +6,11 @@ import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/models/NewsMessage.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:avapp/config.dart';
 
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
@@ -25,7 +27,11 @@ class DataService {
       return _supabaseAdmin!;
     }
     var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
-    _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result!);
+    if(result==null)
+    {
+      throw Exception("You must input service_role key.");
+    }
+    _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result);
     return _supabaseAdmin!;
   }
 
@@ -140,8 +146,13 @@ class DataService {
     return data.user!.id;
   }
 
-  static Future<void> updateUserPassword(String uuid, String password) async {
-    (await GetSupabaseAdminClient()).auth.admin.updateUserById(uuid, attributes: AdminUserAttributes(password: password));
+  static Future<void> updateUserPassword(UserInfoModel user, String password) async {
+    if(config.isServiceRoleSafety){
+      (await GetSupabaseAdminClient()).auth.admin.updateUserById(user.id!, attributes: AdminUserAttributes(password: password));
+    }
+    else{
+      await unsafeChangeUserPassword(user.email!, password);
+    }
   }
 
   static Future<void> deleteUser(String uuid) async {
@@ -239,10 +250,17 @@ class DataService {
     return UserInfoModel.fromJson(data);
   }
 
+  static Future<String?> unsafeChangeUserPassword(String email, String pw) async {
+    return await _supabase.rpc("set_user_password",
+        params: {"user_email": email, "password": pw});
+  }
+
+  static Future<String?> unsafeCreateUser(String email, String pw) async {
+    return await _supabase.rpc("create_user",
+        params: {"email": email, "password": pw});
+  }
+
   static updateUser(UserInfoModel data) async {
-    if (!DataService.isLoggedIn()) {
-      return;
-    }
     //todo change email individually
     if(!DataService.isAdmin())
     {
@@ -253,6 +271,17 @@ class DataService {
         throw Exception(errorText);
       }
     }
+
+    if(data.id == null)
+    {
+      if(config.isServiceRoleSafety){
+        data.id = await DataService.createUser(data.email!);
+        ToastHelper.Show("Vytvořen: ${data.email}");
+      } else{
+        data.id = await UserManagementHelper.unsafeCreateNewUser(data);
+      }
+    }
+
     await _supabase.rpc("set_claim",
         params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
 

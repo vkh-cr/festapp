@@ -1,6 +1,5 @@
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
-import 'package:avapp/services/ToastHelper.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../services/DataService.dart';
@@ -118,12 +117,6 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    if(id == null)
-    {
-      var newUserId = await DataService.createUser(email!);
-      id = newUserId;
-      ToastHelper.Show("Vytvořen: $email");
-    }
     await DataService.updateUser(this);
   }
 

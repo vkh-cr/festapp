@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:avapp/models/ExclusiveGroupModel.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
@@ -9,13 +7,10 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/services/DataGridHelper.dart';
 import 'package:avapp/services/DataService.dart';
-import 'package:avapp/services/ImportHelper.dart';
-import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/ToastHelper.dart';
-import 'package:collection/collection.dart';
+import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/EventModel.dart';
@@ -76,6 +71,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
           ElevatedButton(
             onPressed: _generatePassword,
             child: const Text('Generovat heslo'),
+          ),
+          ElevatedButton(
+            onPressed: _setPassword,
+            child: const Text('Změnit heslo'),
           ),
           ElevatedButton(
             onPressed: _addToGroup,
@@ -676,139 +675,33 @@ class _AdministrationPageState extends State<AdministrationPage> {
 
   List<UserInfoModel> _allUsers = [];
   Future<void> _import() async {
-    var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV tabulky", "Potvrdit", "Storno");
-    if(file==null) {
-      return;
-    }
-    var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element.accommodation!.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element.accommodation!.toLowerCase() == "storno");
-
-    var really = await DialogHelper.showConfirmationDialogAsync(context,
-        "Import uživatelů",
-        "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}",
-        confirmButtonMessage: "Potvrdit");
-
-    if(!really)
-    {
-      return;
-    }
-
-    var existingUsers = await DataService.getUsers();
-
-    List<UserInfoModel> toBeCreated = [];
-    List<UserInfoModel> toBeUpdated = [];
-    for(var u in addOrUpdateUsers)
-    {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u.email!.toLowerCase());
-      if(existing == null) {
-        toBeCreated.add(u);
-        continue;
-      }
-      else if(existing.importedEquals(u)) {
-        continue;
-      }
-      else{
-        u.id = existing.id;
-        toBeUpdated.add(u);
-      }
-    }
-
-    if(toBeCreated.isNotEmpty) {
-      var really = await DialogHelper.showConfirmationDialogAsync(context,
-          "Vytvoření uživatelů",
-          "Tito uživatelé jsou noví. Chcete je vytvořit?\n"
-              "Uživatelé (${toBeCreated.length}):\n${toBeCreated.map((value) => value.toBasicString()).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
-
-      if(really) {
-        toBeCreated.forEach((u) async {
-          u.id = await DataService.createUser(u.email!);
-          await DataService.updateUser(u);
-          await _generateAndUpdatePasswordFromUser(u, true);
-          ToastHelper.Show("Vytvořen ${u.email} a odeslán e-mail s vygenerovaným heslem.");
-        });
-      }
-    }
-
-    if(toBeUpdated.isNotEmpty) {
-      var really = await DialogHelper.showConfirmationDialogAsync(context,
-          "Úprava uživatelů",
-          "Tito uživatelé byli upraveni. Chcete aktualizovat údaje?\n"
-              "Uživatelé (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value.toBasicString()).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
-
-      if(really) {
-        toBeUpdated.forEach((u) async {
-          await DataService.updateUser(u);
-          ToastHelper.Show("Upraven ${u.toBasicString()}.");
-        });
-      }
-    }
-
-    List<UserInfoModel> toBeDeleted = [];
-    for(var u in deleteUsers)
-    {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u.email);
-      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element.email == u.email);
-
-      if(existing != null && duplicated == null) {
-        toBeDeleted.add(existing);
-      }
-    }
-
-    if(toBeDeleted.isNotEmpty) {
-      var reallyDelete = await DialogHelper.showConfirmationDialogAsync(context,
-          "Vymazání uživatelů",
-          "Tito uživatelé byli stornování, přesto stále existují v systému aplikace. Chcete je vymazat?\n"
-           "Uživatelé (${toBeDeleted.length}):\n${toBeDeleted.map((value) => value.toBasicString()).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
-
-      if(reallyDelete) {
-        toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.id!);
-          ToastHelper.Show("Smazán ${existing.toBasicString()}");
-        });
-      }
-    }
-
+    await UserManagementHelper.import(context);
     await usersDataGrid.reloadData();
   }
-
-  Future<void> _generateAndUpdatePasswordFromUser(UserInfoModel u, bool ignoreIfAlreadySignedIn)
-  async {
-    //ignore already signed users
-    if(ignoreIfAlreadySignedIn)
-    {
-      var time = await DataService.getLastTimeSignIn(u.id!);
-      if(time!=null)
-      {
-        ToastHelper.Show("Uživateli ${u.email} nebylo změněno heslo, protože už se s ním přihlásil.");
-        return;
-      }
-    }
-
-    var password = "av${numberFormat.format((random.nextInt(8999)+1000))}";
-    await DataService.updateUserPassword(u.id!, password);
-    ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
-    MailerSendHelper.sendPassword(u, password);
-    await Future.delayed(const Duration(milliseconds: 500));
-  }
-  var random = Random();
-  var numberFormat = NumberFormat("####");
 
   Future<void> _generatePassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
-    if(!really)
-    {
+    if(!really) {
       return;
     }
 
-    for(var u in users)
-    {
-      await _generateAndUpdatePasswordFromUser(u, true);
+    for(var u in users) {
+      await UserManagementHelper.generateAndUpdatePasswordFromUser(u, false);
+    }
+  }
+
+  Future<void> _setPassword() async {
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.id != null).toList();
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Těmto uživatelům bude změno heslo: (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
+    if(!really) {
+      return;
+    }
+
+    for(var u in users) {
+      await UserManagementHelper.unsafeChangeUserPassword(u);
     }
   }
 

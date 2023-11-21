@@ -44,6 +44,10 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     allChildren.clear();
     headerChildren = headerChildren ?? [];
     allChildren.addAll(headerChildren!);
+    if(headerChildren!.isNotEmpty)
+    {
+      allChildren.insertAll(0, [const VerticalDivider()]);
+    }
     allChildren.insertAll(0, [
       ElevatedButton(
       onPressed: _addRow,
@@ -108,11 +112,15 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
       ToastHelper.Show("Smazáno: ${element.toBasicString()}");
     }
 
-    var toUpsert = dataGrid.updatedRows.toList();
-    toUpsert.addAll(dataGrid.newRows);
-    var upsertList = List<T>.from(
-        toUpsert.map((x) => fromPlutoJson(x.toJson())));
-    for (var element in upsertList)
+    var updatedSet = Set<T>.from(
+        dataGrid.updatedRows.map((x) => fromPlutoJson(x.toJson())));
+
+    var newSet = Set<T>.from(
+        dataGrid.newRows.map((x) => fromPlutoJson(x.toJson())));
+
+    updatedSet.addAll(newSet);
+
+    for (var element in updatedSet.toList())
     {
       try
       {
