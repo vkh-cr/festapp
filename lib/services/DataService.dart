@@ -156,6 +156,10 @@ class DataService {
   }
 
   static Future<void> deleteUser(String uuid) async {
+    if(!config.isServiceRoleSafety)
+    {
+      throw Exception("Deleting user is not supported.");
+    }
     var adminClient = await GetSupabaseAdminClient();
     await _supabase
         .from(UserGroupInfoModel.userGroupsTable)
