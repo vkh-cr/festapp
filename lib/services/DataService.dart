@@ -964,10 +964,11 @@ class DataService {
     }
     var messagesData = await _supabase
         .from('news')
-        .select('id, created_at, message, user_info_public(name, surname)')
+        .select('id, created_at, message, user_info_public(name, surname), user_news_views(count)')
         .order("created_at");
     List<NewsModel> loadedMessages = [];
 
+    int viewsAggregate = 0;
     for (var row in messagesData) {
       DateTime createdAt = DateTime.parse(row['created_at']);
       String message = row['message'];
@@ -977,6 +978,10 @@ class DataService {
           message: message,
           createdBy: name,
           id: row['id']);
+
+      int views = row["user_news_views"].isEmpty ? 0 : row["user_news_views"][0]["count"];
+      viewsAggregate+=views;
+      newsMessage.views = viewsAggregate;
       if (isLoggedIn()) {
         newsMessage.isRead = lastReadMessageId >= newsMessage.id;
       }
