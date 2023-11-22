@@ -5,12 +5,14 @@ import 'package:avapp/models/InformationModel.dart';
 
 import 'package:avapp/models/NewsMessage.dart';
 import 'package:avapp/services/DialogHelper.dart';
+import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:avapp/config.dart';
+import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
@@ -60,10 +62,13 @@ class DataService {
     try{
       var result = await _supabase.auth.setSession(refresh.toString());
       if (result.user != null) {
+        NotificationHelper.Login(DataService.currentUserId());
         await _secureStorage.write(
             key: REFRESH_TOKEN_KEY,
             value: _supabase.auth.currentSession!.refreshToken.toString());
         return true;
+      } else {
+        NotificationHelper.Logout();
       }
     }
     catch(e)
@@ -201,12 +206,14 @@ class DataService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
+    NotificationHelper.Login(currentUserId());
   }
 
   static Future<void> logout() async {
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
     await _supabase.auth.signOut();
+    NotificationHelper.Logout();
   }
 
   static UserInfoModel? _currentUser;
@@ -901,14 +908,45 @@ class DataService {
   }
 
   static Future<void> deleteNewsMessage(NewsModel message) async {
-    await _supabase
+
+    var lastMes = await _supabase
+        .from("news")
+        .select("id")
+        .lt("created_at", message.createdAt)
+        .order("created_at")
+        .limit(1)
+        .maybeSingle();
+
+    if(lastMes!=null) {
+      var currentUsers = await _supabase
+          .from("user_news")
+          .select("user")
+          .eq("news_id", message.id);
+
+      List<Map<String, dynamic>> toBeUpdated = [];
+      for(var u in currentUsers) {
+        toBeUpdated.add({
+          "user": u["user"],
+          "news_id": lastMes["id"]
+        });
+      }
+
+      await _supabase
         .from('user_news')
-        .delete()
-        .eq("news_id", message.id);
+        .upsert(toBeUpdated).select();
+    }
+    else {
+      await _supabase
+          .from('user_news')
+          .delete()
+          .eq("news_id", message.id);
+    }
+
     await _supabase
         .from('news')
         .delete()
         .eq("id", message.id);
+
     ToastHelper.Show("Ohláška byla smazána.");
   }
 
@@ -920,10 +958,31 @@ class DataService {
     ToastHelper.Show("Ohláška byla změněna!.");
   }
 
-  static insertNewsMessage(String message) async {
+  static insertNewsMessage(String message, bool withNotification) async {
     await _supabase.from('news').insert(
         {"message": message, "created_by": currentUserId()}).select();
-    ToastHelper.Show("Zpráva byla odeslána!");
+
+    if(withNotification)
+    {
+      String basicMessage = "";
+      var document = parse(message);
+      for(var child in document.getElementsByTagName("p")){
+          var innerText = "${child.text}\n";
+          if(innerText.trim().isEmpty)
+          {
+            continue;
+          }
+          basicMessage+=innerText;
+      }
+      basicMessage = basicMessage.trim();
+      await _supabase.from("notification_records").insert(
+          {"content": basicMessage, "heading": _currentUser!.toFullNameString()}).select();
+
+      ToastHelper.Show("Zpráva byla odeslána!");
+      return;
+    }
+    ToastHelper.Show("Zpráva byla vytvořena!");
+
   }
 
   static Future<int> countNewMessages() async {

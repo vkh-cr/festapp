@@ -3,6 +3,7 @@ import 'package:avapp/config.dart';
 import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
 import '../services/DataService.dart';
@@ -18,12 +19,12 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
-  void _showMessageDialog(BuildContext context) {
+  void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
     Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
       if(value != null)
       {
         var message = value as String;
-        await DataService.insertNewsMessage(message);
+        await DataService.insertNewsMessage(message, withNotification);
         await loadNewsMessages();
       }
     });
@@ -143,9 +144,14 @@ class _NewsPageState extends State<NewsPage> {
       ),
       floatingActionButton: Visibility(
         visible: DataService.isEditor(),
-        child: FloatingActionButton(
-          onPressed: () => _showMessageDialog(context),
-          child: const Icon(Icons.add),
+        child: SpeedDial(
+          direction: SpeedDialDirection.up,
+          spaceBetweenChildren: 20,
+          children: [
+            SpeedDialChild(child: const Icon(Icons.notifications_off), label: "Odeslat zprávu bez notifikace", onTap: () => _showMessageDialog(context, false)),
+            SpeedDialChild(child: const Icon(Icons.message), label: "Odeslat zprávu", onTap: () => _showMessageDialog(context)),
+          ],
+          icon: Icons.add,
         ),
       ),
     );
