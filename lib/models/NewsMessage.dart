@@ -3,6 +3,7 @@ class NewsModel {
   String message;
   final String createdBy;
   final int id;
+  int views = 0;
   bool isRead = false;
 
   NewsModel({
