@@ -901,14 +901,45 @@ class DataService {
   }
 
   static Future<void> deleteNewsMessage(NewsModel message) async {
-    await _supabase
+
+    var lastMes = await _supabase
+        .from("news")
+        .select("id")
+        .lt("created_at", message.createdAt)
+        .order("created_at")
+        .limit(1)
+        .maybeSingle();
+
+    if(lastMes!=null) {
+      var currentUsers = await _supabase
+          .from("user_news")
+          .select("user")
+          .eq("news_id", message.id);
+
+      List<Map<String, dynamic>> toBeUpdated = [];
+      for(var u in currentUsers) {
+        toBeUpdated.add({
+          "user": u["user"],
+          "news_id": lastMes["id"]
+        });
+      }
+
+      await _supabase
         .from('user_news')
-        .delete()
-        .eq("news_id", message.id);
+        .upsert(toBeUpdated).select();
+    }
+    else {
+      await _supabase
+          .from('user_news')
+          .delete()
+          .eq("news_id", message.id);
+    }
+
     await _supabase
         .from('news')
         .delete()
         .eq("id", message.id);
+
     ToastHelper.Show("Ohláška byla smazána.");
   }
 
