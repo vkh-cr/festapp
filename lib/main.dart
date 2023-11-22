@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:avapp/config.dart';
+import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/StorageHelper.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
@@ -42,6 +43,7 @@ Future<void> main() async {
     DataService.tryAuthUser();
   }
   try {
+    NotificationHelper.Initialize();
     DataService.loadOrInitGlobalSettings();
   } catch(e) {}
   runApp(const MyApp());

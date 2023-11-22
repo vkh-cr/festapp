@@ -58,6 +58,8 @@ dependencies:
   csv: ^5.0.2
   get_storage:
   select_dialog: ^2.0.1
+  onesignal_flutter: ^5.0.4
+  flutter_speed_dial: ^7.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
