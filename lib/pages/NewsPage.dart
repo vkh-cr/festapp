@@ -92,7 +92,14 @@ class _NewsPageState extends State<NewsPage> {
                         borderRadius: BorderRadius.circular(10),
                         color: config.color1.withOpacity(0.10)
                       ),
-                      child: Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
+                      child: Column(
+                        children: [
+                          Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
+                          Visibility(
+                            visible: DataService.isLoggedIn(),
+                            child: Padding(padding: const EdgeInsets.all(8), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54,), const SizedBox(width: 6), Text(message.views.toString(), style: readTextStyle,), const SizedBox(width: 10),],)))
+                        ],
+                      ),
                     )),
                   Visibility(
                     visible: DataService.isEditor(),
