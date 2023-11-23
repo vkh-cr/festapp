@@ -19,5 +19,5 @@ class config {
   static const String OneSignalAppId = '009d3437-d794-459f-9e3d-4bd70b740f7d';
 
   static const String generatedPasswordPrefix = "av";
-  static const String welcomeEmailTemplate = "jy7zpl9nqe545vx6";
+  static const String welcomeEmailTemplate = "o65qngk0nno4wr12";
 }
