@@ -16,29 +16,48 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
   List<UserInfoModel> userList = [];
 
   var firstRow = fields[0].map((e) => e.toString()).toList();
+  Map<String, int> userColumnIndex = {};
+  for(var keyValue in UserInfoModel.migrateColumns.entries) {
+    var index = firstRow.indexOf(keyValue.value);
+    if(index == -1) {
+      continue;
+    }
+    userColumnIndex[keyValue.key] = index;
+  }
+
+  if(userColumnIndex.keys.toSet().containsAll([
+    UserInfoModel.emailReadonlyColumn,
+    UserInfoModel.sexColumn,
+    UserInfoModel.nameColumn,
+    UserInfoModel.surnameColumn,
+  ])){
+    throw Exception("Table doesn't contain required columns.");
+  }
+
   for(int r = 1; r < fields.length; r++)
   {
-    var email = fields[r][ImportHelper.getIndex(UserInfoModel.emailReadonlyColumn, firstRow)].toString().trim().toLowerCase();
-    if(email.isEmpty){
-      continue;
+    Map<String, String?> userJsonObject = {};
+    for(var entry in userColumnIndex.entries)
+    {
+      var trimmedString = fields[r][entry.value].toString().trim();
+      if(entry.key == UserInfoModel.emailReadonlyColumn)
+      {
+        if(trimmedString.isEmpty){
+          continue;
+        }
+        trimmedString = trimmedString.toLowerCase();
+      }
+      if(entry.key == UserInfoModel.sexColumn)
+      {
+        if(trimmedString.isEmpty){
+          continue;
+        }
+        trimmedString = trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
+      }
+      userJsonObject[entry.key] = trimmedString;
     }
-    var sex = fields[r][ImportHelper.getIndex(UserInfoModel.sexColumn, firstRow)].toString().trim();
-    if(sex.isEmpty){
-      continue;
-    }
-    var accomodation = fields[r][ImportHelper.getIndex(UserInfoModel.accommodationColumn, firstRow)].toString().trim();
 
-    sex = sex.trim().toLowerCase().startsWith("m") ? "male" : "female";
-    var user = UserInfoModel.fromJson({
-      UserInfoModel.idColumn:null,
-      UserInfoModel.emailReadonlyColumn:email,
-      UserInfoModel.nameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.nameColumn, firstRow)].toString().trim(),
-      UserInfoModel.surnameColumn:fields[r][ImportHelper.getIndex(UserInfoModel.surnameColumn, firstRow)].toString().trim(),
-      UserInfoModel.sexColumn:sex,
-      UserInfoModel.roleColumn:fields[r][ImportHelper.getIndex(UserInfoModel.roleColumn, firstRow)].toString().trim(),
-      UserInfoModel.phoneColumn:fields[r][ImportHelper.getIndex(UserInfoModel.phoneColumn, firstRow)].toString().trim(),
-      UserInfoModel.accommodationColumn:accomodation,
-    });
+    var user = UserInfoModel.fromJson(userJsonObject);
     userList.add(user);
 }
   return userList;
