@@ -14,7 +14,7 @@ class config {
   static const color4 = Color(0xFF1B3659);
   static const attentionColor = Color(0xFF8B0000);
 
-  static const bool isServiceRoleSafety = true;
+  static const bool isServiceRoleSafety = false;
   static const bool isNotificationsSupported = true;
   static const String OneSignalAppId = '009d3437-d794-459f-9e3d-4bd70b740f7d';
 
