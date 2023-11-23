@@ -2,6 +2,7 @@ import 'package:avapp/pages/NewsPage.dart';
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:avapp/config.dart';
+import 'package:flutter/foundation.dart';
 
 import 'NavigationService.dart';
 
@@ -10,6 +11,9 @@ class NotificationHelper
   static void Initialize() async {
     if(!config.isNotificationsSupported) {
         return;
+    }
+    if (kIsWeb) {
+      return;
     }
 
     OneSignal.initialize(config.OneSignalAppId);
@@ -29,6 +33,10 @@ class NotificationHelper
     if(!config.isNotificationsSupported) {
       return;
     }
+    if (kIsWeb) {
+      return;
+    }
+
     if(!OneSignal.Notifications.permission)
     {
       return;
@@ -40,6 +48,10 @@ class NotificationHelper
     if(!config.isNotificationsSupported) {
       return;
     }
+    if (kIsWeb) {
+      return;
+    }
+
     OneSignal.logout();
   }
 

@@ -695,7 +695,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> _setPassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Těmto uživatelům bude změno heslo: (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Těmto uživatelům bude změno heslo: (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Změnit");
     if(!really) {
       return;
     }
