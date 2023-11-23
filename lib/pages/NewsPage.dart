@@ -1,3 +1,4 @@
+import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:avapp/config.dart';
 import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
@@ -20,6 +21,11 @@ class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
   void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
+    if(!config.isNotificationsSupported && withNotification)
+    {
+      ToastHelper.Show("Notifikace nejsou nastavené. Pošli zprávu bez notifikace.", severity: ToastSeverity.NotOk);
+      return;
+    }
     Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
       if(value != null)
       {
