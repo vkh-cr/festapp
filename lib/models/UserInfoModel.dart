@@ -81,11 +81,11 @@ class UserInfoModel extends IPlutoRowModel {
   static UserInfoModel fromPlutoJson(Map<String, dynamic> json) {
     return UserInfoModel(
       id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
-      email: json[emailReadonlyColumn],
-      name: json[nameColumn],
-      surname: json[surnameColumn],
-      phone: json[phoneColumn],
-      role: json[roleColumn],
+      email: json[emailReadonlyColumn].toString().trim(),
+      name: json[nameColumn].toString().trim(),
+      surname: json[surnameColumn].toString().trim(),
+      phone: json[phoneColumn].toString().trim(),
+      role: json[roleColumn].toString().trim(),
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
       isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
