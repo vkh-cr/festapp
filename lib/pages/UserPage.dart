@@ -43,20 +43,6 @@ class _UserPageState extends State<UserPage> {
                 buildTextField('E-mail', userData?.email ?? ''),
                 buildTextField('Pohlaví', userData?.sexToCzech() ?? ''),
                 buildTextField('Role', userData?.role ?? ''),
-                Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                    const Text("Ubytování"),
-                    Container(
-                      alignment: Alignment.topLeft,
-                      child: TextButton(
-                          onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place),
-                          child: Text(userData?.place?.title??"bez ubytování", style: const TextStyle(fontSize: 17))),
-                    )
-                  ],),
-                ),
                 const SizedBox(
                   height: 16,
                 ),
