@@ -25,7 +25,7 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
     userColumnIndex[keyValue.key] = index;
   }
 
-  if(userColumnIndex.keys.toSet().containsAll([
+  if(!userColumnIndex.keys.toSet().containsAll([
     UserInfoModel.emailReadonlyColumn,
     UserInfoModel.sexColumn,
     UserInfoModel.nameColumn,
