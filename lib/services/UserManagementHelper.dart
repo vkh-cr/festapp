@@ -129,7 +129,7 @@ class UserManagementHelper{
     var password = "${config.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
     await DataService.updateUserPassword(u, password);
     ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
-    MailerSendHelper.sendPassword(u, password);
+    //MailerSendHelper.sendPassword(u, password);
   }
 
   static Future<String> unsafeCreateNewUser(UserInfoModel user) async {
