@@ -18,8 +18,8 @@ class UserManagementHelper{
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element.accommodation!.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element.accommodation!.toLowerCase() == "storno");
+    var addOrUpdateUsers = users.where((element) => element.accommodation?.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element.accommodation?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Import uživatelů",
