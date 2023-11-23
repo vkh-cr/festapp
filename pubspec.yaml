@@ -50,7 +50,7 @@ dependencies:
   collection: ^1.17.0
   flutter_map_location_marker: ^7.0.2
   geolocator: ^9.0.2
-  flutter_widget_from_html: ^0.10.3
+  flutter_widget_from_html: ^0.14.7
   quill_html_editor: ^2.2.2
   pluto_grid: ^7.0.2
   url_strategy: ^0.2.0
