@@ -132,12 +132,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
             width: 100,
           ),
           PlutoColumn(
-            title: "Datum narození",
-            field: UserInfoModel.birthDateColumn,
-            type: PlutoColumnType.date(defaultValue: DateTime.now()),
-            width: 140,
-          ),
-          PlutoColumn(
             title: "Admin",
             field: UserInfoModel.isAdminReadOnlyColumn,
             type: PlutoColumnType.select([]),
