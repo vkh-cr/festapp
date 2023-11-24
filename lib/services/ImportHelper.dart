@@ -65,6 +65,7 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
         userJsonObject[entry.key] = dateTime;
       }
       userJsonObject[entry.key] = trimmedString;
+      continue;
     }
     userList.add(userJsonObject);
 }
