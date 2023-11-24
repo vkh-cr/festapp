@@ -989,7 +989,7 @@ class DataService {
       }
       basicMessage = basicMessage.trim();
       await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.toFullNameString()}).select();
+          {"content": basicMessage, "heading": _currentUser!.name??config.home_page}).select();
 
       ToastHelper.Show("Zpráva byla odeslána!");
       return;
