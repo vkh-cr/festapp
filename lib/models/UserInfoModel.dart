@@ -90,12 +90,12 @@ class UserInfoModel extends IPlutoRowModel {
     var bd = dateFormat.parse(birthDateString);
     return UserInfoModel(
       id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
-      email: json[emailReadonlyColumn].toString().trim(),
-      name: json[nameColumn].toString().trim(),
-      surname: json[surnameColumn].toString().trim(),
-      phone: json[phoneColumn].toString().trim(),
-      role: json[roleColumn].toString().trim(),
-      accommodation: json[accommodationColumn],
+      email: json[emailReadonlyColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+      name: json[nameColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+      surname: json[surnameColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+      phone: json[phoneColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+      role: json[roleColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+      accommodation: json[accommodationColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
       sex: json[sexColumn],
       birthDate: bd,
       isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
@@ -107,13 +107,12 @@ class UserInfoModel extends IPlutoRowModel {
   PlutoRow toPlutoRow() {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
-      emailReadonlyColumn: PlutoCell(value: email),
-      nameColumn: PlutoCell(value: name),
-      surnameColumn: PlutoCell(value: surname),
-      phoneColumn: PlutoCell(value: phone ?? PlaceModel.WithouValue),
-      roleColumn: PlutoCell(value: role),
-      accommodationColumn: PlutoCell(
-          value: accommodation ?? PlaceModel.WithouValue),
+      emailReadonlyColumn: PlutoCell(value: email ?? ""),
+      nameColumn: PlutoCell(value: name ?? ""),
+      surnameColumn: PlutoCell(value: surname ?? ""),
+      phoneColumn: PlutoCell(value: phone ?? ""),
+      roleColumn: PlutoCell(value: role ?? ""),
+      accommodationColumn: PlutoCell(value: accommodation ?? ""),
       sexColumn: PlutoCell(value: sex),
       birthDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0))),
       isAdminReadOnlyColumn: PlutoCell(value: isAdmin.toString()),
