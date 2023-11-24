@@ -7,6 +7,7 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/services/DataGridHelper.dart';
 import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
@@ -713,7 +714,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
 
     for(var u in users) {
-      await UserManagementHelper.unsafeChangeUserPassword(u);
+      var pw = await UserManagementHelper.unsafeChangeUserPassword(u);
+      await MailerSendHelper.sendPassword(u, pw);
     }
   }
 

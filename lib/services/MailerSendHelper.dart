@@ -5,14 +5,14 @@ import 'package:avapp/config.dart';
 
 
 class MailerSendHelper{
-  static void sendPassword(UserInfoModel recipient, String password) async {
+  static Future<void> sendPassword(UserInfoModel recipient, String password) async {
     var passwordVar = {"var":"password", "value":password};
     var emailVar = {"var":"email", "value":recipient.email!};
     var variables = [passwordVar, emailVar];
     variables.addAll(_getSalutationPresalutation(recipient));
     await DataService.emailMailerSend(recipient.email!, config.welcomeEmailTemplate, variables);
     ToastHelper.Show("Email s přístupovými údaji byl odeslán uživateli: ${recipient.email}");
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 6000));
   }
 
   static List<Map<String, String>> _getSalutationPresalutation(UserInfoModel user)
