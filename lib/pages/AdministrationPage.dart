@@ -687,8 +687,14 @@ class _AdministrationPageState extends State<AdministrationPage> {
       return;
     }
 
+    bool changePassToUnsignedUsersOnly = false;
+    var reallyAll = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Měnit i už těm, kteří se aspoň jednou přihlásili?", confirmButtonMessage: "Změnit");
+    if(!reallyAll) {
+      changePassToUnsignedUsersOnly = true;
+    }
+
     for(var u in users) {
-      await UserManagementHelper.generateAndUpdatePasswordFromUser(u, false);
+      await UserManagementHelper.generateAndUpdatePasswordFromUser(u, changePassToUnsignedUsersOnly);
     }
   }
 

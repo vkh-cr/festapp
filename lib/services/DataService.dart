@@ -271,6 +271,19 @@ class DataService {
         params: {"email": email, "password": pw});
   }
 
+  static updateUserViaJson(Map<String, String?> json) async {
+    if(json[UserInfoModel.idColumn] == null)
+    {
+      if(config.isServiceRoleSafety){
+        json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
+        ToastHelper.Show("Vytvořen: ${json[UserInfoModel.emailReadonlyColumn]}");
+      } else{
+        json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
+      }
+    }
+    await _supabase.from(UserInfoModel.userInfoTable).upsert(json);
+  }
+
   static updateUser(UserInfoModel data) async {
     //todo change email individually
     if(!DataService.isAdmin())
@@ -289,7 +302,7 @@ class DataService {
         data.id = await DataService.createUser(data.email!);
         ToastHelper.Show("Vytvořen: ${data.email}");
       } else{
-        data.id = await UserManagementHelper.unsafeCreateNewUser(data);
+        data.id = await UserManagementHelper.unsafeCreateNewUser(data.email);
       }
     }
 
