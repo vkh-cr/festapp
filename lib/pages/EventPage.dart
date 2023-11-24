@@ -90,7 +90,7 @@ class _EventPageState extends State<EventPage> {
                               DialogHelper.chooseUser(context, (person) async {
                                 await signIn(person);
                                 await loadData(_event!.id!);
-                              }, _participants, "Přihlásit");
+                              }, _queriedParticipants, "Přihlásit");
                               },
                               child: const Text("Přihlásit druhého")),
                         ),
