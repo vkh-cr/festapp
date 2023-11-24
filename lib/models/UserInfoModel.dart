@@ -77,7 +77,7 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
-      birthDate: json.containsKey(birthDateColumn) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
+      birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       //todo remove backward compatibility
       isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"],
       isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"],
@@ -150,14 +150,15 @@ class UserInfoModel extends IPlutoRowModel {
 
   bool importedEquals(Map<String, dynamic> u) {
     return 
-        u[emailReadonlyColumn] == email
-        && u[nameColumn] == name
-        && u[surnameColumn] == surname
-        && u[accommodationColumn] == accommodation
-        && u[roleColumn] == role
-        && u[emailReadonlyColumn] == phone
-        && u[birthDate] == birthDate
-        && u[sexColumn] == sex;
+        u[emailReadonlyColumn].toString().trim().toLowerCase() == email
+        && u[nameColumn].toString().trim() == name
+        && u[surnameColumn].toString().trim() == surname
+        && u[accommodationColumn].toString().trim() == accommodation
+        && u[roleColumn].toString().trim() == role
+        && u[phoneColumn].toString().trim() == phone
+        //todo fix
+        //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
+        && (u[sexColumn].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == sex;
   }
 
   @override

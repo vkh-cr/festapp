@@ -44,14 +44,14 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
       if(entry.key == UserInfoModel.emailReadonlyColumn)
       {
         if(trimmedString.isEmpty){
-          continue;
+          break;
         }
         trimmedString = trimmedString.toLowerCase();
       }
       else if(entry.key == UserInfoModel.sexColumn)
       {
         if(trimmedString.isEmpty){
-          continue;
+          break;
         }
         trimmedString = trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
       }
@@ -65,6 +65,20 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
         userJsonObject[entry.key] = dateTime;
       }
       userJsonObject[entry.key] = trimmedString;
+      continue;
+    }
+    if(!userJsonObject.keys.toSet().containsAll([
+      UserInfoModel.emailReadonlyColumn,
+      UserInfoModel.sexColumn,
+      UserInfoModel.nameColumn,
+      UserInfoModel.surnameColumn,
+    ]))
+    {
+      continue;
+    }
+    if(userList.any((element) => element[UserInfoModel.emailReadonlyColumn]==userJsonObject[UserInfoModel.emailReadonlyColumn]))
+    {
+      //omit with duplicate email
       continue;
     }
     userList.add(userJsonObject);
