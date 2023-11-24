@@ -73,8 +73,8 @@ class UserInfoModel extends IPlutoRowModel {
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
       //todo remove backward compatibility
-      isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"]??false,
-      isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"]??false,
+      isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"],
+      isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"],
     );
   }
 
@@ -137,15 +137,15 @@ class UserInfoModel extends IPlutoRowModel {
 
   String sexToCzech() => sex == "male" ? "Muž" : "Žena";
 
-  bool importedEquals(UserInfoModel u) {
+  bool importedEquals(Map<String, String?> u) {
     return 
-        u.email == email
-        && u.name == name 
-        && u.surname == surname 
-        && u.accommodation == accommodation
-        && u.role == role
-        && u.phone == phone
-        && u.sex == sex;
+        u[emailReadonlyColumn] == email
+        && u[nameColumn] == name
+        && u[surnameColumn] == surname
+        && u[accommodationColumn] == accommodation
+        && u[roleColumn] == role
+        && u[emailReadonlyColumn] == phone
+        && u[sexColumn] == sex;
   }
 
   @override
