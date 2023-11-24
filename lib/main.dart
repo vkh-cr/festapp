@@ -15,6 +15,7 @@ import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 
@@ -145,10 +146,16 @@ void didChangeDependencies() {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  SvgPicture.asset(
-                    width: 50,
-                    semanticsLabel: 'Absolventský Velehrad',
-                    'assets/icons/avlogo.svg',
+                  GestureDetector(
+                    onDoubleTap: () async {
+                      var packageInfo = await PackageInfo.fromPlatform();
+                      ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                    },
+                    child: SvgPicture.asset(
+                width: 50,
+                semanticsLabel: 'Absolventský Velehrad',
+                'assets/icons/avlogo.svg',
+              ),
                   ),
                   const Spacer(),
                   Visibility(
@@ -369,3 +376,4 @@ void didChangeDependencies() {
     loadEventParticipants();
   }
 }
+
