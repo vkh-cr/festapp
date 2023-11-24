@@ -579,10 +579,13 @@ class DataService {
         .from(UserGroupInfoModel.userGroupInfoTable)
         .delete()
         .eq("id", model.id);
-    await _supabase
-        .from(PlaceModel.placeTable)
-        .delete()
-        .eq("id", model.place!.id);
+    if(model.place!=null)
+    {
+      await _supabase
+          .from(PlaceModel.placeTable)
+          .delete()
+          .eq("id", model.place!.id);
+    }
   }
 
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
