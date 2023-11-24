@@ -1,6 +1,7 @@
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
+import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
