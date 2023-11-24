@@ -1,5 +1,6 @@
 import 'package:csv/csv.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:intl/intl.dart';
 
 import '../models/UserInfoModel.dart';
 
@@ -9,11 +10,11 @@ static int getIndex(String s, List<String> row)
   return row.indexOf(UserInfoModel.migrateColumns[s]!);
 }
 
-static Future<List<Map<String, String?>>> getUsersFromFile(XFile file) async {
+static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
   final rawData = await file.readAsString();
   final fields = const CsvToListConverter().convert(rawData);
 
-  List<Map<String, String?>> userList = [];
+  List<Map<String, dynamic>> userList = [];
 
   var firstRow = fields[0].map((e) => e.toString()).toList();
   Map<String, int> userColumnIndex = {};
@@ -36,7 +37,7 @@ static Future<List<Map<String, String?>>> getUsersFromFile(XFile file) async {
 
   for(int r = 1; r < fields.length; r++)
   {
-    Map<String, String?> userJsonObject = {};
+    Map<String, dynamic> userJsonObject = {};
     for(var entry in userColumnIndex.entries)
     {
       var trimmedString = fields[r][entry.value].toString().trim();
@@ -47,12 +48,21 @@ static Future<List<Map<String, String?>>> getUsersFromFile(XFile file) async {
         }
         trimmedString = trimmedString.toLowerCase();
       }
-      if(entry.key == UserInfoModel.sexColumn)
+      else if(entry.key == UserInfoModel.sexColumn)
       {
         if(trimmedString.isEmpty){
           continue;
         }
         trimmedString = trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
+      }
+      else if(entry.key == UserInfoModel.birthDateColumn)
+      {
+        if(trimmedString.isEmpty){
+          continue;
+        }
+        final format = DateFormat("d/M/y");
+        var dateTime = format.parse(trimmedString);
+        userJsonObject[entry.key] = dateTime;
       }
       userJsonObject[entry.key] = trimmedString;
     }

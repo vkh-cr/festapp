@@ -33,8 +33,8 @@ class UserManagementHelper{
 
     var existingUsers = await DataService.getUsers();
 
-    List<Map<String, String?>> toBeCreated = [];
-    List<Map<String, String?>> toBeUpdated = [];
+    List<Map<String, dynamic>> toBeCreated = [];
+    List<Map<String, dynamic>> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
       var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[UserInfoModel.emailReadonlyColumn]!.toLowerCase());
