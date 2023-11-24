@@ -687,7 +687,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> _generatePassword() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
     if(!really) {
@@ -706,7 +706,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> _setPassword() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Těmto uživatelům bude změno heslo: (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Změnit");
     if(!really) {
@@ -720,7 +720,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> _addToGroup() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.checkedRows.map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var allGroups = await DataService.getUserGroupInfoList();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
