@@ -9,11 +9,11 @@ static int getIndex(String s, List<String> row)
   return row.indexOf(UserInfoModel.migrateColumns[s]!);
 }
 
-static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
+static Future<List<Map<String, String?>>> getUsersFromFile(XFile file) async {
   final rawData = await file.readAsString();
   final fields = const CsvToListConverter().convert(rawData);
 
-  List<UserInfoModel> userList = [];
+  List<Map<String, String?>> userList = [];
 
   var firstRow = fields[0].map((e) => e.toString()).toList();
   Map<String, int> userColumnIndex = {};
@@ -56,9 +56,7 @@ static Future<List<UserInfoModel>> getUsersFromFile(XFile file) async {
       }
       userJsonObject[entry.key] = trimmedString;
     }
-
-    var user = UserInfoModel.fromJson(userJsonObject);
-    userList.add(user);
+    userList.add(userJsonObject);
 }
   return userList;
 }

@@ -18,12 +18,12 @@ class UserManagementHelper{
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element.accommodation?.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element.accommodation?.toLowerCase() == "storno");
+    var addOrUpdateUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Import uživatelů",
-        "Uživatelé (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}",
+        "Uživatelé (${users.length}):\n${users.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
         confirmButtonMessage: "Potvrdit");
 
     if(!really)
@@ -33,11 +33,11 @@ class UserManagementHelper{
 
     var existingUsers = await DataService.getUsers();
 
-    List<UserInfoModel> toBeCreated = [];
-    List<UserInfoModel> toBeUpdated = [];
+    List<Map<String, String?>> toBeCreated = [];
+    List<Map<String, String?>> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u.email!.toLowerCase());
+      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[UserInfoModel.emailReadonlyColumn]!.toLowerCase());
       if(existing == null) {
         toBeCreated.add(u);
         continue;
@@ -46,7 +46,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u.id = existing.id;
+        u[UserInfoModel.idColumn] = existing.id;
         toBeUpdated.add(u);
       }
     }
@@ -55,15 +55,13 @@ class UserManagementHelper{
       var really = await DialogHelper.showConfirmationDialogAsync(context,
           "Vytvoření uživatelů",
           "Tito uživatelé jsou noví. Chcete je vytvořit?\n"
-              "Uživatelé (${toBeCreated.length}):\n${toBeCreated.map((value) => value.toBasicString()).toList().join(",\n")}",
+              "Uživatelé (${toBeCreated.length}):\n${toBeCreated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
           confirmButtonMessage: "Potvrdit");
 
       if(really) {
         toBeCreated.forEach((u) async {
-          u.id = await DataService.createUser(u.email!);
-          await DataService.updateUser(u);
-          await UserManagementHelper.generateAndUpdatePasswordFromUser(u, true);
-          ToastHelper.Show("Vytvořen ${u.email} a odeslán e-mail s vygenerovaným heslem.");
+          await DataService.updateUserViaJson(u);
+          ToastHelper.Show("Vytvořen ${u[UserInfoModel.emailReadonlyColumn]}.");
         });
       }
     }
@@ -72,13 +70,13 @@ class UserManagementHelper{
       var really = await DialogHelper.showConfirmationDialogAsync(context,
           "Úprava uživatelů",
           "Tito uživatelé byli upraveni. Chcete aktualizovat údaje?\n"
-              "Uživatelé (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value.toBasicString()).toList().join(",\n")}",
+              "Uživatelé (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
           confirmButtonMessage: "Potvrdit");
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateUser(u);
-          ToastHelper.Show("Upraven ${u.toBasicString()}.");
+          await DataService.updateUserViaJson(u);
+          ToastHelper.Show("Upraven ${u[UserInfoModel.emailReadonlyColumn]}.");
         });
       }
     }
@@ -86,8 +84,8 @@ class UserManagementHelper{
     List<UserInfoModel> toBeDeleted = [];
     for(var u in deleteUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u.email);
-      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element.email == u.email);
+      var existing = existingUsers.firstWhereOrNull((element) => element.email == u[UserInfoModel.emailReadonlyColumn]);
+      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[UserInfoModel.emailReadonlyColumn] == u[UserInfoModel.emailReadonlyColumn]);
 
       if(existing != null && duplicated == null) {
         toBeDeleted.add(existing);
@@ -132,8 +130,8 @@ class UserManagementHelper{
     MailerSendHelper.sendPassword(u, password);
   }
 
-  static Future<String> unsafeCreateNewUser(UserInfoModel user) async {
-    if(user.email == null)
+  static Future<String> unsafeCreateNewUser(String? email) async {
+    if(email == null)
     {
       throw Exception("User must have an e-mail!");
     }
@@ -142,12 +140,11 @@ class UserManagementHelper{
     var numberFormat = NumberFormat("####");
     var pw = "${config.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
 
-    var newId = await DataService.unsafeCreateUser(user.email!, pw);
+    var newId = await DataService.unsafeCreateUser(email, pw);
     if(newId==null)
     {
       throw Exception("Nepodařilo se vytvořit uživatele.");
     }
-    MailerSendHelper.sendPassword(user, pw);
     return newId;
   }
 
