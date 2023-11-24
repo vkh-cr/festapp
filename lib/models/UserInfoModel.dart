@@ -42,14 +42,15 @@ class UserInfoModel extends IPlutoRowModel {
 
   static const migrateColumns =
   {
-  idColumn:"Id",
-  emailReadonlyColumn:"E-mail",
-  nameColumn:"Jméno",
-  surnameColumn:"Příjmení",
-  sexColumn:"Pohlaví",
-  accommodationColumn:"Varianta ubytování",
-  phoneColumn:"Telefon",
-  roleColumn:"Role",
+    //idColumn:"Id",
+    emailReadonlyColumn:"E-mailová adresa",
+    nameColumn:"Jméno:",
+    surnameColumn:"Příjmení:",
+    sexColumn:"Jsi:",
+    accommodationColumn:"Ubytování",
+    phoneColumn:"Mobilní telefon:",
+    roleColumn:"Typ účastníka:",
+    birthDateColumn:"Datum narození:",
   };
 
   UserInfoModel({
