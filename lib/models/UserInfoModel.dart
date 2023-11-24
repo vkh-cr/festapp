@@ -85,23 +85,26 @@ class UserInfoModel extends IPlutoRowModel {
   }
 
   static UserInfoModel fromPlutoJson(Map<String, dynamic> json) {
-    var birthDateString = json[birthDateColumn];
-    var dateFormat = DateFormat("yyyy-MM-dd");
-    var bd = dateFormat.parse(birthDateString);
-    return UserInfoModel(
-      id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
-      email: json[emailReadonlyColumn]?.trim().isEmpty ? null : json[emailReadonlyColumn]?.trim(),
-      name: json[nameColumn]?.trim().isEmpty ? null : json[nameColumn]?.trim(),
-      surname: json[surnameColumn]?.trim().isEmpty ? null : json[surnameColumn]?.trim(),
-      phone: json[phoneColumn]?.trim().isEmpty ? null : json[phoneColumn]?.trim(),
-      role: json[roleColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
-      accommodation: json[accommodationColumn]?.trim().isEmpty ? null : json[accommodationColumn]?.trim(),
-      sex: json[sexColumn],
-      birthDate: bd,
-      isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
-      isEditor: json[isEditorReadOnlyColumn] == "true" ? true : false,
-    );
-  }
+    DateTime? bd;
+    if (json[birthDateColumn]!=null){
+      var birthDateString = json[birthDateColumn];
+      var dateFormat = DateFormat("yyyy-MM-dd");
+      bd = dateFormat.parse(birthDateString);
+    }
+      return UserInfoModel(
+        id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
+        email: json[emailReadonlyColumn]?.trim().isEmpty ? null : json[emailReadonlyColumn]?.trim(),
+        name: json[nameColumn]?.trim().isEmpty ? null : json[nameColumn]?.trim(),
+        surname: json[surnameColumn]?.trim().isEmpty ? null : json[surnameColumn]?.trim(),
+        phone: json[phoneColumn]?.trim().isEmpty ? null : json[phoneColumn]?.trim(),
+        role: json[roleColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
+        accommodation: json[accommodationColumn]?.trim().isEmpty ? null : json[accommodationColumn]?.trim(),
+        sex: json[sexColumn],
+        birthDate: bd,
+        isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
+        isEditor: json[isEditorReadOnlyColumn] == "true" ? true : false,
+      );
+    }
 
   @override
   PlutoRow toPlutoRow() {
