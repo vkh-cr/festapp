@@ -1,5 +1,6 @@
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../services/DataService.dart';
@@ -14,6 +15,7 @@ class UserInfoModel extends IPlutoRowModel {
   String? role;
   String? phone;
   String? accommodation;
+  DateTime? birthDate;
   bool? isAdmin = false;
   bool? isEditor = false;
   PlaceModel? accommodationModel;
@@ -27,6 +29,8 @@ class UserInfoModel extends IPlutoRowModel {
   static const String accommodationColumn = "accommodation";
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
+  static const String birthDateColumn = "birth_date";
+
   static const String isEditorReadOnlyColumn = "is_editor_readonly";
   static const String isAdminReadOnlyColumn = "is_admin_readonly";
 
@@ -54,6 +58,7 @@ class UserInfoModel extends IPlutoRowModel {
      this.name,
      this.surname,
      this.sex,
+     this.birthDate,
      this.role,
      this.isAdmin,
      this.isEditor,
@@ -72,6 +77,7 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
+      birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       //todo remove backward compatibility
       isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"],
       isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"],
@@ -79,6 +85,9 @@ class UserInfoModel extends IPlutoRowModel {
   }
 
   static UserInfoModel fromPlutoJson(Map<String, dynamic> json) {
+    var birthDateString = json[birthDateColumn];
+    var dateFormat = DateFormat("yyyy-MM-dd");
+    var bd = dateFormat.parse(birthDateString);
     return UserInfoModel(
       id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
       email: json[emailReadonlyColumn].toString().trim(),
@@ -88,6 +97,7 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn].toString().trim(),
       accommodation: json[accommodationColumn],
       sex: json[sexColumn],
+      birthDate: bd,
       isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
       isEditor: json[isEditorReadOnlyColumn] == "true" ? true : false,
     );
@@ -105,6 +115,7 @@ class UserInfoModel extends IPlutoRowModel {
       accommodationColumn: PlutoCell(
           value: accommodation ?? PlaceModel.WithouValue),
       sexColumn: PlutoCell(value: sex),
+      birthDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0))),
       isAdminReadOnlyColumn: PlutoCell(value: isAdmin.toString()),
       isEditorReadOnlyColumn: PlutoCell(value: isEditor.toString()),
     });
@@ -137,15 +148,17 @@ class UserInfoModel extends IPlutoRowModel {
 
   String sexToCzech() => sex == "male" ? "Muž" : "Žena";
 
-  bool importedEquals(Map<String, String?> u) {
+  bool importedEquals(Map<String, dynamic> u) {
     return 
-        u[emailReadonlyColumn] == email
-        && u[nameColumn] == name
-        && u[surnameColumn] == surname
-        && u[accommodationColumn] == accommodation
-        && u[roleColumn] == role
-        && u[emailReadonlyColumn] == phone
-        && u[sexColumn] == sex;
+        u[emailReadonlyColumn].toString().trim().toLowerCase() == email
+        && u[nameColumn].toString().trim() == name
+        && u[surnameColumn].toString().trim() == surname
+        && u[accommodationColumn].toString().trim() == accommodation
+        && u[roleColumn].toString().trim() == role
+        && u[phoneColumn].toString().trim() == phone
+        //todo fix
+        //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
+        && (u[sexColumn].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == sex;
   }
 
   @override

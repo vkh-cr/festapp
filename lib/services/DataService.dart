@@ -271,7 +271,7 @@ class DataService {
         params: {"email": email, "password": pw});
   }
 
-  static updateUserViaJson(Map<String, String?> json) async {
+  static updateUserViaJson(Map<String, dynamic> json) async {
     if(json[UserInfoModel.idColumn] == null)
     {
       if(config.isServiceRoleSafety){
@@ -793,7 +793,7 @@ class DataService {
         }
         return;
       }
-      case 104: ToastHelper.Show("Nelze přihlásit! Přihlašovat se můžeš od čtvrtku 17.8.2023 9:00.", severity: ToastSeverity.NotOk); return;
+      case 104: ToastHelper.Show("Nelze přihlásit! ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
       case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů.", severity: ToastSeverity.NotOk); return;
       case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen.", severity: ToastSeverity.NotOk); return;
     }
