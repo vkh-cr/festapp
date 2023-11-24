@@ -114,7 +114,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
             title: "Ubytování",
             field: UserInfoModel.accommodationColumn,
             type: PlutoColumnType.text(),
-            readOnly: true,
             width: 150,
           ),
           PlutoColumn(
