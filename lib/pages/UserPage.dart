@@ -8,7 +8,6 @@ import 'package:avapp/config.dart';
 
 import '../services/DataService.dart';
 import '../main.dart';
-import 'MapPage.dart';
 
 class UserPage extends StatefulWidget {
   static const ROUTE = "/user";
