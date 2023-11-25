@@ -36,7 +36,15 @@ class UserGroupInfoModel extends IPlutoRowModel {
       place: json.containsKey(PlaceModel.placeTable) && json[PlaceModel.placeTable] != null ? PlaceModel.fromJson(json[PlaceModel.placeTable]) : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
       leader: json[userInfoTable] != null ? UserInfoModel.fromJson(json[userInfoTable]) : null,
-      participants: json.containsKey(userGroupsTable) ? Set<UserInfoModel>.from(json[userGroupsTable].map((e)=>UserInfoModel.fromJson(e["user_info"]))) : {}
+      participants: json.containsKey(userGroupsTable) ?
+      Set<UserInfoModel>.from(json[userGroupsTable].
+      map((e)=>UserInfoModel.fromJson(
+        e["user_info"] != null ?
+          e["user_info"] :
+        e["user_info_public"] != null ?
+        e["user_info_public"]:
+        {}
+      ))) : {},
   );
   }
 

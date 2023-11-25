@@ -501,10 +501,10 @@ class DataService {
         .select(
         "${UserGroupInfoModel.idColumn},"
             "${UserGroupInfoModel.titleColumn},"
-            "user_info!leader(id, name, surname, email_readonly),"
+            "user_info_public!leader(id, name, surname),"
             "${PlaceModel.placeTable}(*),"
             "${UserGroupInfoModel.descriptionColumn},"
-            "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))")
+            "${UserGroupInfoModel.userGroupsTable}(user_info_public(id, name, surname))")
     .eq(UserGroupInfoModel.idColumn, id)
     .maybeSingle();
     if(data==null)
@@ -918,6 +918,13 @@ class DataService {
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
     var data = await _supabase.from(UserInfoModel.userInfoTable)
+        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
+    return List<UserInfoModel>.from(
+        data.map((x) => UserInfoModel.fromJson(x)));
+  }
+
+  static Future<List<UserInfoModel>> getAllUsersPublic() async {
+    var data = await _supabase.from(UserInfoModel.userInfoPublicTable)
         .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
