@@ -90,7 +90,7 @@ class _EventPageState extends State<EventPage> {
                               DialogHelper.chooseUser(context, (person) async {
                                 await signIn(person);
                                 await loadData(_event!.id!);
-                              }, _participants, "Přihlásit");
+                              }, _queriedParticipants, "Přihlásit");
                               },
                               child: const Text("Přihlásit druhého")),
                         ),
@@ -193,9 +193,12 @@ class _EventPageState extends State<EventPage> {
                         const Padding(
                             padding: EdgeInsets.all(8.0),
                             ),
-                        Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                            child: Text("Moderátor: ${_groupInfoModel?.leader?.name??""}", style: normalTextStyle)),
+                        Visibility(
+                          visible: _groupInfoModel?.leader != null,
+                          child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+                              child: Text("Moderátor: ${_groupInfoModel?.leader?.name??""}", style: normalTextStyle)),
+                        ),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
                             child: Text("Členové skupinky:", style: normalTextStyle)),

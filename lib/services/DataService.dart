@@ -501,10 +501,10 @@ class DataService {
         .select(
         "${UserGroupInfoModel.idColumn},"
             "${UserGroupInfoModel.titleColumn},"
-            "user_info!leader(id, name, surname, email_readonly),"
+            "user_info_public!leader(id, name, surname),"
             "${PlaceModel.placeTable}(*),"
             "${UserGroupInfoModel.descriptionColumn},"
-            "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))")
+            "${UserGroupInfoModel.userGroupsTable}(user_info_public(id, name, surname))")
     .eq(UserGroupInfoModel.idColumn, id)
     .maybeSingle();
     if(data==null)
@@ -579,10 +579,13 @@ class DataService {
         .from(UserGroupInfoModel.userGroupInfoTable)
         .delete()
         .eq("id", model.id);
-    await _supabase
-        .from(PlaceModel.placeTable)
-        .delete()
-        .eq("id", model.place!.id);
+    if(model.place!=null)
+    {
+      await _supabase
+          .from(PlaceModel.placeTable)
+          .delete()
+          .eq("id", model.place!.id);
+    }
   }
 
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
@@ -920,6 +923,13 @@ class DataService {
         data.map((x) => UserInfoModel.fromJson(x)));
   }
 
+  static Future<List<UserInfoModel>> getAllUsersPublic() async {
+    var data = await _supabase.from(UserInfoModel.userInfoPublicTable)
+        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
+    return List<UserInfoModel>.from(
+        data.map((x) => UserInfoModel.fromJson(x)));
+  }
+
   static Future<void> deleteNewsMessage(NewsModel message) async {
 
     var lastMes = await _supabase
@@ -989,7 +999,7 @@ class DataService {
       }
       basicMessage = basicMessage.trim();
       await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.toFullNameString()}).select();
+          {"content": basicMessage, "heading": _currentUser!.name??config.home_page}).select();
 
       ToastHelper.Show("Zpráva byla odeslána!");
       return;

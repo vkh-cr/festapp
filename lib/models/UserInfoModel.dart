@@ -139,7 +139,7 @@ class UserInfoModel extends IPlutoRowModel {
   @override
   String toString() => toFullNameString();
 
-  String toFullNameString() => "$name $surname";
+  String toFullNameString() => "${name??""} ${surname??""}".trim();
 
   String shortNameToString() {
     return "$name ${(surname!=null && surname!.isNotEmpty) ? "${surname![0]}." : "-"}";
