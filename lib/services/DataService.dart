@@ -271,7 +271,7 @@ class DataService {
         params: {"email": email, "password": pw});
   }
 
-  static updateUserViaJson(Map<String, dynamic> json) async {
+  static updateUserAsJson(Map<String, dynamic> json) async {
     if(json[UserInfoModel.idColumn] == null)
     {
       if(config.isServiceRoleSafety){

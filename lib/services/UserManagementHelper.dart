@@ -60,7 +60,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeCreated.forEach((u) async {
-          await DataService.updateUserViaJson(u);
+          await DataService.updateUserAsJson(u);
           ToastHelper.Show("Vytvořen ${u[UserInfoModel.emailReadonlyColumn]}.");
         });
       }
@@ -75,7 +75,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateUserViaJson(u);
+          await DataService.updateUserAsJson(u);
           ToastHelper.Show("Upraven ${u[UserInfoModel.emailReadonlyColumn]}.");
         });
       }
