@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../services/DataService.dart';
-import 'PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 
 class UserInfoModel extends IPlutoRowModel {
   String? id;
@@ -39,6 +39,7 @@ class UserInfoModel extends IPlutoRowModel {
 
   PlaceModel? place;
 
+  static const sexes = ["male", "female"];
 
   static const migrateColumns =
   {

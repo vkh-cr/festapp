@@ -2,7 +2,7 @@ import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../models/PlutoAbstract.dart';
+import 'PlutoAbstract.dart';
 import '../services/DialogHelper.dart';
 import '../services/ToastHelper.dart';
 

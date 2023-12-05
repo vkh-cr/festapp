@@ -1,7 +1,7 @@
 import 'package:avapp/services/DataService.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import 'PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 
 class PlaceModel extends IPlutoRowModel {
   dynamic latLng;

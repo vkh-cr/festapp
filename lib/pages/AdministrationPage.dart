@@ -5,7 +5,7 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/services/DataGridHelper.dart';
+import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
@@ -127,8 +127,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
           PlutoColumn(
             title: "Pohlaví",
             field: UserInfoModel.sexColumn,
-            type: PlutoColumnType.select(["male", "female"]),
-            formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, ["male", "female"]),
+            type: PlutoColumnType.select(UserInfoModel.sexes),
+            formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, UserInfoModel.sexes),
             applyFormatterInEditing: true,
             width: 100,
           ),

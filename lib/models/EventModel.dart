@@ -1,9 +1,9 @@
 import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/services/DataGridHelper.dart';
+import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../models/PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 import '../services/DataService.dart';
 
 class EventModel extends IPlutoRowModel {

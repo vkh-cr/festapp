@@ -1,6 +1,6 @@
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../models/PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 import '../services/DataService.dart';
 import 'PlaceModel.dart';
 import 'UserInfoModel.dart';
