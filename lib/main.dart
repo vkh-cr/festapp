@@ -142,7 +142,7 @@ void didChangeDependencies() {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -152,9 +152,9 @@ void didChangeDependencies() {
                       ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                width: 50,
+                height: 112,
                 semanticsLabel: 'Absolventský Velehrad',
-                'assets/icons/avlogo.svg',
+                'assets/icons/festapplogo.svg',
               ),
                   ),
                   const Spacer(),
@@ -168,7 +168,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: config.color4,
+                              backgroundColor: config.color1,
                               child: const Icon(Icons.login),
                             ),
                             const Text("Přihlášení"),
@@ -187,7 +187,7 @@ void didChangeDependencies() {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _profileButtonPressed,
-                              backgroundColor: config.color4,
+                              backgroundColor: config.color1,
                               child: const Icon(Icons.account_circle_rounded),
                             ),
                             Text(userName),

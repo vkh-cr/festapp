@@ -4,17 +4,11 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/icons/avlogo.png"
+  image_path: "assets/icons/festappicon.png"
   min_sdk_android: 21 # android min sdk min:16, default 21
-  web:
-    generate: false
-    image_path: "assets/icons/avlogo.png"
-    background_color: "#FFFFFF"
-    theme_color: "#FFFFFF"
-  windows:
-    generate: true
-    image_path: "assets/icons/avlogo.png"
-    icon_size: 48 # min:48, max:256, default: 48
-  macos:
-    generate: true
-    image_path: "assets/icons/avlogo.png"
+  # for web use https://realfavicongenerator.net/
+#  web:
+#    generate: false
+#    image_path: "assets/icons/festappicon-transparent.png"
+#    background_color: "#FFFFFF"
+#    theme_color: "#FFFFFF"

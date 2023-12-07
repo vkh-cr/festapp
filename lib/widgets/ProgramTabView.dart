@@ -46,8 +46,8 @@ import 'ProgramTimeline.dart';
           child: Scaffold(
             appBar: TabBar(
               unselectedLabelColor: Colors.grey,
-              labelColor: config.color4,
-              indicatorColor: config.color4,
+              labelColor: config.color1,
+              indicatorColor: config.color1,
               indicatorWeight: 3.0,
               indicatorSize: TabBarIndicatorSize.label,
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
