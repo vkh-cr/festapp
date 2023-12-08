@@ -9,8 +9,8 @@ const RESOURCES = {"manifest.json": "c003c8c2a024bb4d42a1ee2a15cd4ad3",
 "version.json": "4d3fda0cc8542336925d118989c682b4",
 "android-chrome-512x512.png": "43661cc1c4cd6d25de716924dc00601a",
 "favicon.ico": "f3f4b2a26513ca4805474cf194bd9242",
-"index.html": "5d3c1ea41f236697f8342518ff653732",
-"/": "5d3c1ea41f236697f8342518ff653732",
+"index.html": "4ccae41936641d256d333ae332a6d2af",
+"/": "4ccae41936641d256d333ae332a6d2af",
 "browserconfig.xml": "a493ba0aa0b8ec8068d786d7248bb92c",
 "android-chrome-192x192.png": "431a129b17ffe4e91aa35a3eaad21eb8",
 "apple-touch-icon.png": "e4044af6b13bd450cfc5dc7268fc640e",
@@ -70,7 +70,7 @@ const RESOURCES = {"manifest.json": "c003c8c2a024bb4d42a1ee2a15cd4ad3",
 "canvaskit/chromium/canvaskit.js": "0ae8bbcc58155679458a0f7a00f66873",
 "canvaskit/chromium/canvaskit.wasm": "143af6ff368f9cd21c863bfa4274c406",
 "mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
-"main.dart.js": "d6425a80e8b41c023a4398f31b85dd67"};
+"main.dart.js": "32379528944e2cc66482e97f6d76b5a4"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
