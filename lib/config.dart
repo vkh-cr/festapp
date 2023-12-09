@@ -16,8 +16,8 @@ class config {
   static const attentionColor = Color(0xFF8B0000);
 
   static const bool isServiceRoleSafety = false;
-  static const bool isNotificationsSupported = false;
-  static const String OneSignalAppId = '';
+  static const bool isNotificationsSupported = true;
+  static const String OneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
 
   static const String generatedPasswordPrefix = "fa";
   static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
