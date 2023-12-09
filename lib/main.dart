@@ -142,7 +142,7 @@ void didChangeDependencies() {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -152,9 +152,9 @@ void didChangeDependencies() {
                       ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                height: 112,
+                height: 50,
                 semanticsLabel: 'Absolventský Velehrad',
-                'assets/icons/festapplogo.svg',
+                'assets/icons/avlogo.svg',
               ),
                   ),
                   const Spacer(),
