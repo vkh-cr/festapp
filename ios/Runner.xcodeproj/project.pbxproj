@@ -569,7 +569,7 @@
 				DEVELOPMENT_TEAM = 8WKBB6L8LT;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AV 2023";
+				INFOPLIST_KEY_CFBundleDisplayName = Festapp;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -860,7 +860,7 @@
 				DEVELOPMENT_TEAM = 8WKBB6L8LT;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AV 2023";
+				INFOPLIST_KEY_CFBundleDisplayName = Festapp;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -886,7 +886,7 @@
 				DEVELOPMENT_TEAM = 8WKBB6L8LT;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "AV 2023";
+				INFOPLIST_KEY_CFBundleDisplayName = Festapp;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
