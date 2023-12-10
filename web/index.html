@@ -62,7 +62,7 @@
   }
 
   svg {
-  margin-bottom: 170px;
+  margin-top: -170px;
   max-width: 280px;
   max-height: 100px;
   position: absolute;
@@ -71,6 +71,7 @@
 
 /* HTML: <div class="loader"></div> */
 .loader {
+  height: 50px;
   width: 50px;
   aspect-ratio: 1;
   display: grid;
@@ -115,7 +116,7 @@
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
-            //await delay(5000);
+            await delay(5000);
 
             loaderContent.style.opacity = "0";
             await delay(200);
