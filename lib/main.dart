@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:avapp/config.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/StorageHelper.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/InfoPage.dart';
@@ -95,6 +96,8 @@ class MyApp extends StatelessWidget {
           AdministrationPage.ROUTE: (context) => const AdministrationPage(),
           NewsPage.ROUTE: (context) => const NewsPage(),
         }
+    ).animate().fadeIn(
+      duration: 200.ms,
     );
   }
 }
