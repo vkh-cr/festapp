@@ -176,7 +176,7 @@ void dispose() {
                     },
                     child: SvgPicture.asset(
                 height: 112,
-                semanticsLabel: 'Absolventský Velehrad',
+                semanticsLabel: 'Festapp logo',
                 'assets/icons/festapplogo.svg',
               ),
                   ),
