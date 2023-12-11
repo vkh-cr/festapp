@@ -121,14 +121,34 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
 String userName = "";
+
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addObserver(this);
+}
 
 @override
 void didChangeDependencies() {
   super.didChangeDependencies();
   loadData();
+}
+
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if(state == AppLifecycleState.resumed)
+  {
+    loadData();
+  }
+}
+
+@override
+void dispose() {
+  WidgetsBinding.instance.removeObserver(this);
+  super.dispose();
 }
 
   @override
