@@ -27,5 +27,8 @@ class config {
   static List<LanguageModel> AvailableLanguages = [
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
+    LanguageModel(const Locale("sk"), "Slovenčina"),
+    LanguageModel(const Locale("pl"), "Polski"),
+    LanguageModel(const Locale("de"), "Deutsch"),
   ];
 }
