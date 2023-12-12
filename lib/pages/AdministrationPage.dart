@@ -717,6 +717,11 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
     chosenGroup.participants.addAll(users);
     await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants);
-    ToastHelper.Show("{group} byla změněna.".tr(namedArgs: {"group":chosenGroup.title}));
+
+    for (var value in usersDataGrid.stateManager.refRows.originalList) {
+      value.setChecked(false);
+    }
+
+    ToastHelper.Show("Updated {item}".tr(namedArgs: {"item":chosenGroup.title}));
   }
 }
