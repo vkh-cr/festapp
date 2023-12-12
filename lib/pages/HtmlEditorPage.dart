@@ -52,7 +52,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
     });
     controller.onEditorLoaded(() {
       debugPrint('Editor Loaded :)');
-      setHtmlText(_html??"");
+      setHtmlText(_html);
     });
     super.initState();
   }
@@ -134,7 +134,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
                 textButton(
                     text: "Reset".tr(),
                     onPressed: () {
-                      setHtmlText(_html!);
+                      setHtmlText(_html);
                     }),
                 textButton(
                     text: "Storno".tr(),
