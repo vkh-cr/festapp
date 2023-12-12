@@ -109,7 +109,6 @@ class EventModel extends IPlutoRowModel {
   static const String idColumn = "id";
   static const String titleColumn = "title";
   static const String descriptionColumn = "description";
-  static const String descriptionHiddenColumn = "descriptionHidden";
   static const String parentEventColumn = "parentEvent";
 
   static const String maxParticipantsColumn = "max_participants";
@@ -143,7 +142,7 @@ class EventModel extends IPlutoRowModel {
       endTime: dateFormat.parse(endTimeString),
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
-      description: json[descriptionHiddenColumn],
+      description: json[descriptionColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
@@ -159,7 +158,6 @@ class EventModel extends IPlutoRowModel {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
       descriptionColumn: PlutoCell(value: description),
-      descriptionHiddenColumn: PlutoCell(value: description),
       startDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
       startTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(startTime)),
       endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),

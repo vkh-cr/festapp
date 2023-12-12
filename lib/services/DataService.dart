@@ -480,7 +480,7 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroupInfoList() async {
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
     var data = await _supabase
         .from(UserGroupInfoModel.userGroupInfoTable)
         .select(
@@ -513,7 +513,7 @@ class DataService {
     return UserGroupInfoModel.fromJson(data);
   }
 
-  static Future<List<ExclusiveGroupModel>> getExclusiveGroups() async {
+  static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
     var data = await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .select("${ExclusiveGroupModel.idColumn}, ${ExclusiveGroupModel.titleColumn}, exclusive_events(event)");

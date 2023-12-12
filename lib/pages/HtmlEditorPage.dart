@@ -12,11 +12,11 @@ class HtmlEditorPage extends StatefulWidget {
 
 class _HtmlEditorState extends State<HtmlEditorPage> {
   _HtmlEditorState();
-  String? _html;
+  late String _html;
   void didChangeDependencies() {
     super.didChangeDependencies();
     var args = ModalRoute.of(context)?.settings.arguments;
-    _html = args != null ?  args as String : null;
+    _html = args as String? ?? "";
   }
 
   ///[controller] create a QuillEditorController to access the editor methods

@@ -361,13 +361,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     formatter: DataGridHelper.GetValueFromFormatted,
                   ),
                   PlutoColumn(
-                    field: EventModel.descriptionHiddenColumn,
-                    type: PlutoColumnType.text(defaultValue: ""),
-                    readOnly: true,
-                    hide: true,
-                    title: "",
-                  ),
-                  PlutoColumn(
                       width: 150,
                       title: "Content".tr(),
                       enableFilterMenuItem: false,
@@ -379,7 +372,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         return ElevatedButton(
                             onPressed: () async{
                               String? textToEdit;
-                              String? oldText = rendererContext.row.cells[EventModel.descriptionHiddenColumn]?.value;
+                              String? oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
                               if(oldText!=null)
                               {
                                 textToEdit = oldText;
@@ -394,14 +387,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   textToEdit = fullEvent.description;
                                 }
                               }
-
                               Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: textToEdit).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
                                   if(newText!=textToEdit)
                                   {
-                                    rendererContext.row.cells[EventModel.descriptionHiddenColumn]?.value = newText;
+                                    rendererContext.row.cells[EventModel.descriptionColumn]?.value = newText;
                                     var cell = rendererContext.row.cells[EventModel.descriptionColumn]!;
                                     rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   }
@@ -485,7 +477,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                 ]).DataGrid(),
             SingleTableDataGrid<ExclusiveGroupModel>(
                 context,
-                DataService.getExclusiveGroups,
+                DataService.getAllExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 ExclusiveGroupModel.idColumn,
@@ -514,7 +506,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
                 context,
-                DataService.getUserGroupInfoList,
+                DataService.getAllUserGroupInfo,
                 UserGroupInfoModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 UserGroupInfoModel.idColumn,
@@ -624,27 +616,15 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
-                              var id = rendererContext.row.cells[UserGroupInfoModel.idColumn]?.value as int;
-                              if(id==-1)
-                              {
-                                ToastHelper.Show("Pro úpravu popisu skupinku nejdřív ulož!");
-                                return;
-                              }
-                              var model = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]?.value as UserGroupInfoModel;
-                              String? oldText = model.description;
-                              String? textToEdit = "";
-                              textToEdit = oldText;
-                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: textToEdit).then((value) async {
+                              var oldText = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!.value as String?;
+                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
-                                  if(newText!=textToEdit)
+                                  if(newText!=oldText)
                                   {
-                                    var model = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]?.value as UserGroupInfoModel?;
-                                    model?.description = newText;
-                                    setState(() {
-                                      rendererContext.row.setState(PlutoRowState.updated);
-                                    });
+                                    var cell = rendererContext.row.cells[InformationModel.descriptionColumn]!;
+                                    rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
                               });},
@@ -729,7 +709,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> _addToGroup() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
-    var allGroups = await DataService.getUserGroupInfoList();
+    var allGroups = await DataService.getAllUserGroupInfo();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
     if(chosenGroup == null)
     {
