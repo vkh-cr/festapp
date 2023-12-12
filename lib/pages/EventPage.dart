@@ -2,6 +2,7 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:avapp/config.dart';
@@ -48,7 +49,7 @@ class _EventPageState extends State<EventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_event==null?"událost":_event.toString()),
+        title: Text(_event==null?"Event".tr():_event.toString()),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -66,14 +67,14 @@ class _EventPageState extends State<EventPage> {
                                 (p) => DataService.currentUserId() == p.id),
                         child: ElevatedButton(
                             onPressed: () => signIn(),
-                            child: const Text("Přihlásit se"))),
+                            child: const Text("Sign in").tr())),
                     Visibility(
                         visible: showLoginLogoutButton() &&
                             _participants.any(
                                 (p) => DataService.currentUserId() == p.id),
                         child: ElevatedButton(
                             onPressed: () => signOut(),
-                            child: const Text("Odhlásit se"))),
+                            child: const Text("Sign out").tr())),
                     Visibility(
                       visible: showLoginLogoutButton() && (DataService.isEditor()),
                       child: Padding(
@@ -90,9 +91,9 @@ class _EventPageState extends State<EventPage> {
                               DialogHelper.chooseUser(context, (person) async {
                                 await signIn(person);
                                 await loadData(_event!.id!);
-                              }, _queriedParticipants, "Přihlásit");
+                              }, _queriedParticipants, "Sign in someone".tr());
                               },
-                              child: const Text("Přihlásit druhého")),
+                              child: const Text("Sign in other").tr()),
                         ),
                       ),
                       Visibility(
@@ -113,18 +114,18 @@ class _EventPageState extends State<EventPage> {
                                     await DataService.updateEvent(_event!);
                                   }
 
-                                  ToastHelper.Show("Popis změněn!");
+                                  ToastHelper.Show("Content has been changed.".tr());
                                   Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
                                 }
                               }),
-                              child: const Text("Upravit popis")))
+                              child: const Text("Edit content").tr()))
                     ]),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Container(
                       alignment: Alignment.topRight,
-                      child: Text(_event?.durationString()??"", style: normalTextStyle),
+                      child: Text(_event?.durationString(context)??"", style: normalTextStyle),
                     ),
                   ),
                   Visibility(
@@ -134,15 +135,15 @@ class _EventPageState extends State<EventPage> {
                           alignment: Alignment.topRight,
                           child: TextButton(
                               onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place).then((value) => loadData(_event!.id!)),
-                              child: Text("Místo: ${_event?.place?.title??""}", style: normalTextStyle,))
+                              child: Text("Place".tr() + ": ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
                       visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
-                      child: const Padding(
+                      child: Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          "Na tuto událost je nutné se přihlásit. Se svým e-mailem se přihlaš do aplikace.",
-                          style: TextStyle(color: config.attentionColor),),
+                        child: const Text(
+                          "You need to sign in to this event. First, sign in to the app.",
+                          style: TextStyle(color: config.attentionColor),).tr(),
                       )),
                   Visibility(
                     visible: _event != null && _event?.description != null,
@@ -161,8 +162,8 @@ class _EventPageState extends State<EventPage> {
                         title:  Row(children: [IconButton(onPressed: () async
                         {
                           await Clipboard.setData(ClipboardData(text: _participants.map((e) => e.shortNameToString()).join("\n")));
-                          ToastHelper.Show("Přihlášeni byli zkopírováni do schránky.");
-                        }, icon: const Icon(Icons.copy)), const Text("Přihlášeni:")]),
+                          ToastHelper.Show("Participants have been copied.".tr());
+                        }, icon: const Icon(Icons.copy)), Text("${"Participants".tr()}:")]),
                         children: [ListView.builder(
                             shrinkWrap: true,
                             padding: const EdgeInsets.all(8),
@@ -197,11 +198,11 @@ class _EventPageState extends State<EventPage> {
                           visible: _groupInfoModel?.leader != null,
                           child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                              child: Text("Moderátor: ${_groupInfoModel?.leader?.name??""}", style: normalTextStyle)),
+                              child: Text("${"Moderator".tr()}: ${_groupInfoModel?.leader?.name??""}", style: normalTextStyle)),
                         ),
                         Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-                            child: Text("Členové skupinky:", style: normalTextStyle)),
+                            child: Text("${"Participants".tr()}:", style: normalTextStyle)),
                         ListView.builder(
                           shrinkWrap: true,
                           padding: const EdgeInsets.all(8),
@@ -293,23 +294,26 @@ class _EventPageState extends State<EventPage> {
     return showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Odhlášení účastníka'),
-        content: Text("Chcete odhlásit účastníka $participant z $_event?"),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'Storno'),
-            child: const Text('Storno'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(context, 'Odhlásit');
-              await DataService.signOutFromEvent(_event!, participant);
-              await loadData(_event!.id!);
-            },
-            child: const Text('Odhlásit'),
-          ),
-        ],
-      ),
+        title: const Text("Sign out participant"),
+        content: const Text("Do you want to sign out participant {participant} from {event}?")
+            .tr(namedArgs: {
+            "participant":participant.toString(),
+            "event":_event!.toString()}),
+    actions: <Widget>[
+    TextButton(
+    onPressed: () => Navigator.pop(context, "Storno".tr()),
+    child: const Text("Storno").tr(),
+    ),
+    TextButton(
+    onPressed: () async {
+    Navigator.pop(context);
+    await DataService.signOutFromEvent(_event!, participant);
+    await loadData(_event!.id!);
+    },
+    child: const Text("Sign out someone").tr(),
+    ),
+    ],
+    )
     );
   }
 }

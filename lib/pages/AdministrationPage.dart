@@ -11,6 +11,7 @@ import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -60,6 +61,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   @override
   Widget build(BuildContext context) {
     usersDataGrid = SingleTableDataGrid<UserInfoModel>(
+        context,
         DataService.getUsers,
         UserInfoModel.fromPlutoJson,
         DataGridFirstColumn.deleteAndCheck,
@@ -67,30 +69,30 @@ class _AdministrationPageState extends State<AdministrationPage> {
         headerChildren: [
           ElevatedButton(
             onPressed: _import,
-            child: const Text('Import'),
+            child: const Text("Import").tr(),
           ),
           ElevatedButton(
             onPressed: _generatePassword,
-            child: const Text('Generovat heslo'),
+            child: const Text("Generate password").tr(),
           ),
           ElevatedButton(
             onPressed: _setPassword,
-            child: const Text('Změnit heslo'),
+            child: const Text("Change password").tr(),
           ),
           ElevatedButton(
             onPressed: _addToGroup,
-            child: const Text('Přidat do skupiny'),
+            child: const Text("Add to group").tr(),
           ),
         ],
         columns: [
           PlutoColumn(
-              title: "Id",
+              title: "Id".tr(),
               field: UserInfoModel.idColumn,
               type: PlutoColumnType.text(),
               readOnly: true,
               width: 50),
           PlutoColumn(
-              title: "E-mail",
+              title: "E-mail".tr(),
               field: UserInfoModel.emailReadonlyColumn,
               type: PlutoColumnType.text(),
               checkReadOnly: (row, cell) {
@@ -100,32 +102,32 @@ class _AdministrationPageState extends State<AdministrationPage> {
               width: 200
           ),
           PlutoColumn(
-            title: "Jméno",
+            title: "Name".tr(),
             field: UserInfoModel.nameColumn,
             type: PlutoColumnType.text(),
             width: 200,
           ),
           PlutoColumn(
-            title: "Příjmení",
+            title: "Surname".tr(),
             field: UserInfoModel.surnameColumn,
             type: PlutoColumnType.text(),
             width: 200,
           ),
           PlutoColumn(
-            title: "Ubytování",
+            title: "Accommodation".tr(),
             field: UserInfoModel.accommodationColumn,
             type: PlutoColumnType.text(),
             readOnly: true,
             width: 150,
           ),
           PlutoColumn(
-            title: "Telefon",
+            title: "Phone".tr(),
             field: UserInfoModel.phoneColumn,
             type: PlutoColumnType.text(),
             width: 200,
           ),
           PlutoColumn(
-            title: "Pohlaví",
+            title: "Sex".tr(),
             field: UserInfoModel.sexColumn,
             type: PlutoColumnType.select(UserInfoModel.sexes),
             formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, UserInfoModel.sexes),
@@ -133,13 +135,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
             width: 100,
           ),
           PlutoColumn(
-            title: "Datum narození",
+            title: "Birthday".tr(),
             field: UserInfoModel.birthDateColumn,
             type: PlutoColumnType.date(defaultValue: DateTime.now()),
             width: 140,
           ),
           PlutoColumn(
-            title: "Admin",
+            title: "Admin".tr(),
             field: UserInfoModel.isAdminReadOnlyColumn,
             type: PlutoColumnType.select([]),
             applyFormatterInEditing: true,
@@ -148,7 +150,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
             renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn),
           ),
           PlutoColumn(
-            title: "Editor",
+            title: "Editor".tr(),
             field: UserInfoModel.isEditorReadOnlyColumn,
             type: PlutoColumnType.select([]),
             applyFormatterInEditing: true,
@@ -157,7 +159,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
             renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn),
           ),
           PlutoColumn(
-            title: "Role",
+            title: "Role".tr(),
             field: UserInfoModel.roleColumn,
             type: PlutoColumnType.text(),
             width: 100,
@@ -167,9 +169,9 @@ class _AdministrationPageState extends State<AdministrationPage> {
       length: 6,
       child: Scaffold(
           appBar: AppBar(
-          title: const Text("Admin"),
-          bottom: const PreferredSize(
-            preferredSize: Size.fromHeight(40),
+          title: const Text("Admin").tr(),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(40),
             child: Align(
               alignment: Alignment.centerLeft,
               child: TabBar(
@@ -177,38 +179,38 @@ class _AdministrationPageState extends State<AdministrationPage> {
                 tabs: [
                   Row(
                   children: [
-                    Icon(Icons.info),
-                    Padding(padding: EdgeInsets.all(12), child: Text("Info"))
+                    const Icon(Icons.info),
+                    Padding(padding: const EdgeInsets.all(12), child: const Text("Info").tr())
                   ]
                 ),
                   Row(
                       children: [
-                        Icon(Icons.calendar_month),
-                        Padding(padding: EdgeInsets.all(12), child: Text("Události"))
+                        const Icon(Icons.calendar_month),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Events").tr())
                       ]
                   ),
                   Row(
                       children: [
-                        Icon(Icons.pin_drop),
-                        Padding(padding: EdgeInsets.all(12), child: Text("Místa"))
+                        const Icon(Icons.pin_drop),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Places").tr())
                       ]
                   ),
                   Row(
                       children: [
-                        Icon(Icons.punch_clock_rounded),
-                        Padding(padding: EdgeInsets.all(12), child: Text("Exkluzivita"))
+                        const Icon(Icons.punch_clock_rounded),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Exclusivity").tr())
                       ]
                   ),
                   Row(
                       children: [
-                        Icon(Icons.groups),
-                        Padding(padding: EdgeInsets.all(12), child: Text("Skupinky"))
+                        const Icon(Icons.groups),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Groups").tr())
                       ]
                   ),
                   Row(
                       children: [
-                        Icon(Icons.people),
-                        Padding(padding: EdgeInsets.all(12), child: Text("Uživatelé"))
+                        const Icon(Icons.people),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Users").tr())
                       ]
                   ),
                   // Row(
@@ -225,25 +227,26 @@ class _AdministrationPageState extends State<AdministrationPage> {
           physics: const NeverScrollableScrollPhysics(),
           children: [
             SingleTableDataGrid<InformationModel>(
+                context,
                 DataService.getInformation,
                 InformationModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 InformationModel.idColumn,
                 columns: [
                   PlutoColumn(
-                      title: "Id",
+                      title: "Id".tr(),
                       field: InformationModel.idColumn,
                       type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
                       width: 50,
                       renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),),
                   PlutoColumn(
-                      title: "Nadpis",
+                      title: "Title".tr(),
                       field: InformationModel.titleColumn,
                       type: PlutoColumnType.text()),
                   PlutoColumn(
                       width: 150,
-                      title: "Popis",
+                      title: "Content".tr(),
                       field: InformationModel.descriptionColumn,
                       type: PlutoColumnType.text(),
                       renderer: (rendererContext) {
@@ -265,14 +268,14 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         );
                       }),
                   PlutoColumn(
-                    title: "Pořadí",
+                    title: "Order".tr(),
                     field: InformationModel.orderColumn,
                     type: PlutoColumnType.number(defaultValue: null),
                     applyFormatterInEditing: true,
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Skrýt",
+                    title: "Hide".tr(),
                     field: InformationModel.isHiddenColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -282,13 +285,14 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
+                context,
                 DataService.getEventsWithPlaces,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 EventModel.idColumn,
                 columns: [
                   PlutoColumn(
-                    title: "Id",
+                    title: "Id".tr(),
                     field: EventModel.idColumn,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
@@ -296,43 +300,43 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
                   PlutoColumn(
-                      title: "Nadpis",
+                      title: "Title".tr(),
                       field: EventModel.titleColumn,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
-                    title: "Datum začátku",
+                    title: "Start date".tr(),
                     field: EventModel.startDateColumn,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
-                    title: "Začátek",
+                    title: "Start".tr(),
                     field: EventModel.startTimeColumn,
                     type: PlutoColumnType.time(),
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Datum konce",
+                    title: "End date".tr(),
                     field: EventModel.endDateColumn,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
-                    title: "Konec",
+                    title: "End".tr(),
                     field: EventModel.endTimeColumn,
                     type: PlutoColumnType.time(),
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Max",
+                    title: "Max".tr(),
                     field: EventModel.maxParticipantsColumn,
                     type: PlutoColumnType.number(negative: false, defaultValue: null),
                     width: 70,
                   ),
                   PlutoColumn(
-                    title: "M/Ž 50/50",
+                    title: "M/F 50/50".tr(),
                     field: EventModel.splitForMenWomenColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -341,7 +345,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
                   ),
                   PlutoColumn(
-                    title: "Skupinka",
+                    title: "Group".tr(),
                     field: EventModel.isGroupEventColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -350,7 +354,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
                   ),
                   PlutoColumn(
-                    title: "Místo",
+                    title: "Place".tr(),
                     field: EventModel.placeColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -365,7 +369,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                   PlutoColumn(
                       width: 150,
-                      title: "Popis",
+                      title: "Content".tr(),
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
@@ -403,24 +407,25 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   }
                                 }
                               });},
-                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                            child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
                       }),
                   PlutoColumn(
-                      title: "Zobrazit v události",
+                      title: "Show inside event".tr(),
                       field: EventModel.parentEventColumn,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                 ]).DataGrid(),
             SingleTableDataGrid<PlaceModel>(
+                context,
                 DataService.getPlaces,
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 PlaceModel.idColumn,
                 columns: [
                   PlutoColumn(
-                    title: "Id",
+                    title: "Id".tr(),
                     field: PlaceModel.idColumn,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
@@ -428,25 +433,25 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
                   PlutoColumn(
-                      title: "Nadpis",
+                      title: "Title".tr(),
                       field: PlaceModel.titleColumn,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
-                      title: "Popis",
+                      title: "Content".tr(),
                       field: PlaceModel.descriptionColumn,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
-                    title: "Ikonka",
+                    title: "Icon".tr(),
                     field: PlaceModel.typeColumn,
                     type: PlutoColumnType.select(mapIcons),
                     renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
                   ),
                   PlutoColumn(
-                    title: "Skryté",
+                    title: "Hide".tr(),
                     field: PlaceModel.isHiddenColumn,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
@@ -456,7 +461,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                   PlutoColumn(
                       width: 150,
-                      title: "Pozice na mapě",
+                      title: "Location on map".tr(),
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
@@ -474,18 +479,19 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                   }
                                  });
                               },
-                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                            child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
                       }),
                 ]).DataGrid(),
             SingleTableDataGrid<ExclusiveGroupModel>(
+                context,
                 DataService.getExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 ExclusiveGroupModel.idColumn,
                 columns: [
                   PlutoColumn(
-                    title: "Id",
+                    title: "Id".tr(),
                     field: ExclusiveGroupModel.idColumn,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
@@ -494,26 +500,27 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
                   PlutoColumn(
-                      title: "Název skupiny",
+                      title: "Name".tr(),
                       field: ExclusiveGroupModel.titleColumn,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
-                      title: "Události",
+                      title: "Events".tr(),
                       field: ExclusiveGroupModel.eventsColumn,
                       type: PlutoColumnType.text(),
                       width: 500
                   ),
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
+                context,
                 DataService.getUserGroupInfoList,
                 UserGroupInfoModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 UserGroupInfoModel.idColumn,
                 columns: [
                   PlutoColumn(
-                    title: "Id",
+                    title: "Id".tr(),
                     field: UserGroupInfoModel.idColumn,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
@@ -522,13 +529,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
                     renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
                   ),
                   PlutoColumn(
-                      title: "Název skupinky",
+                      title: "Name".tr(),
                       field: UserGroupInfoModel.titleColumn,
                       type: PlutoColumnType.text(),
                       width: 200
                   ),
                   PlutoColumn(
-                      title: "Vedoucí",
+                      title: "Moderator".tr(),
                       field: UserGroupInfoModel.leaderColumn,
                       type: PlutoColumnType.text(),
                       enableEditingMode: false,
@@ -556,7 +563,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                       var cell = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                       Navigator.pop(context);
-                                    }), _allUsers, "Nastavit");
+                                    }), _allUsers, "Set".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               Text(userName??""),]
@@ -564,7 +571,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       }
                   ),
                   PlutoColumn(
-                      title: "Členové skupinky",
+                      title: "Participants".tr(),
                       field: UserGroupInfoModel.participantsColumn,
                       type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
                       enableEditingMode: false,
@@ -593,7 +600,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                           rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
                                           var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
                                           rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                        }), _allUsers, "Přidat");
+                                        }), _allUsers, "Add".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
                               IconButton(
@@ -608,7 +615,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   ),
                   PlutoColumn(
                       width: 150,
-                      title: "Popis",
+                      title: "Content".tr(),
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
@@ -646,7 +653,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       }),
                   PlutoColumn(
                       width: 150,
-                      title: "Místo",
+                      title: "Place".tr(),
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
@@ -668,7 +675,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                                 }
                               });
                             },
-                            child: const Row(children: [Icon(Icons.location_pin), Padding(padding: EdgeInsets.all(6), child: Text("Vybrat")) ])
+                            child: Row(children: [const Icon(Icons.location_pin), Padding(padding: const EdgeInsets.all(6), child: const Text("Location").tr()) ])
                         );
                       }),
                 ]).DataGrid(),
@@ -689,13 +696,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> _generatePassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generovat heslo", "Uživatelé dostanou nové heslo emailem (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Generovat");
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generate password".tr(), "${"Users get new password via e-mail".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
     }
 
     bool changePassToUnsignedUsersOnly = false;
-    var reallyAll = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Měnit i už těm, kteří se aspoň jednou přihlásili?", confirmButtonMessage: "Změnit");
+    var reallyAll = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "Change password to users who have been already signed in?".tr(), confirmButtonMessage: "Proceed".tr());
     if(!reallyAll) {
       changePassToUnsignedUsersOnly = true;
     }
@@ -708,7 +715,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   Future<void> _setPassword() async {
     var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Změnit heslo", "Těmto uživatelům bude změno heslo: (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Změnit");
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Users will get a new password".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
     }
@@ -730,6 +737,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
     chosenGroup.participants.addAll(users);
     await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants);
-    ToastHelper.Show("${chosenGroup.title} byla změněna.");
+    ToastHelper.Show("{group} byla změněna.".tr(namedArgs: {"group":chosenGroup.title}));
   }
 }

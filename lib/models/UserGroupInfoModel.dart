@@ -40,7 +40,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       Set<UserInfoModel>.from(json[userGroupsTable].
       map((e)=>UserInfoModel.fromJson(
         e["user_info"] != null ?
-          e["user_info"] :
+        e["user_info"] :
         e["user_info_public"] != null ?
         e["user_info_public"]:
         {}

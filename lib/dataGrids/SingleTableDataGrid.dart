@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -20,10 +21,11 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
   final DataGridFirstColumn firstColumnType;
   final String idColumn;
   final T Function(Map<String, dynamic>) fromPlutoJson;
+  final BuildContext context;
 
   final List<Widget>? headerChildren;
 
-  SingleTableDataGrid(this.loadData, this.fromPlutoJson, this.firstColumnType, this.idColumn, {required this.columns, this.headerChildren});
+  SingleTableDataGrid(this.context, this.loadData, this.fromPlutoJson, this.firstColumnType, this.idColumn, {required this.columns, this.headerChildren});
   DataGrid() {
     return Container(
       padding: const EdgeInsets.all(6),
@@ -103,7 +105,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
               loadData: reloadData,
               headerChildren: headerChildren,
               dataGrid: this),
-        configuration: AdministrationHeader.defaultPlutoGridConfiguration(),
+        configuration: AdministrationHeader.defaultPlutoGridConfiguration(context.locale.languageCode),
   ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/styles/Styles.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../services/ToastHelper.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
@@ -28,7 +29,7 @@ class _InfoPageState extends State<InfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Informace"),
+        title: const Text("Information").tr(),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -61,11 +62,11 @@ class _InfoPageState extends State<InfoPage> {
                                   {
                                     item.description = value as String;
                                     await DataService.updateInformation(item);
-                                    ToastHelper.Show("Popis změněn!");
+                                    ToastHelper.Show("Content has been changed.".tr());
                                     Navigator.popAndPushNamed(context, InfoPage.ROUTE);
                                   }
                                 }),
-                                child: const Text("Upravit popis"))),
+                                child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
                         child: HtmlDescriptionWidget(html: item.description ?? ""),

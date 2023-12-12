@@ -1,5 +1,6 @@
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -149,7 +150,7 @@ class UserInfoModel extends IPlutoRowModel {
   bool isSignedIn = false;
 
 
-  String sexToCzech() => sex == "male" ? "Muž" : "Žena";
+  String sexToLocale() => sex == "male" ? "Male".tr() : "Female".tr();
 
   bool importedEquals(Map<String, dynamic> u) {
     return 
@@ -175,5 +176,9 @@ class UserInfoModel extends IPlutoRowModel {
       return id == other.id;
     }
     return false;
+  }
+
+  String getGenderPrefix() {
+    return sex == "male" ? "M":"F";
   }
 }

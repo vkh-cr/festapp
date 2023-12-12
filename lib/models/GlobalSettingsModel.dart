@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
+
 class GlobalSettingsModel {
   int? id;
   dynamic defaultMapLocation;
   double defaultMapZoom;
-  String? tooSoonMessage = "Ještě je příliš brzy!";
+  String? tooSoonMessage = "It's too soon!".tr();
 
   static const String idColumn = "id";
   static const String jsonColumn = "json";
@@ -47,5 +49,5 @@ class GlobalSettingsModel {
       id: 1,
       defaultMapLocation: DefaultPosition,
       defaultMapZoom: 17,
-      tooSoonMessage: "Ještě je příliš brzy!");
+      tooSoonMessage: "It's too soon!".tr());
 }

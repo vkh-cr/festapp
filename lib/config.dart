@@ -1,10 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'models/LanguageModel.dart';
 
 class config {
   static const String supabase_url = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
   static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String home_page = 'festapp';
-  static const String map_page = 'Mapa';
+  static const String home_page = 'Festapp';
+  static String map_page = "Map".tr();
 
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
@@ -21,4 +23,9 @@ class config {
 
   static const String generatedPasswordPrefix = "fa";
   static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
+
+  static List<LanguageModel> AvailableLanguages = [
+    LanguageModel(const Locale("en"), "English"),
+    LanguageModel(const Locale("cs"), "Čeština"),
+  ];
 }

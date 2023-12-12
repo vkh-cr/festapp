@@ -1,4 +1,6 @@
+import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -18,9 +20,9 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   @override
   _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren);
 
-  static PlutoGridConfiguration defaultPlutoGridConfiguration() {
-    return const PlutoGridConfiguration(
-      localeText: PlutoGridLocaleText.czech(),
+  static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
+    return PlutoGridConfiguration(
+      localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
       style: PlutoGridStyleConfig(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white70
@@ -51,15 +53,15 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     allChildren.insertAll(0, [
       ElevatedButton(
       onPressed: _addRow,
-      child: const Text('Přidat'),
+      child: const Text("Add").tr(),
     ),
       ElevatedButton(
         onPressed: _cancelChanges,
-        child: const Text('Vrátit zpět'),
+        child: const Text("Discard changes").tr(),
       ),
       ElevatedButton(
         onPressed: _saveChanges,
-        child: const Text('Uložit změny'),
+        child: const Text("Save changes").tr(),
       ),]);
 
     return SingleChildScrollView(
@@ -91,8 +93,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     if(deleteList.isNotEmpty)
     {
       var result = await DialogHelper.showConfirmationDialogAsync(context,
-          "Potvrdit smazání", "Opravdu chcete smazat:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
-          confirmButtonMessage: "Ano");
+          "Confirm removal".tr(), "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",);
       if(!result) {
         return;
       }
@@ -109,7 +110,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("Smazáno: ${element.toBasicString()}");
+      ToastHelper.Show("${"Deleted".tr()}: ${element.toBasicString()}");
     }
 
     var updatedSet = Set<T>.from(
@@ -131,13 +132,13 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("Uloženo: ${element.toBasicString()}");
+      ToastHelper.Show("${"Saved".tr()}: ${element.toBasicString()}");
     }
     await loadData();
   }
 
   Future<void> _cancelChanges() async {
-    var result = await DialogHelper.showConfirmationDialogAsync(context, "Vrácení změn", "Opravdu vrátit všechny změny?");
+    var result = await DialogHelper.showConfirmationDialogAsync(context, "Discard changes".tr(), "Really discard all changes?".tr());
     if(!result){
       return;
     }

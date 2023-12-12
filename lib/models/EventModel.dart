@@ -1,5 +1,7 @@
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -10,7 +12,7 @@ class EventModel extends IPlutoRowModel {
 
   String startTimeString() => DateFormat.Hm().format(startTime);
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
-  String durationString() => "${DateFormat("EEEE, MMM d, HH:mm", "cs").format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+  String durationString(BuildContext context) => "${DateFormat("EEEE, MMM d, HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
   int? maxParticipants;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
@@ -22,7 +24,7 @@ class EventModel extends IPlutoRowModel {
   List<int>? parentEventIds;
   List<int>? childEventIds;
   int? currentParticipants;
-  String? title = "událost";
+  String? title = "Event".tr();
   String? description = "";
   bool isSignedIn = false;
   bool splitForMenWomen = false;
@@ -113,6 +115,8 @@ class EventModel extends IPlutoRowModel {
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
   static const String placesTable = "places";
+  static const String eventTable = "events";
+  static const String eventTableStorage = "events";
   static const String eventUsersTable = "event_users";
   static const String eventGroupsTable = "event_groups";
   static const String eventChildColumn = "event_child";
