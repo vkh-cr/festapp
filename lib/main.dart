@@ -37,10 +37,9 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
         supportedLocales: config.AvailableLanguages.map((e) => e.locale).toList(),
-        path: "assets/translations/",
+        path: "assets/translations",
         fallbackLocale: config.AvailableLanguages.map((e) => e.locale).first,
         useOnlyLangCode: true,
-        startLocale: const Locale("cs"),
         saveLocale: true,
         child: const MyApp()
     ),
@@ -119,7 +118,7 @@ class MyApp extends StatelessWidget {
           NewsPage.ROUTE: (context) => const NewsPage(),
         }
     ).animate().fadeIn(
-      duration: 200.ms,
+      duration: 300.ms,
     );
   }
 }
