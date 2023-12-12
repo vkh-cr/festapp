@@ -567,7 +567,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       field: UserGroupInfoModel.participantsColumn,
                       type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
                       enableEditingMode: false,
-                      width: 1000,
+                      width: 600,
                       renderer: (rendererContext) {
                         String? userNames;
                         Set<UserInfoModel> participants = {};
