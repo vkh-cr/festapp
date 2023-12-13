@@ -103,7 +103,7 @@ class DataService {
     return _supabase.auth.currentUser!.id;
   }
 
-  static GlobalSettingsModel? globalSettingsModel;
+  static GlobalSettingsModel? globalSettingsModel = GlobalSettingsModel.DefaultSettings;
 
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;

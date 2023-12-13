@@ -458,7 +458,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                       enableContextMenu: false,
                       enableSorting: false,
                       field: PlaceModel.coordinatesColumn,
-                      type: PlutoColumnType.text(),
+                      type: PlutoColumnType.text(defaultValue: DataService.globalSettingsModel!.defaultMapLocation),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async {
