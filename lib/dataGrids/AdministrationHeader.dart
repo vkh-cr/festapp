@@ -1,3 +1,4 @@
+import 'package:avapp/dataGrids/DataGridAction.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -11,14 +12,15 @@ import '../services/ToastHelper.dart';
 class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   final PlutoGridStateManager stateManager;
   final SingleTableDataGrid dataGrid;
-  final List<Widget>? headerChildren;
+  final List<DataGridAction>? headerChildren;
+  final DataGridExtendedAction? saveExtended;
 
-  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, required this.dataGrid}) : super(key: key);
+  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, this.saveExtended, required this.dataGrid}) : super(key: key);
 
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   @override
-  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren);
+  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren, saveExtended: saveExtended);
 
   static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
     return PlutoGridConfiguration(
@@ -36,16 +38,20 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   final SingleTableDataGrid dataGrid;
-  List<Widget>? headerChildren = [];
+  List<DataGridAction>? headerChildren = [];
+  final DataGridExtendedAction? saveExtended;
   List<Widget> allChildren = [];
 
-  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren});
+  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren, this.saveExtended});
 
   @override
   Widget build(BuildContext context) {
     allChildren.clear();
     headerChildren = headerChildren ?? [];
-    allChildren.addAll(headerChildren!);
+    for(var a in headerChildren!)
+    {
+      allChildren.add(ElevatedButton(onPressed: (){a.action(dataGrid);}, child: Text(a.name)));
+    }
     if(headerChildren!.isNotEmpty)
     {
       allChildren.insertAll(0, [const VerticalDivider()]);
@@ -59,10 +65,19 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         onPressed: _cancelChanges,
         child: const Text("Discard changes").tr(),
       ),
-      ElevatedButton(
-        onPressed: _saveChanges,
-        child: const Text("Save changes").tr(),
-      ),]);
+      saveExtended==null?
+        ElevatedButton(
+          onPressed: _saveChanges,
+          child: const Text("Save changes").tr(),
+        ):
+        ElevatedButton(
+          onPressed: (){
+            saveExtended!.action==null ? _saveChanges() :
+            saveExtended!.action!(dataGrid, _saveChanges);
+            },
+          child: Text(saveExtended!.name??"Save changes".tr()),
+        )
+      ,]);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -85,7 +100,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     }
   }
 
-  void _saveChanges() async{
+  Future<void> _saveChanges() async{
     var toDelete = dataGrid.deletedRows.toList();
     dataGrid.updatedRows.removeAll(toDelete);
     var deleteList = List<T>.from(

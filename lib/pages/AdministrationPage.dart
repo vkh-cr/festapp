@@ -1,3 +1,4 @@
+import 'package:avapp/dataGrids/DataGridAction.dart';
 import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:avapp/models/ExclusiveGroupModel.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
@@ -32,7 +33,6 @@ class _AdministrationPageState extends State<AdministrationPage> {
   List<String> places = [];
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
-  late SingleTableDataGrid<UserInfoModel> usersDataGrid;
 
   @override
   Future<void> didChangeDependencies() async {
@@ -47,10 +47,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   Future<void> loadData() async {
-    var placesRaws =  await DataService.getMapPlaces();
-    var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
-    placesStrings.add(PlaceModel.WithouValue);
-    places = placesStrings;
+    await loadPlaces();
 
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
@@ -58,113 +55,17 @@ class _AdministrationPageState extends State<AdministrationPage> {
     setState(() {});
   }
 
+  Future<void> loadPlaces() async {
+    var placesRaws =  await DataService.getMapPlaces();
+    var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
+    placesStrings.add(PlaceModel.WithouValue);
+    setState(() {
+      places = placesStrings;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    usersDataGrid = SingleTableDataGrid<UserInfoModel>(
-        context,
-        DataService.getUsers,
-        UserInfoModel.fromPlutoJson,
-        DataGridFirstColumn.deleteAndCheck,
-        UserInfoModel.idColumn,
-        headerChildren: [
-          ElevatedButton(
-            onPressed: _import,
-            child: const Text("Import").tr(),
-          ),
-          ElevatedButton(
-            onPressed: _generatePassword,
-            child: const Text("Generate password").tr(),
-          ),
-          ElevatedButton(
-            onPressed: _setPassword,
-            child: const Text("Change password").tr(),
-          ),
-          ElevatedButton(
-            onPressed: _addToGroup,
-            child: const Text("Add to group").tr(),
-          ),
-        ],
-        columns: [
-          PlutoColumn(
-              title: "Id".tr(),
-              field: UserInfoModel.idColumn,
-              type: PlutoColumnType.text(),
-              readOnly: true,
-              width: 50),
-          PlutoColumn(
-              title: "E-mail".tr(),
-              field: UserInfoModel.emailReadonlyColumn,
-              type: PlutoColumnType.text(),
-              checkReadOnly: (row, cell) {
-                final id = row.cells[UserInfoModel.idColumn]?.value as String?;
-                return id != null && id.isNotEmpty;
-              },
-              width: 200
-          ),
-          PlutoColumn(
-            title: "Name".tr(),
-            field: UserInfoModel.nameColumn,
-            type: PlutoColumnType.text(),
-            width: 200,
-          ),
-          PlutoColumn(
-            title: "Surname".tr(),
-            field: UserInfoModel.surnameColumn,
-            type: PlutoColumnType.text(),
-            width: 200,
-          ),
-          PlutoColumn(
-            title: "Accommodation".tr(),
-            field: UserInfoModel.accommodationColumn,
-            type: PlutoColumnType.text(),
-            readOnly: true,
-            width: 150,
-          ),
-          PlutoColumn(
-            title: "Phone".tr(),
-            field: UserInfoModel.phoneColumn,
-            type: PlutoColumnType.text(),
-            width: 200,
-          ),
-          PlutoColumn(
-            title: "Sex".tr(),
-            field: UserInfoModel.sexColumn,
-            type: PlutoColumnType.select(UserInfoModel.sexes),
-            formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
-            applyFormatterInEditing: true,
-            width: 100,
-          ),
-          PlutoColumn(
-            title: "Birthday".tr(),
-            field: UserInfoModel.birthDateColumn,
-            type: PlutoColumnType.date(defaultValue: DateTime.now()),
-            width: 140,
-          ),
-          PlutoColumn(
-            title: "Admin".tr(),
-            field: UserInfoModel.isAdminReadOnlyColumn,
-            type: PlutoColumnType.select([]),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn),
-          ),
-          PlutoColumn(
-            title: "Editor".tr(),
-            field: UserInfoModel.isEditorReadOnlyColumn,
-            type: PlutoColumnType.select([]),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn),
-          ),
-          PlutoColumn(
-            title: "Role".tr(),
-            field: UserInfoModel.roleColumn,
-            type: PlutoColumnType.text(),
-            width: 100,
-          )
-        ]);
     return DefaultTabController(
       length: 6,
       child: Scaffold(
@@ -338,7 +239,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                     title: "M/F 50/50".tr(),
                     field: EventModel.splitForMenWomenColumn,
-                    type: PlutoColumnType.select(places),
+                    type: PlutoColumnType.text(),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
@@ -347,7 +248,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
                   PlutoColumn(
                     title: "Group".tr(),
                     field: EventModel.isGroupEventColumn,
-                    type: PlutoColumnType.select(places),
+                    type: PlutoColumnType.text(),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
@@ -415,6 +316,10 @@ class _AdministrationPageState extends State<AdministrationPage> {
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 PlaceModel.idColumn,
+                saveExtended: DataGridExtendedAction(action: (datagrid, action) async {
+                  await action();
+                  await loadPlaces();
+                }),
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
@@ -659,8 +564,100 @@ class _AdministrationPageState extends State<AdministrationPage> {
                         );
                       }),
                 ]).DataGrid(),
-            usersDataGrid.DataGrid(),
+            SingleTableDataGrid<UserInfoModel>(
+                context,
+                DataService.getUsers,
+                UserInfoModel.fromPlutoJson,
+                DataGridFirstColumn.deleteAndCheck,
+                UserInfoModel.idColumn,
 
+                headerChildren: [
+                  DataGridAction("Import".tr(), (SingleTableDataGrid p0) { _import(p0); }),
+                  DataGridAction("Generate password".tr(), (SingleTableDataGrid p0) { _generatePassword(p0); }),
+                  DataGridAction("Change password".tr(), (SingleTableDataGrid p0) { _setPassword(p0); }),
+                  DataGridAction("Add to group".tr(), (SingleTableDataGrid p0) { _addToGroup(p0); }),
+                ],
+                columns: [
+                  PlutoColumn(
+                      title: "Id".tr(),
+                      field: UserInfoModel.idColumn,
+                      type: PlutoColumnType.text(),
+                      readOnly: true,
+                      width: 50),
+                  PlutoColumn(
+                      title: "E-mail".tr(),
+                      field: UserInfoModel.emailReadonlyColumn,
+                      type: PlutoColumnType.text(),
+                      checkReadOnly: (row, cell) {
+                        final id = row.cells[UserInfoModel.idColumn]?.value as String?;
+                        return id != null && id.isNotEmpty;
+                      },
+                      width: 200
+                  ),
+                  PlutoColumn(
+                    title: "Name".tr(),
+                    field: UserInfoModel.nameColumn,
+                    type: PlutoColumnType.text(),
+                    width: 200,
+                  ),
+                  PlutoColumn(
+                    title: "Surname".tr(),
+                    field: UserInfoModel.surnameColumn,
+                    type: PlutoColumnType.text(),
+                    width: 200,
+                  ),
+                  PlutoColumn(
+                    title: "Accommodation".tr(),
+                    field: UserInfoModel.accommodationColumn,
+                    type: PlutoColumnType.text(),
+                    readOnly: true,
+                    width: 150,
+                  ),
+                  PlutoColumn(
+                    title: "Phone".tr(),
+                    field: UserInfoModel.phoneColumn,
+                    type: PlutoColumnType.text(),
+                    width: 200,
+                  ),
+                  PlutoColumn(
+                    title: "Sex".tr(),
+                    field: UserInfoModel.sexColumn,
+                    type: PlutoColumnType.select(UserInfoModel.sexes),
+                    formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
+                    applyFormatterInEditing: true,
+                    width: 100,
+                  ),
+                  PlutoColumn(
+                    title: "Birthday".tr(),
+                    field: UserInfoModel.birthDateColumn,
+                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    width: 140,
+                  ),
+                  PlutoColumn(
+                    title: "Admin".tr(),
+                    field: UserInfoModel.isAdminReadOnlyColumn,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn),
+                  ),
+                  PlutoColumn(
+                    title: "Editor".tr(),
+                    field: UserInfoModel.isEditorReadOnlyColumn,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn),
+                  ),
+                  PlutoColumn(
+                    title: "Role".tr(),
+                    field: UserInfoModel.roleColumn,
+                    type: PlutoColumnType.text(),
+                    width: 100,
+                  )
+                ]).DataGrid(),
           ]
         ),
       ),
@@ -668,13 +665,13 @@ class _AdministrationPageState extends State<AdministrationPage> {
   }
 
   List<UserInfoModel> _allUsers = [];
-  Future<void> _import() async {
+  Future<void> _import(SingleTableDataGrid dataGrid) async {
     await UserManagementHelper.import(context);
-    await usersDataGrid.reloadData();
+    await dataGrid.reloadData();
   }
 
-  Future<void> _generatePassword() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+  Future<void> _generatePassword(SingleTableDataGrid dataGrid) async {
+    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Generate password".tr(), "${"Users get new password via e-mail".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
@@ -692,8 +689,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
   }
 
-  Future<void> _setPassword() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+  Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
+    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Users will get a new password".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
@@ -706,8 +703,8 @@ class _AdministrationPageState extends State<AdministrationPage> {
     }
   }
 
-  Future<void> _addToGroup() async {
-    var users = List<UserInfoModel>.from(usersDataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
+  Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {
+    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.id != null).toList();
     var allGroups = await DataService.getAllUserGroupInfo();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
@@ -718,7 +715,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
     chosenGroup.participants.addAll(users);
     await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants);
 
-    for (var value in usersDataGrid.stateManager.refRows.originalList) {
+    for (var value in dataGrid.stateManager.refRows.originalList) {
       value.setChecked(false);
     }
 
