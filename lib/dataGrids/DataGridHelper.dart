@@ -23,7 +23,6 @@ class DataGridHelper
       return "???";
     }
     return UserInfoModel.sexToLocale(value);
-    return value;
   }
 
   static int? GetIdFromFormatted(String value) {

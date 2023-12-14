@@ -49,10 +49,10 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Name".tr(), userData?.name ?? ''),
                 buildTextField("Surname".tr(), userData?.surname ?? ''),
                 buildTextField("E-mail".tr(), userData?.email ?? ''),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex) ?? ''),
+                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
                 buildTextField("Role".tr(), userData?.role ?? ''),
                 Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
