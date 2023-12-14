@@ -150,7 +150,7 @@ class UserInfoModel extends IPlutoRowModel {
   bool isSignedIn = false;
 
 
-  String sexToLocale() => sex == "male" ? "Male".tr() : "Female".tr();
+  static String sexToLocale(String? sx) => sx == "male" ? "Male".tr() : "Female".tr();
 
   bool importedEquals(Map<String, dynamic> u) {
     return 

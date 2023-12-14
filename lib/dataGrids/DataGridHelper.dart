@@ -1,4 +1,5 @@
 import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -21,6 +22,7 @@ class DataGridHelper
     {
       return "???";
     }
+    return UserInfoModel.sexToLocale(value);
     return value;
   }
 
@@ -157,5 +159,13 @@ class DataGridHelper
     }
 
     return const PlutoGridLocaleText();
+  }
+
+  static textTransform(String? value, List<String> allValues, String Function(String?) transform) {
+    if(!allValues.contains(value))
+    {
+      return "???";
+    }
+    return transform(value);
   }
 }

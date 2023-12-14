@@ -130,7 +130,7 @@ class _AdministrationPageState extends State<AdministrationPage> {
             title: "Sex".tr(),
             field: UserInfoModel.sexColumn,
             type: PlutoColumnType.select(UserInfoModel.sexes),
-            formatter: (value) => DataGridHelper.returnQuestionMarkOnInvalid(value, UserInfoModel.sexes),
+            formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
             applyFormatterInEditing: true,
             width: 100,
           ),
