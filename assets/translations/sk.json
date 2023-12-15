@@ -148,5 +148,6 @@
   "Place has been changed.": "Miesto bolo zmenené.",
   "Insert here": "Vložiť tu",
   "Insert service_role key from supabase": "Vložiť kľúč service_role zo Supabase",
+  "There will appear your events.": "Tu sa zobrazia tvoje udalosti.",
   "_": "_"
 }
