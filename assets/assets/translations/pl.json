@@ -148,5 +148,6 @@
   "Place has been changed.": "Miejsce zostało zmienione.",
   "Insert here": "Wstaw tutaj",
   "Insert service_role key from supabase": "Wstaw klucz service_role z supabase",
+  "There will appear your events.": "Pojawią się twoje wydarzenia.",
   "_": "_"
 }
