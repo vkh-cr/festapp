@@ -673,6 +673,7 @@ class DataService {
     .from(UserGroupInfoModel.userGroupInfoTable)
     .select("id, title, user_info!leader(id), places(id)")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
+    .limit(1)
     .maybeSingle();
     if(partOfGroup!=null)
     {
@@ -684,6 +685,7 @@ class DataService {
           .from(UserGroupInfoModel.userGroupsTable)
           .select("${UserGroupInfoModel.userGroupInfoTable}(id, title)")
           .eq("user", currentUserId())
+          .limit(1)
           .maybeSingle();
       if(partOfGroup!=null)
       {

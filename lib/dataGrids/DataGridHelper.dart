@@ -36,11 +36,11 @@ class DataGridHelper
     return res;
   }
 
-  static Widget checkBoxRenderer(rendererContext, String idString) {
+  static Widget checkBoxRenderer(rendererContext, String idString, [bool Function()? isEnabled]) {
     var value = rendererContext.cell.value == "true" ? "true" : "false";
     return Checkbox(
       value: bool.parse(value),
-      onChanged: (bool? value) {
+      onChanged: isEnabled != null && isEnabled() == false ? null : (bool? value) {
         var cell = rendererContext.row.cells[idString]!;
         rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
         rendererContext.cell.value = value.toString();

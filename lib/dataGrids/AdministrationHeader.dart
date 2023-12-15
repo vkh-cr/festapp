@@ -13,14 +13,14 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   final PlutoGridStateManager stateManager;
   final SingleTableDataGrid dataGrid;
   final List<DataGridAction>? headerChildren;
-  final DataGridExtendedAction? saveExtended;
+  final DataGridExtendedActions? saveExtended;
 
   const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, this.saveExtended, required this.dataGrid}) : super(key: key);
 
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   @override
-  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren, saveExtended: saveExtended);
+  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren, actionsExtended: saveExtended);
 
   static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
     return PlutoGridConfiguration(
@@ -39,10 +39,10 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
   final Future<void> Function() loadData;
   final SingleTableDataGrid dataGrid;
   List<DataGridAction>? headerChildren = [];
-  final DataGridExtendedAction? saveExtended;
+  final DataGridExtendedActions? actionsExtended;
   List<Widget> allChildren = [];
 
-  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren, this.saveExtended});
+  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren, this.actionsExtended});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,11 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     headerChildren = headerChildren ?? [];
     for(var a in headerChildren!)
     {
-      allChildren.add(ElevatedButton(onPressed: (){a.action(dataGrid);}, child: Text(a.name)));
+      allChildren.add(ElevatedButton(onPressed:
+          a.isEnabled != null && !a.isEnabled!() ?
+          null :
+          () => a.action!(dataGrid, null),
+          child: Text(a.name??"---")));
     }
     if(headerChildren!.isNotEmpty)
     {
@@ -58,25 +62,26 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     }
     allChildren.insertAll(0, [
       ElevatedButton(
-      onPressed: _addRow,
-      child: const Text("Add").tr(),
-    ),
+      onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!()
+        ? null :
+        _addRow,
+        child: const Text("Add").tr(),
+      ),
       ElevatedButton(
-        onPressed: _cancelChanges,
+        onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!()
+            ? null :
+        _cancelChanges,
         child: const Text("Discard changes").tr(),
       ),
-      saveExtended==null?
-        ElevatedButton(
-          onPressed: _saveChanges,
-          child: const Text("Save changes").tr(),
-        ):
-        ElevatedButton(
-          onPressed: (){
-            saveExtended!.action==null ? _saveChanges() :
-            saveExtended!.action!(dataGrid, _saveChanges);
-            },
-          child: Text(saveExtended!.name??"Save changes".tr()),
-        )
+      ElevatedButton(
+        onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!() ?
+        null :
+            () {
+          actionsExtended?.saveAction?.action == null ? _saveChanges() :
+          actionsExtended!.saveAction!.action!(dataGrid, _saveChanges);
+        },
+        child: Text(actionsExtended?.saveAction?.name??"Save changes".tr()),
+      )
       ,]);
 
     return SingleChildScrollView(

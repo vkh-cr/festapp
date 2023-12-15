@@ -1,13 +1,14 @@
 import 'SingleTableDataGrid.dart';
 
 class DataGridAction{
-  String name;
-  void Function(SingleTableDataGrid) action;
-  DataGridAction(this.name, this.action);
+  String? name;
+  void Function(SingleTableDataGrid, [Future<void> Function()? originalAction])? action;
+  bool Function()? isEnabled;
+  DataGridAction({this.action, this.name, this.isEnabled});
 }
 
-class DataGridExtendedAction{
-  String? name;
-  void Function(SingleTableDataGrid dataGrid, Future<void> Function() originalAction)? action;
-  DataGridExtendedAction({this.name, this.action});
+class DataGridExtendedActions{
+  bool Function()? areAllActionsEnabled;
+  DataGridAction? saveAction;
+  DataGridExtendedActions({this.saveAction, this.areAllActionsEnabled});
 }
