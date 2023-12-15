@@ -648,7 +648,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     title: "Sex".tr(),
                     enableEditingMode: DataService.isAdmin(),
                     field: UserInfoModel.sexColumn,
-                    type: PlutoColumnType.select(UserInfoModel.sexes),
+                    type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
                     formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
                     applyFormatterInEditing: true,
                     width: 100,
