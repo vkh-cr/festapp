@@ -9,6 +9,7 @@ import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:avapp/config.dart';
@@ -28,7 +29,7 @@ class DataService {
     {
       return _supabaseAdmin!;
     }
-    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
+    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Input service_role key from supabase".tr(), "Input here".tr());
     if(result==null)
     {
       throw Exception("You must input service_role key.");
@@ -102,7 +103,7 @@ class DataService {
     return _supabase.auth.currentUser!.id;
   }
 
-  static GlobalSettingsModel? globalSettingsModel;
+  static GlobalSettingsModel? globalSettingsModel = GlobalSettingsModel.DefaultSettings;
 
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;
@@ -276,7 +277,6 @@ class DataService {
     {
       if(config.isServiceRoleSafety){
         json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
-        ToastHelper.Show("Vytvořen: ${json[UserInfoModel.emailReadonlyColumn]}");
       } else{
         json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
       }
@@ -291,7 +291,7 @@ class DataService {
       await refreshSession();
       if(!DataService.isAdmin())
       {
-        var errorText = "Je potřeba vyššího oprávnění. Změny na uživateli ${data.email} nemohly být uloženy.";
+        var errorText = "Elevated permission is required. Changes to user ${data.email} could not be saved.";
         throw Exception(errorText);
       }
     }
@@ -300,7 +300,6 @@ class DataService {
     {
       if(config.isServiceRoleSafety){
         data.id = await DataService.createUser(data.email!);
-        ToastHelper.Show("Vytvořen: ${data.email}");
       } else{
         data.id = await UserManagementHelper.unsafeCreateNewUser(data.email);
       }
@@ -481,7 +480,7 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroupInfoList() async {
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
     var data = await _supabase
         .from(UserGroupInfoModel.userGroupInfoTable)
         .select(
@@ -514,7 +513,7 @@ class DataService {
     return UserGroupInfoModel.fromJson(data);
   }
 
-  static Future<List<ExclusiveGroupModel>> getExclusiveGroups() async {
+  static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
     var data = await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .select("${ExclusiveGroupModel.idColumn}, ${ExclusiveGroupModel.titleColumn}, exclusive_events(event)");
@@ -525,8 +524,7 @@ class DataService {
   static updateUserGroupInfo(UserGroupInfoModel model) async {
     if(!(isAdmin() || model.leader!.id == currentUserId()))
     {
-      ToastHelper.Show("Must be leader or admin to change the group.", severity: ToastSeverity.NotOk);
-      return;
+      throw Exception("Must be leader or admin to change the group.");
     }
 
     var upsertObj = {
@@ -675,6 +673,7 @@ class DataService {
     .from(UserGroupInfoModel.userGroupInfoTable)
     .select("id, title, user_info!leader(id), places(id)")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
+    .limit(1)
     .maybeSingle();
     if(partOfGroup!=null)
     {
@@ -686,6 +685,7 @@ class DataService {
           .from(UserGroupInfoModel.userGroupsTable)
           .select("${UserGroupInfoModel.userGroupInfoTable}(id, title)")
           .eq("user", currentUserId())
+          .limit(1)
           .maybeSingle();
       if(partOfGroup!=null)
       {
@@ -737,7 +737,7 @@ class DataService {
     var event = await getEvent(eventId);
 
     if (event.endTime.isBefore(DateTime.now())) {
-      ToastHelper.Show("Nelze přihlásit! Událost už proběhla.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -752,12 +752,13 @@ class DataService {
           e.startTime.isAtSameMomentAs(event.startTime) ||
           e.endTime.isAtSameMomentAs(event.endTime)) {
         if(participant == null) {
-          ToastHelper.Show(
-              "Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in at other event at the same time.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         else{
-          ToastHelper.Show(
-              "Nelze přihlásit! $participant je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} is already signed in at other event at the same time.".tr(namedArgs: {"user":participant.toString()}));
         }
         return;
       }
@@ -770,35 +771,45 @@ class DataService {
     {
       case 100: {
         if(participant == null) {
-          ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("přihlášen", "přihlášena")}.");
+          var trPrefix = _currentUser!.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}You have been signed in.".tr());
         }
         else{
-          ToastHelper.Show("Přihlášen $participant.");
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} has been signed in.".tr(namedArgs: {"user":participant.toString()}));
         }
         return;
       }
-      case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.", severity: ToastSeverity.NotOk); return;
+      case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
         if(participant == null) {
-          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na události tohoto typu.", severity: ToastSeverity.NotOk);
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in at an event of this type.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         else{
-          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen na události tohoto typu.", severity: ToastSeverity.NotOk);
+          var trPrefix = participant.getGenderPrefix();
+          var message = "${trPrefix}{user} is already signed in at an event of this type.".tr(namedArgs: {"user":participant.toString()});
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         return;
       }
       case 103: {
         if(participant == null) {
-          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")}.", severity: ToastSeverity.NotOk); return;
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
-        else{
-          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen.", severity: ToastSeverity.NotOk);
+        else {
+          var trPrefix = participant.getGenderPrefix();
+          var message = "${trPrefix}{user} is already signed in.".tr(namedArgs: {"user":participant.toString()});
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         return;
       }
-      case 104: ToastHelper.Show("Nelze přihlásit! ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
-      case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů.", severity: ToastSeverity.NotOk); return;
-      case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen.", severity: ToastSeverity.NotOk); return;
+      case 104: ToastHelper.Show("${"Cannot sign in!".tr()} ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
+      case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
+      case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
     }
   }
 
@@ -815,7 +826,7 @@ class DataService {
 
     if(!isAdmin() && DateTime.now().isAfter(event.endTime))
     {
-      ToastHelper.Show("Není možné se odhlásit z události, která už proběhla.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("It is not possible to sign out from an event that has already taken place.", severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -826,10 +837,13 @@ class DataService {
         .eq("user", finalId);
 
     if(participant == null) {
-      ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}."); return;
+      var trPrefix = _currentUser!.getGenderPrefix();
+      ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+      return;
     }
     else{
-      ToastHelper.Show("Odhlášen $participant.");
+      var trPrefix = participant.getGenderPrefix();
+      ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
     }
   }
 
@@ -970,7 +984,7 @@ class DataService {
         .delete()
         .eq("id", message.id);
 
-    ToastHelper.Show("Ohláška byla smazána.");
+    ToastHelper.Show("Message has been removed.".tr());
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
@@ -978,7 +992,7 @@ class DataService {
         .from('news')
         .update({"message":message.message})
         .eq("id", message.id);
-    ToastHelper.Show("Ohláška byla změněna!.");
+    ToastHelper.Show("Message has been changed.".tr());
   }
 
   static insertNewsMessage(String message, bool withNotification) async {
@@ -1001,10 +1015,10 @@ class DataService {
       await _supabase.from("notification_records").insert(
           {"content": basicMessage, "heading": _currentUser!.name??config.home_page}).select();
 
-      ToastHelper.Show("Zpráva byla odeslána!");
+      ToastHelper.Show("Message has been sent.".tr());
       return;
     }
-    ToastHelper.Show("Zpráva byla vytvořena!");
+    ToastHelper.Show("Message has been created.".tr());
 
   }
 
@@ -1117,15 +1131,14 @@ class DataService {
   static Future<void> SaveLocation(int placeId, double lat, double lng) async {
     if(!(DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
-      ToastHelper.Show("You do have no rights to change this position.", severity: ToastSeverity.NotOk);
-      return;
+      throw Exception("You cannot change this place.");
     }
     await _supabase.from("places").update({
       "coordinates": {
         "latLng": {"lat": lat, "lng": lng}
       }
     }).eq("id", placeId);
-    ToastHelper.Show("Pozice změněna!");
+    ToastHelper.Show("Place has been changed.".tr());
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

@@ -1,4 +1,9 @@
+import 'package:avapp/models/LanguageModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:avapp/services/ToastHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:avapp/config.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:search_page/search_page.dart';
@@ -15,13 +20,13 @@ class DialogHelper{
         delegate: SearchPage<UserInfoModel>(
           showItemsOnEmpty: true,
           items: _allUsers,
-          searchLabel: 'Hledat účastníky',
-          suggestion: const Center(
+          searchLabel: "Search participants".tr(),
+          suggestion: Center(
             child: Text(
-                "Najdi účastníka podle jména, příjmení nebo e-mailu."),
+                "Find participants by name, surname or e-mail.").tr(),
           ),
-          failure: const Center(
-            child: Text("Nikdo nebyl nalezen."),
+          failure: Center(
+            child: Text("No results.").tr(),
           ),
           filter: (person) => [
             person.name,
@@ -77,7 +82,7 @@ class DialogHelper{
   {
     String confirmButtonMessage = "Ok",
     String cancelButtonMessage = "Storno"
-}
+  }
       ) async {
     bool result = false;
     await showDialog(
@@ -114,9 +119,9 @@ class DialogHelper{
     UserGroupInfoModel? selectedGroup;
     await SelectDialog.showModal<UserGroupInfoModel>(
       context,
-      label: "Přidat do skupiny",
+      label: "Add to group".tr(),
       items: userGroups,
-      searchBoxDecoration: const InputDecoration(hintText: "Hledat"),
+      searchBoxDecoration: InputDecoration(hintText: "Search".tr()),
       selectedValue: selectedGroup,
       itemBuilder:
           (BuildContext context, UserGroupInfoModel item, bool isSelected) {
@@ -140,12 +145,50 @@ class DialogHelper{
     return selectedGroup;
   }
 
+  static Future<LanguageModel?> chooseLanguage(
+      BuildContext context,
+      ) async {
+    var locales = config.AvailableLanguages;
+    LanguageModel? selectedLocale;
+    await SelectDialog.showModal<LanguageModel>(
+      context,
+      label: "Choose language".tr(),
+      items: locales,
+      showSearchBox: false,
+      selectedValue: selectedLocale,
+      itemBuilder:
+          (BuildContext context, LanguageModel item, bool isSelected) {
+        return Container(
+          decoration: !isSelected
+              ? null
+              : BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: Colors.white,
+            border: Border.all(
+              color: Theme.of(context).primaryColor,
+            ),
+          ),
+          child: TextButton(onPressed: null, child: Text(item.name),),
+        );
+      },
+      onChange: (selected) {
+        selectedLocale = selected;
+      },
+    );
+    if(selectedLocale!=null)
+    {
+      context.setLocale(selectedLocale!.locale);
+      ToastHelper.Show("Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
+    }
+    return selectedLocale;
+  }
+
   static Future<String?> showPasswordInputDialog(
       BuildContext context,
       String titleMessage,
       String hint,
-      String confirmButtonMessage,
-      String cancelButtonMessage,
+      [String confirmButtonMessage = "Ok",
+      String cancelButtonMessage = "Storno"]
       ) async {
     final TextEditingController _messageController = TextEditingController();
     String? result;

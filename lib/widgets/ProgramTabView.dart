@@ -1,5 +1,6 @@
 import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
@@ -73,11 +74,11 @@ import 'ProgramTimeline.dart';
       return index;
   }
 
-  static String indexToDay(int index)
+  String indexToDay(int index)
   {
     var now = DateTime.now();
     var d = now.subtract(Duration(days: now.weekday - index));
-    return DateFormat("EEEE", "cs").format(d);
+    return DateFormat("EEEE", context.locale.languageCode).format(d);
   }
 
   }
