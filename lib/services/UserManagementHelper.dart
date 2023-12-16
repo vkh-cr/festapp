@@ -8,12 +8,13 @@ import 'package:avapp/services/NavigationService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/config.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
 class UserManagementHelper{
   static Future<void> import(BuildContext context) async {
-    var file = await DialogHelper.dropFilesHere(context, "Import uživatelů z CSV tabulky", "Potvrdit", "Storno");
+    var file = await DialogHelper.dropFilesHere(context, "Import of users from CSV".tr(), "Ok".tr(), "Storno".tr());
     if(file==null) {
       return;
     }
@@ -22,9 +23,9 @@ class UserManagementHelper{
     var deleteUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
-        "Import uživatelů",
-        "Uživatelé (${users.length}):\n${users.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
-        confirmButtonMessage: "Potvrdit");
+        "Importing users".tr(),
+        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+        confirmButtonMessage: "Proceed".tr());
 
     if(!really)
     {
@@ -53,30 +54,32 @@ class UserManagementHelper{
 
     if(toBeCreated.isNotEmpty) {
       var really = await DialogHelper.showConfirmationDialogAsync(context,
-          "Vytvoření uživatelů",
-          "Tito uživatelé jsou noví. Chcete je vytvořit?\n"
-              "Uživatelé (${toBeCreated.length}):\n${toBeCreated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
+          "Creating users".tr(),
+          "New users found. Do you want to create them?".tr() +
+          "\n" +
+          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeCreated.forEach((u) async {
           await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Vytvořen ${u[UserInfoModel.emailReadonlyColumn]}.");
+          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
         });
       }
     }
 
     if(toBeUpdated.isNotEmpty) {
       var really = await DialogHelper.showConfirmationDialogAsync(context,
-          "Úprava uživatelů",
-          "Tito uživatelé byli upraveni. Chcete aktualizovat údaje?\n"
-              "Uživatelé (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
+          "Updating users".tr(),
+          "These users have some changes. Do you want to update them?".tr() +
+          "\n" +
+          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeUpdated.forEach((u) async {
           await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Upraven ${u[UserInfoModel.emailReadonlyColumn]}.");
+          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
         });
       }
     }
@@ -94,15 +97,16 @@ class UserManagementHelper{
 
     if(toBeDeleted.isNotEmpty) {
       var reallyDelete = await DialogHelper.showConfirmationDialogAsync(context,
-          "Vymazání uživatelů",
-          "Tito uživatelé byli stornování, přesto stále existují v systému aplikace. Chcete je vymazat?\n"
-              "Uživatelé (${toBeDeleted.length}):\n${toBeDeleted.map((value) => value.toBasicString()).toList().join(",\n")}",
-          confirmButtonMessage: "Potvrdit");
+          "Removing users",
+          "These users have been removed, but they still exist in the application. Do you want to remove them?".tr() +
+              "\n" +
+              "${"Users".tr()} (${toBeDeleted.length}):\n${toBeDeleted.map((value) => value.toBasicString()).toList().join(",\n")}",
+          confirmButtonMessage: "Proceed".tr());
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
           await DataService.deleteUser(existing.id!);
-          ToastHelper.Show("Smazán ${existing.toBasicString()}");
+          ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
     }
@@ -116,7 +120,7 @@ class UserManagementHelper{
       var time = await DataService.getLastTimeSignIn(u.id!);
       if(time!=null)
       {
-        ToastHelper.Show("Uživateli ${u.email} nebylo změněno heslo, protože už se s ním přihlásil.");
+        ToastHelper.Show("Password from {user} was not changed because it was already used to sign in.".tr(namedArgs: {"user":u.email!}));
         return;
       }
     }
@@ -126,7 +130,7 @@ class UserManagementHelper{
 
     var password = "${config.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
     await DataService.updateUserPassword(u, password);
-    ToastHelper.Show("Uživateli ${u.email} bylo změněno heslo.");
+    ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
     await MailerSendHelper.sendPassword(u, password);
   }
 
@@ -143,7 +147,7 @@ class UserManagementHelper{
     var newId = await DataService.unsafeCreateUser(email, pw);
     if(newId==null)
     {
-      throw Exception("Nepodařilo se vytvořit uživatele.");
+      throw Exception("Creating of user has failed.");
     }
     return newId;
   }
@@ -166,7 +170,7 @@ class UserManagementHelper{
     var newId = await DataService.unsafeChangeUserPassword(user.email!, pw);
     if(newId==null)
     {
-      throw Exception("Nepodařilo se změnit heslo.");
+      throw Exception("Changing of the password has failed.");
     }
     return pw;
   }

@@ -1,6 +1,7 @@
 import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';
@@ -29,7 +30,7 @@ class _ProgramPageState extends State<ProgramPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Můj program'),
+        title: const Text("My program").tr(),
       ),
       body: Align(
       alignment: Alignment.topCenter,

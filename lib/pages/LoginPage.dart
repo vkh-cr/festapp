@@ -1,4 +1,6 @@
+import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:avapp/config.dart';
@@ -31,7 +33,13 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Přihlášení"),
+        title: const Text("Sign in").tr(),
+        actions: [Padding(
+          padding: const EdgeInsets.all(6),
+          child: IconButton(onPressed: () async {
+            await DialogHelper.chooseLanguage(context);
+            }, icon: const Icon(Icons.translate)),
+        )],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -52,12 +60,12 @@ class _LoginPageState extends State<LoginPage> {
                         autofillHints: const [AutofillHints.email],
                         keyboardType: TextInputType.emailAddress,
                         controller: _emailController,
-                        decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'E-mail'),
+                        decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            labelText: "E-mail".tr()),
                         validator: (String? value) {
                           if (value!.isEmpty || !value.contains('@')) {
-                            return 'E-mail není validní';
+                            return "E-mail is not valid!".tr();
                           }
                         },
                       ),
@@ -71,12 +79,12 @@ class _LoginPageState extends State<LoginPage> {
                         autofillHints: const [AutofillHints.password],
                         keyboardType: TextInputType.text,
                         obscureText: true,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                             border: OutlineInputBorder(),
-                            labelText: 'Heslo'),
+                            labelText: "Password".tr()),
                         validator: (String? value) {
                           if (value!.isEmpty) {
-                            return 'Špatné heslo';
+                            return "Fill the password!".tr();
                           }
                         },
                       ),
@@ -102,9 +110,9 @@ class _LoginPageState extends State<LoginPage> {
                           }
                         },
                         child: const Text(
-                          'Přihlásit se',
+                          "Sign in",
                           style: TextStyle(color: Colors.white, fontSize: 25),
-                        ),
+                        ).tr(),
                       ),
                     ),
                   ],
@@ -126,10 +134,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showToast(value) {
-    ToastHelper.Show("Úspěšné přihlášení!");
+    ToastHelper.Show("Successful sign in!".tr());
   }
 
   void _onError(err) {
-    ToastHelper.Show("Špatné přihlašovací údaje!", severity: ToastSeverity.NotOk);
+    ToastHelper.Show("Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
   }
 }

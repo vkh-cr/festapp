@@ -40,7 +40,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       Set<UserInfoModel>.from(json[userGroupsTable].
       map((e)=>UserInfoModel.fromJson(
         e["user_info"] != null ?
-          e["user_info"] :
+        e["user_info"] :
         e["user_info_public"] != null ?
         e["user_info_public"]:
         {}
@@ -62,12 +62,11 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {
-    var model = json[UserGroupInfoModel.descriptionColumn] as UserGroupInfoModel?;
     return UserGroupInfoModel(
       id: json[idColumn] == -1 ? null : json[idColumn],
       title: json[titleColumn],
       leader: json[leaderColumn] == "" ? null : json[leaderColumn],
-      description: model?.description,
+      description: json[descriptionColumn],
       participants: json[participantsColumn] == "" ? [] : json[participantsColumn],
       place: (json[placeColumn] as PlaceModel?)
     );
@@ -79,7 +78,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
       leaderColumn: PlutoCell(value: leader),
-      descriptionColumn: PlutoCell(value: this),
+      descriptionColumn: PlutoCell(value: description),
       placeColumn: PlutoCell(value: place),
       participantsColumn: PlutoCell(value: participants),
     });

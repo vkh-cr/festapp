@@ -2,6 +2,7 @@ import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:avapp/config.dart';
 import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -23,7 +24,7 @@ class _NewsPageState extends State<NewsPage> {
   void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
     if(!config.isNotificationsSupported && withNotification)
     {
-      ToastHelper.Show("Notifikace nejsou nastavené. Pošli zprávu bez notifikace.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
     Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: null).then((value) async {
@@ -60,7 +61,7 @@ class _NewsPageState extends State<NewsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ohlášky'),
+        title: const Text("News").tr(),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -87,7 +88,7 @@ class _NewsPageState extends State<NewsPage> {
                       padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
                       alignment: Alignment.topRight,
                       child: Text(
-                        DateFormat("EEEE d.M.y", "cs").format(message.createdAt),
+                        DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt),
                         style: message.isRead?readTextStyle:unReadTextStyle,
                       ),
                     ),
@@ -131,13 +132,13 @@ class _NewsPageState extends State<NewsPage> {
                       },
                       icon:  const Icon(Icons.more_horiz),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
-                        const PopupMenuItem<ContextMenuChoice>(
+                        PopupMenuItem<ContextMenuChoice>(
                         value: ContextMenuChoice.edit,
-                        child: Text("Editovat"),
+                        child: const Text("Edit").tr(),
                         ),
-                        const PopupMenuItem<ContextMenuChoice>(
+                        PopupMenuItem<ContextMenuChoice>(
                           value: ContextMenuChoice.delete,
-                          child: Text("Smazat"),
+                          child: const Text("Delete").tr(),
                         )
                       ],
                     ),
@@ -154,8 +155,8 @@ class _NewsPageState extends State<NewsPage> {
           direction: SpeedDialDirection.up,
           spaceBetweenChildren: 20,
           children: [
-            SpeedDialChild(child: const Icon(Icons.notifications_off), label: "Odeslat zprávu bez notifikace", onTap: () => _showMessageDialog(context, false)),
-            SpeedDialChild(child: const Icon(Icons.message), label: "Odeslat zprávu", onTap: () => _showMessageDialog(context)),
+            SpeedDialChild(child: const Icon(Icons.notifications_off), label: "Send without notification".tr(), onTap: () => _showMessageDialog(context, false)),
+            SpeedDialChild(child: const Icon(Icons.message), label: "Send message".tr(), onTap: () => _showMessageDialog(context)),
           ],
           icon: Icons.add,
         ),

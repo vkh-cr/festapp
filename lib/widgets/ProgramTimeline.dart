@@ -1,6 +1,7 @@
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
@@ -112,12 +113,12 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
 
       if (children.isEmpty)
       {
-        children.add(const Center(
+        children.add(Center(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-                "Zde se zobrazí Tvoje přihlášené události.",
-                style: TextStyle(fontSize: 20),),
+            padding: const EdgeInsets.all(16.0),
+            child: const Text(
+                "There will appear your events.",
+                style: TextStyle(fontSize: 20),).tr(),
           ),
         ));
       }
@@ -141,7 +142,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
-              "Odpoledne",
+              "Afternoon".tr(),
               style: timeLineSplitTextStyle,
             ),
           )
@@ -151,7 +152,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
-              "Večer",
+              "Evening".tr(),
               style: timeLineSplitTextStyle,
             ),
           )
@@ -162,7 +163,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
   }
 
   String buildDayFormat(TimeLineItem element) {
-    var result = DateFormat("EEEE d. MMMM ", "cs").format(element.startTime);
+    var result = DateFormat("EEEE d. MMMM ", context.locale.languageCode).format(element.startTime);
     result = result[0].toUpperCase() + result.substring(1);
     return result;
   }

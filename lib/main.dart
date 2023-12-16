@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:avapp/config.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/StorageHelper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/InfoPage.dart';
@@ -31,6 +33,20 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
+  await initializeEverything();
+  runApp(
+    EasyLocalization(
+        supportedLocales: config.AvailableLanguages.map((e) => e.locale).toList(),
+        path: "assets/translations",
+        fallbackLocale: config.AvailableLanguages.map((e) => e.locale).first,
+        useOnlyLangCode: true,
+        saveLocale: true,
+        child: const MyApp()
+    ),
+  );
+}
+
+Future<void> initializeEverything() async {
   configureUrlFormat();
   await GetStorage.init();
 
@@ -39,6 +55,10 @@ Future<void> main() async {
     anonKey: config.anon_key,
   );
   initializeDateFormatting();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
   if(!DataService.isLoggedIn())
   {
     DataService.tryAuthUser();
@@ -47,7 +67,6 @@ Future<void> main() async {
     NotificationHelper.Initialize();
     DataService.loadOrInitGlobalSettings();
   } catch(e) {}
-  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -65,6 +84,9 @@ class MyApp extends StatelessWidget {
         //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
         //   );
         // },
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       navigatorKey: NavigationService.navigatorKey,
       title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
@@ -95,6 +117,8 @@ class MyApp extends StatelessWidget {
           AdministrationPage.ROUTE: (context) => const AdministrationPage(),
           NewsPage.ROUTE: (context) => const NewsPage(),
         }
+    ).animate().fadeIn(
+      duration: 300.ms,
     );
   }
 }
@@ -118,14 +142,34 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
 String userName = "";
+
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addObserver(this);
+}
 
 @override
 void didChangeDependencies() {
   super.didChangeDependencies();
   loadData();
+}
+
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if(state == AppLifecycleState.resumed)
+  {
+    loadData();
+  }
+}
+
+@override
+void dispose() {
+  WidgetsBinding.instance.removeObserver(this);
+  super.dispose();
 }
 
   @override
@@ -142,7 +186,7 @@ void didChangeDependencies() {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -152,9 +196,9 @@ void didChangeDependencies() {
                       ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                height: 50,
-                semanticsLabel: 'Absolventský Velehrad',
-                'assets/icons/avlogo.svg',
+                height: 112,
+                semanticsLabel: 'Festapp logo',
+                'assets/icons/festapplogo.svg',
               ),
                   ),
                   const Spacer(),
@@ -171,7 +215,7 @@ void didChangeDependencies() {
                               backgroundColor: config.color1,
                               child: const Icon(Icons.login),
                             ),
-                            const Text("Přihlášení"),
+                            Text("Sign in".tr()),
                           ],
                         ),
                       ],
@@ -212,7 +256,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
-                    const Text("Můj program"),
+                    Text("My program".tr()),
                   ],
                 ),
                 Column(
@@ -236,7 +280,7 @@ void didChangeDependencies() {
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
-                    const Text("Ohlášky"),
+                    Text("News".tr()),
                   ],
                 ),
                 Column(
@@ -247,7 +291,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color2,
                       child: const Icon(Icons.map),
                     ),
-                    const Text("Mapa"),
+                    Text("Map".tr()),
                   ],
                 ),
                 Column(
@@ -258,7 +302,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color4,
                       child: const Icon(Icons.info),
                     ),
-                    const Text("Info"),
+                    Text("Info".tr()),
                   ],
                 ),
               ],
@@ -272,7 +316,7 @@ void didChangeDependencies() {
   void _programPressed() {
   if(!DataService.isLoggedIn())
     {
-      ToastHelper.Show("Pro zobrazení mého programu se přihlaš!");
+      ToastHelper.Show("Sign in to view My program!".tr());
       return;
     }
     Navigator.push(
@@ -321,7 +365,7 @@ void didChangeDependencies() {
 
     //update offline
     var encoded = jsonEncode(_events);
-    StorageHelper.Set("events", encoded);
+    StorageHelper.Set(EventModel.eventTableStorage, encoded);
   }
 
   _eventPressed(int id) {
@@ -333,11 +377,10 @@ void didChangeDependencies() {
   bool showMessageCount() => _messageCount>0;
   String messageCountString() => _messageCount<100?_messageCount.toString():"99";
   Future<void> loadData() async {
-    
     //get data from offline
     try
     {
-      var eventData = StorageHelper.Get("events");
+      var eventData = StorageHelper.Get(EventModel.eventTableStorage);
       if(eventData!=null && _events.isEmpty)
       {
           var offlineEventsData = json.decode(eventData);

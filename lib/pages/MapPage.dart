@@ -1,6 +1,7 @@
 import 'package:avapp/config.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/MapIconService.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -241,24 +242,24 @@ class _MapPageState extends State<MapPage> {
                     children: [
                       ElevatedButton(
                           onPressed: cancelNewPosition,
-                          child: const Text("Storno")),
+                          child: const Text("Storno").tr()),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       Visibility(
                         visible: !isOnlyEditMode,
                         child: ElevatedButton(
                             onPressed: showAllGroups,
-                            child: const Text("Zobrazit skupinky")),
+                            child: const Text("Show groups").tr()),
                       ),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       ElevatedButton(
                           onPressed: saveNewPosition,
-                          child: const Text("Uložit pozici")),
+                          child: const Text("Save location").tr()),
                     ],
                   ),
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Text("Pozici změníš klikem na mapu."),
+                  child: const Text("You can change location by tapping on the map.").tr(),
                 ),
                 Expanded(child: Container()),
               ],
@@ -365,7 +366,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                     onPressed: _MapPageState.selectedMarker != null
                         ? null
                         : changePositionPressed,
-                    child: const Text("Změnit polohu"))),
+                    child: const Text("Change location").tr())),
             Text(
               widget.marker.place.description ?? "",
               style: const TextStyle(fontSize: 12.0),

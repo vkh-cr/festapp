@@ -1,3 +1,4 @@
 supabase login
 supabase secrets set --env-file ./supabase/.env --project-ref kjdpmixlnhntmxjedpxh
 supabase functions deploy notify --no-verify-jwt --project-ref kjdpmixlnhntmxjedpxh
+https://documentation.onesignal.com/docs/flutter-sdk-setup

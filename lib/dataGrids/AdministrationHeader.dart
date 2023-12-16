@@ -1,4 +1,7 @@
+import 'package:avapp/dataGrids/DataGridAction.dart';
+import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -9,18 +12,19 @@ import '../services/ToastHelper.dart';
 class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   final PlutoGridStateManager stateManager;
   final SingleTableDataGrid dataGrid;
-  final List<Widget>? headerChildren;
+  final List<DataGridAction>? headerChildren;
+  final DataGridExtendedActions? saveExtended;
 
-  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, required this.dataGrid}) : super(key: key);
+  const AdministrationHeader({required this.stateManager, Key? key, required this.fromPlutoJson, required this.loadData, this.headerChildren, this.saveExtended, required this.dataGrid}) : super(key: key);
 
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   @override
-  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren);
+  _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren, actionsExtended: saveExtended);
 
-  static PlutoGridConfiguration defaultPlutoGridConfiguration() {
-    return const PlutoGridConfiguration(
-      localeText: PlutoGridLocaleText.czech(),
+  static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
+    return PlutoGridConfiguration(
+      localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
       style: PlutoGridStyleConfig(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white70
@@ -34,33 +38,51 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final Future<void> Function() loadData;
   final SingleTableDataGrid dataGrid;
-  List<Widget>? headerChildren = [];
+  List<DataGridAction>? headerChildren = [];
+  final DataGridExtendedActions? actionsExtended;
   List<Widget> allChildren = [];
 
-  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren});
+  _AdministrationHeaderState(this.fromPlutoJson, this.loadData, this.dataGrid, {this.headerChildren, this.actionsExtended});
 
   @override
   Widget build(BuildContext context) {
     allChildren.clear();
     headerChildren = headerChildren ?? [];
-    allChildren.addAll(headerChildren!);
+    for(var a in headerChildren!)
+    {
+      allChildren.add(ElevatedButton(onPressed:
+          a.isEnabled != null && !a.isEnabled!() ?
+          null :
+          () => a.action!(dataGrid, null),
+          child: Text(a.name??"---")));
+    }
     if(headerChildren!.isNotEmpty)
     {
       allChildren.insertAll(0, [const VerticalDivider()]);
     }
     allChildren.insertAll(0, [
       ElevatedButton(
-      onPressed: _addRow,
-      child: const Text('Přidat'),
-    ),
-      ElevatedButton(
-        onPressed: _cancelChanges,
-        child: const Text('Vrátit zpět'),
+      onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!()
+        ? null :
+        _addRow,
+        child: const Text("Add").tr(),
       ),
       ElevatedButton(
-        onPressed: _saveChanges,
-        child: const Text('Uložit změny'),
-      ),]);
+        onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!()
+            ? null :
+        _cancelChanges,
+        child: const Text("Discard changes").tr(),
+      ),
+      ElevatedButton(
+        onPressed: actionsExtended != null && actionsExtended!.areAllActionsEnabled != null && !actionsExtended!.areAllActionsEnabled!() ?
+        null :
+            () {
+          actionsExtended?.saveAction?.action == null ? _saveChanges() :
+          actionsExtended!.saveAction!.action!(dataGrid, _saveChanges);
+        },
+        child: Text(actionsExtended?.saveAction?.name??"Save changes".tr()),
+      )
+      ,]);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -83,7 +105,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     }
   }
 
-  void _saveChanges() async{
+  Future<void> _saveChanges() async{
     var toDelete = dataGrid.deletedRows.toList();
     dataGrid.updatedRows.removeAll(toDelete);
     var deleteList = List<T>.from(
@@ -91,8 +113,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     if(deleteList.isNotEmpty)
     {
       var result = await DialogHelper.showConfirmationDialogAsync(context,
-          "Potvrdit smazání", "Opravdu chcete smazat:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
-          confirmButtonMessage: "Ano");
+          "Confirm removal".tr(), "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",);
       if(!result) {
         return;
       }
@@ -109,7 +130,7 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("Smazáno: ${element.toBasicString()}");
+      ToastHelper.Show("${"Deleted".tr()}: ${element.toBasicString()}");
     }
 
     var updatedSet = Set<T>.from(
@@ -131,13 +152,13 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
         ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("Uloženo: ${element.toBasicString()}");
+      ToastHelper.Show("${"Saved".tr()}: ${element.toBasicString()}");
     }
     await loadData();
   }
 
   Future<void> _cancelChanges() async {
-    var result = await DialogHelper.showConfirmationDialogAsync(context, "Vrácení změn", "Opravdu vrátit všechny změny?");
+    var result = await DialogHelper.showConfirmationDialogAsync(context, "Discard changes".tr(), "Really discard all changes?".tr());
     if(!result){
       return;
     }
