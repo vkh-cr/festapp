@@ -5,7 +5,7 @@ import 'models/LanguageModel.dart';
 class config {
   static const String supabase_url = 'https://jyghacisbuntbrshhhey.supabase.co';
   static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5Z2hhY2lzYnVudGJyc2hoaGV5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODIxMjAyMjksImV4cCI6MTk5NzY5NjIyOX0.SLVxu1YRl2iBYRqk2LTm541E0lwBiP4FBebN8PS0Rqg';
-  static const String home_page = 'Festapp';
+  static const String home_page = 'Absolventský Velehrad';
   static String map_page = "Map".tr();
 
   static const primaryColor = 0xFF2C677B;
