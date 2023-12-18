@@ -173,6 +173,10 @@ class UserInfoModel extends IPlutoRowModel {
   @override bool operator ==(Object other) {
     if(other is UserInfoModel)
     {
+      if(id==null && other.id==null)
+      {
+        return false;
+      }
       return id == other.id;
     }
     return false;
