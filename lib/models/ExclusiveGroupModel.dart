@@ -29,6 +29,8 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   static const String eventsColumn = "events";
   static const String exclusiveGroupsTable = "exclusive_groups";
   static const String exclusiveEventsTable = "exclusive_events";
+  static const String exclusiveEventsGroupColumn = "group";
+
 
 
   static ExclusiveGroupModel fromPlutoJson(Map<String, dynamic> json) {

@@ -46,7 +46,10 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
               if(event.row.cells[idColumn]?.value != -1)
               {
                 deletedRows.remove(event.row);
-                updatedRows.add(event.row);
+                if(!newRows.contains(event.row))
+                {
+                  updatedRows.add(event.row);
+                }
 
                 // todo add check for real value change
                 // bool isAnythingChanged = false;
