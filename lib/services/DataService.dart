@@ -620,9 +620,13 @@ class DataService {
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
     await _supabase
+        .from(ExclusiveGroupModel.exclusiveEventsTable)
+        .delete()
+        .eq(ExclusiveGroupModel.exclusiveEventsGroupColumn, data.id);
+    await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .delete()
-        .eq("id", data.id);
+        .eq(ExclusiveGroupModel.idColumn, data.id);
   }
 
   static Future<EventModel> getEvent(int eventId) async {
