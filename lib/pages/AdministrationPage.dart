@@ -553,7 +553,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   }
                                 }
                               });},
-                            child: const Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Editovat")) ])
+                            child: Row(children: [Icon(Icons.edit), Padding(padding: EdgeInsets.all(6), child: Text("Edit".tr())) ])
                         );
                       }),
                   PlutoColumn(
@@ -747,6 +747,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       value.setChecked(false);
     }
 
-    ToastHelper.Show("Updated {item}".tr(namedArgs: {"item":chosenGroup.title}));
+    ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
   }
 }
