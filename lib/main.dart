@@ -47,7 +47,7 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-  configureUrlFormat();
+  //configureUrlFormat();
   await GetStorage.init();
 
   await Supabase.initialize(
