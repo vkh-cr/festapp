@@ -2,10 +2,12 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:avapp/config.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
 import '../models/UserGroupInfoModel.dart';
@@ -17,7 +19,8 @@ import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
   static const ROUTE = "/event";
-  const EventPage({Key? key}) : super(key: key);
+  int? id;
+  EventPage({this.id, super.key});
 
   @override
   _EventPageState createState() => _EventPageState();
@@ -37,12 +40,7 @@ class _EventPageState extends State<EventPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    var args = ModalRoute.of(context)?.settings.arguments;
-    var id = 1;
-    if(args!=null){
-      id = args as int;
-    }
-    loadData(id);
+    loadData(widget.id!);
   }
 
   @override
@@ -50,6 +48,9 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_event==null?"Event".tr():_event.toString()),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -100,7 +101,7 @@ class _EventPageState extends State<EventPage> {
                           visible: DataService.isEditor() ||
                               (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
-                              onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: _event!.description).then((value) async {
+                              onPressed: () => context.push(HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
                                 if(value != null)
                                 {
                                   var changed = value as String;
@@ -115,7 +116,7 @@ class _EventPageState extends State<EventPage> {
                                   }
 
                                   ToastHelper.Show("Content has been changed.".tr());
-                                  Navigator.popAndPushNamed(context, EventPage.ROUTE, arguments: _event!.id);
+                                  context.pushReplacement(EventPage.ROUTE+"/"+_event!.id!.toString());
                                 }
                               }),
                               child: const Text("Edit content").tr()))
@@ -134,7 +135,7 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.topRight,
                           child: TextButton(
-                              onPressed: () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: _event!.place).then((value) => loadData(_event!.id!)),
+                              onPressed: () => context.push("${MapPage.ROUTE}/${_event!.place!.id}").then((value) => loadData(_event!.id!)),
                               child: Text("Place".tr() + ": ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
@@ -254,7 +255,7 @@ class _EventPageState extends State<EventPage> {
       var group = await DataService.getUserGroupInfo(DataService.currentUserGroup()!.id!);
       if(group == null)
       {
-        Navigator.pop(context);
+        context.pop();
         return;
       }
       event.description = group.description;
@@ -276,8 +277,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   _eventPressed(int id) {
-    Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadData(_event!.id!));
+        context.push("${EventPage.ROUTE}/$id");
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {
@@ -301,14 +301,14 @@ class _EventPageState extends State<EventPage> {
             "event":_event!.toString()}),
     actions: <Widget>[
     TextButton(
-    onPressed: () => Navigator.pop(context, "Storno".tr()),
+    onPressed: () => context.pop(),
     child: const Text("Storno").tr(),
     ),
     TextButton(
     onPressed: () async {
-    Navigator.pop(context);
-    await DataService.signOutFromEvent(_event!, participant);
-    await loadData(_event!.id!);
+      context.pop();
+      await DataService.signOutFromEvent(_event!, participant);
+      await loadData(_event!.id!);
     },
     child: const Text("Sign out someone").tr(),
     ),

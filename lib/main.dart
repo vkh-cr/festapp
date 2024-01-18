@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:avapp/config.dart';
+import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/StorageHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -17,6 +18,7 @@ import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -47,7 +49,8 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-  //configureUrlFormat();
+  configureUrlFormat();
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
 
   await Supabase.initialize(
@@ -74,7 +77,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: _router,
       debugShowCheckedModeBanner: false,
         // builder: (context, child) {
         //   final mediaQueryData = MediaQuery.of(context);
@@ -87,7 +91,6 @@ class MyApp extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      navigatorKey: NavigationService.navigatorKey,
       title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
@@ -105,23 +108,70 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: config.backgroundColor)),
-        home: const MyHomePage(title: MyHomePage.HOME_PAGE),
-        initialRoute: "/",
-        routes: {
-          MapPage.ROUTE: (context) => const MapPage(),
-          EventPage.ROUTE: (context) => const EventPage(),
-          InfoPage.ROUTE: (context) => const InfoPage(),
-          UserPage.ROUTE: (context) => const UserPage(),
-          LoginPage.ROUTE: (context) => const LoginPage(),
-          HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
-          AdministrationPage.ROUTE: (context) => const AdministrationPage(),
-          NewsPage.ROUTE: (context) => const NewsPage(),
-        }
     ).animate().fadeIn(
       duration: 300.ms,
     );
   }
 }
+
+final _router = GoRouter(
+  navigatorKey: NavigationService.navigatorKey,
+  initialLocation: '/',
+  routes: <GoRoute>[
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const MyHomePage(title: MyHomePage.HOME_PAGE),
+    ),
+    GoRoute(
+      path: MapPage.ROUTE,
+      builder: (context, state) => MapPage(place: state.extra as PlaceModel?),
+      routes: <RouteBase>[
+      GoRoute(
+        path: ":id",
+        builder: (context, state) {
+          var id = int.parse(state.pathParameters["id"]??"0");
+          return MapPage(id: id);
+          },
+        )
+      ],
+    ),
+    GoRoute(
+      path: "${EventPage.ROUTE}/:id",
+      builder: (context, state) {
+        var id = int.parse(state.pathParameters["id"]??"0");
+        return EventPage(id: id);
+      },
+    ),
+    GoRoute(
+      path: InfoPage.ROUTE,
+      builder: (context, state) => const InfoPage(),
+    ),
+    GoRoute(
+      path: UserPage.ROUTE,
+      builder: (context, state) => const UserPage(),
+    ),
+    GoRoute(
+      path: LoginPage.ROUTE,
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: HtmlEditorPage.ROUTE,
+      builder: (context, state) => HtmlEditorPage(content: state.extra as String?),
+    ),
+    GoRoute(
+      path: AdministrationPage.ROUTE,
+      builder: (context, state) => const AdministrationPage(),
+    ),
+    GoRoute(
+      path: NewsPage.ROUTE,
+      builder: (context, state) => const NewsPage(),
+    ),
+    GoRoute(
+      path: ProgramPage.ROUTE,
+      builder: (context, state) => const ProgramPage(),
+    ),
+  ],
+);
 
 class MyHomePage extends StatefulWidget {
   static const HOME_PAGE = config.home_page;
@@ -319,33 +369,27 @@ void dispose() {
       ToastHelper.Show("Sign in to view My program!".tr());
       return;
     }
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
+    context.push(ProgramPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
-    Navigator.pushNamed(
-        context, NewsPage.ROUTE).then((value) => loadData());
+    context.push(NewsPage.ROUTE).then((value) => loadData());
   }
 
   void _infoPressed() {
-    Navigator.pushNamed(
-        context, InfoPage.ROUTE).then((value) => loadData());
+    context.push(InfoPage.ROUTE).then((value) => loadData());
   }
 
   void _mapPressed() {
-    Navigator.pushNamed(
-        context, MapPage.ROUTE).then((value) => loadData());
+    context.push(MapPage.ROUTE).then((value) => loadData());
   }
 
   void _loginPressed() {
-    Navigator.pushNamed(
-        context, LoginPage.ROUTE).then((value) => loadData());
+    context.push(LoginPage.ROUTE).then((value) => loadData());
   }
 
   void _profileButtonPressed() {
-    Navigator.pushNamed(
-        context, UserPage.ROUTE).then((value) => loadData());
+    context.push(UserPage.ROUTE).then((value) => loadData());
   }
 
   final List<TimeLineItem> _dots = [];
@@ -369,8 +413,7 @@ void dispose() {
   }
 
   _eventPressed(int id) {
-    Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadData());
+    context.push("${EventPage.ROUTE}/$id");
   }
 
   int _messageCount = 0;

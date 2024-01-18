@@ -10,10 +10,12 @@ import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/services/DataService.dart';
 import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../models/EventModel.dart';
@@ -39,10 +41,9 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    await DataService.getCurrentUserInfo();
     if(!DataService.isEditor())
     {
-      Navigator.pop(context);
+      NavigationHelper.goBackOrHome(context);
       return;
     }
     loadData();
@@ -86,6 +87,9 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       child: Scaffold(
           appBar: AppBar(
           title: const Text("Admin").tr(),
+          leading: BackButton(
+            onPressed: () => NavigationHelper.goBackOrHome(context),
+          ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
             child: Align(
@@ -171,7 +175,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[InformationModel.descriptionColumn]?.value;
-                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
+                              context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -305,7 +309,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   textToEdit = fullEvent.description;
                                 }
                               }
-                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: textToEdit).then((value) async {
+                              context.push(HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -388,7 +392,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async {
                               var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: placeModel).then((value) async {
+                              context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                   if(value != null)
                                   {
                                     var cell = rendererContext.row.cells[PlaceModel.coordinatesColumn]!;
@@ -479,7 +483,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                       rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
                                       var cell = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }), _allUsers, "Set".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
@@ -542,7 +546,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!.value as String?;
-                              Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: oldText).then((value) async {
+                              context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -571,7 +575,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               var placeModel = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
 
-                              Navigator.pushNamed(context, MapPage.ROUTE, arguments: placeModel).then((value) async {
+                              context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;

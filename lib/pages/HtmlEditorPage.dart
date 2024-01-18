@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter/material.dart';
 
 class HtmlEditorPage extends StatefulWidget {
   static const ROUTE = "/htmlEditor";
-  const HtmlEditorPage({Key? key}) : super(key: key);
+  String? content;
+  HtmlEditorPage({this.content, super.key});
 
   @override
   _HtmlEditorState createState() => _HtmlEditorState();
@@ -15,8 +17,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   late String _html;
   void didChangeDependencies() {
     super.didChangeDependencies();
-    var args = ModalRoute.of(context)?.settings.arguments;
-    _html = args as String? ?? "";
+    _html = widget.content??"";
   }
 
   ///[controller] create a QuillEditorController to access the editor methods
@@ -170,11 +171,11 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
 
   void savePressed() async {
     String? htmlText = await controller.getText();
-    Navigator.pop(context, htmlText);
+    context.pop(htmlText);
   }
 
   void cancelPressed() async {
-    Navigator.pop(context);
+    context.pop();
   }
 
   ///[setHtmlText] to set the html text to editor

@@ -1,4 +1,5 @@
 import 'package:avapp/services/DialogHelper.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +35,9 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Sign in").tr(),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
         actions: [Padding(
           padding: const EdgeInsets.all(6),
           child: IconButton(onPressed: () async {
@@ -129,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
     var loggedIn = await DataService.tryAuthUser();
     if(loggedIn)
     {
-      Navigator.pop(context);
+      NavigationHelper.goBackOrHome(context);
     }
   }
 
