@@ -49,7 +49,7 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-  configureUrlFormat();
+  //configureUrlFormat();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
 
