@@ -762,7 +762,7 @@ class DataService {
         }
         else{
           var trPrefix = participant.getGenderPrefix();
-          ToastHelper.Show("${trPrefix}{user} is already signed in at other event at the same time.".tr(namedArgs: {"user":participant.toString()}));
+          ToastHelper.Show("${trPrefix}{user} is already signed in at another event at the same time.".tr(namedArgs: {"user":participant.toString()}));
         }
         return;
       }
