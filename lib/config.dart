@@ -29,5 +29,6 @@ class config {
     LanguageModel(const Locale("sk"), "Slovenčina"),
     LanguageModel(const Locale("pl"), "Polski"),
     LanguageModel(const Locale("de"), "Deutsch"),
+    LanguageModel(const Locale("uk"), "українська"),
   ];
 }

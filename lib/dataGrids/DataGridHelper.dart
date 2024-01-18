@@ -155,6 +155,39 @@ class DataGridHelper
         // Common
         loadingText: 'Ładowanie',
       );
+      case "uk": return const PlutoGridLocaleText(
+        unfreezeColumn: 'Розблокувати стовпець',
+        freezeColumnToStart: 'Заморозити стовпець на початок',
+        freezeColumnToEnd: 'Заморозити стовпець на кінець',
+        autoFitColumn: 'Автоматично підлаштувати стовпець',
+        hideColumn: 'Сховати стовпець',
+        setColumns: 'Налаштувати стовпці',
+        setFilter: 'Налаштувати фільтр',
+        resetFilter: 'Скинути фільтр',
+        setColumnsTitle: 'Назва стовпця',
+        filterColumn: 'Стовпець',
+        filterType: 'Тип',
+        filterValue: 'Значення',
+        filterAllColumns: 'Всі стовпці',
+        filterContains: 'Містить',
+        filterEquals: 'Дорівнює',
+        filterStartsWith: 'Починається з',
+        filterEndsWith: 'Закінчується на',
+        filterGreaterThan: 'Більше ніж',
+        filterGreaterThanOrEqualTo: 'Більше або дорівнює',
+        filterLessThan: 'Менше ніж',
+        filterLessThanOrEqualTo: 'Менше або дорівнює',
+        sunday: 'Нд',
+        monday: 'Пн',
+        tuesday: 'Вт',
+        wednesday: 'Ср',
+        thursday: 'Чт',
+        friday: 'Пт',
+        saturday: 'Сб',
+        hour: 'Година',
+        minute: 'Хвилина',
+        loadingText: 'Завантажується',
+      );
     }
 
     return const PlutoGridLocaleText();
