@@ -30,7 +30,6 @@ import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
 import 'services/NavigationService.dart';
 import 'styles/Styles.dart';
-import 'configure_nonweb.dart' if (dart.library.html) 'configure_web.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:badges/badges.dart' as badges;
 
@@ -49,7 +48,6 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-  //configureUrlFormat();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
 
@@ -116,10 +114,10 @@ class MyApp extends StatelessWidget {
 
 final _router = GoRouter(
   navigatorKey: NavigationService.navigatorKey,
-  initialLocation: '/',
+  initialLocation: "/",
   routes: <GoRoute>[
     GoRoute(
-      path: '/',
+      path: "/",
       builder: (context, state) => const MyHomePage(title: MyHomePage.HOME_PAGE),
     ),
     GoRoute(
