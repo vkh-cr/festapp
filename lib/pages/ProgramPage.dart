@@ -3,11 +3,13 @@ import 'package:avapp/services/DataService.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
 import '../styles/Styles.dart';
 
 class ProgramPage extends StatefulWidget {
+  static const ROUTE = "/program";
   const ProgramPage({Key? key}) : super(key: key);
 
   @override
@@ -36,7 +38,7 @@ class _ProgramPageState extends State<ProgramPage> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: appMaxWidth),
-            child: SingleChildScrollView(child: ProgramTimeline(events: _dots, onEventPressed: eventPressed, splitByDay: true, nodePosition: 0.3)))
+            child: SingleChildScrollView(child: ProgramTimeline(events: _dots, onEventPressed: _eventPressed, splitByDay: true, nodePosition: 0.3)))
     ));
   }
 
@@ -56,8 +58,7 @@ class _ProgramPageState extends State<ProgramPage> {
     }
   }
 
-  eventPressed(int id) {
-    Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadEventParticipants());
+  _eventPressed(int id) {
+    context.push("${EventPage.ROUTE}/$id");
   }
 }

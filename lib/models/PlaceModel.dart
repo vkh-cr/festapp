@@ -21,7 +21,8 @@ class PlaceModel extends IPlutoRowModel {
   static const String typeColumn = "type";
 
   static const String placeTable = "places";
-
+  double getLat() => latLng["lat"];
+  double getLng() => latLng["lng"];
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(

@@ -1,8 +1,10 @@
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/services/DataService.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../services/ToastHelper.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
 import 'HtmlEditorPage.dart';
@@ -30,6 +32,9 @@ class _InfoPageState extends State<InfoPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Information").tr(),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -57,13 +62,13 @@ class _InfoPageState extends State<InfoPage> {
                         Visibility(
                             visible: DataService.isEditor(),
                             child: ElevatedButton(
-                                onPressed: () => Navigator.pushNamed(context, HtmlEditorPage.ROUTE, arguments: item.description).then((value) async {
+                                onPressed: () => context.push(HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
                                   if(value != null)
                                   {
                                     item.description = value as String;
                                     await DataService.updateInformation(item);
                                     ToastHelper.Show("Content has been changed.".tr());
-                                    Navigator.popAndPushNamed(context, InfoPage.ROUTE);
+                                    context.pushReplacement(InfoPage.ROUTE);
                                   }
                                 }),
                                 child: const Text("Edit content").tr())),

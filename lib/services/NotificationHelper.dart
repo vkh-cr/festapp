@@ -1,5 +1,5 @@
 import 'package:avapp/pages/NewsPage.dart';
-import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:avapp/config.dart';
 import 'package:flutter/foundation.dart';
@@ -24,8 +24,7 @@ class NotificationHelper
     }
 
     OneSignal.Notifications.addClickListener((event) {
-      Navigator.pushNamed(
-          NavigationService.navigatorKey.currentContext!, NewsPage.ROUTE);
+      NavigationService.navigatorKey.currentContext!.push(NewsPage.ROUTE);
     });
   }
 

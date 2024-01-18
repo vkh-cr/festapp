@@ -3,14 +3,15 @@ import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/services/DialogHelper.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:avapp/config.dart';
+import 'package:go_router/go_router.dart';
 
 import '../services/DataService.dart';
-import '../main.dart';
 
 class UserPage extends StatefulWidget {
   static const ROUTE = "/user";
@@ -29,6 +30,9 @@ class _UserPageState extends State<UserPage> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Profile").tr(),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
         actions: [Padding(
           padding: const EdgeInsets.all(6),
           child: IconButton(onPressed: () async {
@@ -60,7 +64,7 @@ class _UserPageState extends State<UserPage> {
                     Container(
                       alignment: Alignment.topLeft,
                       child: TextButton(
-                          onPressed: userData?.place == null ? null : () => Navigator.pushNamed(context, MapPage.ROUTE, arguments: userData?.place),
+                          onPressed: userData?.place == null ? null : () => context.push("${MapPage.ROUTE}/${userData!.place!.id!}"),
                           child: Text(userData?.place?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
                     )
                   ],),
@@ -113,8 +117,7 @@ class _UserPageState extends State<UserPage> {
     super.didChangeDependencies();
     if(!DataService.isLoggedIn())
     {
-      Navigator.pushNamed(
-          context, LoginPage.ROUTE);
+      context.push(LoginPage.ROUTE);
     }
     loadData();
   }
@@ -139,20 +142,15 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  void _navigateToHomePage() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
-  }
-
   Future<void> _logout() async {
     var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
     await DataService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
-    _navigateToHomePage();
+    NavigationHelper.goBackOrHome(context);
   }
 
   void _redirectToAdminPage() {
-    Navigator.pushNamed(context, AdministrationPage.ROUTE);
+    context.push(AdministrationPage.ROUTE);
   }
 
   Future<void> loadData() async {
