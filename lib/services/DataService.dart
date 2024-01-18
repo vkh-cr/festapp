@@ -757,7 +757,7 @@ class DataService {
           e.endTime.isAtSameMomentAs(event.endTime)) {
         if(participant == null) {
           var trPrefix = _currentUser!.getGenderPrefix();
-          var message = "${trPrefix}You are already signed in at other event at the same time.".tr();
+          var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
           ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         else{
@@ -812,8 +812,8 @@ class DataService {
         return;
       }
       case 104: ToastHelper.Show("${"Cannot sign in!".tr()} ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
-      case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
-      case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
+      case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
+      case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
     }
   }
 
