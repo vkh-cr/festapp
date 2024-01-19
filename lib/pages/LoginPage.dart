@@ -1,10 +1,10 @@
-import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import '../data/DataService.dart';
 import '../styles/Styles.dart';
 
@@ -38,12 +38,7 @@ class _LoginPageState extends State<LoginPage> {
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
-        actions: [Padding(
-          padding: const EdgeInsets.all(6),
-          child: IconButton(onPressed: () async {
-            await DialogHelper.chooseLanguage(context);
-            }, icon: const Icon(Icons.translate)),
-        )],
+        actions: [const LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -100,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 50,
                       width: 250,
                       decoration: BoxDecoration(
-                          color: config.color1,
+                          color: AppConfig.color1,
                           borderRadius: BorderRadius.circular(20)),
                       child: TextButton(
                         onPressed: () async {

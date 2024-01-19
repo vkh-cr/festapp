@@ -15,7 +15,7 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';
@@ -156,7 +156,7 @@ class DataService {
   }
 
   static Future<void> updateUserPassword(UserInfoModel user, String password) async {
-    if(config.isServiceRoleSafety){
+    if(AppConfig.isServiceRoleSafety){
       (await GetSupabaseAdminClient()).auth.admin.updateUserById(user.id!, attributes: AdminUserAttributes(password: password));
     }
     else{
@@ -165,7 +165,7 @@ class DataService {
   }
 
   static Future<void> deleteUser(String uuid) async {
-    if(!config.isServiceRoleSafety)
+    if(!AppConfig.isServiceRoleSafety)
     {
       throw Exception("Deleting user is not supported.");
     }
@@ -278,7 +278,7 @@ class DataService {
   static updateUserAsJson(Map<String, dynamic> json) async {
     if(json[UserInfoModel.idColumn] == null)
     {
-      if(config.isServiceRoleSafety){
+      if(AppConfig.isServiceRoleSafety){
         json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
       } else{
         json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
@@ -301,7 +301,7 @@ class DataService {
 
     if(data.id == null)
     {
-      if(config.isServiceRoleSafety){
+      if(AppConfig.isServiceRoleSafety){
         data.id = await DataService.createUser(data.email!);
       } else{
         data.id = await UserManagementHelper.unsafeCreateNewUser(data.email);
@@ -1066,7 +1066,7 @@ class DataService {
       }
       basicMessage = basicMessage.trim();
       await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.name??config.home_page}).select();
+          {"content": basicMessage, "heading": _currentUser!.name??AppConfig.home_page}).select();
 
       ToastHelper.Show("Message has been sent.".tr());
       return;

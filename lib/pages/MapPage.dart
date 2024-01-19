@@ -1,4 +1,4 @@
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
@@ -72,7 +72,7 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
-  String pageTitle = config.map_page;
+  String pageTitle = AppConfig.map_page;
   bool isOnlyEditMode = false;
 
   /// Used to trigger showing/hiding of popups.
@@ -93,7 +93,7 @@ class _MapPageState extends State<MapPage> {
       {
         placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
       }
-      pageTitle = placeModel.title ?? config.map_page;
+      pageTitle = placeModel.title ?? AppConfig.map_page;
       addPlacesToMap([placeModel]);
       runEditPositionMode(_markers.single);
       isOnlyEditMode = true;
@@ -111,7 +111,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (fill != null) {
       return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: config.color1),
+        const Icon(Icons.location_pin, size: 58, color: AppConfig.color1),
         Positioned(
           top: 7.5,
           left: 14.5,
@@ -131,7 +131,7 @@ class _MapPageState extends State<MapPage> {
             child: Container(alignment: Alignment.center, child: fill))
       ]);
     }
-    return const Icon(Icons.location_pin, size: 36, color: config.color1);
+    return const Icon(Icons.location_pin, size: 36, color: AppConfig.color1);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {

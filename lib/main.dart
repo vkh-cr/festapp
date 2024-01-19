@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
@@ -35,9 +35,9 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
         supportedLocales:
-            config.AvailableLanguages.map((e) => e.locale).toList(),
+            AppConfig.AvailableLanguages.map((e) => e.locale).toList(),
         path: "assets/translations",
-        fallbackLocale: config.AvailableLanguages.map((e) => e.locale).first,
+        fallbackLocale: AppConfig.AvailableLanguages.map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
         child: const MyApp()),
@@ -49,8 +49,8 @@ Future<void> initializeEverything() async {
   await GetStorage.init();
 
   await Supabase.initialize(
-    url: config.supabase_url,
-    anonKey: config.anon_key,
+    url: AppConfig.supabase_url,
+    anonKey: AppConfig.anon_key,
   );
   initializeDateFormatting();
 
@@ -100,10 +100,10 @@ class MyApp extends StatelessWidget {
           // is not restarted.
           fontFamily: 'Futura',
           useMaterial3: false,
-          scaffoldBackgroundColor: config.backgroundColor,
+          scaffoldBackgroundColor: AppConfig.backgroundColor,
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(background: config.backgroundColor)),
+              .copyWith(background: AppConfig.backgroundColor)),
     ).animate().fadeIn(
           duration: 300.ms,
         );
@@ -111,7 +111,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  static const HOME_PAGE = config.home_page;
+  static const HOME_PAGE = AppConfig.home_page;
 
   const MyHomePage({super.key, required this.title});
 
@@ -199,7 +199,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: config.color1,
+                              backgroundColor: AppConfig.color1,
                               child: const Icon(Icons.login),
                             ),
                             Text("Sign in".tr()),
@@ -218,7 +218,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _profileButtonPressed,
-                              backgroundColor: config.color1,
+                              backgroundColor: AppConfig.color1,
                               child: const Icon(Icons.account_circle_rounded),
                             ),
                             Text(userName),
@@ -244,7 +244,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _programPressed,
-                      backgroundColor: config.color1,
+                      backgroundColor: AppConfig.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
                     Text("My program".tr()),
@@ -265,7 +265,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           )),
                       child: MainPageButton(
                         onPressed: _newsPressed,
-                        backgroundColor: config.color3,
+                        backgroundColor: AppConfig.color3,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
@@ -277,7 +277,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _mapPressed,
-                      backgroundColor: config.color2,
+                      backgroundColor: AppConfig.color2,
                       child: const Icon(Icons.map),
                     ),
                     Text("Map".tr()),
@@ -288,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _infoPressed,
-                      backgroundColor: config.color4,
+                      backgroundColor: AppConfig.color4,
                       child: const Icon(Icons.info),
                     ),
                     Text("Info".tr()),
@@ -303,7 +303,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    if (!config.isOwnProgramSupported && !DataService.isLoggedIn()) {
+    if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My program!".tr());
       return;
     }

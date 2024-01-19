@@ -1,7 +1,7 @@
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:avapp/widgets/HtmlDescriptionWidget.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -24,7 +24,7 @@ class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
   void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
-    if(!config.isNotificationsSupported && withNotification)
+    if(!AppConfig.isNotificationsSupported && withNotification)
     {
       ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
       return;
@@ -103,7 +103,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: config.color1.withOpacity(0.10)
+                        color: AppConfig.color1.withOpacity(0.10)
                       ),
                       child: Column(
                         children: [
