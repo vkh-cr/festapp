@@ -18,7 +18,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Aplikace pro diecézní setkání mládeže.">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +27,13 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+  <link rel="manifest" href="./site.webmanifest">
+  <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#5bbad5">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="theme-color" content="#ffffff">
 
   <title>BISCUP</title>
   <link rel="manifest" href="manifest.json">
@@ -40,20 +46,68 @@
   <script src="flutter.js" defer></script>
 </head>
 <body>
-  <script>
+<style>
+  body {
+    background-color: white;
+    height: 100vh;
+    width: 100vw;
+    margin: 0px;
+  }
+  .main-content {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease-out;
+  }
+
+  svg {
+  margin-top: -72px;
+  margin-left: -36px;
+  max-width: 280px;
+  max-height: 100px;
+  position: absolute;
+  }
+
+
+</style>
+<script>
+    function delay(time) {
+      return new Promise(resolve => setTimeout(resolve, time));
+    }
+
     window.addEventListener('load', function(ev) {
+      var loaderContent = document.querySelector('#loader-content');
+
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
+          engineInitializer.initializeEngine().then(async function(appRunner) {
+            //await delay(5000);
+
+            loaderContent.style.opacity = "0";
+            //await delay(200);
             appRunner.runApp();
           });
         }
       });
     });
   </script>
+<div class="main-content" id="loader-content">
+  <div class="loader">
+      <span>
+        <svg width="72" height="72" viewBox="0 0 227 227" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M52.14 126.535L35.6078 126.536C32.0966 126.536 29.2493 123.689 29.2493 120.177V6.35915C29.2493 2.84733 32.0966 0.000610352 35.6078 0.000610352H118.269C121.781 0.000610352 124.627 2.84733 124.627 6.35915V22.8856H101.737V53.4067H75.0181V76.2974H101.737V103.644H52.14V126.535Z" fill="#2C677B"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M52.1401 126.535V197.751C52.1401 201.26 54.9894 204.109 58.4987 204.109L101.737 204.104V126.535H52.1401Z" fill="#E0B73B"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M174.224 126.53H190.768C194.277 126.53 197.126 123.681 197.126 120.171V29.2442C197.126 25.7349 194.277 22.8856 190.768 22.8856H124.627V53.4066H151.321V76.2974H124.627V103.644H174.224V126.53Z" fill="#BA5D3F"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M101.737 204.104V220.641C101.737 224.151 104.586 227 108.095 227H167.865C171.375 227 174.224 224.151 174.224 220.641V126.535H124.627V204.104H101.737Z" fill="#2A77A0"/>
+          </svg>
+      </span>
+  </div>
+</div>
 </body>
 </html>

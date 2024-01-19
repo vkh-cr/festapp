@@ -1,6 +1,7 @@
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
@@ -81,22 +82,15 @@ class ProgramTimeline extends StatefulWidget {
 
   @override
   _ProgramTimelineState createState() =>
-      _ProgramTimelineState(events, onEventPressed, nodePosition, splitByDay);
+      _ProgramTimelineState();
 }
 
 class _ProgramTimelineState extends State<ProgramTimeline> {
-  final List<TimeLineItem> allEvents;
-  Function(int)? onEventPressed;
-
-  double? nodePosition;
-  bool? splitByDay;
-
-  _ProgramTimelineState(this.allEvents, this.onEventPressed, this.nodePosition, this.splitByDay);
 
   @override
   Widget build(BuildContext context) {
-    if(splitByDay!) {
-      var groupByDay = allEvents.groupListsBy((element) =>
+    if(widget.splitByDay!) {
+      var groupByDay = widget.events.groupListsBy((element) =>
           buildDayFormat(element));
       List<Widget> children = [];
       for (var group in groupByDay.entries) {
@@ -112,12 +106,12 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
 
       if (children.isEmpty)
       {
-        children.add(const Center(
+        children.add(Center(
           child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-                "Zde se zobrazí Tvoje přihlášené události.",
-                style: TextStyle(fontSize: 20),),
+            padding: const EdgeInsets.all(16.0),
+            child: const Text(
+                "There will appear your events.",
+                style: TextStyle(fontSize: 20),).tr(),
           ),
         ));
       }
@@ -128,11 +122,11 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           ));
     }
 
-    var morningEvents = allEvents.where((e) => e.startTime.hour <= 12).toList();
-    var afternoonEvents = allEvents
+    var morningEvents = widget.events.where((e) => e.startTime.hour <= 12).toList();
+    var afternoonEvents = widget.events
         .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
         .toList();
-    var eveningEvents = allEvents.where((e) => e.startTime.hour >= 18).toList();
+    var eveningEvents = widget.events.where((e) => e.startTime.hour >= 18).toList();
     return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -141,7 +135,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
-              "Odpoledne",
+              "Afternoon".tr(),
               style: timeLineSplitTextStyle,
             ),
           )
@@ -151,7 +145,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
-              "Večer",
+              "Evening".tr(),
               style: timeLineSplitTextStyle,
             ),
           )
@@ -162,7 +156,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
   }
 
   String buildDayFormat(TimeLineItem element) {
-    var result = DateFormat("EEEE d. MMMM ", "cs").format(element.startTime);
+    var result = DateFormat("EEEE d. MMMM ", context.locale.languageCode).format(element.startTime);
     result = result[0].toUpperCase() + result.substring(1);
     return result;
   }
@@ -172,7 +166,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
-        nodePosition: nodePosition,
+        nodePosition: widget.nodePosition,
         indicatorTheme:
             IndicatorTheme.of(context).copyWith(color: config.color1),
         connectorTheme: ConnectorTheme.of(context)
@@ -192,7 +186,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           final event = events[index];
           //return Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})");
           return TextButton(
-              onPressed: () => onEventPressed!(event.id),
+              onPressed: () => widget.onEventPressed!(event.id),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.black,
                 alignment: Alignment.centerLeft// Text Color

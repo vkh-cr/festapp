@@ -1,10 +1,11 @@
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../services/DataService.dart';
-import 'PlutoAbstract.dart';
+import '../data/DataService.dart';
+import '../dataGrids/PlutoAbstract.dart';
 
 class UserInfoModel extends IPlutoRowModel {
   String? id;
@@ -39,6 +40,7 @@ class UserInfoModel extends IPlutoRowModel {
 
   PlaceModel? place;
 
+  static const sexes = ["male", "female"];
 
   static const migrateColumns =
   {
@@ -149,7 +151,7 @@ class UserInfoModel extends IPlutoRowModel {
   bool isSignedIn = false;
 
 
-  String sexToCzech() => sex == "male" ? "Muž" : "Žena";
+  static String sexToLocale(String? sx) => sx == "male" ? "Male".tr() : "Female".tr();
 
   bool importedEquals(Map<String, dynamic> u) {
     return 
@@ -172,8 +174,16 @@ class UserInfoModel extends IPlutoRowModel {
   @override bool operator ==(Object other) {
     if(other is UserInfoModel)
     {
+      if(id==null && other.id==null)
+      {
+        return false;
+      }
       return id == other.id;
     }
     return false;
+  }
+
+  String getGenderPrefix() {
+    return sex == "male" ? "M":"F";
   }
 }

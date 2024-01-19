@@ -1,37 +1,51 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:avapp/config.dart';
-import 'package:avapp/services/NotificationHelper.dart';
-import 'package:avapp/services/StorageHelper.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:avapp/pages/AdministrationPage.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/pages/UserPage.dart';
+import 'package:avapp/router.dart';
+import 'package:avapp/services/NotificationHelper.dart';
+import 'package:avapp/services/StorageHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 import 'models/EventModel.dart';
 import 'pages/EventPage.dart';
-import 'pages/HtmlEditorPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
-import 'services/NavigationService.dart';
 import 'styles/Styles.dart';
-import 'configure_nonweb.dart' if (dart.library.html) 'configure_web.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
-  configureUrlFormat();
+  await initializeEverything();
+  runApp(
+    EasyLocalization(
+        supportedLocales:
+            config.AvailableLanguages.map((e) => e.locale).toList(),
+        path: "assets/translations",
+        fallbackLocale: config.AvailableLanguages.map((e) => e.locale).first,
+        useOnlyLangCode: true,
+        saveLocale: true,
+        child: const MyApp()),
+  );
+}
+
+Future<void> initializeEverything() async {
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
 
   await Supabase.initialize(
@@ -39,33 +53,40 @@ Future<void> main() async {
     anonKey: config.anon_key,
   );
   initializeDateFormatting();
-  if(!DataService.isLoggedIn())
-  {
-    DataService.tryAuthUser();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
+  if (!DataService.isLoggedIn()) {
+    DataService.tryAuthUser()
+        .then((value) => DataService.synchronizeMyProgram());
   }
   try {
     NotificationHelper.Initialize();
     DataService.loadOrInitGlobalSettings();
-  } catch(e) {}
-  runApp(const MyApp());
+  } catch (e) {}
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-        // builder: (context, child) {
-        //   final mediaQueryData = MediaQuery.of(context);
-        //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
-        //   return MediaQuery(
-        //     child: child!,
-        //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
-        //   );
-        // },
-      navigatorKey: NavigationService.navigatorKey,
+      // builder: (context, child) {
+      //   final mediaQueryData = MediaQuery.of(context);
+      //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
+      //   return MediaQuery(
+      //     child: child!,
+      //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
+      //   );
+      // },
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       title: MyHomePage.HOME_PAGE,
       theme: ThemeData(
           // This is the theme of your application.
@@ -83,19 +104,9 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: config.backgroundColor)),
-        home: const MyHomePage(title: MyHomePage.HOME_PAGE),
-        initialRoute: "/",
-        routes: {
-          MapPage.ROUTE: (context) => const MapPage(),
-          EventPage.ROUTE: (context) => const EventPage(),
-          InfoPage.ROUTE: (context) => const InfoPage(),
-          UserPage.ROUTE: (context) => const UserPage(),
-          LoginPage.ROUTE: (context) => const LoginPage(),
-          HtmlEditorPage.ROUTE: (context) => const HtmlEditorPage(),
-          AdministrationPage.ROUTE: (context) => const AdministrationPage(),
-          NewsPage.ROUTE: (context) => const NewsPage(),
-        }
-    );
+    ).animate().fadeIn(
+          duration: 300.ms,
+        );
   }
 }
 
@@ -114,19 +125,38 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  String userName = "";
 
-String userName = "";
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-@override
-void didChangeDependencies() {
-  super.didChangeDependencies();
-  loadData();
-}
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadData();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      loadData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +179,8 @@ void didChangeDependencies() {
                   GestureDetector(
                     onDoubleTap: () async {
                       var packageInfo = await PackageInfo.fromPlatform();
-                      ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                      ToastHelper.Show(
+                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
                 width: 200,
@@ -171,7 +202,7 @@ void didChangeDependencies() {
                               backgroundColor: config.color1,
                               child: const Icon(Icons.login),
                             ),
-                            const Text("Přihlášení"),
+                            Text("Sign in".tr()),
                           ],
                         ),
                       ],
@@ -198,7 +229,11 @@ void didChangeDependencies() {
                   ),
                 ],
               )),
-          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed,)),
+          Expanded(
+              child: ProgramTabView(
+            events: _dots,
+            onEventPressed: _eventPressed,
+          )),
           Padding(
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
@@ -212,7 +247,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
-                    const Text("Můj program"),
+                    Text("My program".tr()),
                   ],
                 ),
                 Column(
@@ -221,22 +256,20 @@ void didChangeDependencies() {
                     badges.Badge(
                       showBadge: showMessageCount(),
                       badgeContent: SizedBox(
-                        width: 20, height: 20,
-                        child: Center(
-                          child: Text(messageCountString(), style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16
-                          )
-                      ),
-                    )
-                ),
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: Text(messageCountString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 16)),
+                          )),
                       child: MainPageButton(
                         onPressed: _newsPressed,
                         backgroundColor: config.color3,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
-                    const Text("Ohlášky"),
+                    Text("News".tr()),
                   ],
                 ),
                 Column(
@@ -247,7 +280,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color2,
                       child: const Icon(Icons.map),
                     ),
-                    const Text("Mapa"),
+                    Text("Map".tr()),
                   ],
                 ),
                 Column(
@@ -258,7 +291,7 @@ void didChangeDependencies() {
                       backgroundColor: config.color4,
                       child: const Icon(Icons.info),
                     ),
-                    const Text("Info"),
+                    Text("Info".tr()),
                   ],
                 ),
               ],
@@ -270,38 +303,31 @@ void didChangeDependencies() {
   }
 
   void _programPressed() {
-  if(!DataService.isLoggedIn())
-    {
-      ToastHelper.Show("Pro zobrazení mého programu se přihlaš!");
+    if (!config.isOwnProgramSupported && !DataService.isLoggedIn()) {
+      ToastHelper.Show("Sign in to view My program!".tr());
       return;
     }
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ProgramPage())).then((value) => loadData());
+    context.push(ProgramPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
-    Navigator.pushNamed(
-        context, NewsPage.ROUTE).then((value) => loadData());
+    context.push(NewsPage.ROUTE).then((value) => loadData());
   }
 
   void _infoPressed() {
-    Navigator.pushNamed(
-        context, InfoPage.ROUTE).then((value) => loadData());
+    context.push(InfoPage.ROUTE).then((value) => loadData());
   }
 
   void _mapPressed() {
-    Navigator.pushNamed(
-        context, MapPage.ROUTE).then((value) => loadData());
+    context.push(MapPage.ROUTE).then((value) => loadData());
   }
 
   void _loginPressed() {
-    Navigator.pushNamed(
-        context, LoginPage.ROUTE).then((value) => loadData());
+    context.push(LoginPage.ROUTE).then((value) => loadData());
   }
 
   void _profileButtonPressed() {
-    Navigator.pushNamed(
-        context, UserPage.ROUTE).then((value) => loadData());
+    context.push(UserPage.ROUTE).then((value) => loadData());
   }
 
   final List<TimeLineItem> _dots = [];
@@ -310,70 +336,66 @@ void didChangeDependencies() {
   Future<void> loadEventParticipants() async {
     // update sign in status / current participants for events
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events)
-    {
-        var dot = _dots.singleWhere((element) => element.id == e.id!);
-        setState(() {
-          dot.rightText = e.toString();
-          dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
-        });
+    for (var e in _events) {
+      var dot = _dots.singleWhere((element) => element.id == e.id!);
+      setState(() {
+        dot.rightText = e.toString();
+        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+      });
     }
 
     //update offline
     var encoded = jsonEncode(_events);
-    StorageHelper.Set("events", encoded);
+    StorageHelper.Set(EventModel.eventTableStorage, encoded);
   }
 
   _eventPressed(int id) {
-    Navigator.pushNamed(
-        context, EventPage.ROUTE, arguments: id).then((value) => loadData());
+    context.push("${EventPage.ROUTE}/$id");
   }
 
   int _messageCount = 0;
-  bool showMessageCount() => _messageCount>0;
-  String messageCountString() => _messageCount<100?_messageCount.toString():"99";
+
+  bool showMessageCount() => _messageCount > 0;
+
+  String messageCountString() =>
+      _messageCount < 100 ? _messageCount.toString() : "99";
+
   Future<void> loadData() async {
-    
     //get data from offline
-    try
-    {
-      var eventData = StorageHelper.Get("events");
-      if(eventData!=null && _events.isEmpty)
-      {
-          var offlineEventsData = json.decode(eventData);
-          setState((){
-            _events.addAll(List<EventModel>.from(offlineEventsData.map((o)=>EventModel.fromJson(o))));
-            _dots.clear();
-            _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          });
+    try {
+      var eventData = StorageHelper.Get(EventModel.eventTableStorage);
+      if (eventData != null && _events.isEmpty) {
+        var offlineEventsData = json.decode(eventData);
+        setState(() {
+          _events.addAll(List<EventModel>.from(
+              offlineEventsData.map((o) => EventModel.fromJson(o))));
+          _dots.clear();
+          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+        });
       }
-    }
-    catch(e)
-    {
+    } catch (e) {
       // make sure not to fail on start
     }
 
-    if(DataService.isLoggedIn())
-    {
-      await DataService.getCurrentUserInfo().then((value) => userName = value.name!);
+    if (DataService.isLoggedIn()) {
+      await DataService.getCurrentUserInfo()
+          .then((value) => userName = value.name!);
     }
 
     //load online data
-    await DataService.updateEvents(_events)
-        .whenComplete(() async {
-          _dots.clear();
-          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          if(!DataService.isLoggedIn()) {
-            return;
-          }
-          var count = await DataService.countNewMessages();
+    await DataService.updateEvents(_events).whenComplete(() async {
+      _dots.clear();
+      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+      if (!DataService.isLoggedIn()) {
+        return;
+      }
+      var count = await DataService.countNewMessages();
 
-          setState(() {
-            _messageCount = count;
-          });
-        });
+      setState(() {
+        _messageCount = count;
+      });
+    });
 
     loadEventParticipants();
   }
 }
-

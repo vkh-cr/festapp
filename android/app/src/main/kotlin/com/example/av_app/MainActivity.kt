@@ -1,4 +1,4 @@
-package com.example.avapp
+package com.example.festapp.festapp
 
 import io.flutter.embedding.android.FlutterActivity
 

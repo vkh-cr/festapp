@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.avapp">
+    package="com.example.festapp.festapp">
    <application
         android:label="BISCUP"
         android:name="${applicationName}"

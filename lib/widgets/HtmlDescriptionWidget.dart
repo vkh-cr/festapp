@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:go_router/go_router.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode, super.textStyle});
@@ -14,7 +15,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
     if(url.startsWith("navigate:"))
     {
       var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      Navigator.pushNamed(context, "/$navigateTo");
+      context.push(navigateTo);
       return true;
     }
     super.onTapUrl?.call(url);

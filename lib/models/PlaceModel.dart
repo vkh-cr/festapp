@@ -1,7 +1,7 @@
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import 'PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 
 class PlaceModel extends IPlutoRowModel {
   dynamic latLng;
@@ -21,7 +21,8 @@ class PlaceModel extends IPlutoRowModel {
   static const String typeColumn = "type";
 
   static const String placeTable = "places";
-
+  double getLat() => latLng["lat"];
+  double getLng() => latLng["lng"];
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(

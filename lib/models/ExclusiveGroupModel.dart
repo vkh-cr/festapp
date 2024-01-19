@@ -1,7 +1,7 @@
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../models/PlutoAbstract.dart';
-import '../services/DataService.dart';
+import '../dataGrids/PlutoAbstract.dart';
+import '../data/DataService.dart';
 
 class ExclusiveGroupModel extends IPlutoRowModel {
 
@@ -29,6 +29,8 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   static const String eventsColumn = "events";
   static const String exclusiveGroupsTable = "exclusive_groups";
   static const String exclusiveEventsTable = "exclusive_events";
+  static const String exclusiveEventsGroupColumn = "group";
+
 
 
   static ExclusiveGroupModel fromPlutoJson(Map<String, dynamic> json) {

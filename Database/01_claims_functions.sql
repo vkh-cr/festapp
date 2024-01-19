@@ -110,5 +110,16 @@ NOTIFY pgrst, 'reload schema';
 -- DROP FUNCTION delete_claim;
 -- DROP FUNCTION is_claims_admin;
 -- NOTIFY pgrst, 'reload schema';
---select set_claim('9e311817-3215-4454-91d3-ec33e2df1257', 'is_admin', 'true');
---select set_claim('25651d62-2649-4b95-9a16-8ba86efd01d4', 'is_editor', 'true');
+
+set name "test"
+set surname "test"
+set email "test@test.com"
+set password "test"
+
+user_id := (select create_user(:email, :password));
+
+INSERT INTO public.user_info
+  (id, email_readonly, name, surname)
+VALUES
+  (:user_id, :email, :name, :surname);
+

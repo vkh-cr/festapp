@@ -2,7 +2,7 @@ name: Gh-Pages
 
 on:
   push:
-    branches: [ prod/avapp ]
+    branches: [ prod/festapp ]
 
 jobs:
   build-and-deploy:
@@ -24,4 +24,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
           publish_branch: gh-pages
-          cname: av23.cz
+          cname: live.festapp.net
