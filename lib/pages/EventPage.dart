@@ -6,7 +6,7 @@ import 'package:avapp/services/NavigationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
@@ -53,7 +53,7 @@ class _EventPageState extends State<EventPage> {
         ),
         actions: [
           Visibility(
-            visible: config.isOwnProgramSupported && _event?.isEventInMyProgram==false && _event!.canSaveEventToMyProgram(),
+            visible: AppConfig.isOwnProgramSupported && _event?.isEventInMyProgram==false && _event!.canSaveEventToMyProgram(),
             child: Padding(
             padding: const EdgeInsets.all(6),
             child: IconButton(onPressed: () async {
@@ -61,7 +61,7 @@ class _EventPageState extends State<EventPage> {
             }, icon: const Icon(Icons.add_circle_outline)),
           )),
           Visibility(
-              visible: config.isOwnProgramSupported && (_event?.isEventInMyProgram??false),
+              visible: AppConfig.isOwnProgramSupported && (_event?.isEventInMyProgram??false),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(onPressed: () async {
@@ -162,7 +162,7 @@ class _EventPageState extends State<EventPage> {
                         padding: EdgeInsets.all(8.0),
                         child: const Text(
                           "You need to sign in to this event. First, sign in to the app.",
-                          style: TextStyle(color: config.attentionColor),).tr(),
+                          style: TextStyle(color: AppConfig.attentionColor),).tr(),
                       )),
                   Visibility(
                     visible: _event != null && _event?.description != null,

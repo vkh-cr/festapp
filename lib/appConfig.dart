@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
-class config {
+class AppConfig {
   static const String supabase_url = 'https://hncyhpgunboyzsafjtqs.supabase.co';
   static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhuY3locGd1bmJveXpzYWZqdHFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk5NjM4NDcsImV4cCI6MjAxNTUzOTg0N30.BEPwUcGIjev-ux-tVDNkbjiKjWHRdeEJuD8IIpv-8Qo';
   static const String home_page = 'BISCUP';

@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 
 import '../models/EventModel.dart';
 
@@ -168,9 +168,9 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: config.color1),
+            IndicatorTheme.of(context).copyWith(color: AppConfig.color1),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: config.color1, thickness: 2),
+            .copyWith(color: AppConfig.color1, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -197,10 +197,10 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: config.color1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+                  color: AppConfig.color1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
               : const Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: config.color1, size: 8));
+                  child: DotIndicator(color: AppConfig.color1, size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

@@ -1,7 +1,7 @@
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 
@@ -14,7 +14,7 @@ class MailerSendHelper{
     ];
 
     allVars.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email!, config.welcomeEmailTemplate, allVars);
+    await DataService.emailMailerSend(recipient.email!, AppConfig.welcomeEmailTemplate, allVars);
     ToastHelper.Show("E-mail with credentials was sent to: {email}.".tr(namedArgs: {"email":recipient.email!}));
     await Future.delayed(const Duration(milliseconds: 6000));
   }
