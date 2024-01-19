@@ -1,49 +1,46 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:avapp/config.dart';
-import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/services/NotificationHelper.dart';
-import 'package:avapp/services/StorageHelper.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:avapp/pages/AdministrationPage.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
-import 'package:avapp/data/DataService.dart';
+import 'package:avapp/pages/UserPage.dart';
+import 'package:avapp/router.dart';
+import 'package:avapp/services/NotificationHelper.dart';
+import 'package:avapp/services/StorageHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 import 'models/EventModel.dart';
 import 'pages/EventPage.dart';
-import 'pages/HtmlEditorPage.dart';
 import 'pages/LoginPage.dart';
 import 'pages/ProgramPage.dart';
-import 'services/NavigationService.dart';
 import 'styles/Styles.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'package:badges/badges.dart' as badges;
 
 Future<void> main() async {
   await initializeEverything();
   runApp(
     EasyLocalization(
-        supportedLocales: config.AvailableLanguages.map((e) => e.locale).toList(),
+        supportedLocales:
+            config.AvailableLanguages.map((e) => e.locale).toList(),
         path: "assets/translations",
         fallbackLocale: config.AvailableLanguages.map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
-        child: const MyApp()
-    ),
+        child: const MyApp()),
   );
 }
 
@@ -60,32 +57,33 @@ Future<void> initializeEverything() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
-  if(!DataService.isLoggedIn())
-  {
-    DataService.tryAuthUser().then((value) => DataService.synchronizeMyProgram());
+  if (!DataService.isLoggedIn()) {
+    DataService.tryAuthUser()
+        .then((value) => DataService.synchronizeMyProgram());
   }
   try {
     NotificationHelper.Initialize();
     DataService.loadOrInitGlobalSettings();
-  } catch(e) {}
+  } catch (e) {}
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: _router,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
-        // builder: (context, child) {
-        //   final mediaQueryData = MediaQuery.of(context);
-        //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
-        //   return MediaQuery(
-        //     child: child!,
-        //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
-        //   );
-        // },
+      // builder: (context, child) {
+      //   final mediaQueryData = MediaQuery.of(context);
+      //   final scale = mediaQueryData.textScaleFactor.clamp(1.0, 1.3);
+      //   return MediaQuery(
+      //     child: child!,
+      //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
+      //   );
+      // },
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
@@ -107,69 +105,10 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(background: config.backgroundColor)),
     ).animate().fadeIn(
-      duration: 300.ms,
-    );
+          duration: 300.ms,
+        );
   }
 }
-
-final _router = GoRouter(
-  navigatorKey: NavigationService.navigatorKey,
-  initialLocation: "/",
-  routes: <GoRoute>[
-    GoRoute(
-      path: "/",
-      builder: (context, state) => const MyHomePage(title: MyHomePage.HOME_PAGE),
-    ),
-    GoRoute(
-      path: MapPage.ROUTE,
-      builder: (context, state) => MapPage(place: state.extra as PlaceModel?),
-      routes: <RouteBase>[
-      GoRoute(
-        path: ":id",
-        builder: (context, state) {
-          var id = int.parse(state.pathParameters["id"]??"0");
-          return MapPage(id: id);
-          },
-        )
-      ],
-    ),
-    GoRoute(
-      path: "${EventPage.ROUTE}/:id",
-      builder: (context, state) {
-        var id = int.parse(state.pathParameters["id"]??"0");
-        return EventPage(id: id);
-      },
-    ),
-    GoRoute(
-      path: InfoPage.ROUTE,
-      builder: (context, state) => const InfoPage(),
-    ),
-    GoRoute(
-      path: UserPage.ROUTE,
-      builder: (context, state) => const UserPage(),
-    ),
-    GoRoute(
-      path: LoginPage.ROUTE,
-      builder: (context, state) => const LoginPage(),
-    ),
-    GoRoute(
-      path: HtmlEditorPage.ROUTE,
-      builder: (context, state) => HtmlEditorPage(content: state.extra as String?),
-    ),
-    GoRoute(
-      path: AdministrationPage.ROUTE,
-      builder: (context, state) => const AdministrationPage(),
-    ),
-    GoRoute(
-      path: NewsPage.ROUTE,
-      builder: (context, state) => const NewsPage(),
-    ),
-    GoRoute(
-      path: ProgramPage.ROUTE,
-      builder: (context, state) => const ProgramPage(),
-    ),
-  ],
-);
 
 class MyHomePage extends StatefulWidget {
   static const HOME_PAGE = config.home_page;
@@ -186,39 +125,38 @@ class MyHomePage extends StatefulWidget {
   // always marked "final".
 
   final String title;
+
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+  String userName = "";
 
-String userName = "";
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-@override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addObserver(this);
-}
-
-@override
-void didChangeDependencies() {
-  super.didChangeDependencies();
-  loadData();
-}
-
-@override
-void didChangeAppLifecycleState(AppLifecycleState state) {
-  if(state == AppLifecycleState.resumed)
-  {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     loadData();
   }
-}
 
-@override
-void dispose() {
-  WidgetsBinding.instance.removeObserver(this);
-  super.dispose();
-}
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      loadData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -241,13 +179,14 @@ void dispose() {
                   GestureDetector(
                     onDoubleTap: () async {
                       var packageInfo = await PackageInfo.fromPlatform();
-                      ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                      ToastHelper.Show(
+                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                height: 112,
-                semanticsLabel: 'Festapp logo',
-                'assets/icons/festapplogo.svg',
-              ),
+                      height: 112,
+                      semanticsLabel: 'Festapp logo',
+                      'assets/icons/festapplogo.svg',
+                    ),
                   ),
                   const Spacer(),
                   Visibility(
@@ -290,7 +229,11 @@ void dispose() {
                   ),
                 ],
               )),
-          Expanded(child: ProgramTabView(events: _dots, onEventPressed: _eventPressed,)),
+          Expanded(
+              child: ProgramTabView(
+            events: _dots,
+            onEventPressed: _eventPressed,
+          )),
           Padding(
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
@@ -313,15 +256,13 @@ void dispose() {
                     badges.Badge(
                       showBadge: showMessageCount(),
                       badgeContent: SizedBox(
-                        width: 20, height: 20,
-                        child: Center(
-                          child: Text(messageCountString(), style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16
-                          )
-                      ),
-                    )
-                ),
+                          width: 20,
+                          height: 20,
+                          child: Center(
+                            child: Text(messageCountString(),
+                                style: const TextStyle(
+                                    color: Colors.white, fontSize: 16)),
+                          )),
                       child: MainPageButton(
                         onPressed: _newsPressed,
                         backgroundColor: config.color3,
@@ -362,8 +303,7 @@ void dispose() {
   }
 
   void _programPressed() {
-    if(!config.isOwnProgramSupported && !DataService.isLoggedIn())
-    {
+    if (!config.isOwnProgramSupported && !DataService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My program!".tr());
       return;
     }
@@ -396,13 +336,12 @@ void dispose() {
   Future<void> loadEventParticipants() async {
     // update sign in status / current participants for events
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events)
-    {
-        var dot = _dots.singleWhere((element) => element.id == e.id!);
-        setState(() {
-          dot.rightText = e.toString();
-          dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
-        });
+    for (var e in _events) {
+      var dot = _dots.singleWhere((element) => element.id == e.id!);
+      setState(() {
+        dot.rightText = e.toString();
+        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+      });
     }
 
     //update offline
@@ -415,49 +354,48 @@ void dispose() {
   }
 
   int _messageCount = 0;
-  bool showMessageCount() => _messageCount>0;
-  String messageCountString() => _messageCount<100?_messageCount.toString():"99";
+
+  bool showMessageCount() => _messageCount > 0;
+
+  String messageCountString() =>
+      _messageCount < 100 ? _messageCount.toString() : "99";
+
   Future<void> loadData() async {
     //get data from offline
-    try
-    {
+    try {
       var eventData = StorageHelper.Get(EventModel.eventTableStorage);
-      if(eventData!=null && _events.isEmpty)
-      {
-          var offlineEventsData = json.decode(eventData);
-          setState((){
-            _events.addAll(List<EventModel>.from(offlineEventsData.map((o)=>EventModel.fromJson(o))));
-            _dots.clear();
-            _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          });
+      if (eventData != null && _events.isEmpty) {
+        var offlineEventsData = json.decode(eventData);
+        setState(() {
+          _events.addAll(List<EventModel>.from(
+              offlineEventsData.map((o) => EventModel.fromJson(o))));
+          _dots.clear();
+          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+        });
       }
-    }
-    catch(e)
-    {
+    } catch (e) {
       // make sure not to fail on start
     }
 
-    if(DataService.isLoggedIn())
-    {
-      await DataService.getCurrentUserInfo().then((value) => userName = value.name!);
+    if (DataService.isLoggedIn()) {
+      await DataService.getCurrentUserInfo()
+          .then((value) => userName = value.name!);
     }
 
     //load online data
-    await DataService.updateEvents(_events)
-        .whenComplete(() async {
-          _dots.clear();
-          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-          if(!DataService.isLoggedIn()) {
-            return;
-          }
-          var count = await DataService.countNewMessages();
+    await DataService.updateEvents(_events).whenComplete(() async {
+      _dots.clear();
+      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+      if (!DataService.isLoggedIn()) {
+        return;
+      }
+      var count = await DataService.countNewMessages();
 
-          setState(() {
-            _messageCount = count;
-          });
-        });
+      setState(() {
+        _messageCount = count;
+      });
+    });
 
     loadEventParticipants();
   }
 }
-
