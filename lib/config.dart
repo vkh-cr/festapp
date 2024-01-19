@@ -17,6 +17,7 @@ class config {
   static const attentionColor = Color(0xFF8B0000);
 
   static const bool isServiceRoleSafety = false;
+  static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = false;
   static const String OneSignalAppId = '';
 

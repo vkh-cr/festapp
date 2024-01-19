@@ -1,5 +1,5 @@
 import 'package:avapp/models/InformationModel.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';

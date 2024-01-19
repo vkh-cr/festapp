@@ -1,7 +1,7 @@
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 
 class ExclusiveGroupModel extends IPlutoRowModel {
 

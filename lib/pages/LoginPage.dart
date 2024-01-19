@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:avapp/config.dart';
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 import '../styles/Styles.dart';
 
 

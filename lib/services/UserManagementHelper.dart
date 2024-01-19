@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/ImportHelper.dart';
 import 'package:avapp/services/MailerSendHelper.dart';

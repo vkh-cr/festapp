@@ -2,11 +2,10 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 
 class EventModel extends IPlutoRowModel {
 
@@ -28,7 +27,14 @@ class EventModel extends IPlutoRowModel {
   String? description = "";
   bool isSignedIn = false;
   bool splitForMenWomen = false;
+
   bool isGroupEvent = false;
+  bool? isEventInMyProgram;
+  bool canSaveEventToMyProgram() =>
+      (maxParticipants == null || maxParticipants == 0) &&
+          !isGroupEvent &&
+          (childEventIds == null || childEventIds!.isEmpty);
+
   DateTime startTime;
   DateTime endTime;
 
@@ -117,6 +123,11 @@ class EventModel extends IPlutoRowModel {
   static const String eventTable = "events";
   static const String eventTableStorage = "events";
   static const String eventUsersTable = "event_users";
+
+  static const String eventUsersSavedTable = "event_users_saved";
+  static const String eventUsersSavedEventColumn = "event";
+  static const String eventUsersSavedUserColumn = "user";
+
   static const String eventGroupsTable = "event_groups";
   static const String eventChildColumn = "event_child";
   static const String eventParentColumn = "event_parent";
@@ -177,6 +188,7 @@ class EventModel extends IPlutoRowModel {
     {
       await DataService.signOutFromEvent(this, p);
     }
+    await DataService.removeEventFromSaved(this);
     await DataService.removeEventFromEventGroups(this);
     await DataService.deleteEvent(this);
   }

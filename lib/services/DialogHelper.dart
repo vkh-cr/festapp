@@ -22,11 +22,11 @@ class DialogHelper{
           items: _allUsers,
           searchLabel: "Search participants".tr(),
           suggestion: Center(
-            child: Text(
+            child: const Text(
                 "Find participants by name, surname or e-mail.").tr(),
           ),
           failure: Center(
-            child: Text("No results.").tr(),
+            child: const Text("No results.").tr(),
           ),
           filter: (person) => [
             person.name,

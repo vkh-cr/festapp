@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:avapp/config.dart';
 import 'package:go_router/go_router.dart';
 
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 
 class UserPage extends StatefulWidget {
   static const ROUTE = "/user";

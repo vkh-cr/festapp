@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 import '../dataGrids/PlutoAbstract.dart';
 
 class UserInfoModel extends IPlutoRowModel {
