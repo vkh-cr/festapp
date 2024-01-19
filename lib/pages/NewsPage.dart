@@ -10,7 +10,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsMessage.dart';
-import '../services/DataService.dart';
+import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {

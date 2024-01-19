@@ -1,5 +1,5 @@
 import 'package:avapp/config.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -296,7 +296,7 @@ class _MapPageState extends State<MapPage> {
       context.pop({"lat": selectedMarker!.point.latitude, "lng": selectedMarker!.point.longitude});
       return;
     }
-    await DataService.SaveLocation(selectedMarker!.place.id!,
+    await DataService.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove = _markers

@@ -1,5 +1,6 @@
 import 'package:avapp/pages/EventPage.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +22,15 @@ class _ProgramPageState extends State<ProgramPage> {
   @override
   void initState() {
     super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
     DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
       _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
       await loadEventParticipants();
+      await DataService.synchronizeMyProgram();
     });
   }
 
@@ -33,6 +39,9 @@ class _ProgramPageState extends State<ProgramPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("My program").tr(),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
       ),
       body: Align(
       alignment: Alignment.topCenter,
@@ -59,6 +68,6 @@ class _ProgramPageState extends State<ProgramPage> {
   }
 
   _eventPressed(int id) {
-    context.push("${EventPage.ROUTE}/$id");
+    context.push("${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 }

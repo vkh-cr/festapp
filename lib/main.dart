@@ -12,7 +12,7 @@ import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
@@ -62,7 +62,7 @@ Future<void> initializeEverything() async {
 
   if(!DataService.isLoggedIn())
   {
-    DataService.tryAuthUser();
+    DataService.tryAuthUser().then((value) => DataService.synchronizeMyProgram());
   }
   try {
     NotificationHelper.Initialize();
@@ -362,7 +362,7 @@ void dispose() {
   }
 
   void _programPressed() {
-  if(!DataService.isLoggedIn())
+    if(!config.isOwnProgramSupported && !DataService.isLoggedIn())
     {
       ToastHelper.Show("Sign in to view My program!".tr());
       return;

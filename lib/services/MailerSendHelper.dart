@@ -1,5 +1,5 @@
 import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/config.dart';
 import 'package:easy_localization/easy_localization.dart';

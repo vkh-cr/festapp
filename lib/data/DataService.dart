@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:avapp/data/LocalDataHelper.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
@@ -18,7 +21,7 @@ import 'package:html/parser.dart';
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
 import '../models/PlaceModel.dart';
-import 'NavigationService.dart';
+import '../services/NavigationService.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -423,31 +426,46 @@ class DataService {
   }
 
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
-    dynamic data;
     if(onlyForSignedIn)
     {
-      data = await _supabase
+      HashSet<EventModel> data = HashSet<EventModel>(
+          equals: (a, b) => a.id == b.id,
+          hashCode: (a) => a.id.hashCode
+      );
+
+      await loadAllMyProgramLocal(data);
+
+      if(!isLoggedIn()) {
+        return data.toList();
+      }
+
+      await loadAllMyProgramRemote(data);
+
+      var dataSignedIn = await _supabase
           .from('events')
           .select("id, title, start_time, end_time, max_participants, is_group_event, event_users!inner(*)")
           .eq("event_users.user", currentUserId())
           .order('start_time', ascending: true)
           .order('max_participants', ascending: false);
 
+      data.addAll(List<EventModel>.from(
+          dataSignedIn.map((x) => EventModel.fromJson(x))));
+
       //join group events
       if(hasGroup())
       {
-        var data2 = await _supabase
+        var groupData = await _supabase
             .from('events')
             .select("id, title, start_time, end_time, max_participants, is_group_event")
             .eq(EventModel.isGroupEventColumn, true)
             .order('start_time', ascending: true);
-        data.addAll(data2);
+        data.addAll(List<EventModel>.from(
+            groupData.map((x) => EventModel.fromJson(x))));
       }
 
-      return List<EventModel>.from(
-          data.map((x) => EventModel.fromJson(x)));
+      return data.toList();
     }
-    data = await _supabase
+    var data = await _supabase
         .from('events')
         .select("id, title, start_time, end_time, max_participants, is_group_event")
         .order('start_time', ascending: true)
@@ -469,6 +487,30 @@ class DataService {
       }
     }
     return filtered;
+  }
+
+  static Future<void> loadAllMyProgramRemote(HashSet<EventModel> data) async {
+    var dataEventUsersSaved = await _supabase
+        .from('events')
+        .select("id, title, start_time, end_time, max_participants, is_group_event, event_users_saved!inner(*)")
+        .eq("event_users_saved.user", currentUserId())
+        .order('start_time', ascending: true)
+        .order('max_participants', ascending: false);
+    
+    data.addAll(List<EventModel>.from(
+        dataEventUsersSaved.map((x) => EventModel.fromJson(x))));
+  }
+
+  static Future<void> loadAllMyProgramLocal(HashSet<EventModel> data) async {
+    var events = LocalDataHelper.getAllMyProgram();
+    var localData = await _supabase.from("events")
+        .select("id, title, start_time, end_time, max_participants, is_group_event")
+        .in_(EventModel.idColumn, events)
+        .order('start_time', ascending: true)
+        .order('max_participants', ascending: false);
+    
+    data.addAll(List<EventModel>.from(
+        localData.map((x) => EventModel.fromJson(x))));
   }
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
@@ -893,6 +935,13 @@ class DataService {
         .select();
   }
 
+  static Future<void> removeEventFromSaved(EventModel updatedEvent) async {
+    await _supabase
+        .from(EventModel.eventUsersSavedTable)
+        .delete()
+        .eq(EventModel.eventUsersSavedEventColumn, updatedEvent.id);
+  }
+
   static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
     await _supabase
         .from('event_groups')
@@ -1132,7 +1181,7 @@ class DataService {
     });
   }
 
-  static Future<void> SaveLocation(int placeId, double lat, double lng) async {
+  static Future<void> saveLocation(int placeId, double lat, double lng) async {
     if(!(DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
       throw Exception("You cannot change this place.");
@@ -1143,6 +1192,72 @@ class DataService {
       }
     }).eq("id", placeId);
     ToastHelper.Show("Place has been changed.".tr());
+  }
+
+  static Future<bool> isEventSaved(int id) async {
+    bool isSaved = false;
+    if(isLoggedIn()) {
+      var data = await _supabase
+          .from(EventModel.eventUsersSavedTable)
+          .select()
+          .eq(EventModel.eventUsersSavedEventColumn, id)
+          .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
+          .maybeSingle();
+      isSaved = data != null;
+    }
+    return isSaved || LocalDataHelper.isEventSaved(id);
+  }
+
+  static Future<void> removeFromMyProgram(int id) async {
+    if(isLoggedIn()) {
+      await _supabase
+          .from(EventModel.eventUsersSavedTable)
+          .delete()
+          .eq(EventModel.eventUsersSavedEventColumn, id)
+          .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
+    }
+    LocalDataHelper.removeFromMyProgram(id);
+    ToastHelper.Show("Removed from My program.".tr());
+  }
+
+  static Future<void> addToMyProgram(int id) async {
+    if(isLoggedIn()) {
+        await _supabase
+            .from(EventModel.eventUsersSavedTable)
+            .insert({EventModel.eventUsersSavedEventColumn: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
+    }
+    LocalDataHelper.addToMyProgram(id);
+    ToastHelper.Show("Added to My program.".tr());
+  }
+  
+  static Future<void> synchronizeMyProgram()
+  async {
+    if(!isLoggedIn()){
+      return;
+    }
+    HashSet<EventModel> data = HashSet<EventModel>(
+        equals: (a, b) => a.id == b.id,
+        hashCode: (a) => a.id.hashCode
+    );
+
+    await loadAllMyProgramLocal(data);
+    await loadAllMyProgramRemote(data);
+
+    var currentUserEventIds = List<int>.from(
+        data.map((x) => x.id));
+    LocalDataHelper.saveMyProgramData(currentUserEventIds);
+
+    var values = [];
+    for(var v in currentUserEventIds)
+    {
+      values.add({
+        EventModel.eventUsersSavedUserColumn: currentUserId(),
+        EventModel.eventUsersSavedEventColumn: v
+      });
+    }
+
+    await _supabase.from(EventModel.eventUsersSavedTable)
+    .upsert(values);
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

@@ -1,6 +1,6 @@
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/HtmlEditorPage.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -51,6 +51,24 @@ class _EventPageState extends State<EventPage> {
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
+        actions: [
+          Visibility(
+            visible: config.isOwnProgramSupported && _event?.isEventInMyProgram==false && _event!.canSaveEventToMyProgram(),
+            child: Padding(
+            padding: const EdgeInsets.all(6),
+            child: IconButton(onPressed: () async {
+              await addToMyProgram();
+            }, icon: const Icon(Icons.add_circle_outline)),
+          )),
+          Visibility(
+              visible: config.isOwnProgramSupported && (_event?.isEventInMyProgram??false),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: IconButton(onPressed: () async {
+                  await removeFromMyProgram();
+                }, icon: const Icon(Icons.check_circle)),
+          )),
+        ],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -227,6 +245,20 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
+  Future<void> addToMyProgram() async {
+    await DataService.addToMyProgram(_event!.id!);
+    setState(() {
+      _event!.isEventInMyProgram = true;
+    });
+  }
+
+  Future<void> removeFromMyProgram() async {
+    await DataService.removeFromMyProgram(_event!.id!);
+    setState(() {
+      _event!.isEventInMyProgram = false;
+    });
+  }
+
   bool showLoginLogoutButton() {
     return DataService.isLoggedIn() &&
         !isLoadingParticipants &&
@@ -236,6 +268,10 @@ class _EventPageState extends State<EventPage> {
   Future<void> loadData(int id) async {
     await loadEvent(id);
     await loadParticipants(id);
+    var isSaved = await DataService.isEventSaved(id);
+    setState(() {
+      _event!.isEventInMyProgram = isSaved;
+    });
   }
 
   Future<void> loadParticipants(int id) async {
@@ -299,20 +335,20 @@ class _EventPageState extends State<EventPage> {
             .tr(namedArgs: {
             "participant":participant.toString(),
             "event":_event!.toString()}),
-    actions: <Widget>[
-    TextButton(
-    onPressed: () => context.pop(),
-    child: const Text("Storno").tr(),
-    ),
-    TextButton(
-    onPressed: () async {
-      context.pop();
-      await DataService.signOutFromEvent(_event!, participant);
-      await loadData(_event!.id!);
-    },
-    child: const Text("Sign out someone").tr(),
-    ),
-    ],
+      actions: <Widget>[
+        TextButton(
+        onPressed: () => context.pop(),
+        child: const Text("Storno").tr(),
+        ),
+        TextButton(
+        onPressed: () async {
+          context.pop();
+          await DataService.signOutFromEvent(_event!, participant);
+          await loadData(_event!.id!);
+        },
+        child: const Text("Sign out someone").tr(),
+        ),
+      ],
     )
     );
   }
