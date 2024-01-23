@@ -11,7 +11,7 @@ import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
-import 'package:avapp/widgets/TimeTable.dart';
+import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

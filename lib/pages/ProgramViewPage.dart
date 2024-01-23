@@ -1,7 +1,7 @@
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/ProgramPage.dart';
 import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/widgets/TimeTable.dart';
+import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,8 @@ class ProgramViewPage extends StatefulWidget {
 class _ProgramViewPageState extends State<ProgramViewPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
+
+  var timetableController = TimetableController();
 
   @override
   void initState() {
@@ -52,6 +54,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _tabController.addListener(() {
         setState(() {
           _currentIndex = _tabController.index;
+          timetableController.reset?.call();
         });
       });
       await loadEventParticipants();
@@ -120,13 +123,14 @@ class _ProgramViewPageState extends State<ProgramViewPage>
           ),
         ],
       ),
-      body: TimeTable(
+      body: Timetable(
+        controller: timetableController,
           items: _items
               .where((element) =>
                   element.startTime.weekday ==
                   _days.keys.toList()[_currentIndex])
               .toList(),
-          timetablePlaces: _timetablePlaces),
+          timetablePlaces: _timetablePlaces)
     );
   }
 
