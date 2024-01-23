@@ -3,6 +3,7 @@ import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
+import 'package:avapp/widgets/ButtonsHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -51,25 +52,11 @@ class _EventPageState extends State<EventPage> {
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
-        actions: [
-          Visibility(
-            visible: AppConfig.isOwnProgramSupported && _event?.isEventInMyProgram==false && _event!.canSaveEventToMyProgram(),
-            child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: IconButton(onPressed: () async {
-              await addToMyProgram();
-            }, icon: const Icon(Icons.add_circle_outline)),
-          )),
-          Visibility(
-              visible: AppConfig.isOwnProgramSupported && (_event?.isEventInMyProgram??false),
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: IconButton(onPressed: () async {
-                  await removeFromMyProgram();
-                }, icon: const Icon(Icons.check_circle)),
-          )),
-        ],
-      ),
+        actions: ButtonsHelper.getAddToMyProgramButton(
+          _event?.canSaveEventToMyProgram(),
+          addToMyProgram,
+          removeFromMyProgram
+        )),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

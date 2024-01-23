@@ -6,6 +6,7 @@ import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
+import 'package:avapp/pages/ProgramViewPage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';
 import 'package:avapp/services/NotificationHelper.dart';
@@ -27,7 +28,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'models/EventModel.dart';
 import 'pages/EventPage.dart';
 import 'pages/LoginPage.dart';
-import 'pages/ProgramPage.dart';
 import 'styles/Styles.dart';
 
 Future<void> main() async {
@@ -247,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       backgroundColor: AppConfig.color1,
                       child: const Icon(Icons.calendar_month),
                     ),
-                    Text("My program".tr()),
+                    Text("My schedule".tr()),
                   ],
                 ),
                 Column(
@@ -304,10 +304,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void _programPressed() {
     if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
-      ToastHelper.Show("Sign in to view My program!".tr());
+      ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    context.push(ProgramPage.ROUTE).then((value) => loadData());
+    context.push(ProgramViewPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {

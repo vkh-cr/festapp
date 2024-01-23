@@ -67,7 +67,6 @@ class TimeLineItem{
       rightText: model.toString(),
     );
   }
-
 }
 
 class ProgramTimeline extends StatefulWidget {
@@ -189,7 +188,7 @@ class _ProgramTimelineState extends State<ProgramTimeline> {
               onPressed: () => widget.onEventPressed!(event.id),
               style: TextButton.styleFrom(
                 foregroundColor: Colors.black,
-                alignment: Alignment.centerLeft// Text Color
+                alignment: Alignment.centerLeft
               ),
               child: Text(event.rightText, style: timeLineSmallTextStyle,));
         },

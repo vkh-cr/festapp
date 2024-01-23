@@ -11,6 +11,7 @@ import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
+import 'package:avapp/widgets/TimeTable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -351,6 +352,13 @@ class DataService {
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
+  static Future<List<TimetablePlace>> getTimetablePlaces() async {
+    var data = await _supabase.from(PlaceModel.timetablePlacesTable).select();
+    var placeIds = List<int>.from(data.map((x) => x[PlaceModel.timetablePlacesTablePlaceColumn]));
+    var placeData = await _supabase.from(PlaceModel.placeTable).select().in_(PlaceModel.idColumn, placeIds);
+    return List<TimetablePlace>.from(placeData.map((x) => TimetablePlace.fromJson(x)));
+  }
+
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
     var data = await _supabase.from(UserGroupInfoModel.userGroupInfoTable)
         .select("${UserGroupInfoModel.titleColumn}, ${PlaceModel.placeTable}(*)");
@@ -423,16 +431,29 @@ class DataService {
       e.currentParticipants = eq.currentParticipants;
       e.isSignedIn = eq.isSignedIn;
     }
+
+    await loadIsInMyProgram(events);
+  }
+
+  static Future<void> loadIsInMyProgram(List<EventModel> events) async {
+    var set = EventModel.CreateEventModelSet();
+    await loadAllMyProgramLocal(set);
+    if(isLoggedIn())
+    {
+      await loadAllMyProgramRemote(set);
+    }
+
+    for(var e in set)
+    {
+      var eq = events.firstWhere((element) => element.id == e.id);
+      eq.isEventInMyProgram = e.isEventInMyProgram;
+    }
   }
 
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
     if(onlyForSignedIn)
     {
-      HashSet<EventModel> data = HashSet<EventModel>(
-          equals: (a, b) => a.id == b.id,
-          hashCode: (a) => a.id.hashCode
-      );
-
+      var data = EventModel.CreateEventModelSet();
       await loadAllMyProgramLocal(data);
 
       if(!isLoggedIn()) {
@@ -443,7 +464,7 @@ class DataService {
 
       var dataSignedIn = await _supabase
           .from('events')
-          .select("id, title, start_time, end_time, max_participants, is_group_event, event_users!inner(*)")
+          .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users!inner(*)")
           .eq("event_users.user", currentUserId())
           .order('start_time', ascending: true)
           .order('max_participants', ascending: false);
@@ -456,7 +477,7 @@ class DataService {
       {
         var groupData = await _supabase
             .from('events')
-            .select("id, title, start_time, end_time, max_participants, is_group_event")
+            .select("id, title, start_time, end_time, place, max_participants, is_group_event")
             .eq(EventModel.isGroupEventColumn, true)
             .order('start_time', ascending: true);
         data.addAll(List<EventModel>.from(
@@ -467,7 +488,7 @@ class DataService {
     }
     var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, is_group_event")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event")
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
@@ -492,25 +513,32 @@ class DataService {
   static Future<void> loadAllMyProgramRemote(HashSet<EventModel> data) async {
     var dataEventUsersSaved = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, is_group_event, event_users_saved!inner(*)")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users_saved!inner(*)")
         .eq("event_users_saved.user", currentUserId())
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
-    
-    data.addAll(List<EventModel>.from(
-        dataEventUsersSaved.map((x) => EventModel.fromJson(x))));
+
+    var localEvents = List<EventModel>.from(
+        dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
+    for (var element in localEvents) {
+      element.isEventInMyProgram = true;
+    }
+    data.addAll(localEvents);
   }
 
   static Future<void> loadAllMyProgramLocal(HashSet<EventModel> data) async {
     var events = LocalDataHelper.getAllMyProgram();
     var localData = await _supabase.from("events")
-        .select("id, title, start_time, end_time, max_participants, is_group_event")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event")
         .in_(EventModel.idColumn, events)
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
-    
-    data.addAll(List<EventModel>.from(
-        localData.map((x) => EventModel.fromJson(x))));
+    var localEvents = List<EventModel>.from(
+        localData.map((x) => EventModel.fromJson(x)));
+    for (var element in localEvents) {
+      element.isEventInMyProgram = true;
+    }
+    data.addAll(localEvents);
   }
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
@@ -1217,7 +1245,7 @@ class DataService {
           .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
     }
     LocalDataHelper.removeFromMyProgram(id);
-    ToastHelper.Show("Removed from My program.".tr());
+    ToastHelper.Show("Removed from My schedule.".tr());
   }
 
   static Future<void> addToMyProgram(int id) async {
@@ -1227,7 +1255,7 @@ class DataService {
             .insert({EventModel.eventUsersSavedEventColumn: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
     }
     LocalDataHelper.addToMyProgram(id);
-    ToastHelper.Show("Added to My program.".tr());
+    ToastHelper.Show("Added to My schedule.".tr());
   }
   
   static Future<void> synchronizeMyProgram()
@@ -1235,10 +1263,7 @@ class DataService {
     if(!isLoggedIn()){
       return;
     }
-    HashSet<EventModel> data = HashSet<EventModel>(
-        equals: (a, b) => a.id == b.id,
-        hashCode: (a) => a.id.hashCode
-    );
+    HashSet<EventModel> data = EventModel.CreateEventModelSet();
 
     await loadAllMyProgramLocal(data);
     await loadAllMyProgramRemote(data);

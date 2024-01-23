@@ -7,6 +7,7 @@ import 'package:avapp/pages/LoginPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
 import 'package:avapp/pages/ProgramPage.dart';
+import 'package:avapp/pages/ProgramViewPage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/services/NavigationService.dart';
 import 'package:go_router/go_router.dart';
@@ -70,6 +71,10 @@ final router = GoRouter(
     GoRoute(
       path: ProgramPage.ROUTE,
       builder: (context, state) => const ProgramPage(),
+    ),
+    GoRoute(
+      path: ProgramViewPage.ROUTE,
+      builder: (context, state) => const ProgramViewPage(),
     ),
   ],
 );

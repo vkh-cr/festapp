@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -30,10 +32,15 @@ class EventModel extends IPlutoRowModel {
 
   bool isGroupEvent = false;
   bool? isEventInMyProgram;
-  bool canSaveEventToMyProgram() =>
-      (maxParticipants == null || maxParticipants == 0) &&
+  bool? canSaveEventToMyProgram() {
+    var canSave = (maxParticipants == null || maxParticipants == 0) &&
           !isGroupEvent &&
           (childEventIds == null || childEventIds!.isEmpty);
+    if(!canSave){
+      return null;
+    }
+    return isEventInMyProgram==false;
+  }
 
   DateTime startTime;
   DateTime endTime;
@@ -80,7 +87,8 @@ class EventModel extends IPlutoRowModel {
       title: json.containsKey(titleColumn) ? json[titleColumn] : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
       maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
-      place: json.containsKey(placesTable) && json[placesTable] != null ? PlaceModel.fromJson(json[placesTable]) : null,
+      place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
+        json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey("isSignedIn") ? json["isSignedIn"] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
@@ -213,4 +221,11 @@ class EventModel extends IPlutoRowModel {
     "isSignedIn": isSignedIn,
     isGroupEventColumn: isGroupEvent,
   };
+
+  static HashSet<EventModel> CreateEventModelSet() {
+    return HashSet<EventModel>(
+        equals: (a, b) => a.id == b.id,
+        hashCode: (a) => a.id.hashCode
+    );
+  }
 }
