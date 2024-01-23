@@ -76,7 +76,7 @@ class _TimeTableState extends State<TimeTable> {
                       alignment: Alignment.centerLeft,
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text(widget.timetablePlaces[i].title),
+                        child: Text(widget.timetablePlaces[i].title, style: TextStyle(fontWeight: FontWeight.bold),),
                       ),
                     ),
                   )),
