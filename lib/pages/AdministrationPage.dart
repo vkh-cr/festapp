@@ -102,8 +102,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   children: [
                     const Icon(Icons.info),
                     Padding(padding: const EdgeInsets.all(12), child: const Text("Info").tr())
-                  ]
-                ),
+                    ]
+                  ),
                   Row(
                       children: [
                         const Icon(Icons.calendar_month),

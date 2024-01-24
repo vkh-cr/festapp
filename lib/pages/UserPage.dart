@@ -2,13 +2,13 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
 import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
+import 'package:avapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:go_router/go_router.dart';
 
 import '../data/DataService.dart';
@@ -33,12 +33,7 @@ class _UserPageState extends State<UserPage> {
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
-        actions: [Padding(
-          padding: const EdgeInsets.all(6),
-          child: IconButton(onPressed: () async {
-            await DialogHelper.chooseLanguage(context);
-          }, icon: const Icon(Icons.translate)),
-        )],
+        actions: [const LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -96,7 +91,7 @@ class _UserPageState extends State<UserPage> {
                   height: 50,
                   width: 250,
                   decoration: BoxDecoration(
-                      color: config.color1, borderRadius: BorderRadius.circular(20)),
+                      color: AppConfig.color1, borderRadius: BorderRadius.circular(20)),
                   child: TextButton(
                     onPressed: () async => _logout(),
                     child: const Text(

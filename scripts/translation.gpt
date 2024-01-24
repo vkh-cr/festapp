@@ -1,0 +1,19 @@
+Translate the following English sentence into the languages listed below. For each language, provide the translation in a key:value format. The key will always be the original English text and the value will be its translation in the specified language.
+
+Format the result as key:value pairs. An example of the format is shown below:
+
+"English text": "Translation into cs language",
+"English text": "Translation into sk language",
+"English text": "Translation into pl language",
+
+
+English sentence for translation:
+"Schedule":"Schedule",
+  "My schedule":"My schedule",
+  "Added to My schedule.":"Added to My schedule.",
+  "Removed from My schedule.":"Removed from My schedule.",
+
+Languages: cs, sk, pl, de, uk
+
+
+Add comma at the end.

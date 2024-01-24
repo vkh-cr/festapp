@@ -38,7 +38,7 @@ class _ProgramPageState extends State<ProgramPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My program").tr(),
+        title: const Text("My schedule").tr(),
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),

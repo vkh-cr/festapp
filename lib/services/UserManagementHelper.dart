@@ -6,7 +6,7 @@ import 'package:avapp/services/ImportHelper.dart';
 import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/NavigationService.dart';
 import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
@@ -128,7 +128,7 @@ class UserManagementHelper{
     var random = Random();
     var numberFormat = NumberFormat("####");
 
-    var password = "${config.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
+    var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
     await DataService.updateUserPassword(u, password);
     ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
     await MailerSendHelper.sendPassword(u, password);
@@ -142,7 +142,7 @@ class UserManagementHelper{
 
     var random = Random();
     var numberFormat = NumberFormat("####");
-    var pw = "${config.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
+    var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
 
     var newId = await DataService.unsafeCreateUser(email, pw);
     if(newId==null)

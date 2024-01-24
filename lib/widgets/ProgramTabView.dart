@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 
 import 'ProgramTimeline.dart';
 
@@ -47,8 +47,8 @@ import 'ProgramTimeline.dart';
           child: Scaffold(
             appBar: TabBar(
               unselectedLabelColor: Colors.grey,
-              labelColor: config.color1,
-              indicatorColor: config.color1,
+              labelColor: AppConfig.color1,
+              indicatorColor: AppConfig.color1,
               indicatorWeight: 3.0,
               indicatorSize: TabBarIndicatorSize.label,
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),

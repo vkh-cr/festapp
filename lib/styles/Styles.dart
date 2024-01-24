@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 
 MaterialColor primarySwatch = const MaterialColor(
-  config.primaryColor,
+  AppConfig.primaryColor,
   <int, Color>{
     50: Color(0xFFE1F0F4),
     100: Color(0xFFB4D9E4),
@@ -20,7 +20,7 @@ MaterialColor primarySwatch = const MaterialColor(
 TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSplitTextStyle = const TextStyle(
-    color: config.color1, fontWeight: FontWeight.bold, fontSize: 15);
+    color: AppConfig.color1, fontWeight: FontWeight.bold, fontSize: 15);
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
@@ -31,7 +31,7 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
 
     maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
-    backgroundColor: config.color2,
+    backgroundColor: AppConfig.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
@@ -44,7 +44,7 @@ class MainPageButton extends StatelessWidget {
     Key? key,
     required this.onPressed,
     required this.child,
-    this.backgroundColor = config.color2,
+    this.backgroundColor = AppConfig.color2,
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
   }) : super(key: key);
 
@@ -70,7 +70,7 @@ class CircularButton extends MainPageButton {
     Key? key,
     required VoidCallback onPressed,
     required Widget child,
-    backgroundColor = config.color2,
+    backgroundColor = AppConfig.color2,
     this.size = const Size(50, 50),
   }) : super(
           key: key,

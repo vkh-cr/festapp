@@ -1,7 +1,7 @@
 import 'package:avapp/pages/NewsPage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:flutter/foundation.dart';
 
 import 'NavigationService.dart';
@@ -9,14 +9,14 @@ import 'NavigationService.dart';
 class NotificationHelper
 {
   static void Initialize() async {
-    if(!config.isNotificationsSupported) {
+    if(!AppConfig.isNotificationsSupported) {
         return;
     }
     if (kIsWeb) {
       return;
     }
 
-    OneSignal.initialize(config.OneSignalAppId);
+    OneSignal.initialize(AppConfig.OneSignalAppId);
 
     var userAgree = await OneSignal.Notifications.requestPermission(false);
     if(!userAgree) {
@@ -29,7 +29,7 @@ class NotificationHelper
   }
 
   static void Login(String currentUserId) {
-    if(!config.isNotificationsSupported) {
+    if(!AppConfig.isNotificationsSupported) {
       return;
     }
     if (kIsWeb) {
@@ -44,7 +44,7 @@ class NotificationHelper
   }
 
   static void Logout() {
-    if(!config.isNotificationsSupported) {
+    if(!AppConfig.isNotificationsSupported) {
       return;
     }
     if (kIsWeb) {

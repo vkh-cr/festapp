@@ -3,10 +3,11 @@ import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
+import 'package:avapp/widgets/ButtonsHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
@@ -51,25 +52,11 @@ class _EventPageState extends State<EventPage> {
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
-        actions: [
-          Visibility(
-            visible: config.isOwnProgramSupported && _event?.isEventInMyProgram==false && _event!.canSaveEventToMyProgram(),
-            child: Padding(
-            padding: const EdgeInsets.all(6),
-            child: IconButton(onPressed: () async {
-              await addToMyProgram();
-            }, icon: const Icon(Icons.add_circle_outline)),
-          )),
-          Visibility(
-              visible: config.isOwnProgramSupported && (_event?.isEventInMyProgram??false),
-              child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: IconButton(onPressed: () async {
-                  await removeFromMyProgram();
-                }, icon: const Icon(Icons.check_circle)),
-          )),
-        ],
-      ),
+        actions: ButtonsHelper.getAddToMyProgramButton(
+          _event?.canSaveEventToMyProgram(),
+          addToMyProgram,
+          removeFromMyProgram
+        )),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -162,7 +149,7 @@ class _EventPageState extends State<EventPage> {
                         padding: EdgeInsets.all(8.0),
                         child: const Text(
                           "You need to sign in to this event. First, sign in to the app.",
-                          style: TextStyle(color: config.attentionColor),).tr(),
+                          style: TextStyle(color: AppConfig.attentionColor),).tr(),
                       )),
                   Visibility(
                     visible: _event != null && _event?.description != null,
