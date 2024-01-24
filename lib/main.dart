@@ -330,6 +330,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     context.push(UserPage.ROUTE).then((value) => loadData());
   }
 
+  _eventPressed(int id) {
+    context.push("${EventPage.ROUTE}/$id").then((value) => loadData());
+  }
+
   final List<TimeLineItem> _dots = [];
   final List<EventModel> _events = [];
 
@@ -347,10 +351,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     //update offline
     var encoded = jsonEncode(_events);
     StorageHelper.Set(EventModel.eventTableStorage, encoded);
-  }
-
-  _eventPressed(int id) {
-    context.push("${EventPage.ROUTE}/$id");
   }
 
   int _messageCount = 0;

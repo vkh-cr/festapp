@@ -49,6 +49,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   int? firstHour;
   int? lastHour;
 
+  List<TimetableItem> usedItems = [];
+  List<TimetablePlace> usedPlaces = [];
+
   _TimetableState(TimetableController? timetableController) {
     if(timetableController!=null){
       timetableController.reset = () {
@@ -59,7 +62,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   double getTimetableHeight() =>
-      widget.timetablePlaces.length * (placeTitleHeight + itemHeight) +
+      usedPlaces.length * (placeTitleHeight + itemHeight) +
       timelineHeight;
 
   double getTimetableWidth() => (hourCount ?? 24) * pixelsInHour;
@@ -101,6 +104,27 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       return const SizedBox.shrink();
     }
 
+    usedItems = <TimetableItem>[];
+    for(var item in widget.items) {
+        if(widget.timetablePlaces.map((e) => e.id).contains(item.placeId))
+        {
+          //remove invalid items
+          if(item.endTime.isBefore(item.startTime))
+          {
+            continue;
+          }
+          usedItems.add(item);
+        }
+    }
+
+    usedPlaces = <TimetablePlace>[];
+    for(var item in widget.timetablePlaces) {
+      if(usedItems.map((e) => e.placeId).contains(item.id))
+      {
+        usedPlaces.add(item);
+      }
+    }
+
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints cConstraints) {
       constraints = cConstraints;
@@ -120,7 +144,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         transform: matrixPlaceTitles,
         child: Stack(
           children: List<Widget>.generate(
-              widget.timetablePlaces.length,
+              usedPlaces.length,
               (i) => Padding(
                     padding: EdgeInsets.fromLTRB(
                         0,
@@ -133,7 +157,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(
-                          widget.timetablePlaces[i].title,
+                          usedPlaces[i].title,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -209,10 +233,10 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   List<Widget> buildTimeline() {
     List<Widget> allItems = [];
-    var firstEvent = widget.items.reduce((current, next) =>
+    var firstEvent = usedItems.reduce((current, next) =>
         current.startTime.compareTo(next.startTime) < 0 ? current : next);
 
-    var lastEvent = widget.items.reduce((current, next) =>
+    var lastEvent = usedItems.reduce((current, next) =>
         current.endTime.compareTo(next.endTime) > 0 ? current : next);
 
     var range =
@@ -227,7 +251,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
     bool isSkipping = firstEvent.startTime.day != lastEvent.endTime.day;
     hourCount =
-        isSkipping ? 24 - firstHour! + 24 - lastHour! : lastHour! - firstHour!;
+        isSkipping ? 24 - firstHour! + lastHour! : lastHour! - firstHour!;
 
     allItems.add(Row(
       children: List<Widget>.generate(
@@ -246,9 +270,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       ),
     ));
 
-    for (var p = 0; p < widget.timetablePlaces.length; p++) {
-      var pItems = widget.items
-          .where((element) => element.placeId == widget.timetablePlaces[p].id)
+    for (var p = 0; p < usedPlaces.length; p++) {
+      var pItems = usedItems
+          .where((element) => element.placeId == usedPlaces[p].id)
           .toList();
       for (var i = 0; i < pItems.length; i++) {
         var item = pItems[i];
