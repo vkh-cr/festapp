@@ -58,7 +58,8 @@ class EventModel extends IPlutoRowModel {
     required this.splitForMenWomen,
     this.currentParticipants,
     required this.isSignedIn,
-    required this.isGroupEvent});
+    required this.isGroupEvent,
+    this.isEventInMyProgram});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
@@ -90,11 +91,12 @@ class EventModel extends IPlutoRowModel {
       place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
         json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
-      isSignedIn: json.containsKey("isSignedIn") ? json["isSignedIn"] : false,
+      isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
+      isEventInMyProgram: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
-      currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey("currentParticipants") ? json["currentParticipants"] : null,
+      currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
   );
   }
 
@@ -143,6 +145,11 @@ class EventModel extends IPlutoRowModel {
 
   static const String splitForMenWomenColumn = "split_for_men_women";
   static const String isGroupEventColumn = "is_group_event";
+
+  static const String currentParticipantsColumn = "currentParticipants";
+  static const String isSignedInColumn = "isSignedIn";
+  static const String isEventInMyProgramColumn = "isEventInMyProgram";
+
 
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
@@ -210,6 +217,7 @@ class EventModel extends IPlutoRowModel {
   @override
   String toBasicString() => "$title";
 
+
   Map toJson() =>
   {
     idColumn: id,
@@ -218,8 +226,9 @@ class EventModel extends IPlutoRowModel {
     titleColumn: title,
     descriptionColumn: description,
     maxParticipantsColumn: maxParticipants,
-    "currentParticipants": currentParticipants,
-    "isSignedIn": isSignedIn,
+    currentParticipantsColumn: currentParticipants,
+    isSignedInColumn: isSignedIn,
+    isEventInMyProgramColumn: isEventInMyProgram,
     isGroupEventColumn: isGroupEvent,
     placeColumn: place?.id,
   };

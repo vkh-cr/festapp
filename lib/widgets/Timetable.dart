@@ -476,7 +476,7 @@ class TimetableItem {
       endTime: model.endTime,
       itemType: getIndicatorFromEvent(model),
       id: model.id!,
-      text: model.startTimeString(),
+      text: model.title!,
       placeId: model.place!.id!,
     );
   }
