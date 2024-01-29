@@ -2,13 +2,14 @@ import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/models/EventModel.dart';
 import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class TimetableController {
   void Function()? reset;
+  void Function(int)? onItemTap;
+
+  TimetableController({this.onItemTap});
 }
 
 class Timetable extends StatefulWidget {
@@ -283,7 +284,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               placeTitleHeight +
               timelineHeight,
           child: GestureDetector(
-            onTap: () => context.push("${EventPage.ROUTE}/${item.id}"),
+            onTap: (){
+              widget.controller?.onItemTap?.call(item.id);
+            },
             child: Container(
               width:
                   timeRangeLength(pixelsInHour, item.startTime, item.endTime),

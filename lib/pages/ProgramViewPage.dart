@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/pages/ProgramPage.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/StorageHelper.dart';
@@ -25,11 +26,12 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
-  var timetableController = TimetableController();
+  late TimetableController timetableController;
 
   @override
   void initState() {
     super.initState();
+    timetableController = TimetableController(onItemTap: (id) { context.push("${EventPage.ROUTE}/$id").then((value) => loadData()); });
     loadData();
   }
 
@@ -145,7 +147,9 @@ class _ProgramViewPageState extends State<ProgramViewPage>
             padding: const EdgeInsets.all(6),
             child: TextButton(
               onPressed: () async {
-                context.push(ProgramPage.ROUTE);
+                context.push(ProgramPage.ROUTE).then(
+                        (value) => loadData()
+                );
               },
               child: Column(
                 mainAxisSize: MainAxisSize.min,
