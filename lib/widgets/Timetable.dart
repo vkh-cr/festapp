@@ -2,13 +2,14 @@ import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/models/EventModel.dart';
 import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class TimetableController {
   void Function()? reset;
+  void Function(int)? onItemTap;
+
+  TimetableController({this.onItemTap});
 }
 
 class Timetable extends StatefulWidget {
@@ -283,13 +284,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               placeTitleHeight +
               timelineHeight,
           child: GestureDetector(
-            onTap: () => context.push("${EventPage.ROUTE}/${item.id}"),
+            onTap: (){
+              widget.controller?.onItemTap?.call(item.id);
+            },
             child: Container(
               width:
                   timeRangeLength(pixelsInHour, item.startTime, item.endTime),
               height: itemHeight,
               decoration: BoxDecoration(
-                color: item.itemType == TimetableItemType.signed
+                color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
                     ? AppConfig.color2
                     : Colors.black26,
                 borderRadius: BorderRadius.circular(6),
@@ -310,7 +313,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                     padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
                     child: Text(item.text,
                         style: TextStyle(
-                            color: item.itemType == TimetableItemType.signed
+                            color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
                                 ? Colors.white
                                 : Colors.black),
                         overflow: TextOverflow.fade),
@@ -330,14 +333,14 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   Future<void> addToMyProgram(TimetableItem item) async {
     await DataService.addToMyProgram(item.id);
     setState(() {
-      item.itemType = TimetableItemType.signed;
+      item.itemType = TimetableItemType.saved;
     });
   }
 
   Future<void> removeFromMyProgram(TimetableItem item) async {
     await DataService.removeFromMyProgram(item.id);
     setState(() {
-      item.itemType = TimetableItemType.notSigned;
+      item.itemType = TimetableItemType.canSave;
     });
   }
 
@@ -409,7 +412,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 }
 
-enum TimetableItemType { signed, notSigned, disabled }
+enum TimetableItemType { saved, canSave, nothing, signedIn }
 
 class TimetablePlace {
   String title;
@@ -443,25 +446,25 @@ class TimetableItem {
 
   static TimetableItemType getIndicatorFromEvent(EventModel model) {
     if (model.isSignedIn) {
-      return TimetableItemType.signed;
+      return TimetableItemType.signedIn;
     } else if (model.isEventInMyProgram == true) {
-      return TimetableItemType.signed;
+      return TimetableItemType.saved;
     } else if (model.isGroupEvent && DataService.currentUserGroup() != null) {
-      return TimetableItemType.signed;
+      return TimetableItemType.saved;
     } else if (model.currentParticipants != null &&
         model.maxParticipants != null &&
         (!DataService.isLoggedIn() || model.isFull())) {
-      return TimetableItemType.disabled;
+      return TimetableItemType.nothing;
     } else if (EventModel.canSignIn(model)) {
-      return TimetableItemType.notSigned;
+      return TimetableItemType.nothing;
     }
-    return TimetableItemType.notSigned;
+    return TimetableItemType.canSave;
   }
 
   static bool? getTimetableItemTypeAsCanSignIn(TimetableItemType type) {
-    if (type == TimetableItemType.disabled) {
+    if (type == TimetableItemType.nothing || type == TimetableItemType.signedIn) {
       return null;
-    } else if (type == TimetableItemType.notSigned) {
+    } else if (type == TimetableItemType.canSave) {
       return true;
     }
     return false;
@@ -473,7 +476,7 @@ class TimetableItem {
       endTime: model.endTime,
       itemType: getIndicatorFromEvent(model),
       id: model.id!,
-      text: model.startTimeString(),
+      text: model.title!,
       placeId: model.place!.id!,
     );
   }
