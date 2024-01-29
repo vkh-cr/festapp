@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"main.dart.js": "2d8f04611d32801ccdae06c75fdd6a7e",
+const RESOURCES = {"main.dart.js": "0a2e133a4cee5d3b1dabb797d69ed5b1",
 "flutter.js": "7d69e653079438abfbb24b82a655b0a4",
 "favicon.ico": "f3f4b2a26513ca4805474cf194bd9242",
 "browserconfig.xml": "a493ba0aa0b8ec8068d786d7248bb92c",
@@ -70,8 +70,8 @@ const RESOURCES = {"main.dart.js": "2d8f04611d32801ccdae06c75fdd6a7e",
 "safari-pinned-tab.svg": "fa0fc966a391994b65b5503531424af7",
 "apple-touch-icon.png": "e4044af6b13bd450cfc5dc7268fc640e",
 "site.webmanifest": "b9aa277fcfc34c31db6c7a7ea3469b8c",
-"index.html": "cbf8b14513c288abc9620cbcd6cbb93f",
-"/": "cbf8b14513c288abc9620cbcd6cbb93f",
+"index.html": "4775def7c2c44f1248ecd987eff072e0",
+"/": "4775def7c2c44f1248ecd987eff072e0",
 "mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
 "version.json": "23f43d6b2b4c9521539a8b52ab40bfbe",
 "favicon-16x16.png": "517bb576ed98bfc4aa542bea1fc815e6",
