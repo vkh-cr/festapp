@@ -114,6 +114,7 @@ class EventModel extends IPlutoRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
+    place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
   }
 
   static const String startDateColumn = "startDate";
@@ -220,6 +221,7 @@ class EventModel extends IPlutoRowModel {
     "currentParticipants": currentParticipants,
     "isSignedIn": isSignedIn,
     isGroupEventColumn: isGroupEvent,
+    placeColumn: place?.id,
   };
 
   static HashSet<EventModel> CreateEventModelSet() {

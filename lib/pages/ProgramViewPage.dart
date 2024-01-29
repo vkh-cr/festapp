@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/pages/ProgramPage.dart';
 import 'package:avapp/services/NavigationHelper.dart';
+import 'package:avapp/services/StorageHelper.dart';
 import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -31,6 +34,42 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadData() async {
+    try {
+
+      var places = await DataService.getTimetablePlaces();
+      _timetablePlaces.clear();
+      _timetablePlaces.addAll(places);
+
+      var eventData = StorageHelper.Get(EventModel.eventTableStorage);
+      if (eventData != null && _events.isEmpty) {
+        var offlineEventsData = json.decode(eventData);
+        setState(() {
+          _events.addAll(List<EventModel>.from(
+              offlineEventsData.map((o) => EventModel.fromJson(o))).where((element) => element.place?.id != null));
+          _items.clear();
+          _items.addAll(_events.map((e) => TimetableItem.fromEventModel(e)));
+          var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
+          _days.addAll({
+            for (var e in eventsGrouped.values)
+              e.first.startTime.weekday:
+              DateFormat("EEE d. MMM", context.locale.languageCode)
+                  .format(e.first.startTime)
+                  .toUpperCase()
+          });
+        });
+      }
+    } catch (e) {
+      // make sure not to fail on start
+    }
+
+    _tabController = TabController(vsync: this, length: _days.length);
+    _tabController.addListener(() {
+      setState(() {
+        _currentIndex = _tabController.index;
+        timetableController.reset?.call();
+      });
+    });
+
     await DataService.updateEvents(_events).whenComplete(() async {
       var places = await DataService.getTimetablePlaces();
       _timetablePlaces.clear();
@@ -63,7 +102,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
 
   Future<void> loadEventParticipants() async {
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.where((element) => element.place!.id != null)) {
+    for (var e in _events.where((element) => element.place?.id != null)) {
       var dot = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
         dot.text = e.toString();
