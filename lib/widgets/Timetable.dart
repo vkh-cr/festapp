@@ -14,7 +14,7 @@ class TimetableController {
 
 class Timetable extends StatefulWidget {
   final TimetableController? controller;
-  static const int minimalDurationMinutes = 15;
+  static const int minimalDurationMinutes = 25;
 
   const Timetable({
     super.key,
