@@ -150,7 +150,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           children: [
             SingleTableDataGrid<InformationModel>(
                 context,
-                DataService.getInformation,
+                DataService.getAllInformation,
                 InformationModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 InformationModel.idColumn,
@@ -333,7 +333,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<PlaceModel>(
                 context,
-                DataService.getPlaces,
+                DataService.getAllPlaces,
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 PlaceModel.idColumn,
@@ -457,16 +457,16 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                       title: "Moderator".tr(),
-                      field: UserGroupInfoModel.leaderColumn,
+                      field: UserGroupInfoModel.leaderUserColumn,
                       type: PlutoColumnType.text(),
                       enableEditingMode: false,
                       width: 200,
                       renderer: (rendererContext) {
                         String? userName;
-                        var currentValue = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value;
+                        var currentValue = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value;
                         if(currentValue!=null && currentValue.toString().isNotEmpty)
                         {
-                          var user = (rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value as UserInfoModel);
+                          var user = (rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value as UserInfoModel);
                           userName = user.toString();
                         }
                         return Row(
@@ -480,8 +480,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                     }
                                     DialogHelper.chooseUser(context, (person) =>
                                     setState(() {
-                                      rendererContext.row.cells[UserGroupInfoModel.leaderColumn]?.value = person;
-                                      var cell = rendererContext.row.cells[UserGroupInfoModel.leaderColumn]!;
+                                      rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value = person;
+                                      var cell = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                       context.pop();
                                     }), _allUsers, "Set".tr());
@@ -638,7 +638,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     enableEditingMode: DataService.isAdmin(),
                     field: UserInfoModel.accommodationColumn,
                     type: PlutoColumnType.text(),
-                    readOnly: true,
+                    readOnly: false,
                     width: 150,
                   ),
                   PlutoColumn(
@@ -744,8 +744,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     {
       return;
     }
-    chosenGroup.participants.addAll(users);
-    await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants);
+    chosenGroup.participants!.addAll(users);
+    await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
 
     for (var value in dataGrid.stateManager.refRows.originalList) {
       value.setChecked(false);

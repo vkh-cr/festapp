@@ -1,7 +1,9 @@
 import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -79,7 +81,16 @@ class _MapPageState extends State<MapPage> {
   final PopupController _popupLayerController = PopupController();
 
   final MapController mapController = MapController();
+  FlutterMap? _map;
+  late LatLng _mapCenter;
 
+  @override
+  void initState() {
+    super.initState();
+    _mapCenter = widget.place != null ? LatLng(widget.place!.getLat(), widget.place!.getLng()) : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     //reset static values
@@ -89,6 +100,7 @@ class _MapPageState extends State<MapPage> {
       loadPlaces(placeId: widget.id);
     }
     else{
+      //new place
       if(placeModel.latLng.toString().isEmpty)
       {
         placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
@@ -137,10 +149,29 @@ class _MapPageState extends State<MapPage> {
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
 
     _markers.clear();
-    List<PlaceModel> places = [];
+    List<PlaceModel> mapOfflinePlaces = [];
+    var offlinePlaces = OfflineDataHelper.getAllPlaces();
+    if (placeId != null && !loadOtherGroups) {
+      var place = offlinePlaces.firstWhereOrNull((p)=>p.id==placeId);
+      if(place!=null) {
+        mapOfflinePlaces = [place];
+        setMapToOnePlace(place);
+      }
+    }
+    else if (loadOtherGroups)
+    {
+      mapOfflinePlaces = offlinePlaces;
+    }
+    else
+    {
+      mapOfflinePlaces = offlinePlaces.where((element) => !element.isHidden).toList();
+    }
+    addPlacesToMap(mapOfflinePlaces);
+
+    List<PlaceModel> mapPlaces = [];
     if (placeId != null && !loadOtherGroups) {
       var place = await DataService.getPlace(placeId);
-      places = [place];
+      mapPlaces = [place];
       setMapToOnePlace(place);
     }
     else if (loadOtherGroups)
@@ -151,21 +182,26 @@ class _MapPageState extends State<MapPage> {
           continue;
         }
         element.place!.title = element.title;
-        places.add(element.place!);
+        mapPlaces.add(element.place!);
       }
     }
     else {
-      places = await DataService.getMapPlaces();
+      mapPlaces = await DataService.getMapPlaces();
     }
-    addPlacesToMap(places);
+
+    if(mapPlaces.isNotEmpty) {
+      _markers.clear();
+      addPlacesToMap(mapPlaces);
+    }
   }
 
   void setMapToOnePlace(PlaceModel place) {
-    setState(() {
-      mapController.move(LatLng(place.getLat(), place.getLng()),
-          mapController.zoom);
+      _mapCenter = LatLng(place.getLat(), place.getLng());
+      if(_map!=null)
+      {
+        mapController.move(_mapCenter, mapController.zoom);
+      }
       pageTitle = place.title!;
-    });
   }
 
   void addPlacesToMap(List<PlaceModel> places) {
@@ -208,13 +244,13 @@ class _MapPageState extends State<MapPage> {
       ),
       body: Stack(
         children: [
-          FlutterMap(
+          _map = FlutterMap(
             mapController: mapController,
             options: MapOptions(
                 interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 zoom: DataService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
-                center: widget.place != null ? LatLng(widget.place!.getLat(), widget.place!.getLng()) : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]),
+                center: _mapCenter,
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(

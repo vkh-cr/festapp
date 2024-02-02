@@ -1,12 +1,13 @@
 import 'dart:collection';
 
-import 'package:avapp/data/LocalDataHelper.dart';
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/models/InformationModel.dart';
 
-import 'package:avapp/models/NewsMessage.dart';
+import 'package:avapp/models/NewsModel.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
@@ -211,6 +212,8 @@ class DataService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
+    synchronizeMySchedule(true);
+    refreshOfflineData();
     NotificationHelper.Login(currentUserId());
   }
 
@@ -241,6 +244,24 @@ class DataService {
       return female;
     }
     return male;
+  }
+
+  static Future<UserInfoModel> getFullUserInfo() async {
+    var user = await getUserInfoWithAccommodation();
+    var myGroup = await getCurrentUserGroup();
+    if(myGroup!=null)
+    {
+      user.userGroup = await getUserGroupInfo(myGroup.id!);
+    }
+    return user;
+  }
+
+  static Future<UserInfoModel> getUserInfoWithAccommodation() async {
+    var userInfo = await DataService.getCurrentUserInfo();
+    if(userInfo.accommodation != null) {
+      userInfo.place = await DataService.getUserAccommodation(userInfo.accommodation!);
+    }
+    return userInfo;
   }
 
   static Future<PlaceModel?> getUserAccommodation(
@@ -332,6 +353,7 @@ class DataService {
       UserInfoModel.roleColumn: data.role,
       UserInfoModel.accommodationColumn: data.accommodation,
       UserInfoModel.phoneColumn: data.phone,
+      UserInfoModel.birthDateColumn: data.birthDate?.toIso8601String(),
       UserInfoModel.isAdminReadOnlyColumn: data.isAdmin,
       UserInfoModel.isEditorReadOnlyColumn: data.isEditor,
     });
@@ -347,7 +369,7 @@ class DataService {
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
-  static Future<List<PlaceModel>> getPlaces() async {
+  static Future<List<PlaceModel>> getAllPlaces() async {
     var data = await _supabase.from(PlaceModel.placeTable).select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
@@ -389,7 +411,7 @@ class DataService {
     return PlaceModel.fromJson(data);
   }
 
-  static Future<List<InformationModel>> getInformation() async {
+  static Future<List<InformationModel>> getAllInformation() async {
     var data = await _supabase.from(InformationModel.informationTable).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -437,10 +459,12 @@ class DataService {
 
   static Future<void> loadIsInMyProgram(List<EventModel> events) async {
     var set = EventModel.CreateEventModelSet();
-    await loadAllMyProgramLocal(set);
+    var local = await loadAllMyScheduleOffline();
+    set.addAll(local);
     if(isLoggedIn())
     {
-      await loadAllMyProgramRemote(set);
+      var remote = await loadAllMySchedule();
+      set.addAll(remote);
     }
 
     for(var e in set)
@@ -453,14 +477,14 @@ class DataService {
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
     if(onlyForSignedIn)
     {
-      var data = EventModel.CreateEventModelSet();
-      await loadAllMyProgramLocal(data);
+      var data = await loadAllMyScheduleOffline();
 
       if(!isLoggedIn()) {
         return data.toList();
       }
 
-      await loadAllMyProgramRemote(data);
+      var remote = await loadAllMySchedule();
+      data.addAll(remote);
 
       var dataSignedIn = await _supabase
           .from('events')
@@ -488,29 +512,17 @@ class DataService {
     }
     var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, place, max_participants, is_group_event")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_groups!event_groups_event_parent_fkey(event_child)")
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
     var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
-    var groupData = await _supabase
-        .from('event_groups')
-        .select("event_child");
 
-    var groups = List.from(groupData.map((gd)=>gd["event_child"]));
-    List<EventModel> filtered = [];
-    for(var e in events)
-    {
-      if(!groups.contains(e.id))
-      {
-        filtered.add(e);
-      }
-    }
-    return filtered;
+    return events;
   }
 
-  static Future<void> loadAllMyProgramRemote(HashSet<EventModel> data) async {
+  static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
         .from('events')
         .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users_saved!inner(*)")
@@ -518,16 +530,18 @@ class DataService {
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
-    var localEvents = List<EventModel>.from(
+    var remoteEvents = List<EventModel>.from(
         dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
-    for (var element in localEvents) {
+    for (var element in remoteEvents) {
       element.isEventInMyProgram = true;
     }
-    data.addAll(localEvents);
+    var toReturn = EventModel.CreateEventModelSet();
+    toReturn.addAll(remoteEvents);
+    return toReturn;
   }
 
-  static Future<void> loadAllMyProgramLocal(HashSet<EventModel> data) async {
-    var events = LocalDataHelper.getAllMyProgram();
+  static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
+    var events = OfflineDataHelper.getAllMySchedule();
     var localData = await _supabase.from("events")
         .select("id, title, start_time, end_time, place, max_participants, is_group_event")
         .in_(EventModel.idColumn, events)
@@ -538,7 +552,9 @@ class DataService {
     for (var element in localEvents) {
       element.isEventInMyProgram = true;
     }
-    data.addAll(localEvents);
+    var toReturn = EventModel.CreateEventModelSet();
+    toReturn.addAll(localEvents);
+    return toReturn;
   }
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
@@ -546,6 +562,15 @@ class DataService {
         .from('events')
         .select("id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
         .order('start_time', ascending: true);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getEventsDescription(DateTime lastUpdate) async {
+    var data = await _supabase
+        .from(EventModel.eventTable)
+        .select("${EventModel.idColumn}, ${EventModel.descriptionColumn}")
+        .gte(EventModel.updatedAt, lastUpdate);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -621,7 +646,7 @@ class DataService {
       eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);
-    await updateUserGroupParticipants(updated, model.participants);
+    await updateUserGroupParticipants(updated, model.participants!);
   }
 
   static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
@@ -1134,35 +1159,30 @@ class DataService {
         .upsert({"user": currentUserId(), "news_id": newsId}).select();
   }
 
-  static Future<List<NewsModel>> getNewsMessages() async {
+  static Future<List<NewsModel>> getAllNewsMessages() async {
     int lastReadMessageId = 0;
     if (isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
-    var messagesData = await _supabase
-        .from('news')
-        .select('id, created_at, message, user_info_public(name, surname), user_news_views(count)')
-        .order("created_at");
-    List<NewsModel> loadedMessages = [];
+    var data = await _supabase
+        .from(Tb.news.table)
+        .select(
+            "${Tb.news.id},"
+            "${Tb.news.created_at},"
+            "${Tb.news.message},"
+            "${Tb.user_info_public.table}(${Tb.user_info_public.name},${Tb.user_info_public.surname}),"
+            "${Tb.user_news_views.table}(count)")
+        .order(Tb.news.created_at);
+
+    List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
 
     int viewsAggregate = 0;
-    for (var row in messagesData) {
-      DateTime createdAt = DateTime.parse(row['created_at']);
-      String message = row['message'];
-      var name = row[UserInfoModel.userInfoPublicTable] != null ? row['user_info_public']['name'] : "";
-      NewsModel newsMessage = NewsModel(
-          createdAt: createdAt,
-          message: message,
-          createdBy: name,
-          id: row['id']);
-
-      int views = row["user_news_views"].isEmpty ? 0 : row["user_news_views"][0]["count"];
-      viewsAggregate+=views;
-      newsMessage.views = viewsAggregate;
+    for (var message in loadedMessages) {
+      viewsAggregate += message.views;
+      message.views = viewsAggregate;
       if (isLoggedIn()) {
-        newsMessage.isRead = lastReadMessageId >= newsMessage.id;
+        message.isRead = lastReadMessageId >= message.id;
       }
-      loadedMessages.add(newsMessage);
     }
     return loadedMessages;
   }
@@ -1233,10 +1253,10 @@ class DataService {
           .maybeSingle();
       isSaved = data != null;
     }
-    return isSaved || LocalDataHelper.isEventSaved(id);
+    return isSaved || OfflineDataHelper.isEventSaved(id);
   }
 
-  static Future<void> removeFromMyProgram(int id) async {
+  static Future<void> removeFromMySchedule(int id) async {
     if(isLoggedIn()) {
       await _supabase
           .from(EventModel.eventUsersSavedTable)
@@ -1244,33 +1264,40 @@ class DataService {
           .eq(EventModel.eventUsersSavedEventColumn, id)
           .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
     }
-    LocalDataHelper.removeFromMyProgram(id);
+    OfflineDataHelper.removeFromMySchedule(id);
     ToastHelper.Show("Removed from My schedule.".tr());
   }
 
-  static Future<void> addToMyProgram(int id) async {
+  static Future<void> addToMySchedule(int id) async {
     if(isLoggedIn()) {
         await _supabase
             .from(EventModel.eventUsersSavedTable)
             .insert({EventModel.eventUsersSavedEventColumn: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
     }
-    LocalDataHelper.addToMyProgram(id);
+    OfflineDataHelper.addToMySchedule(id);
     ToastHelper.Show("Added to My schedule.".tr());
   }
   
-  static Future<void> synchronizeMyProgram()
+  static Future<void> synchronizeMySchedule([bool join = false])
   async {
     if(!isLoggedIn()){
       return;
     }
     HashSet<EventModel> data = EventModel.CreateEventModelSet();
 
-    await loadAllMyProgramLocal(data);
-    await loadAllMyProgramRemote(data);
+    var remote = await loadAllMySchedule();
+    var local = await loadAllMyScheduleOffline();
 
-    var currentUserEventIds = List<int>.from(
-        data.map((x) => x.id));
-    LocalDataHelper.saveMyProgramData(currentUserEventIds);
+    if (join) {
+      data.addAll(remote);
+      data.addAll(local);
+    }
+    else {
+      data = remote;
+    }
+
+    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
+    OfflineDataHelper.saveMyScheduleData(currentUserEventIds);
 
     var values = [];
     for(var v in currentUserEventIds)
@@ -1283,6 +1310,37 @@ class DataService {
 
     await _supabase.from(EventModel.eventUsersSavedTable)
     .upsert(values);
+  }
+
+  static Future<void> refreshOfflineData() async {
+    var lastUpdated = OfflineDataHelper.getLastUpdate();
+    var now = DateTime.now().toUtc();
+
+    var globalSettings = await DataService.loadOrInitGlobalSettings();
+    OfflineDataHelper.saveGlobalSettings(globalSettings);
+
+    if(DataService.isLoggedIn()) {
+      var userInfo = await getFullUserInfo();
+      OfflineDataHelper.saveUserInfo(userInfo);
+    }
+    else {
+      OfflineDataHelper.deleteUserInfo();
+    }
+
+    var places = await getAllPlaces();
+    OfflineDataHelper.saveAllPlaces(places);
+
+    var info = await getAllInformation();
+    OfflineDataHelper.saveAllInfo(info);
+
+    var messages = await getAllNewsMessages();
+    OfflineDataHelper.saveAllMessages(messages);
+
+    var fullEvents = await getEventsDescription(lastUpdated);
+    for(var e in fullEvents) {
+      OfflineDataHelper.saveEventDescription(e);
+    }
+    OfflineDataHelper.saveLastUpdate(now);
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
@@ -1298,4 +1356,17 @@ class DataService {
 //   }
 //   return toReturn;
 // }
+}
+
+extension FilterExtensions on List<EventModel> {
+  List<EventModel> filterRootEvents() {
+    List<EventModel> filtered = [];
+    var children = where((element) => element.childEventIds!=null)
+        .expand((element) => element.childEventIds!).toList();
+    for(var e in where((element) => !children.contains(element.id!)))
+    {
+      filtered.add(e);
+    }
+    return filtered;
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
@@ -108,6 +109,7 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if(!DataService.isLoggedIn())
@@ -149,13 +151,19 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadData() async {
-    userData = await DataService.getCurrentUserInfo();
-    setState(() {});
-    if(userData!.accommodation != null)
-    {
-      userData!.place = await DataService.getUserAccommodation(userData!.accommodation!);
-      setState(() {});
-    }
+    loadDataOffline();
+    var userInfo = await DataService.getUserInfoWithAccommodation();
+    OfflineDataHelper.saveUserInfo(userInfo);
+    setState(() {
+      userData = userInfo;
+    });
+  }
+
+  void loadDataOffline() {
+    var userInfo = OfflineDataHelper.getUserInfo();
+    setState(() {
+      userData = userInfo;
+    });
   }
 }
 

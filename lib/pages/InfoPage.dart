@@ -1,3 +1,4 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
@@ -65,10 +66,11 @@ class _InfoPageState extends State<InfoPage> {
                                 onPressed: () => context.push(HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
                                   if(value != null)
                                   {
-                                    item.description = value as String;
+                                    setState(() {
+                                      item.description = value as String;
+                                    });
                                     await DataService.updateInformation(item);
                                     ToastHelper.Show("Content has been changed.".tr());
-                                    context.pushReplacement(InfoPage.ROUTE);
                                   }
                                 }),
                                 child: const Text("Edit content").tr())),
@@ -89,7 +91,9 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
+    _informationList = OfflineDataHelper.getAllInfo();
     _informationList = await DataService.getActiveInformation();
+    OfflineDataHelper.saveAllInfo(_informationList!);
     setState(() {});
   }
 }

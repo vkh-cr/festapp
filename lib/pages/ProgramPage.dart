@@ -1,3 +1,4 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
@@ -20,18 +21,41 @@ class ProgramPage extends StatefulWidget {
 class _ProgramPageState extends State<ProgramPage> {
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     loadData();
   }
 
   Future<void> loadData() async {
+    loadDataOffline();
+
     DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
-      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
+      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModelAsChild(e)));
       await loadEventParticipants();
-      await DataService.synchronizeMyProgram();
+      await DataService.synchronizeMySchedule();
     });
+  }
+
+  void loadDataOffline() {
+    var offlineEvents = OfflineDataHelper.getAllEvents();
+    var mySchedules = OfflineDataHelper.getAllMySchedule();
+    for (var e in offlineEvents) {
+      if (mySchedules.contains(e.id!)) {
+        e.isEventInMyProgram = true;
+      }
+    }
+    var myEvents = offlineEvents.where((e) =>
+      e.isEventInMyProgram == true ||
+      (e.isGroupEvent && DataService.isLoggedIn()) ||
+      e.isSignedIn);
+
+      _events.clear();
+      _events.addAll(myEvents);
+
+      _dots.clear();
+      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+      setState(() {});
   }
 
   @override
