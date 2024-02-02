@@ -331,14 +331,14 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimetableItem item) async {
-    await DataService.addToMyProgram(item.id);
+    await DataService.addToMySchedule(item.id);
     setState(() {
       item.itemType = TimetableItemType.saved;
     });
   }
 
   Future<void> removeFromMyProgram(TimetableItem item) async {
-    await DataService.removeFromMyProgram(item.id);
+    await DataService.removeFromMySchedule(item.id);
     setState(() {
       item.itemType = TimetableItemType.canSave;
     });

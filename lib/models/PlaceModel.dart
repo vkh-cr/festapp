@@ -23,6 +23,9 @@ class PlaceModel extends IPlutoRowModel {
   static const String placeTable = "places";
   static const String timetablePlacesTable = "timetable_places";
   static const String timetablePlacesTablePlaceColumn = "place";
+  static const String placesOffline = "places";
+  static const String placeObjectColumn = "placeObject";
+
 
   double getLat() => latLng["lat"];
   double getLng() => latLng["lng"];

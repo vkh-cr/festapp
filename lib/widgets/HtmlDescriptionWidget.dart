@@ -31,25 +31,23 @@ class HtmlDescriptionWidget extends StatefulWidget {
   const HtmlDescriptionWidget({super.key, required this.html});
 
   @override
-  _HtmlDescriptionWidgetState createState() => _HtmlDescriptionWidgetState(html);
+  _HtmlDescriptionWidgetState createState() => _HtmlDescriptionWidgetState();
 }
 
 class _HtmlDescriptionWidgetState extends State<HtmlDescriptionWidget> {
 
-  final String html;
-  _HtmlDescriptionWidgetState(this.html);
+  _HtmlDescriptionWidgetState();
   @override
   Widget build(BuildContext context) {
     return HtmlWithAppLinksWidget(
       // the first parameter (`html`) is required
       context,
-        html,
+        widget.html,
         // select the render mode for HTML body
         // by default, a simple `Column` is rendered
         // consider using `ListView` or `SliverList` for better performance
         renderMode: RenderMode.column,
       textStyle: const TextStyle(fontSize: 18, fontFamily: "Futura"),
-
     );
     }
   }

@@ -81,6 +81,13 @@ class EventModel extends IPlutoRowModel {
         }
       }
     }
+
+    if(json.containsKey(childEventsList)) {
+      childEvents = childEvents ?? [];
+      List<dynamic> toAdd = json[childEventsList]??[];
+      childEvents.addAll(toAdd.map((e) { return e as int;}));
+    }
+
     return EventModel(
       startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
@@ -116,6 +123,8 @@ class EventModel extends IPlutoRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
+    isEventInMyProgram = event.isEventInMyProgram;
+    childEventIds = event.childEventIds;
     place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
   }
 
@@ -127,12 +136,15 @@ class EventModel extends IPlutoRowModel {
   static const String titleColumn = "title";
   static const String descriptionColumn = "description";
   static const String parentEventColumn = "parentEvent";
+  static const String childEventsList = "childEvents";
+  static const String updatedAt = "updated_at";
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
   static const String placesTable = "places";
   static const String eventTable = "events";
-  static const String eventTableStorage = "events";
+  static const String eventsOffline = "events";
+  static const String eventsLastUpdate = "lastUpdate";
   static const String eventUsersTable = "event_users";
 
   static const String eventUsersSavedTable = "event_users_saved";
@@ -231,6 +243,7 @@ class EventModel extends IPlutoRowModel {
     isEventInMyProgramColumn: isEventInMyProgram,
     isGroupEventColumn: isGroupEvent,
     placeColumn: place?.id,
+    childEventsList: childEventIds
   };
 
   static HashSet<EventModel> CreateEventModelSet() {

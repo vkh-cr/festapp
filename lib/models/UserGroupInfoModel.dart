@@ -1,12 +1,12 @@
+import 'package:avapp/models/Tb.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
-import '../dataGrids/PlutoAbstract.dart';
 import '../data/DataService.dart';
+import '../dataGrids/PlutoAbstract.dart';
 import 'PlaceModel.dart';
 import 'UserInfoModel.dart';
 
 class UserGroupInfoModel extends IPlutoRowModel {
-
   int? id;
   String title;
   UserInfoModel? leader;
@@ -14,7 +14,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
   int? placeId;
   String? leaderId;
   String? description;
-  Set<UserInfoModel> participants;
+  Set<UserInfoModel>? participants = {};
 
   UserGroupInfoModel({
     required this.id,
@@ -24,52 +24,59 @@ class UserGroupInfoModel extends IPlutoRowModel {
     this.description,
     this.place,
     this.placeId,
-    required this.participants,
-    });
+    this.participants,
+  });
 
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
       id: json[idColumn],
-      leaderId: json.containsKey(leaderColumn) ? json[leaderColumn] : null,
-      title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-      placeId: json.containsKey(placeColumn) ? json[placeColumn] : null,
-      place: json.containsKey(PlaceModel.placeTable) && json[PlaceModel.placeTable] != null ? PlaceModel.fromJson(json[PlaceModel.placeTable]) : null,
-      description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
-      leader: json[userInfoTable] != null ? UserInfoModel.fromJson(json[userInfoTable]) : null,
-      participants: json.containsKey(userGroupsTable) ?
-      Set<UserInfoModel>.from(json[userGroupsTable].
-      map((e)=>UserInfoModel.fromJson(
-        e["user_info"] != null ?
-        e["user_info"] :
-        e["user_info_public"] != null ?
-        e["user_info_public"]:
-        {}
-      ))) : {},
-  );
+      leaderId: json[leaderColumn],
+      title: json[titleColumn],
+      placeId: json[placeColumn],
+      place: json[PlaceModel.placeTable] != null
+          ? PlaceModel.fromJson(json[PlaceModel.placeTable])
+          : json[PlaceModel.placeObjectColumn] != null
+              ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
+              : null,
+      description: json[descriptionColumn],
+      leader: json[Tb.user_info.table] != null
+          ? UserInfoModel.fromJson(json[Tb.user_info.table])
+          : json[Tb.user_info_public.table] != null
+              ? UserInfoModel.fromJson(json[Tb.user_info_public.table])
+              : json[leaderUserColumn] != null
+                  ? UserInfoModel.fromJson(json[leaderUserColumn])
+                  : null,
+      participants: json.containsKey(userGroupsTable)
+          ? Set<UserInfoModel>.from(json[userGroupsTable].map((e) =>
+              UserInfoModel.fromJson(e[Tb.user_info.table] ??
+                  (e[Tb.user_info_public.table] ?? {}))))
+          : json[participantsColumn] != null
+              ? Set<UserInfoModel>.from(json[participantsColumn]
+                  .map((p) => UserInfoModel.fromJson(p)))
+              : {},
+    );
   }
-
 
   static const String idColumn = "id";
   static const String titleColumn = "title";
   static const String descriptionColumn = "description";
   static const String placeColumn = "place";
   static const String leaderColumn = "leader";
+  static const String leaderUserColumn = "leaderUser";
 
   static const String participantsColumn = "participants";
   static const String userGroupInfoTable = "user_group_info";
   static const String userGroupsTable = "user_groups";
-  static const String userInfoTable = "user_info";
-
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
-      id: json[idColumn] == -1 ? null : json[idColumn],
-      title: json[titleColumn],
-      leader: json[leaderColumn] == "" ? null : json[leaderColumn],
-      description: json[descriptionColumn],
-      participants: json[participantsColumn] == "" ? [] : json[participantsColumn],
-      place: (json[placeColumn] as PlaceModel?)
-    );
+        id: json[idColumn] == -1 ? null : json[idColumn],
+        title: json[titleColumn],
+        leader: json[leaderUserColumn] == "" ? null : json[leaderUserColumn],
+        description: json[descriptionColumn],
+        participants:
+            json[participantsColumn] == "" ? [] : json[participantsColumn],
+        place: (json[placeColumn] as PlaceModel?));
   }
 
   @override
@@ -77,12 +84,21 @@ class UserGroupInfoModel extends IPlutoRowModel {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),
-      leaderColumn: PlutoCell(value: leader),
+      leaderUserColumn: PlutoCell(value: leader),
       descriptionColumn: PlutoCell(value: description),
       placeColumn: PlutoCell(value: place),
       participantsColumn: PlutoCell(value: participants),
     });
   }
+
+  Map toJson() => {
+        idColumn: id,
+        titleColumn: title,
+        leaderUserColumn: leader,
+        PlaceModel.placeObjectColumn: place,
+        descriptionColumn: description,
+        participantsColumn: participants?.toList()
+      };
 
   @override
   Future<void> deleteMethod() async {

@@ -3,7 +3,7 @@ import 'package:get_storage/get_storage.dart';
 class StorageHelper
 {
   static final storages = {};
-  static final box = GetStorage();
+  static final box = GetStorage("GetStorage");
   static String? Get(String key, [String? storage]){
     if(storage == null)
     {
@@ -26,5 +26,17 @@ class StorageHelper
       storages[storage] = GetStorage(storage);
     }
     storages[storage].write(key, value);
+  }
+  static void Remove(String key, [String? storage]){
+    if(storage == null)
+    {
+      box.remove(key);
+      return;
+    }
+    if(!storages.containsKey(storage))
+    {
+      storages[storage] = GetStorage(storage);
+    }
+    storages[storage].remove(key);
   }
 }

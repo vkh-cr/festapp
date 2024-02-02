@@ -1,3 +1,4 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
@@ -9,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../models/NewsMessage.dart';
+import '../models/NewsModel.dart';
 import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
 
@@ -40,10 +41,7 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   Future<void> loadNewsMessages() async {
-    setState(() {
-      newsMessages = [];
-    });
-    var loadedMessages = await DataService.getNewsMessages();
+    var loadedMessages = await DataService.getAllNewsMessages();
     setState(() {
       newsMessages = loadedMessages;
     });
@@ -54,8 +52,9 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    newsMessages = OfflineDataHelper.getAllMessages();
     loadNewsMessages();
   }
 
@@ -79,9 +78,9 @@ class _NewsPageState extends State<NewsPage> {
               final previousMessage = index > 0 ? newsMessages[index - 1] : null;
 
               final isSameDay = previousMessage != null &&
-                  message.createdAt.year == previousMessage.createdAt.year &&
-                  message.createdAt.month == previousMessage.createdAt.month &&
-                  message.createdAt.day == previousMessage.createdAt.day;
+                  message.createdAt!.year == previousMessage.createdAt!.year &&
+                  message.createdAt!.month == previousMessage.createdAt!.month &&
+                  message.createdAt!.day == previousMessage.createdAt!.day;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -93,11 +92,11 @@ class _NewsPageState extends State<NewsPage> {
                       padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
                       alignment: Alignment.topRight,
                       child: Text(
-                        DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt),
+                        DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt!),
                         style: message.isRead?readTextStyle:unReadTextStyle,
                       ),
                     ),
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy, style: message.isRead?readTextStyle:unReadTextStyle,)),
+                  Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy??"", style: message.isRead?readTextStyle:unReadTextStyle,)),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     child: Container(
@@ -107,7 +106,7 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                       child: Column(
                         children: [
-                          Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message)),
+                          Padding(padding: const EdgeInsets.all(16), child: HtmlDescriptionWidget(html: message.message!)),
                           Visibility(
                             visible: DataService.isLoggedIn(),
                             child: Padding(padding: const EdgeInsets.all(8), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54,), const SizedBox(width: 6), Text(message.views.toString(), style: readTextStyle,), const SizedBox(width: 10),],)))

@@ -31,12 +31,17 @@ class UserInfoModel extends IPlutoRowModel {
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
   static const String birthDateColumn = "birth_date";
+  static const String placeColumn = "placeColumn";
+  static const String userGroupColumn = "userGroup";
 
   static const String isEditorReadOnlyColumn = "is_editor_readonly";
   static const String isAdminReadOnlyColumn = "is_admin_readonly";
 
   static const String userInfoTable = "user_info";
   static const String userInfoPublicTable = "user_info_public";
+  static const String userInfoOffline = "user_info";
+
+  static const String birthDateJsonFormat = "yyyy-MM-dd";
 
   PlaceModel? place;
 
@@ -65,8 +70,9 @@ class UserInfoModel extends IPlutoRowModel {
      this.isAdmin,
      this.isEditor,
      this.phone,
-     this.accommodation});
-
+     this.accommodation,
+     this.place,
+     this.userGroup});
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
@@ -78,6 +84,8 @@ class UserInfoModel extends IPlutoRowModel {
       phone: json[phoneColumn],
       role: json[roleColumn],
       accommodation: json[accommodationColumn],
+      place: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
+      userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
       sex: json[sexColumn],
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       //todo remove backward compatibility
@@ -90,7 +98,7 @@ class UserInfoModel extends IPlutoRowModel {
     DateTime? bd;
     if (json[birthDateColumn]!=null){
       var birthDateString = json[birthDateColumn];
-      var dateFormat = DateFormat("yyyy-MM-dd");
+      var dateFormat = DateFormat(birthDateJsonFormat);
       bd = dateFormat.parse(birthDateString);
     }
       return UserInfoModel(
@@ -119,11 +127,27 @@ class UserInfoModel extends IPlutoRowModel {
       roleColumn: PlutoCell(value: role ?? ""),
       accommodationColumn: PlutoCell(value: accommodation ?? ""),
       sexColumn: PlutoCell(value: sex),
-      birthDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0))),
+      birthDateColumn: PlutoCell(value: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0))),
       isAdminReadOnlyColumn: PlutoCell(value: isAdmin.toString()),
       isEditorReadOnlyColumn: PlutoCell(value: isEditor.toString()),
     });
   }
+
+  Map toJson() =>
+  {
+    idColumn: id,
+    emailReadonlyColumn: email,
+    nameColumn: name,
+    surnameColumn: surname,
+    phoneColumn: phone,
+    roleColumn: role,
+    placeColumn: place?.toJson(),
+    userGroupColumn: userGroup?.toJson(),
+    sexColumn: sex,
+    birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
+    isAdminReadOnlyColumn: isAdmin,
+    isEditorReadOnlyColumn: isEditor,
+  };
 
   @override
   Future<void> deleteMethod() async {

@@ -1,9 +1,11 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/ButtonsHelper.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -54,8 +56,8 @@ class _EventPageState extends State<EventPage> {
         ),
         actions: ButtonsHelper.getAddToMyProgramButton(
           _event?.canSaveEventToMyProgram(),
-          addToMyProgram,
-          removeFromMyProgram
+          addToMySchedule,
+          removeFromMySchedule
         )),
       body: Align(
         alignment: Alignment.topCenter,
@@ -116,12 +118,13 @@ class _EventPageState extends State<EventPage> {
                                     await DataService.updateUserGroupInfo(_groupInfoModel!);
                                   }
                                   else{
-                                    _event!.description = changed;
+                                    setState(() {
+                                      _event!.description = changed;
+                                    });
                                     await DataService.updateEvent(_event!);
                                   }
-
+                                  await loadData(_event!.id!);
                                   ToastHelper.Show("Content has been changed.".tr());
-                                  context.pushReplacement(EventPage.ROUTE+"/"+_event!.id!.toString());
                                 }
                               }),
                               child: const Text("Edit content").tr()))
@@ -146,7 +149,7 @@ class _EventPageState extends State<EventPage> {
                   Visibility(
                       visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
                       child: Padding(
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         child: const Text(
                           "You need to sign in to this event. First, sign in to the app.",
                           style: TextStyle(color: AppConfig.attentionColor),).tr(),
@@ -155,7 +158,7 @@ class _EventPageState extends State<EventPage> {
                     visible: _event != null && _event?.description != null,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: HtmlDescriptionWidget(html: _event?.description ?? ""),
+                      child:  HtmlDescriptionWidget(html: _event?.description ?? ""),
                     ),
                   ),
                   Visibility(
@@ -191,7 +194,7 @@ class _EventPageState extends State<EventPage> {
                       ),
                   ),
                   Visibility(
-                  visible: DataService.hasGroup() && _groupInfoModel != null,
+                  visible: _groupInfoModel != null,
                   child: ExpansionTile(
                     title: Text(_groupInfoModel?.title ?? ""),
                     children: [Column(
@@ -213,11 +216,11 @@ class _EventPageState extends State<EventPage> {
                           shrinkWrap: true,
                           padding: const EdgeInsets.all(8),
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _groupInfoModel?.participants.length??0,
+                          itemCount: _groupInfoModel?.participants!.length??0,
                           itemBuilder: (BuildContext context, int index) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                              child: Text("${_groupInfoModel?.participants.toList()[index].name}", style: normalTextStyle),
+                              child: Text("${_groupInfoModel?.participants!.toList()[index].name}", style: normalTextStyle),
                             );
                           })
                       ],
@@ -232,15 +235,15 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Future<void> addToMyProgram() async {
-    await DataService.addToMyProgram(_event!.id!);
+  Future<void> addToMySchedule() async {
+    await DataService.addToMySchedule(_event!.id!);
     setState(() {
       _event!.isEventInMyProgram = true;
     });
   }
 
-  Future<void> removeFromMyProgram() async {
-    await DataService.removeFromMyProgram(_event!.id!);
+  Future<void> removeFromMySchedule() async {
+    await DataService.removeFromMySchedule(_event!.id!);
     setState(() {
       _event!.isEventInMyProgram = false;
     });
@@ -253,12 +256,56 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadData(int id) async {
+    loadOfflineData(widget.id!);
+
     await loadEvent(id);
+    OfflineDataHelper.saveEventDescription(_event!);
+
     await loadParticipants(id);
     var isSaved = await DataService.isEventSaved(id);
     setState(() {
       _event!.isEventInMyProgram = isSaved;
     });
+  }
+
+  void loadOfflineData(int id) {
+    var allEvents = OfflineDataHelper.getAllEvents();
+    var event = allEvents.firstWhereOrNull((element) => element.id == id);
+    if(event!=null) {
+      if (event.isGroupEvent && DataService.isLoggedIn()) {
+        var userInfo = OfflineDataHelper.getUserInfo();
+        if(userInfo?.userGroup!=null) {
+          event.title = userInfo!.userGroup!.title;
+          event.description = userInfo.userGroup!.description;
+          event.place = userInfo.userGroup!.place;
+          _groupInfoModel = userInfo.userGroup;
+        }
+      }
+      else {
+        var descr = OfflineDataHelper.getEventDescription(id.toString());
+        event.description = descr?.description;
+
+        if(event.place?.id!=null) {
+          var place = OfflineDataHelper.getAllPlaces().firstWhereOrNull((element) => element.id == event.place!.id);
+          event.place = place;
+        }
+        else {
+          event.place = null;
+        }
+        event.isEventInMyProgram = OfflineDataHelper.isEventSaved(id);
+      }
+
+      var childEvents = allEvents.where((e)=> event.childEventIds?.contains(e.id)??false)
+          .sortedBy((element) => element.title??"")
+          .sortedBy((element) => element.startTime);
+      event.childEvents = childEvents;
+      _childDots.clear();
+      _childDots.addAll(event.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+
+      setState(() {
+        _event = event;
+      });
+    }
   }
 
   Future<void> loadParticipants(int id) async {
@@ -300,7 +347,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   _eventPressed(int id) {
-        context.push("${EventPage.ROUTE}/$id");
+        context.push("${EventPage.ROUTE}/$id").then((value) => loadData(_event!.id!));
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {

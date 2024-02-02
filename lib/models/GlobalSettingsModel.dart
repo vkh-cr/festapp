@@ -13,6 +13,7 @@ class GlobalSettingsModel {
   static const String defaultMapZoomCode = "defaultMapZoom";
   static const String tooSoonMessageCode = "tooSoonMessage";
   static const String globalSettingsTable = "global_settings";
+  static const String globalSettingsOffline = "globalSettingsOffline";
 
   GlobalSettingsModel({
     this.id,

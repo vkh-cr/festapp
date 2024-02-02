@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
@@ -10,11 +10,11 @@ import 'package:avapp/pages/ProgramViewPage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';
 import 'package:avapp/services/NotificationHelper.dart';
-import 'package:avapp/services/StorageHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:badges/badges.dart' as badges;
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -57,10 +57,27 @@ Future<void> initializeEverything() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
+
   if (!DataService.isLoggedIn()) {
-    DataService.tryAuthUser()
-        .then((value) => DataService.synchronizeMyProgram());
+    await DataService.tryAuthUser();
   }
+  try{
+    if(DataService.isLoggedIn()) {
+      await DataService.getCurrentUserInfo();
+    }
+  }catch(e){}
+
+  //load all offlineData
+  DataService.refreshOfflineData();
+
+  try {
+    var settings = OfflineDataHelper.getGlobalSettings();
+    if(settings!=null){
+      DataService.globalSettingsModel = settings;
+    }
+  }
+  catch(e){}
+
   try {
     NotificationHelper.Initialize();
     DataService.loadOrInitGlobalSettings();
@@ -340,17 +357,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   Future<void> loadEventParticipants() async {
     // update sign in status / current participants for events
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events) {
+    for (var e in _events.filterRootEvents()) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
         dot.rightText = e.toString();
         dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
       });
     }
-
-    //update offline
-    var encoded = jsonEncode(_events);
-    StorageHelper.Set(EventModel.eventTableStorage, encoded);
+    setState(() {});
   }
 
   int _messageCount = 0;
@@ -361,41 +375,40 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       _messageCount < 100 ? _messageCount.toString() : "99";
 
   Future<void> loadData() async {
-    //get data from offline
-    try {
-      var eventData = StorageHelper.Get(EventModel.eventTableStorage);
-      if (eventData != null && _events.isEmpty) {
-        var offlineEventsData = json.decode(eventData);
-        setState(() {
-          _events.addAll(List<EventModel>.from(
-              offlineEventsData.map((o) => EventModel.fromJson(o))));
-          _dots.clear();
-          _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-        });
-      }
-    } catch (e) {
-      // make sure not to fail on start
-    }
+    loadOfflineData();
 
     if (DataService.isLoggedIn()) {
-      await DataService.getCurrentUserInfo()
+      DataService.getCurrentUserInfo()
           .then((value) => userName = value.name!);
     }
 
-    //load online data
     await DataService.updateEvents(_events).whenComplete(() async {
       _dots.clear();
-      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModel(e)));
-      if (!DataService.isLoggedIn()) {
-        return;
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e)));
+      if (DataService.isLoggedIn()) {
+        DataService.countNewMessages().then((value) => {
+          setState(() {
+            _messageCount = value;
+          })
+        });
       }
-      var count = await DataService.countNewMessages();
-
-      setState(() {
-        _messageCount = count;
-      });
     });
+    await loadEventParticipants();
+    OfflineDataHelper.saveAllEvents(_events);
+  }
 
-    loadEventParticipants();
+  void loadOfflineData() {
+    if(_events.isEmpty) {
+      var offlineEvents = OfflineDataHelper.getAllEvents();
+      _events.addAll(offlineEvents);
+      _dots.clear();
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e)));
+    }
+    if (DataService.isLoggedIn()) {
+      var userInfo = OfflineDataHelper.getUserInfo();
+      setState(() {
+        userName = userInfo?.name??"";
+      });
+    }
   }
 }
