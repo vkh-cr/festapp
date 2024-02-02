@@ -1357,16 +1357,3 @@ class DataService {
 //   return toReturn;
 // }
 }
-
-extension FilterExtensions on List<EventModel> {
-  List<EventModel> filterRootEvents() {
-    List<EventModel> filtered = [];
-    var children = where((element) => element.childEventIds!=null)
-        .expand((element) => element.childEventIds!).toList();
-    for(var e in where((element) => !children.contains(element.id!)))
-    {
-      filtered.add(e);
-    }
-    return filtered;
-  }
-}

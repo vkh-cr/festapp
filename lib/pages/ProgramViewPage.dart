@@ -1,3 +1,4 @@
+import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
@@ -54,7 +55,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
 
       _items.clear();
       _items.addAll(_events
-          .where((element) => element.place!.id != null)
+          .timetableEventsFilter(Timetable.minimalDurationMinutes)
           .map((e) => TimetableItem.fromEventModel(e)));
       _days.clear();
       var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
@@ -117,17 +118,19 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     }
 
     _items.clear();
-    _items.addAll(_events.where((e) => e.place?.id != null).map((e) => TimetableItem.fromEventModel(e)));
+    _items.addAll(_events
+        .timetableEventsFilter(Timetable.minimalDurationMinutes)
+        .map((e) => TimetableItem.fromEventModel(e)));
     setState(() {});
   }
 
   Future<void> loadEventParticipants() async {
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.where((element) => element.place?.id != null)) {
-      var dot = _items.singleWhere((element) => element.id == e.id!);
+    for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
+      var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
-        dot.text = e.toString();
-        dot.itemType = TimetableItem.getIndicatorFromEvent(e);
+        item.text = e.toString();
+        item.itemType = TimetableItem.getIndicatorFromEvent(e);
       });
     }
   }

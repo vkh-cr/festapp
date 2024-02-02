@@ -14,6 +14,7 @@ class TimetableController {
 
 class Timetable extends StatefulWidget {
   final TimetableController? controller;
+  static const int minimalDurationMinutes = 15;
 
   const Timetable({
     super.key,
@@ -476,7 +477,7 @@ class TimetableItem {
       endTime: model.endTime,
       itemType: getIndicatorFromEvent(model),
       id: model.id!,
-      text: model.title!,
+      text: model.toString(),
       placeId: model.place!.id!,
     );
   }

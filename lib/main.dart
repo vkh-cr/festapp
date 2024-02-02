@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:avapp/appConfig.dart';
+import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/InfoPage.dart';
@@ -70,6 +71,7 @@ Future<void> initializeEverything() async {
   DataService.refreshOfflineData();
 
   try {
+    await OfflineDataHelper.initialize();
     var settings = OfflineDataHelper.getGlobalSettings();
     if(settings!=null){
       DataService.globalSettingsModel = settings;
