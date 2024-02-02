@@ -145,7 +145,6 @@ class EventModel extends IPlutoRowModel {
   static const String placeColumn = "place";
   static const String placesTable = "places";
   static const String eventTable = "events";
-  static const String eventsOffline = "events";
   static const String eventsLastUpdate = "lastUpdate";
   static const String eventUsersTable = "event_users";
 

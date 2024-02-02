@@ -71,6 +71,7 @@ Future<void> initializeEverything() async {
   DataService.refreshOfflineData();
 
   try {
+    await OfflineDataHelper.initialize();
     var settings = OfflineDataHelper.getGlobalSettings();
     if(settings!=null){
       DataService.globalSettingsModel = settings;

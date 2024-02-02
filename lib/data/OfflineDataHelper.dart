@@ -10,15 +10,16 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/services/StorageHelper.dart';
 
 class OfflineDataHelper {
-  static const String myScheduleStorage = "myProgramStorage";
+  static const String myScheduleOffline = "mySchedule";
+  static const String eventsOfflineStorage = "events";
 
   static void saveMyScheduleData(List<int> offlineData) {
     var encoded = jsonEncode(offlineData);
-    StorageHelper.Set(myScheduleStorage, encoded);
+    StorageHelper.Set(myScheduleOffline, encoded);
   }
 
   static List<int> getMyScheduleData() {
-    var eventData = StorageHelper.Get(myScheduleStorage);
+    var eventData = StorageHelper.Get(myScheduleOffline);
     if (eventData == null) {
       return <int>[];
     }
@@ -66,10 +67,10 @@ class OfflineDataHelper {
       getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
 
   static void saveEventDescription(EventModel toSave) =>
-      saveOffline(toSave.id!.toString(), toSave, EventModel.eventsOffline);
+      saveOffline(toSave.id!.toString(), toSave, eventsOfflineStorage);
 
   static EventModel? getEventDescription(String id) =>
-      getOffline(id, EventModel.fromJson, EventModel.eventsOffline);
+      getOffline(id, EventModel.fromJson, eventsOfflineStorage);
 
   static void saveUserInfo(UserInfoModel toSave) =>
       saveOffline(UserInfoModel.userInfoOffline, toSave);
@@ -87,10 +88,10 @@ class OfflineDataHelper {
       getOffline(GlobalSettingsModel.globalSettingsOffline, GlobalSettingsModel.fromJson);
 
   static void saveAllEvents(List<EventModel> toSave) =>
-      saveAllOffline(EventModel.eventsOffline, toSave);
+      saveAllOffline(eventsOfflineStorage, toSave);
 
   static List<EventModel> getAllEvents() =>
-      getAllOffline(EventModel.eventsOffline, EventModel.fromJson);
+      getAllOffline(eventsOfflineStorage, EventModel.fromJson);
 
   static void saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);
@@ -150,6 +151,11 @@ class OfflineDataHelper {
       //catch incompatibility fails
     }
     return toReturn;
+  }
+
+  static Future<void> initialize() async {
+    await StorageHelper.Initialize();
+    await StorageHelper.Initialize(eventsOfflineStorage);
   }
 
 }
