@@ -14,7 +14,6 @@ import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/widgets/ProgramTabView.dart';
 import 'package:avapp/widgets/ProgramTimeline.dart';
 import 'package:badges/badges.dart' as badges;
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
