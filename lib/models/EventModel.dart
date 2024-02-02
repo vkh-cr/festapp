@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
@@ -14,6 +15,7 @@ class EventModel extends IPlutoRowModel {
   String startTimeString() => DateFormat.Hm().format(startTime);
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
   String durationString(BuildContext context) => "${DateFormat("EEEE, MMM d, HH:mm", context.locale.languageCode).format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+  Duration duration() => startTime.isBefore(endTime) ? (DateTimeRange(start: startTime, end: endTime)).duration : Duration.zero;
 
   int? maxParticipants;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
