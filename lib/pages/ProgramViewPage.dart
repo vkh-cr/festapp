@@ -75,6 +75,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         });
       });
       await loadEventParticipants();
+      await DataService.synchronizeMySchedule();
     });
   }
 
@@ -107,15 +108,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         timetableController.reset?.call();
       });
     });
-    var mySchedules = OfflineDataHelper.getAllMySchedule();
-    for (var e in _events) {
-      if (mySchedules.contains(e.id!)) {
-        e.isEventInMyProgram = true;
-      }
-      else{
-        e.isEventInMyProgram = false;
-      }
-    }
+    OfflineDataHelper.updateEventsWithMySchedule(_events);
+    OfflineDataHelper.updateEventsWithGroupName(_events);
 
     _items.clear();
     _items.addAll(_events

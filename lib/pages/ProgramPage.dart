@@ -39,14 +39,11 @@ class _ProgramPageState extends State<ProgramPage> {
 
   void loadDataOffline() {
     var offlineEvents = OfflineDataHelper.getAllEvents();
-    var mySchedules = OfflineDataHelper.getAllMySchedule();
-    for (var e in offlineEvents) {
-      if (mySchedules.contains(e.id!)) {
-        e.isEventInMyProgram = true;
-      }
-    }
+    OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
+    OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+
     var myEvents = offlineEvents.where((e) =>
-      e.isEventInMyProgram == true ||
+      e.isEventInMySchedule == true ||
       (e.isGroupEvent && DataService.isLoggedIn()) ||
       e.isSignedIn);
 

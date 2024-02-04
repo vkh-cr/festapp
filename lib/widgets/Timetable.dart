@@ -448,10 +448,10 @@ class TimetableItem {
   static TimetableItemType getIndicatorFromEvent(EventModel model) {
     if (model.isSignedIn) {
       return TimetableItemType.signedIn;
-    } else if (model.isEventInMyProgram == true) {
+    } else if (model.isEventInMySchedule == true) {
       return TimetableItemType.saved;
-    } else if (model.isGroupEvent && DataService.currentUserGroup() != null) {
-      return TimetableItemType.saved;
+    } else if (model.isGroupEvent && model.isMyGroupEvent) {
+      return TimetableItemType.signedIn;
     } else if (model.currentParticipants != null &&
         model.maxParticipants != null &&
         (!DataService.isLoggedIn() || model.isFull())) {

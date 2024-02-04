@@ -33,7 +33,9 @@ class EventModel extends IPlutoRowModel {
   bool splitForMenWomen = false;
 
   bool isGroupEvent = false;
-  bool? isEventInMyProgram;
+  bool isMyGroupEvent = false;
+
+  bool? isEventInMySchedule;
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
           !isGroupEvent &&
@@ -41,7 +43,7 @@ class EventModel extends IPlutoRowModel {
     if(!canSave){
       return null;
     }
-    return isEventInMyProgram==false;
+    return isEventInMySchedule == false;
   }
 
   DateTime startTime;
@@ -61,7 +63,7 @@ class EventModel extends IPlutoRowModel {
     this.currentParticipants,
     required this.isSignedIn,
     required this.isGroupEvent,
-    this.isEventInMyProgram});
+    this.isEventInMySchedule});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
@@ -102,7 +104,7 @@ class EventModel extends IPlutoRowModel {
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
-      isEventInMyProgram: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
+      isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
       currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
@@ -125,7 +127,7 @@ class EventModel extends IPlutoRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
-    isEventInMyProgram = event.isEventInMyProgram;
+    isEventInMySchedule = event.isEventInMySchedule;
     childEventIds = event.childEventIds;
     place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
   }
@@ -241,7 +243,7 @@ class EventModel extends IPlutoRowModel {
     maxParticipantsColumn: maxParticipants,
     currentParticipantsColumn: currentParticipants,
     isSignedInColumn: isSignedIn,
-    isEventInMyProgramColumn: isEventInMyProgram,
+    isEventInMyProgramColumn: isEventInMySchedule,
     isGroupEventColumn: isGroupEvent,
     placeColumn: place?.id,
     childEventsList: childEventIds

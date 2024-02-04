@@ -33,7 +33,7 @@ class TimeLineItem{
       if (model.isSignedIn) {
         return DotType.closed;
       }
-      else if(model.isGroupEvent && DataService.currentUserGroup() != null)
+      else if(model.isGroupEvent && model.isMyGroupEvent)
       {
         return DotType.closed;
       }

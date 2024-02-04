@@ -238,14 +238,14 @@ class _EventPageState extends State<EventPage> {
   Future<void> addToMySchedule() async {
     await DataService.addToMySchedule(_event!.id!);
     setState(() {
-      _event!.isEventInMyProgram = true;
+      _event!.isEventInMySchedule = true;
     });
   }
 
   Future<void> removeFromMySchedule() async {
     await DataService.removeFromMySchedule(_event!.id!);
     setState(() {
-      _event!.isEventInMyProgram = false;
+      _event!.isEventInMySchedule = false;
     });
   }
 
@@ -260,12 +260,7 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     OfflineDataHelper.saveEventDescription(_event!);
-
     await loadParticipants(id);
-    var isSaved = await DataService.isEventSaved(id);
-    setState(() {
-      _event!.isEventInMyProgram = isSaved;
-    });
   }
 
   void loadOfflineData(int id) {
@@ -276,6 +271,7 @@ class _EventPageState extends State<EventPage> {
         var userInfo = OfflineDataHelper.getUserInfo();
         if(userInfo?.userGroup!=null) {
           event.title = userInfo!.userGroup!.title;
+          event.isMyGroupEvent = true;
           event.description = userInfo.userGroup!.description;
           event.place = userInfo.userGroup!.place;
           _groupInfoModel = userInfo.userGroup;
@@ -292,7 +288,7 @@ class _EventPageState extends State<EventPage> {
         else {
           event.place = null;
         }
-        event.isEventInMyProgram = OfflineDataHelper.isEventSaved(id);
+        event.isEventInMySchedule = OfflineDataHelper.isEventSaved(id);
       }
 
       var childEvents = allEvents.where((e)=> event.childEventIds?.contains(e.id)??false)
@@ -320,7 +316,7 @@ class _EventPageState extends State<EventPage> {
   Future<void> loadEvent(int eventId) async {
     var event = await DataService.getEvent(eventId);
 
-    if(event.isGroupEvent && DataService.hasGroup())
+    if(event.isGroupEvent && event.isMyGroupEvent)
     {
       var group = await DataService.getUserGroupInfo(DataService.currentUserGroup()!.id!);
       if(group == null)

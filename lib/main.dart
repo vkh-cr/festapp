@@ -401,6 +401,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   void loadOfflineData() {
     if(_events.isEmpty) {
       var offlineEvents = OfflineDataHelper.getAllEvents();
+      OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
       _events.addAll(offlineEvents);
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e)));
