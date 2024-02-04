@@ -567,11 +567,20 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<EventModel>> getEventsDescription(DateTime lastUpdate) async {
+  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
     var data = await _supabase
         .from(EventModel.eventTable)
-        .select("${EventModel.idColumn}, ${EventModel.descriptionColumn}")
-        .gte(EventModel.updatedAt, lastUpdate);
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}, ${EventModel.descriptionColumn}")
+        .in_(EventModel.idColumn, ids);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getAllEventsMeta() async {
+    var data = await _supabase
+        .from(EventModel.eventTable)
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}");
+
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -1324,8 +1333,6 @@ class DataService {
   }
 
   static Future<void> refreshOfflineData() async {
-    var lastUpdated = OfflineDataHelper.getLastUpdate();
-    var now = DateTime.now().toUtc();
 
     var globalSettings = await DataService.loadOrInitGlobalSettings();
     OfflineDataHelper.saveGlobalSettings(globalSettings);
@@ -1347,12 +1354,22 @@ class DataService {
     var messages = await getAllNewsMessages();
     OfflineDataHelper.saveAllMessages(messages);
 
-    var fullEvents = await getEventsDescription(lastUpdated);
+    var needsUpdate = <int>[];
+    var allEventsMeta = await getAllEventsMeta();
+
+    for(var e in allEventsMeta) {
+      var oe = OfflineDataHelper.getEventDescription(e.id.toString());
+      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
+          needsUpdate.add(e.id!);
+      }
+    }
+
+    var fullEvents = await getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
       OfflineDataHelper.saveEventDescription(e);
     }
+
     await DataService.synchronizeMySchedule();
-    OfflineDataHelper.saveLastUpdate(now);
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
