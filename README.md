@@ -33,6 +33,8 @@ Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwW
 - Vytváření mého programu z pomocí + tlačítka.
 - Plná podpora url (možnost odkazů na stránky v aplikaci).
 - Mezi jazyky přidána ukrajinština.
+- Další menší opravy chyb.
+
 
 
 
