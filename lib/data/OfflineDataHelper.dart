@@ -50,8 +50,28 @@ class OfflineDataHelper {
     return offlineData.contains(id);
   }
 
-  static List<int> getAllMySchedule() {
-    return getMyScheduleData();
+  static void updateEventsWithMySchedule(Iterable<EventModel> events) {
+    var myScheduleIds = getMyScheduleData();
+    for (var e in events) {
+      if (myScheduleIds.contains(e.id!)) {
+        e.isEventInMySchedule = true;
+      }
+      else{
+        e.isEventInMySchedule = false;
+      }
+    }
+  }
+
+  static void updateEventsWithGroupName(Iterable<EventModel> events) {
+    var me = getUserInfo();
+    if(me?.userGroup!=null) {
+      for (var e in events) {
+        if (e.isGroupEvent) {
+          e.title = me!.userGroup!.title;
+          e.isMyGroupEvent = true;
+        }
+      }
+    }
   }
 
   static void saveAllMessages(List<NewsModel> toSave) =>
@@ -99,12 +119,10 @@ class OfflineDataHelper {
   static List<InformationModel> getAllInfo() => getAllOffline(
       InformationModel.informationOffline, InformationModel.fromJson);
 
-  static void saveLastUpdate(DateTime date) => StorageHelper.Set(
-      EventModel.eventsLastUpdate, date.millisecondsSinceEpoch.toString());
-
-  static DateTime getLastUpdate() => DateTime.fromMillisecondsSinceEpoch(
-      int.tryParse(StorageHelper.Get(EventModel.eventsLastUpdate) ?? "0") ?? 0,
-      isUtc: true);
+  static void clearUserData() {
+    deleteOffline(UserInfoModel.userInfoOffline);
+    deleteOffline(myScheduleOffline);
+  }
 
   static void saveAllOffline<T>(String offlineTable, List<T> toSave) {
     var encoded = jsonEncode(toSave);
@@ -157,5 +175,4 @@ class OfflineDataHelper {
     await StorageHelper.Initialize();
     await StorageHelper.Initialize(eventsOfflineStorage);
   }
-
 }

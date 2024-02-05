@@ -4,7 +4,6 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
@@ -21,6 +20,7 @@ class EventModel extends IPlutoRowModel {
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
   final int? id;
+  DateTime? updatedAt;
   PlaceModel? place;
   List<EventModel> childEvents = [];
 
@@ -33,7 +33,9 @@ class EventModel extends IPlutoRowModel {
   bool splitForMenWomen = false;
 
   bool isGroupEvent = false;
-  bool? isEventInMyProgram;
+  bool isMyGroupEvent = false;
+
+  bool? isEventInMySchedule;
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
           !isGroupEvent &&
@@ -41,7 +43,7 @@ class EventModel extends IPlutoRowModel {
     if(!canSave){
       return null;
     }
-    return isEventInMyProgram==false;
+    return isEventInMySchedule == false;
   }
 
   DateTime startTime;
@@ -51,6 +53,7 @@ class EventModel extends IPlutoRowModel {
     required this.startTime,
     required this.endTime,
     required this.id,
+    this.updatedAt,
     this.title,
     this.description,
     this.maxParticipants,
@@ -61,7 +64,7 @@ class EventModel extends IPlutoRowModel {
     this.currentParticipants,
     required this.isSignedIn,
     required this.isGroupEvent,
-    this.isEventInMyProgram});
+    this.isEventInMySchedule});
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
@@ -94,6 +97,7 @@ class EventModel extends IPlutoRowModel {
       startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
       id: json[idColumn],
+      updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
       title: json.containsKey(titleColumn) ? json[titleColumn] : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
       maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
@@ -102,7 +106,7 @@ class EventModel extends IPlutoRowModel {
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
-      isEventInMyProgram: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
+      isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
       currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
@@ -125,7 +129,7 @@ class EventModel extends IPlutoRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
-    isEventInMyProgram = event.isEventInMyProgram;
+    isEventInMySchedule = event.isEventInMySchedule;
     childEventIds = event.childEventIds;
     place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
   }
@@ -139,7 +143,7 @@ class EventModel extends IPlutoRowModel {
   static const String descriptionColumn = "description";
   static const String parentEventColumn = "parentEvent";
   static const String childEventsList = "childEvents";
-  static const String updatedAt = "updated_at";
+  static const String updatedAtColumn = "updated_at";
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
@@ -181,6 +185,7 @@ class EventModel extends IPlutoRowModel {
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
       id: json[idColumn] == -1 ? null : json[idColumn],
+      updatedAt: json[updatedAtColumn],
       title: json[titleColumn],
       description: json[descriptionColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
@@ -234,6 +239,7 @@ class EventModel extends IPlutoRowModel {
   Map toJson() =>
   {
     idColumn: id,
+    updatedAtColumn: updatedAt?.toIso8601String(),
     startTimeColumn: startTime.toIso8601String(),
     endTimeColumn: endTime.toIso8601String(),
     titleColumn: title,
@@ -241,7 +247,7 @@ class EventModel extends IPlutoRowModel {
     maxParticipantsColumn: maxParticipants,
     currentParticipantsColumn: currentParticipants,
     isSignedInColumn: isSignedIn,
-    isEventInMyProgramColumn: isEventInMyProgram,
+    isEventInMyProgramColumn: isEventInMySchedule,
     isGroupEventColumn: isGroupEvent,
     placeColumn: place?.id,
     childEventsList: childEventIds

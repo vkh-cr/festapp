@@ -2,7 +2,7 @@ import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/widgets/ProgramTimeline.dart';
+import 'package:avapp/widgets/ScheduleTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -10,15 +10,15 @@ import 'package:go_router/go_router.dart';
 import '../models/EventModel.dart';
 import '../styles/Styles.dart';
 
-class ProgramPage extends StatefulWidget {
-  static const ROUTE = "/program";
-  const ProgramPage({Key? key}) : super(key: key);
+class MySchedulePage extends StatefulWidget {
+  static const ROUTE = "/myschedule";
+  const MySchedulePage({Key? key}) : super(key: key);
 
   @override
-  _ProgramPageState createState() => _ProgramPageState();
+  _MySchedulePageState createState() => _MySchedulePageState();
 }
 
-class _ProgramPageState extends State<ProgramPage> {
+class _MySchedulePageState extends State<MySchedulePage> {
 
   @override
   void didChangeDependencies() {
@@ -39,14 +39,11 @@ class _ProgramPageState extends State<ProgramPage> {
 
   void loadDataOffline() {
     var offlineEvents = OfflineDataHelper.getAllEvents();
-    var mySchedules = OfflineDataHelper.getAllMySchedule();
-    for (var e in offlineEvents) {
-      if (mySchedules.contains(e.id!)) {
-        e.isEventInMyProgram = true;
-      }
-    }
+    OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
+    OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+
     var myEvents = offlineEvents.where((e) =>
-      e.isEventInMyProgram == true ||
+      e.isEventInMySchedule == true ||
       (e.isGroupEvent && DataService.isLoggedIn()) ||
       e.isSignedIn);
 
@@ -71,7 +68,7 @@ class _ProgramPageState extends State<ProgramPage> {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: appMaxWidth),
-            child: SingleChildScrollView(child: ProgramTimeline(events: _dots, onEventPressed: _eventPressed, splitByDay: true, nodePosition: 0.3)))
+            child: SingleChildScrollView(child: ScheduleTimeline(events: _dots, onEventPressed: _eventPressed, splitByDay: true, nodePosition: 0.3)))
     ));
   }
 

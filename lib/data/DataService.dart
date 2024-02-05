@@ -218,9 +218,10 @@ class DataService {
   }
 
   static Future<void> logout() async {
+    await _supabase.auth.signOut();
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
-    await _supabase.auth.signOut();
+    OfflineDataHelper.clearUserData();
     NotificationHelper.Logout();
   }
 
@@ -470,7 +471,7 @@ class DataService {
     for(var e in set)
     {
       var eq = events.firstWhere((element) => element.id == e.id);
-      eq.isEventInMyProgram = e.isEventInMyProgram;
+      eq.isEventInMySchedule = e.isEventInMySchedule;
     }
   }
 
@@ -533,7 +534,7 @@ class DataService {
     var remoteEvents = List<EventModel>.from(
         dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
     for (var element in remoteEvents) {
-      element.isEventInMyProgram = true;
+      element.isEventInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(remoteEvents);
@@ -541,7 +542,7 @@ class DataService {
   }
 
   static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
-    var events = OfflineDataHelper.getAllMySchedule();
+    var events = OfflineDataHelper.getMyScheduleData();
     var localData = await _supabase.from("events")
         .select("id, title, start_time, end_time, place, max_participants, is_group_event")
         .in_(EventModel.idColumn, events)
@@ -550,7 +551,7 @@ class DataService {
     var localEvents = List<EventModel>.from(
         localData.map((x) => EventModel.fromJson(x)));
     for (var element in localEvents) {
-      element.isEventInMyProgram = true;
+      element.isEventInMySchedule = true;
     }
     var toReturn = EventModel.CreateEventModelSet();
     toReturn.addAll(localEvents);
@@ -566,11 +567,20 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<EventModel>> getEventsDescription(DateTime lastUpdate) async {
+  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
     var data = await _supabase
         .from(EventModel.eventTable)
-        .select("${EventModel.idColumn}, ${EventModel.descriptionColumn}")
-        .gte(EventModel.updatedAt, lastUpdate);
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}, ${EventModel.descriptionColumn}")
+        .in_(EventModel.idColumn, ids);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getAllEventsMeta() async {
+    var data = await _supabase
+        .from(EventModel.eventTable)
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}");
+
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -728,10 +738,16 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
+            "id, updated_at, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
         .eq("id", eventId)
         .single();
     var event = EventModel.fromJson(data);
+    if(isLoggedIn()) {
+      event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
+    } else {
+      event.isEventInMySchedule = OfflineDataHelper.isEventSaved(event.id!);
+    }
+
     if(event.childEventIds!=null)
     {
       var childEventsData = await _supabase
@@ -749,6 +765,11 @@ class DataService {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
+    if(event.isGroupEvent && hasGroup())
+    {
+      event.isMyGroupEvent = true;
+    }
+
     return event;
   }
 
@@ -1211,6 +1232,7 @@ class DataService {
       if(e.isGroupEvent && hasGroup())
       {
         e.title = currentUserGroup()!.title;
+        e.isMyGroupEvent = true;
       }
     }
 
@@ -1243,17 +1265,13 @@ class DataService {
   }
 
   static Future<bool> isEventSaved(int id) async {
-    bool isSaved = false;
-    if(isLoggedIn()) {
-      var data = await _supabase
-          .from(EventModel.eventUsersSavedTable)
-          .select()
-          .eq(EventModel.eventUsersSavedEventColumn, id)
-          .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
-          .maybeSingle();
-      isSaved = data != null;
-    }
-    return isSaved || OfflineDataHelper.isEventSaved(id);
+    var data = await _supabase
+        .from(EventModel.eventUsersSavedTable)
+        .select()
+        .eq(EventModel.eventUsersSavedEventColumn, id)
+        .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
+        .maybeSingle();
+    return data != null;
   }
 
   static Future<void> removeFromMySchedule(int id) async {
@@ -1307,14 +1325,14 @@ class DataService {
         EventModel.eventUsersSavedEventColumn: v
       });
     }
-
-    await _supabase.from(EventModel.eventUsersSavedTable)
-    .upsert(values);
+    if(join)
+    {
+      await _supabase.from(EventModel.eventUsersSavedTable)
+          .upsert(values);
+    }
   }
 
   static Future<void> refreshOfflineData() async {
-    var lastUpdated = OfflineDataHelper.getLastUpdate();
-    var now = DateTime.now().toUtc();
 
     var globalSettings = await DataService.loadOrInitGlobalSettings();
     OfflineDataHelper.saveGlobalSettings(globalSettings);
@@ -1336,11 +1354,22 @@ class DataService {
     var messages = await getAllNewsMessages();
     OfflineDataHelper.saveAllMessages(messages);
 
-    var fullEvents = await getEventsDescription(lastUpdated);
+    var needsUpdate = <int>[];
+    var allEventsMeta = await getAllEventsMeta();
+
+    for(var e in allEventsMeta) {
+      var oe = OfflineDataHelper.getEventDescription(e.id.toString());
+      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
+          needsUpdate.add(e.id!);
+      }
+    }
+
+    var fullEvents = await getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
       OfflineDataHelper.saveEventDescription(e);
     }
-    OfflineDataHelper.saveLastUpdate(now);
+
+    await DataService.synchronizeMySchedule();
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

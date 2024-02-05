@@ -6,26 +6,26 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:avapp/appConfig.dart';
 
-import 'ProgramTimeline.dart';
+import 'ScheduleTimeline.dart';
 
-  class ProgramTabView extends StatefulWidget {
+  class ScheduleTabView extends StatefulWidget {
     Function(int)? onEventPressed;
 
     List<TimeLineItem> events = [];
 
-   ProgramTabView({super.key, required this.events, this.onEventPressed});
+   ScheduleTabView({super.key, required this.events, this.onEventPressed});
 
     @override
-    _ProgramTabViewState createState() => _ProgramTabViewState(events, onEventPressed);
+    _ScheduleTabViewState createState() => _ScheduleTabViewState(events, onEventPressed);
   }
 
-  class _ProgramTabViewState extends State<ProgramTabView> {
+  class _ScheduleTabViewState extends State<ScheduleTabView> {
 
     Map<int, List<TimeLineItem>> eventsMap = {};
     final List<TimeLineItem> events;
     Function(int)? onEventPressed;
 
-  _ProgramTabViewState(this.events, this.onEventPressed);
+  _ScheduleTabViewState(this.events, this.onEventPressed);
 
 
     @override
@@ -36,7 +36,7 @@ import 'ProgramTimeline.dart';
       eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
       for(var e in eventsMap.values)
       {
-        var timeline = ProgramTimeline(events: e, onEventPressed: onEventPressed, key: UniqueKey(),);
+        var timeline = ScheduleTimeline(events: e, onEventPressed: onEventPressed, key: UniqueKey(),);
         programLineChildren.add(SingleChildScrollView(child: timeline));
       }
       return Container(
