@@ -119,13 +119,6 @@ class OfflineDataHelper {
   static List<InformationModel> getAllInfo() => getAllOffline(
       InformationModel.informationOffline, InformationModel.fromJson);
 
-  static void saveLastUpdate(DateTime date) => StorageHelper.Set(
-      EventModel.eventsLastUpdate, date.millisecondsSinceEpoch.toString());
-
-  static DateTime getLastUpdate() => DateTime.fromMillisecondsSinceEpoch(
-      int.tryParse(StorageHelper.Get(EventModel.eventsLastUpdate) ?? "0") ?? 0,
-      isUtc: true);
-
   static void clearUserData() {
     deleteOffline(UserInfoModel.userInfoOffline);
     deleteOffline(myScheduleOffline);

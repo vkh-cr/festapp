@@ -23,7 +23,7 @@ class ProgramViewPage extends StatefulWidget {
 
 class _ProgramViewPageState extends State<ProgramViewPage>
     with TickerProviderStateMixin {
-  late TabController _tabController;
+  TabController? _tabController;
 
   late TimetableController timetableController;
 
@@ -67,15 +67,21 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                   .toUpperCase()
       });
 
-      _tabController = TabController(vsync: this, length: _days.length);
-      _tabController.addListener(() {
-        setState(() {
-          _currentIndex = _tabController.index;
-          timetableController.reset?.call();
-        });
-      });
+      setupTabController(_days.length);
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
+    });
+  }
+
+  void setupTabController(int daysCount) {
+    if(_tabController?.length != daysCount) {
+        _tabController = TabController(vsync: this, length: daysCount);
+    }
+    _tabController!.addListener(() {
+      setState(() {
+        _currentIndex = _tabController!.index;
+        timetableController.reset?.call();
+      });
     });
   }
 
@@ -101,13 +107,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _days.addAll(days);
     }
 
-    _tabController = TabController(vsync: this, length: _days.length);
-    _tabController.addListener(() {
-      setState(() {
-        _currentIndex = _tabController.index;
-        timetableController.reset?.call();
-      });
-    });
+    setupTabController(_days.length);
     OfflineDataHelper.updateEventsWithMySchedule(_events);
     OfflineDataHelper.updateEventsWithGroupName(_events);
 

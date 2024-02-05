@@ -738,7 +738,7 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
+            "id, updated_at, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
         .eq("id", eventId)
         .single();
     var event = EventModel.fromJson(data);
