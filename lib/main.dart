@@ -7,13 +7,13 @@ import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
-import 'package:avapp/pages/ProgramViewPage.dart';
+import 'package:avapp/pages/TimetablePage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/widgets/ProgramTabView.dart';
-import 'package:avapp/widgets/ProgramTimeline.dart';
+import 'package:avapp/widgets/ScheduleTabView.dart';
+import 'package:avapp/widgets/ScheduleTimeline.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -248,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 ],
               )),
           Expanded(
-              child: ProgramTabView(
+              child: ScheduleTabView(
             events: _dots,
             onEventPressed: _eventPressed,
           )),

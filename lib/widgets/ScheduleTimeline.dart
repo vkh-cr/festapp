@@ -1,4 +1,3 @@
-import 'package:avapp/data/DataService.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -69,7 +68,7 @@ class TimeLineItem{
   }
 }
 
-class ProgramTimeline extends StatefulWidget {
+class ScheduleTimeline extends StatefulWidget {
   Function(int)? onEventPressed;
 
   List<TimeLineItem> events = [];
@@ -77,14 +76,14 @@ class ProgramTimeline extends StatefulWidget {
 
   bool? splitByDay;
 
-  ProgramTimeline({super.key, required this.events, this.onEventPressed, this.nodePosition = 0.24, this.splitByDay = false});
+  ScheduleTimeline({super.key, required this.events, this.onEventPressed, this.nodePosition = 0.24, this.splitByDay = false});
 
   @override
-  _ProgramTimelineState createState() =>
-      _ProgramTimelineState();
+  _ScheduleTimelineState createState() =>
+      _ScheduleTimelineState();
 }
 
-class _ProgramTimelineState extends State<ProgramTimeline> {
+class _ScheduleTimelineState extends State<ScheduleTimeline> {
 
   @override
   Widget build(BuildContext context) {

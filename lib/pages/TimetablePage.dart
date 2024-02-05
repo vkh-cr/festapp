@@ -2,7 +2,7 @@ import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
-import 'package:avapp/pages/ProgramPage.dart';
+import 'package:avapp/pages/MySchedulePage.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
@@ -13,9 +13,9 @@ import 'package:go_router/go_router.dart';
 import '../models/EventModel.dart';
 
 class ProgramViewPage extends StatefulWidget {
-  static const ROUTE = "/programView";
+  static const ROUTE = "/timetable";
 
-  const ProgramViewPage({Key? key}) : super(key: key);
+  const ProgramViewPage.TimetablePage({Key? key}) : super(key: key);
 
   @override
   _ProgramViewPageState createState() => _ProgramViewPageState();
@@ -163,7 +163,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
               padding: const EdgeInsets.all(6),
               child: TextButton(
                 onPressed: () async {
-                  context.push(ProgramPage.ROUTE).then((value) => loadData());
+                  context.push(MySchedulePage.ROUTE).then((value) => loadData());
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

@@ -17,7 +17,7 @@ import '../models/UserGroupInfoModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import '../widgets/HtmlDescriptionWidget.dart';
-import '../widgets/ProgramTimeline.dart';
+import '../widgets/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
@@ -163,7 +163,7 @@ class _EventPageState extends State<EventPage> {
                   ),
                   Visibility(
                       visible: _event?.childEvents.isNotEmpty == true,
-                      child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: SingleChildScrollView(child: ProgramTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)))),
+                      child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: SingleChildScrollView(child: ScheduleTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)))),
                   Visibility(
                       visible:
                           DataService.isEditor() && _event?.maxParticipants != null,
