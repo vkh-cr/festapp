@@ -26,10 +26,10 @@ Nadstavba:
 **2024.01**
 - Plná podpora offline režimu zobrazení (pokud není připojení dostupné, použijí se data z cache). Stačí jednou otevřít aplikaci a data se načtou na pozadí.
 - Timetable zobrazení programu (skrolovatelná stránka s osou času a místa).
-- Vytváření mého programu z pomocí + tlačítka.
+- Vytváření mého programu z pomocí + tlačítka (i bez nutnosti přihlášení).
 - Plná podpora url (možnost odkazů na stránky ve webové verzi aplikace).
 - Mezi jazyky přidána ukrajinština.
-- Další opravy menších chyb.
+- Opravy menších chyb.
 
 
 
