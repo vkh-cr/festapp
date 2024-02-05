@@ -27,12 +27,13 @@ Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwW
 
 ## Vývoj aplikace
 
-Wiki s tipy, jak nastavit vývojové prostředí Flutter na Windows/Mac -> https://github.com/vkh-cr/av-app/wiki/Setup
+**2024.01**
+- Plná podpora offline režimu zobrazení (pokud není připojení dostupné, použijí se data z cache). Stačí jednou otevřít aplikaci a data se načtou na pozadí.
+- Timetable zobrazení programu (skrolovatelná stránka s osou času a místa).
+- Vytváření mého programu z pomocí + tlačítka.
+- Plná podpora url (možnost odkazů na stránky v aplikaci).
+- Mezi jazyky přidána ukrajinština.
 
-Odkazy pro seznámení se s Flutter:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-Odkaz do dokumentace Flutter s tutoriály, příklady a průvodcem API, [odkaz do online dokumentace](https://docs.flutter.dev/).
 
