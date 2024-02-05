@@ -57,8 +57,8 @@ const RESOURCES = {"assets/assets/images/map/ball.svg": "061bde98a15c0f2f3818195
 "mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
 "manifest.json": "c003c8c2a024bb4d42a1ee2a15cd4ad3",
 "android-chrome-512x512.png": "43661cc1c4cd6d25de716924dc00601a",
-"index.html": "a15e22137e6f07a4fccdbd0e8bf48336",
-"/": "a15e22137e6f07a4fccdbd0e8bf48336",
+"index.html": "449b9e20415940ab91674e56e3cf98d9",
+"/": "449b9e20415940ab91674e56e3cf98d9",
 "canvaskit/chromium/canvaskit.wasm": "143af6ff368f9cd21c863bfa4274c406",
 "canvaskit/chromium/canvaskit.js": "0ae8bbcc58155679458a0f7a00f66873",
 "canvaskit/skwasm.wasm": "2fc47c0a0c3c7af8542b601634fe9674",
@@ -74,7 +74,7 @@ const RESOURCES = {"assets/assets/images/map/ball.svg": "061bde98a15c0f2f3818195
 "favicon-32x32.png": "11d0dfb28bd3a57779a71773b8baff0e",
 "main.dart.js": "4bbb64304bd37c90ff3969121853eeed",
 "flutter.js": "7d69e653079438abfbb24b82a655b0a4",
-"version.json": "d722893a180cd687ed3164c1c776eea4",
+"version.json": "6a50826e99547af469d2a0c4cf8ea927",
 "safari-pinned-tab.svg": "fa0fc966a391994b65b5503531424af7",
 "browserconfig.xml": "a493ba0aa0b8ec8068d786d7248bb92c"};
 // The application shell files that are downloaded before a service worker can
