@@ -15,10 +15,6 @@ Základní funkce aplikace:
 Nadstavba:
 - pro účastníka, který bude zároveň dobrovolník, bude aplikace obsahovat informace, které souvisí s jeho dobrovolnickou činností (např. vyznačené časové bloky v programu s jeho dobrovolnickou aktivitou; speciální oznámení pro dobrovolníky, apod.)
 
-## Základní grafický návrh aplikace
-
-Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwWWI7HHs8Nh1jtiUrCaHa/App-First-draft?node-id=0%3A1&t=xkYTZ3Mz2eovnbQo-1)
-
 
 ## Odkaz na live verzi aplikace
 
@@ -31,9 +27,9 @@ Odkaz do Figma se [základním designem aplikace](https://www.figma.com/file/AwW
 - Plná podpora offline režimu zobrazení (pokud není připojení dostupné, použijí se data z cache). Stačí jednou otevřít aplikaci a data se načtou na pozadí.
 - Timetable zobrazení programu (skrolovatelná stránka s osou času a místa).
 - Vytváření mého programu z pomocí + tlačítka.
-- Plná podpora url (možnost odkazů na stránky v aplikaci).
+- Plná podpora url (možnost odkazů na stránky ve webové verzi aplikace).
 - Mezi jazyky přidána ukrajinština.
-- Další menší opravy chyb.
+- Další opravy menších chyb.
 
 
 
