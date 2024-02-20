@@ -16,7 +16,7 @@ import 'package:avapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
