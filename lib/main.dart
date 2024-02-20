@@ -48,15 +48,17 @@ Future<void> initializeEverything() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
 
-  await Supabase.initialize(
-    url: AppConfig.supabase_url,
-    anonKey: AppConfig.anon_key,
-  );
   initializeDateFormatting();
 
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
+  try{
+    await Supabase.initialize(
+      url: AppConfig.supabase_url,
+      anonKey: AppConfig.anon_key,
+    );
+  }catch(e){}
 
   if (!DataService.isLoggedIn()) {
     await DataService.tryAuthUser();

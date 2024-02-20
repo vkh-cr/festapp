@@ -52,7 +52,7 @@ dependencies:
   geolocator: ^10.1.0
   flutter_widget_from_html: ^0.14.7
   quill_html_editor: ^2.2.7
-  pluto_grid: ^7.0.2
+  pluto_grid_plus: ^8.3.0
   url_strategy: ^0.2.0
   desktop_drop: ^0.4.1
   csv: ^5.0.2

@@ -2,7 +2,7 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../data/DataService.dart';
 import '../dataGrids/PlutoAbstract.dart';

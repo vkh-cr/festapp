@@ -160,22 +160,24 @@ class _ProgramViewPageState extends State<ProgramViewPage>
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.all(6),
+              padding: const EdgeInsets.fromLTRB(6,6,6,0),
               child: TextButton(
                 onPressed: () async {
                   context.push(MySchedulePage.ROUTE).then((value) => loadData());
                 },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.schedule,
-                      color: Colors.white,
-                    ),
-                    Text("My schedule".tr(),
-                        style:
-                            const TextStyle(color: Colors.white, fontSize: 9)),
-                  ],
+                child: FittedBox(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.schedule,
+                        color: Colors.white,
+                      ),
+                      Text("My schedule".tr(),
+                          style:
+                              const TextStyle(color: Colors.white, fontSize: 9)),
+                    ],
+                  ),
                 ),
               ),
             ),

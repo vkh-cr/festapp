@@ -4,7 +4,7 @@ import 'package:avapp/models/PlaceModel.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
 import '../data/DataService.dart';

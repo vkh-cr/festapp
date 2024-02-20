@@ -3,7 +3,7 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
 {
