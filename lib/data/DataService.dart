@@ -481,23 +481,26 @@ class DataService {
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
     if(onlyForSignedIn)
     {
-      var data = await loadAllMyScheduleOffline();
-
-      if(!isLoggedIn()) {
-        return data.toList();
-      }
-
+      List<EventModel> data = [];
       if(AppConfig.isOwnProgramSupported)
       {
-        HashSet<EventModel> remote = await loadAllMySchedule();
-        data.addAll(remote);
-      }
+        data = (await loadAllMyScheduleOffline()).toList();
 
+        if(!isLoggedIn()) {
+          return data.toList();
+        }
+
+        var remote = await loadAllMySchedule();
+        data.addAll(remote);
+      } else if(!isLoggedIn()) {
+        return data;
+      }
 
       var dataSignedIn = await _supabase
           .from('events')
           .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users!inner(*)")
           .eq("event_users.user", currentUserId())
+          .eq("is_hidden", false)
           .order('start_time', ascending: true)
           .order('max_participants', ascending: false);
 
@@ -511,6 +514,7 @@ class DataService {
             .from('events')
             .select("id, title, start_time, end_time, place, max_participants, is_group_event")
             .eq(EventModel.isGroupEventColumn, true)
+            .eq("is_hidden", false)
             .order('start_time', ascending: true);
         data.addAll(List<EventModel>.from(
             groupData.map((x) => EventModel.fromJson(x))));
@@ -521,6 +525,7 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_groups!event_groups_event_parent_fkey(event_child)")
+        .eq("is_hidden", false)
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
@@ -535,6 +540,7 @@ class DataService {
         .from('events')
         .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users_saved!inner(*)")
         .eq("event_users_saved.user", currentUserId())
+        .eq("is_hidden", false)
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
@@ -553,6 +559,7 @@ class DataService {
     var localData = await _supabase.from("events")
         .select("id, title, start_time, end_time, place, max_participants, is_group_event")
         .in_(EventModel.idColumn, events)
+        .eq("is_hidden", false)
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
     var localEvents = List<EventModel>.from(
@@ -568,7 +575,7 @@ class DataService {
   static Future<List<EventModel>> getEventsWithPlaces() async {
     var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
+        .select("id, is_hidden, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
         .order('start_time', ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -761,6 +768,7 @@ class DataService {
           .from('events')
           .select("id, title, start_time, end_time, max_participants, event_users(count)")
           .in_("id", event.childEventIds!)
+          .eq("is_hidden", false)
           .order('start_time', ascending: true)
           .order('title', ascending: true);
 
@@ -984,6 +992,7 @@ class DataService {
       "place": event.place?.id,
       "split_for_men_women": event.splitForMenWomen,
       "is_group_event": event.isGroupEvent,
+      "is_hidden": event.isHidden,
     };
     if(event.description!=null) {
       upsertObj.addAll({"description": event.description});
@@ -1305,7 +1314,7 @@ class DataService {
   
   static Future<void> synchronizeMySchedule([bool join = false])
   async {
-    if(!isLoggedIn() || AppConfig.isOwnProgramSupported){
+    if(!isLoggedIn() || !AppConfig.isOwnProgramSupported){
       return;
     }
     HashSet<EventModel> data = EventModel.CreateEventModelSet();
