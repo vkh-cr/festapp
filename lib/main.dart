@@ -58,22 +58,22 @@ Future<void> initializeEverything() async {
       url: AppConfig.supabase_url,
       anonKey: AppConfig.anon_key,
     );
+    if (!DataService.isLoggedIn()) {
+      await DataService.tryAuthUser();
+    }
   }catch(e){}
 
-  if (!DataService.isLoggedIn()) {
-    await DataService.tryAuthUser();
-  }
   try{
     if(DataService.isLoggedIn()) {
       await DataService.getCurrentUserInfo();
     }
   }catch(e){}
 
-  //load all offlineData
-  DataService.refreshOfflineData();
-
   try {
     await OfflineDataHelper.initialize();
+    //load all offlineData
+    DataService.refreshOfflineData();
+
     var settings = OfflineDataHelper.getGlobalSettings();
     if(settings!=null){
       DataService.globalSettingsModel = settings;
