@@ -455,10 +455,13 @@ class DataService {
       e.isSignedIn = eq.isSignedIn;
     }
 
-    await loadIsInMyProgram(events);
+    if(AppConfig.isOwnProgramSupported)
+    {
+      await loadIsInMySchedule(events);
+    }
   }
 
-  static Future<void> loadIsInMyProgram(List<EventModel> events) async {
+  static Future<void> loadIsInMySchedule(List<EventModel> events) async {
     var set = EventModel.CreateEventModelSet();
     var local = await loadAllMyScheduleOffline();
     set.addAll(local);
@@ -484,8 +487,12 @@ class DataService {
         return data.toList();
       }
 
-      var remote = await loadAllMySchedule();
-      data.addAll(remote);
+      if(AppConfig.isOwnProgramSupported)
+      {
+        HashSet<EventModel> remote = await loadAllMySchedule();
+        data.addAll(remote);
+      }
+
 
       var dataSignedIn = await _supabase
           .from('events')
@@ -1298,7 +1305,7 @@ class DataService {
   
   static Future<void> synchronizeMySchedule([bool join = false])
   async {
-    if(!isLoggedIn()){
+    if(!isLoggedIn() || AppConfig.isOwnProgramSupported){
       return;
     }
     HashSet<EventModel> data = EventModel.CreateEventModelSet();
