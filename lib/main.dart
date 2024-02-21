@@ -203,9 +203,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                      height: 112,
-                      semanticsLabel: 'Festapp logo',
-                      'assets/icons/festapplogo.svg',
+                      width: 100,
+                      semanticsLabel: 'Člověk a Víra',
+                      'assets/icons/cavlogo_full.svg',
                     ),
                   ),
                   const Spacer(),

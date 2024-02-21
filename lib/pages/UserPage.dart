@@ -51,20 +51,6 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("E-mail".tr(), userData?.email ?? ''),
                 buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
                 buildTextField("Role".tr(), userData?.role ?? ''),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                    const Text("Accommodation").tr(),
-                    Container(
-                      alignment: Alignment.topLeft,
-                      child: TextButton(
-                          onPressed: userData?.place == null ? null : () => context.push("${MapPage.ROUTE}/${userData!.place!.id!}"),
-                          child: Text(userData?.place?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
-                    )
-                  ],),
-                ),
                 const SizedBox(
                   height: 16,
                 ),

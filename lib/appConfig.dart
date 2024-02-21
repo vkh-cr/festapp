@@ -3,18 +3,17 @@ import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
 class AppConfig {
-  static const String supabase_url = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String home_page = 'Festapp';
-  static String map_page = "Map".tr();
+  static const String supabase_url = 'https://icdqmvvcvctrulmpucij.supabase.co';
+  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImljZHFtdnZjdmN0cnVsbXB1Y2lqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY2MTc4OTAsImV4cCI6MjAxMjE5Mzg5MH0.appaX_mPTS-yxJVXoezP9Wo6viRV9KUQ9OIEahnTidE';
+  static const String home_page = 'Člověk a Víra';
+  static const String map_page = 'Mapa Duchovní obnovy 2024';
 
-  //frosty style
-  static const primaryColor = 0xFF0D0D0D;
+  static const primaryColor = 0xFF122640;
   static const backgroundColor = Color(0xFFFFFFFF);
   static const color1 = Color(primaryColor);
-  static const color2 = Color(0xFF4465A6);
-  static const color3 = Color(0xFF80BDF2);
-  static const color4 = Color(0xFF253759);
+  static const color2 = Color(0xFFBF8641);
+  static const color3 = Color(0xFF593E25);
+  static const color4 = Color(0xFF1B3659);
   static const attentionColor = Color(0xFF8B0000);
 
   static const bool isServiceRoleSafety = false;
@@ -30,7 +29,5 @@ class AppConfig {
     LanguageModel(const Locale("cs"), "Čeština"),
     LanguageModel(const Locale("sk"), "Slovenčina"),
     LanguageModel(const Locale("pl"), "Polski"),
-    LanguageModel(const Locale("de"), "Deutsch"),
-    LanguageModel(const Locale("uk"), "українська"),
   ];
 }
