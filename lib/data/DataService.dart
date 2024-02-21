@@ -576,7 +576,7 @@ class DataService {
     var data = await _supabase
         .from('events')
         .select("id, is_hidden, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
-        .order('start_time', ascending: true);
+        .order('start_time', ascending: false);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
