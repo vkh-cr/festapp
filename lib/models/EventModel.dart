@@ -21,6 +21,7 @@ class EventModel extends IPlutoRowModel {
 
   final int? id;
   DateTime? updatedAt;
+  bool isHidden;
   PlaceModel? place;
   List<EventModel> childEvents = [];
 
@@ -53,6 +54,7 @@ class EventModel extends IPlutoRowModel {
     required this.startTime,
     required this.endTime,
     required this.id,
+    required this.isHidden,
     this.updatedAt,
     this.title,
     this.description,
@@ -97,6 +99,7 @@ class EventModel extends IPlutoRowModel {
       startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
       id: json[idColumn],
+      isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
       updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
       title: json.containsKey(titleColumn) ? json[titleColumn] : null,
       description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
@@ -144,6 +147,7 @@ class EventModel extends IPlutoRowModel {
   static const String parentEventColumn = "parentEvent";
   static const String childEventsList = "childEvents";
   static const String updatedAtColumn = "updated_at";
+  static const String isHiddenColumn = "is_hidden";
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
@@ -185,6 +189,7 @@ class EventModel extends IPlutoRowModel {
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
       id: json[idColumn] == -1 ? null : json[idColumn],
+      isHidden: json[isHiddenColumn] == "true" ? true : false,
       updatedAt: json[updatedAtColumn],
       title: json[titleColumn],
       description: json[descriptionColumn],
@@ -201,6 +206,7 @@ class EventModel extends IPlutoRowModel {
   PlutoRow toPlutoRow() {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
+      isHiddenColumn: PlutoCell(value: isHidden.toString()),
       titleColumn: PlutoCell(value: title),
       descriptionColumn: PlutoCell(value: description),
       startDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
@@ -242,6 +248,7 @@ class EventModel extends IPlutoRowModel {
     updatedAtColumn: updatedAt?.toIso8601String(),
     startTimeColumn: startTime.toIso8601String(),
     endTimeColumn: endTime.toIso8601String(),
+    isHiddenColumn: isHidden,
     titleColumn: title,
     descriptionColumn: description,
     maxParticipantsColumn: maxParticipants,
