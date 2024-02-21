@@ -1,9 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter/material.dart';
 
 class HtmlEditorPage extends StatefulWidget {
   static const ROUTE = "/htmlEditor";
-  const HtmlEditorPage({Key? key}) : super(key: key);
+  String? content;
+  HtmlEditorPage({this.content, super.key});
 
   @override
   _HtmlEditorState createState() => _HtmlEditorState();
@@ -11,11 +14,10 @@ class HtmlEditorPage extends StatefulWidget {
 
 class _HtmlEditorState extends State<HtmlEditorPage> {
   _HtmlEditorState();
-  String? _html;
+  late String _html;
   void didChangeDependencies() {
     super.didChangeDependencies();
-    var args = ModalRoute.of(context)?.settings.arguments;
-    _html = args != null ?  args as String : null;
+    _html = widget.content??"";
   }
 
   ///[controller] create a QuillEditorController to access the editor methods
@@ -43,7 +45,6 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   final _hintTextStyle = const TextStyle(
       fontSize: 18, color: Colors.black12);
 
-  bool _hasFocus = false;
   @override
   void initState() {
     controller = QuillEditorController();
@@ -52,7 +53,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
     });
     controller.onEditorLoaded(() {
       debugPrint('Editor Loaded :)');
-      setHtmlText(_html??"");
+      setHtmlText(_html);
     });
     super.initState();
   }
@@ -92,7 +93,7 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
             Flexible(
               fit: FlexFit.tight,
               child: QuillHtmlEditor(
-                hintText: 'Upravte text',
+                hintText: null,
                 controller: controller,
                 isEnabled: true,
                 ensureVisible: false,
@@ -112,7 +113,6 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
                 onFocusChanged: (focus) {
                   debugPrint('has focus $focus');
                   setState(() {
-                    _hasFocus = focus;
                   });
                 },
                 onTextChanged: (text) => debugPrint('widget text change $text'),
@@ -133,17 +133,17 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
             child: Wrap(
               children: [
                 textButton(
-                    text: 'Vrátit zpět vše',
+                    text: "Reset".tr(),
                     onPressed: () {
-                      setHtmlText(_html!);
+                      setHtmlText(_html);
                     }),
                 textButton(
-                    text: 'Zrušit',
+                    text: "Storno".tr(),
                     onPressed: () {
                       cancelPressed();
                     }),
                 textButton(
-                    text: 'Uložit',
+                    text: "Save".tr(),
                     onPressed: () {
                       savePressed();
                     }),
@@ -171,11 +171,11 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
 
   void savePressed() async {
     String? htmlText = await controller.getText();
-    Navigator.pop(context, htmlText);
+    context.pop(htmlText);
   }
 
   void cancelPressed() async {
-    Navigator.pop(context);
+    context.pop();
   }
 
   ///[setHtmlText] to set the html text to editor

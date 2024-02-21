@@ -1,17 +1,21 @@
 import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 
 class MailerSendHelper{
   static Future<void> sendPassword(UserInfoModel recipient, String password) async {
-    var passwordVar = {"var":"password", "value":password};
-    var emailVar = {"var":"email", "value":recipient.email!};
-    var variables = [passwordVar, emailVar];
-    variables.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email!, config.welcomeEmailTemplate, variables);
-    ToastHelper.Show("Email s přístupovými údaji byl odeslán uživateli: ${recipient.email}");
+    List<Map<String, String>> allVars = [
+      {"var":"password", "value":password},
+      {"var":"email", "value":recipient.email!},
+      {"var":"name", "value": recipient.name!},
+    ];
+
+    allVars.addAll(_getSalutationPresalutation(recipient));
+    await DataService.emailMailerSend(recipient.email!, AppConfig.welcomeEmailTemplate, allVars);
+    ToastHelper.Show("E-mail with credentials was sent to: {email}.".tr(namedArgs: {"email":recipient.email!}));
     await Future.delayed(const Duration(milliseconds: 6000));
   }
 

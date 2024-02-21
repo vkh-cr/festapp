@@ -1,14 +1,18 @@
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
 import 'package:avapp/pages/MapPage.dart';
+import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
+import 'package:avapp/widgets/LanguageButton.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
+import 'package:go_router/go_router.dart';
 
-import '../services/DataService.dart';
-import '../main.dart';
+import '../data/DataService.dart';
 
 class UserPage extends StatefulWidget {
   static const ROUTE = "/user";
@@ -26,7 +30,11 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Profil"),
+        title: const Text("Profile").tr(),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
+        actions: [const LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -38,11 +46,25 @@ class _UserPageState extends State<UserPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                buildTextField('Jméno', userData?.name ?? ''),
-                buildTextField('Příjmení', userData?.surname ?? ''),
-                buildTextField('E-mail', userData?.email ?? ''),
-                buildTextField('Pohlaví', userData?.sexToCzech() ?? ''),
-                buildTextField('Role', userData?.role ?? ''),
+                buildTextField("Name".tr(), userData?.name ?? ''),
+                buildTextField("Surname".tr(), userData?.surname ?? ''),
+                buildTextField("E-mail".tr(), userData?.email ?? ''),
+                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
+                buildTextField("Role".tr(), userData?.role ?? ''),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                    const Text("Accommodation").tr(),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: TextButton(
+                          onPressed: userData?.place == null ? null : () => context.push("${MapPage.ROUTE}/${userData!.place!.id!}"),
+                          child: Text(userData?.place?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
+                    )
+                  ],),
+                ),
                 const SizedBox(
                   height: 16,
                 ),
@@ -57,9 +79,9 @@ class _UserPageState extends State<UserPage> {
                     child: TextButton(
                       onPressed: () async => _redirectToAdminPage(),
                       child: const Text(
-                        'Administrace',
+                        "Administration",
                         style: TextStyle(color: Colors.black, fontSize: 25),
-                      ),
+                      ).tr(),
                     ),
                   ),
                 ),
@@ -70,13 +92,13 @@ class _UserPageState extends State<UserPage> {
                   height: 50,
                   width: 250,
                   decoration: BoxDecoration(
-                      color: config.color1, borderRadius: BorderRadius.circular(20)),
+                      color: AppConfig.color1, borderRadius: BorderRadius.circular(20)),
                   child: TextButton(
                     onPressed: () async => _logout(),
                     child: const Text(
-                      'Odhlásit se',
+                      "Sign out",
                       style: TextStyle(color: Colors.white, fontSize: 25),
-                    ),
+                    ).tr(),
                   ),
                 ),
               ],
@@ -87,12 +109,12 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if(!DataService.isLoggedIn())
     {
-      Navigator.pushNamed(
-          context, LoginPage.ROUTE);
+      context.push(LoginPage.ROUTE);
     }
     loadData();
   }
@@ -117,29 +139,31 @@ class _UserPageState extends State<UserPage> {
     );
   }
 
-  void _navigateToHomePage() {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => const MyHomePage(title: MyHomePage.HOME_PAGE)));
-  }
-
-  void _logout() {
-    DataService.logout().then((v)=>ToastHelper.Show("Úspěšné odhlášení!"));
-    _navigateToHomePage();
+  Future<void> _logout() async {
+    var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
+    await DataService.logout();
+    ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+    NavigationHelper.goBackOrHome(context);
   }
 
   void _redirectToAdminPage() {
-    Navigator.pushNamed(context, AdministrationPage.ROUTE);
+    context.push(AdministrationPage.ROUTE);
   }
 
   Future<void> loadData() async {
-    userData = await DataService.getCurrentUserInfo();
-    setState(() {});
-    if(userData!.accommodation != null)
-    {
-      userData!.place = await DataService.getUserAccommodation(userData!.accommodation!);
-      setState(() {});
-    }
+    loadDataOffline();
+    var userInfo = await DataService.getUserInfoWithAccommodation();
+    OfflineDataHelper.saveUserInfo(userInfo);
+    setState(() {
+      userData = userInfo;
+    });
+  }
 
+  void loadDataOffline() {
+    var userInfo = OfflineDataHelper.getUserInfo();
+    setState(() {
+      userData = userInfo;
+    });
   }
 }
 

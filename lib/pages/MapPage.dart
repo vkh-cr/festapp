@@ -1,11 +1,16 @@
-import 'package:avapp/config.dart';
-import 'package:avapp/services/DataService.dart';
+import 'package:avapp/appConfig.dart';
+import 'package:avapp/data/DataService.dart';
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
+import 'package:avapp/services/NavigationHelper.dart';
+import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/PlaceModel.dart';
@@ -56,8 +61,10 @@ class MarkerWithText extends Marker {
 
 class MapPage extends StatefulWidget {
   static const ROUTE = "/map";
+  int? id;
+  PlaceModel? place;
 
-  const MapPage({Key? key}) : super(key: key);
+  MapPage({this.id, this.place,  Key? key}) : super(key: key);
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -67,29 +74,38 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
-  String PageTitle = config.map_page;
+  String pageTitle = AppConfig.map_page;
   bool isOnlyEditMode = false;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
 
-  late final MapController mapController = MapController();
+  final MapController mapController = MapController();
+  FlutterMap? _map;
+  late LatLng _mapCenter;
 
+  @override
+  void initState() {
+    super.initState();
+    _mapCenter = widget.place != null ? LatLng(widget.place!.getLat(), widget.place!.getLng()) : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     //reset static values
     selectedMarker = null;
-
-    final placeModel = ModalRoute.of(context)?.settings.arguments as PlaceModel?;
+    var placeModel = widget.place;
     if(placeModel == null || placeModel.latLng == null) {
-      loadPlaces(placeId: placeModel?.id);
+      loadPlaces(placeId: widget.id);
     }
     else{
+      //new place
       if(placeModel.latLng.toString().isEmpty)
       {
         placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
       }
-      PageTitle = placeModel.title ?? config.map_page;
+      pageTitle = placeModel.title ?? AppConfig.map_page;
       addPlacesToMap([placeModel]);
       runEditPositionMode(_markers.single);
       isOnlyEditMode = true;
@@ -107,7 +123,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (fill != null) {
       return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: config.color1),
+        const Icon(Icons.location_pin, size: 58, color: AppConfig.color1),
         Positioned(
           top: 7.5,
           left: 14.5,
@@ -127,21 +143,36 @@ class _MapPageState extends State<MapPage> {
             child: Container(alignment: Alignment.center, child: fill))
       ]);
     }
-    return const Icon(Icons.location_pin, size: 36, color: config.color1);
+    return const Icon(Icons.location_pin, size: 36, color: AppConfig.color1);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
 
     _markers.clear();
-    List<PlaceModel> places = [];
+    List<PlaceModel> mapOfflinePlaces = [];
+    var offlinePlaces = OfflineDataHelper.getAllPlaces();
+    if (placeId != null && !loadOtherGroups) {
+      var place = offlinePlaces.firstWhereOrNull((p)=>p.id==placeId);
+      if(place!=null) {
+        mapOfflinePlaces = [place];
+        setMapToOnePlace(place);
+      }
+    }
+    else if (loadOtherGroups)
+    {
+      mapOfflinePlaces = offlinePlaces;
+    }
+    else
+    {
+      mapOfflinePlaces = offlinePlaces.where((element) => !element.isHidden).toList();
+    }
+    addPlacesToMap(mapOfflinePlaces);
+
+    List<PlaceModel> mapPlaces = [];
     if (placeId != null && !loadOtherGroups) {
       var place = await DataService.getPlace(placeId);
-      places = [place];
-      setState(() {
-        mapController.move(LatLng(place.latLng['lat'], place.latLng['lng']),
-            mapController.zoom);
-        PageTitle = place.title!;
-      });
+      mapPlaces = [place];
+      setMapToOnePlace(place);
     }
     else if (loadOtherGroups)
     {
@@ -151,13 +182,26 @@ class _MapPageState extends State<MapPage> {
           continue;
         }
         element.place!.title = element.title;
-        places.add(element.place!);
+        mapPlaces.add(element.place!);
       }
     }
     else {
-      places = await DataService.getMapPlaces();
+      mapPlaces = await DataService.getMapPlaces();
     }
-    addPlacesToMap(places);
+
+    if(mapPlaces.isNotEmpty) {
+      _markers.clear();
+      addPlacesToMap(mapPlaces);
+    }
+  }
+
+  void setMapToOnePlace(PlaceModel place) {
+      _mapCenter = LatLng(place.getLat(), place.getLng());
+      if(_map!=null)
+      {
+        mapController.move(_mapCenter, mapController.zoom);
+      }
+      pageTitle = place.title!;
   }
 
   void addPlacesToMap(List<PlaceModel> places) {
@@ -165,7 +209,7 @@ class _MapPageState extends State<MapPage> {
         .map(
           (place) => MarkerWithText(
             place: place,
-            point: LatLng(place.latLng['lat'], place.latLng['lng']),
+            point: LatLng(place.getLat(), place.getLng()),
             width: 60,
             height: 60,
             builder: (_) => type2icon(place.type),
@@ -193,18 +237,20 @@ class _MapPageState extends State<MapPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(PageTitle),
+        title: Text(pageTitle),
+        leading: BackButton(
+          onPressed: () => NavigationHelper.goBackOrHome(context),
+        ),
       ),
       body: Stack(
         children: [
-          FlutterMap(
+          _map = FlutterMap(
             mapController: mapController,
             options: MapOptions(
                 interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
                 zoom: DataService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
-
-                center: LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]),
+                center: _mapCenter,
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(
@@ -241,24 +287,24 @@ class _MapPageState extends State<MapPage> {
                     children: [
                       ElevatedButton(
                           onPressed: cancelNewPosition,
-                          child: const Text("Storno")),
+                          child: const Text("Storno").tr()),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       Visibility(
                         visible: !isOnlyEditMode,
                         child: ElevatedButton(
                             onPressed: showAllGroups,
-                            child: const Text("Zobrazit skupinky")),
+                            child: const Text("Show groups").tr()),
                       ),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       ElevatedButton(
                           onPressed: saveNewPosition,
-                          child: const Text("Uložit pozici")),
+                          child: const Text("Save location").tr()),
                     ],
                   ),
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Text("Pozici změníš klikem na mapu."),
+                  child: const Text("You can change location by tapping on the map.").tr(),
                 ),
                 Expanded(child: Container()),
               ],
@@ -283,10 +329,10 @@ class _MapPageState extends State<MapPage> {
   Future<void> saveNewPosition() async {
     if(isOnlyEditMode)
     {
-      Navigator.pop(context, {"lat": selectedMarker!.point.latitude, "lng": selectedMarker!.point.longitude});
+      context.pop({"lat": selectedMarker!.point.latitude, "lng": selectedMarker!.point.longitude});
       return;
     }
-    await DataService.SaveLocation(selectedMarker!.place.id!,
+    await DataService.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove = _markers
@@ -304,7 +350,7 @@ class _MapPageState extends State<MapPage> {
   void cancelNewPosition() {
     if(isOnlyEditMode)
     {
-      Navigator.pop(context);
+      context.pop();
       return;
     }
     setState(() {
@@ -320,7 +366,7 @@ class _MapPageState extends State<MapPage> {
 class MapDescriptionPopup extends StatefulWidget {
   final MarkerWithText marker;
 
-  const MapDescriptionPopup(this.marker, {Key? key}) : super(key: key);
+  const MapDescriptionPopup(this.marker, {super.key});
 
   @override
   State<StatefulWidget> createState() => _MapDescriptionPopupState();
@@ -365,7 +411,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                     onPressed: _MapPageState.selectedMarker != null
                         ? null
                         : changePositionPressed,
-                    child: const Text("Změnit polohu"))),
+                    child: const Text("Change location").tr())),
             Text(
               widget.marker.place.description ?? "",
               style: const TextStyle(fontSize: 12.0),

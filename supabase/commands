@@ -1,2 +1,0 @@
-supabase secrets set --env-file ./supabase/.env --project-ref icdqmvvcvctrulmpucij
-supabase functions deploy notify --no-verify-jwt --project-ref icdqmvvcvctrulmpucij

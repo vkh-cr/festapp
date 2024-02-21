@@ -1,23 +1,29 @@
+import 'dart:collection';
+
+import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/models/InformationModel.dart';
 
-import 'package:avapp/models/NewsMessage.dart';
+import 'package:avapp/models/NewsModel.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
+import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:avapp/config.dart';
+import 'package:avapp/appConfig.dart';
 import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
 import '../models/PlaceModel.dart';
-import 'NavigationService.dart';
+import '../services/NavigationService.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -28,7 +34,7 @@ class DataService {
     {
       return _supabaseAdmin!;
     }
-    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadejte service_role key ze supabase", "vložte zde", "Storno", "Ok");
+    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Input service_role key from supabase".tr(), "Input here".tr());
     if(result==null)
     {
       throw Exception("You must input service_role key.");
@@ -102,7 +108,7 @@ class DataService {
     return _supabase.auth.currentUser!.id;
   }
 
-  static GlobalSettingsModel? globalSettingsModel;
+  static GlobalSettingsModel? globalSettingsModel = GlobalSettingsModel.DefaultSettings;
 
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;
@@ -152,7 +158,7 @@ class DataService {
   }
 
   static Future<void> updateUserPassword(UserInfoModel user, String password) async {
-    if(config.isServiceRoleSafety){
+    if(AppConfig.isServiceRoleSafety){
       (await GetSupabaseAdminClient()).auth.admin.updateUserById(user.id!, attributes: AdminUserAttributes(password: password));
     }
     else{
@@ -161,7 +167,7 @@ class DataService {
   }
 
   static Future<void> deleteUser(String uuid) async {
-    if(!config.isServiceRoleSafety)
+    if(!AppConfig.isServiceRoleSafety)
     {
       throw Exception("Deleting user is not supported.");
     }
@@ -206,13 +212,16 @@ class DataService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
+    synchronizeMySchedule(true);
+    refreshOfflineData();
     NotificationHelper.Login(currentUserId());
   }
 
   static Future<void> logout() async {
+    await _supabase.auth.signOut();
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
-    await _supabase.auth.signOut();
+    OfflineDataHelper.clearUserData();
     NotificationHelper.Logout();
   }
 
@@ -236,6 +245,24 @@ class DataService {
       return female;
     }
     return male;
+  }
+
+  static Future<UserInfoModel> getFullUserInfo() async {
+    var user = await getUserInfoWithAccommodation();
+    var myGroup = await getCurrentUserGroup();
+    if(myGroup!=null)
+    {
+      user.userGroup = await getUserGroupInfo(myGroup.id!);
+    }
+    return user;
+  }
+
+  static Future<UserInfoModel> getUserInfoWithAccommodation() async {
+    var userInfo = await DataService.getCurrentUserInfo();
+    if(userInfo.accommodation != null) {
+      userInfo.place = await DataService.getUserAccommodation(userInfo.accommodation!);
+    }
+    return userInfo;
   }
 
   static Future<PlaceModel?> getUserAccommodation(
@@ -274,9 +301,8 @@ class DataService {
   static updateUserAsJson(Map<String, dynamic> json) async {
     if(json[UserInfoModel.idColumn] == null)
     {
-      if(config.isServiceRoleSafety){
+      if(AppConfig.isServiceRoleSafety){
         json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
-        ToastHelper.Show("Vytvořen: ${json[UserInfoModel.emailReadonlyColumn]}");
       } else{
         json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
       }
@@ -291,16 +317,15 @@ class DataService {
       await refreshSession();
       if(!DataService.isAdmin())
       {
-        var errorText = "Je potřeba vyššího oprávnění. Změny na uživateli ${data.email} nemohly být uloženy.";
+        var errorText = "Elevated permission is required. Changes to user ${data.email} could not be saved.";
         throw Exception(errorText);
       }
     }
 
     if(data.id == null)
     {
-      if(config.isServiceRoleSafety){
+      if(AppConfig.isServiceRoleSafety){
         data.id = await DataService.createUser(data.email!);
-        ToastHelper.Show("Vytvořen: ${data.email}");
       } else{
         data.id = await UserManagementHelper.unsafeCreateNewUser(data.email);
       }
@@ -329,6 +354,7 @@ class DataService {
       UserInfoModel.roleColumn: data.role,
       UserInfoModel.accommodationColumn: data.accommodation,
       UserInfoModel.phoneColumn: data.phone,
+      UserInfoModel.birthDateColumn: data.birthDate?.toIso8601String(),
       UserInfoModel.isAdminReadOnlyColumn: data.isAdmin,
       UserInfoModel.isEditorReadOnlyColumn: data.isEditor,
     });
@@ -344,9 +370,16 @@ class DataService {
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
-  static Future<List<PlaceModel>> getPlaces() async {
+  static Future<List<PlaceModel>> getAllPlaces() async {
     var data = await _supabase.from(PlaceModel.placeTable).select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+  }
+
+  static Future<List<TimetablePlace>> getTimetablePlaces() async {
+    var data = await _supabase.from(PlaceModel.timetablePlacesTable).select();
+    var placeIds = List<int>.from(data.map((x) => x[PlaceModel.timetablePlacesTablePlaceColumn]));
+    var placeData = await _supabase.from(PlaceModel.placeTable).select().in_(PlaceModel.idColumn, placeIds);
+    return List<TimetablePlace>.from(placeData.map((x) => TimetablePlace.fromJson(x)));
   }
 
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
@@ -379,7 +412,7 @@ class DataService {
     return PlaceModel.fromJson(data);
   }
 
-  static Future<List<InformationModel>> getInformation() async {
+  static Future<List<InformationModel>> getAllInformation() async {
     var data = await _supabase.from(InformationModel.informationTable).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -421,55 +454,108 @@ class DataService {
       e.currentParticipants = eq.currentParticipants;
       e.isSignedIn = eq.isSignedIn;
     }
+
+    await loadIsInMyProgram(events);
+  }
+
+  static Future<void> loadIsInMyProgram(List<EventModel> events) async {
+    var set = EventModel.CreateEventModelSet();
+    var local = await loadAllMyScheduleOffline();
+    set.addAll(local);
+    if(isLoggedIn())
+    {
+      var remote = await loadAllMySchedule();
+      set.addAll(remote);
+    }
+
+    for(var e in set)
+    {
+      var eq = events.firstWhere((element) => element.id == e.id);
+      eq.isEventInMySchedule = e.isEventInMySchedule;
+    }
   }
 
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
-    dynamic data;
     if(onlyForSignedIn)
     {
-      data = await _supabase
+      var data = await loadAllMyScheduleOffline();
+
+      if(!isLoggedIn()) {
+        return data.toList();
+      }
+
+      var remote = await loadAllMySchedule();
+      data.addAll(remote);
+
+      var dataSignedIn = await _supabase
           .from('events')
-          .select("id, title, start_time, end_time, max_participants, is_group_event, event_users!inner(*)")
+          .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users!inner(*)")
           .eq("event_users.user", currentUserId())
           .order('start_time', ascending: true)
           .order('max_participants', ascending: false);
 
+      data.addAll(List<EventModel>.from(
+          dataSignedIn.map((x) => EventModel.fromJson(x))));
+
       //join group events
       if(hasGroup())
       {
-        var data2 = await _supabase
+        var groupData = await _supabase
             .from('events')
-            .select("id, title, start_time, end_time, max_participants, is_group_event")
+            .select("id, title, start_time, end_time, place, max_participants, is_group_event")
             .eq(EventModel.isGroupEventColumn, true)
             .order('start_time', ascending: true);
-        data.addAll(data2);
+        data.addAll(List<EventModel>.from(
+            groupData.map((x) => EventModel.fromJson(x))));
       }
 
-      return List<EventModel>.from(
-          data.map((x) => EventModel.fromJson(x)));
+      return data.toList();
     }
-    data = await _supabase
+    var data = await _supabase
         .from('events')
-        .select("id, title, start_time, end_time, max_participants, is_group_event")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_groups!event_groups_event_parent_fkey(event_child)")
         .order('start_time', ascending: true)
         .order('max_participants', ascending: false);
 
     var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
-    var groupData = await _supabase
-        .from('event_groups')
-        .select("event_child");
 
-    var groups = List.from(groupData.map((gd)=>gd["event_child"]));
-    List<EventModel> filtered = [];
-    for(var e in events)
-    {
-      if(!groups.contains(e.id))
-      {
-        filtered.add(e);
-      }
+    return events;
+  }
+
+  static Future<HashSet<EventModel>> loadAllMySchedule() async {
+    var dataEventUsersSaved = await _supabase
+        .from('events')
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users_saved!inner(*)")
+        .eq("event_users_saved.user", currentUserId())
+        .order('start_time', ascending: true)
+        .order('max_participants', ascending: false);
+
+    var remoteEvents = List<EventModel>.from(
+        dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
+    for (var element in remoteEvents) {
+      element.isEventInMySchedule = true;
     }
-    return filtered;
+    var toReturn = EventModel.CreateEventModelSet();
+    toReturn.addAll(remoteEvents);
+    return toReturn;
+  }
+
+  static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
+    var events = OfflineDataHelper.getMyScheduleData();
+    var localData = await _supabase.from("events")
+        .select("id, title, start_time, end_time, place, max_participants, is_group_event")
+        .in_(EventModel.idColumn, events)
+        .order('start_time', ascending: true)
+        .order('max_participants', ascending: false);
+    var localEvents = List<EventModel>.from(
+        localData.map((x) => EventModel.fromJson(x)));
+    for (var element in localEvents) {
+      element.isEventInMySchedule = true;
+    }
+    var toReturn = EventModel.CreateEventModelSet();
+    toReturn.addAll(localEvents);
+    return toReturn;
   }
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
@@ -481,7 +567,25 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getUserGroupInfoList() async {
+  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
+    var data = await _supabase
+        .from(EventModel.eventTable)
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}, ${EventModel.descriptionColumn}")
+        .in_(EventModel.idColumn, ids);
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getAllEventsMeta() async {
+    var data = await _supabase
+        .from(EventModel.eventTable)
+        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}");
+
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
     var data = await _supabase
         .from(UserGroupInfoModel.userGroupInfoTable)
         .select(
@@ -514,7 +618,7 @@ class DataService {
     return UserGroupInfoModel.fromJson(data);
   }
 
-  static Future<List<ExclusiveGroupModel>> getExclusiveGroups() async {
+  static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
     var data = await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .select("${ExclusiveGroupModel.idColumn}, ${ExclusiveGroupModel.titleColumn}, exclusive_events(event)");
@@ -525,8 +629,7 @@ class DataService {
   static updateUserGroupInfo(UserGroupInfoModel model) async {
     if(!(isAdmin() || model.leader!.id == currentUserId()))
     {
-      ToastHelper.Show("Must be leader or admin to change the group.", severity: ToastSeverity.NotOk);
-      return;
+      throw Exception("Must be leader or admin to change the group.");
     }
 
     var upsertObj = {
@@ -553,7 +656,7 @@ class DataService {
       eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);
-    await updateUserGroupParticipants(updated, model.participants);
+    await updateUserGroupParticipants(updated, model.participants!);
   }
 
   static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
@@ -622,19 +725,29 @@ class DataService {
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
     await _supabase
+        .from(ExclusiveGroupModel.exclusiveEventsTable)
+        .delete()
+        .eq(ExclusiveGroupModel.exclusiveEventsGroupColumn, data.id);
+    await _supabase
         .from(ExclusiveGroupModel.exclusiveGroupsTable)
         .delete()
-        .eq("id", data.id);
+        .eq(ExclusiveGroupModel.idColumn, data.id);
   }
 
   static Future<EventModel> getEvent(int eventId) async {
     var data = await _supabase
         .from('events')
         .select(
-            "id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
+            "id, updated_at, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
         .eq("id", eventId)
         .single();
     var event = EventModel.fromJson(data);
+    if(isLoggedIn()) {
+      event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
+    } else {
+      event.isEventInMySchedule = OfflineDataHelper.isEventSaved(event.id!);
+    }
+
     if(event.childEventIds!=null)
     {
       var childEventsData = await _supabase
@@ -652,6 +765,11 @@ class DataService {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
+    if(event.isGroupEvent && hasGroup())
+    {
+      event.isMyGroupEvent = true;
+    }
+
     return event;
   }
 
@@ -675,6 +793,7 @@ class DataService {
     .from(UserGroupInfoModel.userGroupInfoTable)
     .select("id, title, user_info!leader(id), places(id)")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
+    .limit(1)
     .maybeSingle();
     if(partOfGroup!=null)
     {
@@ -686,6 +805,7 @@ class DataService {
           .from(UserGroupInfoModel.userGroupsTable)
           .select("${UserGroupInfoModel.userGroupInfoTable}(id, title)")
           .eq("user", currentUserId())
+          .limit(1)
           .maybeSingle();
       if(partOfGroup!=null)
       {
@@ -737,7 +857,7 @@ class DataService {
     var event = await getEvent(eventId);
 
     if (event.endTime.isBefore(DateTime.now())) {
-      ToastHelper.Show("Nelze přihlásit! Událost už proběhla.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -752,12 +872,13 @@ class DataService {
           e.startTime.isAtSameMomentAs(event.startTime) ||
           e.endTime.isAtSameMomentAs(event.endTime)) {
         if(participant == null) {
-          ToastHelper.Show(
-              "Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         else{
-          ToastHelper.Show(
-              "Nelze přihlásit! $participant je přihlášen na jiné události ve stejném čase.", severity: ToastSeverity.NotOk);
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} is already signed in at another event at the same time.".tr(namedArgs: {"user":participant.toString()}));
         }
         return;
       }
@@ -770,35 +891,45 @@ class DataService {
     {
       case 100: {
         if(participant == null) {
-          ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("přihlášen", "přihlášena")}.");
+          var trPrefix = _currentUser!.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}You have been signed in.".tr());
         }
         else{
-          ToastHelper.Show("Přihlášen $participant.");
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} has been signed in.".tr(namedArgs: {"user":participant.toString()}));
         }
         return;
       }
-      case 101: ToastHelper.Show("Nelze přihlásit! Událost byla zaplněna.", severity: ToastSeverity.NotOk); return;
+      case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
         if(participant == null) {
-          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")} na události tohoto typu.", severity: ToastSeverity.NotOk);
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in at an event of this type.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         else{
-          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen na události tohoto typu.", severity: ToastSeverity.NotOk);
+          var trPrefix = participant.getGenderPrefix();
+          var message = "${trPrefix}{user} is already signed in at an event of this type.".tr(namedArgs: {"user":participant.toString()});
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         return;
       }
       case 103: {
         if(participant == null) {
-          ToastHelper.Show("Nelze přihlásit! Už jsi ${gText("přihlášen", "přihlášena")}.", severity: ToastSeverity.NotOk); return;
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
-        else{
-          ToastHelper.Show("Nelze přihlásit! $participant už je přihlášen.", severity: ToastSeverity.NotOk);
+        else {
+          var trPrefix = participant.getGenderPrefix();
+          var message = "${trPrefix}{user} is already signed in.".tr(namedArgs: {"user":participant.toString()});
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
         }
         return;
       }
-      case 104: ToastHelper.Show("Nelze přihlásit! ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
-      case 105: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum mužů.", severity: ToastSeverity.NotOk); return;
-      case 106: ToastHelper.Show("Nelze přihlásit! Na událost už je přihlášeno maximum žen.", severity: ToastSeverity.NotOk); return;
+      case 104: ToastHelper.Show("${"Cannot sign in!".tr()} ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
+      case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
+      case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
     }
   }
 
@@ -815,7 +946,7 @@ class DataService {
 
     if(!isAdmin() && DateTime.now().isAfter(event.endTime))
     {
-      ToastHelper.Show("Není možné se odhlásit z události, která už proběhla.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show("It is not possible to sign out from an event that has already taken place.", severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -826,10 +957,13 @@ class DataService {
         .eq("user", finalId);
 
     if(participant == null) {
-      ToastHelper.Show("${gText("Byl", "Byla")} jsi ${gText("odhlášen", "odhlášena")}."); return;
+      var trPrefix = _currentUser!.getGenderPrefix();
+      ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+      return;
     }
     else{
-      ToastHelper.Show("Odhlášen $participant.");
+      var trPrefix = participant.getGenderPrefix();
+      ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
     }
   }
 
@@ -873,6 +1007,13 @@ class DataService {
         .from('event_groups')
         .insert(insert)
         .select();
+  }
+
+  static Future<void> removeEventFromSaved(EventModel updatedEvent) async {
+    await _supabase
+        .from(EventModel.eventUsersSavedTable)
+        .delete()
+        .eq(EventModel.eventUsersSavedEventColumn, updatedEvent.id);
   }
 
   static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
@@ -970,7 +1111,7 @@ class DataService {
         .delete()
         .eq("id", message.id);
 
-    ToastHelper.Show("Ohláška byla smazána.");
+    ToastHelper.Show("Message has been removed.".tr());
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
@@ -978,7 +1119,7 @@ class DataService {
         .from('news')
         .update({"message":message.message})
         .eq("id", message.id);
-    ToastHelper.Show("Ohláška byla změněna!.");
+    ToastHelper.Show("Message has been changed.".tr());
   }
 
   static insertNewsMessage(String message, bool withNotification) async {
@@ -999,12 +1140,12 @@ class DataService {
       }
       basicMessage = basicMessage.trim();
       await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.name??config.home_page}).select();
+          {"content": basicMessage, "heading": _currentUser!.name??AppConfig.home_page}).select();
 
-      ToastHelper.Show("Zpráva byla odeslána!");
+      ToastHelper.Show("Message has been sent.".tr());
       return;
     }
-    ToastHelper.Show("Zpráva byla vytvořena!");
+    ToastHelper.Show("Message has been created.".tr());
 
   }
 
@@ -1039,35 +1180,30 @@ class DataService {
         .upsert({"user": currentUserId(), "news_id": newsId}).select();
   }
 
-  static Future<List<NewsModel>> getNewsMessages() async {
+  static Future<List<NewsModel>> getAllNewsMessages() async {
     int lastReadMessageId = 0;
     if (isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
-    var messagesData = await _supabase
-        .from('news')
-        .select('id, created_at, message, user_info_public(name, surname), user_news_views(count)')
-        .order("created_at");
-    List<NewsModel> loadedMessages = [];
+    var data = await _supabase
+        .from(Tb.news.table)
+        .select(
+            "${Tb.news.id},"
+            "${Tb.news.created_at},"
+            "${Tb.news.message},"
+            "${Tb.user_info_public.table}(${Tb.user_info_public.name},${Tb.user_info_public.surname}),"
+            "${Tb.user_news_views.table}(count)")
+        .order(Tb.news.created_at);
+
+    List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
 
     int viewsAggregate = 0;
-    for (var row in messagesData) {
-      DateTime createdAt = DateTime.parse(row['created_at']);
-      String message = row['message'];
-      var name = row[UserInfoModel.userInfoPublicTable] != null ? row['user_info_public']['name'] : "";
-      NewsModel newsMessage = NewsModel(
-          createdAt: createdAt,
-          message: message,
-          createdBy: name,
-          id: row['id']);
-
-      int views = row["user_news_views"].isEmpty ? 0 : row["user_news_views"][0]["count"];
-      viewsAggregate+=views;
-      newsMessage.views = viewsAggregate;
+    for (var message in loadedMessages) {
+      viewsAggregate += message.views;
+      message.views = viewsAggregate;
       if (isLoggedIn()) {
-        newsMessage.isRead = lastReadMessageId >= newsMessage.id;
+        message.isRead = lastReadMessageId >= message.id;
       }
-      loadedMessages.add(newsMessage);
     }
     return loadedMessages;
   }
@@ -1096,6 +1232,7 @@ class DataService {
       if(e.isGroupEvent && hasGroup())
       {
         e.title = currentUserGroup()!.title;
+        e.isMyGroupEvent = true;
       }
     }
 
@@ -1114,18 +1251,125 @@ class DataService {
     });
   }
 
-  static Future<void> SaveLocation(int placeId, double lat, double lng) async {
+  static Future<void> saveLocation(int placeId, double lat, double lng) async {
     if(!(DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
-      ToastHelper.Show("You do have no rights to change this position.", severity: ToastSeverity.NotOk);
-      return;
+      throw Exception("You cannot change this place.");
     }
     await _supabase.from("places").update({
       "coordinates": {
         "latLng": {"lat": lat, "lng": lng}
       }
     }).eq("id", placeId);
-    ToastHelper.Show("Pozice změněna!");
+    ToastHelper.Show("Place has been changed.".tr());
+  }
+
+  static Future<bool> isEventSaved(int id) async {
+    var data = await _supabase
+        .from(EventModel.eventUsersSavedTable)
+        .select()
+        .eq(EventModel.eventUsersSavedEventColumn, id)
+        .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
+        .maybeSingle();
+    return data != null;
+  }
+
+  static Future<void> removeFromMySchedule(int id) async {
+    if(isLoggedIn()) {
+      await _supabase
+          .from(EventModel.eventUsersSavedTable)
+          .delete()
+          .eq(EventModel.eventUsersSavedEventColumn, id)
+          .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
+    }
+    OfflineDataHelper.removeFromMySchedule(id);
+    ToastHelper.Show("Removed from My schedule.".tr());
+  }
+
+  static Future<void> addToMySchedule(int id) async {
+    if(isLoggedIn()) {
+        await _supabase
+            .from(EventModel.eventUsersSavedTable)
+            .insert({EventModel.eventUsersSavedEventColumn: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
+    }
+    OfflineDataHelper.addToMySchedule(id);
+    ToastHelper.Show("Added to My schedule.".tr());
+  }
+  
+  static Future<void> synchronizeMySchedule([bool join = false])
+  async {
+    if(!isLoggedIn()){
+      return;
+    }
+    HashSet<EventModel> data = EventModel.CreateEventModelSet();
+
+    var remote = await loadAllMySchedule();
+    var local = await loadAllMyScheduleOffline();
+
+    if (join) {
+      data.addAll(remote);
+      data.addAll(local);
+    }
+    else {
+      data = remote;
+    }
+
+    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
+    OfflineDataHelper.saveMyScheduleData(currentUserEventIds);
+
+    var values = [];
+    for(var v in currentUserEventIds)
+    {
+      values.add({
+        EventModel.eventUsersSavedUserColumn: currentUserId(),
+        EventModel.eventUsersSavedEventColumn: v
+      });
+    }
+    if(join)
+    {
+      await _supabase.from(EventModel.eventUsersSavedTable)
+          .upsert(values);
+    }
+  }
+
+  static Future<void> refreshOfflineData() async {
+
+    var globalSettings = await DataService.loadOrInitGlobalSettings();
+    OfflineDataHelper.saveGlobalSettings(globalSettings);
+
+    if(DataService.isLoggedIn()) {
+      var userInfo = await getFullUserInfo();
+      OfflineDataHelper.saveUserInfo(userInfo);
+    }
+    else {
+      OfflineDataHelper.deleteUserInfo();
+    }
+
+    var places = await getAllPlaces();
+    OfflineDataHelper.saveAllPlaces(places);
+
+    var info = await getAllInformation();
+    OfflineDataHelper.saveAllInfo(info);
+
+    var messages = await getAllNewsMessages();
+    OfflineDataHelper.saveAllMessages(messages);
+
+    var needsUpdate = <int>[];
+    var allEventsMeta = await getAllEventsMeta();
+
+    for(var e in allEventsMeta) {
+      var oe = OfflineDataHelper.getEventDescription(e.id.toString());
+      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
+          needsUpdate.add(e.id!);
+      }
+    }
+
+    var fullEvents = await getEventsDescription(needsUpdate);
+    for(var e in fullEvents) {
+      OfflineDataHelper.saveEventDescription(e);
+    }
+
+    await DataService.synchronizeMySchedule();
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

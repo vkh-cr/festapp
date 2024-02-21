@@ -1,7 +1,7 @@
-import 'package:avapp/services/DataService.dart';
-import 'package:pluto_grid/pluto_grid.dart';
+import 'package:avapp/data/DataService.dart';
+import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-import 'PlutoAbstract.dart';
+import '../dataGrids/PlutoAbstract.dart';
 
 
 class InformationModel extends IPlutoRowModel {
@@ -21,6 +21,8 @@ class InformationModel extends IPlutoRowModel {
   static const String orderColumn = "order";
 
   static const String informationTable = "information";
+  static const String informationOffline = "information";
+
 
   factory InformationModel.fromJson(Map<String, dynamic> json) {
     return InformationModel(
@@ -32,6 +34,15 @@ class InformationModel extends IPlutoRowModel {
 
     );
   }
+
+  Map toJson() =>
+  {
+    idColumn: id,
+    titleColumn: title,
+    descriptionColumn: description,
+    isHiddenColumn: isHidden,
+    orderColumn: order,
+  };
 
   static InformationModel fromPlutoJson(Map<String, dynamic> json) {
     return InformationModel(
