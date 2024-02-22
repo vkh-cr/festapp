@@ -152,5 +152,7 @@
   "Insert here": "Вставте тут",
   "Insert service_role key from supabase": "Вставте ключ service_role з Supabase",
   "There will appear your events.": "Тут з'являться ваші події.",
+  "Type": "Тип",
+  "Songs": "Пісні",
   "_": "_"
 }

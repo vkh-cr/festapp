@@ -152,5 +152,7 @@
   "Insert here":"Input here",
   "Insert service_role key from supabase":"Input service_role key from supabase",
   "There will appear your events.": "There will appear your events.",
+  "Type": "Type",
+  "Songs": "Songs",
   "_":"_"
 }
