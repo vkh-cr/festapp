@@ -4,6 +4,8 @@ class Tb
   static UserInfoTb user_info = const UserInfoTb();
   static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
   static UserNewsViewsTb user_news_views = const UserNewsViewsTb();
+  static UserNewsTb user_news = const UserNewsTb();
+  static InformationTb information = const InformationTb();
 }
 class NewsTb{
   const NewsTb();
@@ -11,6 +13,14 @@ class NewsTb{
   String get id => "id";
   String get created_at => "created_at";
   String get created_by => "created_by";
+  String get message => "message";
+}
+class UserNewsTb{
+  const UserNewsTb();
+  String get table => "user_news";
+  String get created_at => "created_at";
+  String get news_id => "news_id";
+  String get user => "user";
   String get message => "message";
 }
 class UserInfoTb{
@@ -37,4 +47,14 @@ class UserInfoPublicTb{
 class UserNewsViewsTb{
   const UserNewsViewsTb();
   String get table => "user_news_views";
+}
+class InformationTb{
+  const InformationTb();
+  String get table => "information";
+  String get id => "id";
+  String get title => "title";
+  String get type => "type";
+  String get description => "description";
+  String get is_hidden => "is_hidden";
+  String get order => "order";
 }
