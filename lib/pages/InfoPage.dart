@@ -92,7 +92,7 @@ class _InfoPageState extends State<InfoPage> {
 
   Future<void> loadData() async {
     _informationList = OfflineDataHelper.getAllInfo();
-    _informationList = await DataService.getActiveInformation();
+    _informationList = await DataService.getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(_informationList!);
     setState(() {});
   }
