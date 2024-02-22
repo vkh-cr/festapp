@@ -53,8 +53,11 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
     controller.onEditorLoaded(() {
       debugPrint('Editor Loaded :)');
     });
-    Timer(Duration(seconds: 2), () {
-      setHtmlText(_html);
+    Timer(const Duration(seconds: 2), () {
+      if(_html.isNotEmpty)
+        {
+          setHtmlText(_html);
+        }
     });
     super.initState();
   }
