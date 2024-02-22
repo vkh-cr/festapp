@@ -1093,6 +1093,9 @@ class DataService {
         .from("news")
         .select("id")
         .lt("created_at", message.createdAt)
+    // from some reason lower than is behaving like lower and equal than on web platform
+    // therefore additional check
+        .neq("id", message.id)
         .order("created_at")
         .limit(1)
         .maybeSingle();
