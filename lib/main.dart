@@ -266,7 +266,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     MainPageButton(
                       onPressed: _programPressed,
                       backgroundColor: AppConfig.color1,
-                      child: const Icon(Icons.calendar_month),
+                      child: const Icon(Icons.music_note),
                     ),
                     Text("My schedule".tr()),
                   ],
@@ -324,11 +324,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
-      ToastHelper.Show("Sign in to view My schedule!".tr());
-      return;
-    }
-    context.push(MySchedulePage.ROUTE).then((value) => loadData());
+    context.push("${InfoPage.ROUTE}/song").then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
