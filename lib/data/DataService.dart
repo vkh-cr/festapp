@@ -1092,60 +1092,60 @@ class DataService {
   static Future<void> deleteNewsMessage(NewsModel message) async {
 
     var lastMes = await _supabase
-        .from("news")
-        .select("id")
-        .lt("created_at", message.createdAt)
+        .from(Tb.news.table)
+        .select(Tb.news.id)
+        .lt(Tb.news.created_at, message.createdAt)
     // from some reason lower than is behaving like lower and equal than on web platform
     // therefore additional check
-        .neq("id", message.id)
-        .order("created_at")
+        .neq(Tb.news.id, message.id)
+        .order(Tb.news.created_at)
         .limit(1)
         .maybeSingle();
 
     if(lastMes!=null) {
       var currentUsers = await _supabase
-          .from("user_news")
-          .select("user")
-          .eq("news_id", message.id);
+          .from(Tb.user_news.table)
+          .select(Tb.user_news.user)
+          .eq(Tb.user_news.news_id, message.id);
 
       List<Map<String, dynamic>> toBeUpdated = [];
       for(var u in currentUsers) {
         toBeUpdated.add({
-          "user": u["user"],
-          "news_id": lastMes["id"]
+          Tb.user_news.user: u["user"],
+          Tb.user_news.news_id: lastMes["id"]
         });
       }
 
       await _supabase
-        .from('user_news')
+        .from(Tb.user_news.table)
         .upsert(toBeUpdated).select();
     }
     else {
       await _supabase
-          .from('user_news')
+          .from(Tb.user_news.table)
           .delete()
-          .eq("news_id", message.id);
+          .eq(Tb.user_news.news_id, message.id);
     }
 
     await _supabase
-        .from('news')
+        .from(Tb.news.table)
         .delete()
-        .eq("id", message.id);
+        .eq(Tb.news.id, message.id);
 
     ToastHelper.Show("Message has been removed.".tr());
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
     await _supabase
-        .from('news')
-        .update({"message":message.message})
-        .eq("id", message.id);
+        .from(Tb.news.table)
+        .update({Tb.news.message:message.message})
+        .eq(Tb.news.id, message.id);
     ToastHelper.Show("Message has been changed.".tr());
   }
 
   static insertNewsMessage(String message, bool withNotification) async {
-    await _supabase.from('news').insert(
-        {"message": message, "created_by": currentUserId()}).select();
+    await _supabase.from(Tb.news.table).insert(
+        {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
 
     if(withNotification)
     {
@@ -1174,9 +1174,9 @@ class DataService {
     ensureUserIsLoggedIn();
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
-        .from('news')
+        .from(Tb.news.table)
         .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .gt("id", lastMessageId);
+        .gt(Tb.news.id, lastMessageId);
     return result.count;
   }
 
@@ -1184,12 +1184,12 @@ class DataService {
     ensureUserIsLoggedIn();
     int lastMessageId = 0;
     var lastMessage = await _supabase
-        .from("user_news")
-        .select("news_id")
-        .eq("user", currentUserId())
+        .from(Tb.user_news.table)
+        .select(Tb.user_news.news_id)
+        .eq(Tb.user_news.user, currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
-      lastMessageId = lastMessage["news_id"];
+      lastMessageId = lastMessage[Tb.user_news.news_id];
     }
     return lastMessageId;
   }
@@ -1197,8 +1197,8 @@ class DataService {
   static void setMessagesAsRead(int newsId) async {
     ensureUserIsLoggedIn();
     await _supabase
-        .from('user_news')
-        .upsert({"user": currentUserId(), "news_id": newsId}).select();
+        .from(Tb.user_news.table)
+        .upsert({Tb.user_news.user: currentUserId(), Tb.user_news.news_id: newsId}).select();
   }
 
   static Future<List<NewsModel>> getAllNewsMessages() async {
