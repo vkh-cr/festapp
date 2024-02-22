@@ -261,30 +261,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Max".tr(),
-                    field: EventModel.maxParticipantsColumn,
-                    type: PlutoColumnType.number(negative: false, defaultValue: null),
-                    width: 70,
-                  ),
-                  PlutoColumn(
-                    title: "M/F 50/50".tr(),
-                    field: EventModel.splitForMenWomenColumn,
-                    type: PlutoColumnType.text(),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
-                  ),
-                  PlutoColumn(
-                    title: "Group".tr(),
-                    field: EventModel.isGroupEventColumn,
-                    type: PlutoColumnType.text(),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
-                  ),
-                  PlutoColumn(
                     title: "Place".tr(),
                     field: EventModel.placeColumn,
                     type: PlutoColumnType.select(places),
@@ -332,7 +308,31 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               });},
                             child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
-                      }),
+                  }),
+                  PlutoColumn(
+                    title: "Max".tr(),
+                    field: EventModel.maxParticipantsColumn,
+                    type: PlutoColumnType.number(negative: false, defaultValue: null),
+                    width: 70,
+                  ),
+                  PlutoColumn(
+                    title: "M/F 50/50".tr(),
+                    field: EventModel.splitForMenWomenColumn,
+                    type: PlutoColumnType.text(),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
+                  ),
+                  PlutoColumn(
+                    title: "Group".tr(),
+                    field: EventModel.isGroupEventColumn,
+                    type: PlutoColumnType.text(),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
+                  ),
                   PlutoColumn(
                       title: "Show inside event".tr(),
                       field: EventModel.parentEventColumn,

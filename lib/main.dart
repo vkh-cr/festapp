@@ -6,6 +6,7 @@ import 'package:avapp/data/DataService.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
+import 'package:avapp/pages/MySchedulePage.dart';
 import 'package:avapp/pages/NewsPage.dart';
 import 'package:avapp/pages/TimetablePage.dart';
 import 'package:avapp/pages/UserPage.dart';
@@ -327,7 +328,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    context.push(ProgramViewPage.ROUTE).then((value) => loadData());
+    context.push(MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
