@@ -413,7 +413,7 @@ class DataService {
   }
 
   static Future<List<InformationModel>> getAllInformation() async {
-    var data = await _supabase.from(InformationModel.informationTable).select();
+    var data = await _supabase.from(Tb.information.table).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
@@ -423,9 +423,9 @@ class DataService {
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
-        .from(InformationModel.informationTable)
+        .from(Tb.information.table)
         .select()
-        .eq(InformationModel.isHiddenColumn, false);
+        .eq(Tb.information.is_hidden, false);
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
@@ -1049,30 +1049,30 @@ class DataService {
   static Future<void> updateInformation(InformationModel info) async {
     if(info.id == null)
     {
-      await _supabase.from(InformationModel.informationTable).insert({
-        InformationModel.titleColumn: info.title,
-        InformationModel.descriptionColumn: info.description,
-        InformationModel.typeColumn: info.type,
-        InformationModel.isHiddenColumn: info.isHidden,
-        InformationModel.orderColumn: info.order
+      await _supabase.from(Tb.information.table).insert({
+        Tb.information.title: info.title,
+        Tb.information.description: info.description,
+        Tb.information.type: info.type,
+        Tb.information.is_hidden: info.isHidden,
+        Tb.information.order: info.order
       });
       return;
     }
-    await _supabase.from(InformationModel.informationTable).upsert({
-      InformationModel.titleColumn: info.title,
-      InformationModel.idColumn: info.id,
-      InformationModel.descriptionColumn: info.description,
-      InformationModel.typeColumn: info.type,
-      InformationModel.isHiddenColumn: info.isHidden,
-      InformationModel.orderColumn: info.order
+    await _supabase.from(Tb.information.table).upsert({
+      Tb.information.title: info.title,
+      Tb.information.id: info.id,
+      Tb.information.description: info.description,
+      Tb.information.type: info.type,
+      Tb.information.is_hidden: info.isHidden,
+      Tb.information.order: info.order
     }).select();
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
     await _supabase
-        .from(InformationModel.informationTable)
+        .from(Tb.information.table)
         .delete()
-        .eq(InformationModel.idColumn, info.id);
+        .eq(Tb.information.id, info.id);
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
