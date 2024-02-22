@@ -421,7 +421,7 @@ class DataService {
     return infoList;
   }
 
-  static Future<List<InformationModel>> getActiveInformation() async {
+  static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
         .from(InformationModel.informationTable)
         .select()
@@ -1367,7 +1367,7 @@ class DataService {
     var places = await getAllPlaces();
     OfflineDataHelper.saveAllPlaces(places);
 
-    var info = await getAllInformation();
+    var info = await getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(info);
 
     var messages = await getAllNewsMessages();
