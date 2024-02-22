@@ -45,7 +45,16 @@ final router = GoRouter(
     ),
     GoRoute(
       path: InfoPage.ROUTE,
-      builder: (context, state) => const InfoPage(),
+      builder: (context, state) => InfoPage(),
+      routes: <RouteBase>[
+        GoRoute(
+          path: ":type",
+          builder: (context, state) {
+            var type = state.pathParameters["type"];
+            return InfoPage(type: type);
+          },
+        )
+      ],
     ),
     GoRoute(
       path: UserPage.ROUTE,

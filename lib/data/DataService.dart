@@ -1052,6 +1052,7 @@ class DataService {
       await _supabase.from(InformationModel.informationTable).insert({
         InformationModel.titleColumn: info.title,
         InformationModel.descriptionColumn: info.description,
+        InformationModel.typeColumn: info.type,
         InformationModel.isHiddenColumn: info.isHidden,
         InformationModel.orderColumn: info.order
       });
@@ -1061,6 +1062,7 @@ class DataService {
       InformationModel.titleColumn: info.title,
       InformationModel.idColumn: info.id,
       InformationModel.descriptionColumn: info.description,
+      InformationModel.typeColumn: info.type,
       InformationModel.isHiddenColumn: info.isHidden,
       InformationModel.orderColumn: info.order
     }).select();
