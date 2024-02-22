@@ -24,6 +24,8 @@ class _InfoPageState extends State<InfoPage> {
   List<InformationModel>? _informationList;
   _InfoPageState();
 
+  String title = "Information".tr();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -34,7 +36,7 @@ class _InfoPageState extends State<InfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Information").tr(),
+        title: Text(title),
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
