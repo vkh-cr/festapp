@@ -263,17 +263,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 Column(
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: AppConfig.color1,
-                      child: const Icon(Icons.music_note),
-                    ),
-                    Text("My schedule".tr()),
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
                     badges.Badge(
                       showBadge: showMessageCount(),
                       badgeContent: SizedBox(
@@ -287,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       child: MainPageButton(
                         onPressed: _newsPressed,
                         backgroundColor: AppConfig.color3,
-                        child: const Icon(Icons.newspaper),
+                        child: const Icon(Icons.message),
                       ),
                     ),
                     Text("News".tr()),
@@ -302,6 +291,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                       child: const Icon(Icons.map),
                     ),
                     Text("Map".tr()),
+                  ],
+                ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    MainPageButton(
+                      onPressed: _programPressed,
+                      backgroundColor: AppConfig.color1,
+                      child: const Icon(Icons.music_note),
+                    ),
+                    Text("Songs".tr()),
                   ],
                 ),
                 Column(

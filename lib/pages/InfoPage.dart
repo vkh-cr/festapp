@@ -29,6 +29,9 @@ class _InfoPageState extends State<InfoPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if(widget.type == "song"){
+      title = "Songs".tr();
+    }
     loadData();
   }
 
