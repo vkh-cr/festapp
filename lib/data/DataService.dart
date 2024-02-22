@@ -421,7 +421,7 @@ class DataService {
     return infoList;
   }
 
-  static Future<List<InformationModel>> getActiveInformation() async {
+  static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
         .from(InformationModel.informationTable)
         .select()
@@ -1052,6 +1052,7 @@ class DataService {
       await _supabase.from(InformationModel.informationTable).insert({
         InformationModel.titleColumn: info.title,
         InformationModel.descriptionColumn: info.description,
+        InformationModel.typeColumn: info.type,
         InformationModel.isHiddenColumn: info.isHidden,
         InformationModel.orderColumn: info.order
       });
@@ -1061,6 +1062,7 @@ class DataService {
       InformationModel.titleColumn: info.title,
       InformationModel.idColumn: info.id,
       InformationModel.descriptionColumn: info.description,
+      InformationModel.typeColumn: info.type,
       InformationModel.isHiddenColumn: info.isHidden,
       InformationModel.orderColumn: info.order
     }).select();
@@ -1093,6 +1095,9 @@ class DataService {
         .from("news")
         .select("id")
         .lt("created_at", message.createdAt)
+    // from some reason lower than is behaving like lower and equal than on web platform
+    // therefore additional check
+        .neq("id", message.id)
         .order("created_at")
         .limit(1)
         .maybeSingle();
@@ -1364,7 +1369,7 @@ class DataService {
     var places = await getAllPlaces();
     OfflineDataHelper.saveAllPlaces(places);
 
-    var info = await getAllInformation();
+    var info = await getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(info);
 
     var messages = await getAllNewsMessages();
