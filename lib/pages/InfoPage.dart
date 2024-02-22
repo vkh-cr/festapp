@@ -1,3 +1,4 @@
+import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/data/DataService.dart';
@@ -11,8 +12,9 @@ import '../widgets/HtmlDescriptionWidget.dart';
 import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
+  String? type;
   static const ROUTE = "/info";
-  const InfoPage({Key? key}) : super(key: key);
+  InfoPage({this.type, super.key});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -91,9 +93,10 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo();
-    _informationList = await DataService.getAllActiveInformation();
-    OfflineDataHelper.saveAllInfo(_informationList!);
+    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    var allInfo = await DataService.getAllActiveInformation();
+    _informationList = allInfo.filterByType(widget.type);
+    OfflineDataHelper.saveAllInfo(allInfo);
     setState(() {});
   }
 }
