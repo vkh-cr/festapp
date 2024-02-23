@@ -8,6 +8,7 @@ import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/MySchedulePage.dart';
 import 'package:avapp/pages/NewsPage.dart';
+import 'package:avapp/pages/SongPage.dart';
 import 'package:avapp/pages/TimetablePage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';

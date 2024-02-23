@@ -16,7 +16,7 @@ import '../models/EventModel.dart';
 import '../models/UserGroupInfoModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
-import '../widgets/HtmlDescriptionWidget.dart';
+import '../widgets/HtmlView.dart';
 import '../widgets/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
@@ -158,7 +158,7 @@ class _EventPageState extends State<EventPage> {
                     visible: _event != null && _event?.description != null,
                     child: Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child:  HtmlDescriptionWidget(html: _event?.description ?? ""),
+                      child:  HtmlView(html: _event?.description ?? ""),
                     ),
                   ),
                   Visibility(

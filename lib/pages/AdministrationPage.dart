@@ -3,6 +3,7 @@ import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:avapp/models/ExclusiveGroupModel.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
 import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/MapPage.dart';
@@ -153,44 +154,44 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllInformation,
                 InformationModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
-                InformationModel.idColumn,
+                Tb.information.id,
                 columns: [
                   PlutoColumn(
                       title: "Id".tr(),
-                      field: InformationModel.idColumn,
+                      field: Tb.information.id,
                       type: PlutoColumnType.number(defaultValue: -1),
                       readOnly: true,
                       width: 50,
                       renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),),
                   PlutoColumn(
                     title: "Hide".tr(),
-                    field: InformationModel.isHiddenColumn,
+                    field: Tb.information.is_hidden,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, InformationModel.isHiddenColumn),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
-                      field: InformationModel.titleColumn,
+                      field: Tb.information.title,
                       type: PlutoColumnType.text()),
                   PlutoColumn(
                       width: 150,
                       title: "Content".tr(),
-                      field: InformationModel.descriptionColumn,
+                      field: Tb.information.description,
                       type: PlutoColumnType.text(),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
-                              var oldText = rendererContext.row.cells[InformationModel.descriptionColumn]?.value;
+                              var oldText = rendererContext.row.cells[Tb.information.description]?.value;
                               context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
                                   if(newText!=oldText)
                                   {
-                                    var cell = rendererContext.row.cells[InformationModel.descriptionColumn]!;
+                                    var cell = rendererContext.row.cells[Tb.information.description]!;
                                     rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
@@ -200,14 +201,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       }),
                   PlutoColumn(
                     title: "Order".tr(),
-                    field: InformationModel.orderColumn,
+                    field: Tb.information.order,
                     type: PlutoColumnType.number(defaultValue: null),
                     applyFormatterInEditing: true,
                     width: 100,
                   ),
                   PlutoColumn(
                       title: "Type".tr(),
-                      field: InformationModel.typeColumn,
+                      field: Tb.information.type,
                       type: PlutoColumnType.text()),
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
@@ -565,7 +566,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   var newText = value as String;
                                   if(newText!=oldText)
                                   {
-                                    var cell = rendererContext.row.cells[InformationModel.descriptionColumn]!;
+                                    var cell = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!;
                                     rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
