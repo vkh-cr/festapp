@@ -25,29 +25,36 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
 }
 }
 
-class HtmlDescriptionWidget extends StatefulWidget {
+class HtmlView extends StatefulWidget {
   final String html;
+  double? fontSize;
 
-  const HtmlDescriptionWidget({super.key, required this.html});
+  HtmlView({super.key, required this.html, this.fontSize = 18 });
 
   @override
-  _HtmlDescriptionWidgetState createState() => _HtmlDescriptionWidgetState();
+  _HtmlViewState createState() => _HtmlViewState();
 }
 
-class _HtmlDescriptionWidgetState extends State<HtmlDescriptionWidget> {
+class _HtmlViewState extends State<HtmlView> {
 
-  _HtmlDescriptionWidgetState();
+  _HtmlViewState();
   @override
   Widget build(BuildContext context) {
+    var st = DefaultTextStyle.of(context).style;
     return HtmlWithAppLinksWidget(
       // the first parameter (`html`) is required
       context,
-        widget.html,
-        // select the render mode for HTML body
-        // by default, a simple `Column` is rendered
-        // consider using `ListView` or `SliverList` for better performance
-        renderMode: RenderMode.column,
-      textStyle: const TextStyle(fontSize: 18, fontFamily: "Futura"),
+      widget.html,
+      // select the render mode for HTML body
+      // by default, a simple `Column` is rendered
+      // consider using `ListView` or `SliverList` for better performance
+      renderMode: RenderMode.column,
+      textStyle: TextStyle(
+        fontSize: widget.fontSize,
+      fontFamily: "Futura",
+      color: Colors.black,
+      inherit: false,
+      ),
     );
     }
   }

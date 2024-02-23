@@ -8,7 +8,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/ToastHelper.dart';
-import '../widgets/HtmlDescriptionWidget.dart';
+import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
@@ -80,7 +80,7 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlDescriptionWidget(html: item.description ?? ""),
+                        child: HtmlView(html: item.description ?? ""),
                       )],
                     ),
                       isExpanded: item.isExpanded,
