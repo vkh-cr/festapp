@@ -325,7 +325,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    context.push("${InfoPage.ROUTE}/song").then((value) => loadData());
+    context.push(SongPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
