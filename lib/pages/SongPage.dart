@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import '../widgets/HtmlView.dart';
 
 class SongPage extends StatefulWidget {
-  final String? type = null;
+  final String? type = "song";
 
   static const ROUTE = "/songs";
 
@@ -24,7 +24,7 @@ class SongPage extends StatefulWidget {
 class _SongPageState extends State<SongPage> {
   List<InformationModel>? _informationList;
 
-  double fontSize = 18;
+  static double fontSize = 18;
   double fontSizeStep = 2;
   double maxFontSize = 50;
   double minFontSize = 8;
@@ -65,7 +65,7 @@ class _SongPageState extends State<SongPage> {
                         transitionDuration: const Duration(milliseconds: 300),
                         pageBuilder: (context, __, ___) {
                           var htmlContent =
-                              "<br/><br/><h3><p style='text-align: center;'>${_informationList![index].title}</p></h3>${_informationList![index].description ?? ""}";
+                              "<br/><br/><h3><p style='text-align: center;'>${_informationList![index].title}</p></h3>${_informationList![index].description ?? ""}${"<br/><br/>"}";
                           return StatefulBuilder(builder:
                               (BuildContext context, StateSetter setState) {
                             return Stack(
@@ -109,7 +109,7 @@ class _SongPageState extends State<SongPage> {
                                     child: Icon(Icons.add, color: Colors.white),
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
-                                      padding: EdgeInsets.all(9),
+                                      padding: EdgeInsets.all(12),
                                       backgroundColor: AppConfig.color1,
                                       foregroundColor: AppConfig.color2,
                                     ),
@@ -130,7 +130,7 @@ class _SongPageState extends State<SongPage> {
                                     },
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
-                                      padding: EdgeInsets.all(9),
+                                      padding: EdgeInsets.all(12),
                                       backgroundColor: AppConfig.color1,
                                       foregroundColor: AppConfig.color2,
                                     ),
@@ -147,7 +147,7 @@ class _SongPageState extends State<SongPage> {
                                     },
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
-                                      padding: EdgeInsets.all(9),
+                                      padding: EdgeInsets.all(12),
                                       backgroundColor: AppConfig.color1,
                                       foregroundColor: AppConfig.color2,
                                     ),
@@ -163,7 +163,7 @@ class _SongPageState extends State<SongPage> {
                   child: Container(
                       padding: const EdgeInsets.all(12),
                       alignment: Alignment.centerLeft,
-                      child: Text(_informationList![index].title, textAlign: TextAlign.left)),
+                      child: Text(_informationList![index].title, textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
                 );
               }),
         ),
