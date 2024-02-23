@@ -329,7 +329,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    context.push(MySchedulePage.ROUTE).then((value) => loadData());
+    context.push(ProgramViewPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
