@@ -151,7 +151,7 @@ class _SongPageState extends State<SongPage> {
                                       backgroundColor: AppConfig.color1,
                                       foregroundColor: AppConfig.color2,
                                     ),
-                                    child: const Icon(Icons.arrow_back,
+                                    child: Icon(Icons.adaptive.arrow_back,
                                         color: Colors.white),
                                   ),
                                 )
