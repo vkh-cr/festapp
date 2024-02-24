@@ -6,6 +6,11 @@ class Tb
   static UserNewsViewsTb user_news_views = const UserNewsViewsTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
+  static EventsTb events = const EventsTb();
+  static EventUserTb event_users = const EventUserTb();
+  static EventGroupsTb event_groups = const EventGroupsTb();
+  static ExclusiveGroupTb exclusive_groups = const ExclusiveGroupTb();
+  static ExclusiveEventsTb exclusive_events = const ExclusiveEventsTb();
 }
 class NewsTb{
   const NewsTb();
@@ -57,4 +62,45 @@ class InformationTb{
   String get description => "description";
   String get is_hidden => "is_hidden";
   String get order => "order";
+}
+class EventsTb{
+  const EventsTb();
+  String get table => "events";
+  String get id => "id";
+  String get is_hidden => "is_hidden";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get title => "title";
+  String get start_time => "start_time";
+  String get end_time => "end_time";
+  String get max_participants => "max_participants";
+  String get description => "description";
+  String get place => "place";
+  String get split_for_men_women => "split_for_men_women";
+  String get is_group_event => "is_group_event";
+}
+class EventUserTb{
+  const EventUserTb();
+  String get table => "event_users";
+  String get created_at => "created_at";
+  String get event => "event";
+  String get user => "user";
+}
+class EventGroupsTb{
+  const EventGroupsTb();
+  String get table => "event_groups";
+  String get event_parent => "event_parent";
+  String get event_child => "event_child";
+}
+class ExclusiveGroupTb{
+  const ExclusiveGroupTb();
+  String get table => "exclusive_groups";
+  String get id => "id";
+  String get title => "title";
+}
+class ExclusiveEventsTb{
+  const ExclusiveEventsTb();
+  String get table => "exclusive_events";
+  String get id => "event";
+  String get title => "group";
 }
