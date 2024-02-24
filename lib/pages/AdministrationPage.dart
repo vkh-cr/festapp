@@ -216,11 +216,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getEventsWithPlaces,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
-                EventModel.idColumn,
+                Tb.events.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: EventModel.idColumn,
+                    field: Tb.events.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     width: 50,
@@ -302,20 +302,20 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: EventModel.descriptionColumn,
+                      field: Tb.events.description,
                       type: PlutoColumnType.text(defaultValue: ""),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
                               String? textToEdit;
-                              String? oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
+                              String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
                               if(oldText!=null)
                               {
                                 textToEdit = oldText;
                               }
                               if(textToEdit == null)
                               {
-                                var eventId = rendererContext.row.cells[EventModel.idColumn]!.value;
+                                var eventId = rendererContext.row.cells[Tb.events.id]!.value;
 
                                 if(eventId!=null)
                                 {
@@ -329,8 +329,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   var newText = value as String;
                                   if(newText!=textToEdit)
                                   {
-                                    rendererContext.row.cells[EventModel.descriptionColumn]?.value = newText;
-                                    var cell = rendererContext.row.cells[EventModel.descriptionColumn]!;
+                                    rendererContext.row.cells[Tb.events.description]?.value = newText;
+                                    var cell = rendererContext.row.cells[Tb.events.description]!;
                                     rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   }
                                 }
@@ -452,11 +452,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllUserGroupInfo,
                 UserGroupInfoModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
-                UserGroupInfoModel.idColumn,
+                Tb.user_group_info.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: UserGroupInfoModel.idColumn,
+                    field: Tb.user_group_info.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     enableEditingMode: false,
@@ -554,19 +554,19 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: UserGroupInfoModel.descriptionColumn,
+                      field: Tb.user_group_info.description,
                       type: PlutoColumnType.text(defaultValue: null),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
-                              var oldText = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!.value as String?;
+                              var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
                               context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
                                   if(newText!=oldText)
                                   {
-                                    var cell = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!;
+                                    var cell = rendererContext.row.cells[Tb.user_group_info.description]!;
                                     rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
