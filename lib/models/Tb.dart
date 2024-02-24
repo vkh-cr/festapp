@@ -16,6 +16,7 @@ class Tb {
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
   static NotificationRecordsTb notification_records = const NotificationRecordsTb();
   static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
+  static GlobalSettingsTb global_settings = const GlobalSettingsTb();
 }
 class NewsTb{
   const NewsTb();
@@ -164,4 +165,10 @@ class AccommodationPlacesTb{
   String get table => "accommodation_places";
   String get place => "place";
   String get accommodation_type => "accommodation_type";
+}
+class GlobalSettingsTb{
+  const GlobalSettingsTb();
+  String get table => "global_settings";
+  String get id => "id";
+  String get json => "json";
 }

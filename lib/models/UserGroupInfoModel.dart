@@ -65,7 +65,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
   static const String leaderUserColumn = "leaderUser";
 
   static const String participantsColumn = "participants";
-  static const String userGroupInfoTable = "user_group_info";
   static const String userGroupsTable = "user_groups";
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {

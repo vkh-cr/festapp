@@ -112,14 +112,14 @@ class DataService {
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;
     var data = await _supabase
-        .from(GlobalSettingsModel.globalSettingsTable)
+        .from(Tb.global_settings.table)
         .select()
         .maybeSingle();
 
     if(data == null)
     {
       await _supabase
-          .from(GlobalSettingsModel.globalSettingsTable)
+          .from(Tb.global_settings.table)
           .insert(GlobalSettingsModel.DefaultSettings.toJson());
         toReturn = GlobalSettingsModel.DefaultSettings;
     }
@@ -184,9 +184,9 @@ class DataService {
         .delete()
         .eq(Tb.user_news.user, uuid);
     await _supabase
-        .from(UserInfoModel.userInfoTable)
+        .from(Tb.user_info.table)
         .delete()
-        .eq(UserInfoModel.idColumn, uuid);
+        .eq(Tb.user_info.id, uuid);
     adminClient.auth.admin.deleteUser(uuid);
   }
 
@@ -278,12 +278,12 @@ class DataService {
   }
 
   static Future<List<UserInfoModel>> getUsers() async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable).select();
+    var data = await _supabase.from(Tb.user_info.table).select();
     return List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
   }
 
   static Future<UserInfoModel> getUser(String id) async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable).select().eq(UserInfoModel.idColumn, id).single();
+    var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
     return UserInfoModel.fromJson(data);
   }
 
@@ -298,15 +298,15 @@ class DataService {
   }
 
   static updateUserAsJson(Map<String, dynamic> json) async {
-    if(json[UserInfoModel.idColumn] == null)
+    if(json[Tb.user_info.id] == null)
     {
       if(AppConfig.isServiceRoleSafety){
-        json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
+        json[Tb.user_info.id] = await DataService.createUser(json[Tb.user_info.email_readonly]!);
       } else{
-        json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
+        json[Tb.user_info.id] = await UserManagementHelper.unsafeCreateNewUser(json[Tb.user_info.email_readonly]);
       }
     }
-    await _supabase.from(UserInfoModel.userInfoTable).upsert(json);
+    await _supabase.from(Tb.user_info.table).upsert(json);
   }
 
   static updateUser(UserInfoModel data) async {
@@ -344,18 +344,18 @@ class DataService {
           params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
     }
 
-    await _supabase.from(UserInfoModel.userInfoTable).upsert({
-      UserInfoModel.idColumn: data.id,
-      UserInfoModel.emailReadonlyColumn: data.email,
-      UserInfoModel.nameColumn: data.name,
-      UserInfoModel.surnameColumn: data.surname,
-      UserInfoModel.sexColumn: data.sex,
-      UserInfoModel.roleColumn: data.role,
-      UserInfoModel.accommodationColumn: data.accommodation,
-      UserInfoModel.phoneColumn: data.phone,
-      UserInfoModel.birthDateColumn: data.birthDate?.toIso8601String(),
-      UserInfoModel.isAdminReadOnlyColumn: data.isAdmin,
-      UserInfoModel.isEditorReadOnlyColumn: data.isEditor,
+    await _supabase.from(Tb.user_info.table).upsert({
+      Tb.user_info.id: data.id,
+      Tb.user_info.email_readonly: data.email,
+      Tb.user_info.name: data.name,
+      Tb.user_info.surname: data.surname,
+      Tb.user_info.sex: data.sex,
+      Tb.user_info.role: data.role,
+      Tb.user_info.accommodation: data.accommodation,
+      Tb.user_info.phone: data.phone,
+      Tb.user_info.birth_date: data.birthDate?.toIso8601String(),
+      Tb.user_info.is_admin_readonly: data.isAdmin,
+      Tb.user_info.is_editor_readonly: data.isEditor,
     });
 
     if(data.id == currentUserId())
@@ -1146,18 +1146,11 @@ class DataService {
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable)
-        .select([UserInfoModel.idColumn,
-                UserInfoModel.emailReadonlyColumn,
-                UserInfoModel.nameColumn,
-                UserInfoModel.surnameColumn].join(", "));
-    return List<UserInfoModel>.from(
-        data.map((x) => UserInfoModel.fromJson(x)));
-  }
-
-  static Future<List<UserInfoModel>> getAllUsersPublic() async {
-    var data = await _supabase.from(UserInfoModel.userInfoPublicTable)
-        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
+    var data = await _supabase.from(Tb.user_info.table)
+        .select([Tb.user_info.id,
+                Tb.user_info.email_readonly,
+                Tb.user_info.name,
+                Tb.user_info.surname].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
   }

@@ -607,7 +607,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getUsers,
                 UserInfoModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
-                UserInfoModel.idColumn,
+                Tb.user_info.id,
                 actionsExtended: DataGridExtendedActions(areAllActionsEnabled: DataService.isAdmin),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: DataService.isAdmin),
@@ -618,17 +618,17 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 columns: [
                   PlutoColumn(
                       title: "Id".tr(),
-                      field: UserInfoModel.idColumn,
+                      field: Tb.user_info.id,
                       type: PlutoColumnType.text(),
                       readOnly: true,
                       width: 50),
                   PlutoColumn(
                       title: "E-mail".tr(),
                       enableEditingMode: DataService.isAdmin(),
-                      field: UserInfoModel.emailReadonlyColumn,
+                      field: Tb.user_info.email_readonly,
                       type: PlutoColumnType.text(),
                       checkReadOnly: (row, cell) {
-                        final id = row.cells[UserInfoModel.idColumn]?.value as String?;
+                        final id = row.cells[Tb.user_info.id]?.value as String?;
                         return id != null && id.isNotEmpty;
                       },
                       width: 200
@@ -636,21 +636,21 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Name".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.nameColumn,
+                    field: Tb.user_info.name,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Surname".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.surnameColumn,
+                    field: Tb.user_info.surname,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Accommodation".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.accommodationColumn,
+                    field: Tb.user_info.accommodation,
                     type: PlutoColumnType.text(),
                     readOnly: false,
                     width: 150,
@@ -658,14 +658,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Phone".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.phoneColumn,
+                    field: Tb.user_info.phone,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Sex".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.sexColumn,
+                    field: Tb.user_info.sex,
                     type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
                     formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
                     applyFormatterInEditing: true,
@@ -674,32 +674,32 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Birthday".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.birthDateColumn,
+                    field: Tb.user_info.birth_date,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
                     title: "Admin".tr(),
-                    field: UserInfoModel.isAdminReadOnlyColumn,
+                    field: Tb.user_info.is_admin_readonly,
                     type: PlutoColumnType.select([]),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn, DataService.isAdmin),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_admin_readonly, DataService.isAdmin),
                   ),
                   PlutoColumn(
                     title: "Editor".tr(),
-                    field: UserInfoModel.isEditorReadOnlyColumn,
+                    field: Tb.user_info.is_editor_readonly,
                     type: PlutoColumnType.select([]),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn, DataService.isAdmin),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_editor_readonly, DataService.isAdmin),
                   ),
                   PlutoColumn(
                     title: "Role".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.roleColumn,
+                    field: Tb.user_info.role,
                     type: PlutoColumnType.text(),
                     width: 100,
                   )
