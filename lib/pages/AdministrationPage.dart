@@ -228,12 +228,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Hide".tr(),
-                    field: PlaceModel.isHiddenColumn,
+                    field: Tb.events.is_hidden,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, PlaceModel.isHiddenColumn),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
@@ -350,7 +350,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllPlaces,
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
-                PlaceModel.idColumn,
+                Tb.places.id,
                 actionsExtended: DataGridExtendedActions(saveAction:
                 DataGridAction(
                   action: (datagrid, [action]) async {
@@ -361,7 +361,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: PlaceModel.idColumn,
+                    field: Tb.places.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     width: 50,
@@ -369,28 +369,28 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Hide".tr(),
-                    field: PlaceModel.isHiddenColumn,
+                    field: Tb.places.is_hidden,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, PlaceModel.isHiddenColumn),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.places.is_hidden),
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
-                      field: PlaceModel.titleColumn,
+                      field: Tb.places.title,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
                       title: "Content".tr(),
-                      field: PlaceModel.descriptionColumn,
+                      field: Tb.places.description,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
                     title: "Icon".tr(),
-                    field: PlaceModel.typeColumn,
+                    field: Tb.places.type,
                     type: PlutoColumnType.select(mapIcons),
                     renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
                   ),
@@ -400,7 +400,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: PlaceModel.coordinatesColumn,
+                      field: Tb.places.coordinates,
                       type: PlutoColumnType.text(defaultValue: DataService.globalSettingsModel!.defaultMapLocation),
                       renderer: (rendererContext) {
                         return ElevatedButton(
@@ -409,7 +409,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                   if(value != null)
                                   {
-                                    var cell = rendererContext.row.cells[PlaceModel.coordinatesColumn]!;
+                                    var cell = rendererContext.row.cells[Tb.places.coordinates]!;
                                     rendererContext.stateManager.changeCellValue(cell, value, force: true);
                                   }
                                  });

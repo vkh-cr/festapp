@@ -12,7 +12,6 @@ import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
-import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -269,13 +268,13 @@ class DataService {
       String accommodationType) async {
     var data = await _supabase
         .from('accommodation_places')
-        .select("places(id, title)")
+        .select("${Tb.places.table}(id, title)")
         .eq("accommodation_type", accommodationType)
         .maybeSingle();
     if (data == null) {
       return null;
     }
-    return PlaceModel.fromJson(data["places"]);
+    return PlaceModel.fromJson(data[Tb.places.table]);
   }
 
   static Future<List<UserInfoModel>> getUsers() async {
@@ -366,35 +365,28 @@ class DataService {
   }
 
   static Future<List<PlaceModel>> getMapPlaces() async {
-    var data = await _supabase.from(PlaceModel.placeTable).select().eq(PlaceModel.isHiddenColumn, false);
+    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.is_hidden, false);
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
-    var data = await _supabase.from(PlaceModel.placeTable).select();
+    var data = await _supabase.from(Tb.places.table).select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
-  }
-
-  static Future<List<TimetablePlace>> getTimetablePlaces() async {
-    var data = await _supabase.from(PlaceModel.timetablePlacesTable).select();
-    var placeIds = List<int>.from(data.map((x) => x[PlaceModel.timetablePlacesTablePlaceColumn]));
-    var placeData = await _supabase.from(PlaceModel.placeTable).select().in_(PlaceModel.idColumn, placeIds);
-    return List<TimetablePlace>.from(placeData.map((x) => TimetablePlace.fromJson(x)));
   }
 
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
     var data = await _supabase.from(UserGroupInfoModel.userGroupInfoTable)
-        .select("${UserGroupInfoModel.titleColumn}, ${PlaceModel.placeTable}(*)");
+        .select("${UserGroupInfoModel.titleColumn}, ${Tb.places.table}(*)");
     return List<UserGroupInfoModel>.from(data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
   static Future<PlaceModel> getPlace(int id) async {
-    var data = await _supabase.from(PlaceModel.placeTable).select().eq("id", id).single();
+    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.id, id).single();
     return PlaceModel.fromJson(data);
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
-    await _supabase.from(PlaceModel.placeTable).delete().eq("id", placeModel.id);
+    await _supabase.from(Tb.places.table).delete().eq(Tb.places.id, placeModel.id);
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
@@ -402,12 +394,12 @@ class DataService {
     var json = placeModel.toJson();
     Map<String, dynamic> data;
     if(placeModel.id!=null) {
-      data = await _supabase.from(PlaceModel.placeTable).update(json).eq("id", placeModel.id).select().single();
+      data = await _supabase.from(Tb.places.table).update(json).eq(Tb.places.id, placeModel.id).select().single();
     }
     else
     {
-      json.remove(PlaceModel.idColumn);
-      data = await _supabase.from(PlaceModel.placeTable).insert(json).select().single();
+      json.remove(Tb.places.id);
+      data = await _supabase.from(Tb.places.table).insert(json).select().single();
     }
     return PlaceModel.fromJson(data);
   }
@@ -628,7 +620,7 @@ class DataService {
         "${UserGroupInfoModel.idColumn},"
         "${UserGroupInfoModel.titleColumn},"
         "user_info!leader(id, name, surname, email_readonly),"
-        "${PlaceModel.placeTable}(*),"
+        "${Tb.places.table}(*),"
         "${UserGroupInfoModel.descriptionColumn},"
         "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))");
     return List<UserGroupInfoModel>.from(
@@ -642,7 +634,7 @@ class DataService {
         "${UserGroupInfoModel.idColumn},"
             "${UserGroupInfoModel.titleColumn},"
             "user_info_public!leader(id, name, surname),"
-            "${PlaceModel.placeTable}(*),"
+            "${Tb.places.table}(*),"
             "${UserGroupInfoModel.descriptionColumn},"
             "${UserGroupInfoModel.userGroupsTable}(user_info_public(id, name, surname))")
     .eq(UserGroupInfoModel.idColumn, id)
@@ -721,9 +713,9 @@ class DataService {
     if(model.place!=null)
     {
       await _supabase
-          .from(PlaceModel.placeTable)
+          .from(Tb.places.table)
           .delete()
-          .eq("id", model.place!.id);
+          .eq(Tb.places.id, model.place!.id);
     }
   }
 
@@ -828,7 +820,7 @@ class DataService {
     UserGroupInfoModel? group;
     var partOfGroup = await _supabase
     .from(UserGroupInfoModel.userGroupInfoTable)
-    .select("id, title, user_info!leader(id), places(id)")
+    .select("id, title, user_info!leader(id), ${Tb.places.table}(id)")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
     .limit(1)
     .maybeSingle();
@@ -1307,11 +1299,11 @@ class DataService {
     {
       throw Exception("You cannot change this place.");
     }
-    await _supabase.from("places").update({
-      "coordinates": {
+    await _supabase.from(Tb.places.table).update({
+      Tb.places.coordinates: {
         "latLng": {"lat": lat, "lng": lng}
       }
-    }).eq("id", placeId);
+    }).eq(Tb.places.id, placeId);
     ToastHelper.Show("Place has been changed.".tr());
   }
 

@@ -33,8 +33,8 @@ class UserGroupInfoModel extends IPlutoRowModel {
       leaderId: json[leaderColumn],
       title: json[titleColumn],
       placeId: json[placeColumn],
-      place: json[PlaceModel.placeTable] != null
-          ? PlaceModel.fromJson(json[PlaceModel.placeTable])
+      place: json[Tb.places.table] != null
+          ? PlaceModel.fromJson(json[Tb.places.table])
           : json[PlaceModel.placeObjectColumn] != null
               ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
               : null,
