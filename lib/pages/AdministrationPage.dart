@@ -423,11 +423,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
-                ExclusiveGroupModel.idColumn,
+                Tb.exclusive_groups.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: ExclusiveGroupModel.idColumn,
+                    field: Tb.exclusive_groups.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     enableEditingMode: false,
@@ -436,7 +436,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                       title: "Name".tr(),
-                      field: ExclusiveGroupModel.titleColumn,
+                      field: Tb.exclusive_groups.title,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
@@ -465,7 +465,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                       title: "Name".tr(),
-                      field: UserGroupInfoModel.titleColumn,
+                      field: Tb.user_group_info.title,
                       type: PlutoColumnType.text(),
                       width: 200
                   ),
@@ -580,20 +580,20 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: UserGroupInfoModel.placeColumn,
+                      field: Tb.user_group_info.place,
                       type: PlutoColumnType.text(defaultValue: null),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async {
-                              var title = rendererContext.row.cells[UserGroupInfoModel.titleColumn]?.value;
-                              var placeModel = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as PlaceModel?;
+                              var title = rendererContext.row.cells[Tb.user_group_info.title]?.value;
+                              var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
 
                               context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;
-                                  var cell = rendererContext.row.cells[UserGroupInfoModel.placeColumn]!;
+                                  var cell = rendererContext.row.cells[Tb.user_group_info.place]!;
                                   rendererContext.stateManager.changeCellValue(cell, placeModel, force: true);
                                 }
                               });

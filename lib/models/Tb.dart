@@ -7,6 +7,7 @@ class Tb {
   static InformationTb information = const InformationTb();
   static EventsTb events = const EventsTb();
   static EventUserTb event_users = const EventUserTb();
+  static EventUsersSavedTb event_users_saved = const EventUsersSavedTb();
   static EventGroupsTb event_groups = const EventGroupsTb();
   static ExclusiveGroupTb exclusive_groups = const ExclusiveGroupTb();
   static ExclusiveEventsTb exclusive_events = const ExclusiveEventsTb();
@@ -93,6 +94,13 @@ class EventsTb{
 class EventUserTb{
   const EventUserTb();
   String get table => "event_users";
+  String get created_at => "created_at";
+  String get event => "event";
+  String get user => "user";
+}
+class EventUsersSavedTb{
+  const EventUsersSavedTb();
+  String get table => "event_users_saved";
   String get created_at => "created_at";
   String get event => "event";
   String get user => "user";
