@@ -1,5 +1,4 @@
-class Tb
-{
+class Tb {
   static NewsTb news = const NewsTb();
   static UserInfoTb user_info = const UserInfoTb();
   static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
@@ -11,12 +10,14 @@ class Tb
   static EventGroupsTb event_groups = const EventGroupsTb();
   static ExclusiveGroupTb exclusive_groups = const ExclusiveGroupTb();
   static ExclusiveEventsTb exclusive_events = const ExclusiveEventsTb();
+  static PlacesTb places = const PlacesTb();
 }
 class NewsTb{
   const NewsTb();
   String get table => "news";
   String get id => "id";
   String get created_at => "created_at";
+  String get updated_at => "updated_at";
   String get created_by => "created_by";
   String get message => "message";
 }
@@ -32,6 +33,8 @@ class UserInfoTb{
   const UserInfoTb();
   String get table => "user_info";
   String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
   String get name => "name";
   String get surname => "surname";
@@ -57,19 +60,21 @@ class InformationTb{
   const InformationTb();
   String get table => "information";
   String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
   String get title => "title";
   String get type => "type";
   String get description => "description";
-  String get is_hidden => "is_hidden";
   String get order => "order";
 }
 class EventsTb{
   const EventsTb();
   String get table => "events";
   String get id => "id";
-  String get is_hidden => "is_hidden";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
   String get title => "title";
   String get start_time => "start_time";
   String get end_time => "end_time";
@@ -103,4 +108,16 @@ class ExclusiveEventsTb{
   String get table => "exclusive_events";
   String get id => "event";
   String get title => "group";
+}
+class PlacesTb{
+  const PlacesTb();
+  String get table => "places";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
+  String get title => "title";
+  String get description => "description";
+  String get type => "type";
+  String get coordinates => "coordinates";
 }
