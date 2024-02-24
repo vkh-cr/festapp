@@ -172,9 +172,9 @@ class DataService {
     }
     var adminClient = await GetSupabaseAdminClient();
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("user", uuid);
+        .eq(Tb.user_groups.user, uuid);
     await _supabase
         .from(Tb.event_users.table)
         .delete()
@@ -267,9 +267,9 @@ class DataService {
   static Future<PlaceModel?> getUserAccommodation(
       String accommodationType) async {
     var data = await _supabase
-        .from('accommodation_places')
-        .select("${Tb.places.table}(id, title)")
-        .eq("accommodation_type", accommodationType)
+        .from(Tb.accommodation_places.table)
+        .select("${Tb.places.table}(${Tb.places.id}, ${Tb.places.title})")
+        .eq(Tb.accommodation_places.accommodation_type, accommodationType)
         .maybeSingle();
     if (data == null) {
       return null;
@@ -611,7 +611,7 @@ class DataService {
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-        "${Tb.event_groups.table}!event_groups_event_child_fkey(event_parent)")
+        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})")
         .order(Tb.events.start_time, ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -629,7 +629,10 @@ class DataService {
   static Future<List<EventModel>> getAllEventsMeta() async {
     var data = await _supabase
         .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.events.updated_at}");
+        .select(
+            "${Tb.events.id},"
+            "${Tb.events.updated_at}"
+        );
 
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -644,7 +647,7 @@ class DataService {
         "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}),"
         "${Tb.places.table}(*),"
         "${Tb.user_group_info.description},"
-        "${UserGroupInfoModel.userGroupsTable}(${Tb.user_info.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}))");
+        "${Tb.user_groups.table}(${Tb.user_info.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}))");
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
@@ -658,7 +661,7 @@ class DataService {
             "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}),"
             "${Tb.places.table}(*),"
             "${Tb.user_group_info.description},"
-            "${UserGroupInfoModel.userGroupsTable}(${Tb.user_info_public.table}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}))")
+            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}))")
     .eq(Tb.user_group_info.id, id)
     .maybeSingle();
     if(data==null)
@@ -711,27 +714,30 @@ class DataService {
 
   static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("group", group.id);
+        .eq(Tb.user_groups.group, group.id);
 
     for(var p in participants)
     {
       await _supabase
-          .from(UserGroupInfoModel.userGroupsTable)
-          .insert({"group":group.id, "user":p.id});
+          .from(Tb.user_groups.table)
+          .insert({
+              Tb.user_groups.group:group.id,
+              Tb.user_groups.user:p.id
+          });
     }
   }
 
   static deleteUserGroupInfo(UserGroupInfoModel model) async {
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("group", model.id);
+        .eq(Tb.user_groups.group, model.id);
     await _supabase
         .from(Tb.user_group_info.table)
         .delete()
-        .eq("id", model.id);
+        .eq(Tb.user_group_info.id, model.id);
     if(model.place!=null)
     {
       await _supabase
@@ -861,7 +867,7 @@ class DataService {
     .from(Tb.user_group_info.table)
     .select("${Tb.user_group_info.id},"
         "${Tb.user_group_info.title},"
-        "user_info!leader(id),"
+        "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}),"
         "${Tb.places.table}(${Tb.places.id})")
     .eq(UserGroupInfoModel.leaderColumn, currentUserId())
     .limit(1)
@@ -873,9 +879,9 @@ class DataService {
     if(group==null)
     {
       partOfGroup = await _supabase
-          .from(UserGroupInfoModel.userGroupsTable)
-          .select("${Tb.user_group_info.table}(id, title)")
-          .eq("user", currentUserId())
+          .from(Tb.user_groups.table)
+          .select("${Tb.user_group_info.table}(${Tb.user_group_info.id}, ${Tb.user_group_info.title})")
+          .eq(Tb.user_groups.user, currentUserId())
           .limit(1)
           .maybeSingle();
       if(partOfGroup!=null)
@@ -1227,8 +1233,12 @@ class DataService {
           basicMessage+=innerText;
       }
       basicMessage = basicMessage.trim();
-      await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.name??AppConfig.home_page}).select();
+      await _supabase.from(Tb.notification_records.table)
+          .insert(
+          {
+            Tb.notification_records.content: basicMessage, 
+            Tb.notification_records.heading: _currentUser!.name??AppConfig.home_page
+          }).select();
 
       ToastHelper.Show("Message has been sent.".tr());
       return;

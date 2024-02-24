@@ -11,7 +11,10 @@ class Tb {
   static ExclusiveGroupTb exclusive_groups = const ExclusiveGroupTb();
   static ExclusiveEventsTb exclusive_events = const ExclusiveEventsTb();
   static PlacesTb places = const PlacesTb();
+  static UserGroupsTb user_groups = const UserGroupsTb();
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
+  static NotificationRecordsTb notification_records = const NotificationRecordsTb();
+  static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
 }
 class NewsTb{
   const NewsTb();
@@ -132,4 +135,25 @@ class UserGroupInfoTb{
   String get leader => "leader";
   String get place => "place";
   String get description => "description";
+}
+class UserGroupsTb{
+  const UserGroupsTb();
+  String get table => "user_groups";
+  String get user => "user";
+  String get group => "group";
+}
+class NotificationRecordsTb{
+  const NotificationRecordsTb();
+  String get table => "notification_records";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get user_id => "user_id";
+  String get heading => "heading";
+  String get content => "content";
+}
+class AccommodationPlacesTb{
+  const AccommodationPlacesTb();
+  String get table => "accommodation_places";
+  String get place => "place";
+  String get accommodation_type => "accommodation_type";
 }
