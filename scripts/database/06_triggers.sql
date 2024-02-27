@@ -11,3 +11,5 @@ create trigger handle_updated_at before update on public.information
   for each row execute procedure moddatetime (updated_at);
 create trigger handle_updated_at before update on public.user_info
   for each row execute procedure moddatetime (updated_at);
+create trigger handle_updated_at before update on public.occasions
+    for each row execute procedure moddatetime (updated_at);

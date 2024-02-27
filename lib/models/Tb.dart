@@ -1,4 +1,6 @@
 class Tb {
+  static OccasionsTb occasions = const OccasionsTb();
+  static OccasionUsersTb occasion_users = const OccasionUsersTb();
   static NewsTb news = const NewsTb();
   static UserInfoTb user_info = const UserInfoTb();
   static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
@@ -17,6 +19,32 @@ class Tb {
   static NotificationRecordsTb notification_records = const NotificationRecordsTb();
   static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
   static GlobalSettingsTb global_settings = const GlobalSettingsTb();
+}
+class OccasionsTb{
+  const OccasionsTb();
+  String get table => "occasions";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
+  String get start_time => "start_time";
+  String get end_time => "end_time";
+  String get is_open => "is_open";
+  String get link => "link";
+  String get title => "title";
+  String get data => "data";
+}
+class OccasionUsersTb{
+  const OccasionUsersTb();
+  String get table => "occasion_users";
+  String get occasion => "occasion";
+  String get created_at => "created_at";
+  String get user => "user";
+  String get is_editor => "is_editor";
+  String get is_manager => "is_manager";
+  String get is_approved => "is_approved";
+  String get is_approver => "is_approver";
+  String get data => "data";
 }
 class NewsTb{
   const NewsTb();
@@ -128,6 +156,7 @@ class PlacesTb{
   const PlacesTb();
   String get table => "places";
   String get id => "id";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get is_hidden => "is_hidden";
