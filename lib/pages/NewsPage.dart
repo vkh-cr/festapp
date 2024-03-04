@@ -56,6 +56,7 @@ class _NewsPageState extends State<NewsPage> {
     super.didChangeDependencies();
     newsMessages = OfflineDataHelper.getAllMessages();
     loadNewsMessages();
+    OfflineDataHelper.saveAllMessages(newsMessages);
   }
 
   @override
