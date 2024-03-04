@@ -58,7 +58,7 @@ Future<void> initializeEverything() async {
     await Supabase.initialize(
       url: AppConfig.supabase_url,
       anonKey: AppConfig.anon_key,
-    );
+    ).timeout(const Duration(seconds: 2));
     if (!DataService.isLoggedIn()) {
       await DataService.tryAuthUser();
     }
