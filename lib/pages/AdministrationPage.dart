@@ -216,11 +216,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getEventsWithPlaces,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
-                EventModel.idColumn,
+                Tb.events.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: EventModel.idColumn,
+                    field: Tb.events.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     width: 50,
@@ -228,12 +228,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Hide".tr(),
-                    field: PlaceModel.isHiddenColumn,
+                    field: Tb.events.is_hidden,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, PlaceModel.isHiddenColumn),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
@@ -302,20 +302,20 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: EventModel.descriptionColumn,
+                      field: Tb.events.description,
                       type: PlutoColumnType.text(defaultValue: ""),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
                               String? textToEdit;
-                              String? oldText = rendererContext.row.cells[EventModel.descriptionColumn]?.value;
+                              String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
                               if(oldText!=null)
                               {
                                 textToEdit = oldText;
                               }
                               if(textToEdit == null)
                               {
-                                var eventId = rendererContext.row.cells[EventModel.idColumn]!.value;
+                                var eventId = rendererContext.row.cells[Tb.events.id]!.value;
 
                                 if(eventId!=null)
                                 {
@@ -329,8 +329,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   var newText = value as String;
                                   if(newText!=textToEdit)
                                   {
-                                    rendererContext.row.cells[EventModel.descriptionColumn]?.value = newText;
-                                    var cell = rendererContext.row.cells[EventModel.descriptionColumn]!;
+                                    rendererContext.row.cells[Tb.events.description]?.value = newText;
+                                    var cell = rendererContext.row.cells[Tb.events.description]!;
                                     rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   }
                                 }
@@ -350,7 +350,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllPlaces,
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
-                PlaceModel.idColumn,
+                Tb.places.id,
                 actionsExtended: DataGridExtendedActions(saveAction:
                 DataGridAction(
                   action: (datagrid, [action]) async {
@@ -361,7 +361,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: PlaceModel.idColumn,
+                    field: Tb.places.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     width: 50,
@@ -369,28 +369,28 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Hide".tr(),
-                    field: PlaceModel.isHiddenColumn,
+                    field: Tb.places.is_hidden,
                     type: PlutoColumnType.select(places),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, PlaceModel.isHiddenColumn),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.places.is_hidden),
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
-                      field: PlaceModel.titleColumn,
+                      field: Tb.places.title,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
                       title: "Content".tr(),
-                      field: PlaceModel.descriptionColumn,
+                      field: Tb.places.description,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
                   PlutoColumn(
                     title: "Icon".tr(),
-                    field: PlaceModel.typeColumn,
+                    field: Tb.places.type,
                     type: PlutoColumnType.select(mapIcons),
                     renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
                   ),
@@ -400,7 +400,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: PlaceModel.coordinatesColumn,
+                      field: Tb.places.coordinates,
                       type: PlutoColumnType.text(defaultValue: DataService.globalSettingsModel!.defaultMapLocation),
                       renderer: (rendererContext) {
                         return ElevatedButton(
@@ -409,7 +409,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                   if(value != null)
                                   {
-                                    var cell = rendererContext.row.cells[PlaceModel.coordinatesColumn]!;
+                                    var cell = rendererContext.row.cells[Tb.places.coordinates]!;
                                     rendererContext.stateManager.changeCellValue(cell, value, force: true);
                                   }
                                  });
@@ -423,11 +423,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
-                ExclusiveGroupModel.idColumn,
+                Tb.exclusive_groups.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: ExclusiveGroupModel.idColumn,
+                    field: Tb.exclusive_groups.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     enableEditingMode: false,
@@ -436,7 +436,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                       title: "Name".tr(),
-                      field: ExclusiveGroupModel.titleColumn,
+                      field: Tb.exclusive_groups.title,
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
@@ -452,11 +452,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getAllUserGroupInfo,
                 UserGroupInfoModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
-                UserGroupInfoModel.idColumn,
+                Tb.user_group_info.id,
                 columns: [
                   PlutoColumn(
                     title: "Id".tr(),
-                    field: UserGroupInfoModel.idColumn,
+                    field: Tb.user_group_info.id,
                     type: PlutoColumnType.number(defaultValue: -1),
                     readOnly: true,
                     enableEditingMode: false,
@@ -465,7 +465,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                       title: "Name".tr(),
-                      field: UserGroupInfoModel.titleColumn,
+                      field: Tb.user_group_info.title,
                       type: PlutoColumnType.text(),
                       width: 200
                   ),
@@ -554,19 +554,19 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: UserGroupInfoModel.descriptionColumn,
+                      field: Tb.user_group_info.description,
                       type: PlutoColumnType.text(defaultValue: null),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
-                              var oldText = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!.value as String?;
+                              var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
                               context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
                                   if(newText!=oldText)
                                   {
-                                    var cell = rendererContext.row.cells[UserGroupInfoModel.descriptionColumn]!;
+                                    var cell = rendererContext.row.cells[Tb.user_group_info.description]!;
                                     rendererContext.stateManager.changeCellValue(cell, newText, force: true);
                                   }
                                 }
@@ -580,20 +580,20 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableFilterMenuItem: false,
                       enableContextMenu: false,
                       enableSorting: false,
-                      field: UserGroupInfoModel.placeColumn,
+                      field: Tb.user_group_info.place,
                       type: PlutoColumnType.text(defaultValue: null),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async {
-                              var title = rendererContext.row.cells[UserGroupInfoModel.titleColumn]?.value;
-                              var placeModel = rendererContext.row.cells[UserGroupInfoModel.placeColumn]?.value as PlaceModel?;
+                              var title = rendererContext.row.cells[Tb.user_group_info.title]?.value;
+                              var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
 
                               context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;
-                                  var cell = rendererContext.row.cells[UserGroupInfoModel.placeColumn]!;
+                                  var cell = rendererContext.row.cells[Tb.user_group_info.place]!;
                                   rendererContext.stateManager.changeCellValue(cell, placeModel, force: true);
                                 }
                               });
@@ -607,7 +607,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 DataService.getUsers,
                 UserInfoModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
-                UserInfoModel.idColumn,
+                Tb.user_info.id,
                 actionsExtended: DataGridExtendedActions(areAllActionsEnabled: DataService.isAdmin),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: DataService.isAdmin),
@@ -618,17 +618,17 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 columns: [
                   PlutoColumn(
                       title: "Id".tr(),
-                      field: UserInfoModel.idColumn,
+                      field: Tb.user_info.id,
                       type: PlutoColumnType.text(),
                       readOnly: true,
                       width: 50),
                   PlutoColumn(
                       title: "E-mail".tr(),
                       enableEditingMode: DataService.isAdmin(),
-                      field: UserInfoModel.emailReadonlyColumn,
+                      field: Tb.user_info.email_readonly,
                       type: PlutoColumnType.text(),
                       checkReadOnly: (row, cell) {
-                        final id = row.cells[UserInfoModel.idColumn]?.value as String?;
+                        final id = row.cells[Tb.user_info.id]?.value as String?;
                         return id != null && id.isNotEmpty;
                       },
                       width: 200
@@ -636,21 +636,21 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Name".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.nameColumn,
+                    field: Tb.user_info.name,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Surname".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.surnameColumn,
+                    field: Tb.user_info.surname,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Accommodation".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.accommodationColumn,
+                    field: Tb.user_info.accommodation,
                     type: PlutoColumnType.text(),
                     readOnly: false,
                     width: 150,
@@ -658,14 +658,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Phone".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.phoneColumn,
+                    field: Tb.user_info.phone,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Sex".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.sexColumn,
+                    field: Tb.user_info.sex,
                     type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
                     formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
                     applyFormatterInEditing: true,
@@ -674,32 +674,32 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Birthday".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.birthDateColumn,
+                    field: Tb.user_info.birth_date,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
                     title: "Admin".tr(),
-                    field: UserInfoModel.isAdminReadOnlyColumn,
+                    field: Tb.user_info.is_admin_readonly,
                     type: PlutoColumnType.select([]),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isAdminReadOnlyColumn, DataService.isAdmin),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_admin_readonly, DataService.isAdmin),
                   ),
                   PlutoColumn(
                     title: "Editor".tr(),
-                    field: UserInfoModel.isEditorReadOnlyColumn,
+                    field: Tb.user_info.is_editor_readonly,
                     type: PlutoColumnType.select([]),
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, UserInfoModel.isEditorReadOnlyColumn, DataService.isAdmin),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_editor_readonly, DataService.isAdmin),
                   ),
                   PlutoColumn(
                     title: "Role".tr(),
                     enableEditingMode: DataService.isAdmin(),
-                    field: UserInfoModel.roleColumn,
+                    field: Tb.user_info.role,
                     type: PlutoColumnType.text(),
                     width: 100,
                   )

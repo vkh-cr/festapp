@@ -1,7 +1,7 @@
 import 'package:avapp/appConfig.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/models/EventModel.dart';
-import 'package:avapp/models/PlaceModel.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:avapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -423,8 +423,8 @@ class TimetablePlace {
 
   factory TimetablePlace.fromJson(Map<String, dynamic> json) {
     return TimetablePlace(
-      id: json[PlaceModel.idColumn],
-      title: json[PlaceModel.titleColumn],
+      id: json[Tb.places.id],
+      title: json[Tb.places.title],
     );
   }
 }

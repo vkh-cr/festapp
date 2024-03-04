@@ -1,4 +1,11 @@
-# Aplikace Absolventský Velehrad
+# Festapp
+
+Mobile app for your festival, conference or event. Try [now](https://live.festapp.net). See more info on [festapp.net](https://festapp.net).</br></br>
+![Alt text](repo-data/festapp-showcase.png?raw=true "Showcase")
+
+---
+(Czech)
+## Aplikace Absolventský Velehrad
 
 Repozitář pro vývoj aplikace AV -> mobilní aplikace pro účastníky a dobrovolníky Absolventského Velehradu.
 

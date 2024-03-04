@@ -33,8 +33,8 @@ class UserGroupInfoModel extends IPlutoRowModel {
       leaderId: json[leaderColumn],
       title: json[titleColumn],
       placeId: json[placeColumn],
-      place: json[PlaceModel.placeTable] != null
-          ? PlaceModel.fromJson(json[PlaceModel.placeTable])
+      place: json[Tb.places.table] != null
+          ? PlaceModel.fromJson(json[Tb.places.table])
           : json[PlaceModel.placeObjectColumn] != null
               ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
               : null,
@@ -65,7 +65,6 @@ class UserGroupInfoModel extends IPlutoRowModel {
   static const String leaderUserColumn = "leaderUser";
 
   static const String participantsColumn = "participants";
-  static const String userGroupInfoTable = "user_group_info";
   static const String userGroupsTable = "user_groups";
 
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {

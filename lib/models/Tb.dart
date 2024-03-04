@@ -1,5 +1,6 @@
-class Tb
-{
+class Tb {
+  static OccasionsTb occasions = const OccasionsTb();
+  static OccasionUsersTb occasion_users = const OccasionUsersTb();
   static NewsTb news = const NewsTb();
   static UserInfoTb user_info = const UserInfoTb();
   static UserInfoPublicTb user_info_public = const UserInfoPublicTb();
@@ -8,15 +9,49 @@ class Tb
   static InformationTb information = const InformationTb();
   static EventsTb events = const EventsTb();
   static EventUserTb event_users = const EventUserTb();
+  static EventUsersSavedTb event_users_saved = const EventUsersSavedTb();
   static EventGroupsTb event_groups = const EventGroupsTb();
   static ExclusiveGroupTb exclusive_groups = const ExclusiveGroupTb();
   static ExclusiveEventsTb exclusive_events = const ExclusiveEventsTb();
+  static PlacesTb places = const PlacesTb();
+  static UserGroupsTb user_groups = const UserGroupsTb();
+  static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
+  static NotificationRecordsTb notification_records = const NotificationRecordsTb();
+  static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
+  static GlobalSettingsTb global_settings = const GlobalSettingsTb();
+}
+class OccasionsTb{
+  const OccasionsTb();
+  String get table => "occasions";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
+  String get start_time => "start_time";
+  String get end_time => "end_time";
+  String get is_open => "is_open";
+  String get link => "link";
+  String get title => "title";
+  String get data => "data";
+}
+class OccasionUsersTb{
+  const OccasionUsersTb();
+  String get table => "occasion_users";
+  String get occasion => "occasion";
+  String get created_at => "created_at";
+  String get user => "user";
+  String get is_editor => "is_editor";
+  String get is_manager => "is_manager";
+  String get is_approved => "is_approved";
+  String get is_approver => "is_approver";
+  String get data => "data";
 }
 class NewsTb{
   const NewsTb();
   String get table => "news";
   String get id => "id";
   String get created_at => "created_at";
+  String get updated_at => "updated_at";
   String get created_by => "created_by";
   String get message => "message";
 }
@@ -32,6 +67,8 @@ class UserInfoTb{
   const UserInfoTb();
   String get table => "user_info";
   String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
   String get name => "name";
   String get surname => "surname";
@@ -46,8 +83,10 @@ class UserInfoTb{
 class UserInfoPublicTb{
   const UserInfoPublicTb();
   String get table => "user_info_public";
+  String get id => "id";
   String get name => "name";
   String get surname => "surname";
+  String get sex => "sex";
 }
 class UserNewsViewsTb{
   const UserNewsViewsTb();
@@ -57,19 +96,21 @@ class InformationTb{
   const InformationTb();
   String get table => "information";
   String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
   String get title => "title";
   String get type => "type";
   String get description => "description";
-  String get is_hidden => "is_hidden";
   String get order => "order";
 }
 class EventsTb{
   const EventsTb();
   String get table => "events";
   String get id => "id";
-  String get is_hidden => "is_hidden";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
   String get title => "title";
   String get start_time => "start_time";
   String get end_time => "end_time";
@@ -82,6 +123,13 @@ class EventsTb{
 class EventUserTb{
   const EventUserTb();
   String get table => "event_users";
+  String get created_at => "created_at";
+  String get event => "event";
+  String get user => "user";
+}
+class EventUsersSavedTb{
+  const EventUsersSavedTb();
+  String get table => "event_users_saved";
   String get created_at => "created_at";
   String get event => "event";
   String get user => "user";
@@ -101,6 +149,55 @@ class ExclusiveGroupTb{
 class ExclusiveEventsTb{
   const ExclusiveEventsTb();
   String get table => "exclusive_events";
-  String get id => "event";
-  String get title => "group";
+  String get event => "event";
+  String get group => "group";
+}
+class PlacesTb{
+  const PlacesTb();
+  String get table => "places";
+  String get id => "id";
+  String get occasion => "occasion";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
+  String get title => "title";
+  String get description => "description";
+  String get type => "type";
+  String get coordinates => "coordinates";
+}
+class UserGroupInfoTb{
+  const UserGroupInfoTb();
+  String get table => "user_group_info";
+  String get id => "id";
+  String get title => "title";
+  String get leader => "leader";
+  String get place => "place";
+  String get description => "description";
+}
+class UserGroupsTb{
+  const UserGroupsTb();
+  String get table => "user_groups";
+  String get user => "user";
+  String get group => "group";
+}
+class NotificationRecordsTb{
+  const NotificationRecordsTb();
+  String get table => "notification_records";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get user_id => "user_id";
+  String get heading => "heading";
+  String get content => "content";
+}
+class AccommodationPlacesTb{
+  const AccommodationPlacesTb();
+  String get table => "accommodation_places";
+  String get place => "place";
+  String get accommodation_type => "accommodation_type";
+}
+class GlobalSettingsTb{
+  const GlobalSettingsTb();
+  String get table => "global_settings";
+  String get id => "id";
+  String get json => "json";
 }

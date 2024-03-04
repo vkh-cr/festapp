@@ -1,4 +1,5 @@
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
@@ -13,16 +14,6 @@ class PlaceModel extends IPlutoRowModel {
 
   static const String WithouValue = "---";
 
-  static const String idColumn = "id";
-  static const String titleColumn = "title";
-  static const String descriptionColumn = "description";
-  static const String isHiddenColumn = "is_hidden";
-  static const String coordinatesColumn = "coordinates";
-  static const String typeColumn = "type";
-
-  static const String placeTable = "places";
-  static const String timetablePlacesTable = "timetable_places";
-  static const String timetablePlacesTablePlaceColumn = "place";
   static const String placesOffline = "places";
   static const String placeObjectColumn = "placeObject";
 
@@ -32,34 +23,34 @@ class PlaceModel extends IPlutoRowModel {
 
   factory PlaceModel.fromJson(Map<String, dynamic> json) {
     return PlaceModel(
-    latLng: json.containsKey(coordinatesColumn) ? json[coordinatesColumn]["latLng"] : null,
-    id: json[idColumn],
-    title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-    description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
-    type: json.containsKey(typeColumn) ? json[typeColumn] : null,
-    isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
+    latLng: json.containsKey(Tb.places.coordinates) ? json[Tb.places.coordinates]["latLng"] : null,
+    id: json[Tb.places.id],
+    title: json.containsKey(Tb.places.title) ? json[Tb.places.title] : null,
+    description: json.containsKey(Tb.places.description) ? json[Tb.places.description] : null,
+    type: json.containsKey(Tb.places.type) ? json[Tb.places.type] : null,
+    isHidden: json.containsKey(Tb.places.is_hidden) ? json[Tb.places.is_hidden] : false,
   );
   }
 
   static PlaceModel fromPlutoJson(Map<String, dynamic> json) {
     return PlaceModel(
-      latLng: json[coordinatesColumn],
-      id: json[idColumn] == -1 ? null : json[idColumn],
-      title: json[titleColumn],
-      description: json[descriptionColumn].isEmpty ? null : json[descriptionColumn],
-      type: json[typeColumn] == WithouValue ? null : json[typeColumn],
-      isHidden: json[isHiddenColumn] == "true" ? true : false,
+      latLng: json[Tb.places.coordinates],
+      id: json[Tb.places.id] == -1 ? null : json[Tb.places.id],
+      title: json[Tb.places.title],
+      description: json[Tb.places.description].isEmpty ? null : json[Tb.places.description],
+      type: json[Tb.places.type] == WithouValue ? null : json[Tb.places.type],
+      isHidden: json[Tb.places.is_hidden] == "true" ? true : false,
     );
   }
 
   Map toJson() =>
   {
-    idColumn: id,
-    titleColumn: title,
-    coordinatesColumn: {"latLng" : latLng },
-    descriptionColumn: description,
-    typeColumn: type,
-    isHiddenColumn: isHidden
+    Tb.places.id: id,
+    Tb.places.title: title,
+    Tb.places.coordinates: {"latLng" : latLng },
+    Tb.places.description: description,
+    Tb.places.type: type,
+    Tb.places.is_hidden: isHidden
   };
 
   PlaceModel({
@@ -85,12 +76,12 @@ class PlaceModel extends IPlutoRowModel {
   @override
   PlutoRow toPlutoRow() {
     return PlutoRow(cells: {
-      idColumn: PlutoCell(value: id),
-      titleColumn: PlutoCell(value: title),
-      descriptionColumn: PlutoCell(value: description ?? ""),
-      coordinatesColumn: PlutoCell(value: latLng),
-      typeColumn: PlutoCell(value: type ?? WithouValue),
-      isHiddenColumn: PlutoCell(value: isHidden.toString()),
+      Tb.places.id: PlutoCell(value: id),
+      Tb.places.title: PlutoCell(value: title),
+      Tb.places.description: PlutoCell(value: description ?? ""),
+      Tb.places.coordinates: PlutoCell(value: latLng),
+      Tb.places.type: PlutoCell(value: type ?? WithouValue),
+      Tb.places.is_hidden: PlutoCell(value: isHidden.toString()),
     });
   }
 
