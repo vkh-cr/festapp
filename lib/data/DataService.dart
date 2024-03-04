@@ -1462,6 +1462,12 @@ class DataService {
     await DataService.synchronizeMySchedule();
   }
 
+  static Future<String?> checkOccasionLink(String link) async {
+    var data = await _supabase.rpc("check_occasion_link",
+        params: {"link": link});
+    return data;
+  }
+
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
 //   List<ParticipantModel> toReturn = [];
 //   var result = await _supabase
