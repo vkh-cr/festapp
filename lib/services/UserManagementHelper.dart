@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:avapp/models/Tb.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/data/DataService.dart';
 import 'package:avapp/services/DialogHelper.dart';
@@ -19,12 +20,12 @@ class UserManagementHelper{
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() == "storno");
+    var addOrUpdateUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Importing users".tr(),
-        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
         confirmButtonMessage: "Proceed".tr());
 
     if(!really)
@@ -38,7 +39,7 @@ class UserManagementHelper{
     List<Map<String, dynamic>> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[UserInfoModel.emailReadonlyColumn]!.toLowerCase());
+      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[Tb.user_info.email_readonly]!.toLowerCase());
       if(existing == null) {
         toBeCreated.add(u);
         continue;
@@ -47,7 +48,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u[UserInfoModel.idColumn] = existing.id;
+        u[Tb.user_info.id] = existing.id;
         toBeUpdated.add(u);
       }
     }
@@ -57,13 +58,13 @@ class UserManagementHelper{
           "Creating users".tr(),
           "New users found. Do you want to create them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeCreated.forEach((u) async {
           await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
+          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
@@ -73,13 +74,13 @@ class UserManagementHelper{
           "Updating users".tr(),
           "These users have some changes. Do you want to update them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeUpdated.forEach((u) async {
           await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
+          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
@@ -87,8 +88,8 @@ class UserManagementHelper{
     List<UserInfoModel> toBeDeleted = [];
     for(var u in deleteUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u[UserInfoModel.emailReadonlyColumn]);
-      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[UserInfoModel.emailReadonlyColumn] == u[UserInfoModel.emailReadonlyColumn]);
+      var existing = existingUsers.firstWhereOrNull((element) => element.email == u[Tb.user_info.email_readonly]);
+      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[Tb.user_info.email_readonly] == u[Tb.user_info.email_readonly]);
 
       if(existing != null && duplicated == null) {
         toBeDeleted.add(existing);
