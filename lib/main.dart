@@ -7,6 +7,7 @@ import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/InfoPage.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/pages/NewsPage.dart';
+import 'package:avapp/pages/SongPage.dart';
 import 'package:avapp/pages/TimetablePage.dart';
 import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';
@@ -57,7 +58,7 @@ Future<void> initializeEverything() async {
     await Supabase.initialize(
       url: AppConfig.supabase_url,
       anonKey: AppConfig.anon_key,
-    );
+    ).timeout(const Duration(seconds: 2));
     if (!DataService.isLoggedIn()) {
       await DataService.tryAuthUser();
     }

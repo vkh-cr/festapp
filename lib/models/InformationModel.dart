@@ -1,4 +1,5 @@
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/models/Tb.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../dataGrids/PlutoAbstract.dart';
@@ -8,60 +9,57 @@ class InformationModel extends IPlutoRowModel {
   int? id;
   String title;
   String? description;
+  String? type;
   bool isHidden;
   int? order;
   int getOrder()  => order??0;
 
   bool isExpanded = false;
 
-  static const String idColumn = "id";
-  static const String titleColumn = "title";
-  static const String descriptionColumn = "description";
-  static const String isHiddenColumn = "is_hidden";
-  static const String orderColumn = "order";
-
-  static const String informationTable = "information";
   static const String informationOffline = "information";
 
 
   factory InformationModel.fromJson(Map<String, dynamic> json) {
     return InformationModel(
-      id: json[idColumn],
-      title: json[titleColumn],
-      description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
-      isHidden: json[isHiddenColumn],
-      order: json[orderColumn],
-
+      id: json[Tb.information.id],
+      title: json[Tb.information.title],
+      description: json[Tb.information.description],
+      type: json[Tb.information.type],
+      isHidden: json[Tb.information.is_hidden],
+      order: json[Tb.information.order],
     );
   }
 
   Map toJson() =>
   {
-    idColumn: id,
-    titleColumn: title,
-    descriptionColumn: description,
-    isHiddenColumn: isHidden,
-    orderColumn: order,
+    Tb.information.id: id,
+    Tb.information.title: title,
+    Tb.information.description: description,
+    Tb.information.type: type,
+    Tb.information.is_hidden: isHidden,
+    Tb.information.order: order,
   };
 
   static InformationModel fromPlutoJson(Map<String, dynamic> json) {
     return InformationModel(
-      id: json[idColumn] == -1 ? null : json[idColumn],
-      title: json[titleColumn],
-      description: json[descriptionColumn],
-      isHidden: json[isHiddenColumn] == "true" ? true : false,
-      order: json[orderColumn],
+      id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
+      title: json[Tb.information.title],
+      description: json[Tb.information.description],
+      type: json[Tb.information.type],
+      isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
+      order: json[Tb.information.order],
     );
   }
 
   @override
   PlutoRow toPlutoRow() {
     return PlutoRow(cells: {
-      idColumn: PlutoCell(value: id),
-      titleColumn: PlutoCell(value: title),
-      descriptionColumn: PlutoCell(value: description),
-      isHiddenColumn: PlutoCell(value: isHidden.toString()),
-      orderColumn: PlutoCell(value: order),
+      Tb.information.id: PlutoCell(value: id),
+      Tb.information.title: PlutoCell(value: title),
+      Tb.information.description: PlutoCell(value: description),
+      Tb.information.type: PlutoCell(value: type ?? ""),
+      Tb.information.is_hidden: PlutoCell(value: isHidden.toString()),
+      Tb.information.order: PlutoCell(value: order),
     });
   }
 
@@ -82,6 +80,7 @@ class InformationModel extends IPlutoRowModel {
     required this.id,
     required this.title,
     required this.description,
+    this.type,
     required this.isHidden,
     required this.order});
 }

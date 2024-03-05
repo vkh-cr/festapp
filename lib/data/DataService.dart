@@ -12,7 +12,6 @@ import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/services/UserManagementHelper.dart';
-import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -113,14 +112,14 @@ class DataService {
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;
     var data = await _supabase
-        .from(GlobalSettingsModel.globalSettingsTable)
+        .from(Tb.global_settings.table)
         .select()
         .maybeSingle();
 
     if(data == null)
     {
       await _supabase
-          .from(GlobalSettingsModel.globalSettingsTable)
+          .from(Tb.global_settings.table)
           .insert(GlobalSettingsModel.DefaultSettings.toJson());
         toReturn = GlobalSettingsModel.DefaultSettings;
     }
@@ -173,21 +172,21 @@ class DataService {
     }
     var adminClient = await GetSupabaseAdminClient();
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("user", uuid);
+        .eq(Tb.user_groups.user, uuid);
     await _supabase
-        .from("event_users")
+        .from(Tb.event_users.table)
         .delete()
-        .eq("user", uuid);
+        .eq(Tb.event_users.user, uuid);
     await _supabase
-        .from("user_news")
+        .from(Tb.user_news.table)
         .delete()
-        .eq("user", uuid);
+        .eq(Tb.user_news.user, uuid);
     await _supabase
-        .from(UserInfoModel.userInfoTable)
+        .from(Tb.user_info.table)
         .delete()
-        .eq(UserInfoModel.idColumn, uuid);
+        .eq(Tb.user_info.id, uuid);
     adminClient.auth.admin.deleteUser(uuid);
   }
 
@@ -229,9 +228,9 @@ class DataService {
   static Future<UserInfoModel> loadCurrentUserData() async {
     ensureUserIsLoggedIn();
     var jsonUser = await _supabase
-        .from(UserInfoModel.userInfoTable)
+        .from(Tb.user_info.table)
         .select()
-        .eq(UserInfoModel.idColumn, _supabase.auth.currentUser!.id)
+        .eq(Tb.user_info.id, _supabase.auth.currentUser!.id)
         .single();
     _currentUser = UserInfoModel.fromJson(jsonUser);
     _currentUser!.userGroup = await getCurrentUserGroup();
@@ -268,23 +267,23 @@ class DataService {
   static Future<PlaceModel?> getUserAccommodation(
       String accommodationType) async {
     var data = await _supabase
-        .from('accommodation_places')
-        .select("places(id, title)")
-        .eq("accommodation_type", accommodationType)
+        .from(Tb.accommodation_places.table)
+        .select("${Tb.places.table}(${Tb.places.id}, ${Tb.places.title})")
+        .eq(Tb.accommodation_places.accommodation_type, accommodationType)
         .maybeSingle();
     if (data == null) {
       return null;
     }
-    return PlaceModel.fromJson(data["places"]);
+    return PlaceModel.fromJson(data[Tb.places.table]);
   }
 
   static Future<List<UserInfoModel>> getUsers() async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable).select();
+    var data = await _supabase.from(Tb.user_info.table).select();
     return List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
   }
 
   static Future<UserInfoModel> getUser(String id) async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable).select().eq(UserInfoModel.idColumn, id).single();
+    var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
     return UserInfoModel.fromJson(data);
   }
 
@@ -299,15 +298,15 @@ class DataService {
   }
 
   static updateUserAsJson(Map<String, dynamic> json) async {
-    if(json[UserInfoModel.idColumn] == null)
+    if(json[Tb.user_info.id] == null)
     {
       if(AppConfig.isServiceRoleSafety){
-        json[UserInfoModel.idColumn] = await DataService.createUser(json[UserInfoModel.emailReadonlyColumn]!);
+        json[Tb.user_info.id] = await DataService.createUser(json[Tb.user_info.email_readonly]!);
       } else{
-        json[UserInfoModel.idColumn] = await UserManagementHelper.unsafeCreateNewUser(json[UserInfoModel.emailReadonlyColumn]);
+        json[Tb.user_info.id] = await UserManagementHelper.unsafeCreateNewUser(json[Tb.user_info.email_readonly]);
       }
     }
-    await _supabase.from(UserInfoModel.userInfoTable).upsert(json);
+    await _supabase.from(Tb.user_info.table).upsert(json);
   }
 
   static updateUser(UserInfoModel data) async {
@@ -345,18 +344,18 @@ class DataService {
           params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
     }
 
-    await _supabase.from(UserInfoModel.userInfoTable).upsert({
-      UserInfoModel.idColumn: data.id,
-      UserInfoModel.emailReadonlyColumn: data.email,
-      UserInfoModel.nameColumn: data.name,
-      UserInfoModel.surnameColumn: data.surname,
-      UserInfoModel.sexColumn: data.sex,
-      UserInfoModel.roleColumn: data.role,
-      UserInfoModel.accommodationColumn: data.accommodation,
-      UserInfoModel.phoneColumn: data.phone,
-      UserInfoModel.birthDateColumn: data.birthDate?.toIso8601String(),
-      UserInfoModel.isAdminReadOnlyColumn: data.isAdmin,
-      UserInfoModel.isEditorReadOnlyColumn: data.isEditor,
+    await _supabase.from(Tb.user_info.table).upsert({
+      Tb.user_info.id: data.id,
+      Tb.user_info.email_readonly: data.email,
+      Tb.user_info.name: data.name,
+      Tb.user_info.surname: data.surname,
+      Tb.user_info.sex: data.sex,
+      Tb.user_info.role: data.role,
+      Tb.user_info.accommodation: data.accommodation,
+      Tb.user_info.phone: data.phone,
+      Tb.user_info.birth_date: data.birthDate?.toIso8601String(),
+      Tb.user_info.is_admin_readonly: data.isAdmin,
+      Tb.user_info.is_editor_readonly: data.isEditor,
     });
 
     if(data.id == currentUserId())
@@ -366,35 +365,28 @@ class DataService {
   }
 
   static Future<List<PlaceModel>> getMapPlaces() async {
-    var data = await _supabase.from(PlaceModel.placeTable).select().eq(PlaceModel.isHiddenColumn, false);
+    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.is_hidden, false);
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
-    var data = await _supabase.from(PlaceModel.placeTable).select();
+    var data = await _supabase.from(Tb.places.table).select();
     return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
   }
 
-  static Future<List<TimetablePlace>> getTimetablePlaces() async {
-    var data = await _supabase.from(PlaceModel.timetablePlacesTable).select();
-    var placeIds = List<int>.from(data.map((x) => x[PlaceModel.timetablePlacesTablePlaceColumn]));
-    var placeData = await _supabase.from(PlaceModel.placeTable).select().in_(PlaceModel.idColumn, placeIds);
-    return List<TimetablePlace>.from(placeData.map((x) => TimetablePlace.fromJson(x)));
-  }
-
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
-    var data = await _supabase.from(UserGroupInfoModel.userGroupInfoTable)
-        .select("${UserGroupInfoModel.titleColumn}, ${PlaceModel.placeTable}(*)");
+    var data = await _supabase.from(Tb.user_group_info.table)
+        .select("${Tb.user_group_info.title}, ${Tb.places.table}(*)");
     return List<UserGroupInfoModel>.from(data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
   static Future<PlaceModel> getPlace(int id) async {
-    var data = await _supabase.from(PlaceModel.placeTable).select().eq("id", id).single();
+    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.id, id).single();
     return PlaceModel.fromJson(data);
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
-    await _supabase.from(PlaceModel.placeTable).delete().eq("id", placeModel.id);
+    await _supabase.from(Tb.places.table).delete().eq(Tb.places.id, placeModel.id);
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
@@ -402,18 +394,18 @@ class DataService {
     var json = placeModel.toJson();
     Map<String, dynamic> data;
     if(placeModel.id!=null) {
-      data = await _supabase.from(PlaceModel.placeTable).update(json).eq("id", placeModel.id).select().single();
+      data = await _supabase.from(Tb.places.table).update(json).eq(Tb.places.id, placeModel.id).select().single();
     }
     else
     {
-      json.remove(PlaceModel.idColumn);
-      data = await _supabase.from(PlaceModel.placeTable).insert(json).select().single();
+      json.remove(Tb.places.id);
+      data = await _supabase.from(Tb.places.table).insert(json).select().single();
     }
     return PlaceModel.fromJson(data);
   }
 
   static Future<List<InformationModel>> getAllInformation() async {
-    var data = await _supabase.from(InformationModel.informationTable).select();
+    var data = await _supabase.from(Tb.information.table).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
@@ -421,11 +413,11 @@ class DataService {
     return infoList;
   }
 
-  static Future<List<InformationModel>> getActiveInformation() async {
+  static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
-        .from(InformationModel.informationTable)
+        .from(Tb.information.table)
         .select()
-        .eq(InformationModel.isHiddenColumn, false);
+        .eq(Tb.information.is_hidden, false);
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title.toLowerCase());
@@ -436,9 +428,9 @@ class DataService {
   static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
   async {
     var data = await _supabase
-        .from('events')
-        .select("id, event_users(count)")
-        .in_("id", events.map((e)=>e.id).toList());
+        .from(Tb.events.table)
+        .select("${Tb.events.id}, ${Tb.event_users.table}(count)")
+        .in_(Tb.events.id, events.map((e)=>e.id).toList());
 
     var eventList = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -455,10 +447,13 @@ class DataService {
       e.isSignedIn = eq.isSignedIn;
     }
 
-    await loadIsInMyProgram(events);
+    if(AppConfig.isOwnProgramSupported)
+    {
+      await loadIsInMySchedule(events);
+    }
   }
 
-  static Future<void> loadIsInMyProgram(List<EventModel> events) async {
+  static Future<void> loadIsInMySchedule(List<EventModel> events) async {
     var set = EventModel.CreateEventModelSet();
     var local = await loadAllMyScheduleOffline();
     set.addAll(local);
@@ -478,21 +473,35 @@ class DataService {
   static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
     if(onlyForSignedIn)
     {
-      var data = await loadAllMyScheduleOffline();
+      List<EventModel> data = [];
+      if(AppConfig.isOwnProgramSupported)
+      {
+        data = (await loadAllMyScheduleOffline()).toList();
 
-      if(!isLoggedIn()) {
-        return data.toList();
+        if(!isLoggedIn()) {
+          return data.toList();
+        }
+
+        var remote = await loadAllMySchedule();
+        data.addAll(remote);
+      } else if(!isLoggedIn()) {
+        return data;
       }
 
-      var remote = await loadAllMySchedule();
-      data.addAll(remote);
-
       var dataSignedIn = await _supabase
-          .from('events')
-          .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users!inner(*)")
-          .eq("event_users.user", currentUserId())
-          .order('start_time', ascending: true)
-          .order('max_participants', ascending: false);
+          .from(Tb.events.table)
+          .select("${Tb.events.id},"
+          "${Tb.events.title},"
+          "${Tb.events.start_time},"
+          "${Tb.events.end_time},"
+          "${Tb.events.place},"
+          "${Tb.events.max_participants},"
+          "${Tb.events.is_group_event},"
+          "${Tb.event_users.table}!inner(*)")
+          .eq("${Tb.event_users.table}.${Tb.event_users.user}", currentUserId())
+          .eq(Tb.events.is_hidden, false)
+          .order(Tb.events.start_time, ascending: true)
+          .order(Tb.events.max_participants, ascending: false);
 
       data.addAll(List<EventModel>.from(
           dataSignedIn.map((x) => EventModel.fromJson(x))));
@@ -501,10 +510,18 @@ class DataService {
       if(hasGroup())
       {
         var groupData = await _supabase
-            .from('events')
-            .select("id, title, start_time, end_time, place, max_participants, is_group_event")
+            .from(Tb.events.table)
+            .select(
+            "${Tb.events.id},"
+            "${Tb.events.title},"
+            "${Tb.events.start_time},"
+            "${Tb.events.end_time},"
+            "${Tb.events.place},"
+            "${Tb.events.max_participants},"
+            "${Tb.events.is_group_event}")
             .eq(EventModel.isGroupEventColumn, true)
-            .order('start_time', ascending: true);
+            .eq(Tb.events.is_hidden, false)
+            .order(Tb.events.start_time, ascending: true);
         data.addAll(List<EventModel>.from(
             groupData.map((x) => EventModel.fromJson(x))));
       }
@@ -512,10 +529,19 @@ class DataService {
       return data.toList();
     }
     var data = await _supabase
-        .from('events')
-        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_groups!event_groups_event_parent_fkey(event_child)")
-        .order('start_time', ascending: true)
-        .order('max_participants', ascending: false);
+        .from(Tb.events.table)
+        .select(
+            "${Tb.events.id},"
+            "${Tb.events.title},"
+            "${Tb.events.start_time},"
+            "${Tb.events.end_time},"
+            "${Tb.events.place},"
+            "${Tb.events.max_participants},"
+            "${Tb.events.is_group_event}, "
+            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
+        .eq(Tb.events.is_hidden, false)
+        .order(Tb.events.start_time, ascending: true)
+        .order(Tb.events.max_participants, ascending: false);
 
     var events = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -525,11 +551,19 @@ class DataService {
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
-        .from('events')
-        .select("id, title, start_time, end_time, place, max_participants, is_group_event, event_users_saved!inner(*)")
-        .eq("event_users_saved.user", currentUserId())
-        .order('start_time', ascending: true)
-        .order('max_participants', ascending: false);
+        .from(Tb.events.table)
+        .select("${Tb.events.id},"
+        "${Tb.events.title},"
+        "${Tb.events.start_time},"
+        "${Tb.events.end_time},"
+        "${Tb.events.place},"
+        "${Tb.events.max_participants},"
+        "${Tb.events.is_group_event},"
+        "${Tb.event_users_saved.table}!inner(*)")
+        .eq("${Tb.event_users_saved.table}.${Tb.event_users_saved.user}", currentUserId())
+        .eq(Tb.events.is_hidden, false)
+        .order(Tb.events.start_time, ascending: true)
+        .order(Tb.events.max_participants, ascending: false);
 
     var remoteEvents = List<EventModel>.from(
         dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
@@ -543,11 +577,18 @@ class DataService {
 
   static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
     var events = OfflineDataHelper.getMyScheduleData();
-    var localData = await _supabase.from("events")
-        .select("id, title, start_time, end_time, place, max_participants, is_group_event")
-        .in_(EventModel.idColumn, events)
-        .order('start_time', ascending: true)
-        .order('max_participants', ascending: false);
+    var localData = await _supabase.from(Tb.events.table)
+        .select("${Tb.events.id},"
+        "${Tb.events.title},"
+        "${Tb.events.start_time},"
+        "${Tb.events.end_time},"
+        "${Tb.events.place},"
+        "${Tb.events.max_participants},"
+        "${Tb.events.is_group_event}")
+        .in_(Tb.events.id, events)
+        .eq(Tb.events.is_hidden, false)
+        .order(Tb.events.start_time, ascending: true)
+        .order(Tb.events.max_participants, ascending: false);
     var localEvents = List<EventModel>.from(
         localData.map((x) => EventModel.fromJson(x)));
     for (var element in localEvents) {
@@ -560,26 +601,38 @@ class DataService {
 
   static Future<List<EventModel>> getEventsWithPlaces() async {
     var data = await _supabase
-        .from('events')
-        .select("id, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, places(id, title), event_groups!event_groups_event_child_fkey(event_parent)")
-        .order('start_time', ascending: true);
+        .from(Tb.events.table)
+        .select("${Tb.events.id},"
+        "${Tb.events.is_hidden},"
+        "${Tb.events.title},"
+        "${Tb.events.start_time},"
+        "${Tb.events.end_time},"
+        "${Tb.events.max_participants},"
+        "${Tb.events.split_for_men_women},"
+        "${Tb.events.is_group_event},"
+        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
+        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})")
+        .order(Tb.events.start_time, ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
 
   static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
     var data = await _supabase
-        .from(EventModel.eventTable)
-        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}, ${EventModel.descriptionColumn}")
-        .in_(EventModel.idColumn, ids);
+        .from(Tb.events.table)
+        .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
+        .in_(Tb.events.id, ids);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
 
   static Future<List<EventModel>> getAllEventsMeta() async {
     var data = await _supabase
-        .from(EventModel.eventTable)
-        .select("${EventModel.idColumn}, ${EventModel.updatedAtColumn}");
+        .from(Tb.events.table)
+        .select(
+            "${Tb.events.id},"
+            "${Tb.events.updated_at}"
+        );
 
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -587,29 +640,29 @@ class DataService {
 
   static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
     var data = await _supabase
-        .from(UserGroupInfoModel.userGroupInfoTable)
+        .from(Tb.user_group_info.table)
         .select(
-        "${UserGroupInfoModel.idColumn},"
-        "${UserGroupInfoModel.titleColumn},"
-        "user_info!leader(id, name, surname, email_readonly),"
-        "${PlaceModel.placeTable}(*),"
-        "${UserGroupInfoModel.descriptionColumn},"
-        "${UserGroupInfoModel.userGroupsTable}(user_info(id, name, surname, email_readonly))");
+        "${Tb.user_group_info.id},"
+        "${Tb.user_group_info.title},"
+        "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}),"
+        "${Tb.places.table}(*),"
+        "${Tb.user_group_info.description},"
+        "${Tb.user_groups.table}(${Tb.user_info.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}))");
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
     var data = await _supabase
-        .from(UserGroupInfoModel.userGroupInfoTable)
+        .from(Tb.user_group_info.table)
         .select(
-        "${UserGroupInfoModel.idColumn},"
-            "${UserGroupInfoModel.titleColumn},"
-            "user_info_public!leader(id, name, surname),"
-            "${PlaceModel.placeTable}(*),"
-            "${UserGroupInfoModel.descriptionColumn},"
-            "${UserGroupInfoModel.userGroupsTable}(user_info_public(id, name, surname))")
-    .eq(UserGroupInfoModel.idColumn, id)
+        "${Tb.user_group_info.id},"
+            "${Tb.user_group_info.title},"
+            "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}),"
+            "${Tb.places.table}(*),"
+            "${Tb.user_group_info.description},"
+            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info_public.id}, ${Tb.user_info_public.name}, ${Tb.user_info_public.surname}))")
+    .eq(Tb.user_group_info.id, id)
     .maybeSingle();
     if(data==null)
     {
@@ -620,8 +673,8 @@ class DataService {
 
   static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
     var data = await _supabase
-        .from(ExclusiveGroupModel.exclusiveGroupsTable)
-        .select("${ExclusiveGroupModel.idColumn}, ${ExclusiveGroupModel.titleColumn}, exclusive_events(event)");
+        .from(Tb.exclusive_groups.table)
+        .select("${Tb.exclusive_groups.id}, ${Tb.exclusive_groups.title}, ${Tb.exclusive_events.table}(${Tb.exclusive_events.event})");
     return List<ExclusiveGroupModel>.from(
         data.map((x) => ExclusiveGroupModel.fromJson(x)));
   }
@@ -633,27 +686,27 @@ class DataService {
     }
 
     var upsertObj = {
-      UserGroupInfoModel.titleColumn: model.title,
-      UserGroupInfoModel.leaderColumn: model.leader?.id,
+      Tb.user_group_info.title: model.title,
+      Tb.user_group_info.leader: model.leader?.id,
     };
 
     if(model.description != null)
     {
-      upsertObj.addAll({UserGroupInfoModel.descriptionColumn: model.description});
+      upsertObj.addAll({Tb.user_group_info.description: model.description});
     }
     if(model.place != null)
     {
       model.place = await DataService.updatePlace(model.place!);
-      upsertObj.addAll({UserGroupInfoModel.placeColumn: model.place!.id.toString()});
+      upsertObj.addAll({Tb.user_group_info.place: model.place!.id.toString()});
     }
     dynamic eventData;
     if(model.id!=null) {
-      upsertObj.addAll({"id": model.id.toString()});
-      eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).upsert(upsertObj).eq("id", model.id).select().single();
+      upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
+      eventData = await _supabase.from(Tb.user_group_info.table).upsert(upsertObj).eq(Tb.user_group_info.id, model.id).select().single();
     }
     else
     {
-      eventData = await _supabase.from(UserGroupInfoModel.userGroupInfoTable).insert(upsertObj).select().single();
+      eventData = await _supabase.from(Tb.user_group_info.table).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);
     await updateUserGroupParticipants(updated, model.participants!);
@@ -661,85 +714,100 @@ class DataService {
 
   static updateUserGroupParticipants(UserGroupInfoModel group, Set<UserInfoModel> participants) async {
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("group", group.id);
+        .eq(Tb.user_groups.group, group.id);
 
     for(var p in participants)
     {
       await _supabase
-          .from(UserGroupInfoModel.userGroupsTable)
-          .insert({"group":group.id, "user":p.id});
+          .from(Tb.user_groups.table)
+          .insert({
+              Tb.user_groups.group:group.id,
+              Tb.user_groups.user:p.id
+          });
     }
   }
 
   static deleteUserGroupInfo(UserGroupInfoModel model) async {
     await _supabase
-        .from(UserGroupInfoModel.userGroupsTable)
+        .from(Tb.user_groups.table)
         .delete()
-        .eq("group", model.id);
+        .eq(Tb.user_groups.group, model.id);
     await _supabase
-        .from(UserGroupInfoModel.userGroupInfoTable)
+        .from(Tb.user_group_info.table)
         .delete()
-        .eq("id", model.id);
+        .eq(Tb.user_group_info.id, model.id);
     if(model.place!=null)
     {
       await _supabase
-          .from(PlaceModel.placeTable)
+          .from(Tb.places.table)
           .delete()
-          .eq("id", model.place!.id);
+          .eq(Tb.places.id, model.place!.id);
     }
   }
 
   static updateExclusiveGroup(ExclusiveGroupModel model) async {
     var upsertObj = {
-      "title": model.title,
+      Tb.exclusive_groups.title: model.title,
     };
 
     dynamic eventData;
     if(model.id!=null) {
-      upsertObj.addAll({"id": model.id.toString()});
-      eventData = await _supabase.from(ExclusiveGroupModel.exclusiveGroupsTable).update(upsertObj).eq("id", model.id).select().single();
+      upsertObj.addAll({Tb.exclusive_groups.id: model.id.toString()});
+      eventData = await _supabase.from(Tb.exclusive_groups.table).update(upsertObj).eq(Tb.exclusive_groups.id, model.id).select().single();
     }
     else
     {
-      eventData = await _supabase.from(ExclusiveGroupModel.exclusiveGroupsTable).insert(upsertObj).select().single();
+      eventData = await _supabase.from(Tb.exclusive_groups.table).insert(upsertObj).select().single();
     }
     var updated = ExclusiveGroupModel.fromJson(eventData);
 
     await _supabase
-        .from('exclusive_events')
+        .from(Tb.exclusive_events.table)
         .delete()
-        .eq('group', updated.id);
+        .eq(Tb.exclusive_events.group, updated.id);
 
     var insert = [];
     for(var e in model.events!)
     {
-      insert.add({"group":updated.id, "event":e});
+      insert.add(
+          {Tb.exclusive_events.group:updated.id, 
+            Tb.exclusive_events.event:e});
     }
     await _supabase
-        .from('exclusive_events')
+        .from(Tb.exclusive_events.table)
         .insert(insert)
         .select();
   }
 
   static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
     await _supabase
-        .from(ExclusiveGroupModel.exclusiveEventsTable)
+        .from(Tb.exclusive_events.table)
         .delete()
-        .eq(ExclusiveGroupModel.exclusiveEventsGroupColumn, data.id);
+        .eq(Tb.exclusive_events.group, data.id);
     await _supabase
-        .from(ExclusiveGroupModel.exclusiveGroupsTable)
+        .from(Tb.exclusive_groups.table)
         .delete()
-        .eq(ExclusiveGroupModel.idColumn, data.id);
+        .eq(Tb.exclusive_groups.id, data.id);
   }
 
   static Future<EventModel> getEvent(int eventId) async {
     var data = await _supabase
-        .from('events')
+        .from(Tb.events.table)
         .select(
-            "id, updated_at, title, start_time, end_time, max_participants, split_for_men_women, is_group_event, description, places(id, title), event_groups!event_groups_event_parent_fkey(event_child)")
-        .eq("id", eventId)
+            "${Tb.events.id},"
+            "${Tb.events.updated_at},"
+            "${Tb.events.title},"
+            "${Tb.events.start_time},"
+            "${Tb.events.end_time},"
+            "${Tb.events.max_participants},"
+            "${Tb.events.split_for_men_women},"
+            "${Tb.events.is_group_event},"
+            "${Tb.events.description},"
+            "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
+            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
+        .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
     if(isLoggedIn()) {
@@ -751,11 +819,17 @@ class DataService {
     if(event.childEventIds!=null)
     {
       var childEventsData = await _supabase
-          .from('events')
-          .select("id, title, start_time, end_time, max_participants, event_users(count)")
-          .in_("id", event.childEventIds!)
-          .order('start_time', ascending: true)
-          .order('title', ascending: true);
+          .from(Tb.events.table)
+          .select("${Tb.events.id},"
+                  "${Tb.events.title},"
+                  "${Tb.events.start_time},"
+                  "${Tb.events.end_time},"
+                  "${Tb.events.max_participants},"
+                  "${Tb.event_users.table}(count)")
+          .in_(Tb.events.id, event.childEventIds!)
+          .eq(Tb.events.is_hidden, false)
+          .order(Tb.events.start_time, ascending: true)
+          .order(Tb.events.title, ascending: true);
 
       event.childEvents = List<EventModel>.from(
           childEventsData.map((x) => EventModel.fromJson(x)));
@@ -775,12 +849,12 @@ class DataService {
 
   static Future<void> loadIsCurrentUserSignedIn(List<EventModel> events) async {
     List<dynamic> currentUserStatePerEventData = await _supabase
-        .from('events')
-        .select("id, event_users!inner(count)")
-        .eq("event_users.user", currentUserId())
-        .in_("id", events.map((e) => e.id).toList());
+        .from(Tb.events.table)
+        .select("${Tb.events.id}, ${Tb.event_users.table}!inner(count)")
+        .eq("${Tb.event_users.table}.${Tb.event_users.user}", currentUserId())
+        .in_(Tb.events.id, events.map((e) => e.id).toList());
 
-    Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c["event_users"][0]["count"]>0).map((c)=>c["id"] as int).toSet();
+    Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c[Tb.event_users.table][0]["count"]>0).map((c)=>c["id"] as int).toSet();
     for(var e in events)
     {
       e.isSignedIn = userSignedInEvents.contains(e.id!) ? true : false;
@@ -790,9 +864,12 @@ class DataService {
   static Future<UserGroupInfoModel?> getCurrentUserGroup() async {
     UserGroupInfoModel? group;
     var partOfGroup = await _supabase
-    .from(UserGroupInfoModel.userGroupInfoTable)
-    .select("id, title, user_info!leader(id), places(id)")
-    .eq(UserGroupInfoModel.leaderColumn, currentUserId())
+    .from(Tb.user_group_info.table)
+    .select("${Tb.user_group_info.id},"
+        "${Tb.user_group_info.title},"
+        "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}),"
+        "${Tb.places.table}(${Tb.places.id})")
+    .eq(Tb.user_group_info.leader, currentUserId())
     .limit(1)
     .maybeSingle();
     if(partOfGroup!=null)
@@ -802,14 +879,14 @@ class DataService {
     if(group==null)
     {
       partOfGroup = await _supabase
-          .from(UserGroupInfoModel.userGroupsTable)
-          .select("${UserGroupInfoModel.userGroupInfoTable}(id, title)")
-          .eq("user", currentUserId())
+          .from(Tb.user_groups.table)
+          .select("${Tb.user_group_info.table}(${Tb.user_group_info.id}, ${Tb.user_group_info.title})")
+          .eq(Tb.user_groups.user, currentUserId())
           .limit(1)
           .maybeSingle();
       if(partOfGroup!=null)
       {
-        group = UserGroupInfoModel.fromJson(partOfGroup[UserGroupInfoModel.userGroupInfoTable]);
+        group = UserGroupInfoModel.fromJson(partOfGroup[Tb.user_group_info.table]);
       }
     }
     return group;
@@ -817,36 +894,44 @@ class DataService {
 
   static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
-      .from('event_users')
-      .select("user, event, user_info_public(*)")
-      .eq("event", eventId);
-    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par["user_info_public"])));
+      .from(Tb.event_users.table)
+      .select(
+        "${Tb.event_users.user},"
+        "${Tb.event_users.event},"
+        "${Tb.user_info_public.table}(*)")
+      .eq(Tb.event_users.event, eventId);
+    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par[Tb.user_info_public.table])));
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
     var result = await _supabase
-        .from('event_users')
+        .from(Tb.event_users.table)
         .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .eq("event", eventId);
+        .eq(Tb.event_users.event, eventId);
     return result.count;
   }
 
   static Future<List<EventModel>> getParticipantEventTimes(String id) async {
     var data = await _supabase
-        .from('event_users')
-        .select("events(id, start_time, end_time)")
-        .eq("user", id);
+        .from(Tb.event_users.table)
+        .select("${Tb.events.table}"
+        "("
+          "${Tb.events.id},"
+          "${Tb.events.start_time},"
+          "${Tb.events.end_time}"
+        ")")
+        .eq(Tb.event_users.user, id);
     return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x["events"])));
+        data.map((x) => EventModel.fromJson(x[Tb.events.table])));
   }
 
   static Future<bool> isCurrentUserSignedToEvent(int eventId) async {
     ensureUserIsLoggedIn();
     var result = await _supabase
-        .from('event_users')
+        .from(Tb.event_users.table)
         .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .eq("event", eventId)
-        .eq("user", currentUserId());
+        .eq(Tb.event_users.event, eventId)
+        .eq(Tb.event_users.user, currentUserId());
     return result.count > 0;
   }
 
@@ -951,10 +1036,10 @@ class DataService {
     }
 
     await _supabase
-        .from('event_users')
+        .from(Tb.event_users.table)
         .delete()
-        .eq("event", event.id!)
-        .eq("user", finalId);
+        .eq(Tb.event_users.event, event.id!)
+        .eq(Tb.event_users.user, finalId);
 
     if(participant == null) {
       var trPrefix = _currentUser!.getGenderPrefix();
@@ -970,25 +1055,26 @@ class DataService {
   static Future<EventModel> updateEvent(EventModel event) async
    {
     var upsertObj = {
-      "start_time": event.startTime.toIso8601String(),
-      "end_time": event.endTime.toIso8601String(),
-      "title": event.title,
-      "max_participants": event.maxParticipants,
-      "place": event.place?.id,
-      "split_for_men_women": event.splitForMenWomen,
-      "is_group_event": event.isGroupEvent,
+      Tb.events.start_time: event.startTime.toIso8601String(),
+      Tb.events.end_time: event.endTime.toIso8601String(),
+      Tb.events.title: event.title,
+      Tb.events.max_participants: event.maxParticipants,
+      Tb.events.place: event.place?.id,
+      Tb.events.split_for_men_women: event.splitForMenWomen,
+      Tb.events.is_group_event: event.isGroupEvent,
+      Tb.events.is_hidden: event.isHidden,
     };
     if(event.description!=null) {
-      upsertObj.addAll({"description": event.description});
+      upsertObj.addAll({Tb.events.description: event.description});
     }
     dynamic eventData;
     if(event.id!=null) {
-      upsertObj.addAll({"id": event.id});
-      eventData = await _supabase.from('events').update(upsertObj).eq("id", event.id).select().single();
+      upsertObj.addAll({Tb.events.id: event.id});
+      eventData = await _supabase.from(Tb.events.table).update(upsertObj).eq(Tb.events.id, event.id).select().single();
     }
     else
     {
-      eventData = await _supabase.from('events').insert(upsertObj).select().single();
+      eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
     }
     return EventModel.fromJson(eventData);
   }
@@ -1001,130 +1087,130 @@ class DataService {
     var insert = [];
     for(var eParent in event.parentEventIds!)
     {
-      insert.add({"event_child":updatedEvent.id, "event_parent":eParent});
+      insert.add({Tb.event_groups.event_child:updatedEvent.id, Tb.event_groups.event_parent:eParent});
     }
     await _supabase
-        .from('event_groups')
+        .from(Tb.event_groups.table)
         .insert(insert)
         .select();
   }
 
   static Future<void> removeEventFromSaved(EventModel updatedEvent) async {
     await _supabase
-        .from(EventModel.eventUsersSavedTable)
+        .from(Tb.event_users_saved.table)
         .delete()
-        .eq(EventModel.eventUsersSavedEventColumn, updatedEvent.id);
+        .eq(Tb.event_users_saved.event, updatedEvent.id);
   }
 
   static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
     await _supabase
-        .from('event_groups')
+        .from(Tb.event_groups.table)
         .delete()
-        .eq('event_child', updatedEvent.id);
+        .eq(Tb.event_groups.event_child, updatedEvent.id);
   }
 
   static Future<void> deleteEvent(EventModel data) async {
     await _supabase
-        .from('events')
+        .from(Tb.events.table)
         .delete()
-        .eq("id", data.id);
+        .eq(Tb.events.id, data.id);
   }
 
   static Future<void> updateInformation(InformationModel info) async {
     if(info.id == null)
     {
-      await _supabase.from(InformationModel.informationTable).insert({
-        InformationModel.titleColumn: info.title,
-        InformationModel.descriptionColumn: info.description,
-        InformationModel.isHiddenColumn: info.isHidden,
-        InformationModel.orderColumn: info.order
+      await _supabase.from(Tb.information.table).insert({
+        Tb.information.title: info.title,
+        Tb.information.description: info.description,
+        Tb.information.type: info.type,
+        Tb.information.is_hidden: info.isHidden,
+        Tb.information.order: info.order
       });
       return;
     }
-    await _supabase.from(InformationModel.informationTable).upsert({
-      InformationModel.titleColumn: info.title,
-      InformationModel.idColumn: info.id,
-      InformationModel.descriptionColumn: info.description,
-      InformationModel.isHiddenColumn: info.isHidden,
-      InformationModel.orderColumn: info.order
+    await _supabase.from(Tb.information.table).upsert({
+      Tb.information.title: info.title,
+      Tb.information.id: info.id,
+      Tb.information.description: info.description,
+      Tb.information.type: info.type,
+      Tb.information.is_hidden: info.isHidden,
+      Tb.information.order: info.order
     }).select();
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
     await _supabase
-        .from(InformationModel.informationTable)
+        .from(Tb.information.table)
         .delete()
-        .eq(InformationModel.idColumn, info.id);
+        .eq(Tb.information.id, info.id);
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
-    var data = await _supabase.from(UserInfoModel.userInfoTable)
-        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
-    return List<UserInfoModel>.from(
-        data.map((x) => UserInfoModel.fromJson(x)));
-  }
-
-  static Future<List<UserInfoModel>> getAllUsersPublic() async {
-    var data = await _supabase.from(UserInfoModel.userInfoPublicTable)
-        .select([UserInfoModel.idColumn, UserInfoModel.emailReadonlyColumn, UserInfoModel.nameColumn, UserInfoModel.surnameColumn].join(", "));
+    var data = await _supabase.from(Tb.user_info.table)
+        .select([Tb.user_info.id,
+                Tb.user_info.email_readonly,
+                Tb.user_info.name,
+                Tb.user_info.surname].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
   }
 
   static Future<void> deleteNewsMessage(NewsModel message) async {
-
     var lastMes = await _supabase
-        .from("news")
-        .select("id")
-        .lt("created_at", message.createdAt)
-        .order("created_at")
+        .from(Tb.news.table)
+        .select(Tb.news.id)
+        .lt(Tb.news.created_at, message.createdAt)
+    // from some reason lower than is behaving like lower and equal than on web platform
+    // therefore additional check
+        .neq(Tb.news.id, message.id)
+        .order(Tb.news.created_at)
         .limit(1)
         .maybeSingle();
 
     if(lastMes!=null) {
       var currentUsers = await _supabase
-          .from("user_news")
-          .select("user")
-          .eq("news_id", message.id);
+          .from(Tb.user_news.table)
+          .select(Tb.user_news.user)
+          .eq(Tb.user_news.news_id, message.id);
 
       List<Map<String, dynamic>> toBeUpdated = [];
       for(var u in currentUsers) {
         toBeUpdated.add({
-          "user": u["user"],
-          "news_id": lastMes["id"]
+          Tb.user_news.user: u[Tb.user_news.user],
+          Tb.user_news.news_id: lastMes[Tb.news.id]
         });
       }
 
       await _supabase
-        .from('user_news')
+        .from(Tb.user_news.table)
         .upsert(toBeUpdated).select();
     }
     else {
       await _supabase
-          .from('user_news')
+          .from(Tb.user_news.table)
           .delete()
-          .eq("news_id", message.id);
+          .eq(Tb.user_news.news_id, message.id);
     }
 
     await _supabase
-        .from('news')
+        .from(Tb.news.table)
         .delete()
-        .eq("id", message.id);
+        .eq(Tb.news.id, message.id);
 
     ToastHelper.Show("Message has been removed.".tr());
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
     await _supabase
-        .from('news')
-        .update({"message":message.message})
-        .eq("id", message.id);
+        .from(Tb.news.table)
+        .update({Tb.news.message:message.message})
+        .eq(Tb.news.id, message.id);
     ToastHelper.Show("Message has been changed.".tr());
   }
 
   static insertNewsMessage(String message, bool withNotification) async {
-    await _supabase.from('news').insert(
-        {"message": message, "created_by": currentUserId()}).select();
+    await _supabase.from(Tb.news.table).insert(
+        {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
 
     if(withNotification)
     {
@@ -1139,8 +1225,12 @@ class DataService {
           basicMessage+=innerText;
       }
       basicMessage = basicMessage.trim();
-      await _supabase.from("notification_records").insert(
-          {"content": basicMessage, "heading": _currentUser!.name??AppConfig.home_page}).select();
+      await _supabase.from(Tb.notification_records.table)
+          .insert(
+          {
+            Tb.notification_records.content: basicMessage, 
+            Tb.notification_records.heading: _currentUser!.name??AppConfig.home_page
+          }).select();
 
       ToastHelper.Show("Message has been sent.".tr());
       return;
@@ -1153,9 +1243,9 @@ class DataService {
     ensureUserIsLoggedIn();
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
-        .from('news')
+        .from(Tb.news.table)
         .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .gt("id", lastMessageId);
+        .gt(Tb.news.id, lastMessageId);
     return result.count;
   }
 
@@ -1163,12 +1253,12 @@ class DataService {
     ensureUserIsLoggedIn();
     int lastMessageId = 0;
     var lastMessage = await _supabase
-        .from("user_news")
-        .select("news_id")
-        .eq("user", currentUserId())
+        .from(Tb.user_news.table)
+        .select(Tb.user_news.news_id)
+        .eq(Tb.user_news.user, currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
-      lastMessageId = lastMessage["news_id"];
+      lastMessageId = lastMessage[Tb.user_news.news_id];
     }
     return lastMessageId;
   }
@@ -1176,8 +1266,8 @@ class DataService {
   static void setMessagesAsRead(int newsId) async {
     ensureUserIsLoggedIn();
     await _supabase
-        .from('user_news')
-        .upsert({"user": currentUserId(), "news_id": newsId}).select();
+        .from(Tb.user_news.table)
+        .upsert({Tb.user_news.user: currentUserId(), Tb.user_news.news_id: newsId}).select();
   }
 
   static Future<List<NewsModel>> getAllNewsMessages() async {
@@ -1256,19 +1346,19 @@ class DataService {
     {
       throw Exception("You cannot change this place.");
     }
-    await _supabase.from("places").update({
-      "coordinates": {
+    await _supabase.from(Tb.places.table).update({
+      Tb.places.coordinates: {
         "latLng": {"lat": lat, "lng": lng}
       }
-    }).eq("id", placeId);
+    }).eq(Tb.places.id, placeId);
     ToastHelper.Show("Place has been changed.".tr());
   }
 
   static Future<bool> isEventSaved(int id) async {
     var data = await _supabase
-        .from(EventModel.eventUsersSavedTable)
+        .from(Tb.event_users_saved.table)
         .select()
-        .eq(EventModel.eventUsersSavedEventColumn, id)
+        .eq(Tb.event_users_saved.event, id)
         .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
         .maybeSingle();
     return data != null;
@@ -1277,9 +1367,9 @@ class DataService {
   static Future<void> removeFromMySchedule(int id) async {
     if(isLoggedIn()) {
       await _supabase
-          .from(EventModel.eventUsersSavedTable)
+          .from(Tb.event_users_saved.table)
           .delete()
-          .eq(EventModel.eventUsersSavedEventColumn, id)
+          .eq(Tb.event_users_saved.event, id)
           .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
     }
     OfflineDataHelper.removeFromMySchedule(id);
@@ -1289,8 +1379,8 @@ class DataService {
   static Future<void> addToMySchedule(int id) async {
     if(isLoggedIn()) {
         await _supabase
-            .from(EventModel.eventUsersSavedTable)
-            .insert({EventModel.eventUsersSavedEventColumn: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
+            .from(Tb.event_users_saved.table)
+            .insert({Tb.event_users_saved.event: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
     }
     OfflineDataHelper.addToMySchedule(id);
     ToastHelper.Show("Added to My schedule.".tr());
@@ -1298,7 +1388,7 @@ class DataService {
   
   static Future<void> synchronizeMySchedule([bool join = false])
   async {
-    if(!isLoggedIn()){
+    if(!isLoggedIn() || !AppConfig.isOwnProgramSupported){
       return;
     }
     HashSet<EventModel> data = EventModel.CreateEventModelSet();
@@ -1322,12 +1412,12 @@ class DataService {
     {
       values.add({
         EventModel.eventUsersSavedUserColumn: currentUserId(),
-        EventModel.eventUsersSavedEventColumn: v
+        Tb.event_users_saved.event: v
       });
     }
     if(join)
     {
-      await _supabase.from(EventModel.eventUsersSavedTable)
+      await _supabase.from(Tb.event_users_saved.table)
           .upsert(values);
     }
   }
@@ -1348,7 +1438,7 @@ class DataService {
     var places = await getAllPlaces();
     OfflineDataHelper.saveAllPlaces(places);
 
-    var info = await getAllInformation();
+    var info = await getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(info);
 
     var messages = await getAllNewsMessages();
@@ -1370,6 +1460,12 @@ class DataService {
     }
 
     await DataService.synchronizeMySchedule();
+  }
+
+  static Future<String?> checkOccasionLink(String link) async {
+    var data = await _supabase.rpc("check_occasion_link",
+        params: {"link": link});
+    return data;
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {

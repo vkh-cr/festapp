@@ -1,8 +1,6 @@
 import 'package:avapp/models/Tb.dart';
 
 class NewsModel {
-  static const String newsTable = "news";
-  static const String userInfoPublicTable = "user_info_public";
   static const String newsOffline = "newsOffline";
   static const String viewsColumn = "views";
 

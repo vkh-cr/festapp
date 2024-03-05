@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
@@ -15,10 +17,6 @@ class HtmlEditorPage extends StatefulWidget {
 class _HtmlEditorState extends State<HtmlEditorPage> {
   _HtmlEditorState();
   late String _html;
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _html = widget.content??"";
-  }
 
   ///[controller] create a QuillEditorController to access the editor methods
   late QuillEditorController controller;
@@ -47,13 +45,19 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
 
   @override
   void initState() {
+    _html = widget.content??"";
     controller = QuillEditorController();
     controller.onTextChanged((text) {
       debugPrint('listening to $text');
     });
     controller.onEditorLoaded(() {
       debugPrint('Editor Loaded :)');
-      setHtmlText(_html);
+    });
+    Timer(const Duration(seconds: 2), () {
+      if(_html.isNotEmpty)
+        {
+          setHtmlText(_html);
+        }
     });
     super.initState();
   }

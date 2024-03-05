@@ -1,3 +1,4 @@
+import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/data/DataService.dart';
@@ -7,12 +8,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../services/ToastHelper.dart';
-import '../widgets/HtmlDescriptionWidget.dart';
+import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
+  String? type;
   static const ROUTE = "/info";
-  const InfoPage({Key? key}) : super(key: key);
+  InfoPage({this.type, super.key});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -21,6 +23,8 @@ class InfoPage extends StatefulWidget {
 class _InfoPageState extends State<InfoPage> {
   List<InformationModel>? _informationList;
   _InfoPageState();
+
+  String title = "Information".tr();
 
   @override
   void didChangeDependencies() {
@@ -32,7 +36,7 @@ class _InfoPageState extends State<InfoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Information").tr(),
+        title: Text(title),
         leading: BackButton(
           onPressed: () => NavigationHelper.goBackOrHome(context),
         ),
@@ -76,7 +80,7 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlDescriptionWidget(html: item.description ?? ""),
+                        child: HtmlView(html: item.description ?? ""),
                       )],
                     ),
                       isExpanded: item.isExpanded,
@@ -91,9 +95,10 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo();
-    _informationList = await DataService.getActiveInformation();
-    OfflineDataHelper.saveAllInfo(_informationList!);
+    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    var allInfo = await DataService.getAllActiveInformation();
+    _informationList = allInfo.filterByType(widget.type);
+    OfflineDataHelper.saveAllInfo(allInfo);
     setState(() {});
   }
 }
