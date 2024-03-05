@@ -50,10 +50,10 @@ class MarkerWithText extends Marker {
 
 class MapPage extends StatefulWidget {
   static const ROUTE = "/map";
-  int? id;
-  PlaceModel? place;
+  final int? id;
+  final PlaceModel? place;
 
-  MapPage({this.id, this.place, super.key});
+  const MapPage({this.id, this.place, super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -181,7 +181,7 @@ class _MapPageState extends State<MapPage> {
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_map != null) {
-      mapController.move(_mapCenter, mapController.zoom);
+      mapController.move(_mapCenter, mapController.camera.zoom);
     }
     pageTitle = place.title!;
   }
@@ -240,7 +240,6 @@ class _MapPageState extends State<MapPage> {
               TileLayer(
                 maxZoom: 19,
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
               ),
               CurrentLocationLayer(),
               PopupMarkerLayer(
