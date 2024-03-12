@@ -1,8 +1,8 @@
-import 'package:avapp/models/LanguageModel.dart';
-import 'package:avapp/models/UserGroupInfoModel.dart';
-import 'package:avapp/services/ToastHelper.dart';
+import 'package:festapp/models/LanguageModel.dart';
+import 'package:festapp/models/UserGroupInfoModel.dart';
+import 'package:festapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';

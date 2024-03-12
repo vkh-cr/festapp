@@ -1,5 +1,5 @@
-import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/models/UserGroupInfoModel.dart';
+import 'package:festapp/models/PlaceModel.dart';
+import 'package:festapp/models/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';

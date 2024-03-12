@@ -1,5 +1,5 @@
-import 'package:avapp/models/EventModel.dart';
-import 'package:avapp/models/InformationModel.dart';
+import 'package:festapp/models/EventModel.dart';
+import 'package:festapp/models/InformationModel.dart';
 
 extension DataExtensions on List<EventModel> {
   List<EventModel> filterRootEvents() {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/appConfig.dart';
 
 MaterialColor primarySwatch = const MaterialColor(
   AppConfig.primaryColor,

@@ -1,16 +1,16 @@
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/pages/AdministrationPage.dart';
-import 'package:avapp/pages/LoginPage.dart';
-import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/router.dart';
-import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/styles/Styles.dart';
-import 'package:avapp/widgets/LanguageButton.dart';
+import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/models/UserInfoModel.dart';
+import 'package:festapp/pages/AdministrationPage.dart';
+import 'package:festapp/pages/LoginPage.dart';
+import 'package:festapp/pages/MapPage.dart';
+import 'package:festapp/router.dart';
+import 'package:festapp/services/NavigationHelper.dart';
+import 'package:festapp/services/ToastHelper.dart';
+import 'package:festapp/styles/Styles.dart';
+import 'package:festapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/appConfig.dart';
 
 import '../data/DataService.dart';
 

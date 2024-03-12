@@ -1,10 +1,10 @@
-import 'package:avapp/data/DataExtensions.dart';
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/models/InformationModel.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/router.dart';
-import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/styles/Styles.dart';
+import 'package:festapp/data/DataExtensions.dart';
+import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/models/InformationModel.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/router.dart';
+import 'package:festapp/services/NavigationHelper.dart';
+import 'package:festapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../services/ToastHelper.dart';

@@ -1,9 +1,9 @@
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/pages/EventPage.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/router.dart';
-import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/widgets/ScheduleTimeline.dart';
+import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/pages/EventPage.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/router.dart';
+import 'package:festapp/services/NavigationHelper.dart';
+import 'package:festapp/widgets/ScheduleTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 

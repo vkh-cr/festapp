@@ -1,5 +1,5 @@
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/models/Tb.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/models/Tb.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import '../dataGrids/PlutoAbstract.dart';

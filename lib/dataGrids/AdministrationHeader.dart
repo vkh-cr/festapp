@@ -1,6 +1,6 @@
-import 'package:avapp/dataGrids/DataGridAction.dart';
-import 'package:avapp/dataGrids/DataGridHelper.dart';
-import 'package:avapp/dataGrids/SingleTableDataGrid.dart';
+import 'package:festapp/dataGrids/DataGridAction.dart';
+import 'package:festapp/dataGrids/DataGridHelper.dart';
+import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
