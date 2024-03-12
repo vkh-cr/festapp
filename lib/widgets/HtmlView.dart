@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:avapp/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -15,7 +16,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
     if(url.startsWith("navigate:"))
     {
       var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      context.push(navigateTo);
+      RouterService.navigate(context, navigateTo);
       return true;
     }
     super.onTapUrl?.call(url);

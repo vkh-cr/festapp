@@ -13,6 +13,7 @@ import 'package:avapp/pages/UserPage.dart';
 import 'package:avapp/router.dart';
 import 'package:avapp/services/NotificationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
+import 'package:avapp/tests/DataServiceTests.dart';
 import 'package:avapp/widgets/ScheduleTabView.dart';
 import 'package:avapp/widgets/ScheduleTimeline.dart';
 import 'package:badges/badges.dart' as badges;
@@ -32,6 +33,7 @@ import 'pages/LoginPage.dart';
 import 'styles/Styles.dart';
 
 Future<void> main() async {
+  debugProfileBuildsEnabled = true;
   await initializeEverything();
   runApp(
     EasyLocalization(
@@ -95,7 +97,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: router,
+      routerConfig: RouterService.router,
       debugShowCheckedModeBanner: false,
       // builder: (context, child) {
       //   final mediaQueryData = MediaQuery.of(context);
@@ -328,31 +330,31 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    context.push(ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, ProgramViewPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
-    context.push(NewsPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, NewsPage.ROUTE).then((value) => loadData());
   }
 
   void _infoPressed() {
-    context.push(InfoPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, InfoPage.ROUTE).then((value) => loadData());
   }
 
   void _mapPressed() {
-    context.push(MapPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, MapPage.ROUTE).then((value) => loadData());
   }
 
   void _loginPressed() {
-    context.push(LoginPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, LoginPage.ROUTE).then((value) => loadData());
   }
 
   void _profileButtonPressed() {
-    context.push(UserPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, UserPage.ROUTE).then((value) => loadData());
   }
 
   _eventPressed(int id) {
-    context.push("${EventPage.ROUTE}/$id").then((value) => loadData());
+    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 
   final List<TimeLineItem> _dots = [];
@@ -379,6 +381,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       _messageCount < 100 ? _messageCount.toString() : "99";
 
   Future<void> loadData() async {
+    if(!await RouterService.checkOccasionLinkAndRedirect(context))
+    {
+      return;
+    }
     loadOfflineData();
 
     if (DataService.isLoggedIn()) {

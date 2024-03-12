@@ -49,7 +49,7 @@ class MarkerWithText extends Marker {
 }
 
 class MapPage extends StatefulWidget {
-  static const ROUTE = "/map";
+  static const ROUTE = "map";
   final int? id;
   final PlaceModel? place;
 

@@ -3,6 +3,7 @@ import 'package:avapp/data/DataService.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/pages/MySchedulePage.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';
@@ -13,7 +14,7 @@ import 'package:go_router/go_router.dart';
 import '../models/EventModel.dart';
 
 class ProgramViewPage extends StatefulWidget {
-  static const ROUTE = "/timetable";
+  static const ROUTE = "timetable";
 
   const ProgramViewPage.TimetablePage({Key? key}) : super(key: key);
 
@@ -31,7 +32,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   void initState() {
     super.initState();
     timetableController = TimetableController(onItemTap: (id) {
-      context.push("${EventPage.ROUTE}/$id").then((value) => loadData());
+      RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
     });
   }
 
@@ -163,7 +164,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
               padding: const EdgeInsets.fromLTRB(6,6,6,0),
               child: TextButton(
                 onPressed: () async {
-                  context.push(MySchedulePage.ROUTE).then((value) => loadData());
+                  RouterService.navigate(context, MySchedulePage.ROUTE).then((value) => loadData());
                 },
                 child: FittedBox(
                   child: Column(

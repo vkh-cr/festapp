@@ -3,6 +3,7 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/AdministrationPage.dart';
 import 'package:avapp/pages/LoginPage.dart';
 import 'package:avapp/pages/MapPage.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
@@ -15,7 +16,7 @@ import 'package:go_router/go_router.dart';
 import '../data/DataService.dart';
 
 class UserPage extends StatefulWidget {
-  static const ROUTE = "/user";
+  static const ROUTE = "user";
   const UserPage({Key? key}) : super(key: key);
 
   @override
@@ -60,7 +61,7 @@ class _UserPageState extends State<UserPage> {
                     Container(
                       alignment: Alignment.topLeft,
                       child: TextButton(
-                          onPressed: userData?.place == null ? null : () => context.push("${MapPage.ROUTE}/${userData!.place!.id!}"),
+                          onPressed: userData?.place == null ? null : () => RouterService.navigate(context, "${MapPage.ROUTE}/${userData!.place!.id!}"),
                           child: Text(userData?.place?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
                     )
                   ],),
@@ -114,7 +115,7 @@ class _UserPageState extends State<UserPage> {
     super.didChangeDependencies();
     if(!DataService.isLoggedIn())
     {
-      context.push(LoginPage.ROUTE);
+      RouterService.navigate(context, LoginPage.ROUTE);
     }
     loadData();
   }
@@ -147,7 +148,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    context.push(AdministrationPage.ROUTE);
+    RouterService.navigate(context, AdministrationPage.ROUTE);
   }
 
   Future<void> loadData() async {

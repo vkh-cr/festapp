@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/GlobalSettingsModel.dart';
+import 'package:avapp/models/OccasionModel.dart';
 import 'package:avapp/models/Tb.dart';
 import 'package:avapp/models/UserGroupInfoModel.dart';
 import 'package:avapp/models/UserInfoModel.dart';
@@ -1462,10 +1463,10 @@ class DataService {
     await DataService.synchronizeMySchedule();
   }
 
-  static Future<String?> checkOccasionLink(String link) async {
+  static Future<OccasionLinkModel> checkOccasionLink(String link) async {
     var data = await _supabase.rpc("check_occasion_link",
-        params: {"link": link});
-    return data;
+        params: {"link_txt": link});
+    return OccasionLinkModel.fromJson(data);
   }
 
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
