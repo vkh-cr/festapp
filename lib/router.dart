@@ -26,7 +26,7 @@ class RouterService{
 
   static Future<T?> navigate<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
-    return GoRouter.of(context).push(RouterService.getCurrentLink()+location, extra: extra);
+    return context.push(RouterService.getCurrentLink()+location, extra: extra);
   }
 
   static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
