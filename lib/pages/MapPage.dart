@@ -230,8 +230,12 @@ class _MapPageState extends State<MapPage> {
             mapController: mapController,
             options: MapOptions(
                 interactionOptions: const InteractionOptions(
-                    pinchZoomWinGestures: MultiFingerGesture.pinchZoom |
-                        MultiFingerGesture.pinchMove),
+                  flags: InteractiveFlag.doubleTapDragZoom |
+                  InteractiveFlag.doubleTapZoom |
+                  InteractiveFlag.pinchMove |
+                  InteractiveFlag.pinchZoom |
+                  InteractiveFlag.flingAnimation |
+                  InteractiveFlag.drag),
                 initialZoom: DataService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
                 initialCenter: _mapCenter,
