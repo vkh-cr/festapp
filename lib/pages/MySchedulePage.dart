@@ -1,17 +1,17 @@
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/pages/EventPage.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/ScheduleTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
 import '../styles/Styles.dart';
 
 class MySchedulePage extends StatefulWidget {
-  static const ROUTE = "/myschedule";
+  static const ROUTE = "myschedule";
   const MySchedulePage({Key? key}) : super(key: key);
 
   @override
@@ -89,6 +89,6 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   _eventPressed(int id) {
-    context.push("${EventPage.ROUTE}/$id").then((value) => loadData());
+    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 }

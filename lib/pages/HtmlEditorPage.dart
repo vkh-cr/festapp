@@ -6,7 +6,7 @@ import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter/material.dart';
 
 class HtmlEditorPage extends StatefulWidget {
-  static const ROUTE = "/htmlEditor";
+  static const ROUTE = "htmlEditor";
   String? content;
   HtmlEditorPage({this.content, super.key});
 

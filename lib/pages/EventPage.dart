@@ -2,6 +2,7 @@ import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/HtmlEditorPage.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/DialogHelper.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/widgets/ButtonsHelper.dart';
@@ -21,7 +22,7 @@ import '../widgets/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
-  static const ROUTE = "/event";
+  static const ROUTE = "event";
   int? id;
   EventPage({this.id, super.key});
 
@@ -108,7 +109,7 @@ class _EventPageState extends State<EventPage> {
                           visible: DataService.isEditor() ||
                               (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
-                              onPressed: () => context.push(HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
+                              onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
                                 if(value != null)
                                 {
                                   var changed = value as String;
@@ -143,7 +144,7 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.topRight,
                           child: TextButton(
-                              onPressed: () => context.push("${MapPage.ROUTE}/${_event!.place!.id}").then((value) => loadData(_event!.id!)),
+                              onPressed: () => RouterService.navigate(context, "${MapPage.ROUTE}/${_event!.place!.id}").then((value) => loadData(_event!.id!)),
                               child: Text("Place".tr() + ": ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
@@ -343,7 +344,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   _eventPressed(int id) {
-        context.push("${EventPage.ROUTE}/$id").then((value) => loadData(_event!.id!));
+    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData(_event!.id!));
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {

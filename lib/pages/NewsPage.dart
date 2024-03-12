@@ -1,4 +1,5 @@
 import 'package:avapp/data/OfflineDataHelper.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/services/ToastHelper.dart';
 import 'package:avapp/styles/Styles.dart';
@@ -15,7 +16,7 @@ import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
-  static const ROUTE = "/news";
+  static const ROUTE = "news";
   const NewsPage({Key? key}) : super(key: key);
   @override
   _NewsPageState createState() => _NewsPageState();
@@ -30,7 +31,7 @@ class _NewsPageState extends State<NewsPage> {
       ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
-    context.push(HtmlEditorPage.ROUTE).then((value) async {
+    RouterService.navigate(context, HtmlEditorPage.ROUTE).then((value) async {
       if(value != null)
       {
         var message = value as String;
@@ -123,7 +124,7 @@ class _NewsPageState extends State<NewsPage> {
                           await DataService.deleteNewsMessage(message);
                         }
                         else{
-                          context.push(HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
+                          RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
                             if(value != null)
                             {
                               var newMessage = value as String;

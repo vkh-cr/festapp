@@ -9,6 +9,7 @@ import 'package:avapp/models/UserInfoModel.dart';
 import 'package:avapp/pages/MapPage.dart';
 import 'package:avapp/dataGrids/DataGridHelper.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/MailerSendHelper.dart';
 import 'package:avapp/services/MapIconService.dart';
 import 'package:avapp/services/NavigationHelper.dart';
@@ -25,7 +26,7 @@ import 'HtmlEditorPage.dart';
 import '../models/InformationModel.dart';
 
 class AdministrationPage extends StatefulWidget {
-  static const ROUTE = "/admin";
+  static const ROUTE = "admin";
   const AdministrationPage({Key? key}) : super(key: key);
 
   @override
@@ -185,7 +186,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.information.description]?.value;
-                              context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -323,7 +324,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   textToEdit = fullEvent.description;
                                 }
                               }
-                              context.push(HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
+                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -406,7 +407,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async {
                               var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                              context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                   if(value != null)
                                   {
                                     var cell = rendererContext.row.cells[Tb.places.coordinates]!;
@@ -560,7 +561,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
-                              context.push(HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -589,7 +590,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
 
-                              context.push(MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;

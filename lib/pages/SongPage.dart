@@ -13,7 +13,7 @@ import '../widgets/HtmlView.dart';
 class SongPage extends StatefulWidget {
   final String? type = "song";
 
-  static const ROUTE = "/songs";
+  static const ROUTE = "songs";
 
   SongPage({super.key});
 

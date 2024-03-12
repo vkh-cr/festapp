@@ -2,18 +2,18 @@ import 'package:avapp/data/DataExtensions.dart';
 import 'package:avapp/data/OfflineDataHelper.dart';
 import 'package:avapp/models/InformationModel.dart';
 import 'package:avapp/data/DataService.dart';
+import 'package:avapp/router.dart';
 import 'package:avapp/services/NavigationHelper.dart';
 import 'package:avapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../services/ToastHelper.dart';
 import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
   String? type;
-  static const ROUTE = "/info";
+  static const ROUTE = "info";
   InfoPage({this.type, super.key});
 
   @override
@@ -67,7 +67,7 @@ class _InfoPageState extends State<InfoPage> {
                         Visibility(
                             visible: DataService.isEditor(),
                             child: ElevatedButton(
-                                onPressed: () => context.push(HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
+                                onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
                                   if(value != null)
                                   {
                                     setState(() {

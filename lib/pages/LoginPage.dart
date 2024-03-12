@@ -10,7 +10,7 @@ import '../styles/Styles.dart';
 
 
 class LoginPage extends StatefulWidget {
-  static const ROUTE = "/login";
+  static const ROUTE = "login";
   const LoginPage({Key? key}) : super(key: key);
 
   @override
