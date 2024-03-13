@@ -29,7 +29,7 @@ Mobile solution for your festival, conference or event.
   - Change or delete content of Event, Information or News via included Text Editor.
 - Other features
   - Available on Android, iOS and Web.
-  - Available Offline (Timeline, Event detail, Timetable, My Schedule, News, Map, Info, Songs, User profile).
+  - Available Offline: Timeline, Event detail, Timetable, My Schedule, News, Map, Info, Songs, User profile.
   - Languages: English, Czech, Slovak, Polish, German, Ukrainan.
  
 ---
