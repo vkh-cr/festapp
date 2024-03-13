@@ -1,7 +1,7 @@
 # Festapp
 
 Mobile solution for your festival, conference or event. 
-- Try now on [live.festapp.net](https://live.festapp.net)
+- Try now on [live.festapp.net](https://live.festapp.net) or [Android](https://play.google.com/store/apps/details?id=festapp.festapp) or [iOS](https://apps.apple.com/us/app/festapp/id6474078383)
 - Visit us on website: [festapp.net](https://festapp.net)</br></br>
 ![Alt text](repo-data/festapp-showcase.png?raw=true "Showcase")
 
