@@ -33,7 +33,7 @@ Mobile solution for your festival, conference or event.
   - Languages: English, Czech, Slovak, Polish, German, Ukrainan.
  
 ---
-## Technical details
+## Architecture
 Solution is based on Flutter framework with language dart. As a backend is used serverless service Supabase.
 
 ---
