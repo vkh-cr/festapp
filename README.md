@@ -43,7 +43,7 @@ Solution is based on Flutter framework with language dart. As a backend is used 
 - [Člověk a Víra](https://ff23.cz)
 - [BISCUP](https://biscup23.app)
 
-Links to Appstore/Play Store versions are usually save in info section.
+Links to Appstore/Play Store versions are usually saved in info section.
 
 ---
 ## Latest development
@@ -55,6 +55,10 @@ Links to Appstore/Play Store versions are usually save in info section.
 - Full support for URLs (ability to link to pages in the web version of the application).
 - Ukrainian language added among the languages.
 - Minor bug fixes.
+
+---
+## Credits
+The app was originally developed by a team of volunteers for [Absolventský Velehrad](https://absolventskyvelehrad.cz) event in 2023.
 
 
 
