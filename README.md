@@ -19,9 +19,9 @@ Mobile solution for your festival, conference or event.
   - Songs - Page with list of Songs with possibility to increase font size.
 - Signed in user sees:
   - User profile - Name, e-mail, sex, role, accommodation (with link).
-  - Limited capacity events
-  - Groups (discuss groups)
-  - Synchronized "My schedule"
+  - Limited capacity events.
+  - Groups (discuss groups).
+  - Synchronized "My schedule".
 - Admin sees:
   - Admin dashboard with possibility to change: Information, Events, Places, Groups, Exclusivity, Users.
   - User import from CSV table.
