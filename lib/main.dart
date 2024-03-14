@@ -6,6 +6,7 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/pages/InfoPage.dart';
 import 'package:festapp/pages/MapPage.dart';
+import 'package:festapp/pages/MySchedulePage.dart';
 import 'package:festapp/pages/NewsPage.dart';
 import 'package:festapp/pages/SongPage.dart';
 import 'package:festapp/pages/TimetablePage.dart';
@@ -330,7 +331,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    RouterService.navigate(context, ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigate(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
