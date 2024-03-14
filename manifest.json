@@ -1,6 +1,6 @@
 {
-    "name": "avapp",
-    "short_name": "avapp",
+    "name": "festapp",
+    "short_name": "festapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
