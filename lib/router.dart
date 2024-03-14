@@ -1,18 +1,19 @@
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/pages/AdministrationPage.dart';
-import 'package:avapp/pages/EventPage.dart';
-import 'package:avapp/pages/HtmlEditorPage.dart';
-import 'package:avapp/pages/InfoPage.dart';
-import 'package:avapp/pages/LoginPage.dart';
-import 'package:avapp/pages/MapPage.dart';
-import 'package:avapp/pages/NewsPage.dart';
-import 'package:avapp/pages/MySchedulePage.dart';
-import 'package:avapp/pages/SongPage.dart';
-import 'package:avapp/pages/TimetablePage.dart';
-import 'package:avapp/pages/UserPage.dart';
-import 'package:avapp/services/NavigationService.dart';
-import 'package:avapp/services/ToastHelper.dart';
+import 'package:festapp/appConfig.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/models/PlaceModel.dart';
+import 'package:festapp/pages/AdministrationPage.dart';
+import 'package:festapp/pages/EventPage.dart';
+import 'package:festapp/pages/HtmlEditorPage.dart';
+import 'package:festapp/pages/InfoPage.dart';
+import 'package:festapp/pages/LoginPage.dart';
+import 'package:festapp/pages/MapPage.dart';
+import 'package:festapp/pages/NewsPage.dart';
+import 'package:festapp/pages/MySchedulePage.dart';
+import 'package:festapp/pages/SongPage.dart';
+import 'package:festapp/pages/TimetablePage.dart';
+import 'package:festapp/pages/UserPage.dart';
+import 'package:festapp/services/NavigationService.dart';
+import 'package:festapp/services/ToastHelper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
@@ -31,12 +32,12 @@ class RouterService{
 
   static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
-    return context.pushReplacement("/"+location, extra: extra);
+    return context.pushReplacement("/$location", extra: extra);
   }
 
   static final router = GoRouter(
     navigatorKey: NavigationService.navigatorKey,
-    initialLocation: "/",
+    initialLocation: "/${AppConfig.defaultLink}",
     routes: <GoRoute>[
       GoRoute(
         path: "/",

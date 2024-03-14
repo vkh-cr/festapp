@@ -1,5 +1,5 @@
-import 'package:avapp/services/DialogHelper.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/services/DialogHelper.dart';
+import 'package:festapp/appConfig.dart';
 import 'package:flutter/material.dart';
 
 class LanguageButton extends StatelessWidget {

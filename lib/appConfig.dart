@@ -25,6 +25,9 @@ class AppConfig {
   static const String generatedPasswordPrefix = "fa";
   static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
 
+  static const String defaultLink = "conference2024";
+
+
   static List<LanguageModel> AvailableLanguages = [
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),

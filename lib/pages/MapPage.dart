@@ -1,8 +1,8 @@
-import 'package:avapp/appConfig.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/services/MapIconService.dart';
-import 'package:avapp/services/NavigationHelper.dart';
+import 'package:festapp/appConfig.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/services/MapIconService.dart';
+import 'package:festapp/services/NavigationHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

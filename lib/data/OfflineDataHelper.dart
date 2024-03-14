@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'dart:core';
 
-import 'package:avapp/models/EventModel.dart';
-import 'package:avapp/models/GlobalSettingsModel.dart';
-import 'package:avapp/models/InformationModel.dart';
-import 'package:avapp/models/NewsModel.dart';
-import 'package:avapp/models/PlaceModel.dart';
-import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/services/StorageHelper.dart';
+import 'package:festapp/models/EventModel.dart';
+import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/InformationModel.dart';
+import 'package:festapp/models/NewsModel.dart';
+import 'package:festapp/models/PlaceModel.dart';
+import 'package:festapp/models/UserInfoModel.dart';
+import 'package:festapp/services/StorageHelper.dart';
 
 class OfflineDataHelper {
   static const String myScheduleOffline = "mySchedule";

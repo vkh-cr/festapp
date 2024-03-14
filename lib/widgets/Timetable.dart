@@ -1,8 +1,8 @@
-import 'package:avapp/appConfig.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/models/EventModel.dart';
-import 'package:avapp/models/Tb.dart';
-import 'package:avapp/widgets/ButtonsHelper.dart';
+import 'package:festapp/appConfig.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/models/EventModel.dart';
+import 'package:festapp/models/Tb.dart';
+import 'package:festapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 
 class TimetableController {

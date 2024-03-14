@@ -1,23 +1,23 @@
 import 'dart:collection';
 
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/models/GlobalSettingsModel.dart';
-import 'package:avapp/models/OccasionModel.dart';
-import 'package:avapp/models/Tb.dart';
-import 'package:avapp/models/UserGroupInfoModel.dart';
-import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/models/InformationModel.dart';
+import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionModel.dart';
+import 'package:festapp/models/Tb.dart';
+import 'package:festapp/models/UserGroupInfoModel.dart';
+import 'package:festapp/models/UserInfoModel.dart';
+import 'package:festapp/models/InformationModel.dart';
 
-import 'package:avapp/models/NewsModel.dart';
-import 'package:avapp/services/DialogHelper.dart';
-import 'package:avapp/services/NotificationHelper.dart';
-import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/services/UserManagementHelper.dart';
+import 'package:festapp/models/NewsModel.dart';
+import 'package:festapp/services/DialogHelper.dart';
+import 'package:festapp/services/NotificationHelper.dart';
+import 'package:festapp/services/ToastHelper.dart';
+import 'package:festapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/appConfig.dart';
 import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';

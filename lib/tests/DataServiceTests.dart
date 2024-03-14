@@ -1,4 +1,4 @@
-import 'package:avapp/data/DataService.dart';
+import 'package:festapp/data/DataService.dart';
 
 class DataServiceTests {
   static Future<void> test_check_occasion_link()

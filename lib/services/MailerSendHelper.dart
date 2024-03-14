@@ -1,7 +1,7 @@
-import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:festapp/models/UserInfoModel.dart';
+import 'package:festapp/data/DataService.dart';
+import 'package:festapp/services/ToastHelper.dart';
+import 'package:festapp/appConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 

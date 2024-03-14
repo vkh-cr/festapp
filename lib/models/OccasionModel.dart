@@ -1,4 +1,4 @@
-import 'package:avapp/models/Tb.dart';
+import 'package:festapp/models/Tb.dart';
 
 class OccasionModel{
   int? id;
