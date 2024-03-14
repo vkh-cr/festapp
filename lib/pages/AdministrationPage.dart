@@ -78,7 +78,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: 6);
+    _tabController = TabController(vsync: this, length: 5);
   }
 
   @override
@@ -116,12 +116,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       children: [
                         const Icon(Icons.pin_drop),
                         Padding(padding: const EdgeInsets.all(12), child: const Text("Places").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.punch_clock_rounded),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Exclusivity").tr())
                       ]
                   ),
                   Row(
@@ -418,35 +412,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
                       }),
-                ]).DataGrid(),
-            SingleTableDataGrid<ExclusiveGroupModel>(
-                context,
-                DataService.getAllExclusiveGroups,
-                ExclusiveGroupModel.fromPlutoJson,
-                DataGridFirstColumn.delete,
-                Tb.exclusive_groups.id,
-                columns: [
-                  PlutoColumn(
-                    title: "Id".tr(),
-                    field: Tb.exclusive_groups.id,
-                    type: PlutoColumnType.number(defaultValue: -1),
-                    readOnly: true,
-                    enableEditingMode: false,
-                    width: 50,
-                    renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
-                  ),
-                  PlutoColumn(
-                      title: "Name".tr(),
-                      field: Tb.exclusive_groups.title,
-                      type: PlutoColumnType.text(),
-                      width: 300
-                  ),
-                  PlutoColumn(
-                      title: "Events".tr(),
-                      field: ExclusiveGroupModel.eventsColumn,
-                      type: PlutoColumnType.text(),
-                      width: 500
-                  ),
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
                 context,

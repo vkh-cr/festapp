@@ -206,9 +206,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                      height: 112,
-                      semanticsLabel: 'Festapp logo',
-                      'assets/icons/festapplogo.svg',
+                      height: 72,
+                      semanticsLabel: 'CSA logo',
+                      'assets/icons/LOGO CSA APP.svg',
                     ),
                   ),
                   const Spacer(),
@@ -288,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           )),
                       child: MainPageButton(
                         onPressed: _newsPressed,
-                        backgroundColor: AppConfig.color3,
+                        backgroundColor: AppConfig.color2,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
@@ -300,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _mapPressed,
-                      backgroundColor: AppConfig.color2,
+                      backgroundColor: AppConfig.color3,
                       child: const Icon(Icons.map),
                     ),
                     Text("Map".tr()),

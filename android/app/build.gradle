@@ -34,7 +34,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "festapp.festapp"
+    namespace "festapp.aksmcz"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
@@ -52,7 +52,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "festapp.festapp"
+        applicationId "festapp.aksmcz"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 23
