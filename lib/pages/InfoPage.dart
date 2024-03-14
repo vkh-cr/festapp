@@ -1,3 +1,4 @@
+import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataExtensions.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/models/InformationModel.dart';
@@ -57,6 +58,7 @@ class _InfoPageState extends State<InfoPage> {
               children:
                 _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
+                    backgroundColor: AppConfig.backgroundColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
                         title: Text(item.title),

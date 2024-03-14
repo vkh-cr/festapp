@@ -1,6 +1,7 @@
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/router.dart';
 import 'package:festapp/services/NavigationHelper.dart';
+import 'package:festapp/services/NavigationService.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:festapp/appConfig.dart';
@@ -130,7 +131,7 @@ class _NewsPageState extends State<NewsPage> {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DataService.updateNewsMessage(message);
-                              context.pushReplacement(NewsPage.ROUTE);
+                              RouterService.pushReplacement(context, NewsPage.ROUTE);
                             }
                           });
                         }
