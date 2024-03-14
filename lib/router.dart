@@ -30,9 +30,14 @@ class RouterService{
     return context.push(RouterService.getCurrentLink()+location, extra: extra);
   }
 
-  static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
+  static void pushReplacementFull<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
     return context.pushReplacement("/$location", extra: extra);
+  }
+
+  static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
+  {
+    return context.pushReplacement(RouterService.getCurrentLink()+location, extra: extra);
   }
 
   static final router = GoRouter(
@@ -131,7 +136,7 @@ class RouterService{
 
     if(userOccasion.link!=RouterService.currentOccasionLink && userOccasion.isAvailable())
     {
-      RouterService.pushReplacement(context, userOccasion.link!);
+      RouterService.pushReplacementFull(context, userOccasion.link!);
       canContinue = false;
     }
     else if(userOccasion.isAccessDenied())
