@@ -1,3 +1,4 @@
+import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/pages/AdministrationPage.dart';
@@ -31,12 +32,12 @@ class RouterService{
 
   static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
-    return context.pushReplacement("/"+location, extra: extra);
+    return context.pushReplacement("/$location", extra: extra);
   }
 
   static final router = GoRouter(
     navigatorKey: NavigationService.navigatorKey,
-    initialLocation: "/",
+    initialLocation: "/${AppConfig.defaultLink}",
     routes: <GoRoute>[
       GoRoute(
         path: "/",
