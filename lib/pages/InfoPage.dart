@@ -1,9 +1,10 @@
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataExtensions.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/InformationModel.dart';
 import 'package:festapp/data/DataService.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -67,7 +68,7 @@ class _InfoPageState extends State<InfoPage> {
                     body: Column(
                       children: [
                         Visibility(
-                            visible: DataService.isEditor(),
+                            visible: RightsHelper.isEditor(),
                             child: ElevatedButton(
                                 onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
                                   if(value != null)

@@ -10,7 +10,7 @@ import 'package:festapp/pages/NewsPage.dart';
 import 'package:festapp/pages/SongPage.dart';
 import 'package:festapp/pages/TimetablePage.dart';
 import 'package:festapp/pages/UserPage.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/NotificationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/tests/DataServiceTests.dart';
@@ -385,8 +385,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     {
       return;
     }
+    //DataServiceTests.test_update_user();
+    //await DataService.ImportFromSingleToMultipleEventType();
     loadOfflineData();
-
+    DataServiceTests.test_has_event_allowed_role();
     if (DataService.isLoggedIn()) {
       DataService.getCurrentUserInfo()
           .then((value) => userName = value.name!);

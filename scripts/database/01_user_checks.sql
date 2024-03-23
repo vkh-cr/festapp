@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_is_editor_on_occasion(oc int) RETURNS bool
+CREATE OR REPLACE FUNCTION get_is_editor_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
     AS $$
@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION get_is_editor_on_occasion(oc int) RETURNS bool
     occasion = oc), false)
 $$;
 
-CREATE OR REPLACE FUNCTION get_is_approver_on_occasion(oc int) RETURNS bool
+CREATE OR REPLACE FUNCTION get_is_approver_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
     AS $$
@@ -26,7 +26,7 @@ CREATE OR REPLACE FUNCTION get_is_approver_on_occasion(oc int) RETURNS bool
     occasion = oc), false)
 $$;
 
-CREATE OR REPLACE FUNCTION get_is_manager_on_occasion(oc int) RETURNS bool
+CREATE OR REPLACE FUNCTION get_is_manager_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
     AS $$
@@ -40,7 +40,7 @@ CREATE OR REPLACE FUNCTION get_is_manager_on_occasion(oc int) RETURNS bool
     occasion = oc), false)
 $$;
 
-CREATE OR REPLACE FUNCTION get_is_approved_on_occasion(oc int) RETURNS bool
+CREATE OR REPLACE FUNCTION get_is_approved_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
     AS $$
@@ -54,7 +54,7 @@ CREATE OR REPLACE FUNCTION get_is_approved_on_occasion(oc int) RETURNS bool
     occasion = oc), false)
 $$;
 
-CREATE OR REPLACE FUNCTION get_exists_on_occasion(oc int) RETURNS bool
+CREATE OR REPLACE FUNCTION get_exists_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER
     AS $$
@@ -65,5 +65,19 @@ CREATE OR REPLACE FUNCTION get_exists_on_occasion(oc int) RETURNS bool
     occasion_users
   where
     "user" = auth.uid() and
+    occasion = oc)
+$$;
+
+CREATE OR REPLACE FUNCTION get_exists_on_occasion_user(usr uuid, oc bigint) RETURNS bool
+    LANGUAGE "sql" STABLE
+    SECURITY DEFINER
+    AS $$
+  select exists(
+  select
+    1
+  from
+    occasion_users
+  where
+    "user" = usr and
     occasion = oc)
 $$;

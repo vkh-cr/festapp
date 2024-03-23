@@ -1,7 +1,9 @@
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/dataGrids/DataGridAction.dart';
 import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:festapp/models/ExclusiveGroupModel.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
@@ -9,7 +11,7 @@ import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/pages/MapPage.dart';
 import 'package:festapp/dataGrids/DataGridHelper.dart';
 import 'package:festapp/data/DataService.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/MailerSendHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
 import 'package:festapp/services/NavigationHelper.dart';
@@ -43,7 +45,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    if(!DataService.isEditor())
+    if(!(RightsHelper.currentUserOccasion?.isEditor??false))
     {
       NavigationHelper.goBackOrHome(context);
       return;
@@ -345,6 +347,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       type: PlutoColumnType.text(),
                       width: 300
                   ),
+                  PlutoColumn(
+                      title: "Roles".tr(),
+                      field: Tb.event_roles.role,
+                      type: PlutoColumnType.text(),
+                      width: 100
+                  ),
                 ]).DataGrid(),
             SingleTableDataGrid<PlaceModel>(
                 context,
@@ -603,107 +611,125 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         );
                       }),
                 ]).DataGrid(),
-            SingleTableDataGrid<UserInfoModel>(
+            SingleTableDataGrid<OccasionUserModel>(
                 context,
-                DataService.getUsers,
-                UserInfoModel.fromPlutoJson,
+                DataService.getOccasionUsers,
+                OccasionUserModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
-                Tb.user_info.id,
-                actionsExtended: DataGridExtendedActions(areAllActionsEnabled: DataService.isAdmin),
+                Tb.occasion_users.user,
+                actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
-                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: DataService.isAdmin),
-                  DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: DataService.isAdmin),
-                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: DataService.isAdmin),
+                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
                 ],
                 columns: [
                   PlutoColumn(
                       title: "Id".tr(),
-                      field: Tb.user_info.id,
+                      field: Tb.occasion_users.user,
                       type: PlutoColumnType.text(),
                       readOnly: true,
                       width: 50),
                   PlutoColumn(
                       title: "E-mail".tr(),
-                      enableEditingMode: DataService.isAdmin(),
-                      field: Tb.user_info.email_readonly,
+                      enableEditingMode: false,
+                      field: Tb.occasion_users.data_email,
                       type: PlutoColumnType.text(),
                       checkReadOnly: (row, cell) {
-                        final id = row.cells[Tb.user_info.id]?.value as String?;
+                        final id = row.cells[Tb.occasion_users.user]?.value as String?;
                         return id != null && id.isNotEmpty;
                       },
                       width: 200
                   ),
                   PlutoColumn(
                     title: "Name".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.name,
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.user_info_public.name,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Surname".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.surname,
-                    type: PlutoColumnType.text(),
-                    width: 200,
-                  ),
-                  PlutoColumn(
-                    title: "Accommodation".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.accommodation,
-                    type: PlutoColumnType.text(),
-                    readOnly: false,
-                    width: 150,
-                  ),
-                  PlutoColumn(
-                    title: "Phone".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.phone,
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.user_info_public.surname,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Sex".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.sex,
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.user_info_public.sex,
                     type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
                     formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
                     applyFormatterInEditing: true,
                     width: 100,
                   ),
                   PlutoColumn(
+                    title: "Accommodation".tr(),
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.occasion_users.data_accommodation,
+                    type: PlutoColumnType.text(),
+                    readOnly: false,
+                    width: 150,
+                  ),
+                  PlutoColumn(
+                    title: "Phone".tr(),
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.occasion_users.data_phone,
+                    type: PlutoColumnType.text(),
+                    width: 200,
+                  ),
+                  PlutoColumn(
                     title: "Birthday".tr(),
-                    enableEditingMode: DataService.isAdmin(),
-                    field: Tb.user_info.birth_date,
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    field: Tb.occasion_users.data_birthDate,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
-                    title: "Admin".tr(),
-                    field: Tb.user_info.is_admin_readonly,
-                    type: PlutoColumnType.select([]),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_admin_readonly, DataService.isAdmin),
-                  ),
-                  PlutoColumn(
-                    title: "Editor".tr(),
-                    field: Tb.user_info.is_editor_readonly,
-                    type: PlutoColumnType.select([]),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.user_info.is_editor_readonly, DataService.isAdmin),
-                  ),
-                  PlutoColumn(
                     title: "Role".tr(),
-                    enableEditingMode: DataService.isAdmin(),
+                    enableEditingMode: RightsHelper.canUpdateUsers(),
                     field: Tb.user_info.role,
                     type: PlutoColumnType.text(),
                     width: 100,
-                  )
+                  ),
+                  PlutoColumn(
+                    title: "Manager".tr(),
+                    field: Tb.occasion_users.is_manager,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_manager, RightsHelper.canUpdateUsers),
+                  ),
+                  PlutoColumn(
+                    title: "Editor".tr(),
+                    field: Tb.occasion_users.is_editor,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_editor, RightsHelper.canUpdateUsers),
+                  ),
+                  PlutoColumn(
+                    title: "Approver".tr(),
+                    field: Tb.occasion_users.is_approver,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approver, RightsHelper.canUpdateUsers),
+                  ),
+                  PlutoColumn(
+                    title: "Approved".tr(),
+                    field: Tb.occasion_users.is_approved,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approved, RightsHelper.canUpdateUsers),
+                  ),
                 ]).DataGrid(),
           ]
         ),
