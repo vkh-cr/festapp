@@ -1,5 +1,3 @@
---alter table public.news
---add column updated_at timestamp with time zone not null default now();
 --enable moddatetime extension in supabase
 create trigger handle_updated_at before update on public.events
   for each row execute procedure moddatetime (updated_at);
