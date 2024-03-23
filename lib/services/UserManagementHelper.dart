@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/data/DataService.dart';
@@ -33,13 +34,13 @@ class UserManagementHelper{
       return;
     }
 
-    var existingUsers = await DataService.getUsers();
+    var existingUsers = await DataService.getOccasionUsers();
 
     List<Map<String, dynamic>> toBeCreated = [];
     List<Map<String, dynamic>> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[Tb.user_info.email_readonly]!.toLowerCase());
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email]!.toLowerCase() == u[Tb.user_info.email_readonly]!.toLowerCase());
       if(existing == null) {
         toBeCreated.add(u);
         continue;
@@ -48,7 +49,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u[Tb.user_info.id] = existing.id;
+        u[Tb.user_info.id] = existing.user;
         toBeUpdated.add(u);
       }
     }
@@ -85,10 +86,10 @@ class UserManagementHelper{
       }
     }
 
-    List<UserInfoModel> toBeDeleted = [];
+    List<OccasionUserModel> toBeDeleted = [];
     for(var u in deleteUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u[Tb.user_info.email_readonly]);
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email] == u[Tb.user_info.email_readonly]);
       var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[Tb.user_info.email_readonly] == u[Tb.user_info.email_readonly]);
 
       if(existing != null && duplicated == null) {
@@ -106,7 +107,7 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.id!);
+          await DataService.deleteUser(existing.user!);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }

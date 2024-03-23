@@ -1,4 +1,5 @@
 import 'package:festapp/models/PlaceModel.dart';
+import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
@@ -78,18 +79,23 @@ class UserInfoModel extends IPlutoRowModel {
     return UserInfoModel(
       id: json[idColumn],
       //todo remove backward compatibility
-      email: json[emailReadonlyColumn]??json["email"],
+      email: json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json[emailReadonlyColumn]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
+      //todo remove
       phone: json[phoneColumn],
+      //todo remove
       role: json[roleColumn],
+      //todo remove
       accommodation: json[accommodationColumn],
       place: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
       userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
       sex: json[sexColumn],
+      //todo remove
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       //todo remove backward compatibility
       isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"],
+      //todo remove backward compatibility
       isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"],
     );
   }
@@ -147,6 +153,7 @@ class UserInfoModel extends IPlutoRowModel {
     birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
     isAdminReadOnlyColumn: isAdmin,
     isEditorReadOnlyColumn: isEditor,
+    Tb.user_info.data: {Tb.occasion_users.data_email: email}
   };
 
   @override

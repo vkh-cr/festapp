@@ -1,6 +1,5 @@
 import 'package:festapp/pages/NewsPage.dart';
-import 'package:festapp/router.dart';
-import 'package:go_router/go_router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:festapp/appConfig.dart';
 import 'package:flutter/foundation.dart';

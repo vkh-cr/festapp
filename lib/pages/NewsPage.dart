@@ -1,7 +1,7 @@
 import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/services/NavigationHelper.dart';
-import 'package:festapp/services/NavigationService.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:festapp/appConfig.dart';
@@ -10,7 +10,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsModel.dart';
 import '../data/DataService.dart';
@@ -117,7 +116,7 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                     )),
                   Visibility(
-                    visible: DataService.isEditor(),
+                    visible: RightsHelper.isEditor(),
                     child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
                         if(choice == ContextMenuChoice.delete)
@@ -157,7 +156,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: DataService.isEditor(),
+        visible: RightsHelper.isEditor(),
         child: SpeedDial(
           direction: SpeedDialDirection.up,
           spaceBetweenChildren: 20,

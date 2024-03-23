@@ -16,9 +16,13 @@ class Tb {
   static PlacesTb places = const PlacesTb();
   static UserGroupsTb user_groups = const UserGroupsTb();
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
+  //todo delete
   static NotificationRecordsTb notification_records = const NotificationRecordsTb();
+  static LogNotificationsTb log_notifications = const LogNotificationsTb();
   static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
   static GlobalSettingsTb global_settings = const GlobalSettingsTb();
+  static EventRolesTb event_roles = const EventRolesTb();
+  static RoleInfoTb role_info = const RoleInfoTb();
 }
 class OccasionsTb{
   const OccasionsTb();
@@ -44,12 +48,22 @@ class OccasionUsersTb{
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";
   String get is_approver => "is_approver";
+  String get role => "role";
   String get data => "data";
+  String get data_email => "email";
+  String get data_name => "name";
+  String get data_surname => "surname";
+  String get data_sex => "sex";
+  String get data_phone => "phone";
+  String get data_accommodation => "accommodation";
+  String get data_birthDate => "birthDate";
+  String get data_isInvited => "is_invited";
 }
 class NewsTb{
   const NewsTb();
   String get table => "news";
   String get id => "id";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get created_by => "created_by";
@@ -79,6 +93,7 @@ class UserInfoTb{
   String get birth_date => "birth_date";
   String get is_editor_readonly => "is_editor_readonly";
   String get is_admin_readonly => "is_admin_readonly";
+  String get data => "data";
 }
 class UserInfoPublicTb{
   const UserInfoPublicTb();
@@ -92,10 +107,24 @@ class UserNewsViewsTb{
   const UserNewsViewsTb();
   String get table => "user_news_views";
 }
+class RoleInfoTb{
+  const RoleInfoTb();
+  String get table => "role_info";
+  String get id => "id";
+  String get title => "title";
+  String get occasion => "occasion";
+}
+class EventRolesTb{
+  const EventRolesTb();
+  String get table => "event_roles";
+  String get event => "event";
+  String get role => "role";
+}
 class InformationTb{
   const InformationTb();
   String get table => "information";
   String get id => "id";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get is_hidden => "is_hidden";
@@ -169,6 +198,7 @@ class UserGroupInfoTb{
   const UserGroupInfoTb();
   String get table => "user_group_info";
   String get id => "id";
+  String get occasion => "occasion";
   String get title => "title";
   String get leader => "leader";
   String get place => "place";
@@ -180,10 +210,21 @@ class UserGroupsTb{
   String get user => "user";
   String get group => "group";
 }
+//todo delete
 class NotificationRecordsTb{
   const NotificationRecordsTb();
   String get table => "notification_records";
   String get id => "id";
+  String get created_at => "created_at";
+  String get user_id => "user_id";
+  String get heading => "heading";
+  String get content => "content";
+}
+class LogNotificationsTb{
+  const LogNotificationsTb();
+  String get table => "log_notifications";
+  String get id => "id";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get user_id => "user_id";
   String get heading => "heading";

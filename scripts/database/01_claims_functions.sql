@@ -111,15 +111,3 @@ NOTIFY pgrst, 'reload schema';
 -- DROP FUNCTION is_claims_admin;
 -- NOTIFY pgrst, 'reload schema';
 
-set name "test"
-set surname "test"
-set email "test@test.com"
-set password "test"
-
-user_id := (select create_user(:email, :password));
-
-INSERT INTO public.user_info
-  (id, email_readonly, name, surname)
-VALUES
-  (:user_id, :email, :name, :surname);
-

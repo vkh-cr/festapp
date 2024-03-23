@@ -1,8 +1,9 @@
 import 'dart:collection';
 
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
-import 'package:festapp/models/OccasionModel.dart';
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
 import 'package:festapp/models/UserInfoModel.dart';
@@ -138,20 +139,6 @@ class DataService {
     return _currentUser!;
   }
 
-  static bool isAdmin() {
-    var containsAdminField = _supabase.auth.currentUser?.appMetadata.containsKey("is_admin");
-    return containsAdminField != null && _supabase.auth.currentUser!.appMetadata["is_admin"] == true;
-  }
-
-  static bool isEditor() {
-    var containsAdminField = _supabase.auth.currentUser?.appMetadata.containsKey("is_editor");
-    return containsAdminField != null && _supabase.auth.currentUser!.appMetadata["is_editor"] == true;
-  }
-
-  static bool isReceptionAdmin() {
-    return _currentUser != null && _currentUser!.isEditor!;
-  }
-
   static Future<String> createUser(String email) async {
     var data = await (await GetSupabaseAdminClient()).auth.admin.createUser(AdminUserAttributes(email: email, emailConfirm: true));
     return data.user!.id;
@@ -166,6 +153,24 @@ class DataService {
     }
   }
 
+  static Future<void> deleteOccasionUser(OccasionUserModel occasionUserModel) async {
+    await _supabase
+        .from(Tb.user_groups.table)
+        .delete()
+        .eq(Tb.user_groups.user, occasionUserModel.user)
+        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
+    await _supabase
+        .from(Tb.event_users.table)
+        .delete()
+        .eq(Tb.event_users.user, occasionUserModel.user)
+        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
+    await _supabase
+        .from(Tb.event_users_saved.table)
+        .delete()
+        .eq(Tb.event_users_saved.user, occasionUserModel.user)
+        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
+  }
+  
   static Future<void> deleteUser(String uuid) async {
     if(!AppConfig.isServiceRoleSafety)
     {
@@ -278,9 +283,9 @@ class DataService {
     return PlaceModel.fromJson(data[Tb.places.table]);
   }
 
-  static Future<List<UserInfoModel>> getUsers() async {
-    var data = await _supabase.from(Tb.user_info.table).select();
-    return List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
+  static Future<List<OccasionUserModel>> getOccasionUsers() async {
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion);
+    return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x)));
   }
 
   static Future<UserInfoModel> getUser(String id) async {
@@ -310,12 +315,41 @@ class DataService {
     await _supabase.from(Tb.user_info.table).upsert(json);
   }
 
+  static updateOccasionUser(OccasionUserModel data) async {
+      //todo change email individually
+      if(!RightsHelper.canUpdateUsers())
+      {
+        await refreshSession();
+        if(!RightsHelper.canUpdateUsers())
+        {
+          var errorText = "Elevated permission is required. Changes to user ${data.data?[Tb.occasion_users.data_email]} could not be saved.";
+          throw Exception(errorText);
+        }
+      }
+
+      data.user ??= await UserManagementHelper.unsafeCreateNewUser(data.data?[Tb.occasion_users.data_email]);
+      await updateUserInfo(data);
+      await _supabase.from(Tb.occasion_users.table).upsert(
+        data.toUpdateJson()
+      );
+  }
+
+  static Future<void> updateUserInfo(OccasionUserModel data) async {
+    await _supabase.rpc("update_user",
+        params:
+        {
+          "usr": data.user,
+          "oc": RightsHelper.currentOccasion,
+          "data": data.data
+        });
+  }
+  
   static updateUser(UserInfoModel data) async {
     //todo change email individually
-    if(!DataService.isAdmin())
+    if(!RightsHelper.isAdmin())
     {
       await refreshSession();
-      if(!DataService.isAdmin())
+      if(!RightsHelper.isAdmin())
       {
         var errorText = "Elevated permission is required. Changes to user ${data.email} could not be saved.";
         throw Exception(errorText);
@@ -612,7 +646,8 @@ class DataService {
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})")
+        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
+        "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role})")
         .order(Tb.events.start_time, ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -645,10 +680,10 @@ class DataService {
         .select(
         "${Tb.user_group_info.id},"
         "${Tb.user_group_info.title},"
-        "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}),"
+        "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}),"
         "${Tb.places.table}(*),"
         "${Tb.user_group_info.description},"
-        "${Tb.user_groups.table}(${Tb.user_info.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}, ${Tb.user_info.email_readonly}))");
+        "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))");
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
@@ -681,7 +716,7 @@ class DataService {
   }
 
   static updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(isAdmin() || model.leader!.id == currentUserId()))
+    if(!(RightsHelper.isEditor() || model.leader!.id == currentUserId()))
     {
       throw Exception("Must be leader or admin to change the group.");
     }
@@ -868,7 +903,7 @@ class DataService {
     .from(Tb.user_group_info.table)
     .select("${Tb.user_group_info.id},"
         "${Tb.user_group_info.title},"
-        "${Tb.user_info.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}),"
+        "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}),"
         "${Tb.places.table}(${Tb.places.id})")
     .eq(Tb.user_group_info.leader, currentUserId())
     .limit(1)
@@ -1030,7 +1065,7 @@ class DataService {
     ensureUserIsLoggedIn();
     var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
 
-    if(!isAdmin() && DateTime.now().isAfter(event.endTime))
+    if(!RightsHelper.canSignInOutUsersFromEvents() && DateTime.now().isAfter(event.endTime))
     {
       ToastHelper.Show("It is not possible to sign out from an event that has already taken place.", severity: ToastSeverity.NotOk);
       return;
@@ -1080,8 +1115,7 @@ class DataService {
     return EventModel.fromJson(eventData);
   }
 
-  static updateEventAndParents(EventModel event) async {
-
+  static updateEventFromDataGrid(EventModel event) async {
     var updatedEvent = await updateEvent(event);
     await removeEventFromEventGroups(updatedEvent);
 
@@ -1092,8 +1126,22 @@ class DataService {
     }
     await _supabase
         .from(Tb.event_groups.table)
-        .insert(insert)
-        .select();
+        .insert(insert);
+
+    var insertRoles = [];
+    for(var eParent in event.eventRolesIds!)
+    {
+      insertRoles.add({Tb.event_roles.event:updatedEvent.id, Tb.event_roles.role:eParent});
+    }
+
+    await _supabase
+        .from(Tb.event_roles.table)
+        .delete()
+        .eq(Tb.event_roles.event, updatedEvent.id);
+
+    await _supabase
+        .from(Tb.event_roles.table)
+        .insert(insertRoles);
   }
 
   static Future<void> removeEventFromSaved(EventModel updatedEvent) async {
@@ -1147,11 +1195,10 @@ class DataService {
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
-    var data = await _supabase.from(Tb.user_info.table)
-        .select([Tb.user_info.id,
-                Tb.user_info.email_readonly,
-                Tb.user_info.name,
-                Tb.user_info.surname].join(", "));
+    var data = await _supabase.from(Tb.user_info_public.table)
+        .select([Tb.user_info_public.id,
+                Tb.user_info_public.name,
+                Tb.user_info_public.surname].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
   }
@@ -1343,7 +1390,7 @@ class DataService {
   }
 
   static Future<void> saveLocation(int placeId, double lat, double lng) async {
-    if(!(DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
+    if(!(RightsHelper.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
       throw Exception("You cannot change this place.");
     }
@@ -1468,7 +1515,47 @@ class DataService {
         params: {"link_txt": link});
     return OccasionLinkModel.fromJson(data);
   }
+  static Future<bool> hasEventAllowedRole(int eventId) async {
+    var data = await _supabase.rpc("get_is_event_allowed",
+        params: {"ev": eventId});
+    return data;
+  }
 
+  static Future<void> ImportFromSingleToMultipleEventType() async {
+    var data = await _supabase.from(Tb.user_info.table).select();
+    var allUsers = List<UserInfoModel>.from(data.map((x) => UserInfoModel.fromJson(x)));
+    List<OccasionUserModel> insertOu = [];
+    var ou = await getOccasionUsers();
+    for(var userInfo in allUsers){
+      if(!ou.any((element) => element.user==userInfo.id))
+      {
+        insertOu.add(
+            OccasionUserModel(
+              user: userInfo.id,
+              isEditor: userInfo.isEditor!,
+              isManager: false,
+              isApprover: false,
+              isApproved: false,
+              occasion: 1,
+              data:{
+                Tb.occasion_users.data_email: userInfo.email,
+                Tb.occasion_users.data_sex: userInfo.sex,
+                Tb.occasion_users.data_name: userInfo.name,
+                Tb.occasion_users.data_surname: userInfo.surname,
+                Tb.occasion_users.data_phone: userInfo.phone,
+                Tb.occasion_users.data_accommodation: userInfo.accommodation,
+                Tb.occasion_users.data_birthDate: userInfo.birthDate?.toIso8601String(),
+                Tb.occasion_users.data_isInvited: true,
+              }
+            )
+        );
+      }
+    }
+    for(var usr in insertOu){
+      await _supabase.from(Tb.occasion_users.table).insert(usr.toUpdateJson());
+    }
+
+  }
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
 //   List<ParticipantModel> toReturn = [];
 //   var result = await _supabase
