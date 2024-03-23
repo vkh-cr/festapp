@@ -91,7 +91,7 @@ class OccasionUserModel extends IPlutoRowModel {
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-      role: int.parse(json[Tb.occasion_users.role]),
+      role: int.tryParse(json[Tb.occasion_users.role]),
       data: {
         Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? null : json[Tb.occasion_users.data_name]?.trim(),
         Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? null : json[Tb.occasion_users.data_surname]?.trim(),
