@@ -3,8 +3,8 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"index.html": "ffd91822a2221700b9f11a1c67633e32",
-"/": "ffd91822a2221700b9f11a1c67633e32",
+const RESOURCES = {"index.html": "c499c259ff0f994a256e4985fd493360",
+"/": "c499c259ff0f994a256e4985fd493360",
 "favicon-16x16.png": "517bb576ed98bfc4aa542bea1fc815e6",
 "canvaskit/canvaskit.js": "c86fbd9e7b17accae76e5ad116583dc4",
 "canvaskit/skwasm.js": "445e9e400085faead4493be2224d95aa",
@@ -46,10 +46,10 @@ const RESOURCES = {"index.html": "ffd91822a2221700b9f11a1c67633e32",
 "assets/assets/translations/pl.json": "25e7419b3cebd11e5aa9e464755a220e",
 "assets/assets/translations/sk.json": "09a5e941724dc26cec3f5304aa70b96c",
 "assets/assets/translations/de.json": "aa391f3310ee7af216fb75b24e99b225",
-"assets/assets/translations/en.json": "9817ad8995dbf1a6750a590262c2ca36",
+"assets/assets/translations/en.json": "67d991769ebf591d1bfefe95bbb5bff9",
 "assets/assets/translations/cs.json": "95c902788185098037469afe63527ac1",
 "assets/AssetManifest.bin": "5d3265dbf6c48c8e2843ee127faf4257",
-"assets/NOTICES": "4274efd2f8dedc807b218cf213255981",
+"assets/NOTICES": "04bcc4325caa95d39fbdeb2da0d46fe3",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "assets/packages/fluttertoast/assets/toastify.js": "18cfdd77033aa55d215e8a78c090ba89",
 "assets/packages/fluttertoast/assets/toastify.css": "910ddaaf9712a0b0392cf7975a3b7fb5",
@@ -79,7 +79,7 @@ const RESOURCES = {"index.html": "ffd91822a2221700b9f11a1c67633e32",
 "android-chrome-192x192.png": "431a129b17ffe4e91aa35a3eaad21eb8",
 "flutter.js": "c71a09214cb6f5f8996a531350400a9a",
 "site.webmanifest": "b9aa277fcfc34c31db6c7a7ea3469b8c",
-"main.dart.js": "cb188115ff3ad4bc5317f2e5752ede12"};
+"main.dart.js": "65e1871343d420be9e0507a5e4cfdc6f"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",

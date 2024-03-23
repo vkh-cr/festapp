@@ -154,5 +154,9 @@
   "There will appear your events.": "There will appear your events.",
   "Type": "Type",
   "Songs": "Songs",
+  "Manager": "Manager",
+  "Approver": "Approver",
+  "Approved": "Approved",
+  "Roles": "Roles",
   "_":"_"
 }
