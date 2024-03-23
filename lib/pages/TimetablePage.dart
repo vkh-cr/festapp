@@ -3,7 +3,7 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/pages/EventPage.dart';
 import 'package:festapp/pages/MySchedulePage.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/widgets/Timetable.dart';
 import 'package:collection/collection.dart';

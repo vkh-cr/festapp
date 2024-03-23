@@ -1,9 +1,10 @@
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/pages/AdministrationPage.dart';
 import 'package:festapp/pages/LoginPage.dart';
 import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
@@ -69,7 +70,7 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 Visibility(
-                  visible: DataService.isEditor(),
+                  visible: RightsHelper.canSeeAdmin(),
                   child: Container(
                     height: 50,
                     width: 250,

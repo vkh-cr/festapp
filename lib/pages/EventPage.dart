@@ -1,8 +1,9 @@
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/pages/HtmlEditorPage.dart';
 import 'package:festapp/data/DataService.dart';
-import 'package:festapp/router.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/DialogHelper.dart';
 import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/widgets/ButtonsHelper.dart';
@@ -85,7 +86,7 @@ class _EventPageState extends State<EventPage> {
                             onPressed: () => signOut(),
                             child: const Text("Sign out").tr())),
                     Visibility(
-                      visible: showLoginLogoutButton() && (DataService.isEditor()),
+                      visible: showLoginLogoutButton() && (RightsHelper.isEditor()),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: ElevatedButton(
@@ -106,7 +107,7 @@ class _EventPageState extends State<EventPage> {
                         ),
                       ),
                       Visibility(
-                          visible: DataService.isEditor() ||
+                          visible: RightsHelper.isEditor() ||
                               (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
                               onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
@@ -167,7 +168,7 @@ class _EventPageState extends State<EventPage> {
                       child: Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: SingleChildScrollView(child: ScheduleTimeline(events: _childDots, onEventPressed: _eventPressed, nodePosition: 0.3)))),
                   Visibility(
                       visible:
-                          DataService.isEditor() && _event?.maxParticipants != null,
+                          RightsHelper.isEditor() && _event?.maxParticipants != null,
                       child: ExpansionTile(
                         title:  Row(children: [IconButton(onPressed: () async
                         {

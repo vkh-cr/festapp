@@ -1,5 +1,6 @@
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/pages/AdministrationPage.dart';
 import 'package:festapp/pages/EventPage.dart';
@@ -23,6 +24,7 @@ class RouterService{
   static const LINK = "link";
   static const LINK_PATH = "/:$LINK";
   static String currentOccasionLink = "";
+
   static String getCurrentLink() => "/$currentOccasionLink/";
 
   static Future<T?> navigate<T extends Object?>(BuildContext context, String location, {Object? extra})
@@ -126,25 +128,25 @@ class RouterService{
             ),
           ]
       ),
-
     ],
   );
 
   static Future<bool> checkOccasionLinkAndRedirect(BuildContext context) async {
     bool canContinue = true;
-    var userOccasion = await DataService.checkOccasionLink(RouterService.currentOccasionLink);
-
-    if(userOccasion.link!=RouterService.currentOccasionLink && userOccasion.isAvailable())
+    var checkedObject = await DataService.checkOccasionLink(RouterService.currentOccasionLink);
+    RightsHelper.currentUserOccasion = checkedObject.user;
+    RightsHelper.currentOccasion = checkedObject.occasionId;
+    if(checkedObject.link!=RouterService.currentOccasionLink && checkedObject.isAvailable())
     {
-      RouterService.pushReplacementFull(context, userOccasion.link!);
+      RouterService.pushReplacementFull(context, checkedObject.link!);
       canContinue = false;
     }
-    else if(userOccasion.isAccessDenied())
+    else if(checkedObject.isAccessDenied())
     {
       ToastHelper.Show("You cannot access this occasion.");
       canContinue = false;
     }
-    else if(userOccasion.isNotFound())
+    else if(checkedObject.isNotFound())
     {
       ToastHelper.Show("The occasion has not been found.");
       canContinue = false;

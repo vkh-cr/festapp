@@ -157,39 +157,3 @@ BEGIN
   RETURN (SELECT au.last_sign_in_at FROM auth.users au WHERE au.id = user_id);
 END;
 $$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION check_occasion_link(link_txt text) RETURNS jsonb
-LANGUAGE plpgsql STABLE
-SECURITY DEFINER
-AS $$
-DECLARE
-    link_exists INT;
-    is_open_bool BOOLEAN;
-    occasion_user occasion_users%rowtype;
-    occasion_link TEXT;
-BEGIN
-    IF link_txt = '' THEN
-        SELECT link INTO link_txt FROM occasions WHERE occasions.is_open = true AND occasions.is_hidden = false LIMIT 1;
-        --RETURN json_build_object('code', 404, 'link', occasion_link);
-    END IF;
-    SELECT COUNT(*) INTO link_exists FROM occasions WHERE occasions.link = link_txt AND occasions.is_hidden = false;
-    IF link_exists = 0 THEN
-        RETURN json_build_object('code', 404);
-    END IF;
-    SELECT is_open INTO is_open_bool FROM occasions WHERE occasions.link = link_txt;
-    SELECT * INTO occasion_user FROM occasion_users WHERE occasion = (SELECT id FROM occasions WHERE occasions.link = link_txt) AND "user" = auth.uid();
-    IF is_open_bool = FALSE THEN
-        IF auth.uid() IS NULL THEN
-            RETURN json_build_object('code', 403);
-        END IF;
-        IF occasion_user IS NULL THEN
-            RETURN json_build_object('code', 403);
-        END IF;
-        RETURN json_build_object('code', 200, 'occasion_user', row_to_json(occasion_user)::jsonb);
-    END IF;
-    IF occasion_user IS NULL THEN
-         RETURN json_build_object('code', 200, 'link', link_txt);
-    END IF;
-    RETURN json_build_object('code', 200, 'occasion_user', row_to_json(occasion_user)::jsonb, 'link', link_txt);
-END;
-$$;

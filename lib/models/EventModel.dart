@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/dataGrids/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:festapp/models/Tb.dart';
 import 'package:flutter/material.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -25,6 +26,7 @@ class EventModel extends IPlutoRowModel {
   PlaceModel? place;
   List<EventModel> childEvents = [];
 
+  List<int>? eventRolesIds;
   List<int>? parentEventIds;
   List<int>? childEventIds;
   int? currentParticipants;
@@ -62,6 +64,7 @@ class EventModel extends IPlutoRowModel {
     this.place,
     this.childEventIds,
     this.parentEventIds,
+    this.eventRolesIds,
     required this.splitForMenWomen,
     this.currentParticipants,
     required this.isSignedIn,
@@ -72,6 +75,7 @@ class EventModel extends IPlutoRowModel {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
     List<int>? childEvents;
     List<int>? parentEvents;
+
     if(eventGroups != null)
     {
       for(var e in eventGroups)
@@ -95,6 +99,13 @@ class EventModel extends IPlutoRowModel {
       childEvents.addAll(toAdd.map((e) { return e as int;}));
     }
 
+    List<int>? eventRoles;
+    if(json.containsKey(Tb.event_roles.table)) {
+      eventRoles = [];
+      List<dynamic> toAdd = json[Tb.event_roles.table]??[];
+      eventRoles.addAll(toAdd.map((e) { return e[Tb.event_roles.role] as int;}));
+    }
+
     return EventModel(
       startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
       endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
@@ -112,6 +123,7 @@ class EventModel extends IPlutoRowModel {
       isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
       childEventIds: childEvents,
       parentEventIds: parentEvents,
+      eventRolesIds: eventRoles,
       currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
   );
   }
@@ -185,6 +197,12 @@ class EventModel extends IPlutoRowModel {
       parentEvents = json[parentEventColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
     }
 
+    List<int> eventRoles = [];
+    if(json[Tb.event_roles.role].toString().trim().isNotEmpty)
+    {
+      eventRoles = json[Tb.event_roles.role].toString().split(",").map((e) => int.parse(e.trim())).toList();
+    }
+
     return EventModel(
       startTime: dateFormat.parse(startTimeString),
       endTime: dateFormat.parse(endTimeString),
@@ -197,8 +215,9 @@ class EventModel extends IPlutoRowModel {
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
       parentEventIds: parentEvents,
+      eventRolesIds: eventRoles,
       isSignedIn: false,
-      isGroupEvent: json[isGroupEventColumn] == "true" ? true : false
+      isGroupEvent: json[isGroupEventColumn] == "true" ? true : false,
     );
   }
 
@@ -217,7 +236,8 @@ class EventModel extends IPlutoRowModel {
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouValue : place!.toPlutoSelectString()),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
       isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
-      parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??"")
+      parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
+      Tb.event_roles.role: PlutoCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??"")
     });
   }
 
@@ -235,7 +255,7 @@ class EventModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateEventAndParents(this);
+    await DataService.updateEventFromDataGrid(this);
   }
 
   @override

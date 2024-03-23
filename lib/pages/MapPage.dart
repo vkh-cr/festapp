@@ -1,6 +1,7 @@
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
 import 'package:festapp/services/NavigationHelper.dart';
 import 'package:collection/collection.dart';
@@ -396,7 +397,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
-                visible: DataService.isEditor() ||
+                visible: RightsHelper.isEditor() ||
                     (DataService.isGroupLeader() &&
                         DataService.currentUserGroup()!.place!.id ==
                             widget.marker.place.id),
