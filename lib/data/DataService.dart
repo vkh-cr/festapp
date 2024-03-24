@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionModel.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
@@ -284,6 +285,11 @@ class DataService {
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
     var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x)));
+  }
+
+  static Future<OccasionModel> getOccasion(int id) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, id).maybeSingle();
+    return OccasionModel.fromJson(data);
   }
 
   static Future<UserInfoModel> getUser(String id) async {

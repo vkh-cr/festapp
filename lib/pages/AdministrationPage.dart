@@ -3,6 +3,7 @@ import 'package:festapp/dataGrids/DataGridAction.dart';
 import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:festapp/models/ExclusiveGroupModel.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionModel.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/models/Tb.dart';
@@ -35,6 +36,7 @@ class AdministrationPage extends StatefulWidget {
 }
 
 class _AdministrationPageState extends State<AdministrationPage> with SingleTickerProviderStateMixin {
+  OccasionModel? occasionModel;
   List<String> places = [];
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
@@ -44,7 +46,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    if(!(RightsHelper.currentUserOccasion?.isEditor??false))
+    RightsHelper.ensureAccessProcedure(context);
+    if(!RightsHelper.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
       return;
@@ -53,8 +56,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Future<void> loadData() async {
+    occasionModel = await DataService.getOccasion(RightsHelper.currentOccasion!);
     await loadPlaces();
-
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
 
@@ -246,7 +249,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Start date".tr(),
                     field: EventModel.startDateColumn,
-                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
                     width: 140,
                   ),
                   PlutoColumn(
@@ -258,7 +261,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "End date".tr(),
                     field: EventModel.endDateColumn,
-                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
                     width: 140,
                   ),
                   PlutoColumn(
