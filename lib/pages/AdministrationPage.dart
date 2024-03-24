@@ -632,28 +632,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Accommodation".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
-                    field: Tb.occasion_users.data_accommodation,
-                    type: PlutoColumnType.text(),
-                    readOnly: false,
-                    width: 150,
-                  ),
-                  PlutoColumn(
-                    title: "Phone".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
-                    field: Tb.occasion_users.data_phone,
-                    type: PlutoColumnType.text(),
-                    width: 200,
-                  ),
-                  PlutoColumn(
-                    title: "Birthday".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
-                    field: Tb.occasion_users.data_birthDate,
-                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
-                    width: 140,
-                  ),
-                  PlutoColumn(
                     title: "Role".tr(),
                     enableEditingMode: RightsHelper.canUpdateUsers(),
                     field: Tb.user_info.role,
