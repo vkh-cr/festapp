@@ -25,7 +25,7 @@ class RightsHelper{
   }
 
   static bool canSeeAdmin(){
-    return currentUserOccasion?.isEditor??false || currentUserOccasion!.isManager || isAdmin();
+    return currentUserOccasion?.isEditor??false || (currentUserOccasion?.isManager??false) || isAdmin();
   }
 
   static bool canUpdateUsers() {
