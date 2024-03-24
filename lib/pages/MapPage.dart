@@ -1,9 +1,9 @@
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -72,20 +72,16 @@ class _MapPageState extends State<MapPage> {
 
   final MapController mapController = MapController();
   FlutterMap? _map;
-  late LatLng _mapCenter;
+  LatLng? _mapCenter;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    await RightsHelper.ensureAccessProcedure(context);
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
         : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"],
-            DataService.globalSettingsModel!.defaultMapLocation["lng"]);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+        DataService.globalSettingsModel!.defaultMapLocation["lng"]);
     //reset static values
     selectedMarker = null;
     var placeModel = widget.place;
@@ -182,7 +178,7 @@ class _MapPageState extends State<MapPage> {
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_map != null) {
-      mapController.move(_mapCenter, mapController.camera.zoom);
+      mapController.move(_mapCenter!, mapController.camera.zoom);
     }
     pageTitle = place.title!;
   }
@@ -222,12 +218,12 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: Text(pageTitle),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
       ),
       body: Stack(
         children: [
-          _map = FlutterMap(
+          _mapCenter == null ? const SizedBox.shrink() : _map = FlutterMap(
             mapController: mapController,
             options: MapOptions(
                 interactionOptions: const InteractionOptions(
@@ -239,7 +235,7 @@ class _MapPageState extends State<MapPage> {
                   InteractiveFlag.drag),
                 initialZoom: DataService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
-                initialCenter: _mapCenter,
+                initialCenter: _mapCenter!,
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(

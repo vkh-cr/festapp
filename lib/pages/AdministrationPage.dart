@@ -14,7 +14,6 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/MailerSendHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,7 +46,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     super.didChangeDependencies();
     if(!(RightsHelper.currentUserOccasion?.isEditor??false))
     {
-      NavigationHelper.goBackOrHome(context);
+      RouterService.goBackOrHome(context);
       return;
     }
     loadData();
@@ -92,7 +91,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           appBar: AppBar(
           title: const Text("Admin").tr(),
           leading: BackButton(
-            onPressed: () => NavigationHelper.goBackOrHome(context),
+            onPressed: () => RouterService.goBackOrHome(context),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),

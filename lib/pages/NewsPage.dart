@@ -1,7 +1,6 @@
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/RouterService.dart';
 import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:festapp/appConfig.dart';
@@ -66,7 +65,7 @@ class _NewsPageState extends State<NewsPage> {
       appBar: AppBar(
         title: const Text("News").tr(),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
       ),
       body: Align(

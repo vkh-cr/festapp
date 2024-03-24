@@ -1,4 +1,4 @@
-import 'package:festapp/services/NavigationHelper.dart';
+import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
         title: const Text("Sign in").tr(),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
         actions: [const LanguageButton()],
       ),
@@ -128,7 +128,8 @@ class _LoginPageState extends State<LoginPage> {
     var loggedIn = await DataService.tryAuthUser();
     if(loggedIn)
     {
-      NavigationHelper.goBackOrHome(context);
+      RouterService.checkOccasionLinkAndRedirect(context);
+      RouterService.goBackOrHome(context);
     }
   }
 
