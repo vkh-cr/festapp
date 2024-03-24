@@ -635,7 +635,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       width: 50),
                   PlutoColumn(
                       title: "E-mail".tr(),
-                      enableEditingMode: false,
                       field: Tb.occasion_users.data_email,
                       type: PlutoColumnType.text(),
                       checkReadOnly: (row, cell) {
