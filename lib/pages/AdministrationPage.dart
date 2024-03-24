@@ -205,10 +205,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     applyFormatterInEditing: true,
                     width: 100,
                   ),
-                  PlutoColumn(
-                      title: "Type".tr(),
-                      field: Tb.information.type,
-                      type: PlutoColumnType.text()),
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
                 context,
