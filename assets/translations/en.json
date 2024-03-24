@@ -157,6 +157,7 @@
   "Manager": "Manager",
   "Approver": "Approver",
   "Approved": "Approved",
+  "Password has been changed.": "Password has been changed.",
   "Roles": "Roles",
   "_":"_"
 }

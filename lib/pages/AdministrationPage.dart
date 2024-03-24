@@ -771,22 +771,28 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       return;
     }
 
-    for(var u in users) {
-      var pw = await UserManagementHelper.unsafeChangeUserPassword(u);
-      //await MailerSendHelper.sendPassword(u, pw);
+    try {
+      for(var u in users) {
+        await UserManagementHelper.unsafeChangeUserPassword(u);
+      }
+    } on Exception catch (e) {
+      ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+      return;
     }
+
+    ToastHelper.Show("Password has been changed.".tr());
   }
 
   Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {
-    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    users = users.where((element) => element.id != null).toList();
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
     var allGroups = await DataService.getAllUserGroupInfo();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
     if(chosenGroup == null)
     {
       return;
     }
-    chosenGroup.participants!.addAll(users);
+    chosenGroup.participants!.addAll(users.map((e) => UserInfoModel(id: e.user)));
     await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
 
     for (var value in dataGrid.stateManager.refRows.originalList) {
