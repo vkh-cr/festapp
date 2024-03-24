@@ -675,25 +675,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     enableEditingMode: false,
                     width: 100,
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_editor, RightsHelper.canUpdateUsers),
-                  ),
-                  PlutoColumn(
-                    title: "Approver".tr(),
-                    field: Tb.occasion_users.is_approver,
-                    type: PlutoColumnType.select([]),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approver, RightsHelper.canUpdateUsers),
-                  ),
-                  PlutoColumn(
-                    title: "Approved".tr(),
-                    field: Tb.occasion_users.is_approved,
-                    type: PlutoColumnType.select([]),
-                    applyFormatterInEditing: true,
-                    enableEditingMode: false,
-                    width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approved, RightsHelper.canUpdateUsers),
-                  ),
+                  )
                 ]).DataGrid(),
           ]
         ),
