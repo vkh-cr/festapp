@@ -113,21 +113,19 @@ class DataService {
 
   static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
     GlobalSettingsModel toReturn;
-    var data = await _supabase
-        .from(Tb.global_settings.table)
-        .select()
-        .maybeSingle();
-
-    if(data == null)
-    {
-      await _supabase
-          .from(Tb.global_settings.table)
-          .insert(GlobalSettingsModel.DefaultSettings.toJson());
-        toReturn = GlobalSettingsModel.DefaultSettings;
+    if(RightsHelper.currentOccasion == null) {
+      toReturn =  GlobalSettingsModel.DefaultSettings;
     }
     else{
-      toReturn = GlobalSettingsModel.fromJson(data);
+      var data = await _supabase
+          .from(Tb.occasions.table)
+          .select(Tb.occasions.data)
+          .eq(Tb.occasions.id, RightsHelper.currentOccasion)
+          .single();
+
+      toReturn = GlobalSettingsModel.fromJson(data[Tb.occasions.data]);
     }
+
     globalSettingsModel = toReturn;
     return toReturn;
   }
@@ -1471,10 +1469,6 @@ class DataService {
   }
 
   static Future<void> refreshOfflineData() async {
-
-    var globalSettings = await DataService.loadOrInitGlobalSettings();
-    OfflineDataHelper.saveGlobalSettings(globalSettings);
-
     if(DataService.isLoggedIn()) {
       var userInfo = await getFullUserInfo();
       OfflineDataHelper.saveUserInfo(userInfo);

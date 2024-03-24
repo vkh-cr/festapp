@@ -1,13 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 
 class GlobalSettingsModel {
-  int? id;
   dynamic defaultMapLocation;
   double defaultMapZoom;
   String? tooSoonMessage = "It's too soon!".tr();
-
-  static const String idColumn = "id";
-  static const String jsonColumn = "json";
 
   static const String defaultMapLocationCode = "defaultMapLocation";
   static const String defaultMapZoomCode = "defaultMapZoom";
@@ -16,7 +12,6 @@ class GlobalSettingsModel {
   static const String globalSettingsOffline = "globalSettingsOffline";
 
   GlobalSettingsModel({
-    this.id,
     this.defaultMapLocation,
     required this.tooSoonMessage,
     required this.defaultMapZoom
@@ -24,21 +19,17 @@ class GlobalSettingsModel {
 
   static GlobalSettingsModel fromJson(Map<String, dynamic> json) {
     return GlobalSettingsModel(
-      id: json[idColumn],
-      defaultMapLocation: json[jsonColumn][defaultMapLocationCode]??DefaultSettings.defaultMapLocation,
-      defaultMapZoom: json[jsonColumn][defaultMapZoomCode].toDouble(),
-      tooSoonMessage: json[jsonColumn][tooSoonMessageCode]??DefaultSettings.tooSoonMessage,
+      defaultMapLocation: json[defaultMapLocationCode]??DefaultSettings.defaultMapLocation,
+      defaultMapZoom: json[defaultMapZoomCode].toDouble(),
+      tooSoonMessage: json[tooSoonMessageCode]??DefaultSettings.tooSoonMessage,
     );
   }
 
   Map toJson() =>
   {
-    idColumn: id,
-    jsonColumn: {
-      defaultMapLocationCode: defaultMapLocation,
-      defaultMapZoomCode: defaultMapZoom,
-      tooSoonMessageCode: tooSoonMessage
-    }
+    defaultMapLocationCode: defaultMapLocation,
+    defaultMapZoomCode: defaultMapZoom,
+    tooSoonMessageCode: tooSoonMessage
   };
 
   static const dynamic DefaultPosition =  {
@@ -47,7 +38,6 @@ class GlobalSettingsModel {
   };
 
   static GlobalSettingsModel DefaultSettings = GlobalSettingsModel(
-      id: 1,
       defaultMapLocation: DefaultPosition,
       defaultMapZoom: 17,
       tooSoonMessage: "It's too soon!".tr());

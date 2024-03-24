@@ -4,6 +4,7 @@ import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataExtensions.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/pages/InfoPage.dart';
 import 'package:festapp/pages/MapPage.dart';
 import 'package:festapp/pages/NewsPage.dart';
@@ -75,7 +76,6 @@ Future<void> initializeEverything() async {
   try {
     await OfflineDataHelper.initialize();
     //load all offlineData
-    DataService.refreshOfflineData();
 
     var settings = OfflineDataHelper.getGlobalSettings();
     if(settings!=null){
@@ -86,7 +86,6 @@ Future<void> initializeEverything() async {
 
   try {
     NotificationHelper.Initialize();
-    DataService.loadOrInitGlobalSettings();
   } catch (e) {}
 }
 
@@ -381,14 +380,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       _messageCount < 100 ? _messageCount.toString() : "99";
 
   Future<void> loadData() async {
-    if(!await RouterService.checkOccasionLinkAndRedirect(context))
-    {
-      return;
-    }
+    await RightsHelper.ensureAccessProcedure(context);
     //DataServiceTests.test_update_user();
     //await DataService.ImportFromSingleToMultipleEventType();
+    //DataServiceTests.test_has_event_allowed_role();
+
     loadOfflineData();
-    DataServiceTests.test_has_event_allowed_role();
     if (DataService.isLoggedIn()) {
       DataService.getCurrentUserInfo()
           .then((value) => userName = value.name!);

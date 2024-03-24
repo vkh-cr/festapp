@@ -5,7 +5,6 @@ import 'package:festapp/pages/AdministrationPage.dart';
 import 'package:festapp/pages/LoginPage.dart';
 import 'package:festapp/pages/MapPage.dart';
 import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:festapp/widgets/LanguageButton.dart';
@@ -33,7 +32,7 @@ class _UserPageState extends State<UserPage> {
         centerTitle: true,
         title: const Text("Profile").tr(),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
         actions: [const LanguageButton()],
       ),
@@ -144,7 +143,7 @@ class _UserPageState extends State<UserPage> {
     var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
     await DataService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
-    NavigationHelper.goBackOrHome(context);
+    RouterService.goBackOrHome(context);
   }
 
   void _redirectToAdminPage() {
