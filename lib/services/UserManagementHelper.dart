@@ -154,22 +154,22 @@ class UserManagementHelper{
     return newId;
   }
 
-  static Future<String> unsafeChangeUserPassword(UserInfoModel user) async {
-    if(user.email == null)
+  static Future<String> unsafeChangeUserPassword(OccasionUserModel user) async {
+    if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
     }
-    if(user.id == null)
+    if(user.user == null)
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadej heslo pro uživatele ${user.email}. Uživatel obdrží e-mail s přihlašovacími údaji.", "vlož zde", "Storno", "Ok");
+    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadej heslo pro uživatele ${user.data![Tb.occasion_users.data_email]!}. Uživatel obdrží e-mail s přihlašovacími údaji.", "vlož zde", "Storno", "Ok");
     if(pw==null)
     {
       throw Exception("You must set password!");
     }
 
-    var newId = await DataService.unsafeChangeUserPassword(user.email!, pw);
+    var newId = await DataService.unsafeChangeUserPassword(user.data![Tb.occasion_users.data_email]!, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");

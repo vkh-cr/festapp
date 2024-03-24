@@ -3,7 +3,6 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/dataGrids/PlutoAbstract.dart';
 import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserInfoModel.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -80,10 +79,14 @@ class OccasionUserModel extends IPlutoRowModel {
 
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
     DateTime? bd;
-    if (json[Tb.occasion_users.data_birthDate]!=null){
+    var jsonTime = json[Tb.occasion_users.data_birthDate];
+    if (jsonTime!=null && jsonTime is String){
       var birthDateString = json[Tb.occasion_users.data_birthDate];
       var dateFormat = DateFormat(birthDateJsonFormat);
       bd = dateFormat.parse(birthDateString);
+    }
+    else{
+      bd = jsonTime;
     }
     return OccasionUserModel(
       user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],

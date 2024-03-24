@@ -764,8 +764,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
-    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    users = users.where((element) => element.id != null).toList();
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Users will get a new password".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
@@ -773,7 +773,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
     for(var u in users) {
       var pw = await UserManagementHelper.unsafeChangeUserPassword(u);
-      await MailerSendHelper.sendPassword(u, pw);
+      //await MailerSendHelper.sendPassword(u, pw);
     }
   }
 
