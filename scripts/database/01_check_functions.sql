@@ -89,7 +89,7 @@ BEGIN
 
     select * into usr_info from user_info where id = usr;
     IF usr_info is NULL THEN
-       INSERT INTO user_info (id) VALUES (usr);
+       INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
        select * into usr_info from user_info where id = usr;
     END IF;
 
@@ -97,6 +97,13 @@ BEGIN
         SELECT * FROM jsonb_each_text(data)
     LOOP
         usr_info.data := jsonb_set(usr_info.data, array[_key], to_jsonb(_value));
+        IF _key = 'name' THEN
+          UPDATE user_info SET name = _value where id = usr;
+        ELSIF _key = 'surname' THEN
+          UPDATE user_info SET surname = _value where id = usr;
+        ELSIF _key = 'sex' THEN
+          UPDATE user_info SET sex = _value where id = usr;
+        END IF;
     END LOOP;
 
     UPDATE user_info SET data = usr_info.data where id = usr;

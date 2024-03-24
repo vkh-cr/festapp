@@ -86,16 +86,16 @@ class OccasionUserModel extends IPlutoRowModel {
       bd = dateFormat.parse(birthDateString);
     }
     return OccasionUserModel(
-      user: json[Tb.occasion_users.user],
+      user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
       isApprover: json[Tb.occasion_users.is_approver] == "true" ? true : false,
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
       role: int.tryParse(json[Tb.occasion_users.role]),
       data: {
-        Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? null : json[Tb.occasion_users.data_name]?.trim(),
-        Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? null : json[Tb.occasion_users.data_surname]?.trim(),
-        Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim().isEmpty ? null : json[Tb.occasion_users.data_sex]?.trim(),
+        Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_name]?.trim(),
+        Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_surname]?.trim(),
+        Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_sex]?.trim(),
 
         Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim().isEmpty ? null : json[Tb.occasion_users.data_email]?.trim(),
         Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim().isEmpty ? null : json[Tb.occasion_users.data_phone]?.trim(),
