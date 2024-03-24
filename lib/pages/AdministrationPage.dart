@@ -623,7 +623,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
-                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.isAdmin),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
                 ],
                 columns: [
