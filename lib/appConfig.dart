@@ -19,7 +19,7 @@ class AppConfig {
   static const bool isServiceRoleSafety = false;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
-  static const String OneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
+  static const String OneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
 
   static const String generatedPasswordPrefix = "fa";
   static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
