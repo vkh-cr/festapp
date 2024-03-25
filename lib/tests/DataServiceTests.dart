@@ -22,4 +22,9 @@ class DataServiceTests {
     await DataService.updateUserInfo(oc);
   }
 
+  static Future<void> test_mail()
+  async {
+    await DataService.resetPasswordForEmail("bujnmi@gmail.com");
+  }
+
 }
