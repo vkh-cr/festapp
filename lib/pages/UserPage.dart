@@ -50,7 +50,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Surname".tr(), userData?.surname ?? ''),
                 buildTextField("E-mail".tr(), userData?.email ?? ''),
                 buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), userData?.role ?? ''),
+                buildTextField("Role".tr(), RightsHelper.currentUserOccasion!.role?.toString()??""),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(

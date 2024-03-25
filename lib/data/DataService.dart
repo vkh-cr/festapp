@@ -307,35 +307,35 @@ class DataService {
         params: {"email": email, "password": pw});
   }
 
-  static updateUserAsJson(Map<String, dynamic> json) async {
-    if(json[Tb.user_info.id] == null)
-    {
-      if(AppConfig.isServiceRoleSafety){
-        json[Tb.user_info.id] = await DataService.createUser(json[Tb.user_info.email_readonly]!);
-      } else{
-        json[Tb.user_info.id] = await UserManagementHelper.unsafeCreateNewUser(json[Tb.user_info.email_readonly]);
-      }
-    }
-    await _supabase.from(Tb.user_info.table).upsert(json);
+  static updateOccasionUser(OccasionUserModel oum) async {
+      await ensureCanUpdateUsers(oum);
+      oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.data?[Tb.occasion_users.data_email]);
+      await _supabase.from(Tb.occasion_users.table).upsert(
+          oum.toUpdateJson()
+      );
+      await updateUserInfo(oum);
+
   }
 
-  static updateOccasionUser(OccasionUserModel data) async {
-      //todo change email individually
+  static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
+    await ensureCanUpdateUsers(oum);
+    await _supabase.from(Tb.occasion_users.table).upsert(
+        oum.toImportedUpdateJson()
+    );
+    await updateUserInfo(oum);
+
+  }
+
+  static Future<void> ensureCanUpdateUsers(OccasionUserModel oum) async {
+    if(!RightsHelper.canUpdateUsers())
+    {
+      await refreshSession();
       if(!RightsHelper.canUpdateUsers())
       {
-        await refreshSession();
-        if(!RightsHelper.canUpdateUsers())
-        {
-          var errorText = "Elevated permission is required. Changes to user ${data.data?[Tb.occasion_users.data_email]} could not be saved.";
-          throw Exception(errorText);
-        }
+        var errorText = "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
+        throw Exception(errorText);
       }
-
-      data.user ??= await UserManagementHelper.unsafeCreateNewUser(data.data?[Tb.occasion_users.data_email]);
-      await updateUserInfo(data);
-      await _supabase.from(Tb.occasion_users.table).upsert(
-        data.toUpdateJson()
-      );
+    }
   }
 
   static Future<void> updateUserInfo(OccasionUserModel data) async {
@@ -343,7 +343,7 @@ class DataService {
         params:
         {
           "usr": data.user,
-          "oc": RightsHelper.currentOccasion,
+          "oc": data.occasion,
           "data": data.data
         });
   }
