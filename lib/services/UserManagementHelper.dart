@@ -108,7 +108,7 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.user!);
+          await DataService.deleteUser(existing);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
@@ -164,7 +164,7 @@ class UserManagementHelper{
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadej heslo pro uživatele ${user.data![Tb.occasion_users.data_email]!}. Uživatel obdrží e-mail s přihlašovacími údaji.", "vlož zde", "Storno", "Ok");
+    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
     if(pw==null)
     {
       throw Exception("You must set password!");

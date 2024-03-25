@@ -73,7 +73,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteOccasionUser(this);
+    await DataService.deleteUser(this);
   }
 
   @override
