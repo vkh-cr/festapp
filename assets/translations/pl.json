@@ -154,5 +154,10 @@
   "There will appear your events.": "Pojawią się twoje wydarzenia.",
   "Type": "Typ",
   "Songs": "Piosenki",
+  "Manager": "Kierownik",
+  "Approver": "Zatwierdzający",
+  "Approved": "Zatwierdzone",
+  "Password has been changed.": "Hasło zostało zmienione.",
+  "Roles": "Role",
   "_": "_"
 }

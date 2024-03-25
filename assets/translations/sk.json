@@ -154,5 +154,10 @@
   "There will appear your events.": "Tu sa zobrazia tvoje udalosti.",
   "Type": "Typ",
   "Songs": "Piesňe",
+  "Manager": "Manažér",
+  "Approver": "Schvaľovateľ",
+  "Approved": "Schválené",
+  "Password has been changed.": "Heslo bolo zmenené.",
+  "Roles": "Role",
   "_": "_"
 }

@@ -62,3 +62,28 @@ BEGIN
   END IF;
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION delete_user(usr uuid, oc bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $$
+
+BEGIN
+    IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+        RETURN json_build_object('code', 403);
+    END IF;
+    IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
+         RETURN json_build_object('code', 403);
+    END IF;
+    UPDATE user_group_info SET leader = null where leader = usr;
+    DELETE FROM user_groups WHERE "user" = usr;
+    DELETE FROM event_users WHERE "user" = usr;
+    DELETE FROM user_news WHERE "user" = usr;
+    DELETE FROM event_users_saved WHERE "user" = usr;
+    DELETE FROM occasion_users WHERE "user" = usr;
+    DELETE FROM user_info WHERE id = usr;
+    DELETE FROM auth.identities WHERE id = usr;
+    DELETE FROM auth.users WHERE id = usr;
+END;
+$$;

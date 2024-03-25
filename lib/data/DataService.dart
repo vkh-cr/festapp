@@ -152,47 +152,13 @@ class DataService {
     }
   }
 
-  static Future<void> deleteOccasionUser(OccasionUserModel occasionUserModel) async {
-    await _supabase
-        .from(Tb.user_groups.table)
-        .delete()
-        .eq(Tb.user_groups.user, occasionUserModel.user)
-        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
-    await _supabase
-        .from(Tb.event_users.table)
-        .delete()
-        .eq(Tb.event_users.user, occasionUserModel.user)
-        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
-    await _supabase
-        .from(Tb.event_users_saved.table)
-        .delete()
-        .eq(Tb.event_users_saved.user, occasionUserModel.user)
-        .eq("${Tb.occasion_users.table}.${Tb.occasion_users.occasion}", occasionUserModel.occasion);
-  }
-  
-  static Future<void> deleteUser(String uuid) async {
-    if(!AppConfig.isServiceRoleSafety)
+  static Future<void> deleteUser(OccasionUserModel data) async {
+    await _supabase.rpc("delete_user",
+    params:
     {
-      throw Exception("Deleting user is not supported.");
-    }
-    var adminClient = await GetSupabaseAdminClient();
-    await _supabase
-        .from(Tb.user_groups.table)
-        .delete()
-        .eq(Tb.user_groups.user, uuid);
-    await _supabase
-        .from(Tb.event_users.table)
-        .delete()
-        .eq(Tb.event_users.user, uuid);
-    await _supabase
-        .from(Tb.user_news.table)
-        .delete()
-        .eq(Tb.user_news.user, uuid);
-    await _supabase
-        .from(Tb.user_info.table)
-        .delete()
-        .eq(Tb.user_info.id, uuid);
-    adminClient.auth.admin.deleteUser(uuid);
+      "usr": data.user,
+      "oc": data.occasion
+    });
   }
 
   static Future<String?> getUserByEmail(String email) async {
