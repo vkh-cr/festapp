@@ -598,7 +598,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             onPressed: () async {
                               var title = rendererContext.row.cells[Tb.user_group_info.title]?.value;
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
-                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
+                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: DataService.globalSettingsModel!.defaultMapLocation);
 
                               RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
