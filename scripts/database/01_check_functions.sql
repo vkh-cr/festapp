@@ -101,7 +101,7 @@ BEGIN
           UPDATE user_info SET name = _value where id = usr;
         ELSIF _key = 'surname' THEN
           UPDATE user_info SET surname = _value where id = usr;
-       ELSIF _key = 'email' THEN
+        ELSIF _key = 'email' THEN
           UPDATE user_info SET email_readonly = _value where id = usr;
         ELSIF _key = 'sex' THEN
           UPDATE user_info SET sex = _value where id = usr;

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserInfoModel.dart';
@@ -49,7 +50,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u[Tb.user_info.id] = existing.user;
+        u[Tb.occasion_users.user] = existing.user;
         toBeUpdated.add(u);
       }
     }
@@ -64,7 +65,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeCreated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
+          await DataService.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
@@ -80,7 +81,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
+          await DataService.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
