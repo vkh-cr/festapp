@@ -1277,11 +1277,11 @@ class DataService {
           basicMessage+=innerText;
       }
       basicMessage = basicMessage.trim();
-      await _supabase.from(Tb.notification_records.table)
+      await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
-            Tb.notification_records.content: basicMessage, 
-            Tb.notification_records.heading: _currentUser!.name??AppConfig.home_page
+            Tb.log_notifications.content: basicMessage,
+            Tb.log_notifications.heading: _currentUser!.name??AppConfig.home_page
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());

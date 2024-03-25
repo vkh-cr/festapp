@@ -380,12 +380,13 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       _messageCount < 100 ? _messageCount.toString() : "99";
 
   Future<void> loadData() async {
-    await RightsHelper.ensureAccessProcedure(context);
     //DataServiceTests.test_update_user();
     //await DataService.ImportFromSingleToMultipleEventType();
     //DataServiceTests.test_has_event_allowed_role();
 
     loadOfflineData();
+    await RightsHelper.ensureAccessProcedure(context);
+
     if (DataService.isLoggedIn()) {
       DataService.getCurrentUserInfo()
           .then((value) => userName = value.name!);

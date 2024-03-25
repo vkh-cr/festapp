@@ -1,6 +1,7 @@
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/RightsHelper.dart';
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/pages/AdministrationPage.dart';
 import 'package:festapp/pages/EventPage.dart';

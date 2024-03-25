@@ -77,7 +77,8 @@ class _MapPageState extends State<MapPage> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    await RightsHelper.ensureAccessProcedure(context);
+    //todo clean offline access
+    //await RightsHelper.ensureAccessProcedure(context);
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
         : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"],
