@@ -179,7 +179,7 @@ class DataService {
   }
 
   static Future<void> logout() async {
-    await _supabase.auth.signOut();
+    await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
     OfflineDataHelper.clearUserData();
