@@ -131,10 +131,10 @@ class UserManagementHelper{
     var random = Random();
     var numberFormat = NumberFormat("####");
 
-    var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-    await DataService.updateUserPassword(u, password);
-    ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
-    await MailerSendHelper.sendPassword(u, password);
+    //var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
+    //await DataService.updateUserPassword(u, password);
+    //ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
+    //await MailerSendHelper.sendPassword(u, password);
   }
 
   static Future<String> unsafeCreateNewUser(String? email) async {
@@ -169,8 +169,7 @@ class UserManagementHelper{
     {
       throw Exception("You must set password!");
     }
-
-    var newId = await DataService.unsafeChangeUserPassword(user.data![Tb.occasion_users.data_email]!, pw);
+    var newId = await DataService.unsafeChangeUserPassword(user, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");

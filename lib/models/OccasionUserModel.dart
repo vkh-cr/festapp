@@ -122,9 +122,9 @@ class OccasionUserModel extends IPlutoRowModel {
         Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_surname]?.trim(),
         Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_sex]?.trim(),
 
-        Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim().isEmpty ? null : json[Tb.occasion_users.data_email]?.trim(),
-        Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim().isEmpty ? null : json[Tb.occasion_users.data_phone]?.trim(),
-        Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim().isEmpty ? null : json[Tb.occasion_users.data_accommodation]?.trim(),
+        Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_email]?.trim(),
+        Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_phone]?.trim(),
+        Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_accommodation]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
         Tb.occasion_users.data_isInvited: json[Tb.occasion_users.data_isInvited] == "true" ? true : false,
       },

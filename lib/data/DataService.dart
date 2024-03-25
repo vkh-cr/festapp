@@ -143,15 +143,6 @@ class DataService {
     return data.user!.id;
   }
 
-  static Future<void> updateUserPassword(UserInfoModel user, String password) async {
-    if(AppConfig.isServiceRoleSafety){
-      (await GetSupabaseAdminClient()).auth.admin.updateUserById(user.id!, attributes: AdminUserAttributes(password: password));
-    }
-    else{
-      await unsafeChangeUserPassword(user.email!, password);
-    }
-  }
-
   static Future<void> deleteUser(OccasionUserModel data) async {
     await _supabase.rpc("delete_user",
     params:
@@ -263,14 +254,19 @@ class DataService {
     return UserInfoModel.fromJson(data);
   }
 
-  static Future<String?> unsafeChangeUserPassword(String email, String pw) async {
+  static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
     return await _supabase.rpc("set_user_password",
-        params: {"user_email": email, "password": pw});
+      params:
+      {
+        "usr": occasionUserModel.user,
+        "oc": occasionUserModel.occasion??RightsHelper.currentOccasion,
+        "password": pwd
+      });
   }
 
   static Future<String?> unsafeCreateUser(String email, String pw) async {
     return await _supabase.rpc("create_user",
-        params: {"email": email, "password": pw});
+        params: {"oc": RightsHelper.currentOccasion, "email": email, "password": pw});
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {
