@@ -11,7 +11,6 @@ import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/models/InformationModel.dart';
 
 import 'package:festapp/models/NewsModel.dart';
-import 'package:festapp/services/DialogHelper.dart';
 import 'package:festapp/services/NotificationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/services/UserManagementHelper.dart';
@@ -25,25 +24,9 @@ import 'package:html/parser.dart';
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
 import '../models/PlaceModel.dart';
-import '../services/NavigationService.dart';
 
 class DataService {
   static final _supabase = Supabase.instance.client;
-  
-  static SupabaseClient? _supabaseAdmin;
-  static Future<SupabaseClient> GetSupabaseAdminClient() async {
-    if(_supabaseAdmin != null)
-    {
-      return _supabaseAdmin!;
-    }
-    var result = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Input service_role key from supabase".tr(), "Input here".tr());
-    if(result==null)
-    {
-      throw Exception("You must input service_role key.");
-    }
-    _supabaseAdmin = SupabaseClient(_supabase.supabaseUrl, result);
-    return _supabaseAdmin!;
-  }
 
   static final _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
@@ -121,7 +104,7 @@ class DataService {
       var data = await _supabase
           .from(Tb.occasions.table)
           .select(Tb.occasions.data)
-          .eq(Tb.occasions.id, RightsHelper.currentOccasion)
+          .eq(Tb.occasions.id, RightsHelper.currentOccasion!)
           .single();
 
       toReturn = GlobalSettingsModel.fromJson(data[Tb.occasions.data]);
@@ -136,11 +119,6 @@ class DataService {
       return await loadCurrentUserData();
     }
     return _currentUser!;
-  }
-
-  static Future<String> createUser(String email) async {
-    var data = await (await GetSupabaseAdminClient()).auth.admin.createUser(AdminUserAttributes(email: email, emailConfirm: true));
-    return data.user!.id;
   }
 
   static Future<void> deleteUser(OccasionUserModel data) async {
@@ -244,12 +222,12 @@ class DataService {
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion!);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x)));
   }
 
   static Future<OccasionModel> getOccasion(int id) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, id).maybeSingle();
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, id).single();
     return OccasionModel.fromJson(data);
   }
 
@@ -336,7 +314,7 @@ class DataService {
   }
 
   static Future<void> deletePlace(PlaceModel placeModel) async {
-    await _supabase.from(Tb.places.table).delete().eq(Tb.places.id, placeModel.id);
+    await _supabase.from(Tb.places.table).delete().eq(Tb.places.id, placeModel.id!);
   }
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
@@ -344,7 +322,7 @@ class DataService {
     var json = placeModel.toJson();
     Map<String, dynamic> data;
     if(placeModel.id!=null) {
-      data = await _supabase.from(Tb.places.table).update(json).eq(Tb.places.id, placeModel.id).select().single();
+      data = await _supabase.from(Tb.places.table).update(json).eq(Tb.places.id, placeModel.id!).select().single();
     }
     else
     {
@@ -380,7 +358,7 @@ class DataService {
     var data = await _supabase
         .from(Tb.events.table)
         .select("${Tb.events.id}, ${Tb.event_users.table}(count)")
-        .in_(Tb.events.id, events.map((e)=>e.id).toList());
+        .inFilter(Tb.events.id, events.map((e)=>e.id).toList());
 
     var eventList = List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -535,7 +513,7 @@ class DataService {
         "${Tb.events.place},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event}")
-        .in_(Tb.events.id, events)
+        .inFilter(Tb.events.id, events)
         .eq(Tb.events.is_hidden, false)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
@@ -572,7 +550,7 @@ class DataService {
     var data = await _supabase
         .from(Tb.events.table)
         .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
-        .in_(Tb.events.id, ids);
+        .inFilter(Tb.events.id, ids);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -653,7 +631,7 @@ class DataService {
     dynamic eventData;
     if(model.id!=null) {
       upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
-      eventData = await _supabase.from(Tb.user_group_info.table).upsert(upsertObj).eq(Tb.user_group_info.id, model.id).select().single();
+      eventData = await _supabase.from(Tb.user_group_info.table).upsert(upsertObj).eq(Tb.user_group_info.id, model.id!).select().single();
     }
     else
     {
@@ -667,7 +645,7 @@ class DataService {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
-        .eq(Tb.user_groups.group, group.id);
+        .eq(Tb.user_groups.group, group.id!);
 
     for(var p in participants)
     {
@@ -684,17 +662,17 @@ class DataService {
     await _supabase
         .from(Tb.user_groups.table)
         .delete()
-        .eq(Tb.user_groups.group, model.id);
+        .eq(Tb.user_groups.group, model.id!);
     await _supabase
         .from(Tb.user_group_info.table)
         .delete()
-        .eq(Tb.user_group_info.id, model.id);
+        .eq(Tb.user_group_info.id, model.id!);
     if(model.place!=null)
     {
       await _supabase
           .from(Tb.places.table)
           .delete()
-          .eq(Tb.places.id, model.place!.id);
+          .eq(Tb.places.id, model.place!.id!);
     }
   }
 
@@ -706,7 +684,7 @@ class DataService {
     dynamic eventData;
     if(model.id!=null) {
       upsertObj.addAll({Tb.exclusive_groups.id: model.id.toString()});
-      eventData = await _supabase.from(Tb.exclusive_groups.table).update(upsertObj).eq(Tb.exclusive_groups.id, model.id).select().single();
+      eventData = await _supabase.from(Tb.exclusive_groups.table).update(upsertObj).eq(Tb.exclusive_groups.id, model.id!).select().single();
     }
     else
     {
@@ -717,7 +695,7 @@ class DataService {
     await _supabase
         .from(Tb.exclusive_events.table)
         .delete()
-        .eq(Tb.exclusive_events.group, updated.id);
+        .eq(Tb.exclusive_events.group, updated.id!);
 
     var insert = [];
     for(var e in model.events!)
@@ -736,11 +714,11 @@ class DataService {
     await _supabase
         .from(Tb.exclusive_events.table)
         .delete()
-        .eq(Tb.exclusive_events.group, data.id);
+        .eq(Tb.exclusive_events.group, data.id!);
     await _supabase
         .from(Tb.exclusive_groups.table)
         .delete()
-        .eq(Tb.exclusive_groups.id, data.id);
+        .eq(Tb.exclusive_groups.id, data.id!);
   }
 
   static Future<EventModel> getEvent(int eventId) async {
@@ -777,7 +755,7 @@ class DataService {
                   "${Tb.events.end_time},"
                   "${Tb.events.max_participants},"
                   "${Tb.event_users.table}(count)")
-          .in_(Tb.events.id, event.childEventIds!)
+          .inFilter(Tb.events.id, event.childEventIds!)
           .eq(Tb.events.is_hidden, false)
           .order(Tb.events.start_time, ascending: true)
           .order(Tb.events.title, ascending: true);
@@ -803,7 +781,7 @@ class DataService {
         .from(Tb.events.table)
         .select("${Tb.events.id}, ${Tb.event_users.table}!inner(count)")
         .eq("${Tb.event_users.table}.${Tb.event_users.user}", currentUserId())
-        .in_(Tb.events.id, events.map((e) => e.id).toList());
+        .inFilter(Tb.events.id, events.map((e) => e.id).toList());
 
     Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c[Tb.event_users.table][0]["count"]>0).map((c)=>c["id"] as int).toSet();
     for(var e in events)
@@ -857,8 +835,9 @@ class DataService {
   static Future<int> getParticipantsPerEventCount(int eventId) async {
     var result = await _supabase
         .from(Tb.event_users.table)
-        .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .eq(Tb.event_users.event, eventId);
+        .select()
+        .eq(Tb.event_users.event, eventId)
+        .count();
     return result.count;
   }
 
@@ -880,9 +859,10 @@ class DataService {
     ensureUserIsLoggedIn();
     var result = await _supabase
         .from(Tb.event_users.table)
-        .select('*', const FetchOptions(count: CountOption.exact, head: true))
+        .select()
         .eq(Tb.event_users.event, eventId)
-        .eq(Tb.event_users.user, currentUserId());
+        .eq(Tb.event_users.user, currentUserId())
+        .count();
     return result.count > 0;
   }
 
@@ -990,7 +970,7 @@ class DataService {
         .from(Tb.event_users.table)
         .delete()
         .eq(Tb.event_users.event, event.id!)
-        .eq(Tb.event_users.user, finalId);
+        .eq(Tb.event_users.user, finalId!);
 
     if(participant == null) {
       var trPrefix = _currentUser!.getGenderPrefix();
@@ -1021,7 +1001,7 @@ class DataService {
     dynamic eventData;
     if(event.id!=null) {
       upsertObj.addAll({Tb.events.id: event.id});
-      eventData = await _supabase.from(Tb.events.table).update(upsertObj).eq(Tb.events.id, event.id).select().single();
+      eventData = await _supabase.from(Tb.events.table).update(upsertObj).eq(Tb.events.id, event.id!).select().single();
     }
     else
     {
@@ -1052,7 +1032,7 @@ class DataService {
     await _supabase
         .from(Tb.event_roles.table)
         .delete()
-        .eq(Tb.event_roles.event, updatedEvent.id);
+        .eq(Tb.event_roles.event, updatedEvent.id!);
 
     await _supabase
         .from(Tb.event_roles.table)
@@ -1063,21 +1043,21 @@ class DataService {
     await _supabase
         .from(Tb.event_users_saved.table)
         .delete()
-        .eq(Tb.event_users_saved.event, updatedEvent.id);
+        .eq(Tb.event_users_saved.event, updatedEvent.id!);
   }
 
   static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
     await _supabase
         .from(Tb.event_groups.table)
         .delete()
-        .eq(Tb.event_groups.event_child, updatedEvent.id);
+        .eq(Tb.event_groups.event_child, updatedEvent.id!);
   }
 
   static Future<void> deleteEvent(EventModel data) async {
     await _supabase
         .from(Tb.events.table)
         .delete()
-        .eq(Tb.events.id, data.id);
+        .eq(Tb.events.id, data.id!);
   }
 
   static Future<void> updateInformation(InformationModel info) async {
@@ -1106,7 +1086,7 @@ class DataService {
     await _supabase
         .from(Tb.information.table)
         .delete()
-        .eq(Tb.information.id, info.id);
+        .eq(Tb.information.id, info.id!);
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
@@ -1122,7 +1102,7 @@ class DataService {
     var lastMes = await _supabase
         .from(Tb.news.table)
         .select(Tb.news.id)
-        .lt(Tb.news.created_at, message.createdAt)
+        .lt(Tb.news.created_at, message.createdAt!)
     // from some reason lower than is behaving like lower and equal than on web platform
     // therefore additional check
         .neq(Tb.news.id, message.id)
@@ -1207,8 +1187,9 @@ class DataService {
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
         .from(Tb.news.table)
-        .select('*', const FetchOptions(count: CountOption.exact, head: true))
-        .gt(Tb.news.id, lastMessageId);
+        .select()
+        .gt(Tb.news.id, lastMessageId)
+        .count();
     return result.count;
   }
 
