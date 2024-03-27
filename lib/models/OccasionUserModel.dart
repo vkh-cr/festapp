@@ -111,6 +111,7 @@ class OccasionUserModel extends IPlutoRowModel {
       bd = jsonTime;
     }
     return OccasionUserModel(
+      occasion: RightsHelper.currentOccasion,
       user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
       isApprover: json[Tb.occasion_users.is_approver] == "true" ? true : false,
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
