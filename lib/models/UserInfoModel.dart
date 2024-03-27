@@ -163,7 +163,7 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateUser(this);
+    //await DataService.updateUser(this);
   }
 
   @override

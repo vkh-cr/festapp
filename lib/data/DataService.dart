@@ -188,7 +188,6 @@ class DataService {
 
   static Future<void> resetPasswordForEmail(String email) async {
     var result = await _supabase.auth.resetPasswordForEmail(email);
-
   }
 
   static UserInfoModel? _currentUser;
@@ -269,14 +268,14 @@ class DataService {
       });
   }
 
-  static Future<String?> unsafeCreateUser(String email, String pw) async {
+  static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
     return await _supabase.rpc("create_user",
-        params: {"oc": RightsHelper.currentOccasion, "email": email, "password": pw});
+        params: {"oc": occasion, "email": email, "password": pw});
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
-      oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.data?[Tb.occasion_users.data_email]);
+      oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email]);
       await _supabase.from(Tb.occasion_users.table).upsert(
           oum.toUpdateJson()
       );
@@ -313,61 +312,6 @@ class DataService {
           "oc": data.occasion,
           "data": data.data
         });
-  }
-  
-  static updateUser(UserInfoModel data) async {
-    //todo change email individually
-    if(!RightsHelper.isAdmin())
-    {
-      await refreshSession();
-      if(!RightsHelper.isAdmin())
-      {
-        var errorText = "Elevated permission is required. Changes to user ${data.email} could not be saved.";
-        throw Exception(errorText);
-      }
-    }
-
-    if(data.id == null)
-    {
-      if(AppConfig.isServiceRoleSafety){
-        data.id = await DataService.createUser(data.email!);
-      } else{
-        data.id = await UserManagementHelper.unsafeCreateNewUser(data.email);
-      }
-    }
-
-    await _supabase.rpc("set_claim",
-        params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
-
-    await _supabase.rpc("set_claim",
-        params: {"uid": data.id, "claim": "is_admin", "value": data.isAdmin});
-
-
-    if(data.isAdmin! && !data.isEditor!)
-    {
-      data.isEditor = true;
-      await _supabase.rpc("set_claim",
-          params: {"uid": data.id, "claim": "is_editor", "value": data.isEditor});
-    }
-
-    await _supabase.from(Tb.user_info.table).upsert({
-      Tb.user_info.id: data.id,
-      Tb.user_info.email_readonly: data.email,
-      Tb.user_info.name: data.name,
-      Tb.user_info.surname: data.surname,
-      Tb.user_info.sex: data.sex,
-      Tb.user_info.role: data.role,
-      Tb.user_info.accommodation: data.accommodation,
-      Tb.user_info.phone: data.phone,
-      Tb.user_info.birth_date: data.birthDate?.toIso8601String(),
-      Tb.user_info.is_admin_readonly: data.isAdmin,
-      Tb.user_info.is_editor_readonly: data.isEditor,
-    });
-
-    if(data.id == currentUserId())
-    {
-      await refreshSession();
-    }
   }
 
   static Future<List<PlaceModel>> getMapPlaces() async {

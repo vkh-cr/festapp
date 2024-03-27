@@ -137,7 +137,7 @@ class UserManagementHelper{
     //await MailerSendHelper.sendPassword(u, password);
   }
 
-  static Future<String> unsafeCreateNewUser(String? email) async {
+  static Future<String> unsafeCreateNewUser(int occasion, String? email) async {
     if(email == null)
     {
       throw Exception("User must have an e-mail!");
@@ -147,7 +147,7 @@ class UserManagementHelper{
     var numberFormat = NumberFormat("####");
     var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
 
-    var newId = await DataService.unsafeCreateUser(email, pw);
+    var newId = await DataService.unsafeCreateUser(occasion, email, pw);
     if(newId==null)
     {
       throw Exception("Creating of user has failed.");

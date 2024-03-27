@@ -81,10 +81,10 @@ DECLARE
     usr_info user_info%rowtype;
 BEGIN
     IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
-        RETURN json_build_object('code', 403);
+        RETURN jsonb_build_object('code', 403);
     END IF;
     IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
-         RETURN json_build_object('code', 403);
+         RETURN jsonb_build_object('code', 403);
     END IF;
 
     select * into usr_info from user_info where id = usr;
@@ -101,7 +101,7 @@ BEGIN
           UPDATE user_info SET name = _value where id = usr;
         ELSIF _key = 'surname' THEN
           UPDATE user_info SET surname = _value where id = usr;
-        ELSIF _key = 'email' THEN
+       ELSIF _key = 'email' THEN
           UPDATE user_info SET email_readonly = _value where id = usr;
         ELSIF _key = 'sex' THEN
           UPDATE user_info SET sex = _value where id = usr;
@@ -109,6 +109,6 @@ BEGIN
     END LOOP;
 
     UPDATE user_info SET data = usr_info.data where id = usr;
-    RETURN json_build_object('code', 200);
+    RETURN jsonb_build_object('code', 200);
 END;
 $$;

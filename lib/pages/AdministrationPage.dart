@@ -619,7 +619,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 OccasionUserModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
                 Tb.occasion_users.user,
-                actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsHelper.canUpdateUsers),
+                actionsExtended: DataGridExtendedActions(
+                  saveAction: DataGridAction(
+                      action: (datagrid, [action]) async {
+                        await action!();
+                        _allUsers = [];
+                      }
+                  ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
