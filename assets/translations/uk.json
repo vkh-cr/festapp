@@ -154,5 +154,10 @@
   "There will appear your events.": "Тут з'являться ваші події.",
   "Type": "Тип",
   "Songs": "Пісні",
+  "Manager": "Менеджер",
+  "Approver": "Схвалювач",
+  "Approved": "Схвалено",
+  "Password has been changed.": "Пароль змінено.",
+  "Roles": "Ролі",
   "_": "_"
 }

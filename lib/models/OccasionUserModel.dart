@@ -3,7 +3,6 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/dataGrids/PlutoAbstract.dart';
 import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserInfoModel.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -16,13 +15,13 @@ class OccasionUserModel extends IPlutoRowModel {
   String? user;
   int? role;
 
-  bool isEditor;
-  bool isManager;
-  bool isApprover;
-  bool isApproved;
+  bool? isEditor = false;
+  bool? isManager = false;
+  bool? isApprover = false;
+  bool? isApproved = false;
   Map<String, dynamic>? data;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-    required this.isEditor, required this.isManager, required this.isApprover, required this.isApproved});
+     this.isEditor, this.isManager, this.isApprover, this.isApproved});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -42,17 +41,39 @@ class OccasionUserModel extends IPlutoRowModel {
   {
     Tb.occasion_users.occasion: RightsHelper.currentOccasion,
     Tb.occasion_users.user: user,
-    Tb.occasion_users.is_editor: isEditor,
-    Tb.occasion_users.is_approver: isApprover,
-    Tb.occasion_users.is_approved: isApproved,
-    Tb.occasion_users.is_manager: isManager,
+    Tb.occasion_users.is_editor: isEditor??false,
+    Tb.occasion_users.is_approver: isApprover??false,
+    Tb.occasion_users.is_approved: isApproved??false,
+    Tb.occasion_users.is_manager: isManager??false,
     Tb.occasion_users.role: role,
     Tb.occasion_users.data: data,
   };
 
+  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json) {
+    return OccasionUserModel(
+        occasion: RightsHelper.currentOccasion!,
+        user: json[Tb.occasion_users.user],
+        role: json[Tb.occasion_users.role],
+        data: {
+          Tb.occasion_users.data_email: json[Tb.user_info.email_readonly],
+          Tb.occasion_users.data_name: json[Tb.user_info.name],
+          Tb.occasion_users.data_surname: json[Tb.user_info.surname],
+          Tb.occasion_users.data_sex: json[Tb.user_info.sex],
+        }
+    );
+  }
+
+  dynamic toImportedUpdateJson() =>
+      {
+        Tb.occasion_users.occasion: occasion,
+        Tb.occasion_users.user: user,
+        Tb.occasion_users.role: role,
+        Tb.occasion_users.data: data,
+      };
+
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteOccasionUser(this);
+    await DataService.deleteUser(this);
   }
 
   @override
@@ -80,26 +101,31 @@ class OccasionUserModel extends IPlutoRowModel {
 
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
     DateTime? bd;
-    if (json[Tb.occasion_users.data_birthDate]!=null){
+    var jsonTime = json[Tb.occasion_users.data_birthDate];
+    if (jsonTime!=null && jsonTime is String){
       var birthDateString = json[Tb.occasion_users.data_birthDate];
       var dateFormat = DateFormat(birthDateJsonFormat);
       bd = dateFormat.parse(birthDateString);
     }
+    else{
+      bd = jsonTime;
+    }
     return OccasionUserModel(
-      user: json[Tb.occasion_users.user],
+      occasion: RightsHelper.currentOccasion,
+      user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
       isApprover: json[Tb.occasion_users.is_approver] == "true" ? true : false,
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
       role: int.tryParse(json[Tb.occasion_users.role]),
       data: {
-        Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? null : json[Tb.occasion_users.data_name]?.trim(),
-        Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? null : json[Tb.occasion_users.data_surname]?.trim(),
-        Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim().isEmpty ? null : json[Tb.occasion_users.data_sex]?.trim(),
+        Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_name]?.trim(),
+        Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_surname]?.trim(),
+        Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_sex]?.trim(),
 
-        Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim().isEmpty ? null : json[Tb.occasion_users.data_email]?.trim(),
-        Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim().isEmpty ? null : json[Tb.occasion_users.data_phone]?.trim(),
-        Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim().isEmpty ? null : json[Tb.occasion_users.data_accommodation]?.trim(),
+        Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_email]?.trim(),
+        Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_phone]?.trim(),
+        Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_accommodation]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
         Tb.occasion_users.data_isInvited: json[Tb.occasion_users.data_isInvited] == "true" ? true : false,
       },
@@ -116,9 +142,9 @@ class OccasionUserModel extends IPlutoRowModel {
       u[Tb.user_info.email_readonly].toString().trim().toLowerCase() == data?[Tb.occasion_users.data_email]
       && u[Tb.user_info.name].toString().trim() == data?[Tb.occasion_users.data_name]
       && u[Tb.user_info.surname].toString().trim() == data?[Tb.occasion_users.data_surname]
-      && u[Tb.user_info.accommodation].toString().trim() == data?[Tb.occasion_users.data_accommodation]
+      && u[Tb.user_info.accommodation]?.toString().trim() == data?[Tb.occasion_users.data_accommodation]
       && u[Tb.user_info.role] == role
-      && u[Tb.user_info.phone].toString().trim() == data?[Tb.occasion_users.data_phone]
+      && u[Tb.user_info.phone]?.toString().trim() == data?[Tb.occasion_users.data_phone]
       //todo fix
       //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
       && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];

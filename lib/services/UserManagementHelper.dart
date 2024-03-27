@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserInfoModel.dart';
@@ -49,7 +50,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u[Tb.user_info.id] = existing.user;
+        u[Tb.occasion_users.user] = existing.user;
         toBeUpdated.add(u);
       }
     }
@@ -64,7 +65,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeCreated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
+          await DataService.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
@@ -80,7 +81,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
+          await DataService.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
@@ -107,7 +108,7 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.user!);
+          await DataService.deleteUser(existing);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
@@ -130,13 +131,13 @@ class UserManagementHelper{
     var random = Random();
     var numberFormat = NumberFormat("####");
 
-    var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-    await DataService.updateUserPassword(u, password);
-    ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
-    await MailerSendHelper.sendPassword(u, password);
+    //var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
+    //await DataService.updateUserPassword(u, password);
+    //ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
+    //await MailerSendHelper.sendPassword(u, password);
   }
 
-  static Future<String> unsafeCreateNewUser(String? email) async {
+  static Future<String> unsafeCreateNewUser(int occasion, String? email) async {
     if(email == null)
     {
       throw Exception("User must have an e-mail!");
@@ -146,7 +147,7 @@ class UserManagementHelper{
     var numberFormat = NumberFormat("####");
     var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
 
-    var newId = await DataService.unsafeCreateUser(email, pw);
+    var newId = await DataService.unsafeCreateUser(occasion, email, pw);
     if(newId==null)
     {
       throw Exception("Creating of user has failed.");
@@ -154,22 +155,21 @@ class UserManagementHelper{
     return newId;
   }
 
-  static Future<String> unsafeChangeUserPassword(UserInfoModel user) async {
-    if(user.email == null)
+  static Future<String> unsafeChangeUserPassword(OccasionUserModel user) async {
+    if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
     }
-    if(user.id == null)
+    if(user.user == null)
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadej heslo pro uživatele ${user.email}. Uživatel obdrží e-mail s přihlašovacími údaji.", "vlož zde", "Storno", "Ok");
+    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
     if(pw==null)
     {
       throw Exception("You must set password!");
     }
-
-    var newId = await DataService.unsafeChangeUserPassword(user.email!, pw);
+    var newId = await DataService.unsafeChangeUserPassword(user, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");

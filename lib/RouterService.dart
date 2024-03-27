@@ -1,6 +1,7 @@
 import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/data/RightsHelper.dart';
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/pages/AdministrationPage.dart';
 import 'package:festapp/pages/EventPage.dart';
@@ -40,6 +41,15 @@ class RouterService{
   static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
     return context.pushReplacement(RouterService.getCurrentLink()+location, extra: extra);
+  }
+
+  static void goBackOrHome(BuildContext context){
+    if(!context.canPop())
+    {
+      navigate(context, "");
+      return;
+    }
+    context.pop();
   }
 
   static final router = GoRouter(
@@ -136,6 +146,8 @@ class RouterService{
     var checkedObject = await DataService.checkOccasionLink(RouterService.currentOccasionLink);
     RightsHelper.currentUserOccasion = checkedObject.user;
     RightsHelper.currentOccasion = checkedObject.occasionId;
+    RightsHelper.currentLink = checkedObject.link;
+
     if(checkedObject.link!=RouterService.currentOccasionLink && checkedObject.isAvailable())
     {
       RouterService.pushReplacementFull(context, checkedObject.link!);

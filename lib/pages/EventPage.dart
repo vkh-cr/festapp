@@ -5,7 +5,6 @@ import 'package:festapp/pages/HtmlEditorPage.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/DialogHelper.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/widgets/ButtonsHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -54,7 +53,7 @@ class _EventPageState extends State<EventPage> {
       appBar: AppBar(
         title: Text(_event==null?"Event".tr():_event.toString()),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
         actions: ButtonsHelper.getAddToMyProgramButton(
           _event?.canSaveEventToMyProgram(),

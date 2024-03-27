@@ -5,7 +5,6 @@ import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/InformationModel.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +39,7 @@ class _InfoPageState extends State<InfoPage> {
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
       ),
       body: Align(

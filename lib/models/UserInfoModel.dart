@@ -158,12 +158,12 @@ class UserInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteUser(id!);
+    //await DataService.deleteUserInfo(id!);
   }
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateUser(this);
+    //await DataService.updateUser(this);
   }
 
   @override

@@ -49,6 +49,15 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
         }
         trimmedString = trimmedString.toLowerCase();
       }
+      else if(entry.key == Tb.occasion_users.role)
+      {
+        if(trimmedString.isEmpty){
+          break;
+        }
+        var role = trimmedString.toLowerCase().startsWith("p") ? 1 : 2;
+        userJsonObject[entry.key] = role;
+        continue;
+      }
       else if(entry.key == Tb.user_info.sex)
       {
         if(trimmedString.isEmpty){
@@ -64,6 +73,7 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
         final format = DateFormat("d/M/y");
         var dateTime = format.parse(trimmedString);
         userJsonObject[entry.key] = dateTime;
+        continue;
       }
       userJsonObject[entry.key] = trimmedString;
       continue;

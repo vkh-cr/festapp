@@ -46,6 +46,7 @@ import 'ScheduleTimeline.dart';
           length: eventsMap.length,
           child: Scaffold(
             appBar: TabBar(
+              isScrollable: eventsMap.length > 4 ? true : false,
               unselectedLabelColor: Colors.grey,
               labelColor: AppConfig.color1,
               indicatorColor: AppConfig.color1,

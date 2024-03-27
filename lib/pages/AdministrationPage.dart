@@ -3,6 +3,7 @@ import 'package:festapp/dataGrids/DataGridAction.dart';
 import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:festapp/models/ExclusiveGroupModel.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionModel.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/models/Tb.dart';
@@ -14,7 +15,6 @@ import 'package:festapp/data/DataService.dart';
 import 'package:festapp/RouterService.dart';
 import 'package:festapp/services/MailerSendHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -36,6 +36,7 @@ class AdministrationPage extends StatefulWidget {
 }
 
 class _AdministrationPageState extends State<AdministrationPage> with SingleTickerProviderStateMixin {
+  OccasionModel? occasionModel;
   List<String> places = [];
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
@@ -45,17 +46,18 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    if(!(RightsHelper.currentUserOccasion?.isEditor??false))
+    RightsHelper.ensureAccessProcedure(context);
+    if(!RightsHelper.canSeeAdmin())
     {
-      NavigationHelper.goBackOrHome(context);
+      RouterService.goBackOrHome(context);
       return;
     }
     loadData();
   }
 
   Future<void> loadData() async {
+    occasionModel = await DataService.getOccasion(RightsHelper.currentOccasion!);
     await loadPlaces();
-
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
 
@@ -92,7 +94,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           appBar: AppBar(
           title: const Text("Admin").tr(),
           leading: BackButton(
-            onPressed: () => NavigationHelper.goBackOrHome(context),
+            onPressed: () => RouterService.goBackOrHome(context),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
@@ -247,7 +249,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "Start date".tr(),
                     field: EventModel.startDateColumn,
-                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
                     width: 140,
                   ),
                   PlutoColumn(
@@ -259,7 +261,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   PlutoColumn(
                     title: "End date".tr(),
                     field: EventModel.endDateColumn,
-                    type: PlutoColumnType.date(defaultValue: DateTime.now()),
+                    type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
                     width: 140,
                   ),
                   PlutoColumn(
@@ -596,7 +598,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             onPressed: () async {
                               var title = rendererContext.row.cells[Tb.user_group_info.title]?.value;
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
-                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: GlobalSettingsModel.DefaultPosition);
+                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: DataService.globalSettingsModel!.defaultMapLocation);
 
                               RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
@@ -617,10 +619,16 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 OccasionUserModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
                 Tb.occasion_users.user,
-                actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsHelper.canUpdateUsers),
+                actionsExtended: DataGridExtendedActions(
+                  saveAction: DataGridAction(
+                      action: (datagrid, [action]) async {
+                        await action!();
+                        _allUsers = [];
+                      }
+                  ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
-                  DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  //DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
                 ],
@@ -633,7 +641,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       width: 50),
                   PlutoColumn(
                       title: "E-mail".tr(),
-                      enableEditingMode: false,
                       field: Tb.occasion_users.data_email,
                       type: PlutoColumnType.text(),
                       checkReadOnly: (row, cell) {
@@ -763,29 +770,35 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
-    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    users = users.where((element) => element.id != null).toList();
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
     var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Users will get a new password".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
     }
 
-    for(var u in users) {
-      var pw = await UserManagementHelper.unsafeChangeUserPassword(u);
-      await MailerSendHelper.sendPassword(u, pw);
+    try {
+      for(var u in users) {
+        await UserManagementHelper.unsafeChangeUserPassword(u);
+      }
+    } on Exception catch (e) {
+      ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+      return;
     }
+
+    ToastHelper.Show("Password has been changed.".tr());
   }
 
   Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {
-    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    users = users.where((element) => element.id != null).toList();
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
     var allGroups = await DataService.getAllUserGroupInfo();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
     if(chosenGroup == null)
     {
       return;
     }
-    chosenGroup.participants!.addAll(users);
+    chosenGroup.participants!.addAll(users.map((e) => UserInfoModel(id: e.user)));
     await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
 
     for (var value in dataGrid.stateManager.refRows.originalList) {

@@ -2,7 +2,6 @@ import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/pages/EventPage.dart';
 import 'package:festapp/data/DataService.dart';
 import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/NavigationHelper.dart';
 import 'package:festapp/widgets/ScheduleTimeline.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -61,7 +60,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       appBar: AppBar(
         title: const Text("My schedule").tr(),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
       ),
       body: Align(
