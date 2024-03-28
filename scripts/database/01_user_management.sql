@@ -58,18 +58,62 @@ BEGIN
 END;
 $$;
 
+
+CREATE OR REPLACE FUNCTION update_user(usr uuid, oc bigint, data jsonb) RETURNS jsonb
+LANGUAGE plpgsql VOLATILE
+SECURITY DEFINER
+AS $$
+DECLARE
+    existingInfo jsonb;
+    _key   text;
+    _value text;
+    usr_info user_info%rowtype;
+BEGIN
+    IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+        RETURN jsonb_build_object('code', 403);
+    END IF;
+    IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
+         RETURN jsonb_build_object('code', 403);
+    END IF;
+
+    select * into usr_info from user_info where id = usr;
+    IF usr_info is NULL THEN
+       INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
+       select * into usr_info from user_info where id = usr;
+    END IF;
+
+    FOR _key, _value IN
+        SELECT * FROM jsonb_each_text(data)
+    LOOP
+        usr_info.data := jsonb_set(usr_info.data, array[_key], to_jsonb(_value));
+        IF _key = 'name' THEN
+          UPDATE user_info SET name = _value where id = usr;
+        ELSIF _key = 'surname' THEN
+          UPDATE user_info SET surname = _value where id = usr;
+       ELSIF _key = 'email' THEN
+          UPDATE user_info SET email_readonly = _value where id = usr;
+        ELSIF _key = 'sex' THEN
+          UPDATE user_info SET sex = _value where id = usr;
+        END IF;
+    END LOOP;
+
+    UPDATE user_info SET data = usr_info.data where id = usr;
+    RETURN jsonb_build_object('code', 200);
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION delete_user(usr uuid, oc bigint)
- RETURNS void
+ RETURNS jsonb
  LANGUAGE plpgsql
  SECURITY DEFINER
 AS $$
 
 BEGIN
     IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
-        RETURN json_build_object('code', 403);
+        RETURN jsonb_build_object('code', 403);
     END IF;
     IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
-         RETURN json_build_object('code', 403);
+         RETURN jsonb_build_object('code', 403);
     END IF;
     UPDATE user_group_info SET leader = null where leader = usr;
     DELETE FROM user_groups WHERE "user" = usr;
@@ -80,5 +124,6 @@ BEGIN
     DELETE FROM user_info WHERE id = usr;
     DELETE FROM auth.identities WHERE id = usr;
     DELETE FROM auth.users WHERE id = usr;
+    RETURN jsonb_build_object('code', 200);
 END;
 $$;
