@@ -16,7 +16,6 @@ class Tb {
   static PlacesTb places = const PlacesTb();
   static UserGroupsTb user_groups = const UserGroupsTb();
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
-  //todo delete
   static NotificationRecordsTb notification_records = const NotificationRecordsTb();
   static LogNotificationsTb log_notifications = const LogNotificationsTb();
   static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
@@ -230,12 +229,14 @@ class LogNotificationsTb{
   String get heading => "heading";
   String get content => "content";
 }
+//todo migrate and delete
 class AccommodationPlacesTb{
   const AccommodationPlacesTb();
   String get table => "accommodation_places";
   String get place => "place";
   String get accommodation_type => "accommodation_type";
 }
+//todo delete
 class GlobalSettingsTb{
   const GlobalSettingsTb();
   String get table => "global_settings";
