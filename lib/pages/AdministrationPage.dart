@@ -190,7 +190,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.information.description]?.value;
-                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -328,7 +328,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   textToEdit = fullEvent.description;
                                 }
                               }
-                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -417,7 +417,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async {
                               var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                              RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigateOccasion(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                   if(value != null)
                                   {
                                     var cell = rendererContext.row.cells[Tb.places.coordinates]!;
@@ -571,7 +571,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
-                              RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -600,7 +600,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: DataService.globalSettingsModel!.defaultMapLocation);
 
-                              RouterService.navigate(context, MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigateOccasion(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;
@@ -628,7 +628,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
-                  //DataGridAction(name: "Generate password".tr(), action:  (SingleTableDataGrid p0, [_]) { _generatePassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
                 ],
@@ -737,6 +737,15 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     width: 100,
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approved, RightsHelper.canUpdateUsers),
                   ),
+                  PlutoColumn(
+                    title: "Invited".tr(),
+                    field: Tb.occasion_users.data_isInvited,
+                    type: PlutoColumnType.select([]),
+                    applyFormatterInEditing: true,
+                    enableEditingMode: false,
+                    width: 100,
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.data_isInvited, ()=>false),
+                  )
                 ]).DataGrid(),
           ]
         ),
@@ -750,22 +759,28 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     await dataGrid.reloadData();
   }
 
-  Future<void> _generatePassword(SingleTableDataGrid dataGrid) async {
-    var users = List<UserInfoModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => UserInfoModel.fromPlutoJson(x.toJson())));
-    users = users.where((element) => element.id != null).toList();
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Generate password".tr(), "${"Users get new password via e-mail".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
+  Future<void> _invite(SingleTableDataGrid dataGrid) async {
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "${"Users will get invitation via e-mail.".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
     }
 
-    bool changePassToUnsignedUsersOnly = false;
-    var reallyAll = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "Change password to users who have been already signed in?".tr(), confirmButtonMessage: "Proceed".tr());
-    if(!reallyAll) {
-      changePassToUnsignedUsersOnly = true;
+    if(users.any((u) => u.data![Tb.occasion_users.data_isInvited]==true))
+    {
+      var reallyAll = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "Invite users who have already been invited?".tr(), confirmButtonMessage: "Proceed".tr());
+      if(!reallyAll) {
+        users = users.where((element) => !element.data![Tb.occasion_users.data_isInvited]).toList();
+      }
     }
 
-    for(var u in users) {
-      await UserManagementHelper.generateAndUpdatePasswordFromUser(u, changePassToUnsignedUsersOnly);
+
+    for(OccasionUserModel u in users) {
+      await DataService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
+      u.data![Tb.occasion_users.data_isInvited] = true;
+      await DataService.updateOccasionUser(u);
+      ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
   }
 
@@ -779,14 +794,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
     try {
       for(var u in users) {
-        await UserManagementHelper.unsafeChangeUserPassword(u);
+          await UserManagementHelper.unsafeChangeUserPassword(u);
+          ToastHelper.Show("Password has been changed.".tr());
       }
     } on Exception catch (e) {
       ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
       return;
     }
-
-    ToastHelper.Show("Password has been changed.".tr());
   }
 
   Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {

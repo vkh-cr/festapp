@@ -88,6 +88,6 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   _eventPressed(int id) {
-    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
+    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 }

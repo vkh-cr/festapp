@@ -246,6 +246,17 @@ class DataService {
       });
   }
 
+  static Future<void> sendResetRequest(String email) async {
+    await _supabase.auth.resetPasswordForEmail(email);
+  }
+
+  static Future<void> changeMyPassword(String pw) async {
+    await _supabase.auth.updateUser(
+        UserAttributes(
+          password: pw,
+        ));
+  }
+
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
     return await _supabase.rpc("create_user",
         params: {"oc": occasion, "email": email, "password": pw});
@@ -1172,7 +1183,7 @@ class DataService {
           .insert(
           {
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: _currentUser!.name??AppConfig.home_page
+            Tb.log_notifications.heading: _currentUser!.name??AppConfig.appName
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());

@@ -114,7 +114,7 @@ class _UserPageState extends State<UserPage> {
     super.didChangeDependencies();
     if(!DataService.isLoggedIn())
     {
-      RouterService.navigate(context, LoginPage.ROUTE);
+      RouterService.navigateOccasion(context, LoginPage.ROUTE);
     }
     loadData();
   }
@@ -147,7 +147,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    RouterService.navigate(context, AdministrationPage.ROUTE);
+    RouterService.navigateOccasion(context, AdministrationPage.ROUTE);
   }
 
   Future<void> loadData() async {

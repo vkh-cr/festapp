@@ -115,28 +115,6 @@ class UserManagementHelper{
     }
   }
 
-  static Future<void> generateAndUpdatePasswordFromUser(UserInfoModel u, bool ignoreIfAlreadySignedIn)
-  async {
-    //ignore already signed users
-    if(ignoreIfAlreadySignedIn)
-    {
-      var time = await DataService.getLastTimeSignIn(u.id!);
-      if(time!=null)
-      {
-        ToastHelper.Show("Password from {user} was not changed because it was already used to sign in.".tr(namedArgs: {"user":u.email!}));
-        return;
-      }
-    }
-
-    var random = Random();
-    var numberFormat = NumberFormat("####");
-
-    //var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-    //await DataService.updateUserPassword(u, password);
-    //ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
-    //await MailerSendHelper.sendPassword(u, password);
-  }
-
   static Future<String> unsafeCreateNewUser(int occasion, String? email) async {
     if(email == null)
     {
@@ -155,7 +133,7 @@ class UserManagementHelper{
     return newId;
   }
 
-  static Future<String> unsafeChangeUserPassword(OccasionUserModel user) async {
+  static Future<bool> unsafeChangeUserPassword(OccasionUserModel user) async {
     if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
@@ -165,16 +143,16 @@ class UserManagementHelper{
       throw Exception("User must be created first.");
     }
     var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
-    if(pw==null)
+    if(pw==null || pw.isEmpty)
     {
-      throw Exception("You must set password!");
+      throw Exception("Password has not been set.");
     }
     var newId = await DataService.unsafeChangeUserPassword(user, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");
     }
-    return pw;
+    return true;
   }
 
 }

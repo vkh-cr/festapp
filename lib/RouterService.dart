@@ -11,6 +11,8 @@ import 'package:festapp/pages/LoginPage.dart';
 import 'package:festapp/pages/MapPage.dart';
 import 'package:festapp/pages/NewsPage.dart';
 import 'package:festapp/pages/MySchedulePage.dart';
+import 'package:festapp/pages/ResetPasswordPage.dart';
+import 'package:festapp/pages/ForgotPassword.dart';
 import 'package:festapp/pages/SongPage.dart';
 import 'package:festapp/pages/TimetablePage.dart';
 import 'package:festapp/pages/UserPage.dart';
@@ -28,9 +30,14 @@ class RouterService{
 
   static String getCurrentLink() => "/$currentOccasionLink/";
 
-  static Future<T?> navigate<T extends Object?>(BuildContext context, String location, {Object? extra})
+  static Future<T?> navigateOccasion<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
     return context.push(RouterService.getCurrentLink()+location, extra: extra);
+  }
+
+  static Future<T?> navigate<T extends Object?>(BuildContext context, String location, {Object? extra})
+  {
+    return context.push("/$location", extra: extra);
   }
 
   static void pushReplacementFull<T extends Object?>(BuildContext context, String location, {Object? extra})
@@ -38,7 +45,7 @@ class RouterService{
     return context.pushReplacement("/$location", extra: extra);
   }
 
-  static void pushReplacement<T extends Object?>(BuildContext context, String location, {Object? extra})
+  static void pushReplacementOccasion<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
     return context.pushReplacement(RouterService.getCurrentLink()+location, extra: extra);
   }
@@ -52,18 +59,47 @@ class RouterService{
     context.pop();
   }
 
+  static void goBackOrInitial(BuildContext context){
+    if(!context.canPop())
+    {
+      goToInitial(context);
+      return;
+    }
+    context.pop();
+  }
+
+  static void goToInitial(BuildContext context){
+    navigateOccasion(context, "/${AppConfig.defaultLink}");
+  }
+
+  static Uri getCurrentUri(){
+    return Uri.base;
+  }
+
   static final router = GoRouter(
     navigatorKey: NavigationService.navigatorKey,
     initialLocation: "/${AppConfig.defaultLink}",
     routes: <GoRoute>[
-      GoRoute(
-        path: "/",
-        builder: (context, state) {
-          currentOccasionLink = "";
-          return const MyHomePage(title: MyHomePage.HOME_PAGE);
-        },
-      ),
-      GoRoute(
+        GoRoute(
+          path: "/",
+          builder: (context, state) {
+            currentOccasionLink = "";
+            return const MyHomePage(title: MyHomePage.HOME_PAGE);
+          },
+        ),
+        GoRoute(
+        path: "/${ResetPasswordPage.ROUTE}",
+        builder: (context, state) => const ResetPasswordPage(),
+        ),
+        GoRoute(
+          path: "/${ForgotPasswordPage.ROUTE}",
+          builder: (context, state) => const ForgotPasswordPage(),
+        ),
+        GoRoute(
+          path: "/${LoginPage.ROUTE}",
+          builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
           path: LINK_PATH,
           builder: (context, state) {
             currentOccasionLink = state.pathParameters[LINK]??"";
@@ -110,10 +146,6 @@ class RouterService{
             GoRoute(
               path: UserPage.ROUTE,
               builder: (context, state) => const UserPage(),
-            ),
-            GoRoute(
-              path: LoginPage.ROUTE,
-              builder: (context, state) => const LoginPage(),
             ),
             GoRoute(
               path: HtmlEditorPage.ROUTE,
