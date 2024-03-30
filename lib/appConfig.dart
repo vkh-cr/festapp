@@ -5,7 +5,7 @@ import 'models/LanguageModel.dart';
 class AppConfig {
   static const String supabase_url = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
   static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
-  static const String home_page = 'CSA 2024';
+  static const String appName = 'CSA 2024';
   static String map_page = "Map".tr();
 
   static const primaryColor = 0xFF2c366f;
