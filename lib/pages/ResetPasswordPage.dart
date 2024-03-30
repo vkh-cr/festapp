@@ -30,13 +30,25 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     var currentUri = RouterService.getCurrentUri();
-    var regExp = RegExp("refresh_token=(?<refresh_token>[^&]+)");
-    var regExpMatch = regExp.firstMatch(currentUri.toString());
+    var refreshExp = RegExp("refresh_token=(?<refresh_token>[^&]+)");
+    var regExpMatch = refreshExp.firstMatch(currentUri.toString());
 
     if (regExpMatch != null) {
       try {
         var groupName = regExpMatch.namedGroup("refresh_token")!;
         await Supabase.instance.client.auth.setSession(groupName);
+      } on Exception catch (e) {
+        ToastHelper.Show(e.toString());
+      }
+    }
+
+    var codeExp = RegExp("code=(?<code>[^&]+)");
+    var codeExpMatch = codeExp.firstMatch(currentUri.toString());
+
+    if (codeExpMatch != null) {
+      try {
+        var groupName = codeExpMatch.namedGroup("code")!;
+        await Supabase.instance.client.auth.exchangeCodeForSession(groupName);
       } on Exception catch (e) {
         ToastHelper.Show(e.toString());
       }
