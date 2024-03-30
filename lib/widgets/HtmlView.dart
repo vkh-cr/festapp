@@ -15,7 +15,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
     if(url.startsWith("navigate:"))
     {
       var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      RouterService.navigate(context, navigateTo);
+      RouterService.navigateOccasion(context, navigateTo);
       return true;
     }
     super.onTapUrl?.call(url);

@@ -1,5 +1,7 @@
 import 'package:festapp/RouterService.dart';
+import 'package:festapp/pages/ForgotPassword.dart';
 import 'package:festapp/services/ToastHelper.dart';
+import 'package:festapp/widgets/FormFields.dart';
 import 'package:festapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -55,38 +57,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        autofillHints: const [AutofillHints.email],
-                        keyboardType: TextInputType.emailAddress,
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "E-mail".tr()),
-                        validator: (String? value) {
-                          if (value!.isEmpty || !value.contains('@')) {
-                            return "E-mail is not valid!".tr();
-                          }
-                        },
-                      ),
+                      child: FormFields.email(_emailController),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      //padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        autofillHints: const [AutofillHints.password],
-                        keyboardType: TextInputType.text,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Password".tr()),
-                        validator: (String? value) {
-                          if (value!.isEmpty) {
-                            return "Fill the password!".tr();
-                          }
-                        },
-                      ),
+                      child: FormFields.password(_passwordController),
                     ),
                     const SizedBox(
                       height: 16,
@@ -114,6 +90,16 @@ class _LoginPageState extends State<LoginPage> {
                         ).tr(),
                       ),
                     ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
+                            child: Text("Forgot your password?", style: normalTextStyle,).tr())
+                    )
                   ],
                 ),
               ),

@@ -5,7 +5,7 @@ import 'models/LanguageModel.dart';
 class AppConfig {
   static const String supabase_url = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
   static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String home_page = 'Festapp';
+  static const String appName = 'Festapp';
   static String map_page = "Map".tr();
 
   //frosty style

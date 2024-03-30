@@ -109,7 +109,7 @@ class _EventPageState extends State<EventPage> {
                           visible: RightsHelper.isEditor() ||
                               (DataService.isGroupLeader() && _event != null && _event!.isGroupEvent),
                           child: ElevatedButton(
-                              onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
+                              onPressed: () => RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: _event!.description).then((value) async {
                                 if(value != null)
                                 {
                                   var changed = value as String;
@@ -144,8 +144,8 @@ class _EventPageState extends State<EventPage> {
                           padding: const EdgeInsets.all(8.0),
                           alignment: Alignment.topRight,
                           child: TextButton(
-                              onPressed: () => RouterService.navigate(context, "${MapPage.ROUTE}/${_event!.place!.id}").then((value) => loadData(_event!.id!)),
-                              child: Text("Place".tr() + ": ${_event?.place?.title??""}", style: normalTextStyle,))
+                              onPressed: () => RouterService.navigateOccasion(context, "${MapPage.ROUTE}/${_event!.place!.id}").then((value) => loadData(_event!.id!)),
+                              child: Text("${"Place".tr()}: ${_event?.place?.title??""}", style: normalTextStyle,))
                       )),
                   Visibility(
                       visible: EventModel.canSignIn(_event) && !DataService.isLoggedIn(),
@@ -344,7 +344,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   _eventPressed(int id) {
-    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData(_event!.id!));
+    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData(_event!.id!));
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {

@@ -133,7 +133,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  static const HOME_PAGE = AppConfig.home_page;
+  static const HOME_PAGE = AppConfig.appName;
 
   const MyHomePage({super.key, required this.title});
 
@@ -329,19 +329,19 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    RouterService.navigate(context, ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
-    RouterService.navigate(context, NewsPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, NewsPage.ROUTE).then((value) => loadData());
   }
 
   void _infoPressed() {
-    RouterService.navigate(context, InfoPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, InfoPage.ROUTE).then((value) => loadData());
   }
 
   void _mapPressed() {
-    RouterService.navigate(context, MapPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, MapPage.ROUTE).then((value) => loadData());
   }
 
   void _loginPressed() {
@@ -349,11 +349,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _profileButtonPressed() {
-    RouterService.navigate(context, UserPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, UserPage.ROUTE).then((value) => loadData());
   }
 
   _eventPressed(int id) {
-    RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
+    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 
   final List<TimeLineItem> _dots = [];

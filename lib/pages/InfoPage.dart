@@ -69,7 +69,7 @@ class _InfoPageState extends State<InfoPage> {
                         Visibility(
                             visible: RightsHelper.isEditor(),
                             child: ElevatedButton(
-                                onPressed: () => RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
+                                onPressed: () => RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
                                   if(value != null)
                                   {
                                     setState(() {

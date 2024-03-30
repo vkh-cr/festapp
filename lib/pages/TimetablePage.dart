@@ -30,7 +30,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   void initState() {
     super.initState();
     timetableController = TimetableController(onItemTap: (id) {
-      RouterService.navigate(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
+      RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
     });
   }
 
@@ -162,7 +162,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
               padding: const EdgeInsets.fromLTRB(6,6,6,0),
               child: TextButton(
                 onPressed: () async {
-                  RouterService.navigate(context, MySchedulePage.ROUTE).then((value) => loadData());
+                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
                 },
                 child: FittedBox(
                   child: Column(
