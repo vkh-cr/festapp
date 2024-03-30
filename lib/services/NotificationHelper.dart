@@ -24,7 +24,7 @@ class NotificationHelper
     }
 
     OneSignal.Notifications.addClickListener((event) {
-      RouterService.navigate(NavigationService.navigatorKey.currentContext!, NewsPage.ROUTE);
+      RouterService.navigateOccasion(NavigationService.navigatorKey.currentContext!, NewsPage.ROUTE);
     });
   }
 

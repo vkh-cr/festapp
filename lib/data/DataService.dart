@@ -165,7 +165,7 @@ class DataService {
   }
 
   static Future<void> resetPasswordForEmail(String email) async {
-    var result = await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.auth.resetPasswordForEmail(email);
   }
 
   static UserInfoModel? _currentUser;
@@ -244,6 +244,17 @@ class DataService {
         "oc": occasionUserModel.occasion??RightsHelper.currentOccasion,
         "password": pwd
       });
+  }
+
+  static Future<void> sendResetRequest(String email) async {
+    await _supabase.auth.resetPasswordForEmail(email);
+  }
+
+  static Future<void> changeMyPassword(String pw) async {
+    await _supabase.auth.updateUser(
+        UserAttributes(
+          password: pw,
+        ));
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
@@ -1172,7 +1183,7 @@ class DataService {
           .insert(
           {
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: _currentUser!.name??AppConfig.home_page
+            Tb.log_notifications.heading: _currentUser!.name??AppConfig.appName
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());

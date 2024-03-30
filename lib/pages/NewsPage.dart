@@ -30,7 +30,7 @@ class _NewsPageState extends State<NewsPage> {
       ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
-    RouterService.navigate(context, HtmlEditorPage.ROUTE).then((value) async {
+    RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE).then((value) async {
       if(value != null)
       {
         var message = value as String;
@@ -123,13 +123,13 @@ class _NewsPageState extends State<NewsPage> {
                           await DataService.deleteNewsMessage(message);
                         }
                         else{
-                          RouterService.navigate(context, HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
+                          RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
                             if(value != null)
                             {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DataService.updateNewsMessage(message);
-                              RouterService.pushReplacement(context, NewsPage.ROUTE);
+                              RouterService.pushReplacementOccasion(context, NewsPage.ROUTE);
                             }
                           });
                         }

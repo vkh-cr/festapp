@@ -19,6 +19,7 @@ class OccasionUserModel extends IPlutoRowModel {
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
+
   Map<String, dynamic>? data;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
      this.isEditor, this.isManager, this.isApprover, this.isApproved});
