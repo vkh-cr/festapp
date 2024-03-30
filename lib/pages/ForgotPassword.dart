@@ -7,7 +7,6 @@ import 'package:festapp/styles/Styles.dart';
 import 'package:festapp/widgets/FormFields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   static const ROUTE = "forgotPassword";

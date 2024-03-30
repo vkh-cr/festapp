@@ -165,7 +165,7 @@ class DataService {
   }
 
   static Future<void> resetPasswordForEmail(String email) async {
-    var result = await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.auth.resetPasswordForEmail(email);
   }
 
   static UserInfoModel? _currentUser;
