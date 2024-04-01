@@ -42,7 +42,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       }
     }
 
-    var codeExp = RegExp("code=(?<code>[^&]+)");
+    var codeExp = RegExp("code=(?<code>[^#]+)");
     var codeExpMatch = codeExp.firstMatch(currentUri.toString());
 
     if (codeExpMatch != null) {
