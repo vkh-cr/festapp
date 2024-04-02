@@ -104,7 +104,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           await DataService.changePassword(token!, _passwordController.text)
                               .then((value) async {
                                 if(value["code"] == 403 || value["code"] == 404) {
-                                    ToastHelper.Show("Token is not valid".tr(), severity: ToastSeverity.NotOk);
+                                    ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
                                   }
                                 else if(value["code"] == 200) {
                                   await DataService.login(value["email"], _passwordController.text);
