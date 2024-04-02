@@ -165,7 +165,7 @@ class DataService {
   }
 
   static Future<void> resetPasswordForEmail(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.auth.resetPasswordForEmail(email, redirectTo: "https://aksmcz.netlify.app/#/resetPassword");
   }
 
   static UserInfoModel? _currentUser;
