@@ -257,6 +257,10 @@ class DataService {
         ));
   }
 
+  static Future<void> setSession(String code) async {
+    await _supabase.auth.exchangeCodeForSession(code);
+  }
+
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
     return await _supabase.rpc("create_user",
         params: {"oc": occasion, "email": email, "password": pw});
