@@ -6,7 +6,6 @@ import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
@@ -49,7 +48,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Reset password").tr(),
+        title: const Text("New Password").tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
         ),
@@ -86,6 +85,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           if (value!.isEmpty) {
                             return "Fill the password!".tr();
                           }
+                          return null;
                         },
                       )),
                   const SizedBox(
