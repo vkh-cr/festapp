@@ -169,5 +169,7 @@
   "Users will get invitation via e-mail.": "Користувачі отримають запрошення по електронній пошті.",
   "Invite users who have already been invited?": "Запросити користувачів, які вже були запрошені?",
   "Invited: {user}.": "Запрошено: {user}.",
+  "Token is not valid.": "Токен недійсний.",
+  "New Password": "Новий пароль",
   "_": "_"
 }

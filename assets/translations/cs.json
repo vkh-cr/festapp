@@ -169,5 +169,7 @@
   "Users will get invitation via e-mail.": "Uživatelé obdrží pozvánku e-mailem.",
   "Invite users who have already been invited?": "Pozvat i uživatele, kteří již byli pozváni?",
   "Invited: {user}.": "Pozván: {user}.",
+  "Token is not valid.": "Token není platný.",
+  "New Password": "Nové heslo",
   "_": "_"
 }
