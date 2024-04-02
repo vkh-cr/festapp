@@ -246,10 +246,6 @@ class DataService {
       });
   }
 
-  static Future<void> sendResetRequest(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
-  }
-
   static Future<void> changeMyPassword(String pw) async {
     await _supabase.auth.updateUser(
         UserAttributes(
