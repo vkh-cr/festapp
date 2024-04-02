@@ -785,6 +785,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       await DataService.updateOccasionUser(u);
       ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
+    await dataGrid.reloadData();
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
