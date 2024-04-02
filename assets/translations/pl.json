@@ -169,5 +169,7 @@
   "Users will get invitation via e-mail.": "Użytkownicy otrzymają zaproszenie drogą e-mailową.",
   "Invite users who have already been invited?": "Zaprosić użytkowników, którzy już zostali zaproszeni?",
   "Invited: {user}.": "Zaproszony: {user}.",
+  "Token is not valid.": "Token nie jest ważny.",
+  "New Password": "Nowe hasło",
   "_": "_"
 }
