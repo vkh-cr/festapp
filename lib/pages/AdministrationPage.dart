@@ -160,6 +160,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.information.id,
                 columns: [
                   PlutoColumn(
+                      hide: true,
                       title: "Id".tr(),
                       field: Tb.information.id,
                       type: PlutoColumnType.number(defaultValue: -1),
@@ -369,6 +370,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 )),
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.places.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -435,6 +437,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.exclusive_groups.id,
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.exclusive_groups.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -464,6 +467,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.user_group_info.id,
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.user_group_info.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -632,6 +636,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ],
                 columns: [
                   PlutoColumn(
+                      hide: true,
                       title: "Id".tr(),
                       field: Tb.occasion_users.user,
                       type: PlutoColumnType.text(),
