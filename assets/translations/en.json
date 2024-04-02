@@ -169,5 +169,6 @@
   "Users will get invitation via e-mail.": "Users will get invitation via e-mail.",
   "Invite users who have already been invited?": "Invite users who have already been invited?",
   "Invited: {user}.": "Invited: {user}.",
+  "Token is not valid": "Token is not valid. ",
   "_":"_"
 }

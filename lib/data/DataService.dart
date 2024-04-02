@@ -165,7 +165,7 @@ class DataService {
   }
 
   static Future<void> resetPasswordForEmail(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+    await _supabase.functions.invoke("email", body: {"email": email});
   }
 
   static UserInfoModel? _currentUser;
@@ -255,6 +255,15 @@ class DataService {
         UserAttributes(
           password: pw,
         ));
+  }
+
+  static Future<dynamic> changePassword(String token, String pw) async {
+    return await _supabase.rpc("set_user_password_token",
+        params:
+        {
+          "token": token,
+          "password": pw,
+        });
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {

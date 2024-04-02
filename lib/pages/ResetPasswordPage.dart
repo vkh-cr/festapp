@@ -21,6 +21,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
 
+  String? token;
   @override
   void dispose() {
     super.dispose();
@@ -29,26 +30,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+
     var currentUri = RouterService.getCurrentUri();
-    var refreshExp = RegExp("refresh_token=(?<refresh_token>[^&]+)");
-    var regExpMatch = refreshExp.firstMatch(currentUri.toString());
+    var tokenExp = RegExp("token=(?<token>[^&]+)");
+    var regExpMatch = tokenExp.firstMatch(currentUri.toString());
 
     if (regExpMatch != null) {
       try {
-        var groupName = regExpMatch.namedGroup("refresh_token")!;
-        await Supabase.instance.client.auth.setSession(groupName);
-      } on Exception catch (e) {
-        ToastHelper.Show(e.toString());
-      }
-    }
-
-    var codeExp = RegExp("code=(?<code>[^#]+)");
-    var codeExpMatch = codeExp.firstMatch(currentUri.toString());
-
-    if (codeExpMatch != null) {
-      try {
-        var groupName = codeExpMatch.namedGroup("code")!;
-        await Supabase.instance.client.auth.exchangeCodeForSession(groupName);
+        token = regExpMatch.namedGroup("token")!;
       } on Exception catch (e) {
         ToastHelper.Show(e.toString());
       }
@@ -112,11 +101,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           TextInput.finishAutofillContext();
-                          await DataService.changeMyPassword(
-                                  _passwordController.text)
-                              .then((value) {
-                            ToastHelper.Show("Password has been changed.".tr());
-                            RouterService.goBackOrInitial(context);
+                          await DataService.changePassword(token!, _passwordController.text)
+                              .then((value) async {
+                                if(value["code"] == 403 || value["code"] == 404) {
+                                    ToastHelper.Show("Token is not valid".tr(), severity: ToastSeverity.NotOk);
+                                  }
+                                else if(value["code"] == 200) {
+                                  await DataService.login(value["email"], _passwordController.text);
+                                  ToastHelper.Show("Password has been changed.".tr());
+                                  RouterService.goBackOrInitial(context);
+                                }
                           }).onError((error, stackTrace) {
                             ToastHelper.Show(error.toString());
                           });
