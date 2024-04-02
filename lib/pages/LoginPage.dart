@@ -90,16 +90,16 @@ class _LoginPageState extends State<LoginPage> {
                         ).tr(),
                       ),
                     ),
-                    // const SizedBox(
-                    //   height: 8,
-                    // ),
-                    // Container(
-                    //     padding: const EdgeInsets.all(8.0),
-                    //     alignment: Alignment.topRight,
-                    //     child: TextButton(
-                    //         onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
-                    //         child: Text("Forgot your password?", style: normalTextStyle,).tr())
-                    // )
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
+                            child: Text("Forgot your password?", style: normalTextStyle,).tr())
+                    )
                   ],
                 ),
               ),
