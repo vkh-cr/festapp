@@ -155,6 +155,7 @@ BEGIN
     DELETE FROM user_news WHERE "user" = usr;
     DELETE FROM event_users_saved WHERE "user" = usr;
     DELETE FROM occasion_users WHERE "user" = usr;
+    DELETE FROM user_reset_token WHERE "user" = usr;
     DELETE FROM user_info WHERE id = usr;
     DELETE FROM auth.identities WHERE id = usr;
     DELETE FROM auth.users WHERE id = usr;
