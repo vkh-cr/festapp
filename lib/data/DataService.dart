@@ -164,8 +164,8 @@ class DataService {
     NotificationHelper.Logout();
   }
 
-  static Future<void> resetPasswordForEmail(String email) async {
-    await _supabase.functions.invoke("email", body: {"email": email});
+  static Future<dynamic> resetPasswordForEmail(String email) async {
+    return await _supabase.functions.invoke("email", body: {"email": email});
   }
 
   static UserInfoModel? _currentUser;

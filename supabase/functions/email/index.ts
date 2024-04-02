@@ -27,22 +27,20 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     console.log(reqData);
 
-
-    const { data: { user } } = await _supabase.auth.getUser();
     const userEmail = reqData.email != null ? reqData.email : "bujnmi@gmail.com";
 
     const userData = await _supabase
           .from("user_info")
           .select()
           .eq("email_readonly", userEmail)
-          .single();
+          .maybeSingle();
 
     if(userData.data == null)
     {
-        return new Response(userEmail, {
+        return new Response(JSON.stringify({"email":userEmail}), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 404,
-        })
+          status: 200,
+        });
     }
 
     const userId = userData.data.id;
@@ -83,7 +81,6 @@ Deno.serve(async (req) => {
       },
     });
 
-
     await client.send({
       from: _DEFAULT_EMAIL,
       to: userEmail,
@@ -93,7 +90,15 @@ Deno.serve(async (req) => {
 
     await client.close();
 
-    return new Response("", {
+    await _supabase
+      .from("log_emails")
+      .insert({
+        "from":_DEFAULT_EMAIL,
+        "to":userEmail,
+        "template":template.data.id
+    });
+
+    return new Response(JSON.stringify({"email":userEmail}), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
