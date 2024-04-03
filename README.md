@@ -42,6 +42,7 @@ Solution is based on Flutter framework with language dart. As a backend is used 
 - [Absolventský Velehrad](https://av23.cz)
 - [Člověk a Víra](https://ff23.cz)
 - [BISCUP](https://biscup23.app)
+- [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app/#/csa2024)
 
 Links to Appstore/Play Store versions are usually saved in info section.
 
