@@ -7,6 +7,7 @@ const _SMTP_USER_PASSWORD = Deno.env.get('SMTP_USER_PASSWORD')!
 
 const _DEFAULT_URL = Deno.env.get('DEFAULT_URL')!
 const _DEFAULT_EMAIL = Deno.env.get('DEFAULT_EMAIL')!
+const _APP_NAME = Deno.env.get('APP_NAME')!
 
 
 const _supabase = createClient(
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
     });
 
     await client.send({
-      from: _DEFAULT_EMAIL,
+      from: _APP_NAME + " | Festapp" + "<" + _DEFAULT_EMAIL + ">",
       to: userEmail,
       subject: template.data.subject,
       html: html,
