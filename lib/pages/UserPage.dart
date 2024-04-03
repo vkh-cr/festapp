@@ -34,7 +34,7 @@ class _UserPageState extends State<UserPage> {
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
         ),
-        actions: [const LanguageButton()],
+        actions: const [LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -50,7 +50,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Surname".tr(), userData?.surname ?? ''),
                 buildTextField("E-mail".tr(), userData?.email ?? ''),
                 buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), RightsHelper.currentUserOccasion!.role?.toString()??""),
+                buildTextField("Role".tr(), userData?.roleString??""),
                 const SizedBox(
                   height: 16,
                 ),
@@ -138,7 +138,7 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> loadData() async {
     loadDataOffline();
-    var userInfo = await DataService.getUserInfoWithAccommodation();
+    var userInfo = await DataService.getUserInfoWithRole();
     OfflineDataHelper.saveUserInfo(userInfo);
     setState(() {
       userData = userInfo;

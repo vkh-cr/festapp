@@ -151,24 +151,3 @@ class OccasionUserModel extends IPlutoRowModel {
       && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];
   }
 }
-class OccasionLinkModel{
-  int? code;
-  int? occasionId;
-  String? link;
-  OccasionUserModel? user;
-
-  bool isAvailable() => code == 200;
-  bool isAccessDenied() => code == 403;
-  bool isNotFound() => code == 404;
-
-  factory OccasionLinkModel.fromJson(Map<String, dynamic> json) {
-    return OccasionLinkModel(
-      code: json["code"],
-      user: json["occasion_user"]!=null ? OccasionUserModel.fromJson(json["occasion_user"]):null,
-      link: json["link"],
-      occasionId: json["occasion"],
-    );
-  }
-
-  OccasionLinkModel({this.code, this.user, this.link, this.occasionId});
-}
