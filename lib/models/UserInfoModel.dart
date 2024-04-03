@@ -1,14 +1,11 @@
+import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-import '../data/DataService.dart';
-import '../dataGrids/PlutoAbstract.dart';
-
-class UserInfoModel extends IPlutoRowModel {
+class UserInfoModel {
   String? id;
   String? email;
   String? name;
@@ -20,8 +17,10 @@ class UserInfoModel extends IPlutoRowModel {
   DateTime? birthDate;
   bool? isAdmin = false;
   bool? isEditor = false;
-  PlaceModel? accommodationModel;
+  PlaceModel? accommodationPlace;
   UserGroupInfoModel? userGroup;
+  OccasionUserModel? occasionUser;
+  String? roleString;
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
@@ -34,6 +33,8 @@ class UserInfoModel extends IPlutoRowModel {
   static const String birthDateColumn = "birth_date";
   static const String placeColumn = "placeColumn";
   static const String userGroupColumn = "userGroup";
+  static const String occasionUserColumn = "occasionUser";
+  static const String roleStringColumn = "roleString";
 
   static const String isEditorReadOnlyColumn = "is_editor_readonly";
   static const String isAdminReadOnlyColumn = "is_admin_readonly";
@@ -44,7 +45,6 @@ class UserInfoModel extends IPlutoRowModel {
 
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
-  PlaceModel? place;
 
   static const sexes = ["male", "female"];
 
@@ -72,8 +72,10 @@ class UserInfoModel extends IPlutoRowModel {
      this.isEditor,
      this.phone,
      this.accommodation,
-     this.place,
-     this.userGroup});
+     this.accommodationPlace,
+     this.userGroup,
+     this.occasionUser,
+     this.roleString});
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
@@ -88,8 +90,10 @@ class UserInfoModel extends IPlutoRowModel {
       role: json[roleColumn],
       //todo remove
       accommodation: json[accommodationColumn],
-      place: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
+      accommodationPlace: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
       userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
+      occasionUser: json[occasionUserColumn]!=null?OccasionUserModel.fromJson(json[occasionUserColumn]):null,
+      roleString: json[roleStringColumn],
       sex: json[sexColumn],
       //todo remove
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
@@ -100,45 +104,6 @@ class UserInfoModel extends IPlutoRowModel {
     );
   }
 
-  static UserInfoModel fromPlutoJson(Map<String, dynamic> json) {
-    DateTime? bd;
-    if (json[birthDateColumn]!=null){
-      var birthDateString = json[birthDateColumn];
-      var dateFormat = DateFormat(birthDateJsonFormat);
-      bd = dateFormat.parse(birthDateString);
-    }
-      return UserInfoModel(
-        id: json[idColumn]?.isEmpty == true ? null : json[idColumn],
-        email: json[emailReadonlyColumn]?.trim().isEmpty ? null : json[emailReadonlyColumn]?.trim(),
-        name: json[nameColumn]?.trim().isEmpty ? null : json[nameColumn]?.trim(),
-        surname: json[surnameColumn]?.trim().isEmpty ? null : json[surnameColumn]?.trim(),
-        phone: json[phoneColumn]?.trim().isEmpty ? null : json[phoneColumn]?.trim(),
-        role: json[roleColumn]?.trim().isEmpty ? null : json[roleColumn]?.trim(),
-        accommodation: json[accommodationColumn]?.trim().isEmpty ? null : json[accommodationColumn]?.trim(),
-        sex: json[sexColumn],
-        birthDate: bd,
-        isAdmin: json[isAdminReadOnlyColumn] == "true" ? true : false,
-        isEditor: json[isEditorReadOnlyColumn] == "true" ? true : false,
-      );
-    }
-
-  @override
-  PlutoRow toPlutoRow() {
-    return PlutoRow(cells: {
-      idColumn: PlutoCell(value: id),
-      emailReadonlyColumn: PlutoCell(value: email ?? ""),
-      nameColumn: PlutoCell(value: name ?? ""),
-      surnameColumn: PlutoCell(value: surname ?? ""),
-      phoneColumn: PlutoCell(value: phone ?? ""),
-      roleColumn: PlutoCell(value: role ?? ""),
-      accommodationColumn: PlutoCell(value: accommodation ?? ""),
-      sexColumn: PlutoCell(value: sex),
-      birthDateColumn: PlutoCell(value: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0))),
-      isAdminReadOnlyColumn: PlutoCell(value: isAdmin.toString()),
-      isEditorReadOnlyColumn: PlutoCell(value: isEditor.toString()),
-    });
-  }
-
   Map toJson() =>
   {
     idColumn: id,
@@ -147,27 +112,16 @@ class UserInfoModel extends IPlutoRowModel {
     surnameColumn: surname,
     phoneColumn: phone,
     roleColumn: role,
-    placeColumn: place?.toJson(),
+    placeColumn: accommodationPlace?.toJson(),
     userGroupColumn: userGroup?.toJson(),
+    occasionUserColumn: occasionUser?.toUpdateJson(),
+    roleStringColumn: roleString,
     sexColumn: sex,
     birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
     isAdminReadOnlyColumn: isAdmin,
     isEditorReadOnlyColumn: isEditor,
     Tb.user_info.data: {Tb.occasion_users.data_email: email}
   };
-
-  @override
-  Future<void> deleteMethod() async {
-    //await DataService.deleteUserInfo(id!);
-  }
-
-  @override
-  Future<void> updateMethod() async {
-    //await DataService.updateUser(this);
-  }
-
-  @override
-  String toBasicString() => email??"";
 
   @override
   String toString() => toFullNameString();
