@@ -175,6 +175,8 @@ class UserInfoModel extends IPlutoRowModel {
     return "$name ${(surname!=null && surname!.isNotEmpty) ? "${surname![0]}." : "-"}";
   }
 
+  bool hasGroup() => userGroup != null;
+
   bool isSignedIn = false;
 
 
