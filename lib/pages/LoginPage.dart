@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
         ),
-        actions: [const LanguageButton()],
+        actions: const [LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
