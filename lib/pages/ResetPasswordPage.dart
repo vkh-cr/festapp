@@ -6,7 +6,6 @@ import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:supabase_auth_ui/supabase_auth_ui.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
@@ -21,6 +20,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
 
+  String? token;
   @override
   void dispose() {
     super.dispose();
@@ -29,14 +29,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+
     var currentUri = RouterService.getCurrentUri();
-    var regExp = RegExp("refresh_token=(?<refresh_token>[^&]+)");
-    var regExpMatch = regExp.firstMatch(currentUri.toString());
+    var tokenExp = RegExp("token=(?<token>[^&]+)");
+    var regExpMatch = tokenExp.firstMatch(currentUri.toString());
 
     if (regExpMatch != null) {
       try {
-        var groupName = regExpMatch.namedGroup("refresh_token")!;
-        await Supabase.instance.client.auth.setSession(groupName);
+        token = regExpMatch.namedGroup("token")!;
       } on Exception catch (e) {
         ToastHelper.Show(e.toString());
       }
@@ -48,7 +48,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Reset password").tr(),
+        title: const Text("New Password").tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
         ),
@@ -85,6 +85,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           if (value!.isEmpty) {
                             return "Fill the password!".tr();
                           }
+                          return null;
                         },
                       )),
                   const SizedBox(
@@ -100,11 +101,16 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
                           TextInput.finishAutofillContext();
-                          await DataService.changeMyPassword(
-                                  _passwordController.text)
-                              .then((value) {
-                            ToastHelper.Show("Password has been changed.".tr());
-                            RouterService.goBackOrInitial(context);
+                          await DataService.changePassword(token!, _passwordController.text)
+                              .then((value) async {
+                                if(value["code"] == 403 || value["code"] == 404) {
+                                    ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
+                                  }
+                                else if(value["code"] == 200) {
+                                  await DataService.login(value["email"], _passwordController.text);
+                                  ToastHelper.Show("Password has been changed.".tr());
+                                  RouterService.goBackOrInitial(context);
+                                }
                           }).onError((error, stackTrace) {
                             ToastHelper.Show(error.toString());
                           });

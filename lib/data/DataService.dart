@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/GlobalSettingsModel.dart';
+import 'package:festapp/models/OccasionLinkModel.dart';
 import 'package:festapp/models/OccasionModel.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
@@ -164,8 +165,8 @@ class DataService {
     NotificationHelper.Logout();
   }
 
-  static Future<void> resetPasswordForEmail(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
+  static Future<dynamic> resetPasswordForEmail(String email) async {
+    return await _supabase.functions.invoke("email", body: {"email": email});
   }
 
   static UserInfoModel? _currentUser;
@@ -191,21 +192,29 @@ class DataService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await getUserInfoWithAccommodation();
+    var user = await getUserInfoWithRole();
     var myGroup = await getCurrentUserGroup();
-    if(myGroup!=null)
-    {
+    if(myGroup!=null) {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
     return user;
   }
 
-  static Future<UserInfoModel> getUserInfoWithAccommodation() async {
+  static Future<UserInfoModel> getUserInfoWithRole() async {
     var userInfo = await DataService.getCurrentUserInfo();
-    if(userInfo.accommodation != null) {
-      userInfo.place = await DataService.getUserAccommodation(userInfo.accommodation!);
+    if(RightsHelper.currentUserOccasion?.role != null) {
+      userInfo.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
     }
     return userInfo;
+  }
+
+  static Future<String> getRoleInfo(int role) async {
+    var data = await _supabase
+        .from(Tb.role_info.table)
+        .select(Tb.role_info.title)
+        .eq(Tb.role_info.id, role)
+        .single();
+    return data[Tb.role_info.title];
   }
 
   static Future<PlaceModel?> getUserAccommodation(
@@ -246,15 +255,20 @@ class DataService {
       });
   }
 
-  static Future<void> sendResetRequest(String email) async {
-    await _supabase.auth.resetPasswordForEmail(email);
-  }
-
   static Future<void> changeMyPassword(String pw) async {
     await _supabase.auth.updateUser(
         UserAttributes(
           password: pw,
         ));
+  }
+
+  static Future<dynamic> changePassword(String token, String pw) async {
+    return await _supabase.rpc("set_user_password_token",
+        params:
+        {
+          "token": token,
+          "password": pw,
+        });
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {

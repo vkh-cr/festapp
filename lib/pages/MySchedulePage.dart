@@ -40,10 +40,11 @@ class _MySchedulePageState extends State<MySchedulePage> {
     var offlineEvents = OfflineDataHelper.getAllEvents();
     OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
     OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+    var userInfo = OfflineDataHelper.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
       e.isEventInMySchedule == true ||
-      (e.isGroupEvent && DataService.isLoggedIn()) ||
+      (e.isGroupEvent && (userInfo?.hasGroup()??false)) ||
       e.isSignedIn);
 
       _events.clear();

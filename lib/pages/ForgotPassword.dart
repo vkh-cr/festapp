@@ -69,7 +69,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             if (_formKey.currentState!.validate()) {
                               TextInput.finishAutofillContext();
                               await DataService
-                                  .sendResetRequest(_emailController.text)
+                                  .resetPasswordForEmail(_emailController.text)
                                   .then((value)  {
                                     setState(() {
                                       _isSent = true;

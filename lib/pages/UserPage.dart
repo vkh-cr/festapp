@@ -34,7 +34,7 @@ class _UserPageState extends State<UserPage> {
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
         ),
-        actions: [const LanguageButton()],
+        actions: const [LanguageButton()],
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -50,7 +50,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Surname".tr(), userData?.surname ?? ''),
                 buildTextField("E-mail".tr(), userData?.email ?? ''),
                 buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), RightsHelper.currentUserOccasion!.role?.toString()??""),
+                buildTextField("Role".tr(), userData?.roleString??""),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
@@ -60,8 +60,8 @@ class _UserPageState extends State<UserPage> {
                     Container(
                       alignment: Alignment.topLeft,
                       child: TextButton(
-                          onPressed: userData?.place == null ? null : () => RouterService.navigate(context, "${MapPage.ROUTE}/${userData!.place!.id!}"),
-                          child: Text(userData?.place?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
+                          onPressed: userData?.accommodationPlace == null ? null : () => RouterService.navigate(context, "${MapPage.ROUTE}/${userData!.accommodationPlace!.id!}"),
+                          child: Text(userData?.accommodationPlace?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
                     )
                   ],),
                 ),
@@ -152,7 +152,7 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> loadData() async {
     loadDataOffline();
-    var userInfo = await DataService.getUserInfoWithAccommodation();
+    var userInfo = await DataService.getUserInfoWithRole();
     OfflineDataHelper.saveUserInfo(userInfo);
     setState(() {
       userData = userInfo;

@@ -160,6 +160,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.information.id,
                 columns: [
                   PlutoColumn(
+                      hide: true,
                       title: "Id".tr(),
                       field: Tb.information.id,
                       type: PlutoColumnType.number(defaultValue: -1),
@@ -369,6 +370,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 )),
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.places.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -435,6 +437,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.exclusive_groups.id,
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.exclusive_groups.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -464,6 +467,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 Tb.user_group_info.id,
                 columns: [
                   PlutoColumn(
+                    hide: true,
                     title: "Id".tr(),
                     field: Tb.user_group_info.id,
                     type: PlutoColumnType.number(defaultValue: -1),
@@ -632,6 +636,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ],
                 columns: [
                   PlutoColumn(
+                      hide: true,
                       title: "Id".tr(),
                       field: Tb.occasion_users.user,
                       type: PlutoColumnType.text(),
@@ -780,12 +785,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       await DataService.updateOccasionUser(u);
       ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
+    await dataGrid.reloadData();
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
     var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.user != null).toList();
-    var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Users will get a new password".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
+    var really = await DialogHelper.showConfirmationDialogAsync(context, "Change password".tr(), "${"Change password to users".tr()} (${users.length}):\n${users.map((value) => value.toBasicString()).toList().join(",\n")}", confirmButtonMessage: "Proceed".tr());
     if(!really) {
       return;
     }
