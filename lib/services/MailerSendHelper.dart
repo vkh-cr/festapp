@@ -14,7 +14,7 @@ class MailerSendHelper{
     ];
 
     allVars.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email!, AppConfig.welcomeEmailTemplate, allVars);
+    await DataService.emailMailerSend(recipient.email!, "templateid", allVars);
     ToastHelper.Show("E-mail with credentials was sent to: {email}.".tr(namedArgs: {"email":recipient.email!}));
     await Future.delayed(const Duration(milliseconds: 6000));
   }

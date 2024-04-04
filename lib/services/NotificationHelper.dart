@@ -16,7 +16,7 @@ class NotificationHelper
       return;
     }
 
-    OneSignal.initialize(AppConfig.OneSignalAppId);
+    OneSignal.initialize(AppConfig.oneSignalAppId);
 
     var userAgree = await OneSignal.Notifications.requestPermission(false);
     if(!userAgree) {

@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
 class AppConfig {
-  static const String supabase_url = 'https://kluhpargrjwxiqlxlkdu.supabase.co';
-  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsdWhwYXJncmp3eGlxbHhsa2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNDc1NDEsImV4cCI6MjAyNzgyMzU0MX0.gA7QtEvLNoQf-eztGBdeJFczqlENAw8veHC6h3nVKxs';
+  static const String supabaseUrl = 'https://kluhpargrjwxiqlxlkdu.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsdWhwYXJncmp3eGlxbHhsa2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNDc1NDEsImV4cCI6MjAyNzgyMzU0MX0.gA7QtEvLNoQf-eztGBdeJFczqlENAw8veHC6h3nVKxs';
   static const String appName = 'Festival Slunovrat';
-  static String map_page = "Map".tr();
+  static String mapTitle = "Map".tr();
+  static const bool isOwnProgramSupported = true;
+  static const bool isNotificationsSupported = true;
+  static const String oneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
+  static const String generatedPasswordPrefix = "fa";
+  static const String defaultLink = "2024";
 
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
@@ -17,18 +22,7 @@ class AppConfig {
   static const color4 = Color(0xFF253759);
   static const attentionColor = Color(0xFF8B0000);
 
-  static const bool isServiceRoleSafety = false;
-  static const bool isOwnProgramSupported = true;
-  static const bool isNotificationsSupported = true;
-  static const String OneSignalAppId = 'e9c1ac36-4d81-4bd9-9641-18b130f656cb';
-
-  static const String generatedPasswordPrefix = "fa";
-  static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
-
-  static const String defaultLink = "2024";
-
-
-  static List<LanguageModel> AvailableLanguages = [
+  static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
     LanguageModel(const Locale("sk"), "Slovenčina"),
