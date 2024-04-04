@@ -1,3 +1,4 @@
+import 'package:festapp/appConfig.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/dataGrids/DataGridAction.dart';
 import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
@@ -633,7 +634,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       }
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
-                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => AppConfig.isUsersImportSupported),
                   DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
