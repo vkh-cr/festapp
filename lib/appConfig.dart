@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
 class AppConfig {
-  static const String supabase_url = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
-  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
+  static const String supabase_url = 'https://kluhpargrjwxiqlxlkdu.supabase.co';
+  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsdWhwYXJncmp3eGlxbHhsa2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNDc1NDEsImV4cCI6MjAyNzgyMzU0MX0.gA7QtEvLNoQf-eztGBdeJFczqlENAw8veHC6h3nVKxs';
   static const String appName = 'Festival Slunovrat';
   static String map_page = "Map".tr();
 
@@ -20,12 +20,12 @@ class AppConfig {
   static const bool isServiceRoleSafety = false;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
-  static const String OneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
+  static const String OneSignalAppId = 'e9c1ac36-4d81-4bd9-9641-18b130f656cb';
 
   static const String generatedPasswordPrefix = "fa";
   static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
 
-  static const String defaultLink = "conference2024";
+  static const String defaultLink = "2024";
 
 
   static List<LanguageModel> AvailableLanguages = [
