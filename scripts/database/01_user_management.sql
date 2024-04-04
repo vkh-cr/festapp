@@ -37,9 +37,7 @@ CREATE OR REPLACE FUNCTION set_user_password(usr uuid, oc bigint, password text)
  SECURITY DEFINER
 AS $$
   declare
-  user_id uuid;
   encrypted_pw text;
-  user_meta_data jsonb;
 BEGIN
     IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
         RETURN NULL;
@@ -54,9 +52,10 @@ BEGIN
     UPDATE auth.users
     SET encrypted_password = encrypted_pw
     WHERE auth.users.id = usr;
-    RETURN user_id;
+    RETURN usr;
 END;
 $$;
+
 
 CREATE OR REPLACE FUNCTION set_user_password_token(token uuid, password text)
  RETURNS jsonb

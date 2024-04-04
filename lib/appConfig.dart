@@ -3,10 +3,15 @@ import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
 class AppConfig {
-  static const String supabase_url = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
-  static const String anon_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
+  static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3ZnBkanhzZG1rZnlyenFicmxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTEyMjgwNDksImV4cCI6MjAyNjgwNDA0OX0.440P3yf8ZqNjOHEQTn9uJhkKyObhD_7PZ2NwaE9e4J0';
   static const String appName = 'CSA 2024';
-  static String map_page = "Map".tr();
+  static String mapTitle = "Map".tr();
+  static const bool isOwnProgramSupported = true;
+  static const bool isNotificationsSupported = true;
+  static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
+  static const String generatedPasswordPrefix = "fa";
+  static const String defaultLink = "csa2024";
 
   static const primaryColor = 0xFF2c366f;
   static const backgroundColor = Color(0xFFE3E2D3);
@@ -16,18 +21,7 @@ class AppConfig {
   static const color4 = Color(0xFF233182);
   static const attentionColor = Color(0xFF8B0000);
 
-  static const bool isServiceRoleSafety = false;
-  static const bool isOwnProgramSupported = true;
-  static const bool isNotificationsSupported = true;
-  static const String OneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
-
-  static const String generatedPasswordPrefix = "fa";
-  static const String welcomeEmailTemplate = "3zxk54v68jqgjy6v";
-
-  static const String defaultLink = "csa2024";
-
-
-  static List<LanguageModel> AvailableLanguages = [
+  static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
 }

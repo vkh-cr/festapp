@@ -65,7 +65,7 @@ class _MapPageState extends State<MapPage> {
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
-  String pageTitle = AppConfig.map_page;
+  String pageTitle = AppConfig.mapTitle;
   bool isOnlyEditMode = false;
 
   /// Used to trigger showing/hiding of popups.
@@ -94,7 +94,7 @@ class _MapPageState extends State<MapPage> {
       if (placeModel.latLng.toString().isEmpty) {
         placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
       }
-      pageTitle = placeModel.title ?? AppConfig.map_page;
+      pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
       runEditPositionMode(_markers.single);
       isOnlyEditMode = true;
