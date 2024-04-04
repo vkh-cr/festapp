@@ -23,7 +23,7 @@
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Festapp">
+  <meta name="apple-mobile-web-app-title" content="Festival Slunovrat">
 
   <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
@@ -34,7 +34,7 @@
   <meta name="msapplication-TileColor" content="#da532c">
   <meta name="theme-color" content="#ffffff">
 
-  <title>Festapp</title>
+  <title>Festival Slunovrat</title>
   <link rel="manifest" href="manifest.json">
 
   <script>
@@ -62,44 +62,12 @@
   }
 
   svg {
-  margin-top: -170px;
+  margin-top: 0;
   max-width: 280px;
   max-height: 100px;
   position: absolute;
   }
 
-
-/* HTML: <div class="loader"></div> */
-.loader {
-  height: 50px;
-  width: 50px;
-  aspect-ratio: 1;
-  display: grid;
-  border: 4px solid #0000;
-  border-radius: 50%;
-  border-color: #ccc #0000;
-  animation: l16 1s infinite linear;
-}
-.loader::before,
-.loader::after {
-  content: "";
-  grid-area: 1/1;
-  margin: 2px;
-  border: inherit;
-  border-radius: 50%;
-}
-.loader::before {
-  border-color: #253759 #0000;
-  animation: inherit;
-  animation-duration: .5s;
-  animation-direction: reverse;
-}
-.loader::after {
-  margin: 8px;
-}
-@keyframes l16 {
-  100%{transform: rotate(1turn)}
-}
 </style>
   <script>
     function delay(time) {
@@ -127,13 +95,88 @@
     });
   </script>
   <div class="main-content" id="loader-content">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 512" width="1024" height="512">
-      <path id="festapp" class="s0" aria-label="festapp" fill="#253759"  d="m117.4 300.7q0 31-31.5 36.3 2.7-29.3 2.7-57.1v-59.9q-11 0-24.3 2.6 0-24 24.3-24v-16q0-43.2 46.6-43.2h24q0 21.4-17.8 21.4-24.6 0-24.6 23.2v14.6h42.4q0 21.4-18.4 21.4h-23.4zm120.5 23.7q-64.6 0-64.6-63.7 0-31.5 16.6-48.3 16.8-17 48-17 50.6 0 50.6 38.6 0 35.2-45 35.2h-41.1q1.3 17.1 10.4 25.1 9.1 8 26.9 8 8.8 0 18.4-2.7 9.6-2.7 12-2.7 13.1 0 15.2 19.5-23.2 8-47.4 8zm-35.5-73.9h30.4q28.5 0 28.5-17.6-0.2-17.3-24.5-17.3-32.8 0-34.4 34.9zm105.6 66.4q1.6-21.8 15.4-21.8 3 0 12.8 3.4 10.2 3.5 20.8 3.5 24.8 0 24.8-15.2 0-13.3-35.2-20.8-35.2-7.5-35.2-34.1 0-17.4 13.4-27 13.3-9.5 37.3-9.5 25.6 0 43.7 5.3-1.3 21.8-14.9 21.8-2.4 0-11.2-2.4-8.8-2.4-16.5-2.4-24.8 0-24.8 12.8 0 12.3 35.4 20.3 35.8 7.7 35.8 36.5 0 18.2-13.9 27.8-13.6 9.3-40.3 9.3-28.8 0-47.4-7.5zm189.3 5.9q-44.6 0-44.6-41.1v-61.8q-9.3 0-23.9 2.6 0-19.7 13.8-23.2 12.5-3.1 12.5-18.3v-25.4q26.4 0 26.4 21.4v21.5h42.4q0 21.4-19.4 21.4h-23v59.4q0 20.3 22.7 20.3 18.1 0 18.1 20.8-9.6 2.4-25 2.4zm81.3 1.1q-19.2 0-29.6-9.4-10.1-9.6-10.1-26.6 0-31.5 57.3-40.8l25.6-4.3q0-22.9-30.4-22.9-6.2 0-15.2 2.1-9.1 1.9-13.6 1.9-11.2 0-13.3-19.5 22.4-7.2 44.5-7.2 56.8 0 56.8 45.6v39.2q0 19.5 4.2 39.7-29.3 0-31.4-18.4-14.4 20.6-44.8 20.6zm10.9-20.8q20 0 32.3-12.8v-29.6l-23.5 4.2q-30.4 6.2-30.4 21.9 0 16.3 21.6 16.3zm94.7 71.1q2.6-21.6 2.6-43.4v-89.1q0-21.6-2.6-43.2 29.6 0 29.6 18.4 14.3-21.5 44.2-21.5 23.7 0 36.5 16.7 12.8 16.6 12.8 47.8 0 31.2-12.8 47.7-12.5 16.5-36.5 16.5-26.7 0-41.8-17.6v44q0 23.7-32 23.7zm63.7-71.9q14.9 0 21.8-10.4 7.2-10.4 7.2-32 0-22.2-7.2-32.3-6.9-10.1-21.8-10.1-17.4 0-31.7 11.7v61.1q14.3 12 31.7 12zm88 71.9q2.6-21.6 2.6-43.4v-89.1q0-21.6-2.6-43.2 29.5 0 29.5 18.4 14.4-21.5 44.3-21.5 23.7 0 36.5 16.7 12.8 16.6 12.8 47.8 0 31.2-12.8 47.7-12.5 16.5-36.5 16.5-26.7 0-41.9-17.6v44q0 23.7-31.9 23.7zm63.7-71.9q14.9 0 21.8-10.4 7.2-10.4 7.2-32 0-22.2-7.2-32.3-6.9-10.1-21.8-10.1-17.4 0-31.8 11.7v61.1q14.4 12 31.8 12z"/>
+    <svg id="Vrstva_1" data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 462.04 247.12">
+      <defs>
+        <linearGradient id="Nepojmenovaný_přechod_9" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.57" x2="-64.61" y2="799.57" gradientTransform="matrix(0 416.96 416.96 0 -333142.5 27258.71)" gradientUnits="userSpaceOnUse">
+          <stop offset="0" stop-color="#2ba29e"/>
+          <stop offset=".19" stop-color="#2ba29e"/>
+          <stop offset=".27" stop-color="#5bab77"/>
+          <stop offset=".46" stop-color="#d5c318"/>
+          <stop offset=".5" stop-color="#f5ca00"/>
+          <stop offset=".56" stop-color="#f0bf00"/>
+          <stop offset=".65" stop-color="#e4a201"/>
+          <stop offset=".78" stop-color="#d07303"/>
+          <stop offset=".92" stop-color="#b63306"/>
+          <stop offset="1" stop-color="#a70f08"/>
+          <stop offset="1" stop-color="#a70f08"/>
+        </linearGradient>
+        <linearGradient id="Nepojmenovaný_přechod_9-2" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.66" x2="-64.61" y2="799.66" gradientTransform="matrix(0 416.96 416.96 0 -333092.86 27180.77)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-3" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.48" x2="-64.61" y2="799.48" gradientTransform="matrix(0 416.96 416.96 0 -333192.77 27337.61)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-4" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.72" x2="-64.61" y2="799.72" gradientTransform="matrix(0 416.96 416.96 0 -333056.32 27123.43)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-5" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.6" x2="-64.61" y2="799.6" gradientTransform="matrix(0 416.96 416.96 0 -333339.65 27366.66)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-6" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.68" x2="-64.61" y2="799.68" gradientTransform="matrix(0 416.96 416.96 0 -333297.32 27300.12)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-7" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.75" x2="-64.61" y2="799.75" gradientTransform="matrix(0 416.96 416.96 0 -333255.74 27236.78)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-8" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.84" x2="-64.61" y2="799.84" gradientTransform="matrix(0 416.96 416.96 0 -333204.52 27154.45)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <linearGradient id="Nepojmenovaný_přechod_9-9" data-name="Nepojmenovaný přechod 9" x1="-65.61" y1="799.92" x2="-64.61" y2="799.92" gradientTransform="matrix(0 416.96 416.96 0 -333156.57 27080.65)" xlink:href="#Nepojmenovaný_přechod_9"/>
+        <clipPath id="clippath">
+          <path class="cls-2" d="M226.87 139.91h21.57c6.56 0 11.74 1.52 15.39 4.52 3.54 2.91 5.34 7.34 5.34 13.17s-1.73 10.08-5.14 12.9c-3.51 2.9-8.38 4.37-14.47 4.37h-22.7v-34.96Zm-12.68-12.12v87.07h12.68v-27.88h23l21.74 27.88h12.35v-4.42l-20.15-25.93c5.33-1.94 9.67-5.09 12.9-9.38 3.6-4.78 5.43-10.77 5.43-17.81 0-9.5-3.03-16.89-9.02-21.97-5.89-5.01-14.15-7.55-24.54-7.55h-34.39Z"/>
+        </clipPath>
+        <clipPath id="clippath-1">
+          <path class="cls-2" d="m335.12 145.63 16.07 38.48h-32.27l16.2-38.48Zm-5.35-17.84-36.82 87.07h13.09l7.75-18.63h42.4l7.88 18.63h13.09l-36.82-87.07h-10.58Z"/>
+        </clipPath>
+        <clipPath id="clippath-2">
+          <path class="cls-2" d="m191.03 127.79-29.08 69.23L133 127.79h-13.09l36.82 87.07h10.57l36.82-87.07h-13.09z"/>
+        </clipPath>
+        <clipPath id="clippath-3">
+          <path class="cls-2" d="M367.98 127.79v12.12h27.89v74.95h12.66v-74.95h20.16l-5.82-12.12h-54.89z"/>
+        </clipPath>
+        <clipPath id="clippath-4">
+          <path class="cls-2" d="M65.91 26.05c-9.46 0-17.05 2.1-22.57 6.25-5.67 4.26-8.54 10.1-8.54 17.35 0 6.5 2.34 11.72 6.96 15.52 4.4 3.63 11.74 7.02 21.82 10.08 8.33 2.41 14.04 4.78 16.95 7.03 2.67 2.07 4.02 4.8 4.02 8.12 0 3.86-1.51 6.93-4.48 9.13-3.13 2.32-8.08 3.5-14.71 3.5-4.47 0-8.74-.71-12.71-2.12-4.96-1.76-6.89-2.8-7.63-3.37-1.2-.91-2.09-1.61-2.72-2.14l-1.14-.97-7.03 9.65 2.05 1.75c.75.84 2.02 1.79 3.75 2.82 1.66.98 3.63 1.96 5.88 2.9 2.24.94 5.14 1.77 8.62 2.48 3.47.7 7.19 1.06 11.07 1.06 10.03 0 17.91-2.28 23.44-6.76 5.64-4.58 8.5-10.66 8.5-18.07 0-6.73-2.22-12.25-6.6-16.42-4.24-4.03-11.7-7.58-22.17-10.56-8.28-2.42-13.98-4.66-16.95-6.68-2.66-1.8-4.01-4.14-4.01-6.97 0-3.53 1.6-6.33 4.74-8.32 3.38-2.13 7.91-3.21 13.48-3.21 4.2 0 8.2.62 11.9 1.85 4.85 1.61 6.47 2.5 7 2.89 1 .73 1.76 1.35 2.27 1.85l1.2 1.18 7.01-10.53-1.94-1.62c-.65-.65-1.79-1.42-3.38-2.3-1.56-.86-3.37-1.69-5.39-2.48-2.08-.81-4.82-1.5-8.14-2.06-3.31-.56-6.86-.84-10.54-.84Z"/>
+        </clipPath>
+        <clipPath id="clippath-5">
+          <path class="cls-2" d="M167.23 101.26h-43.47V27.83h-12.61v85.36h56.08v-11.93z"/>
+        </clipPath>
+        <clipPath id="clippath-6">
+          <path class="cls-2" d="M232.09 27.83v49.4c0 7.83-1.95 14.17-5.78 18.85-3.78 4.62-9.37 6.96-16.61 6.96s-12.83-2.34-16.61-6.96c-3.84-4.68-5.78-11.03-5.78-18.85v-49.4H174.7v49.4c0 11.33 3.16 20.56 9.38 27.46 6.24 6.91 14.87 10.42 25.63 10.42s19.62-3.51 25.77-10.43c6.13-6.89 9.23-16.12 9.23-27.45v-49.4H232.1Z"/>
+        </clipPath>
+        <clipPath id="clippath-7">
+          <path class="cls-2" d="m276.19 50.43 50.99 62.76h9.06V27.83h-12.62v62.49l-50.85-62.49h-9.19v85.36h12.61V50.43z"/>
+        </clipPath>
+        <clipPath id="clippath-8">
+          <path class="cls-2" d="M375.42 28.21c-16.1 6.88-26.5 23.23-26.5 41.67 0 24.76 18.88 44.9 42.09 44.9 8.01 0 15.85-2.46 22.64-7.11l1.07-.74-5.69-11.83-1.35.99c-4.94 3.6-10.71 5.5-16.68 5.5-16.37 0-29.68-14.22-29.68-31.7 0-13.22 7.84-25.18 19.52-29.74l1.5-.59-5.7-11.86-1.22.52Z"/>
+        </clipPath>
+        <style>
+          .cls-2{stroke-width:0;fill:none}
+        </style>
+      </defs>
+      <g clip-path="url(#clippath)">
+        <path transform="rotate(-65 249.07705973 171.32429836)" stroke-width="0" fill="url(#Nepojmenovaný_přechod_9)" d="M194.88 121.31h108.4v100.03h-108.4z"/>
+      </g>
+      <g clip-path="url(#clippath-1)">
+        <path transform="rotate(-65 335.05200982 171.32470233)" fill="url(#Nepojmenovaný_přechod_9-2)" stroke-width="0" d="M277.8 114.77h114.5v113.12H277.8z"/>
+      </g>
+      <g clip-path="url(#clippath-2)">
+        <path transform="rotate(-65 162.01796372 171.32834534)" fill="url(#Nepojmenovaný_přechod_9-3)" stroke-width="0" d="M104.76 114.77h114.5v113.12h-114.5z"/>
+      </g>
+      <g clip-path="url(#clippath-3)">
+        <path transform="rotate(-65 398.34059217 171.32654684)" fill="url(#Nepojmenovaný_přechod_9-4)" stroke-width="0" d="M346.05 125.42h104.57v91.82H346.05z"/>
+      </g>
+      <g clip-path="url(#clippath-4)">
+        <path transform="rotate(-65 65.77182226 70.57806407)" fill="url(#Nepojmenovaný_přechod_9-5)" stroke-width="0" d="M12.03 23.07h107.48v95.02H12.03z"/>
+      </g>
+      <g clip-path="url(#clippath-5)">
+        <path transform="rotate(-65 139.1888677 70.5114877)" fill="url(#Nepojmenovaný_přechod_9-6)" stroke-width="0" d="M88.66 27.06h101.06v86.9H88.66z"/>
+      </g>
+      <g clip-path="url(#clippath-6)">
+        <path transform="rotate(-65 209.69198542 71.468351)" fill="url(#Nepojmenovaný_přechod_9-7)" stroke-width="0" d="M155.35 21.3h108.69v100.34H155.35z"/>
+      </g>
+      <g clip-path="url(#clippath-7)">
+        <path transform="rotate(-65 299.90906828 70.50807692)" fill="url(#Nepojmenovaný_přechod_9-8)" stroke-width="0" d="M245.87 19.55h108.07v101.93H245.87z"/>
+      </g>
+      <g clip-path="url(#clippath-8)">
+        <path transform="rotate(-65 381.82543087 71.23300926)" fill="url(#Nepojmenovaný_přechod_9-9)" stroke-width="0" d="M328.45 23.01h106.74v96.44H328.45z"/>
+      </g>
     </svg>
-    <div class="loader">
-
-    </div>
-
   </div>
 </body>
 </html>

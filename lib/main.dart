@@ -205,8 +205,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                      height: 112,
-                      semanticsLabel: 'Festapp logo',
+                      height: 80,
+                      semanticsLabel: 'Festival Slunovrat logo',
                       'assets/icons/festapplogo.svg',
                     ),
                   ),

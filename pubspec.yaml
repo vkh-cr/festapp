@@ -1,5 +1,5 @@
 name: festapp
-description: Application for your event - festival - conference.
+description: Aplikace pro Festival Slunovrat.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -91,8 +91,8 @@ flutter:
   fonts:
     - family: Futura
       fonts:
-        - asset: fonts/Futura PT Book.ttf
-        - asset: fonts/Futura PT Medium.ttf
+        - asset: fonts/NimbusSanL-Reg.otf
+        - asset: fonts/NimbusSanL-Bol.otf
   assets:
     - assets/icons/
     - assets/images/map/
