@@ -39,9 +39,9 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
         supportedLocales:
-            AppConfig.AvailableLanguages.map((e) => e.locale).toList(),
+            AppConfig.availableLanguages.map((e) => e.locale).toList(),
         path: "assets/translations",
-        fallbackLocale: AppConfig.AvailableLanguages.map((e) => e.locale).first,
+        fallbackLocale: AppConfig.availableLanguages.map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
         child: const MyApp()),
@@ -59,8 +59,8 @@ Future<void> initializeEverything() async {
 
   try{
     await Supabase.initialize(
-      url: AppConfig.supabase_url,
-      anonKey: AppConfig.anon_key,
+      url: AppConfig.supabaseUrl,
+      anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
     if (!DataService.isLoggedIn()) {
       await DataService.tryAuthUser();
