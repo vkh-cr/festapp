@@ -10,7 +10,7 @@ class LanguageButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: AppConfig.AvailableLanguages.length>1,
+      visible: AppConfig.availableLanguages.length>1,
       child: Padding(
         padding: const EdgeInsets.all(6),
         child: IconButton(onPressed: () async {
