@@ -24,6 +24,7 @@ class EventModel extends IPlutoRowModel {
   DateTime? updatedAt;
   bool isHidden;
   PlaceModel? place;
+  String? type;
   List<EventModel> childEvents = [];
 
   List<int>? eventRolesIds;
@@ -62,6 +63,7 @@ class EventModel extends IPlutoRowModel {
     this.description,
     this.maxParticipants,
     this.place,
+    this.type,
     this.childEventIds,
     this.parentEventIds,
     this.eventRolesIds,
@@ -117,6 +119,7 @@ class EventModel extends IPlutoRowModel {
       maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
       place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
         json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
+      type: json[Tb.events.type],
       splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
       isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
       isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
@@ -147,6 +150,7 @@ class EventModel extends IPlutoRowModel {
     isEventInMySchedule = event.isEventInMySchedule;
     childEventIds = event.childEventIds;
     place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
+    type = event.type;
   }
 
   static const String startDateColumn = "startDate";
@@ -213,6 +217,7 @@ class EventModel extends IPlutoRowModel {
       description: json[descriptionColumn],
       maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
       place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
+      type: json[Tb.events.type],
       splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
       parentEventIds: parentEvents,
       eventRolesIds: eventRoles,
@@ -234,6 +239,7 @@ class EventModel extends IPlutoRowModel {
       endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
       maxParticipantsColumn: PlutoCell(value: maxParticipants),
       placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouValue : place!.toPlutoSelectString()),
+      Tb.events.type: PlutoCell(value: type ?? ""),
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
       isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
       parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
@@ -277,6 +283,7 @@ class EventModel extends IPlutoRowModel {
     isEventInMyProgramColumn: isEventInMySchedule,
     isGroupEventColumn: isGroupEvent,
     placeColumn: place?.id,
+    Tb.events.type: type,
     childEventsList: childEventIds
   };
 
