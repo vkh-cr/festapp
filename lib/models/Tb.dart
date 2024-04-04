@@ -147,6 +147,7 @@ class EventsTb{
   String get place => "place";
   String get split_for_men_women => "split_for_men_women";
   String get is_group_event => "is_group_event";
+  String get type => "type";
 }
 class EventUserTb{
   const EventUserTb();

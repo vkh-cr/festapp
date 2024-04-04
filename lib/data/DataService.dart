@@ -552,7 +552,7 @@ class DataService {
     return toReturn;
   }
 
-  static Future<List<EventModel>> getEventsWithPlaces() async {
+  static Future<List<EventModel>> getAllEventsWithPlaces() async {
     var data = await _supabase
         .from(Tb.events.table)
         .select("${Tb.events.id},"
@@ -563,6 +563,7 @@ class DataService {
         "${Tb.events.max_participants},"
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
+        "${Tb.events.type},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
         "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role})")
@@ -759,6 +760,8 @@ class DataService {
             "${Tb.events.split_for_men_women},"
             "${Tb.events.is_group_event},"
             "${Tb.events.description},"
+            "${Tb.events.is_hidden},"
+            "${Tb.events.type},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
             "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
         .eq(Tb.events.id, eventId)
@@ -1019,6 +1022,7 @@ class DataService {
       Tb.events.split_for_men_women: event.splitForMenWomen,
       Tb.events.is_group_event: event.isGroupEvent,
       Tb.events.is_hidden: event.isHidden,
+      Tb.events.type: event.type,
     };
     if(event.description!=null) {
       upsertObj.addAll({Tb.events.description: event.description});
