@@ -86,7 +86,7 @@
   "Location": "Місцезнаходження",
   "Proceed": "Продовжити",
   "Change password to users who have been already signed in?": "Змінити пароль користувачам, які вже увійшли?",
-  "Users will get a new password": "Користувачі отримають новий пароль",
+  "Change password to users": "Змінити пароль користувачам",
   "Male": "Чоловік",
   "Female": "Жінка",
   "It's too soon!": "Зарано!",
@@ -169,5 +169,7 @@
   "Users will get invitation via e-mail.": "Користувачі отримають запрошення по електронній пошті.",
   "Invite users who have already been invited?": "Запросити користувачів, які вже були запрошені?",
   "Invited: {user}.": "Запрошено: {user}.",
+  "Token is not valid.": "Токен недійсний.",
+  "New Password": "Новий пароль",
   "_": "_"
 }
