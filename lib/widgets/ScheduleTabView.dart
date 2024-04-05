@@ -48,8 +48,8 @@ import 'ScheduleTimeline.dart';
             appBar: TabBar(
               isScrollable: eventsMap.length > 4 ? true : false,
               unselectedLabelColor: Colors.grey,
-              labelColor: AppConfig.color1,
-              indicatorColor: AppConfig.color1,
+              labelColor: AppConfig.timelineTabLabelColor,
+              indicatorColor: AppConfig.timelineTabIndicatorColor,
               indicatorWeight: 3.0,
               indicatorSize: TabBarIndicatorSize.label,
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),

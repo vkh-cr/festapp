@@ -112,7 +112,7 @@ class _MapPageState extends State<MapPage> {
     }
     if (fill != null) {
       return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: AppConfig.color1),
+        const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
         Positioned(
           top: 7.5,
           left: 14.5,
@@ -132,7 +132,7 @@ class _MapPageState extends State<MapPage> {
             child: Container(alignment: Alignment.center, child: fill))
       ]);
     }
-    return const Icon(Icons.location_pin, size: 36, color: AppConfig.color1);
+    return const Icon(Icons.location_pin, size: 36, color: AppConfig.mapPinColor);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
