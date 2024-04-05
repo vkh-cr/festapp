@@ -434,6 +434,7 @@ class TimetableItem {
   DateTime endTime;
   String text;
   TimetableItemType itemType;
+  String? eventType;
   int placeId;
   int id;
 
@@ -442,6 +443,7 @@ class TimetableItem {
       required this.startTime,
       required this.endTime,
       required this.text,
+      required this.eventType,
       required this.placeId,
       required this.id});
 
@@ -478,6 +480,7 @@ class TimetableItem {
       itemType: getIndicatorFromEvent(model),
       id: model.id!,
       text: model.toString(),
+      eventType: model.type,
       placeId: model.place!.id!,
     );
   }

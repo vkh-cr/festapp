@@ -218,7 +218,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
                 context,
-                DataService.getAllEventsWithPlaces,
+                DataService.getAllEventsForDatagrid,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.events.id,
