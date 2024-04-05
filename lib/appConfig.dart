@@ -18,9 +18,9 @@ class AppConfig {
   static const primaryColor = 0xFF0D0D0D;
   static const backgroundColor = Color(0xFFFFFFFF);
   static const color1 = Color(primaryColor);
-  static const color2 = Color(0xFF4465A6);
-  static const color3 = Color(0xFF80BDF2);
-  static const color4 = Color(0xFF253759);
+  static const color2 = Color(0xFFf5ca00);
+  static const color3 = Color(0xFF2ba29d);
+  static const color4 = Color(0xFFa70f08);
   static const attentionColor = Color(0xFF8B0000);
 
   static const timelineTabLabelColor = color1;
