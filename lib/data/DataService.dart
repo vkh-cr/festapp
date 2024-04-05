@@ -1355,6 +1355,10 @@ class DataService {
   }
 
   static Future<void> addToMySchedule(int id) async {
+    if(!AppConfig.isOwnProgramSupportedWithoutSignIn && !isLoggedIn()) {
+      ToastHelper.Show("Before adding to 'My schedule', please sign in first.".tr());
+      return;
+    }
     if(isLoggedIn()) {
         await _supabase
             .from(Tb.event_users_saved.table)
