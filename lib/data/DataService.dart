@@ -448,6 +448,7 @@ class DataService {
           "${Tb.events.start_time},"
           "${Tb.events.end_time},"
           "${Tb.events.place},"
+          "${Tb.events.type},"
           "${Tb.events.max_participants},"
           "${Tb.events.is_group_event},"
           "${Tb.event_users.table}!inner(*)")
@@ -470,6 +471,7 @@ class DataService {
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
             "${Tb.events.place},"
+            "${Tb.events.type},"
             "${Tb.events.max_participants},"
             "${Tb.events.is_group_event}")
             .eq(EventModel.isGroupEventColumn, true)
@@ -489,6 +491,7 @@ class DataService {
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
             "${Tb.events.place},"
+            "${Tb.events.type},"
             "${Tb.events.max_participants},"
             "${Tb.events.is_group_event}, "
             "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
@@ -510,6 +513,7 @@ class DataService {
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
         "${Tb.events.place},"
+        "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event},"
         "${Tb.event_users_saved.table}!inner(*)")
@@ -536,6 +540,7 @@ class DataService {
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
         "${Tb.events.place},"
+        "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event}")
         .inFilter(Tb.events.id, events)
@@ -552,7 +557,7 @@ class DataService {
     return toReturn;
   }
 
-  static Future<List<EventModel>> getAllEventsWithPlaces() async {
+  static Future<List<EventModel>> getAllEventsForDatagrid() async {
     var data = await _supabase
         .from(Tb.events.table)
         .select("${Tb.events.id},"
