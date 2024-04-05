@@ -7,6 +7,7 @@ class AppConfig {
   static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsdWhwYXJncmp3eGlxbHhsa2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNDc1NDEsImV4cCI6MjAyNzgyMzU0MX0.gA7QtEvLNoQf-eztGBdeJFczqlENAw8veHC6h3nVKxs';
   static const String appName = 'Festival Slunovrat';
   static String mapTitle = "Map".tr();
+  static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = false;
