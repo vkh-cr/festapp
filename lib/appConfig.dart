@@ -33,6 +33,16 @@ class AppConfig {
   static const button3Color = color2;
   static const button4Color = color4;
 
+  static Color eventTypeToColor(String? type)
+  {
+    switch (type){
+      case "music": return color2;
+      case "talk": return color3;
+      case "other": return color4;
+    }
+    return color1;
+  }
+
   static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
