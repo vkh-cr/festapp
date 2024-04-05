@@ -634,7 +634,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       }
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
-                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => AppConfig.isUsersImportSupported),
+                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsHelper.canUpdateUsers())),
                   DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),

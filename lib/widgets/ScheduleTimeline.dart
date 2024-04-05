@@ -166,9 +166,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: AppConfig.color1),
+            IndicatorTheme.of(context).copyWith(color: AppConfig.timelineColor),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: AppConfig.color1, thickness: 2),
+            .copyWith(color: AppConfig.timelineColor, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -195,10 +195,10 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: AppConfig.color1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+                  color: AppConfig.timelineColor, borderWidth: event.dotType == DotType.closed ? 6 : 2)
               : const Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: AppConfig.color1, size: 8));
+                  child: DotIndicator(color: AppConfig.timelineColor, size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();
