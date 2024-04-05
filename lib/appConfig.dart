@@ -34,11 +34,8 @@ class AppConfig {
   static const button4Color = color4;
 
   static List<LanguageModel> availableLanguages = [
-    LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
-    LanguageModel(const Locale("sk"), "Slovenčina"),
+    LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("pl"), "Polski"),
-    LanguageModel(const Locale("de"), "Deutsch"),
-    LanguageModel(const Locale("uk"), "українська"),
   ];
 }
