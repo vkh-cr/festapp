@@ -294,8 +294,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                    ? AppConfig.color2
-                    : Colors.black26,
+                    ? AppConfig.eventTypeToColor(item.eventType).withOpacity(1)
+                    : AppConfig.eventTypeToColor(item.eventType).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Stack(

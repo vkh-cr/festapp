@@ -51,6 +51,7 @@ class _EventPageState extends State<EventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: _event==null?AppConfig.color1:AppConfig.eventTypeToColor(_event!.type),
         title: Text(_event==null?"Event".tr():_event.toString()),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
