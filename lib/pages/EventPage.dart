@@ -237,7 +237,9 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> addToMySchedule() async {
-    await DataService.addToMySchedule(_event!.id!);
+    if(!await DataService.addToMySchedule(_event!.id!)) {
+        return;
+    }
     setState(() {
       _event!.isEventInMySchedule = true;
     });

@@ -1354,10 +1354,10 @@ class DataService {
     ToastHelper.Show("Removed from My schedule.".tr());
   }
 
-  static Future<void> addToMySchedule(int id) async {
+  static Future<bool> addToMySchedule(int id) async {
     if(!AppConfig.isOwnProgramSupportedWithoutSignIn && !isLoggedIn()) {
       ToastHelper.Show("Before adding to 'My schedule', please sign in first.".tr());
-      return;
+      return false;
     }
     if(isLoggedIn()) {
         await _supabase
@@ -1366,6 +1366,7 @@ class DataService {
     }
     OfflineDataHelper.addToMySchedule(id);
     ToastHelper.Show("Added to My schedule.".tr());
+    return true;
   }
   
   static Future<void> synchronizeMySchedule([bool join = false])
