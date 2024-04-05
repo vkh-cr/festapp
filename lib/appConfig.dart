@@ -23,6 +23,16 @@ class AppConfig {
   static const color4 = Color(0xFF253759);
   static const attentionColor = Color(0xFF8B0000);
 
+  static const timelineTabLabelColor = color1;
+  static const timelineTabIndicatorColor = color1;
+  static const timelineColor = color1;
+  static const mapPinColor = color1;
+  static const profileButtonColor = color1;
+  static const button1Color = color1;
+  static const button2Color = color3;
+  static const button3Color = color2;
+  static const button4Color = color4;
+
   static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
