@@ -237,7 +237,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
                   ),
                   PlutoColumn(
-                    hide: true,
                     title: "Interest".tr(),
                     field: Tb.event_users.table,
                     readOnly: true,
