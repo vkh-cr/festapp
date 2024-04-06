@@ -571,7 +571,9 @@ class DataService {
         "${Tb.events.type},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
-        "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role})")
+        "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
+        "${Tb.event_users_saved.table}(count),"
+        "${Tb.event_users.table}(count)")
         .order(Tb.events.start_time, ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));

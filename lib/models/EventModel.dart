@@ -31,6 +31,7 @@ class EventModel extends IPlutoRowModel {
   List<int>? parentEventIds;
   List<int>? childEventIds;
   int? currentParticipants;
+  int? currentUsersSaved;
   String? title = "Event".tr();
   String? description = "";
   bool isSignedIn = false;
@@ -69,6 +70,7 @@ class EventModel extends IPlutoRowModel {
     this.eventRolesIds,
     required this.splitForMenWomen,
     this.currentParticipants,
+    this.currentUsersSaved,
     required this.isSignedIn,
     required this.isGroupEvent,
     this.isEventInMySchedule});
@@ -128,6 +130,7 @@ class EventModel extends IPlutoRowModel {
       parentEventIds: parentEvents,
       eventRolesIds: eventRoles,
       currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
+      currentUsersSaved: json[Tb.event_users_saved.table] != null ? json[Tb.event_users_saved.table][0]["count"] : null,
   );
   }
 
@@ -243,7 +246,8 @@ class EventModel extends IPlutoRowModel {
       splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
       isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
       parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_roles.role: PlutoCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??"")
+      Tb.event_roles.role: PlutoCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
+      Tb.event_users.table: PlutoCell(value: (currentUsersSaved??0) == 0 ? currentParticipants??0 : currentUsersSaved)
     });
   }
 
