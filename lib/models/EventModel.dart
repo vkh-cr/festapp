@@ -247,7 +247,7 @@ class EventModel extends IPlutoRowModel {
       isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
       parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
       Tb.event_roles.role: PlutoCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_users.table: PlutoCell(value: (currentUsersSaved??0) == 0 ? currentParticipants??0 : currentUsersSaved)
+      Tb.event_users.table: PlutoCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0)
     });
   }
 
