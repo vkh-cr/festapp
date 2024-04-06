@@ -248,6 +248,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     width: 100,
                   ),
                   PlutoColumn(
+                      hide: true,
                       title: "Title".tr(),
                       field: EventModel.titleColumn,
                       type: PlutoColumnType.text(),
