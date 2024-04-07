@@ -208,7 +208,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
                 context,
-                DataService.getAllEventsWithPlaces,
+                DataService.getAllEventsForDatagrid,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.events.id,
@@ -229,6 +229,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     enableEditingMode: false,
                     width: 100,
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
+                  ),
+                  PlutoColumn(
+                    hide: true,
+                    title: "Interest".tr(),
+                    field: Tb.event_users.table,
+                    readOnly: true,
+                    type: PlutoColumnType.number(negative: false, defaultValue: null),
+                    width: 100,
                   ),
                   PlutoColumn(
                       title: "Title".tr(),
@@ -590,7 +598,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       }
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
-                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => AppConfig.isUsersImportSupported),
+                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsHelper.canUpdateUsers())),
                   DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),

@@ -172,6 +172,9 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
                     var newRow = rendererContext.stateManager.getNewRows()[0];
                     for(var c in originRow.cells.entries)
                     {
+                      if(c.value.column.readOnly){
+                        continue;
+                      }
                       if(c.key==idColumn)
                       {
                         newRow.cells[idColumn]?.value = -1;

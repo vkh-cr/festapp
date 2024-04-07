@@ -222,7 +222,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _loginPressed,
-                              backgroundColor: AppConfig.color1,
+                              backgroundColor: AppConfig.button1Color,
                               child: const Icon(Icons.login),
                             ),
                             Text("Sign in".tr()),
@@ -241,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           children: <Widget>[
                             CircularButton(
                               onPressed: _profileButtonPressed,
-                              backgroundColor: AppConfig.color1,
+                              backgroundColor: AppConfig.profileButtonColor,
                               child: const Icon(Icons.account_circle_rounded),
                             ),
                             Text(userName),
@@ -267,7 +267,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _programPressed,
-                      backgroundColor: AppConfig.color1,
+                      backgroundColor: AppConfig.button1Color,
                       child: const Icon(Icons.calendar_month),
                     ),
                     Text("My schedule".tr()),
@@ -288,7 +288,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           )),
                       child: MainPageButton(
                         onPressed: _newsPressed,
-                        backgroundColor: AppConfig.color2,
+                        backgroundColor: AppConfig.button2Color,
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
@@ -300,7 +300,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _mapPressed,
-                      backgroundColor: AppConfig.color3,
+                      backgroundColor: AppConfig.button3Color,
                       child: const Icon(Icons.map),
                     ),
                     Text("Map".tr()),
@@ -311,7 +311,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   children: <Widget>[
                     MainPageButton(
                       onPressed: _infoPressed,
-                      backgroundColor: AppConfig.color4,
+                      backgroundColor: AppConfig.button4Color,
                       child: const Icon(Icons.info),
                     ),
                     Text("Info".tr()),
