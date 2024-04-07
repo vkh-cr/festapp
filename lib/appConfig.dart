@@ -29,8 +29,8 @@ class AppConfig {
   static const mapPinColor = color1;
   static const profileButtonColor = color1;
   static const button1Color = color1;
-  static const button2Color = color3;
-  static const button3Color = color2;
+  static const button2Color = color2;
+  static const button3Color = color3;
   static const button4Color = color4;
 
   static Color eventTypeToColor(String? type)
