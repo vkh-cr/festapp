@@ -172,7 +172,8 @@
   "Invited: {user}.": "Pozvaný: {user}.",
   "Token is not valid.": "Token nie je platný.",
   "New Password": "Nové heslo.",
-  "Before adding to 'My schedule', please sign in first.": "Pred pridaním do Môjho programu sa najprv prihláste.",
+  "Before adding to 'My schedule', please sign in first.": "Pred pridaním do Môjho programu sa najprv prihlás.",
   "Interest": "Záujem",
+  "Create your own schedule with ⊕ button.": "Vytvor si vlastný rozvrh pomocou tlačidla ⊕.",
   "_": "_"
 }
