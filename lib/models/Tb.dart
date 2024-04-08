@@ -36,6 +36,9 @@ class OccasionsTb{
   String get link => "link";
   String get title => "title";
   String get data => "data";
+  String get data_defaultMapZoom => "defaultMapZoom";
+  String get data_defaultMapLocation => "defaultMapLocation";
+  String get data_events_registration_start => "events_registration_start";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
