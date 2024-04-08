@@ -118,7 +118,7 @@
   "These users have been removed, but they still exist in the application. Do you want to remove them?": "Tito uživatelé byli odebráni, ale stále existují v aplikaci. Chcete je odstranit?",
   "Password from {user} was not changed because it was already used to sign in.": "Heslo od uživatele {user} nebylo změněno, protože již bylo použito k přihlášení.",
   "Password from {user} has been changed.": "Heslo od uživatele {user} bylo změněno.",
-  "Cannot sign in!": "Nelze se přihlásit!",
+  "Cannot sign in!": "Přihlášení není možné!",
   "Event is over.": "Událost skončila.",
   "MYou are already signed in at another event at the same time.": "Již jsi přihlášen na jiné události ve stejný čas.",
   "FYou are already signed in at another event at the same time.": "Již jsi přihlášena na jiné události ve stejný čas.",
@@ -173,5 +173,6 @@
   "New Password": "Nové heslo",
   "Before adding to 'My schedule', please sign in first.": "Before adding to 'My schedule', please sign in first.",
   "Interest": "Zájem",
+  "You can sign in from {time}.": "Můžeš se přihlásit od {time}.",
   "_": "_"
 }
