@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:festapp/models/EventModel.dart';
-import 'package:festapp/models/GlobalSettingsModel.dart';
 import 'package:festapp/models/InformationModel.dart';
 import 'package:festapp/models/NewsModel.dart';
+import 'package:festapp/models/OccasionSettingsModel.dart';
 import 'package:festapp/models/PlaceModel.dart';
 import 'package:festapp/models/UserInfoModel.dart';
 import 'package:festapp/services/StorageHelper.dart';
@@ -101,11 +101,11 @@ class OfflineDataHelper {
   static UserInfoModel? getUserInfo() =>
       getOffline(UserInfoModel.userInfoOffline, UserInfoModel.fromJson);
 
-  static void saveGlobalSettings(GlobalSettingsModel toSave) =>
-      saveOffline(GlobalSettingsModel.globalSettingsOffline, toSave);
+  static void saveGlobalSettings(OccasionSettingsModel toSave) =>
+      saveOffline(OccasionSettingsModel.globalSettingsOffline, toSave);
 
-  static GlobalSettingsModel? getGlobalSettings() =>
-      getOffline(GlobalSettingsModel.globalSettingsOffline, GlobalSettingsModel.fromJson);
+  static OccasionSettingsModel? getGlobalSettings() =>
+      getOffline(OccasionSettingsModel.globalSettingsOffline, OccasionSettingsModel.fromJson);
 
   static void saveAllEvents(List<EventModel> toSave) =>
       saveAllOffline(eventsOfflineStorage, toSave);

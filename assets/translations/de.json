@@ -173,5 +173,6 @@
   "New Password": "Neues Passwort",
   "Before adding to 'My schedule', please sign in first.": "Bevor Sie zu 'Mein Zeitplan' hinzufügen, melden Sie sich bitte zuerst an.",
   "Interest": "Interesse",
+  "You can sign in from {time}.": "Sie können sich ab {time} anmelden.",
   "_": "_"
 }

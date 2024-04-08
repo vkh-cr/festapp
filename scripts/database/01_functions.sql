@@ -1,9 +1,5 @@
--- Create a function to upsert record in event_user table
--- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
--- If it is more return false, otherwise return true
--- Make whole function transaction
-create
-or replace function upsert_event_user (event_id integer, user_id uuid) returns integer language plpgsql as $$
+create or replace function sign_user_to_event (ev bigint, usr uuid) returns jsonb
+ language plpgsql as $$
 declare
   i_max_participants integer;
   current_participants integer;
@@ -16,63 +12,113 @@ declare
   b_split_for_men_women boolean;
   is_current_user_male boolean;
 
+  events_registration_start TIMESTAMP;
+  event_start_time TIMESTAMP;
+  event_end_time TIMESTAMP;
+  e RECORD;
+
 begin
 
-  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < '2023-08-10 07:00:00' then
-    return 104;
+  IF
+    (select get_exists_on_occasion_user(usr, (select occasion from events where id = ev))) <> TRUE
+  THEN
+    RETURN json_build_object('code', 403);
+  END IF;
+
+  IF
+    (select auth.uid()) <> usr AND
+    (select get_is_editor_on_occasion((select occasion from events where id = ev))) <> TRUE
+  THEN
+    RETURN json_build_object('code', 403);
+  END IF;
+
+  SELECT (data->>'events_registration_start')::timestamp INTO events_registration_start
+  FROM occasions
+  WHERE id = (select occasion from events where events.id = ev);
+
+  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < events_registration_start then
+    RETURN json_build_object(
+      'code', 104,
+      'events_registration_start', events_registration_start AT TIME ZONE 'UTC');
   end if;
 
-  select count(*) from event_users eu where eu.event = event_id and eu."user" = user_id into already_in_count;
+  SELECT start_time, end_time INTO event_start_time, event_end_time
+  FROM events
+  WHERE id = ev;
+
+  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' > event_end_time then
+    RETURN json_build_object('code', 100);
+  end if;
+
+  select count(*) from event_users eu where eu.event = ev and eu."user" = usr into already_in_count;
   if already_in_count > 0 then
-    return 103;
+    RETURN json_build_object('code', 103);
   end if;
 
-  select count(*) from exclusive_events where event = event_id into event_group_count;
+  select count(*) from exclusive_events where event = ev into event_group_count;
   if event_group_count > 0 then
-    select "group" from exclusive_events where event = event_id into event_group;
+    select "group" from exclusive_events where event = ev into event_group;
     select count(*) from exclusive_events ee join event_users eu on ee.event = eu.event
-    where ee."group" = event_group and eu."user" = user_id into exclusive_event_count;
+    where ee."group" = event_group and eu."user" = usr into exclusive_event_count;
     if exclusive_event_count > 0 then
-      return 102;
+      RETURN json_build_object('code', 102);
     end if;
   end if;
 
-  -- Check if event_table doesnt have more records with event_id than is in table event in column max_participants
-  select max_participants from events where id = event_id into i_max_participants;
-  select split_for_men_women from events where id = event_id into b_split_for_men_women;
+  -- Check if event_table doesnt have more records with ev than is in table event in column max_participants
+  select max_participants from events where id = ev into i_max_participants;
+  select split_for_men_women from events where id = ev into b_split_for_men_women;
 
   if b_split_for_men_women then
-    select exists (select sex from user_info where id = user_id and sex = 'male') into is_current_user_male;
-    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = upsert_event_user.event_id and ei.sex = 'male' into current_men_participants;
-    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = upsert_event_user.event_id and ei.sex <> 'male' into current_women_participants;
+    select exists (select sex from user_info where id = usr and sex = 'male') into is_current_user_male;
+    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = ev and ei.sex = 'male' into current_men_participants;
+    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = ev and ei.sex <> 'male' into current_women_participants;
     if is_current_user_male and current_men_participants >= (i_max_participants / 2) then
-      return 105;
+      RETURN json_build_object('code', 105);
     elsif not is_current_user_male and current_women_participants >= (i_max_participants / 2) then
-      return 106;
+      RETURN json_build_object('code', 106);
     end if;
   end if;
 
-  select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
+  -- Loop through user_events to check for conflicts
+  FOR e IN
+      SELECT events.id, events.start_time, events.end_time
+      FROM events
+      JOIN event_users ON events.id = event_users.event
+      WHERE event_users."user" = usr
+  LOOP
+      IF ((e.start_time < event_end_time AND e.start_time > event_start_time) OR
+          (e.end_time < event_end_time AND e.end_time > event_start_time) OR
+          (e.start_time = event_start_time) OR
+          (e.end_time = event_end_time)) THEN
+          RETURN json_build_object('code', 107);
+      END IF;
+  END LOOP;
 
-  select count(*) from event_users where event = upsert_event_user.event_id into current_participants;
+
+  select count(*) from event_users where event = ev into current_participants;
+
+  select count(*) from event_users where event = ev into current_participants;
   if current_participants >= i_max_participants then
     -- If it is more return false
-    return 101;
+    RETURN json_build_object('code', 101);
   else
     -- otherwise return true
-    insert into event_users (event, "user") values (event_id, user_id);
-    return 100;
+    insert into event_users (event, "user") values (ev, usr);
+    RETURN json_build_object('code', 200);
   end if;
 end;
 $$;
 
---100 ok
+--200 ok
+--100 event is over
 --101 full
 --102 exclusive already taken
 --103 already signed in
 --104 not time yet
 --105 enough male
 --106 enough female
+--107 conflicting event
 
 
 

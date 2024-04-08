@@ -118,7 +118,7 @@
   "These users have been removed, but they still exist in the application. Do you want to remove them?": "Цих користувачів було видалено, але вони все ще існують у додатку. Ви хочете їх видалити?",
   "Password from {user} was not changed because it was already used to sign in.": "Пароль від користувача {user} не було змінено, тому що він вже був використаний для входу.",
   "Password from {user} has been changed.": "Пароль від користувача {user} було змінено.",
-  "Cannot sign in!": "Неможливо увійти!",
+  "Cannot sign in!": "Вхід неможливий!",
   "Event is over.": "Подія закінчилась.",
   "MYou are already signed in at another event at the same time.": "Ви вже зареєстровані на іншу подію в цей же час.",
   "FYou are already signed in at another event at the same time.": "Ви вже зареєстровані на іншу подію в цей же час.",
@@ -173,5 +173,6 @@
   "New Password": "Новий пароль",
   "Before adding to 'My schedule', please sign in first.": "Перш ніж додати до 'Мого розкладу', спочатку увійдіть.",
   "Interest": "Інтерес",
+  "You can sign in from {time}.": "Ви можете увійти з {time}.",
   "_": "_"
 }
