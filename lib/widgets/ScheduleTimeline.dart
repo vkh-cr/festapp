@@ -104,14 +104,14 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
 
       if (children.isEmpty)
       {
-        children.add(Center(
+        return Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(24,88,24,24),
             child: const Text(
-                "There will appear your events.",
-                style: TextStyle(fontSize: 20),).tr(),
+              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
+              style: TextStyle(fontSize: 20),).tr(),
           ),
-        ));
+        );
       }
       return SingleChildScrollView(
           child: Column(

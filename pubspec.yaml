@@ -63,7 +63,7 @@ dependencies:
   package_info_plus: ^5.0.1
   flutter_animate: ^4.3.0
   easy_localization: ^3.0.5
-  go_router: ^13.2.2
+  go_router: ^13.2.3
   flutter_map_cancellable_tile_provider: ^2.0.0
   simple_shadow: ^0.3.1
 
