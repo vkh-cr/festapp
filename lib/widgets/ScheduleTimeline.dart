@@ -104,14 +104,14 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
 
       if (children.isEmpty)
       {
-        children.add(Center(
+        return Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(24,88,24,24),
             child: const Text(
-                "There will appear your events.",
-                style: TextStyle(fontSize: 20),).tr(),
+              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
+              style: TextStyle(fontSize: 20),).tr(),
           ),
-        ));
+        );
       }
       return SingleChildScrollView(
           child: Column(
@@ -129,7 +129,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
     createTimeline(morningEvents),
-    afternoonEvents.isNotEmpty
+    afternoonEvents.isNotEmpty && morningEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
@@ -139,7 +139,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           )
         : const SizedBox.shrink(),
     createTimeline(afternoonEvents),
-    eveningEvents.isNotEmpty
+    eveningEvents.isNotEmpty && afternoonEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
