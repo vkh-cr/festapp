@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:festapp/appConfig.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:simple_shadow/simple_shadow.dart';
 
 MaterialColor primarySwatch = const MaterialColor(
   AppConfig.primaryColor,
@@ -92,6 +94,39 @@ class CircularButton extends MainPageButton {
         ),
         child: child,
       ),
+    );
+  }
+}
+
+class SvgIconButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String iconPath;
+  final double splashRadius;
+  final double iconSize;
+
+
+  const SvgIconButton({
+    required this.onPressed,
+    required this.iconPath,
+    this.splashRadius = 32,
+    this.iconSize = 60,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        padding: const EdgeInsets.all(0),
+        splashRadius: splashRadius,
+        iconSize: iconSize,
+        icon: SimpleShadow(
+          opacity: 0.2,
+          offset: const Offset(0,2),
+          //sigma: 10,
+          child: SvgPicture.asset(
+            iconPath,
+          ),
+        ),
+        onPressed: onPressed,
     );
   }
 }
