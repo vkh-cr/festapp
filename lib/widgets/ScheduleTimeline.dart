@@ -177,7 +177,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(event.leftText, style: timeLineSmallTextStyle,),
+            child: Text(event.leftText, style: const TextStyle(fontSize: 15),),
           );
         },
         contentsBuilder: (_, index) {
