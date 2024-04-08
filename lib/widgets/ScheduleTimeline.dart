@@ -129,7 +129,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
     createTimeline(morningEvents),
-    afternoonEvents.isNotEmpty
+    afternoonEvents.isNotEmpty && morningEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
@@ -139,7 +139,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           )
         : const SizedBox.shrink(),
     createTimeline(afternoonEvents),
-    eveningEvents.isNotEmpty
+    eveningEvents.isNotEmpty && afternoonEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
