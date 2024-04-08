@@ -351,7 +351,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {
-    await DataService.signInToEvent(_event!.id!, participant);
+    await DataService.signInToEvent(context, _event!.id!, participant);
     await loadData(_event!.id!);
   }
 

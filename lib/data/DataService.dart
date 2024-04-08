@@ -2,9 +2,9 @@ import 'dart:collection';
 
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/GlobalSettingsModel.dart';
 import 'package:festapp/models/OccasionLinkModel.dart';
 import 'package:festapp/models/OccasionModel.dart';
+import 'package:festapp/models/OccasionSettingsModel.dart';
 import 'package:festapp/models/OccasionUserModel.dart';
 import 'package:festapp/models/Tb.dart';
 import 'package:festapp/models/UserGroupInfoModel.dart';
@@ -17,6 +17,7 @@ import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:festapp/appConfig.dart';
@@ -94,12 +95,12 @@ class DataService {
     return _supabase.auth.currentUser!.id;
   }
 
-  static GlobalSettingsModel? globalSettingsModel = GlobalSettingsModel.DefaultSettings;
+  static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.DefaultSettings;
 
-  static Future<GlobalSettingsModel> loadOrInitGlobalSettings() async {
-    GlobalSettingsModel toReturn;
+  static Future<OccasionSettingsModel> loadOrInitGlobalSettings() async {
+    OccasionSettingsModel toReturn;
     if(RightsHelper.currentOccasion == null) {
-      toReturn =  GlobalSettingsModel.DefaultSettings;
+      toReturn =  OccasionSettingsModel.DefaultSettings;
     }
     else{
       var data = await _supabase
@@ -108,7 +109,7 @@ class DataService {
           .eq(Tb.occasions.id, RightsHelper.currentOccasion!)
           .single();
 
-      toReturn = GlobalSettingsModel.fromJson(data[Tb.occasions.data]);
+      toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
     }
 
     globalSettingsModel = toReturn;
@@ -901,46 +902,16 @@ class DataService {
     return result.count > 0;
   }
 
-  static signInToEvent(int eventId, [UserInfoModel? participant]) async {
+  static signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
     var userId = participant?.id ?? currentUserId();
-    //check for max participants
-    var event = await getEvent(eventId);
 
-    if (event.endTime.isBefore(DateTime.now())) {
-      ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk);
-      return;
-    }
+    var result = await _supabase.rpc("sign_user_to_event",
+        params: {"ev": eventId, "usr": userId});
 
-    //check for similar times
-    var userEvents = await getParticipantEventTimes(userId);
-    for (var i = 0; i < userEvents.length; i++) {
-      var e = userEvents[i];
-      if (e.startTime.isBefore(event.endTime) &&
-              e.startTime.isAfter(event.startTime) ||
-          e.endTime.isBefore(event.endTime) &&
-              e.endTime.isAfter(event.startTime) ||
-          e.startTime.isAtSameMomentAs(event.startTime) ||
-          e.endTime.isAtSameMomentAs(event.endTime)) {
-        if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
-          var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        else{
-          var trPrefix = participant.getGenderPrefix();
-          ToastHelper.Show("${trPrefix}{user} is already signed in at another event at the same time.".tr(namedArgs: {"user":participant.toString()}));
-        }
-        return;
-      }
-    }
-
-    int result = await _supabase.rpc("upsert_event_user",
-        params: {"event_id": eventId, "user_id": userId});
-
-    switch(result)
+    switch(result["code"])
     {
-      case 100: {
+      case 200: {
         if(participant == null) {
           var trPrefix = _currentUser!.getGenderPrefix();
           ToastHelper.Show("${trPrefix}You have been signed in.".tr());
@@ -951,6 +922,7 @@ class DataService {
         }
         return;
       }
+      case 100: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk); return;
       case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
         if(participant == null) {
@@ -978,7 +950,32 @@ class DataService {
         }
         return;
       }
-      case 104: ToastHelper.Show("${"Cannot sign in!".tr()} ${globalSettingsModel!.tooSoonMessage!}", severity: ToastSeverity.NotOk); return;
+      case 107: {
+        if(participant == null) {
+          var trPrefix = _currentUser!.getGenderPrefix();
+          var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
+          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
+        }
+        else{
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} is already signed in at another event at the same time.".tr(namedArgs: {"user":participant.toString()}));
+        }
+        return;
+      }
+      case 104: {
+        String answerWhy = "It's too soon!".tr();
+        if(result["events_registration_start"]!=null)
+        {
+          var start = DateTime.parse(result["events_registration_start"]).toLocal();
+          var datePart = DateFormat.MMMMEEEEd(context.locale.languageCode).format(start);
+          var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
+          String startString = "$datePart $timePart";
+          answerWhy = "You can sign in from {time}.".tr(namedArgs: {"time":startString});
+        }
+
+        ToastHelper.Show("${"Cannot sign in!".tr()} $answerWhy",
+          severity: ToastSeverity.NotOk); return;
+      }
       case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
       case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
     }
@@ -1129,7 +1126,8 @@ class DataService {
     var data = await _supabase.from(Tb.user_info_public.table)
         .select([Tb.user_info_public.id,
                 Tb.user_info_public.name,
-                Tb.user_info_public.surname].join(", "));
+                Tb.user_info_public.surname,
+                Tb.user_info.sex].join(", "));
     return List<UserInfoModel>.from(
         data.map((x) => UserInfoModel.fromJson(x)));
   }

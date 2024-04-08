@@ -118,7 +118,7 @@
   "These users have been removed, but they still exist in the application. Do you want to remove them?": "Ci użytkownicy zostali usunięci, ale nadal istnieją w aplikacji. Czy chcesz ich usunąć?",
   "Password from {user} was not changed because it was already used to sign in.": "Hasło użytkownika {user} nie zostało zmienione, ponieważ zostało już użyte do logowania.",
   "Password from {user} has been changed.": "Hasło użytkownika {user} zostało zmienione.",
-  "Cannot sign in!": "Nie można się zalogować!",
+  "Cannot sign in!": "Logowanie nie jest możliwe!",
   "Event is over.": "Wydarzenie się zakończyło.",
   "MYou are already signed in at another event at the same time.": "Jesteś już zalogowany na inne wydarzenie o tej samej porze.",
   "FYou are already signed in at another event at the same time.": "Jesteś już zalogowana na inne wydarzenie o tej samej porze.",
@@ -173,5 +173,6 @@
   "New Password": "Nowe hasło",
   "Before adding to 'My schedule', please sign in first.": "Przed dodaniem do 'Mój program' najpierw się zaloguj.",
   "Interest": "Zainteresowanie",
+  "You can sign in from {time}.": "Możesz zalogować się od {time}.",
   "_": "_"
 }
