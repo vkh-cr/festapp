@@ -107,9 +107,17 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         return Center(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24,88,24,24),
-            child: const Text(
-              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
-              style: TextStyle(fontSize: 20),).tr(),
+            child: AppConfig.isOwnProgramSupported ?
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+              Text("Create your own schedule with button".tr()+ " ", style: const TextStyle(fontSize: 20)),
+              const Icon(Icons.add_circle_outline)
+            ],) :
+             const Text(
+              "There will appear your events.",
+                style: TextStyle(fontSize: 20)
+              ).tr(),
           ),
         );
       }
