@@ -7,6 +7,7 @@ import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/pages/InfoPage.dart';
 import 'package:festapp/pages/MapPage.dart';
+import 'package:festapp/pages/MySchedulePage.dart';
 import 'package:festapp/pages/NewsPage.dart';
 import 'package:festapp/pages/SongPage.dart';
 import 'package:festapp/pages/TimetablePage.dart';
@@ -19,6 +20,7 @@ import 'package:festapp/widgets/ScheduleTabView.dart';
 import 'package:festapp/widgets/ScheduleTimeline.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -211,6 +213,17 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     ),
                   ),
                   const Spacer(),
+                  Column(
+                    children: [
+                      SvgIconButton(
+                        onPressed: _mySchedulePressed, // do something,
+                        iconPath: 'assets/icons/ikona muj program.svg',
+                        iconSize: 42,
+                      ),
+                      Text("My schedule".tr()),
+                    ],
+                  ),
+                  const SizedBox.square(dimension: 12,),
                   Visibility(
                     visible: !DataService.isLoggedIn(),
                     child: Row(
@@ -256,20 +269,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
             events: _dots,
             onEventPressed: _eventPressed,
           )),
-          Padding(
+          Container(
+            constraints: const BoxConstraints(
+              maxWidth: 420,
+            ),
             padding: const EdgeInsets.only(bottom: 6.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _programPressed,
-                      backgroundColor: AppConfig.button1Color,
-                      child: const Icon(Icons.calendar_month),
+                  children: [
+                    SvgIconButton(
+                      onPressed: _programPressed, // do something,
+                      iconPath: 'assets/icons/ikona program.svg',
                     ),
-                    Text("My schedule".tr()),
+                    Text("Schedule".tr()),
                   ],
                 ),
                 Column(
@@ -285,33 +299,28 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 style: const TextStyle(
                                     color: Colors.white, fontSize: 16)),
                           )),
-                      child: MainPageButton(
-                        onPressed: _newsPressed,
-                        backgroundColor: AppConfig.button2Color,
-                        child: const Icon(Icons.newspaper),
+                      child: SvgIconButton(
+                        onPressed: _newsPressed, // do something,
+                        iconPath: 'assets/icons/ikona oznameni.svg',
                       ),
                     ),
                     Text("News".tr()),
                   ],
                 ),
                 Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _mapPressed,
-                      backgroundColor: AppConfig.button3Color,
-                      child: const Icon(Icons.map),
+                  children: [
+                    SvgIconButton(
+                      onPressed: _mapPressed, // do something,
+                      iconPath: 'assets/icons/ikona mapa.svg',
                     ),
                     Text("Map".tr()),
                   ],
                 ),
                 Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    MainPageButton(
-                      onPressed: _infoPressed,
-                      backgroundColor: AppConfig.button4Color,
-                      child: const Icon(Icons.info),
+                  children: [
+                    SvgIconButton(
+                      onPressed: _infoPressed, // do something,
+                      iconPath: 'assets/icons/ikona informace.svg',
                     ),
                     Text("Info".tr()),
                   ],
@@ -330,6 +339,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       return;
     }
     RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+  }
+
+  Future<void> _mySchedulePressed() async {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {

@@ -1,0 +1,19 @@
+<svg data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="a" data-name="Nepojmenovaný přechod 16" x1="-218.86" y1="201.02" x2="-217.21" y2="201.02" gradientTransform="scale(650.36 -650.36) rotate(9.9 1052.41539121 1360.78507612)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ba29e"/>
+      <stop offset="0" stop-color="#2ba29e"/>
+      <stop offset=".12" stop-color="#5bab77"/>
+      <stop offset=".39" stop-color="#d5c318"/>
+      <stop offset=".46" stop-color="#f5ca00"/>
+      <stop offset=".51" stop-color="#f2c300"/>
+      <stop offset=".6" stop-color="#eaaf01"/>
+      <stop offset=".7" stop-color="#dc9002"/>
+      <stop offset=".82" stop-color="#ca6404"/>
+      <stop offset=".94" stop-color="#b32c06"/>
+      <stop offset="1" stop-color="#a70f08"/>
+      <stop offset="1" stop-color="#a70f08"/>
+    </linearGradient>
+  </defs>
+  <path d="M33.59 153.26c2.14.71 4.33 1.2 6.6 1.21 6.83.05 13.66.07 20.49.11h.99v32.03c0 1.41.54 2.21 1.75 2.59.82.26 1.52.06 2.08-.6 5.93-7.02 11.87-14.03 17.8-21.05 3.57-4.22 7.12-8.45 10.7-12.67.14-.16.4-.24.63-.29.22-.05.45-.01.68-.01h67.9c6 0 11.44-1.73 16.19-5.44 4.79-3.74 7.97-8.57 9.62-14.42.77-2.73 1.07-5.51 1.07-8.34-.01-19.38 0-38.75-.01-58.13 0-7.99-2.79-14.86-8.53-20.46-3.72-3.63-8.16-5.91-13.28-6.85-.83-.15-1.67-.28-2.5-.41H39.5c-.99.17-1.98.33-2.97.52-5.04.99-9.35 3.35-13.01 6.93-4.06 3.96-6.58 8.78-7.77 14.3-.23 1.08-.3 2.2-.46 3.3-.02.13-.08.25-.13.37v63.26c.14.84.27 1.67.4 2.51.81 4.97 2.8 9.4 6.01 13.28 3.21 3.9 7.2 6.68 11.99 8.28ZM47.21 78.8h112.31v3H47.21v-3Zm0 18.66h112.31v3H47.21v-3Zm0 19.93h112.31v3H47.21v-3Z" fill="url(#a)"/>
+</svg>

@@ -1,0 +1,24 @@
+<svg data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="b" data-name="Nepojmenovaný přechod 16" x1="-438.68" y1="200.91" x2="-436.99" y2="200.91" gradientTransform="matrix(650.36 0 0 -650.36 284675.06 130768.97)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2ba29e"/>
+      <stop offset="0" stop-color="#2ba29e"/>
+      <stop offset=".12" stop-color="#5bab77"/>
+      <stop offset=".39" stop-color="#d5c318"/>
+      <stop offset=".46" stop-color="#f5ca00"/>
+      <stop offset=".51" stop-color="#f2c300"/>
+      <stop offset=".6" stop-color="#eaaf01"/>
+      <stop offset=".7" stop-color="#dc9002"/>
+      <stop offset=".82" stop-color="#ca6404"/>
+      <stop offset=".94" stop-color="#b32c06"/>
+      <stop offset="1" stop-color="#a70f08"/>
+      <stop offset="1" stop-color="#a70f08"/>
+    </linearGradient>
+    <clipPath id="a">
+      <path d="M102.52 106.7c-16.47-.19-29.73-13.81-29.6-30.39.13-16.55 13.68-29.86 30.23-29.7 16.77.16 29.99 13.59 29.87 30.33-.11 16.44-13.65 29.77-30.14 29.77h-.36M52.13 40.82c-7.21 10.3-11.33 21.55-11.34 33.71v.09c0 2.79.22 5.62.66 8.51 1.77 11.48 6.83 21.89 12.06 32.14 11.23 22.01 24.92 42.51 39.23 62.6 3.24 4.55 6.62 9.01 10.15 13.82.73-.89 1.15-1.33 1.49-1.83 9.95-14.34 20.14-28.52 29.75-43.08 9.87-14.94 18.68-30.52 25.45-47.16 3.25-7.98 5.49-16.08 5.54-24.55v-.55c-.01-2.46-.22-4.95-.63-7.49-4.14-25.17-22.67-45.16-47.51-50.97-4.71-1.1-9.46-1.64-14.16-1.64-19.85 0-38.88 9.56-50.69 26.41" stroke-width="0" fill="none"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#a)">
+    <path transform="rotate(-9.9 102.98341158 103.02788978)" fill="url(#b)" d="M26.48 5.03h152.97v196.01H26.48z"/>
+  </g>
+</svg>
