@@ -1,11 +1,11 @@
 {
-    "name": "festapp",
-    "short_name": "festapp",
+    "name": "Festapp",
+    "short_name": "Festapp",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#FFFFFF",
-    "description": "A new Flutter project.",
+    "description": "Mobile app for festivals, conferences or events.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
