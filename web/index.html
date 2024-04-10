@@ -48,6 +48,8 @@
 
     window.addEventListener('beforeinstallprompt', (e) => {
       deferredPrompt = e;
+      //e.preventDefault();
+      //return false;
     });
 
     function promptInstall(){
