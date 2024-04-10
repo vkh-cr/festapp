@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:festapp/data/DataExtensions.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/OccasionLinkModel.dart';
@@ -792,12 +793,10 @@ class DataService {
                   "${Tb.events.max_participants},"
                   "${Tb.event_users.table}(count)")
           .inFilter(Tb.events.id, event.childEventIds!)
-          .eq(Tb.events.is_hidden, false)
-          .order(Tb.events.start_time, ascending: true)
-          .order(Tb.events.title, ascending: true);
+          .eq(Tb.events.is_hidden, false);
 
       event.childEvents = List<EventModel>.from(
-          childEventsData.map((x) => EventModel.fromJson(x)));
+          childEventsData.map((x) => EventModel.fromJson(x))).sortEvents();
 
       if(isLoggedIn())
       {
@@ -1337,7 +1336,7 @@ class DataService {
         .from(Tb.event_users_saved.table)
         .select()
         .eq(Tb.event_users_saved.event, id)
-        .eq(EventModel.eventUsersSavedUserColumn, currentUserId())
+        .eq(Tb.event_users_saved.user, currentUserId())
         .maybeSingle();
     return data != null;
   }

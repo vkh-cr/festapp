@@ -27,6 +27,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'models/EventModel.dart';
@@ -52,6 +53,7 @@ Future<void> main() async {
 Future<void> initializeEverything() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   await GetStorage.init();
+  PWAInstall().setup();
 
   initializeDateFormatting();
 

@@ -1,6 +1,9 @@
 {
-    "name": "Celost\u00e1tn\u00ed setk\u00e1n\u00ed anim\u00e1tor\u016f 2024",
-    "short_name": "Celost\u00e1tn\u00ed setk\u00e1n\u00ed anim\u00e1tor\u016f 2024",
+    "name": "Celostátní setkání mládeže 2024",
+    "short_name": "CSA 2024",
+    "description": "Mobilní aplikace pro Celostátní setkání mládeže 2024.",
+    "start_url": ".",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
