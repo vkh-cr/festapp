@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> actions = [const LanguageButton()];
-    if(PWAInstall().installPromptEnabled){
+    if(AppConfig.showPWAInstallOption && PWAInstall().installPromptEnabled){
       actions.add(ButtonsHelper.pwaInstallButton());
     }
 
