@@ -52,7 +52,7 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: _event==null?AppConfig.color1:AppConfig.eventTypeToColor(_event!.type),
-        title: Text(_event==null?"Event".tr():_event.toString()),
+        title: Text(_event==null?"Event".tr():_event.toString(), style: const TextStyle(fontWeight: FontWeight.bold),),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
         ),
