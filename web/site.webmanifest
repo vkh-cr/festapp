@@ -1,6 +1,9 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "Festapp",
+    "short_name": "Festapp",
+    "description": "Mobile app for festivals, conferences or events.",
+    "start_url": ".",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
