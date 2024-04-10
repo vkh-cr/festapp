@@ -9,8 +9,8 @@ const RESOURCES = {"mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
 "safari-pinned-tab.svg": "fa0fc966a391994b65b5503531424af7",
 "manifest.json": "90fb379fac4697bd362505283fc852d0",
 "main.dart.js": "5b59794b99f2c898c1126f16ad10dddd",
-"index.html": "b8bb7977f4968bb2378b9fd5f0b67c34",
-"/": "b8bb7977f4968bb2378b9fd5f0b67c34",
+"index.html": "857c3e400d120ff2c3dc08191a7bc772",
+"/": "857c3e400d120ff2c3dc08191a7bc772",
 "canvaskit/skwasm.js.symbols": "741d50ffba71f89345996b0aa8426af8",
 "canvaskit/canvaskit.wasm": "3d2a2d663e8c5111ac61a46367f751ac",
 "canvaskit/canvaskit.js": "c86fbd9e7b17accae76e5ad116583dc4",
@@ -79,7 +79,7 @@ const RESOURCES = {"mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
 "android-chrome-512x512.png": "43661cc1c4cd6d25de716924dc00601a",
 "favicon-16x16.png": "517bb576ed98bfc4aa542bea1fc815e6",
 "apple-touch-icon.png": "e4044af6b13bd450cfc5dc7268fc640e",
-"site.webmanifest": "b9aa277fcfc34c31db6c7a7ea3469b8c"};
+"site.webmanifest": "68f54bdc321df4be45aae846e9f367d2"};
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = ["main.dart.js",
