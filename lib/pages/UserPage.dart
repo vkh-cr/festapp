@@ -30,7 +30,7 @@ class _UserPageState extends State<UserPage> {
   @override
   Widget build(BuildContext context) {
     List<Widget> actions = [const LanguageButton()];
-    if(PWAInstall().installPromptEnabled){
+    if(AppConfig.showPWAInstallOption && PWAInstall().installPromptEnabled){
       actions.add(ButtonsHelper.pwaInstallButton());
     }
 
