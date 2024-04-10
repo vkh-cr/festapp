@@ -41,7 +41,7 @@ dependencies:
   flutter_map: ^6.1.0
   latlong2: ^0.9.1
   flutter_map_marker_popup: ^6.1.2
-  supabase_flutter: ^2.4.0
+  supabase_flutter: ^2.5.0
   flutter_secure_storage: ^9.0.0
   timelines: ^0.1.0
   intl: ^0.18.1
@@ -66,6 +66,7 @@ dependencies:
   go_router: ^13.2.3
   flutter_map_cancellable_tile_provider: ^2.0.0
   simple_shadow: ^0.3.1
+  pwa_install: ^0.0.5
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

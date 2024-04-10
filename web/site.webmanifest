@@ -1,6 +1,9 @@
 {
     "name": "Festival Slunovrat",
     "short_name": "Festival Slunovrat",
+    "description": "Mobilní aplikace pro Festival Slunovrat.",
+    "start_url": ".",
+    "orientation": "portrait-primary",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",
