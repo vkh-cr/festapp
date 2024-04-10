@@ -1,3 +1,4 @@
+import 'package:festapp/data/DataExtensions.dart';
 import 'package:festapp/data/OfflineDataHelper.dart';
 import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/models/UserInfoModel.dart';
@@ -294,9 +295,7 @@ class _EventPageState extends State<EventPage> {
         event.isEventInMySchedule = OfflineDataHelper.isEventSaved(id);
       }
 
-      var childEvents = allEvents.where((e)=> event.childEventIds?.contains(e.id)??false)
-          .sortedBy((element) => element.title??"")
-          .sortedBy((element) => element.startTime);
+      var childEvents = allEvents.where((e)=> event.childEventIds?.contains(e.id)??false).toList().sortEvents();
       event.childEvents = childEvents;
       _childDots.clear();
       _childDots.addAll(event.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));

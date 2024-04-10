@@ -1,7 +1,11 @@
+import 'package:collection/collection.dart';
 import 'package:festapp/models/EventModel.dart';
 import 'package:festapp/models/InformationModel.dart';
 
 extension DataExtensions on List<EventModel> {
+  List<EventModel> sortEvents() => sortedBy((element) => element.title??"")
+    .sortedBy((element) => element.startTime);
+
   List<EventModel> filterRootEvents() {
     List<EventModel> filtered = [];
     var children = where((element) => element.childEventIds!=null)
