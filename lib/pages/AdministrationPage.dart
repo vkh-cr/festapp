@@ -245,7 +245,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     title: "Interest".tr(),
                     field: Tb.event_users.table,
                     readOnly: true,
-                    type: PlutoColumnType.number(negative: false, defaultValue: null),
+                    type: PlutoColumnType.number(negative: false, defaultValue: 0),
                     width: 100,
                   ),
                   PlutoColumn(
