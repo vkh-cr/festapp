@@ -170,16 +170,13 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
                   onPressed: () async{
                     var originRow = rendererContext.row;
                     var newRow = rendererContext.stateManager.getNewRows()[0];
+                    var readOnlyColumns = rendererContext.stateManager.columns.where((element) => element.readOnly).map((e) => e.field).toList();
                     for(var c in originRow.cells.entries)
                     {
-                      if(c.value.column.readOnly){
+                      if (readOnlyColumns.contains(c.key)) {
                         continue;
-                      }
-                      if(c.key==idColumn)
-                      {
-                        newRow.cells[idColumn]?.value = -1;
-                      }
-                      else{
+                        //and use default value
+                      } else {
                         newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
                       }
                     }
