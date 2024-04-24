@@ -6,7 +6,6 @@ import 'package:festapp/data/RightsHelper.dart';
 import 'package:festapp/services/MapIconService.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -14,6 +13,8 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+
 
 import '../models/PlaceModel.dart';
 
@@ -242,6 +243,7 @@ class _MapPageState extends State<MapPage> {
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(
+                tileProvider: CancellableNetworkTileProvider(),
                 maxZoom: 19,
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               ),

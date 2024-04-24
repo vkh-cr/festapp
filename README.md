@@ -34,7 +34,9 @@ Mobile solution for your festival, conference or event.
  
 ---
 ## Architecture
-Solution is based on Flutter framework with language dart. As a backend is used serverless service Supabase.
+The solution is based on the [Flutter](https://github.com/flutter/flutter) framework with the Dart language.
+As a backend, the serverless service [Supabase](https://github.com/supabase/supabase) is used. 
+Both technologies were chosen to speed up development, and they have effectively met this requirement.
 
 ---
 ## Currently in production
@@ -43,6 +45,7 @@ Solution is based on Flutter framework with language dart. As a backend is used 
 - [Člověk a Víra](https://ff23.cz)
 - [BISCUP](https://biscup23.app)
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app/#/csa2024)
+- [In development] [Festival Slunovrat](https://festivalslunovrat.netlify.app/#/2024)
 
 Links to Appstore/Play Store versions are usually saved in info section.
 
@@ -58,7 +61,7 @@ Links to Appstore/Play Store versions are usually saved in info section.
 - Minor bug fixes.
 
 ---
-## Credits
+## About
 The app was originally developed by a team of volunteers for [Absolventský Velehrad](https://absolventskyvelehrad.cz) event in 2023.
 
 
