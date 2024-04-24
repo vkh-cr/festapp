@@ -171,10 +171,12 @@
   "Invited: {user}.": "Invited: {user}.",
   "Token is not valid.": "Token is not valid.",
   "New Password": "New Password",
-  "Before adding to 'My schedule', please sign in first.": "Před přidáním do Mého programu se nejdřív přihlašte.",
+  "Before adding to 'My schedule', please sign in first.": "Before adding to 'My schedule', please sign in first.",
   "Interest": "Interest",
   "You can sign in from {time}.": "You can sign in from {time}.",
   "Create your own schedule with button": "Create your own schedule with button",
   "Install": "Install",
+  "City": "City",
+  "Sign up": "Sign up",
   "_":"_"
 }
