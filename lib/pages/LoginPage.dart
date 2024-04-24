@@ -1,5 +1,5 @@
 import 'package:festapp/RouterService.dart';
-import 'package:festapp/pages/ForgotPassword.dart';
+import 'package:festapp/pages/ForgotPasswordPage.dart';
 import 'package:festapp/services/ToastHelper.dart';
 import 'package:festapp/widgets/ButtonsHelper.dart';
 import 'package:festapp/widgets/FormFields.dart';

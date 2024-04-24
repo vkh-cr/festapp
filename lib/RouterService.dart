@@ -12,7 +12,8 @@ import 'package:festapp/pages/MapPage.dart';
 import 'package:festapp/pages/NewsPage.dart';
 import 'package:festapp/pages/MySchedulePage.dart';
 import 'package:festapp/pages/ResetPasswordPage.dart';
-import 'package:festapp/pages/ForgotPassword.dart';
+import 'package:festapp/pages/ForgotPasswordPage.dart';
+import 'package:festapp/pages/SignupPage.dart';
 import 'package:festapp/pages/SongPage.dart';
 import 'package:festapp/pages/TimetablePage.dart';
 import 'package:festapp/pages/UserPage.dart';
@@ -98,6 +99,10 @@ class RouterService{
         GoRoute(
           path: "/${LoginPage.ROUTE}",
           builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
+          path: "/${SignupPage.ROUTE}",
+          builder: (context, state) => const SignupPage(),
         ),
         GoRoute(
           path: LINK_PATH,
