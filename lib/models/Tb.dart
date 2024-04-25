@@ -196,6 +196,7 @@ class PlacesTb{
   String get description => "description";
   String get type => "type";
   String get coordinates => "coordinates";
+  String get order => "order";
 }
 class UserGroupInfoTb{
   const UserGroupInfoTb();
