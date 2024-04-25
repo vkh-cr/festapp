@@ -1,6 +1,22 @@
 import 'package:collection/collection.dart';
 import 'package:festapp/models/EventModel.dart';
 import 'package:festapp/models/InformationModel.dart';
+import 'package:festapp/models/PlaceModel.dart';
+
+extension DataExtension on int? {
+  int safeInt() => this??0;
+}
+
+extension PlaceExtensions on List<PlaceModel> {
+  void sortPlaces([bool asc = true]) {
+    if(asc)
+    {
+      sort((a,b) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    } else {
+      sort((b,a) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    }
+  }
+}
 
 extension DataExtensions on List<EventModel> {
   List<EventModel> sortEvents() => sortedBy((element) => element.title??"")
