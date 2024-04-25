@@ -441,6 +441,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
                       }),
+                  PlutoColumn(
+                    title: "Order".tr(),
+                    field: Tb.places.order,
+                    type: PlutoColumnType.number(defaultValue: null),
+                    applyFormatterInEditing: true,
+                    width: 100,
+                  ),
                 ]).DataGrid(),
             SingleTableDataGrid<ExclusiveGroupModel>(
                 context,

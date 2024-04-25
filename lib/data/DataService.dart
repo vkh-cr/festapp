@@ -321,12 +321,16 @@ class DataService {
 
   static Future<List<PlaceModel>> getMapPlaces() async {
     var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.is_hidden, false);
-    return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+    var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+    toReturn.sortPlaces(false);
+    return toReturn;
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
     var data = await _supabase.from(Tb.places.table).select();
-    return List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+    var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+    toReturn.sortPlaces();
+    return toReturn;
   }
 
   static Future<List<UserGroupInfoModel>> getGroupsWithPlaces() async {
