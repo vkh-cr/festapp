@@ -25,8 +25,10 @@ class _SignupPageState extends State<SignupPage> {
     {"type":"name",
     "value":"Michael"},
     {"type":"surname"},
+    {"type":"sex"},
     {"type":"email"},
     {"type":"city"},
+    {"type":"birthYear"},
   ]};
   final _formKey = GlobalKey<FormBuilderState>();
 
