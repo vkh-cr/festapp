@@ -36,10 +36,8 @@
 
   <title>Festapp</title>
 
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
-  </script>
+  <script src="flutter_bootstrap.js" async></script>
+
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
   <script>
@@ -141,14 +139,15 @@
       var loaderContent = document.querySelector('#loader-content');
 
       // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
+      _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
+          serviceWorkerVersion: {{flutter_service_worker_version}},
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
             //await delay(5000);
 
+            loaderContent.style.opacity = "0";
             loaderContent.style.opacity = "0";
             //await delay(200);
             appRunner.runApp();
