@@ -109,7 +109,7 @@ class SvgIconButton extends StatelessWidget {
     required this.onPressed,
     required this.iconPath,
     this.splashRadius = 32,
-    this.iconSize = 60,
+    this.iconSize = 58,
   });
 
   @override

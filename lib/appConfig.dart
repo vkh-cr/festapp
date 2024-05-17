@@ -18,7 +18,7 @@ class AppConfig {
 
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
-  static const backgroundColor = Color(0xFFFFFFFF);
+  static const backgroundColor = Color(0xFFfbfbfb);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFFf5ca00);
   static const color3 = Color(0xFF2ba29d);

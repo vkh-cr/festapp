@@ -198,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              padding: const EdgeInsets.fromLTRB(10, 0, 12, 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -209,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                           "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     },
                     child: SvgPicture.asset(
-                      height: 80,
+                      height: 82,
                       semanticsLabel: 'Festival Slunovrat logo',
                       'assets/icons/fstapplogo.svg',
                     ),
