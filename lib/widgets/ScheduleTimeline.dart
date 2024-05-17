@@ -1,10 +1,10 @@
-import 'package:festapp/styles/Styles.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 
 import '../models/EventModel.dart';
 

@@ -1,7 +1,7 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 

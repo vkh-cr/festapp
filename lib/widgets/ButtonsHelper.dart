@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:pwa_install/pwa_install.dart';
 

@@ -1,9 +1,9 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/services/MapIconService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/services/MapIconService.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

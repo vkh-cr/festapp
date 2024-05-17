@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
 
 class DataServiceTests {
   static Future<void> test_check_occasion_link()

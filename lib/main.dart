@@ -1,22 +1,22 @@
 import 'dart:async';
 
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/pages/InfoPage.dart';
-import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/pages/NewsPage.dart';
-import 'package:festapp/pages/SongPage.dart';
-import 'package:festapp/pages/TimetablePage.dart';
-import 'package:festapp/pages/UserPage.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/NotificationHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/tests/DataServiceTests.dart';
-import 'package:festapp/widgets/ScheduleTabView.dart';
-import 'package:festapp/widgets/ScheduleTimeline.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/pages/InfoPage.dart';
+import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/pages/NewsPage.dart';
+import 'package:fstapp/pages/SongPage.dart';
+import 'package:fstapp/pages/TimetablePage.dart';
+import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/tests/DataServiceTests.dart';
+import 'package:fstapp/widgets/ScheduleTabView.dart';
+import 'package:fstapp/widgets/ScheduleTimeline.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -209,7 +209,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     child: SvgPicture.asset(
                       height: 112,
                       semanticsLabel: 'Festapp logo',
-                      'assets/icons/festapplogo.svg',
+                      'assets/icons/fstapplogo.svg',
                     ),
                   ),
                   const Spacer(),

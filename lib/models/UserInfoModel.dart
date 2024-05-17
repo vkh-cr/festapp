@@ -1,7 +1,7 @@
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/PlaceModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserGroupInfoModel.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/PlaceModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/models/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
 

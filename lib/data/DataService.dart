@@ -1,27 +1,27 @@
 import 'dart:collection';
 
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/OccasionLinkModel.dart';
-import 'package:festapp/models/OccasionModel.dart';
-import 'package:festapp/models/OccasionSettingsModel.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserGroupInfoModel.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/models/InformationModel.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/OccasionLinkModel.dart';
+import 'package:fstapp/models/OccasionModel.dart';
+import 'package:fstapp/models/OccasionSettingsModel.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/models/UserGroupInfoModel.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/models/InformationModel.dart';
 
-import 'package:festapp/models/NewsModel.dart';
-import 'package:festapp/services/NotificationHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/services/UserManagementHelper.dart';
+import 'package:fstapp/models/NewsModel.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';

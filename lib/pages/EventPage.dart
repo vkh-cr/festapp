@@ -1,17 +1,17 @@
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/pages/HtmlEditorPage.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/DialogHelper.dart';
-import 'package:festapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';

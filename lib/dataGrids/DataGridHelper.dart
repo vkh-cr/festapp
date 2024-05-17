@@ -1,6 +1,6 @@
-import 'package:festapp/models/PlaceModel.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/services/MapIconService.dart';
+import 'package:fstapp/models/PlaceModel.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/services/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
