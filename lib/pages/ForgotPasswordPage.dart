@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/styles/Styles.dart';
-import 'package:festapp/widgets/FormFields.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/FormFields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

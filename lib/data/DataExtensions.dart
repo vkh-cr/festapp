@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:festapp/models/EventModel.dart';
-import 'package:festapp/models/InformationModel.dart';
-import 'package:festapp/models/PlaceModel.dart';
+import 'package:fstapp/models/EventModel.dart';
+import 'package:fstapp/models/InformationModel.dart';
+import 'package:fstapp/models/PlaceModel.dart';
 
 extension DataExtension on int? {
   int safeInt() => this??0;

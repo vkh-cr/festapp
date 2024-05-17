@@ -1,4 +1,4 @@
-import 'package:festapp/models/Tb.dart';
+import 'package:fstapp/models/Tb.dart';
 
 class OccasionSettingsModel {
   dynamic defaultMapLocation;

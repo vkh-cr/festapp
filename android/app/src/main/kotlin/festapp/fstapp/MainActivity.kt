@@ -1,4 +1,4 @@
-package festapp.festivalslunovrat
+package fstapp.slunovratopava
 
 import io.flutter.embedding.android.FlutterActivity
 

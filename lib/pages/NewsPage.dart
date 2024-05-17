@@ -1,10 +1,10 @@
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/styles/Styles.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/widgets/HtmlView.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
