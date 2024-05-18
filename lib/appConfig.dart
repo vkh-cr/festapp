@@ -12,7 +12,7 @@ class AppConfig {
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = false;
-  static const String oneSignalAppId = 'e9c1ac36-4d81-4bd9-9641-18b130f656cb';
+  static const String oneSignalAppId = '4c5b7280-510f-4628-8fb8-b4bdd4fed1b2';
   static const String generatedPasswordPrefix = "fa";
   static const String defaultLink = "2024";
 
