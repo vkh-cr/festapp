@@ -5,7 +5,7 @@
 create trigger push_log_notifications
 after insert on log_notifications for each row
 execute function supabase_functions.http_request (
-'https://kluhpargrjwxiqlxlkdu.supabase.co/functions/v1/notify',
+'https://hvtsoseaywurkmhywdbd.supabase.co/functions/v1/notify',
 'POST',
 '{"Content-type":"application/json"}',
 '{}',

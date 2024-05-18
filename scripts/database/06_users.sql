@@ -1,14 +1,14 @@
 INSERT INTO public.user_info
   (id, email_readonly, name, surname, sex)
 VALUES
-  ((select get_user_id_by_email('test@test.com')), 'test@test.com', 'test', 'testik', 'male');
+  ((select get_user_id_by_email('t@t.com')), 't@t.com', 'test', 'testik', 'male');
 
 INSERT INTO public.occasion_users
   ("user", occasion, data, is_manager)
 VALUES
-  ((select get_user_id_by_email('test@test.com')), 1,
+  ((select get_user_id_by_email('t@t.com')), 1,
   json_build_object(
-  'email','test@test.com',
+  'email','t@t.com',
   'name','test',
   'surname','testik',
   'sex', 'male'

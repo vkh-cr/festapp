@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'models/LanguageModel.dart';
 
 class AppConfig {
-  static const String supabaseUrl = 'https://kluhpargrjwxiqlxlkdu.supabase.co';
-  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsdWhwYXJncmp3eGlxbHhsa2R1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTIyNDc1NDEsImV4cCI6MjAyNzgyMzU0MX0.gA7QtEvLNoQf-eztGBdeJFczqlENAw8veHC6h3nVKxs';
+  static const String supabaseUrl = 'https://hvtsoseaywurkmhywdbd.supabase.co';
+  static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2dHNvc2VheXd1cmttaHl3ZGJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTYwMzk1MDYsImV4cCI6MjAzMTYxNTUwNn0.LIFBDLrSxTrI4z_Wwnt_5mS5SW2FC9ysVIhJ3m7FD10';
   static const String appName = 'Slunovrat 2024';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
