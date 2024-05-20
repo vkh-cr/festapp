@@ -176,5 +176,7 @@
   "You can sign in from {time}.": "Możesz zalogować się od {time}.",
   "Create your own schedule with button": "Stwórz własny harmonogram za pomocą przycisku",
   "Install": "Zainstalować",
+  "Delete account": "Usuń konto",
+  "Request account deletion by sending email with your credentials to info@festapp.net.": "Poproś o usunięcie konta, wysyłając e-mail ze swoimi danymi logowania na adres info@festapp.net.",
   "_": "_"
 }
