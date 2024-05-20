@@ -5,6 +5,7 @@ import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -108,6 +109,13 @@ class _UserPageState extends State<UserPage> {
                     ).tr(),
                   ),
                 ),
+                Container(
+                    padding: const EdgeInsets.all(8.0),
+                    alignment: Alignment.topCenter,
+                    child: TextButton(
+                        onPressed: () => DialogHelper.showInformationDialogAsync(context, "Delete account".tr(), "Request account deletion by sending email with your credentials to info@festapp.net."),
+                        child: Text("Delete account".tr(), style: normalTextStyle,).tr())
+                )
               ],
             ),
           ),

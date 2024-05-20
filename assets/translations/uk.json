@@ -176,5 +176,7 @@
   "You can sign in from {time}.": "Ви можете увійти з {time}.",
   "Create your own schedule with button": "Створіть свій власний графік за допомогою кнопки",
   "Install": "Встановити",
+  "Delete account": "Видалити акаунт",
+  "Request account deletion by sending email with your credentials to info@festapp.net.": "Запитайте про видалення акаунта, надіславши електронний лист з вашими обліковими даними на info@festapp.net.",
   "_": "_"
 }

@@ -178,5 +178,7 @@
   "Install": "Install",
   "City": "City",
   "Sign up": "Sign up",
+  "Delete account": "Delete account",
+  "Request account deletion by sending email with your credentials to info@festapp.net.": "Request account deletion by sending email with your credentials to info@festapp.net.",
   "_":"_"
 }

@@ -176,5 +176,7 @@
   "Interest": "Záujem",
   "Create your own schedule with button": "Vytvor si vlastný rozvrh pomocou tlačidla",
   "Install": "Inštalovať",
+  "Delete account": "Zmazať účet",
+  "Request account deletion by sending email with your credentials to info@festapp.net.": "Požiadajte o zmazanie účtu zaslaním e-mailu s vašimi prihlasovacími údajmi na info@festapp.net.",
   "_": "_"
 }
