@@ -68,12 +68,15 @@ dependencies:
   simple_shadow: ^0.3.1
   pwa_install: ^0.0.5
   flutter_form_builder: ^9.2.1
-  form_builder_validators: ^10.0.0
+  form_builder_validators: ^9.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
+
+dependency_overrides:
+  intl: 0.19.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
