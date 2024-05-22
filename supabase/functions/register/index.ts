@@ -28,27 +28,47 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     console.log(reqData);
 
-    const emailField = reqData.fields.find(field => field.type === "email");
+    const userEmail = reqData.email;
+    console.log(userEmail);
 
     const userData = await _supabase
           .from("user_info")
           .select()
-          .eq("email_readonly", emailField.value)
+          .eq("email_readonly", userEmail)
           .maybeSingle();
 
     if(userData.data != null) {
-        return new Response(JSON.stringify({"email":emailField.value}), {
+        return new Response(JSON.stringify({"email":userEmail}), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });
     }
 
-    _supabase.
+//     const result = await _supabase.rpc("process_token_register",
+//                          { params: {'data': reqData}});
 
-    const userId = userData.data.id;
+//     if(result.code != 200){
+//         return new Response(JSON.stringify({"code":result.code}), {
+//           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+//           status: 200,
+//         })
+//     }
+
+    const { data } = await _supabase.rpc("create_user",
+            {oc: 1, email: userEmail, password: "88888888"});
+    console.log(data);
+    await _supabase.rpc("update_user",
+                    {
+                      usr: data,
+                      oc: 1,
+                      data: reqData
+                    });
+
+    const userId = data;
 
     const token = crypto.randomUUID();
 
+    console.log(token);
     await _supabase
           .from("user_reset_token")
           .delete()
