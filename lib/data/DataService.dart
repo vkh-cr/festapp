@@ -1490,6 +1490,11 @@ class DataService {
     }
 
   }
+
+  static Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+    var resp = await _supabase.functions.invoke("register", body: data);
+    return resp.data;
+  }
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
 //   List<ParticipantModel> toReturn = [];
 //   var result = await _supabase
