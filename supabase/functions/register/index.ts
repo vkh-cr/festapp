@@ -120,7 +120,7 @@ Deno.serve(async (req) => {
         "template":template.data.id
     });
 
-    return new Response(JSON.stringify({"email":userEmail}), {
+    return new Response(JSON.stringify({"email":userEmail, "code":200}), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
