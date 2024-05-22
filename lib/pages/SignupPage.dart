@@ -1,10 +1,12 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/models/FormModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
@@ -75,6 +77,11 @@ class _SignupPageState extends State<SignupPage> {
                               setState(() {
                                 _isLoading = true;
                               });
+                              var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                              var resp = await DataService.register(data);
+                              if(resp["code"]==200){
+                                ToastHelper.Show("Almost done! Confirm registration in your email.".tr());
+                              }
                             }
                           }
                         },

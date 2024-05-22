@@ -177,7 +177,10 @@
   "Create your own schedule with button": "Create your own schedule with button",
   "Install": "Install",
   "City": "City",
+  "Birth year": "Birth year",
   "Sign up": "Sign up",
+  "I'm": "I'm",
+  "Almost done! Confirm registration in your email.": "Almost done! Confirm registration in your email.",
   "Delete account": "Delete account",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Request account deletion by sending email with your credentials to info@festapp.net.",
   "_":"_"

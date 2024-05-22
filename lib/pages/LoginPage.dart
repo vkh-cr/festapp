@@ -1,5 +1,6 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
@@ -106,6 +107,13 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextButton(
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
                             child: Text("Forgot your password?", style: normalTextStyle,).tr())
+                    ),
+                    Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                            child: Text("Sign up", style: normalTextStyle,).tr())
                     )
                   ],
                 ),
