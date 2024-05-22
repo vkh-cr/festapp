@@ -23,6 +23,7 @@ class AppConfig {
   static const color2 = Color(0xFFf5ca00);
   static const color3 = Color(0xFF2ba29d);
   static const color4 = Color(0xFFa70f08);
+  static const color5 = Color(0xFF40E0D0);
   static const attentionColor = Color(0xFF8B0000);
 
   static const timelineTabLabelColor = color1;
@@ -35,12 +36,14 @@ class AppConfig {
   static const button3Color = color2;
   static const button4Color = color4;
 
+
   static Color eventTypeToColor(String? type)
   {
     switch (type){
       case "music": return color2;
       case "talk": return color3;
       case "other": return color4;
+      case "children": return color5;
     }
     return color1;
   }
