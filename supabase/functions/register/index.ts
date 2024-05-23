@@ -57,11 +57,18 @@ Deno.serve(async (req) => {
     const { data } = await _supabase.rpc("create_user",
             {oc: 1, email: userEmail, password: "88888888"});
     console.log(data);
+
     await _supabase.rpc("update_user",
                     {
                       usr: data,
                       oc: 1,
                       data: reqData
+                    });
+
+    await _supabase.rpc("add_user_to_occasion",
+                    {
+                      usr: data,
+                      oc: 1,
                     });
 
     const userId = data;

@@ -165,7 +165,7 @@
   "Create a new password to continue.": "Vytvorte nové heslo pre pokračovanie.",
   "Welcome in {name}!": "Vitajte v {name}!",
   "Invite": "Pozvať",
-  "You can sign in from {time}.": "Môžeš sa prihlásiť od {time}.",
+  "You can sign in from {time}.": "Môžeš sa prihlásiť od času {time}.",
   "Invited": "Pozvaný",
   "Users will get invitation via e-mail.": "Používatelia dostanú pozvánku e-mailom.",
   "Invite users who have already been invited?": "Pozvať používateľov, ktorí už boli pozvaní?",

@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text("First time?".tr(), style: TextStyle(fontSize: 20),),
+                          Text("First time?".tr(), style: TextStyle(fontSize: 18),),
                           const SizedBox(
                             width: 16,
                           ),
