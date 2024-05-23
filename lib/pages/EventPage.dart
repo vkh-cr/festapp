@@ -153,7 +153,7 @@ class _EventPageState extends State<EventPage> {
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: const Text(
-                          "You need to sign in to this event. First, sign in to the app.",
+                          "You need to have an account to sign in to the event.",
                           style: TextStyle(color: AppConfig.attentionColor),).tr(),
                       )),
                   Visibility(
