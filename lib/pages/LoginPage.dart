@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:pwa_install/pwa_install.dart';
 import '../data/DataService.dart';
 import '../styles/Styles.dart';
@@ -70,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: FormFields.password(_passwordController),
+                      child: PasswordField(label: "Password".tr(), controller:  _passwordController),
                     ),
                     const SizedBox(
                       height: 16,
