@@ -6,6 +6,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
@@ -73,21 +74,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        autofillHints: const [AutofillHints.password],
-                        keyboardType: TextInputType.text,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "New Password".tr()),
-                        validator: (String? value) {
-                          if (value!.isEmpty) {
-                            return "Fill the password!".tr();
-                          }
-                          return null;
-                        },
-                      )),
+                      child: PasswordField(label: "New Password".tr(), controller:  _passwordController),),
                   const SizedBox(
                     height: 16,
                   ),

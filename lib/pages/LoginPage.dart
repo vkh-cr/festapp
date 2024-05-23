@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:pwa_install/pwa_install.dart';
 import '../data/DataService.dart';
 import '../styles/Styles.dart';
@@ -63,6 +64,22 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 200,
                     ),
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("First time?".tr(), style: TextStyle(fontSize: 20),),
+                          const SizedBox(
+                            width: 16,
+                          ),
+                          TextButton(
+                              onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                              child: Text("Sign up", style: normalTextStyle,).tr())
+                        ]
+
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: FormFields.email(_emailController),
@@ -70,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: FormFields.password(_passwordController),
+                      child: PasswordField(label: "Password".tr(), controller:  _passwordController),
                     ),
                     const SizedBox(
                       height: 16,
@@ -108,13 +125,6 @@ class _LoginPageState extends State<LoginPage> {
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
                             child: Text("Forgot your password?", style: normalTextStyle,).tr())
                     ),
-                    Container(
-                        padding: const EdgeInsets.all(8.0),
-                        alignment: Alignment.topRight,
-                        child: TextButton(
-                            onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                            child: Text("Sign up", style: normalTextStyle,).tr())
-                    )
                   ],
                 ),
               ),
