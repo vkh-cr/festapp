@@ -281,11 +281,17 @@ class DataService {
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
       oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email]);
-      await _supabase.from(Tb.occasion_users.table).upsert(
-          oum.toUpdateJson()
-      );
+      await addUserToCurrentOccasion(oum.user!);
       await updateUserInfo(oum);
+  }
 
+  static Future<void> addUserToCurrentOccasion(String id) async {
+    await _supabase.rpc("add_user_to_occasion",
+        params:
+        {
+          "usr": id,
+          "oc": RightsHelper.currentOccasion,
+        });
   }
 
   static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
