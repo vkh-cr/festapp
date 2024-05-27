@@ -9,3 +9,6 @@ channel = "stable"
 
 command = "flutter build web --web-renderer canvaskit --release"
 publish = "build/web"
+
+[build.environment]
+FLUTTER_VERSION = "3.22.0"
