@@ -1,5 +1,6 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
@@ -140,6 +141,7 @@ class _MapPageState extends State<MapPage> {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
     var offlinePlaces = OfflineDataHelper.getAllPlaces();
+    offlinePlaces.sortPlaces();
     if (placeId != null && !loadOtherGroups) {
       var place = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (place != null) {
