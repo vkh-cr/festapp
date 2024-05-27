@@ -97,7 +97,6 @@ LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
 AS $$
 DECLARE
-    existingInfo jsonb;
     _key   text;
     _value text;
     usr_info user_info%rowtype;
@@ -113,6 +112,11 @@ BEGIN
     IF usr_info is NULL THEN
        INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
        select * into usr_info from user_info where id = usr;
+    END IF;
+
+    --Initialize usr_info.data if it is null
+    IF usr_info.data IS NULL THEN
+        usr_info.data := '{}'::jsonb;
     END IF;
 
     FOR _key, _value IN
