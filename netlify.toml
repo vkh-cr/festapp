@@ -4,11 +4,8 @@ package = "netlify-plugin-flutter"
 
 [plugins.inputs]
 channel = "stable"
-
+flutter_version = "3.22.0"
 [build]
 
 command = "flutter build web --web-renderer canvaskit --release"
 publish = "build/web"
-
-[build.environment]
-FLUTTER_VERSION = "3.22.0"
