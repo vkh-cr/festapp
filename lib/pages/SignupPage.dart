@@ -20,11 +20,13 @@ class SignupPage extends StatefulWidget {
 
 class _SignupPageState extends State<SignupPage> {
   bool _isLoading = false;
+  bool _isRegistrationSuccess = false;
+  Map<String, dynamic>? fieldsData;
+
   final dynamic fields =
   {"fields":
   [
-    {"type":"name",
-    "value":"Michael"},
+    {"type":"name"},
     {"type":"surname"},
     {"type":"sex"},
     {"type":"email"},
@@ -55,7 +57,12 @@ class _SignupPageState extends State<SignupPage> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: FormBuilder(
+              child: _isRegistrationSuccess ?
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12,88,12,12),
+                  child: Text("Almost done! Confirm registration in your email {email}.".tr(namedArgs: {"email": fieldsData?["email"]}), style: const TextStyle(fontSize: 18), textAlign: TextAlign.center,))
+                  :
+              FormBuilder(
                 key: _formKey,
                 child: AutofillGroup(
                   child: Column(
@@ -79,9 +86,16 @@ class _SignupPageState extends State<SignupPage> {
                                   _isLoading = true;
                                 });
                                 var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                                fieldsData = data;
                                 var resp = await DataService.register(data);
                                 if(resp["code"]==200){
-                                  ToastHelper.Show("Almost done! Confirm registration in your email.".tr());
+                                  ToastHelper.Show("Registration is almost complete!".tr());
+                                  setState(() {
+                                    _isRegistrationSuccess = true;
+                                    _isLoading = false;
+                                  });
+                                } else {
+                                  ToastHelper.Show("Registration has failed.".tr(), severity: ToastSeverity.NotOk);
                                 }
                               }
                             }
