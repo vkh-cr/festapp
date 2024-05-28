@@ -54,43 +54,46 @@ class _SignupPageState extends State<SignupPage> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: appMaxWidth),
           child: SingleChildScrollView(
-            child: FormBuilder(
-              key: _formKey,
-              child: AutofillGroup(
-                child: Column(
-                  children: [
-                  ...FormHelper.getFormFields(fields),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Container(
-                      height: 50,
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: AppConfig.color1,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: TextButton(
-                        onPressed: _isLoading ? null : () async {
-                          TextInput.finishAutofillContext();
-                          if (_formKey.currentState?.saveAndValidate() ?? false) {
-                            if (true) {
-                              setState(() {
-                                _isLoading = true;
-                              });
-                              var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
-                              var resp = await DataService.register(data);
-                              if(resp["code"]==200){
-                                ToastHelper.Show("Almost done! Confirm registration in your email.".tr());
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: FormBuilder(
+                key: _formKey,
+                child: AutofillGroup(
+                  child: Column(
+                    children: [
+                    ...FormHelper.getFormFields(fields),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Container(
+                        height: 50,
+                        width: 250,
+                        decoration: BoxDecoration(
+                            color: AppConfig.color1,
+                            borderRadius: BorderRadius.circular(20)),
+                        child: TextButton(
+                          onPressed: _isLoading ? null : () async {
+                            TextInput.finishAutofillContext();
+                            if (_formKey.currentState?.saveAndValidate() ?? false) {
+                              if (true) {
+                                setState(() {
+                                  _isLoading = true;
+                                });
+                                var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                                var resp = await DataService.register(data);
+                                if(resp["code"]==200){
+                                  ToastHelper.Show("Almost done! Confirm registration in your email.".tr());
+                                }
                               }
                             }
-                          }
-                        },
-                        child: const Text(
-                          "Sign up",
-                          style: TextStyle(color: Colors.white, fontSize: 25),
-                        ).tr(),
-                      ),
-                    ),]
+                          },
+                          child: const Text(
+                            "Sign up",
+                            style: TextStyle(color: Colors.white, fontSize: 25),
+                          ).tr(),
+                        ),
+                      ),]
+                  ),
                 ),
               ),
             ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
@@ -108,7 +109,10 @@ class MyApp extends StatelessWidget {
       //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
       //   );
       // },
-      localizationsDelegates: context.localizationDelegates,
+      localizationsDelegates: [
+        ...context.localizationDelegates,
+        FormBuilderLocalizations.delegate,
+      ],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       title: MyHomePage.HOME_PAGE,
