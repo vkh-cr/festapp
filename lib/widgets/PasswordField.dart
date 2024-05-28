@@ -7,11 +7,11 @@ class PasswordField extends StatefulWidget {
   final String passwordType;
 
   const PasswordField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
-    required this.passwordType
-  }) : super(key: key);
+    required this.passwordType,
+  });
 
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
@@ -55,8 +55,8 @@ class _PasswordFieldState extends State<PasswordField> {
             onTap: _toggleObscured,
             child: Icon(
               _obscured
-                  ? Icons.visibility_rounded
-                  : Icons.visibility_off_rounded,
+                  ? Icons.visibility_off_rounded
+                  : Icons.visibility_rounded,
               size: 24,
             ),
           ),
