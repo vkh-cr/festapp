@@ -182,7 +182,8 @@
   "I'm": "Jsem",
   "First time?": "Poprvé?",
   "Add existing": "Přidat už vytvořeného",
-  "Almost done! Confirm registration in your email.": "Skoro hotovo! Potvrď svou registraci v došlém e-mailu.",
+  "Almost done! Confirm registration in your email {email}.": "Skoro hotovo! Potvrď svou registraci v došlém e-mailu.",
+  "Registration is almost complete!": "Registrace je téměř dokončená!",
   "Delete account": "Smazat účet",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Požádejte o smazání účtu zasláním e-mailu s vašimi přihlašovacími údaji na info@festapp.net.",
   "_": "_"
