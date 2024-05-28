@@ -1,13 +1,13 @@
+import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
-import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/widgets/Timetable.dart';
-import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
 
 import '../models/EventModel.dart';
 
@@ -30,7 +30,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   void initState() {
     super.initState();
     timetableController = TimetableController(onItemTap: (id) {
-      RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
+      RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+          .then((value) => loadData());
     });
   }
 
@@ -60,10 +61,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
       _days.addAll({
         for (var e in eventsGrouped.values)
-          e.first.startTime.weekday:
-              DateFormat("EEE d. MMM", context.locale.languageCode)
-                  .format(e.first.startTime)
-                  .toUpperCase()
+          e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
       });
 
       setupTabController(_days.length);
@@ -72,9 +70,12 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     });
   }
 
+  String TimetableDateFormat(DateTime e) =>
+      DateFormat("EEEE", context.locale.languageCode).format(e).toUpperCase();
+
   void setupTabController(int daysCount) {
-    if(_tabController?.length != daysCount) {
-        _tabController = TabController(vsync: this, length: daysCount);
+    if (_tabController?.length != daysCount) {
+      _tabController = TabController(vsync: this, length: daysCount);
     }
     _tabController!.addListener(() {
       setState(() {
@@ -98,10 +99,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
       var days = {
         for (var e in eventsGrouped.values)
-          e.first.startTime.weekday:
-              DateFormat("EEE d. MMM", context.locale.languageCode)
-                  .format(e.first.startTime)
-                  .toUpperCase()
+          e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
       };
       _days.addAll(days);
     }
@@ -119,7 +117,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
 
   Future<void> loadEventParticipants() async {
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
+    for (var e
+        in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
         item.text = e.toString();
@@ -159,10 +158,11 @@ class _ProgramViewPageState extends State<ProgramViewPage>
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(6,6,6,0),
+              padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
               child: TextButton(
                 onPressed: () async {
-                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
+                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
+                      .then((value) => loadData());
                 },
                 child: FittedBox(
                   child: Column(
@@ -173,8 +173,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                         color: Colors.white,
                       ),
                       Text("My schedule".tr(),
-                          style:
-                              const TextStyle(color: Colors.white, fontSize: 9)),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 9)),
                     ],
                   ),
                 ),
