@@ -25,13 +25,13 @@ class FormHelper{
   static dynamic getValueFromTypeField(GlobalKey<FormBuilderState> formKey, String type){
     switch (type) {
       case "name":
-        return formKey.currentState?.fields["name"]!.value;
+        return formKey.currentState?.fields["name"]!.value.trim();
       case "surname":
-        return formKey.currentState?.fields["surname"]!.value;
+        return formKey.currentState?.fields["surname"]!.value.trim();
       case "city":
-        return formKey.currentState?.fields["city"]!.value;
+        return formKey.currentState?.fields["city"]!.value.trim();
       case "email":
-        return formKey.currentState?.fields["email"]!.value;
+        return formKey.currentState?.fields["email"]!.value.trim();
       case "sex":
         var option =  formKey.currentState?.fields["sex"]!.value as FormOptionModel;
         return option.code;

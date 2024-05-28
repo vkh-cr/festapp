@@ -74,7 +74,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: PasswordField(label: "New Password".tr(), controller:  _passwordController),),
+                      child: PasswordField(label: "New Password".tr(), controller:  _passwordController, passwordType: AutofillHints.newPassword),),
                   const SizedBox(
                     height: 16,
                   ),

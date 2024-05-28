@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class PasswordField extends StatefulWidget {
   final String label;
   final TextEditingController controller;
+  final String passwordType;
 
   const PasswordField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
-  }) : super(key: key);
+    required this.passwordType,
+  });
 
   @override
   _PasswordFieldState createState() => _PasswordFieldState();
@@ -34,7 +36,7 @@ class _PasswordFieldState extends State<PasswordField> {
       obscureText: _obscured,
       controller: widget.controller,
       focusNode: textFieldFocusNode,
-      autofillHints: const [AutofillHints.password],
+      autofillHints: [widget.passwordType],
       validator: (String? value) {
         if (value!.isEmpty) {
           return "Fill the password!".tr();
@@ -53,8 +55,8 @@ class _PasswordFieldState extends State<PasswordField> {
             onTap: _toggleObscured,
             child: Icon(
               _obscured
-                  ? Icons.visibility_rounded
-                  : Icons.visibility_off_rounded,
+                  ? Icons.visibility_off_rounded
+                  : Icons.visibility_rounded,
               size: 24,
             ),
           ),
