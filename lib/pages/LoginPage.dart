@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: PasswordField(label: "Password".tr(), controller:  _passwordController),
+                      child: PasswordField(label: "Password".tr(), controller:  _passwordController, passwordType: AutofillHints.password),
                     ),
                     const SizedBox(
                       height: 16,
