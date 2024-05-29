@@ -124,12 +124,12 @@ class DataService {
     return _currentUser!;
   }
 
-  static Future<void> deleteUser(OccasionUserModel data) async {
+  static Future<void> deleteUser(String user, int occasion) async {
     await _supabase.rpc("delete_user",
     params:
     {
-      "usr": data.user,
-      "oc": data.occasion
+      "usr": user,
+      "oc": occasion
     });
   }
 
@@ -997,30 +997,27 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(EventModel event, [UserInfoModel? participant]) async {
+  static Future<void> signOutFromEvent(int eventId, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
-    var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
+    var userId = participant?.id ?? currentUserId();
 
-    if(!RightsHelper.canSignInOutUsersFromEvents() && DateTime.now().isAfter(event.endTime))
-    {
-      ToastHelper.Show("It is not possible to sign out from an event that has already taken place.", severity: ToastSeverity.NotOk);
-      return;
-    }
-
-    await _supabase
-        .from(Tb.event_users.table)
-        .delete()
-        .eq(Tb.event_users.event, event.id!)
-        .eq(Tb.event_users.user, finalId!);
-
-    if(participant == null) {
-      var trPrefix = _currentUser!.getGenderPrefix();
-      ToastHelper.Show("${trPrefix}You have been signed out.".tr());
-      return;
-    }
-    else{
-      var trPrefix = participant.getGenderPrefix();
-      ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
+    var result = await _supabase.rpc("sign_user_out_of_event",
+        params: {"ev": eventId, "usr": userId});
+    switch(result["code"]) {
+      case 200:
+        if(participant == null) {
+          var trPrefix = _currentUser!.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+          return;
+        }
+        else{
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
+        }
+        return;
+      case 201:
+        ToastHelper.Show("It is not possible to sign out from an event that has already taken place.".tr(), severity: ToastSeverity.NotOk);
+        return;
     }
   }
 

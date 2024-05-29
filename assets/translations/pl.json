@@ -186,5 +186,12 @@
   "Registration is almost complete!": "Rejestracja jest prawie zakończona!",
   "Delete account": "Usuń konto",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Poproś o usunięcie konta, wysyłając e-mail ze swoimi danymi logowania na adres info@festapp.net.",
+  "Delete companion": "Usuń towarzysza",
+  "By deleting your companion you will also sign him/her out of all registered sessions.": "Usunięcie towarzysza spowoduje również jego wyrejestrowanie ze wszystkich zarejestrowanych sesji.",
+  "Companions": "Towarzysze",
+  "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "Jeśli masz dziecko, partnera lub przyjaciela bez telefonu, możesz ich zarejestrować jako towarzysza. Do wejścia na wydarzenie będą potrzebować opaski festiwalowej. Maksymalna liczba towarzyszy to {max_companions}.",
+  "Companion Name": "Nazwa towarzysza",
+  "Create Companion": "Utwórz towarzysza",
+  "Sign in companion": "Zaloguj towarzysza",
   "_": "_"
 }

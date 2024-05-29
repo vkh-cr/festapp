@@ -186,5 +186,12 @@
   "Registration is almost complete!": "Реєстрацію майже завершено!",
   "Delete account": "Видалити акаунт",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Запитайте про видалення акаунта, надіславши електронний лист з вашими обліковими даними на info@festapp.net.",
+  "Delete companion": "Видалити супутника",
+  "By deleting your companion you will also sign him/her out of all registered sessions.": "Видаляючи свого супутника, ви також виведете його з усіх зареєстрованих сеансів.",
+  "Companions": "Супутники",
+  "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "Якщо у вас є дитина, партнер або друг без телефону, ви можете зареєструвати їх як супутника. Для входу на захід їм знадобиться фестивальний браслет. Максимальна кількість супутників - {max_companions}.",
+  "Companion Name": "Ім'я супутника",
+  "Create Companion": "Створити супутника",
+  "Sign in companion": "Зареєструвати супутника",
   "_": "_"
 }
