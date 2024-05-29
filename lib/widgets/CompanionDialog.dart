@@ -1,0 +1,155 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:fstapp/data/CompanionHelper.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/models/CompanionModel.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+
+class CompanionDialog extends StatefulWidget {
+  final int eventId;
+  final int maxCompanions;
+  List<CompanionModel> companions = [];
+
+  CompanionDialog({
+    super.key,
+    required this.eventId,
+    required this.maxCompanions,
+    required this.companions,
+  });
+
+  @override
+  _CompanionDialogState createState() => _CompanionDialogState();
+}
+
+class _CompanionDialogState extends State<CompanionDialog> {
+  final TextEditingController _nameController = TextEditingController();
+
+  Future<void> _createCompanion() async {
+    if (widget.companions.length < widget.maxCompanions &&
+        _nameController.text.isNotEmpty) {
+      await CompanionHelper.create(_nameController.text);
+      _nameController.clear();
+      widget.companions =
+          await CompanionHelper.getAllCompanions(widget.eventId);
+      setState(() {});
+    }
+  }
+
+  Future<void> _deleteCompanion(CompanionModel companion) async {
+    var answer = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Delete companion".tr(),
+        "By deleting your companion you will also sign him/her out of all registered sessions."
+            .tr());
+    if (!answer) {
+      return;
+    }
+    await CompanionHelper.delete(companion);
+    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    setState(() {});
+  }
+
+  Future<void> _signInCompanion(CompanionModel companion) async {
+    await CompanionHelper.signIn(context, widget.eventId, companion);
+    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+  }
+
+  Future<void> _signOutCompanion(CompanionModel companion) async {
+    await CompanionHelper.signOut(widget.eventId, companion);
+    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Companions").tr(),
+      content: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 480),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                      "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.", )
+                  .tr(namedArgs: {"max_companions": DataService.globalSettingsModel!.maxCompanions!.toString()}),
+              const SizedBox(height: 20),
+              Visibility(
+                visible: widget.companions.length < widget.maxCompanions,
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      decoration:
+                          InputDecoration(labelText: "Companion Name".tr()),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _createCompanion,
+                      child: const Text("Create Companion").tr(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: 380,
+                height: 100,
+                child: ListView.builder(
+                  shrinkWrap: false,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.companions.length,
+                  itemBuilder: (context, index) {
+                    final companion = widget.companions[index];
+                    return ListTile(
+                      title: Row(
+                        children: [
+                          Visibility(
+                              maintainSize: true,
+                              maintainAnimation: true,
+                              maintainState: true,
+                              visible: companion.isSignedIn,
+                              child: const Icon(Icons.check_circle)),
+                          const SizedBox(width: 4),
+                          Text(companion.name),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Visibility(
+                            visible: !companion.isSignedIn,
+                            child: ElevatedButton(
+                              child: const Text("Sign in someone").tr(),
+                              onPressed: () => _signInCompanion(companion),
+                            ),
+                          ),
+                          Visibility(
+                            visible: companion.isSignedIn,
+                            child: ElevatedButton(
+                              child: const Text("Sign out").tr(),
+                              onPressed: () => _signOutCompanion(companion),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => _deleteCompanion(companion),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Ok").tr(),
+        ),
+      ],
+    );
+  }
+}

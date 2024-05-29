@@ -1,6 +1,8 @@
+import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/CompanionModel.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/data/DataService.dart';
@@ -12,6 +14,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
@@ -38,6 +41,8 @@ class _EventPageState extends State<EventPage> {
 
   List<UserInfoModel> _participants = [];
   List<UserInfoModel> _queriedParticipants = [];
+  List<CompanionModel> _companions = [];
+
   bool isLoadingParticipants = true;
 
   _EventPageState();
@@ -85,6 +90,14 @@ class _EventPageState extends State<EventPage> {
                         child: ElevatedButton(
                             onPressed: () => signOut(),
                             child: const Text("Sign out").tr())),
+                    Visibility(
+                        visible: showLoginLogoutButton() && ((DataService.globalSettingsModel?.maxCompanions??0) > 0),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                          child: ElevatedButton(
+                              onPressed: () => signInCompanion(),
+                              child: const Text("Sign in companion").tr()),
+                        )),
                     Visibility(
                       visible: showLoginLogoutButton() && (RightsHelper.isEditor()),
                       child: Padding(
@@ -354,8 +367,18 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event!);
+    await DataService.signOutFromEvent(_event!.id!);
     await loadData(_event!.id!);
+  }
+
+  Future<void> signInCompanion() async {
+    _companions = await CompanionHelper.getAllCompanions(_event!.id!);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CompanionDialog(eventId: _event!.id!, maxCompanions: DataService.globalSettingsModel!.maxCompanions!, companions: _companions,);
+      },
+    );
   }
 
   Future<String?> signOutOther(UserInfoModel participant) {
@@ -375,7 +398,7 @@ class _EventPageState extends State<EventPage> {
         TextButton(
         onPressed: () async {
           context.pop();
-          await DataService.signOutFromEvent(_event!, participant);
+          await DataService.signOutFromEvent(_event!.id!, participant);
           await loadData(_event!.id!);
         },
         child: const Text("Sign out someone").tr(),

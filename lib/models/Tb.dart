@@ -22,6 +22,7 @@ class Tb {
   static GlobalSettingsTb global_settings = const GlobalSettingsTb();
   static EventRolesTb event_roles = const EventRolesTb();
   static RoleInfoTb role_info = const RoleInfoTb();
+  static UserCompanionsTb user_companions = const UserCompanionsTb();
 }
 class OccasionsTb{
   const OccasionsTb();
@@ -39,6 +40,7 @@ class OccasionsTb{
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";
   String get data_events_registration_start => "events_registration_start";
+  String get data_max_companions => "max_companions";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -247,4 +249,10 @@ class GlobalSettingsTb{
   String get table => "global_settings";
   String get id => "id";
   String get json => "json";
+}
+class UserCompanionsTb{
+  const UserCompanionsTb();
+  String get table => "user_companions";
+  String get user => "user";
+  String get companion => "companion";
 }

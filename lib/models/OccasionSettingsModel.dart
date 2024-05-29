@@ -4,19 +4,22 @@ class OccasionSettingsModel {
   dynamic defaultMapLocation;
   double defaultMapZoom;
   DateTime? eventsRegistrationTime;
+  int? maxCompanions;
 
   static const String globalSettingsOffline = "globalSettingsOffline";
 
   OccasionSettingsModel({
     this.defaultMapLocation,
     required this.defaultMapZoom,
-    this.eventsRegistrationTime
+    this.eventsRegistrationTime,
+    this.maxCompanions
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
     return OccasionSettingsModel(
       defaultMapLocation: json[Tb.occasions.data_defaultMapLocation]??DefaultSettings.defaultMapLocation,
       defaultMapZoom: json[Tb.occasions.data_defaultMapZoom].toDouble(),
+      maxCompanions: json[Tb.occasions.data_max_companions],
       eventsRegistrationTime: json[Tb.occasions.data_events_registration_start]!=null ? DateTime.parse(json[Tb.occasions.data_events_registration_start]) : null
     );
   }

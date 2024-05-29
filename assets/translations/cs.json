@@ -186,5 +186,12 @@
   "Registration is almost complete!": "Registrace je téměř dokončená!",
   "Delete account": "Smazat účet",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Požádejte o smazání účtu zasláním e-mailu s vašimi přihlašovacími údaji na info@festapp.net.",
+  "Delete companion": "Smazat společníka",
+  "By deleting your companion you will also sign him/her out of all registered sessions.": "Smazáním svého společníka jej také odhlásíte ze všech registrovaných událostí.",
+  "Companions": "Společníci",
+  "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "Pokud máte dítě, partnera nebo kamaráda bez telefonu, můžete je přihlásit jako společníka. K vstupu na akci budou potřebovat festivalový náramek. Maximální počet společníků je {max_companions}.",
+  "Companion Name": "Jméno společníka",
+  "Create Companion": "Vytvořit společníka",
+  "Sign in companion": "Přihlásit společníka",
   "_": "_"
 }
