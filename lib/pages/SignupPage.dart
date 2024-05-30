@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
@@ -60,7 +61,21 @@ class _SignupPageState extends State<SignupPage> {
               child: _isRegistrationSuccess ?
               Padding(
                 padding: const EdgeInsets.fromLTRB(12,88,12,12),
-                  child: Text("Almost done! Confirm registration in your email {email}.".tr(namedArgs: {"email": fieldsData?["email"]}), style: const TextStyle(fontSize: 18), textAlign: TextAlign.center,))
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          style: const TextStyle(fontSize: 18),
+                          text: "Almost done! Confirm registration in your email {email}.".tr(namedArgs: {"email": fieldsData?["email"]}),
+                        ),
+                        const WidgetSpan(
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(6,0,0,0),
+                              child: Icon(Icons.check_circle)),
+                        )
+                      ],
+                    )))
                   :
               FormBuilder(
                 key: _formKey,
