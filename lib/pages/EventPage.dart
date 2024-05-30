@@ -185,7 +185,7 @@ class _EventPageState extends State<EventPage> {
                       child: ExpansionTile(
                         title:  Row(children: [IconButton(onPressed: () async
                         {
-                          await Clipboard.setData(ClipboardData(text: _participants.map((e) => e.shortNameToString()).join("\n")));
+                          await Clipboard.setData(ClipboardData(text: _participants.map((e) => e.toFullNameString()).join("\n")));
                           ToastHelper.Show("Participants have been copied.".tr());
                         }, icon: const Icon(Icons.copy)), Text("${"Participants".tr()}:")]),
                         children: [ListView.builder(
