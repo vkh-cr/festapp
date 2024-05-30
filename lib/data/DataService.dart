@@ -931,6 +931,9 @@ class DataService {
         }
         return;
       }
+      case 403:
+        ToastHelper.Show("Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
+        return;
       case 100: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk); return;
       case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
