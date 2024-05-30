@@ -52,11 +52,13 @@ class _CompanionDialogState extends State<CompanionDialog> {
   Future<void> _signInCompanion(CompanionModel companion) async {
     await CompanionHelper.signIn(context, widget.eventId, companion);
     widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    setState(() {});
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
     await CompanionHelper.signOut(widget.eventId, companion);
     widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    setState(() {});
   }
 
   @override
@@ -65,7 +67,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
       title: const Text("Companions").tr(),
       content: SingleChildScrollView(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 480),
+          constraints: const BoxConstraints(maxWidth: 480),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -126,7 +128,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
                           Visibility(
                             visible: companion.isSignedIn,
                             child: ElevatedButton(
-                              child: const Text("Sign out").tr(),
+                              child: const Text("Sign out someone").tr(),
                               onPressed: () => _signOutCompanion(companion),
                             ),
                           ),

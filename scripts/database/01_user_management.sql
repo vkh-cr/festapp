@@ -277,7 +277,7 @@ BEGIN
     SELECT email_readonly, name, surname INTO user_email, user_name, user_surname
             FROM public.user_info
             WHERE id = usr;
-        companion_email :=  user_email || '+' || c_name;
+        companion_email :=  user_email || '+' || oc || '+' || c_name;
 
     new_companion := create_user_with_data(oc, companion_email, '', jsonb_build_object('name', c_name, 'email', companion_email));
 
