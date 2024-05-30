@@ -174,7 +174,8 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
   }
 
   void savePressed() async {
-    String? htmlText = await controller.getText();
+    String? htmlTextEdited = await controller.getText();
+    var htmlText = removeBackgroundColor(htmlTextEdited);
     context.pop(htmlText);
   }
 
@@ -190,4 +191,13 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
 
   /// to clear the editor
   void clearEditor() => controller.clear();
+
+  String removeBackgroundColor(String htmlString) {
+    RegExp regExp = RegExp(r'background-color\s*:\s*[^;]+;?\s*', caseSensitive: false);
+
+    // Replace all matches with an empty string
+    String cleanedHtmlString = htmlString.replaceAll(regExp, '');
+
+    return cleanedHtmlString;
+  }
 }
