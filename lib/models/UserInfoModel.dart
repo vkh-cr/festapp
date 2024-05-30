@@ -170,6 +170,6 @@ class UserInfoModel {
   }
 
   String getGenderPrefix() {
-    return sex == "male" ? "M":"F";
+    return sex == "female" ? "F":"M";
   }
 }

@@ -376,7 +376,13 @@ class _EventPageState extends State<EventPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CompanionDialog(eventId: _event!.id!, maxCompanions: DataService.globalSettingsModel!.maxCompanions!, companions: _companions,);
+        return CompanionDialog(
+          eventId: _event!.id!,
+          maxCompanions: DataService.globalSettingsModel!.maxCompanions!,
+          companions: _companions,
+          refreshData: () async {
+            await loadData(widget.id!);
+          } ,);
       },
     );
   }
