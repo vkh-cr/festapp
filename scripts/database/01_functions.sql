@@ -1,5 +1,7 @@
 create or replace function sign_user_to_event (ev bigint, usr uuid) returns jsonb
- language plpgsql as $$
+ language plpgsql
+ SECURITY DEFINER
+ as $$
 declare
   i_max_participants integer;
   current_participants integer;
@@ -19,19 +21,19 @@ declare
 
 begin
 
-    -- Existing checks for occasion user and editor
-    IF (SELECT get_exists_on_occasion_user(usr, (SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
-        RETURN json_build_object('code', 403);
-    END IF;
+  -- Existing checks for occasion user and editor
+  IF (SELECT get_exists_on_occasion_user(usr, (SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
+      RETURN json_build_object('code', 403);
+  END IF;
 
-    IF auth.uid() <> usr THEN
-        IF NOT EXISTS (
-            SELECT 1 FROM user_companions WHERE "user" = auth.uid() AND companion = usr ) THEN
-            IF (SELECT get_is_editor_on_occasion((SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
-                    RETURN json_build_object('code', 403);
-            END IF;
-        END IF;
-    END IF;
+  IF auth.uid() <> usr THEN
+      IF NOT EXISTS (
+        SELECT 1 FROM user_companions WHERE "user" = auth.uid() AND companion = usr) THEN
+          IF (SELECT get_is_editor_on_occasion((SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
+            RETURN json_build_object('code', 403);
+          END IF;
+      END IF;
+  END IF;
 
   SELECT (data->>'events_registration_start')::timestamp INTO events_registration_start
   FROM occasions
