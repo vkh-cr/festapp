@@ -45,7 +45,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    RightsHelper.ensureAccessProcedure(context);
+    await RightsHelper.ensureAccessProcedure(context);
     if(!RightsHelper.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
