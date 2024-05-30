@@ -20,6 +20,7 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:html/parser.dart';
@@ -27,6 +28,7 @@ import 'package:html/parser.dart';
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
 import '../models/PlaceModel.dart';
+
 
 class DataService {
   static final _supabase = Supabase.instance.client;
@@ -1432,6 +1434,15 @@ class DataService {
     var messages = await getAllNewsMessages();
     OfflineDataHelper.saveAllMessages(messages);
 
+    if (!const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed )
+    {
+      await updateEventDescriptions();
+    }
+
+    await DataService.synchronizeMySchedule();
+  }
+
+  static Future<void> updateEventDescriptions() async {
     var needsUpdate = <int>[];
     var allEventsMeta = await getAllEventsMeta();
 
@@ -1446,8 +1457,6 @@ class DataService {
     for(var e in fullEvents) {
       OfflineDataHelper.saveEventDescription(e);
     }
-
-    await DataService.synchronizeMySchedule();
   }
 
   static Future<OccasionLinkModel> checkOccasionLink(String link) async {
