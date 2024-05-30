@@ -9,12 +9,14 @@ class CompanionDialog extends StatefulWidget {
   final int eventId;
   final int maxCompanions;
   List<CompanionModel> companions = [];
+  Future<void> Function()? refreshData;
 
   CompanionDialog({
     super.key,
     required this.eventId,
     required this.maxCompanions,
     required this.companions,
+    this.refreshData
   });
 
   @override
@@ -47,18 +49,21 @@ class _CompanionDialogState extends State<CompanionDialog> {
     await CompanionHelper.delete(companion);
     widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
     setState(() {});
+    await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
     await CompanionHelper.signIn(context, widget.eventId, companion);
     widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
     setState(() {});
+    await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
     await CompanionHelper.signOut(widget.eventId, companion);
     widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
     setState(() {});
+    await widget.refreshData?.call();
   }
 
   @override
