@@ -112,24 +112,6 @@ class UserManagementHelper{
     }
   }
 
-  static Future<String> unsafeCreateNewUser(int occasion, String? email) async {
-    if(email == null)
-    {
-      throw Exception("User must have an e-mail!");
-    }
-
-    var random = Random();
-    var numberFormat = NumberFormat("####");
-    var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-
-    var newId = await DataService.unsafeCreateUser(occasion, email, pw);
-    if(newId==null)
-    {
-      throw Exception("Creating of user has failed.");
-    }
-    return newId;
-  }
-
   static Future<bool> unsafeChangeUserPassword(OccasionUserModel user) async {
     if(user.data?[Tb.occasion_users.data_email] == null)
     {

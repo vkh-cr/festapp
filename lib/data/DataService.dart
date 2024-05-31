@@ -275,16 +275,19 @@ class DataService {
         });
   }
 
-  static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
-    return await _supabase.rpc("create_user",
-        params: {"oc": occasion, "email": email, "password": pw});
+  static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
+    var newId = await _supabase.rpc("create_user_with_data",
+        params: {"oc": occasion, "email": email, "password": pw, "data": data});
+    if(newId==null)
+    {
+      throw Exception("Creating of user has failed.");
+    }
+    return newId;
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
-      oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email]);
-      await addUserToCurrentOccasion(oum.user!);
-      await updateUserInfo(oum);
+      oum.user ??= await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
   }
 
   static Future<void> addUserToCurrentOccasion(String id) async {
