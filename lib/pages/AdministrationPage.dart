@@ -858,7 +858,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
     DialogHelper.chooseUser(context, (person) async
     {
-      await DataService.addUserToCurrentOccasion(person.id);
+      await DataService.addUserToCurrentOccasion(person.id, RightsHelper.currentOccasion!);
       ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
     }, nonAdded, "Add".tr());
 

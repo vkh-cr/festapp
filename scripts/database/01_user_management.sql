@@ -68,40 +68,51 @@ DECLARE
     _value text;
     usr_info user_info%rowtype;
 BEGIN
-    IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+    -- Check if the caller is a manager for the occasion
+    IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403);
     END IF;
-    IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
+
+    -- Check if the user exists for the occasion
+    IF (SELECT get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
          RETURN jsonb_build_object('code', 403);
     END IF;
 
-    select * into usr_info from user_info where id = usr;
-    IF usr_info is NULL THEN
-       INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
-       select * into usr_info from user_info where id = usr;
+    -- Retrieve user information
+    SELECT * INTO usr_info FROM user_info WHERE id = usr;
+
+    -- If the user does not exist, insert a new user record
+    IF usr_info IS NULL THEN
+        INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
+        SELECT * INTO usr_info FROM user_info WHERE id = usr;
     END IF;
 
-    --Initialize usr_info.data if it is null
+    -- Initialize usr_info.data if it is null
     IF usr_info.data IS NULL THEN
         usr_info.data := '{}'::jsonb;
     END IF;
 
-    FOR _key, _value IN
-        SELECT * FROM jsonb_each_text(data)
-    LOOP
-        usr_info.data := jsonb_set(usr_info.data, array[_key], to_jsonb(_value));
-        IF _key = 'name' THEN
-          UPDATE user_info SET name = _value where id = usr;
-        ELSIF _key = 'surname' THEN
-          UPDATE user_info SET surname = _value where id = usr;
-       ELSIF _key = 'email' THEN
-          UPDATE user_info SET email_readonly = _value where id = usr;
-        ELSIF _key = 'sex' THEN
-          UPDATE user_info SET sex = _value where id = usr;
-        END IF;
-    END LOOP;
+    -- Merge the input data with existing usr_info.data
+    usr_info.data := usr_info.data || data;
 
-    UPDATE user_info SET data = usr_info.data where id = usr;
+    -- Update individual columns if they are part of the input JSON data
+    IF usr_info.data ? 'name' THEN
+        UPDATE user_info SET name = usr_info.data->>'name' WHERE id = usr;
+    END IF;
+    IF usr_info.data ? 'surname' THEN
+        UPDATE user_info SET surname = usr_info.data->>'surname' WHERE id = usr;
+    END IF;
+    IF usr_info.data ? 'email' THEN
+        UPDATE user_info SET email_readonly = usr_info.data->>'email' WHERE id = usr;
+    END IF;
+    IF usr_info.data ? 'sex' THEN
+        UPDATE user_info SET sex = usr_info.data->>'sex' WHERE id = usr;
+    END IF;
+
+    -- Update the user_info data column with the modified JSON data
+    UPDATE user_info SET data = usr_info.data WHERE id = usr;
+
+    -- Return a success code
     RETURN jsonb_build_object('code', 200);
 END;
 $$;
@@ -156,20 +167,9 @@ BEGIN
 
     -- If the occasion is not open, raise an exception
     IF NOT occasion_open THEN
-        IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
-    END IF;
-
-    SELECT EXISTS (
-            SELECT 1
-            FROM occasion_users
-            WHERE occasion = oc AND "user" = usr
-        ) INTO user_exists;
-
-    -- If the user already exists, raise an exception
-    IF user_exists THEN
-        RETURN jsonb_build_object('code', 403);
     END IF;
 
     -- Retrieve user info and create JSON data, merging with existing data
@@ -182,29 +182,46 @@ BEGIN
     FROM user_info ui
     WHERE ui.id = usr;
 
-    -- Insert a new row into occasion_users
-    INSERT INTO occasion_users (
-        occasion,
-        "user",
-        created_at,
-        is_editor,
-        is_manager,
-        is_approved,
-        is_approver,
-        data,
-        role
-    )
-    VALUES (
-        oc,
-        usr,
-        now(),  -- Set the created_at timestamp to the current time
-        FALSE,  -- Default value for is_editor
-        FALSE,  -- Default value for is_manager
-        FALSE,  -- Default value for is_approved
-        FALSE,  -- Default value for is_approver
-        user_data, -- Combined user info as JSON data
-        NULL   -- Default value for role (null)
-    );
+    -- Check if the user already exists in the occasion_users table
+    SELECT EXISTS (
+                SELECT 1
+                FROM occasion_users
+                WHERE occasion = oc AND "user" = usr
+            ) INTO user_exists;
+
+    -- If the user already exists, update the existing row
+    IF user_exists THEN
+        UPDATE occasion_users
+        SET
+            data = user_data
+        WHERE occasion = oc AND "user" = usr;
+    ELSE
+        -- Insert a new row into occasion_users
+        INSERT INTO occasion_users (
+            occasion,
+            "user",
+            created_at,
+            is_editor,
+            is_manager,
+            is_approved,
+            is_approver,
+            data,
+            role
+        )
+        VALUES (
+            oc,
+            usr,
+            now(),  -- Set the created_at timestamp to the current time
+            FALSE,  -- Default value for is_editor
+            FALSE,  -- Default value for is_manager
+            FALSE,  -- Default value for is_approved
+            FALSE,  -- Default value for is_approver
+            user_data, -- Combined user info as JSON data
+            NULL   -- Default value for role (null)
+        );
+    END IF;
+
+    -- Return success code
     RETURN jsonb_build_object('code', 200);
 END;
 $$;
