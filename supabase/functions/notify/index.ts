@@ -7,16 +7,22 @@ Deno.serve(async (req) => {
     const url = 'https://onesignal.com/api/v1/notifications';
 
     var payload = {};
-    if (record.to){
-     payload = {
+
+    if (record.to) {
+         payload = {
+                app_id: _OnesignalAppId_,
+                include_aliases: { "external_id": record.to},
+                target_channel: "push",
+                headings: { en: record.heading },
+                contents: { en: record.content },
+              };
+    } else {
+        payload = {
             app_id: _OnesignalAppId_,
-            include_aliases: { "external_id": record.to},
-            target_channel: "push",
+            included_segments: ["All"],
             headings: { en: record.heading },
             contents: { en: record.content },
           };
-    } else {
-
     }
 
       const response = await fetch(url, {
