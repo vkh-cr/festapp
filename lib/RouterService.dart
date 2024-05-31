@@ -9,6 +9,7 @@ import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
@@ -172,6 +173,10 @@ class RouterService{
             GoRoute(
               path: ProgramViewPage.ROUTE,
               builder: (context, state) => const ProgramViewPage.TimetablePage(),
+            ),
+            GoRoute(
+              path: NewsFormPage.ROUTE,
+              builder: (context, state) => const NewsFormPage(),
             ),
           ]
       ),

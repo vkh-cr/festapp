@@ -1196,7 +1196,7 @@ class DataService {
     ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String message, bool withNotification) async {
+  static insertNewsMessage(String heading, String message, bool withNotification, List<String>? to) async {
     await _supabase.from(Tb.news.table).insert(
         {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
 
@@ -1216,8 +1216,9 @@ class DataService {
       await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
+            Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: _currentUser!.name??AppConfig.appName
+            Tb.log_notifications.heading: heading
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());

@@ -1,6 +1,7 @@
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/appConfig.dart';
@@ -8,7 +9,6 @@ import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:intl/intl.dart';
 import '../models/NewsModel.dart';
 import '../data/DataService.dart';
@@ -25,16 +25,19 @@ class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
   void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
-    if(!AppConfig.isNotificationsSupported && withNotification)
-    {
+    if(!AppConfig.isNotificationsSupported && withNotification) {
       ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
-    RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE).then((value) async {
-      if(value != null)
-      {
-        var message = value as String;
-        await DataService.insertNewsMessage(message, withNotification);
+
+    RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
+      if(value != null) {
+        var data = value as Map<String, dynamic>;
+        List<String>? to = data["to"];
+        String message = data["content"]!;
+        String heading = data["heading"]!;
+        bool withNotification = data["with_notification"]!;
+        await DataService.insertNewsMessage(heading, message, withNotification, to);
         await loadNewsMessages();
       }
     });
@@ -156,14 +159,9 @@ class _NewsPageState extends State<NewsPage> {
       ),
       floatingActionButton: Visibility(
         visible: RightsHelper.isEditor(),
-        child: SpeedDial(
-          direction: SpeedDialDirection.up,
-          spaceBetweenChildren: 20,
-          children: [
-            SpeedDialChild(child: const Icon(Icons.notifications_off), label: "Send without notification".tr(), onTap: () => _showMessageDialog(context, false)),
-            SpeedDialChild(child: const Icon(Icons.message), label: "Send message".tr(), onTap: () => _showMessageDialog(context)),
-          ],
-          icon: Icons.add,
+        child: FloatingActionButton(
+          onPressed: () => _showMessageDialog(context),
+          child: const Icon(Icons.add),
         ),
       ),
     );
