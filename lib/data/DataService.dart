@@ -278,7 +278,7 @@ class DataService {
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
     var newId = await _supabase.rpc("create_user_with_data",
         params: {"oc": occasion, "email": email, "password": pw, "data": data});
-    if(newId==null)
+    if (newId==null)
     {
       throw Exception("Creating of user has failed.");
     }
@@ -287,16 +287,22 @@ class DataService {
 
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
-      oum.user ??= await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
+      if (oum.user == null) {
+        await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
+      } else {
+        await _supabase.rpc("update_user",
+            params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
+        await addUserToCurrentOccasion(oum.user!, oum.occasion!);
+      }
   }
 
-  static Future<void> addUserToCurrentOccasion(String id) async {
+  static Future<void> addUserToCurrentOccasion(String id, int occasion) async {
     await _supabase.rpc("add_user_to_occasion",
-        params:
-        {
-          "usr": id,
-          "oc": RightsHelper.currentOccasion,
-        });
+      params:
+      {
+        "usr": id,
+        "oc": occasion,
+      });
   }
 
   static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
