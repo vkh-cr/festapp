@@ -235,6 +235,7 @@ class LogNotificationsTb{
   String get user_id => "user_id";
   String get heading => "heading";
   String get content => "content";
+  String get to => "to";
 }
 //todo migrate and delete
 class AccommodationPlacesTb{
