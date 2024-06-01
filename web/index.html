@@ -36,12 +36,11 @@
 
   <title>Festival Slunovrat</title>
 
-  <script src="flutter_bootstrap.js" async></script>
+<body>
+<script src="flutter_bootstrap.js" async></script>
 
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
-  <script>
-    let deferredPrompt;
+<script>
+  let deferredPrompt;
 
     window.addEventListener('beforeinstallprompt', (e) => {
       deferredPrompt = e;
@@ -49,31 +48,56 @@
       return false;
     });
 
-    function promptInstall(){
-       deferredPrompt.prompt();
+  function promptInstall(){
+     deferredPrompt.prompt();
+  }
+
+  // Listen for app install event
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    appInstalled();
+  });
+
+  // Track how PWA was launched (either from browser or as PWA)
+  function getLaunchMode() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    if(deferredPrompt) hasPrompt();
+    if (document.referrer.startsWith('android-app://')) {
+      appLaunchedAsTWA();
+    } else if (navigator.standalone || isStandalone) {
+      appLaunchedAsPWA();
+    } else {
+      window.appLaunchedInBrowser();
     }
+  }
+</script>
 
-    // Listen for app install event
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-      appInstalled();
-    });
+<script>
+  function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+  }
 
-    // Track how PWA was launched (either from browser or as PWA)
-    function getLaunchMode() {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if(deferredPrompt) hasPrompt();
-      if (document.referrer.startsWith('android-app://')) {
-        appLaunchedAsTWA();
-      } else if (navigator.standalone || isStandalone) {
-        appLaunchedAsPWA();
-      } else {
-        window.appLaunchedInBrowser();
+  window.addEventListener('load', function(ev) {
+    var loaderContent = document.querySelector('#loader-content');
+
+    // Download main.dart.js
+    _flutter.loader.load({
+      serviceWorker: {
+        serviceWorkerVersion: {{flutter_service_worker_version}},
+      },
+      onEntrypointLoaded: function(engineInitializer) {
+        engineInitializer.initializeEngine().then(async function(appRunner) {
+          //await delay(5000);
+
+          loaderContent.style.opacity = "0";
+          //await delay(200);
+          appRunner.runApp();
+        });
       }
-    }
-  </script>
-</head>
-<body>
+    });
+  });
+</script>
+
 <style>
   body {
     background-color: #f9f9f9;
