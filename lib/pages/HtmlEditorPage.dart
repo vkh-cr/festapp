@@ -1,4 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
@@ -36,51 +38,39 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
-        body: HtmlEditorWidget(
-          initialContent: _html,
-          controller: controller,
-          onTextChanged: (text) => debugPrint('listening to $text'),
+        body: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            child: HtmlEditorWidget(
+              initialContent: _html,
+              controller: controller,
+              onTextChanged: (text) => debugPrint('listening to $text'),
+            ),
+          ),
         ),
         bottomNavigationBar: Container(
           width: double.maxFinite,
           color: Colors.grey.shade200,
           child: Wrap(
+            alignment: WrapAlignment.end,
             children: [
-              textButton(
+              ButtonsHelper.bottomBarButton(
                 text: "Reset".tr(),
                 onPressed: () {
                   setHtmlText(_html);
                 },
               ),
-              textButton(
+              ButtonsHelper.bottomBarButton(
                 text: "Storno".tr(),
-                onPressed: () {
-                  cancelPressed();
-                },
+                onPressed: cancelPressed,
               ),
-              textButton(
+              ButtonsHelper.bottomBarButton(
                 text: "Save".tr(),
-                onPressed: () {
-                  savePressed();
-                },
+                onPressed: savePressed,
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget textButton({required String text, required VoidCallback onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: MaterialButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        color: Colors.black87,
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: TextStyle(color: Colors.grey.shade200),
         ),
       ),
     );

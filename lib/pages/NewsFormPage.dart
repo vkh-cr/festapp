@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -67,78 +68,68 @@ class _NewsFormPageState extends State<NewsFormPage> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("Form with HTML Editor").tr(),
+          title: const Text("Create news").tr(),
           leading: BackButton(
             onPressed: () => RouterService.goBackOrHome(context),
           ),
         ),
         body: Align(
           alignment: Alignment.topCenter,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: appMaxWidth),
-                  child: Column(
-                    children: [
-                      FormBuilder(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            // FormBuilderTextField(
-                            //   name: 'to',
-                            //   focusNode: _toFocusNode,
-                            //   decoration: const InputDecoration(
-                            //     labelText: 'To',
-                            //   ),
-                            // ),
-                            // if (_isToFieldFocused)
-                            //   const Padding(
-                            //     padding: EdgeInsets.symmetric(vertical: 8.0),
-                            //     child: Text(
-                            //       "If the 'To' field remains empty, the message will be sent to all.",
-                            //       style: TextStyle(color: Colors.grey),
-                            //     ),
-                            //   ),
-                            FormBuilderCheckbox(
-                              name: 'with_notification',
-                              initialValue: _sendWithNotification,
-                              title: const Text('Send with notification'),
-                            ),
-                          ],
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: appMaxWidth),
+              child: Column(
+                children: [
+                  FormBuilder(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        // FormBuilderTextField(
+                        //   name: 'to',
+                        //   focusNode: _toFocusNode,
+                        //   decoration: const InputDecoration(
+                        //     labelText: 'To',
+                        //   ),
+                        // ),
+                        // if (_isToFieldFocused)
+                        //   const Padding(
+                        //     padding: EdgeInsets.symmetric(vertical: 8.0),
+                        //     child: Text(
+                        //       "If the 'To' field remains empty, the message will be sent to all.",
+                        //       style: TextStyle(color: Colors.grey),
+                        //     ),
+                        //   ),
+                        FormBuilderCheckbox(
+                          name: 'with_notification',
+                          initialValue: _sendWithNotification,
+                          title: const Text('Send with notification'),
                         ),
-                      ),
-                      HtmlEditorWidget(
-                        initialContent: '',
-                        controller: _controller,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                  HtmlEditorWidget(
+                    initialContent: '',
+                    controller: _controller,
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
         bottomNavigationBar: Container(
           width: double.maxFinite,
           color: Colors.grey.shade200,
           child: Wrap(
-            alignment: WrapAlignment.center,
+            alignment: WrapAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: _stornoPressed,
-                  child: Text("Storno".tr()),
-                ),
+              ButtonsHelper.bottomBarButton(
+                onPressed: _stornoPressed,
+                text: "Storno".tr(),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  onPressed: _sendPressed,
-                  child: Text("Send".tr()),
-                ),
+              ButtonsHelper.bottomBarButton(
+                onPressed: _sendPressed,
+                text: "Send".tr(),
               ),
             ],
           ),

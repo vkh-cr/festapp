@@ -485,7 +485,7 @@ class _EventPageState extends State<EventPage> {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text("Sign out participant"),
+              title: const Text("Sign out participant").tr(),
               content: const Text(
                       "Do you want to sign out participant {participant} from {event}?")
                   .tr(namedArgs: {
