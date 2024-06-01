@@ -83,8 +83,7 @@ BEGIN
 
     -- If the user does not exist, insert a new user record
     IF usr_info IS NULL THEN
-        INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
-        SELECT * INTO usr_info FROM user_info WHERE id = usr;
+        RETURN jsonb_build_object('code', 404);
     END IF;
 
     -- Initialize usr_info.data if it is null
@@ -101,9 +100,6 @@ BEGIN
     END IF;
     IF usr_info.data ? 'surname' THEN
         UPDATE user_info SET surname = usr_info.data->>'surname' WHERE id = usr;
-    END IF;
-    IF usr_info.data ? 'email' THEN
-        UPDATE user_info SET email_readonly = usr_info.data->>'email' WHERE id = usr;
     END IF;
     IF usr_info.data ? 'sex' THEN
         UPDATE user_info SET sex = usr_info.data->>'sex' WHERE id = usr;
@@ -322,6 +318,16 @@ AS $$
   _value text;
   usr_info user_info%rowtype;
 BEGIN
+    -- Trim and lower the email input
+    email := lower(trim(email));
+
+    -- Trim all values in the data JSONB object
+    FOR _key, _value IN
+        SELECT key, trim(value) FROM jsonb_each_text(data)
+    LOOP
+        data := jsonb_set(data, array[_key], to_jsonb(_value));
+    END LOOP;
+
     -- Check if the occasion is open
     SELECT is_open INTO occasion_open
     FROM occasions
@@ -363,14 +369,13 @@ BEGIN
           UPDATE user_info SET name = _value where id = usr;
         ELSIF _key = 'surname' THEN
           UPDATE user_info SET surname = _value where id = usr;
-       ELSIF _key = 'email' THEN
-          UPDATE user_info SET email_readonly = _value where id = usr;
         ELSIF _key = 'sex' THEN
           UPDATE user_info SET sex = _value where id = usr;
         END IF;
     END LOOP;
 
     UPDATE user_info SET data = usr_info.data where id = usr;
+    UPDATE user_info SET email_readonly = email where id = usr;
 
     PERFORM add_user_to_occasion(oc, usr);
 
