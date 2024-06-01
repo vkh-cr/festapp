@@ -789,7 +789,6 @@ class DataService {
             "${Tb.events.max_participants},"
             "${Tb.events.split_for_men_women},"
             "${Tb.events.is_group_event},"
-            "${Tb.events.description},"
             "${Tb.events.is_hidden},"
             "${Tb.events.type},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
@@ -797,6 +796,15 @@ class DataService {
         .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
+
+    var cachedEvent = OfflineDataHelper.getEventDescription(eventId.toString());
+    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
+      var descrEvent = await getEventsDescription([event.id!]);
+      event.description = descrEvent[0].description;
+    } else {
+      event.description = cachedEvent?.description!;
+    }
+
     if(isLoggedIn()) {
       event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
     } else {
