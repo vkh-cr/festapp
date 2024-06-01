@@ -19,19 +19,13 @@ class NewsFormPage extends StatefulWidget {
 class _NewsFormPageState extends State<NewsFormPage> {
   final _formKey = GlobalKey<FormBuilderState>();
   late QuillEditorController _controller;
-  bool _sendWithNotification = true;
+  final bool _sendWithNotification = true;
   final FocusNode _toFocusNode = FocusNode();
-  bool _isToFieldFocused = false;
 
   @override
   void initState() {
     super.initState();
     _controller = QuillEditorController();
-    _toFocusNode.addListener(() {
-      setState(() {
-        _isToFieldFocused = _toFocusNode.hasFocus;
-      });
-    });
   }
 
   @override
