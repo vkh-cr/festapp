@@ -81,7 +81,7 @@ class UserInfoModel {
     return UserInfoModel(
       id: json[idColumn],
       //todo remove backward compatibility
-      email: json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json[emailReadonlyColumn]??json["email"],
+      email: json[emailReadonlyColumn]??json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
       //todo remove

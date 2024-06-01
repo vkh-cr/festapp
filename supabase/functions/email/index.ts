@@ -28,12 +28,12 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     console.log(reqData);
 
-    const userEmail = reqData.email != null ? reqData.email : "bujnmi@gmail.com";
+    const userEmail = reqData.email != null ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
 
     const userData = await _supabase
           .from("user_info")
           .select()
-          .eq("email_readonly", userEmail)
+          .ilike("email_readonly", userEmail)
           .maybeSingle();
 
     if(userData.data == null)
