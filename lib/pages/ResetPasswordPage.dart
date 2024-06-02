@@ -6,6 +6,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 
 class ResetPasswordPage extends StatefulWidget {
@@ -44,6 +45,24 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
     }
   }
 
+  Future<void> _changePassword(BuildContext context) async {
+    if (_formKey.currentState!.validate()) {
+      TextInput.finishAutofillContext();
+      await DataService.changePassword(token!, _passwordController.text)
+          .then((value) async {
+        if (value["code"] == 403 || value["code"] == 404) {
+          ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
+        } else if (value["code"] == 200) {
+          await DataService.login(value["email"], _passwordController.text);
+          ToastHelper.Show("Password has been changed.".tr());
+          RouterService.goBackOrInitial(context);
+        }
+      }).onError((error, stackTrace) {
+        ToastHelper.Show(error.toString());
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,36 +97,11 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   const SizedBox(
                     height: 16,
                   ),
-                  Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(
-                        color: AppConfig.color1,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: TextButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          TextInput.finishAutofillContext();
-                          await DataService.changePassword(token!, _passwordController.text)
-                              .then((value) async {
-                                if(value["code"] == 403 || value["code"] == 404) {
-                                    ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
-                                  }
-                                else if(value["code"] == 200) {
-                                  await DataService.login(value["email"], _passwordController.text);
-                                  ToastHelper.Show("Password has been changed.".tr());
-                                  RouterService.goBackOrInitial(context);
-                                }
-                          }).onError((error, stackTrace) {
-                            ToastHelper.Show(error.toString());
-                          });
-                        }
-                      },
-                      child: const Text(
-                        "Change Password",
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ).tr(),
-                    ),
+                  ButtonsHelper.bigButton(
+                    onPressed: () async => _changePassword(context),
+                    label: "Change Password".tr(),
+                    color: AppConfig.color1,
+                    textColor: Colors.white,
                   ),
                 ],
               ),

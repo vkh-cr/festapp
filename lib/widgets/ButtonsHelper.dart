@@ -53,6 +53,29 @@ class ButtonsHelper {
     ];
   }
 
+  static Widget bigButton({
+    required VoidCallback onPressed,
+    required String label,
+    Color color = const Color.fromARGB(255, 220, 226, 237),
+    Color textColor = Colors.black,
+  }) {
+    return Container(
+      height: 50,
+      width: 250,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: TextButton(
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: TextStyle(color: textColor, fontSize: 25),
+        ),
+      ),
+    );
+  }
+
   static Widget bottomBarButton({required String text, required VoidCallback onPressed}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
