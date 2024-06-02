@@ -72,32 +72,6 @@
   }
 </script>
 
-<script>
-  function delay(time) {
-    return new Promise(resolve => setTimeout(resolve, time));
-  }
-
-  window.addEventListener('load', function(ev) {
-    var loaderContent = document.querySelector('#loader-content');
-
-    // Download main.dart.js
-    _flutter.loader.load({
-      serviceWorker: {
-        serviceWorkerVersion: {{flutter_service_worker_version}},
-      },
-      onEntrypointLoaded: function(engineInitializer) {
-        engineInitializer.initializeEngine().then(async function(appRunner) {
-          //await delay(5000);
-
-          loaderContent.style.opacity = "0";
-          //await delay(200);
-          appRunner.runApp();
-        });
-      }
-    });
-  });
-</script>
-
 <style>
   body {
     background-color: white;
