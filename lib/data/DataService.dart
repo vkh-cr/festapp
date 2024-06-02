@@ -801,7 +801,7 @@ class DataService {
       var descrEvent = await getEventsDescription([event.id!]);
       event.description = descrEvent[0].description;
     } else {
-      event.description = cachedEvent?.description!;
+      event.description = cachedEvent?.description;
     }
 
     if(isLoggedIn()) {
