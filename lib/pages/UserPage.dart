@@ -78,37 +78,19 @@ class _UserPageState extends State<UserPage> {
                 ),
                 Visibility(
                   visible: RightsHelper.canSeeAdmin(),
-                  child: Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 220, 226, 237),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: TextButton(
-                      onPressed: () async => _redirectToAdminPage(),
-                      child: const Text(
-                        "Administration",
-                        style: TextStyle(color: Colors.black, fontSize: 25),
-                      ).tr(),
-                    ),
+                  child: ButtonsHelper.bigButton(
+                    onPressed: () async => _redirectToAdminPage(),
+                    label: "Administration".tr(),
                   ),
                 ),
                 const SizedBox(
                   height: 16,
                 ),
-                Container(
-                  height: 50,
-                  width: 250,
-                  decoration: BoxDecoration(
-                      color: AppConfig.color1, borderRadius: BorderRadius.circular(20)),
-                  child: TextButton(
+                ButtonsHelper.bigButton(
                     onPressed: () async => _logout(),
-                    child: const Text(
-                      "Sign out",
-                      style: TextStyle(color: Colors.white, fontSize: 25),
-                    ).tr(),
-                  ),
-                ),
+                    label: "Sign out".tr(),
+                    color: AppConfig.color1,
+                    textColor: Colors.white),
                 Container(
                     padding: const EdgeInsets.all(8.0),
                     alignment: Alignment.topCenter,
