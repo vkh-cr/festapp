@@ -8,6 +8,7 @@ import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
