@@ -52,13 +52,14 @@ Future<void> main() async {
 
 Future<void> initializeEverything() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  await GetStorage.init();
+  WidgetsFlutterBinding.ensureInitialized();
+
   PWAInstall().setup();
 
   initializeDateFormatting();
 
-  WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await GetStorage.init();
 
   try{
     await Supabase.initialize(
@@ -66,7 +67,7 @@ Future<void> initializeEverything() async {
       anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
     if (!DataService.isLoggedIn()) {
-      await DataService.tryAuthUser();
+      await DataService.refreshSession();
     }
   }catch(e){}
 
@@ -132,9 +133,7 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(surface: AppConfig.backgroundColor)),
-    ).animate().fadeIn(
-          duration: 300.ms,
-        );
+    );
   }
 }
 
@@ -297,7 +296,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
-                    Text("News".tr()),
+                    const Text("News").tr(),
                   ],
                 ),
                 Column(
