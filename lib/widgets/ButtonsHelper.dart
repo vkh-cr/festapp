@@ -54,20 +54,23 @@ class ButtonsHelper {
   }
 
   static Widget bigButton({
-    required VoidCallback onPressed,
     required String label,
+    VoidCallback? onPressed,
     Color color = const Color.fromARGB(255, 220, 226, 237),
     Color textColor = Colors.black,
+    bool isEnabled = true,
+    double height = 50.0,
+    double width = 250.0,
   }) {
     return Container(
-      height: 50,
-      width: 250,
+      height: height,
+      width: width,
       decoration: BoxDecoration(
-        color: color,
+        color: isEnabled ? color : Colors.black38,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextButton(
-        onPressed: onPressed,
+        onPressed: isEnabled ? onPressed : null,
         child: Text(
           label,
           style: TextStyle(color: textColor, fontSize: 25),

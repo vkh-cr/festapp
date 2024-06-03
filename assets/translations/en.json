@@ -196,5 +196,7 @@
   "Create news": "Create news",
   "Send with notification": "Send with notification",
   "Send": "Send",
+  "Registration failed: Email {email} is already in use.": "Registration failed: Email {email} is already in use.",
+  "Registration has failed.": "Registration has failed.",
   "_":"_"
 }

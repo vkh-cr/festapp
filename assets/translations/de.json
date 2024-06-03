@@ -196,5 +196,7 @@
   "Create news": "Nachricht erstellen",
   "Send with notification": "Mit Benachrichtigung senden",
   "Send": "Senden",
+  "Registration failed: Email {email} is already in use.": "Registrierung fehlgeschlagen: E-Mail {email} wird bereits verwendet.",
+  "Registration has failed.": "Registrierung fehlgeschlagen.",
   "_": "_"
 }
