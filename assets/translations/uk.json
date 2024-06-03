@@ -28,7 +28,6 @@
   "Sign out": "Вийти",
   "MYou have been signed out.": "Ви вийшли (чол.).",
   "FYou have been signed out.": "Ви вийшли (жін.).",
-  "Notifications are not supported. Send message without notification.": "Повідомлення не підтримуються. Надішліть повідомлення без сповіщення.",
   "Edit": "Редагувати",
   "Delete": "Видалити",
   "Send message": "Надіслати повідомлення",
@@ -192,5 +191,10 @@
   "Companion Name": "Ім'я супутника",
   "Create Companion": "Створити супутника",
   "Sign in companion": "Зареєструвати супутника",
+  "Show Code": "Показати код",
+  "Show my code": "Показати мій код",
+  "Create news": "Створити новину",
+  "Send with notification": "Надіслати з повідомленням",
+  "Send": "Надіслати",
   "_": "_"
 }

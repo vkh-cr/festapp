@@ -24,12 +24,7 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
-  void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
-    if(!AppConfig.isNotificationsSupported && withNotification) {
-      ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
-      return;
-    }
-
+  void _showMessageDialog(BuildContext context) {
     RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
       if(value != null) {
         var data = value as Map<String, dynamic>;

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/models/CompanionModel.dart';
@@ -88,6 +89,9 @@ class _CompanionDialogState extends State<CompanionDialog> {
                       controller: _nameController,
                       decoration:
                           InputDecoration(labelText: "Companion Name".tr()),
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(30),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
@@ -100,43 +104,32 @@ class _CompanionDialogState extends State<CompanionDialog> {
               const SizedBox(height: 20),
               SizedBox(
                 width: 380,
-                height: 100,
+                height: 150,
                 child: ListView.builder(
                   shrinkWrap: false,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: widget.companions.length,
                   itemBuilder: (context, index) {
                     final companion = widget.companions[index];
-                    return ListTile(
-                      title: Row(
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                      child: Row(
                         children: [
-                          Visibility(
-                              maintainSize: true,
-                              maintainAnimation: true,
-                              maintainState: true,
-                              visible: companion.isSignedIn,
-                              child: const Icon(Icons.check_circle)),
+                          if (companion.isSignedIn) const Icon(Icons.check_circle),
                           const SizedBox(width: 4),
-                          Text(companion.name),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Visibility(
-                            visible: !companion.isSignedIn,
-                            child: ElevatedButton(
+                          Expanded(
+                            child: Text(companion.name),
+                          ),
+                          if (!companion.isSignedIn)
+                            ElevatedButton(
                               child: const Text("Sign in someone").tr(),
                               onPressed: () => _signInCompanion(companion),
                             ),
-                          ),
-                          Visibility(
-                            visible: companion.isSignedIn,
-                            child: ElevatedButton(
+                          if (companion.isSignedIn)
+                            ElevatedButton(
                               child: const Text("Sign out someone").tr(),
                               onPressed: () => _signOutCompanion(companion),
                             ),
-                          ),
                           IconButton(
                             icon: const Icon(Icons.delete),
                             onPressed: () => _deleteCompanion(companion),

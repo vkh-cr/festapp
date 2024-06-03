@@ -28,7 +28,6 @@
   "Sign out": "Abmelden",
   "MYou have been signed out.": "Du wurdest abgemeldet.",
   "FYou have been signed out.": "Du wurdest abgemeldet.",
-  "Notifications are not supported. Send message without notification.": "Benachrichtigungen werden nicht unterstützt. Nachricht ohne Benachrichtigung senden.",
   "Edit": "Bearbeiten",
   "Delete": "Löschen",
   "Send message": "Nachricht senden",
@@ -192,5 +191,10 @@
   "Companion Name": "Name des Begleiters",
   "Create Companion": "Begleiter erstellen",
   "Sign in companion": "Begleiter anmelden",
+  "Show Code": "Code anzeigen",
+  "Show my code": "Meinen Code anzeigen",
+  "Create news": "Nachricht erstellen",
+  "Send with notification": "Mit Benachrichtigung senden",
+  "Send": "Senden",
   "_": "_"
 }
