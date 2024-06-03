@@ -31,6 +31,7 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
+  final double minimalPadding = 1.5;
   final double pixelsInHour = 200;
   final double placeTitleHeight = 40;
   final double timelineHeight = 30;
@@ -280,7 +281,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         var item = pItems[i];
         var timeBlock = Positioned(
           left: timeRangeLength(
-              pixelsInHour, firstEvent.startTime, item.startTime),
+              pixelsInHour, firstEvent.startTime, item.startTime)+minimalPadding,
           top: (placeTitleHeight + itemHeight) * p +
               placeTitleHeight +
               timelineHeight,
@@ -290,7 +291,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
             },
             child: Container(
               width:
-                  timeRangeLength(pixelsInHour, item.startTime, item.endTime),
+                  timeRangeLength(pixelsInHour, item.startTime, item.endTime)-minimalPadding*2,
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
