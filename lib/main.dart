@@ -57,7 +57,7 @@ Future<void> initializeEverything() async {
   print('Widgets binding initialized');
 
   try {
-    await PWAInstall().setup();
+    PWAInstall().setup();
     print('PWA setup completed');
   } catch (e) {
     print('PWA setup failed: $e');
@@ -115,6 +115,8 @@ Future<void> initializeEverything() async {
       DataService.globalSettingsModel = settings;
       print('Global settings loaded');
     }
+  } catch (e) {
+    print('Offline data helper initialization failed: $e');
   }
 
   try {
@@ -211,8 +213,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       loadData();
     }
-  } catch (e) {
-    print('Offline data helper initialization failed: $e');
   }
 
   @override
