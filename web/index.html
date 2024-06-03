@@ -37,7 +37,7 @@
   <title>Festapp</title>
 
 <body>
-<script src="flutter_bootstrap.js" async></script>
+<!--<script src="flutter_bootstrap.js" async></script>-->
 
 <script>
   let deferredPrompt;
@@ -134,6 +134,9 @@
     }
 
     window.addEventListener('load', function(ev) {
+      {{flutter_js}}
+      {{flutter_build_config}}
+
       var loaderContent = document.querySelector('#loader-content');
 
       // Download main.dart.js
