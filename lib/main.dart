@@ -171,6 +171,8 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(surface: AppConfig.backgroundColor)),
+    ).animate().fadeIn(
+      duration: 300.ms,
     );
   }
 }
