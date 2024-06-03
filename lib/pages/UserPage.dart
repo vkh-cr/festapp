@@ -147,11 +147,6 @@ class _UserPageState extends State<UserPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                buildTextField("Name".tr(), userData?.name ?? ''),
-                buildTextField("Surname".tr(), userData?.surname ?? ''),
-                buildTextField("E-mail".tr(), userData?.email ?? ''),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), userData?.roleString??""),
                 Visibility(
                   visible: DataService.globalSettingsModel!.isEnabledEntryCode??false,
                   child: Column(
