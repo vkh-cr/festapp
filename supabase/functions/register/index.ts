@@ -34,11 +34,11 @@ Deno.serve(async (req) => {
     const userData = await _supabase
           .from("user_info")
           .select()
-          .eq("email_readonly", userEmail)
+          .ilike("email_readonly", userEmail)
           .maybeSingle();
 
     if(userData.data != null) {
-        return new Response(JSON.stringify({"email":userEmail}), {
+        return new Response(JSON.stringify({"email":userEmail, "code":409}), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });

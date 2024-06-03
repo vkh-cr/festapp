@@ -196,5 +196,7 @@
   "Create news": "Vytvořit novinku",
   "Send with notification": "Odeslat s notifikací",
   "Send": "Odeslat",
+  "Registration failed: Email {email} is already in use.": "Registrace se nezdařila: Email {email} je již používán.",
+  "Registration has failed.": "Registrace se nezdařila.",
   "_": "_"
 }

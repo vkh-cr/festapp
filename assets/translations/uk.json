@@ -196,5 +196,7 @@
   "Create news": "Створити новину",
   "Send with notification": "Надіслати з повідомленням",
   "Send": "Надіслати",
+  "Registration failed: Email {email} is already in use.": "Реєстрація не вдалася: електронна адреса {email} вже використовується.",
+  "Registration has failed.": "Реєстрація не вдалася.",
   "_": "_"
 }

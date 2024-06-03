@@ -7,6 +7,7 @@ import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import '../styles/Styles.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
@@ -86,40 +87,40 @@ class _SignupPageState extends State<SignupPage> {
                       const SizedBox(
                         height: 16,
                       ),
-                      Container(
-                        height: 50,
-                        width: 250,
-                        decoration: BoxDecoration(
-                            color: AppConfig.color1,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: TextButton(
-                          onPressed: _isLoading ? null : () async {
-                            TextInput.finishAutofillContext();
-                            if (_formKey.currentState?.saveAndValidate() ?? false) {
-                              if (true) {
-                                setState(() {
-                                  _isLoading = true;
-                                });
-                                var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
-                                fieldsData = data;
-                                var resp = await DataService.register(data);
-                                if(resp["code"]==200){
-                                  ToastHelper.Show("Registration is almost complete!".tr());
-                                  setState(() {
-                                    _isRegistrationSuccess = true;
-                                    _isLoading = false;
-                                  });
-                                } else {
-                                  ToastHelper.Show("Registration has failed.".tr(), severity: ToastSeverity.NotOk);
-                                }
-                              }
+                      ButtonsHelper.bigButton(
+                        onPressed: _isLoading ? null : () async {
+                          TextInput.finishAutofillContext();
+                          if (_formKey.currentState?.saveAndValidate() ?? false) {
+                            setState(() {
+                              _isLoading = true;
+                            });
+                            var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                            fieldsData = data;
+                            var resp = await DataService.register(data);
+                            if (resp["code"] == 200) {
+                              ToastHelper.Show("Registration is almost complete!".tr());
+                              setState(() {
+                                _isRegistrationSuccess = true;
+                              });
+                            } else if (resp["code"] == 409) {
+                              ToastHelper.Show(
+                                  "Registration failed: Email {email} is already in use.".tr(namedArgs: {"email": resp["email"]}),
+                                  severity: ToastSeverity.NotOk
+                              );
+                            } else {
+                              ToastHelper.Show("Registration has failed.".tr(), severity: ToastSeverity.NotOk);
                             }
-                          },
-                          child: const Text(
-                            "Sign up",
-                            style: TextStyle(color: Colors.white, fontSize: 25),
-                          ).tr(),
-                        ),
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        },
+                        label: "Sign up".tr(),
+                        color: AppConfig.color1,
+                        textColor: Colors.white,
+                        isEnabled: !_isLoading,
+                        height: 50.0,
+                        width: 250.0,
                       ),]
                   ),
                 ),
