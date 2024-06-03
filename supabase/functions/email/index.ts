@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
 
     console.log(template);
     let html = template.data.html;
-    html = html.replace(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
+    html = html.replaceAll(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
 
     const client = new SMTPClient({
       connection: {
