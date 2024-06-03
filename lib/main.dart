@@ -51,46 +51,80 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
+  print('Initialization started');
   GoRouter.optionURLReflectsImperativeAPIs = true;
   WidgetsFlutterBinding.ensureInitialized();
+  print('Widgets binding initialized');
 
-  PWAInstall().setup();
+  try {
+    await PWAInstall().setup();
+    print('PWA setup completed');
+  } catch (e) {
+    print('PWA setup failed: $e');
+  }
 
-  initializeDateFormatting();
+  try {
+    initializeDateFormatting();
+    print('Date formatting initialized');
+  } catch (e) {
+    print('Date formatting initialization failed: $e');
+  }
 
-  await EasyLocalization.ensureInitialized();
-  await GetStorage.init();
+  try {
+    await EasyLocalization.ensureInitialized();
+    print('EasyLocalization initialized');
+  } catch (e) {
+    print('EasyLocalization initialization failed: $e');
+  }
 
-  try{
+  try {
+    await GetStorage.init();
+    print('GetStorage initialized');
+  } catch (e) {
+    print('GetStorage initialization failed: $e');
+  }
+
+  try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
+    print('Supabase initialized');
     if (!DataService.isLoggedIn()) {
       await DataService.refreshSession();
+      print('Session refreshed');
     }
-  }catch(e){}
+  } catch (e) {
+    print('Fetching current user info failed: $e');
+  }
 
-  try{
-    if(DataService.isLoggedIn()) {
+  try {
+    if (DataService.isLoggedIn()) {
       await DataService.getCurrentUserInfo();
+      print('Current user info fetched');
     }
-  }catch(e){}
+  } catch (e) {
+    print('Supabase initialization failed: $e');
+  }
 
   try {
     await OfflineDataHelper.initialize();
-    //load all offlineData
-
+    print('Offline data helper initialized');
     var settings = OfflineDataHelper.getGlobalSettings();
-    if(settings!=null){
+    if (settings != null) {
       DataService.globalSettingsModel = settings;
+      print('Global settings loaded');
     }
   }
-  catch(e){}
 
   try {
     NotificationHelper.Initialize();
-  } catch (e) {}
+    print('Notification helper initialized');
+  } catch (e) {
+    print('Notification helper initialization failed: $e');
+  }
+
+  print('Initialization completed');
 }
 
 class MyApp extends StatelessWidget {
@@ -177,6 +211,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       loadData();
     }
+  } catch (e) {
+    print('Offline data helper initialization failed: $e');
   }
 
   @override
