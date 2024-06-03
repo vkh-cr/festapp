@@ -28,7 +28,6 @@
   "Sign out": "Wyloguj się",
   "MYou have been signed out.": "Zostałeś wylogowany.",
   "FYou have been signed out.": "Zostałaś wylogowana.",
-  "Notifications are not supported. Send message without notification.": "Powiadomienia nie są obsługiwane. Wyślij wiadomość bez powiadomienia.",
   "Edit": "Edytuj",
   "Delete": "Usuń",
   "Send message": "Wyślij wiadomość",
@@ -192,5 +191,10 @@
   "Companion Name": "Nazwa towarzysza",
   "Create Companion": "Utwórz towarzysza",
   "Sign in companion": "Zaloguj towarzysza",
+  "Show Code": "Pokaż kod",
+  "Show my code": "Pokaż mój kod",
+  "Create news": "Utwórz wiadomość",
+  "Send with notification": "Wyślij z notyfikacją",
+  "Send": "Wyślij",
   "_": "_"
 }

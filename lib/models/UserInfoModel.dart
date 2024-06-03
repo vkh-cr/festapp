@@ -1,3 +1,4 @@
+import 'package:fstapp/models/CompanionModel.dart';
 import 'package:fstapp/models/OccasionUserModel.dart';
 import 'package:fstapp/models/PlaceModel.dart';
 import 'package:fstapp/models/Tb.dart';
@@ -21,6 +22,7 @@ class UserInfoModel {
   UserGroupInfoModel? userGroup;
   OccasionUserModel? occasionUser;
   String? roleString;
+  List<CompanionModel>? companions = [];
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
@@ -35,6 +37,8 @@ class UserInfoModel {
   static const String userGroupColumn = "userGroup";
   static const String occasionUserColumn = "occasionUser";
   static const String roleStringColumn = "roleString";
+  static const String userCompanionsColumn = "userCompanions";
+
 
   static const String isEditorReadOnlyColumn = "is_editor_readonly";
   static const String isAdminReadOnlyColumn = "is_admin_readonly";
@@ -75,7 +79,9 @@ class UserInfoModel {
      this.accommodationPlace,
      this.userGroup,
      this.occasionUser,
-     this.roleString});
+     this.roleString,
+     this.companions
+  });  
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
@@ -94,6 +100,7 @@ class UserInfoModel {
       userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
       occasionUser: json[occasionUserColumn]!=null?OccasionUserModel.fromJson(json[occasionUserColumn]):null,
       roleString: json[roleStringColumn],
+      companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
       sex: json[sexColumn],
       //todo remove
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
@@ -120,6 +127,7 @@ class UserInfoModel {
     birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
     isAdminReadOnlyColumn: isAdmin,
     isEditorReadOnlyColumn: isEditor,
+    userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c)=>c.toJson())) : null,
     Tb.user_info.data: {Tb.occasion_users.data_email: email}
   };
 

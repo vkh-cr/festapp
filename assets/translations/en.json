@@ -26,7 +26,6 @@
   "Without accommodation":"Without accommodation",
   "Administration":"Administration",
   "Sign out":"Sign out",
-  "Notifications are not supported. Send message without notification.":"Notifications are not supported. Send message without notification.",
   "Edit":"Edit",
   "Delete":"Delete",
   "Send message":"Send message",
@@ -192,5 +191,10 @@
   "Companion Name": "Companion Name",
   "Create Companion": "Create Companion",
   "Sign in companion": "Sign in companion",
+  "Show Code": "Show Code",
+  "Show my code": "Show my code",
+  "Create news": "Create news",
+  "Send with notification": "Send with notification",
+  "Send": "Send",
   "_":"_"
 }

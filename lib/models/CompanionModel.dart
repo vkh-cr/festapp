@@ -6,6 +6,12 @@ class CompanionModel {
   CompanionModel({required this.id, required this.name, this.isSignedIn = false});
 
   factory CompanionModel.fromJson(Map<String, dynamic> json){
-    return CompanionModel(id: json["id"], name: json["name"], isSignedIn: json["is_signed_in"]);
+    return CompanionModel(id: json["id"], name: json["name"], isSignedIn: json["is_signed_in"]??false);
   }
+
+  Map toJson() =>
+  {
+    "id": id,
+    "name": name,
+  };
 }

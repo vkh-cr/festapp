@@ -97,7 +97,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                         FormBuilderCheckbox(
                           name: 'with_notification',
                           initialValue: _sendWithNotification,
-                          title: const Text('Send with notification'),
+                          title: const Text("Send with notification").tr(),
                         ),
                       ],
                     ),

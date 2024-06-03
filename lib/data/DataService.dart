@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
@@ -195,20 +196,19 @@ class DataService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await getUserInfoWithRole();
+    var user = await DataService.getCurrentUserInfo();
+    if(RightsHelper.currentUserOccasion?.role != null) {
+      user.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
+    }
     var myGroup = await getCurrentUserGroup();
     if(myGroup!=null) {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
-    return user;
-  }
-
-  static Future<UserInfoModel> getUserInfoWithRole() async {
-    var userInfo = await DataService.getCurrentUserInfo();
-    if(RightsHelper.currentUserOccasion?.role != null) {
-      userInfo.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
+    if(globalSettingsModel!.isEnabledEntryCode??false) {
+      user.companions = await CompanionHelper.getAllCompanions(0);
     }
-    return userInfo;
+
+    return user;
   }
 
   static Future<String> getRoleInfo(int role) async {

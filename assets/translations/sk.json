@@ -28,7 +28,6 @@
   "Sign out": "Odhlásiť sa",
   "MYou have been signed out.": "Bol si odhlásený.",
   "FYou have been signed out.": "Bola si odhlásená.",
-  "Notifications are not supported. Send message without notification.": "Notifikace nie sú podporované. Odošlite správu bez oznámenia.",
   "Edit": "Upraviť",
   "Delete": "Zmazať",
   "Send message": "Odoslať správu",
@@ -192,5 +191,10 @@
   "Companion Name": "Meno spoločníka",
   "Create Companion": "Vytvoriť spoločníka",
   "Sign in companion": "Prihlásiť spoločníka",
+  "Show Code": "Zobraziť kód",
+  "Show my code": "Zobraziť môj kód",
+  "Create news": "Vytvoriť novinku",
+  "Send with notification": "Odoslať s notifikáciou",
+  "Send": "Odoslať",
   "_": "_"
 }
