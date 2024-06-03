@@ -33,7 +33,7 @@ import '../models/PlaceModel.dart';
 class DataService {
   static final _supabase = Supabase.instance.client;
 
-  static final _secureStorage = FlutterSecureStorage();
+  static const _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
 
   static Future<void> emailMailerSend(String recipient, String templateId, List<Map<String, String>> variables)
@@ -46,8 +46,12 @@ class DataService {
         }, "subs": variables});
   }
 
-  static refreshSession() async {
-    await _supabase.auth.refreshSession();
+  static Future<bool> refreshSession() async {
+    var response = await _supabase.auth.refreshSession();
+    if(response.session!=null){
+      return true;
+    }
+    return false;
   }
 
   static Future<bool> tryAuthUser() async {
