@@ -51,7 +51,7 @@ class _UserPageState extends State<UserPage> {
                 color: AppConfig.color1,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                RouterService.goBack(context);
               },
             ),
             actions: [
