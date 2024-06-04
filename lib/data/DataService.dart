@@ -252,6 +252,23 @@ class DataService {
     return UserInfoModel.fromJson(data);
   }
 
+  static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
+    var result = await _supabase.rpc("get_user_info_for_users",
+        params: {"oc": RightsHelper.currentOccasion, "user_ids": userIds});
+    if(result["code"] == 200) {
+      return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+    }
+    return [];
+  }
+
+  static Future<UserInfoModel?> getUserInfo(String userId) async {
+    var list = await getUsersInfo([userId]);
+    if(list.length == 1){
+      return list[0];
+    }
+    return null;
+  }
+
   static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
     return await _supabase.rpc("set_user_password",
       params:
@@ -291,11 +308,17 @@ class DataService {
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
       if (oum.user == null) {
-        await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
+        oum.user = await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
       } else {
         await _supabase.rpc("update_user",
             params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
         await addUserToCurrentOccasion(oum.user!, oum.occasion!);
+      }
+
+      if(oum.user!=null){
+        await _supabase.from(Tb.occasion_users.table).upsert(
+            oum.toUpdateJson()
+        );
       }
   }
 
@@ -810,6 +833,7 @@ class DataService {
 
     if(isLoggedIn()) {
       event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
+      event.isSignedIn = await isCurrentUserSignedToEvent(event.id!);
     } else {
       event.isEventInMySchedule = OfflineDataHelper.isEventSaved(event.id!);
     }
@@ -891,12 +915,11 @@ class DataService {
   static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
       .from(Tb.event_users.table)
-      .select(
-        "${Tb.event_users.user},"
-        "${Tb.event_users.event},"
-        "${Tb.user_info_public.table}(*)")
+      .select(Tb.event_users.user)
       .eq(Tb.event_users.event, eventId);
-    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par[Tb.user_info_public.table])));
+    var listOfIds = List<String>.from(data.map((par) => par[Tb.event_users.user]));
+    var users = await getUsersInfo(listOfIds);
+    return users;
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {

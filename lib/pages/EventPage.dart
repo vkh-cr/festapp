@@ -11,11 +11,11 @@ import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/CompanionModel.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
-import 'package:go_router/go_router.dart';
 
 import '../models/EventModel.dart';
 import '../models/UserGroupInfoModel.dart';
@@ -44,7 +44,7 @@ class _EventPageState extends State<EventPage> {
   List<UserInfoModel> _queriedParticipants = [];
   List<CompanionModel> _companions = [];
 
-  bool isLoadingParticipants = true;
+  bool isLoadingEvent = true;
 
   _EventPageState();
 
@@ -68,10 +68,28 @@ class _EventPageState extends State<EventPage> {
           leading: BackButton(
             onPressed: () => RouterService.goBackOrHome(context),
           ),
-          actions: ButtonsHelper.getAddToMyProgramButton(
-              _event?.canSaveEventToMyProgram(),
-              addToMySchedule,
-              removeFromMySchedule)),
+          actions:[
+            Visibility(
+              visible: RightsHelper.isApprover(),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: IconButton(
+                    onPressed: () async {
+                      RouterService.navigate(
+                          context,
+                          "${CheckPage.ROUTE}/${_event!.id!}",
+                          extra:
+                          _event!.id!);
+                    },
+                    icon: const Icon(
+                      Icons.qr_code_scanner,
+                    )),
+              ),
+            ),
+            ...ButtonsHelper.getAddToMyProgramButton(
+                _event?.canSaveEventToMyProgram(),
+                addToMySchedule,
+                removeFromMySchedule)]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -95,17 +113,13 @@ class _EventPageState extends State<EventPage> {
                                 children: [
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          !_participants.any((p) =>
-                                              DataService.currentUserId() ==
-                                              p.id),
+                                          !(_event?.isSignedIn??false),
                                       child: ElevatedButton(
                                           onPressed: () => signIn(),
                                           child: const Text("Sign in").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          _participants.any((p) =>
-                                              DataService.currentUserId() ==
-                                              p.id),
+                                          (_event?.isSignedIn??false),
                                       child: ElevatedButton(
                                           onPressed: () => signOut(),
                                           child: const Text("Sign out").tr())),
@@ -357,7 +371,7 @@ class _EventPageState extends State<EventPage> {
 
   bool showLoginLogoutButton() {
     return DataService.isLoggedIn() &&
-        !isLoadingParticipants &&
+        !isLoadingEvent &&
         EventModel.canSignIn(_event);
   }
 
@@ -365,8 +379,11 @@ class _EventPageState extends State<EventPage> {
     loadOfflineData(widget.id!);
 
     await loadEvent(id);
+    isLoadingEvent = false;
     OfflineDataHelper.saveEventDescription(_event!);
-    await loadParticipants(id);
+    if (RightsHelper.isEditor()) {
+      await loadParticipants(id);
+    }
   }
 
   void loadOfflineData(int id) {
@@ -412,11 +429,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadParticipants(int id) async {
-    if (!DataService.isLoggedIn()) {
-      return;
-    }
     _participants = await DataService.getParticipantsPerEvent(id);
-    isLoadingParticipants = false;
     setState(() => {});
   }
 
@@ -427,7 +440,7 @@ class _EventPageState extends State<EventPage> {
       var group = await DataService.getUserGroupInfo(
           DataService.currentUserGroup()!.id!);
       if (group == null) {
-        RouterService.goBack(context);;
+        RouterService.goBack(context);
         return;
       }
       event.description = group.description;

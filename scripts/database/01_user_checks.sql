@@ -108,3 +108,36 @@ CREATE OR REPLACE FUNCTION get_exists_on_occasion_user(usr uuid, oc bigint) RETU
     "user" = usr and
     occasion = oc)
 $$;
+
+CREATE OR REPLACE FUNCTION get_user_info_for_users(user_ids uuid[], oc bigint)
+RETURNS jsonb
+SECURITY definer
+AS $$
+BEGIN
+  -- Check if the user is a manager, editor, or approver for the occasion
+  IF (SELECT get_is_manager_on_occasion(oc) OR get_is_editor_on_occasion(oc) OR get_is_approver_on_occasion(oc)) <> TRUE THEN
+      RETURN jsonb_build_object('code', 403);
+    END IF;
+
+  -- Aggregate the user information as JSON
+  RETURN jsonb_build_object(
+    'code', 200,
+    'data', (
+      SELECT jsonb_agg(jsonb_build_object(
+        'id', ui.id,
+        'created_at', ui.created_at,
+        'updated_at', ui.updated_at,
+        'email_readonly', ui.email_readonly,
+        'name', ui.name,
+        'surname', ui.surname,
+        'sex', ui.sex,
+        'phone', ui.phone,
+        'data', ui.data,
+        'birth_date', ui.birth_date
+      ))
+      FROM public.user_info ui
+      WHERE ui.id = ANY(user_ids)
+    )
+  );
+END;
+$$ LANGUAGE plpgsql;

@@ -3,6 +3,7 @@ import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/PlaceModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
+import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
@@ -107,6 +108,13 @@ class RouterService{
         GoRoute(
           path: "/${SignupPage.ROUTE}",
           builder: (context, state) => const SignupPage(),
+        ),
+        GoRoute(
+          path: "/${CheckPage.ROUTE}/:id",
+          builder: (context, state) {
+            var id = int.parse(state.pathParameters["id"] ?? "0");
+            return CheckPage(id: id);
+          },
         ),
         GoRoute(
           path: LINK_PATH,

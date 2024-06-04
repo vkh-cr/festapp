@@ -44,4 +44,8 @@ class RightsHelper{
   static bool isEditor() {
     return currentUserOccasion?.isEditor??false;
   }
+
+  static bool isApprover() {
+    return currentUserOccasion?.isApprover??false;
+  }
 }
