@@ -63,11 +63,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         onPressed: _isSent == true ? null : () async {
                           if (_formKey.currentState!.validate()) {
                             TextInput.finishAutofillContext();
+                            setState(() {
+                              _isSent = true;
+                            });
                             await DataService.resetPasswordForEmail(_emailController.text)
                                 .then((value) {
-                              setState(() {
-                                _isSent = true;
-                              });
                               ToastHelper.Show("Password reset email has been sent.".tr());
                             })
                                 .onError((error, stackTrace) {
