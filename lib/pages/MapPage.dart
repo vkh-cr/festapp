@@ -320,7 +320,7 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> saveNewPosition() async {
     if (isOnlyEditMode) {
-      context.pop({
+      RouterService.goBack(context, {
         "lat": selectedMarker!.point.latitude,
         "lng": selectedMarker!.point.longitude
       });
@@ -343,7 +343,7 @@ class _MapPageState extends State<MapPage> {
 
   void cancelNewPosition() {
     if (isOnlyEditMode) {
-      context.pop();
+      RouterService.goBack(context);
       return;
     }
     setState(() {

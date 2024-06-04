@@ -530,7 +530,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                       rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value = person;
                                       var cell = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                      context.pop();
+                                      RouterService.goBack(context);
                                     }), _allUsers, "Set".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),

@@ -427,7 +427,7 @@ class _EventPageState extends State<EventPage> {
       var group = await DataService.getUserGroupInfo(
           DataService.currentUserGroup()!.id!);
       if (group == null) {
-        context.pop();
+        RouterService.goBack(context);;
         return;
       }
       event.description = group.description;
@@ -494,12 +494,12 @@ class _EventPageState extends State<EventPage> {
               }),
               actions: <Widget>[
                 TextButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () => RouterService.goBack(context),
                   child: const Text("Storno").tr(),
                 ),
                 TextButton(
                   onPressed: () async {
-                    context.pop();
+                    RouterService.goBack(context);
                     await DataService.signOutFromEvent(
                         _event!.id!, participant);
                     await loadData(_event!.id!);

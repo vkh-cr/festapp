@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
@@ -79,11 +80,11 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
   void savePressed() async {
     String? htmlTextEdited = await controller.getText();
     var htmlText = removeBackgroundColor(htmlTextEdited);
-    context.pop(htmlText);
+    RouterService.goBack(context, htmlText);
   }
 
   void cancelPressed() async {
-    context.pop();
+    RouterService.goBack(context);
   }
 
   void setHtmlText(String text) async {
