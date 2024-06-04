@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/models/EventModel.dart';
@@ -206,23 +207,44 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       );
       stackChildren.add(timeline);
 
-      return Stack(
-        children: [
-          GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanStart: panStarted,
-              onPanUpdate: enforceConstraints,
-              onPanEnd: panEnded,
-              child: SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      child: Stack(
-                        children: stackChildren,
-                      ))))
-        ],
+      return Listener(
+        onPointerSignal: (PointerSignalEvent event) {
+          if (event is PointerScrollEvent) {
+            _animationController.stop();
+            // var xOffset = matrixTimetable.row0.a;
+            // var yOffset = matrixTimetable.row1.a;
+
+            var constrained = constrainDeltaOffset(-event.scrollDelta.dx, -event.scrollDelta.dy);
+            setOffset(constrained);
+
+            // animationY = Tween<double>(begin: yOffset, end: constrained.dy).animate(
+            //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+            // animationX = Tween<double>(begin: xOffset, end: constrained.dx).animate(
+            //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+            //
+            // _animationController.duration = Duration(milliseconds: scrollAnimationDuration);
+            // _animationController.reset();
+            // _animationController.forward();
+          }
+        },
+        child: Stack(
+          children: [
+            GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanStart: panStarted,
+                onPanUpdate: enforceConstraints,
+                onPanEnd: panEnded,
+                child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        child: Stack(
+                          children: stackChildren,
+                        ))))
+          ],
+        ),
       );
     });
   }
@@ -407,6 +429,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     animationX = Tween<double>(begin: xOffset, end: offset.dx).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
 
+    _animationController.duration = Duration(milliseconds: animationDuration);
     _animationController.reset();
     _animationController.forward();
   }
