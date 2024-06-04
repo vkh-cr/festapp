@@ -57,7 +57,7 @@ class RouterService{
       navigate(context, "");
       return;
     }
-    context.pop();
+    Router.neglect(context, () => context.pop());
   }
 
   static void goBackOrInitial(BuildContext context){
@@ -66,7 +66,11 @@ class RouterService{
       goToInitial(context);
       return;
     }
-    context.pop();
+    Router.neglect(context, () => context.pop());
+  }
+
+  static void goBack(BuildContext context, [dynamic object]){
+    Router.neglect(context, () => context.pop(object));
   }
 
   static void goToInitial(BuildContext context){

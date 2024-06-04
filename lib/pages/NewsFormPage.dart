@@ -69,13 +69,13 @@ class _NewsFormPageState extends State<NewsFormPage> {
         ),
         body: Align(
           alignment: Alignment.topCenter,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: appMaxWidth),
-              child: Column(
-                children: [
-                  FormBuilder(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: FormBuilder(
                     key: _formKey,
                     child: Column(
                       children: [
@@ -102,12 +102,12 @@ class _NewsFormPageState extends State<NewsFormPage> {
                       ],
                     ),
                   ),
-                  HtmlEditorWidget(
-                    initialContent: '',
-                    controller: _controller,
-                  ),
-                ],
-              ),
+                ),
+                HtmlEditorWidget(
+                  initialContent: '',
+                  controller: _controller,
+                ),
+              ],
             ),
           ),
         ),
