@@ -149,42 +149,18 @@ class _UserPageState extends State<UserPage> {
                   height: 15,
                 ),
                 Visibility(
-                  visible: DataService.globalSettingsModel!.isEnabledEntryCode??false,
+                  visible: DataService.globalSettingsModel!.isEnabledEntryCode ?? false,
                   child: Column(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            color: Colors.grey[300]!,
-                          ),
-                          child: IntrinsicWidth(
-                            child: TextButton.icon(
-                              onPressed: () => _showFullScreenDialog(context, userData!.name!, AppConfig.appName, userData!.id!),
-                              iconAlignment: IconAlignment.end,
-                              icon: const Icon(Icons.qr_code),
-                              label: const Text(
-                                "Show my code",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ).tr(),
-                              style: TextButton.styleFrom(
-                                padding: const EdgeInsets.all(12.0),
-                                backgroundColor: bigButtonColor, // Set the background color
-                                minimumSize: const Size.fromHeight(60),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
-                                ),
-                              ),
-                            ),
-                          ),
+                        child: ButtonsHelper.buildQRCodeButton(
+                          onPressed: () => _showFullScreenDialog(context, userData!.name!, AppConfig.appName, userData!.id!),
+                          label: "Show my code",
                         ),
                       ),
                       Visibility(
-                        visible: userData?.companions?.isNotEmpty??false,
+                        visible: userData?.companions?.isNotEmpty ?? false,
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
@@ -193,7 +169,7 @@ class _UserPageState extends State<UserPage> {
                           child: ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            itemCount: (userData?.companions?.length??0) + 1,
+                            itemCount: (userData?.companions?.length ?? 0) + 1,
                             itemBuilder: (context, index) {
                               if (index == 0) {
                                 return ListTile(
@@ -204,43 +180,23 @@ class _UserPageState extends State<UserPage> {
                                 );
                               }
 
-                              final companion = userData!.companions![index-1];
+                              final companion = userData!.companions![index - 1];
 
                               return Column(
                                 children: [
                                   const SizedBox(height: 10),
                                   ListTile(
                                     title: Text(companion.name),
-                                    trailing: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        color: Colors.grey[300]!,
+                                    trailing: ButtonsHelper.buildQRCodeButton(
+                                      onPressed: () => _showFullScreenDialog(
+                                        context,
+                                        companion.name,
+                                        AppConfig.appName,
+                                        companion.id,
                                       ),
-                                      child: IntrinsicWidth(
-                                        child: TextButton.icon(
-                                          onPressed: () {
-                                            _showFullScreenDialog(
-                                              context,
-                                              companion.name,
-                                              AppConfig.appName,
-                                              companion.id, // Example ID
-                                            );
-                                          },
-                                          iconAlignment: IconAlignment.end,
-                                          icon: const Icon(Icons.qr_code),
-                                          label: const Text("Show Code").tr(),
-                                          style: TextButton.styleFrom(
-                                            padding: const EdgeInsets.all(12.0),
-                                            backgroundColor: bigButtonColor, // Set the background color
-                                            minimumSize: const Size.fromHeight(60),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      label: "Show Code",
                                     ),
-                                  ), // Minimal gap between items
+                                  ),
                                 ],
                               );
                             },

@@ -94,4 +94,35 @@ class ButtonsHelper {
       ),
     );
   }
+
+  static Widget buildQRCodeButton({required VoidCallback onPressed, required String label}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[300]!,
+      ),
+      child: IntrinsicWidth(
+        child: TextButton.icon(
+          onPressed: onPressed,
+          iconAlignment: IconAlignment.end,
+          icon: const Icon(Icons.qr_code),
+          label: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ).tr(),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.all(12.0),
+            backgroundColor: bigButtonColor, // Set the background color
+            minimumSize: const Size.fromHeight(60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
