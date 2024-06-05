@@ -67,7 +67,7 @@ class _SignupPageState extends State<SignupPage> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          style: const TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18, color: Colors.black),
                           text: "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.".tr(namedArgs: {"email": fieldsData?["email"]}),
                         ),
                         const WidgetSpan(
