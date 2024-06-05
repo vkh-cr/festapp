@@ -156,7 +156,7 @@ class _UserPageState extends State<UserPage> {
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: ButtonsHelper.buildQRCodeButton(
                           onPressed: () => _showFullScreenDialog(context, userData!.name!, AppConfig.appName, userData!.id!),
-                          label: "Show my code",
+                          label: "Show my code".tr(),
                         ),
                       ),
                       Visibility(
@@ -194,7 +194,7 @@ class _UserPageState extends State<UserPage> {
                                         AppConfig.appName,
                                         companion.id,
                                       ),
-                                      label: "Show Code",
+                                      label: "Show Code".tr(),
                                     ),
                                   ),
                                 ],
