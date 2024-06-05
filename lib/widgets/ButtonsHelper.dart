@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:pwa_install/pwa_install.dart';
 
 class ButtonsHelper {
@@ -56,7 +57,7 @@ class ButtonsHelper {
   static Widget bigButton({
     required String label,
     VoidCallback? onPressed,
-    Color color = const Color.fromARGB(255, 220, 226, 237),
+    Color color = bigButtonColor,
     Color textColor = Colors.black,
     bool isEnabled = true,
     double height = 50.0,

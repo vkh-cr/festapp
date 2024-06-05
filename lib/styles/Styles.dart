@@ -36,6 +36,8 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     backgroundColor: AppConfig.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
+const Color bigButtonColor = Color.fromARGB(255, 220, 226, 237);
+
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
