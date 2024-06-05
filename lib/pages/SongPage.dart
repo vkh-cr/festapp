@@ -1,10 +1,10 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/models/InformationModel.dart';
-import 'package:festapp/styles/Styles.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/models/InformationModel.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 

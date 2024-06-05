@@ -1,9 +1,10 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/services/MapIconService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/services/MapIconService.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -140,6 +141,7 @@ class _MapPageState extends State<MapPage> {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
     var offlinePlaces = OfflineDataHelper.getAllPlaces();
+    offlinePlaces.sortPlaces();
     if (placeId != null && !loadOtherGroups) {
       var place = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (place != null) {
@@ -318,7 +320,7 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> saveNewPosition() async {
     if (isOnlyEditMode) {
-      context.pop({
+      RouterService.goBack(context, {
         "lat": selectedMarker!.point.latitude,
         "lng": selectedMarker!.point.longitude
       });
@@ -341,7 +343,7 @@ class _MapPageState extends State<MapPage> {
 
   void cancelNewPosition() {
     if (isOnlyEditMode) {
-      context.pop();
+      RouterService.goBack(context);
       return;
     }
     setState(() {

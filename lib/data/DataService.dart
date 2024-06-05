@@ -1,37 +1,39 @@
 import 'dart:collection';
 
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/OccasionLinkModel.dart';
-import 'package:festapp/models/OccasionModel.dart';
-import 'package:festapp/models/OccasionSettingsModel.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserGroupInfoModel.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/models/InformationModel.dart';
+import 'package:fstapp/data/CompanionHelper.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/OccasionLinkModel.dart';
+import 'package:fstapp/models/OccasionModel.dart';
+import 'package:fstapp/models/OccasionSettingsModel.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/models/UserGroupInfoModel.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/models/InformationModel.dart';
 
-import 'package:festapp/models/NewsModel.dart';
-import 'package:festapp/services/NotificationHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/services/UserManagementHelper.dart';
+import 'package:fstapp/models/NewsModel.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:html/parser.dart';
 
 import '../models/EventModel.dart';
 import '../models/ExclusiveGroupModel.dart';
 import '../models/PlaceModel.dart';
 
+
 class DataService {
   static final _supabase = Supabase.instance.client;
 
-  static final _secureStorage = FlutterSecureStorage();
+  static const _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
 
   static Future<void> emailMailerSend(String recipient, String templateId, List<Map<String, String>> variables)
@@ -44,8 +46,12 @@ class DataService {
         }, "subs": variables});
   }
 
-  static refreshSession() async {
-    await _supabase.auth.refreshSession();
+  static Future<bool> refreshSession() async {
+    var response = await _supabase.auth.refreshSession();
+    if(response.session!=null){
+      return true;
+    }
+    return false;
   }
 
   static Future<bool> tryAuthUser() async {
@@ -124,12 +130,12 @@ class DataService {
     return _currentUser!;
   }
 
-  static Future<void> deleteUser(OccasionUserModel data) async {
+  static Future<void> deleteUser(String user, int occasion) async {
     await _supabase.rpc("delete_user",
     params:
     {
-      "usr": data.user,
-      "oc": data.occasion
+      "usr": user,
+      "oc": occasion
     });
   }
 
@@ -194,20 +200,19 @@ class DataService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await getUserInfoWithRole();
+    var user = await DataService.getCurrentUserInfo();
+    if(RightsHelper.currentUserOccasion?.role != null) {
+      user.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
+    }
     var myGroup = await getCurrentUserGroup();
     if(myGroup!=null) {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
-    return user;
-  }
-
-  static Future<UserInfoModel> getUserInfoWithRole() async {
-    var userInfo = await DataService.getCurrentUserInfo();
-    if(RightsHelper.currentUserOccasion?.role != null) {
-      userInfo.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
+    if(globalSettingsModel!.isEnabledEntryCode??false) {
+      user.companions = await CompanionHelper.getAllCompanions(0);
     }
-    return userInfo;
+
+    return user;
   }
 
   static Future<String> getRoleInfo(int role) async {
@@ -234,7 +239,7 @@ class DataService {
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
     var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion!);
-    return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x)));
+    return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
   }
 
   static Future<OccasionModel> getOccasion(int id) async {
@@ -245,6 +250,23 @@ class DataService {
   static Future<UserInfoModel> getUser(String id) async {
     var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
     return UserInfoModel.fromJson(data);
+  }
+
+  static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
+    var result = await _supabase.rpc("get_user_info_for_users",
+        params: {"oc": RightsHelper.currentOccasion, "user_ids": userIds});
+    if(result["code"] == 200) {
+      return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+    }
+    return [];
+  }
+
+  static Future<UserInfoModel?> getUserInfo(String userId) async {
+    var list = await getUsersInfo([userId]);
+    if(list.length == 1){
+      return list[0];
+    }
+    return null;
   }
 
   static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
@@ -273,19 +295,40 @@ class DataService {
         });
   }
 
-  static Future<String?> unsafeCreateUser(int occasion, String email, String pw) async {
-    return await _supabase.rpc("create_user",
-        params: {"oc": occasion, "email": email, "password": pw});
+  static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
+    var newId = await _supabase.rpc("create_user_with_data",
+        params: {"oc": occasion, "email": email, "password": pw, "data": data});
+    if (newId==null)
+    {
+      throw Exception("Creating of user has failed.");
+    }
+    return newId;
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {
       await ensureCanUpdateUsers(oum);
-      oum.user ??= await UserManagementHelper.unsafeCreateNewUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email]);
-      await _supabase.from(Tb.occasion_users.table).upsert(
-          oum.toUpdateJson()
-      );
-      await updateUserInfo(oum);
+      if (oum.user == null) {
+        oum.user = await DataService.unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
+      } else {
+        await _supabase.rpc("update_user",
+            params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
+        await addUserToCurrentOccasion(oum.user!, oum.occasion!);
+      }
 
+      if(oum.user!=null){
+        await _supabase.from(Tb.occasion_users.table).upsert(
+            oum.toUpdateJson()
+        );
+      }
+  }
+
+  static Future<void> addUserToCurrentOccasion(String id, int occasion) async {
+    await _supabase.rpc("add_user_to_occasion",
+      params:
+      {
+        "usr": id,
+        "oc": occasion,
+      });
   }
 
   static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
@@ -772,7 +815,6 @@ class DataService {
             "${Tb.events.max_participants},"
             "${Tb.events.split_for_men_women},"
             "${Tb.events.is_group_event},"
-            "${Tb.events.description},"
             "${Tb.events.is_hidden},"
             "${Tb.events.type},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
@@ -780,8 +822,18 @@ class DataService {
         .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
+
+    var cachedEvent = OfflineDataHelper.getEventDescription(eventId.toString());
+    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
+      var descrEvent = await getEventsDescription([event.id!]);
+      event.description = descrEvent[0].description;
+    } else {
+      event.description = cachedEvent?.description;
+    }
+
     if(isLoggedIn()) {
       event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
+      event.isSignedIn = await isCurrentUserSignedToEvent(event.id!);
     } else {
       event.isEventInMySchedule = OfflineDataHelper.isEventSaved(event.id!);
     }
@@ -863,12 +915,11 @@ class DataService {
   static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
     var data = await _supabase
       .from(Tb.event_users.table)
-      .select(
-        "${Tb.event_users.user},"
-        "${Tb.event_users.event},"
-        "${Tb.user_info_public.table}(*)")
+      .select(Tb.event_users.user)
       .eq(Tb.event_users.event, eventId);
-    return List<UserInfoModel>.from(data.map((par) => UserInfoModel.fromJson(par[Tb.user_info_public.table])));
+    var listOfIds = List<String>.from(data.map((par) => par[Tb.event_users.user]));
+    var users = await getUsersInfo(listOfIds);
+    return users;
   }
 
   static Future<int> getParticipantsPerEventCount(int eventId) async {
@@ -925,6 +976,9 @@ class DataService {
         }
         return;
       }
+      case 403:
+        ToastHelper.Show("Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
+        return;
       case 100: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk); return;
       case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
@@ -991,30 +1045,27 @@ class DataService {
     }
   }
 
-  static signOutFromEvent(EventModel event, [UserInfoModel? participant]) async {
+  static Future<void> signOutFromEvent(int eventId, [UserInfoModel? participant]) async {
     ensureUserIsLoggedIn();
-    var finalId = participant?.id ?? _supabase.auth.currentUser?.id;
+    var userId = participant?.id ?? currentUserId();
 
-    if(!RightsHelper.canSignInOutUsersFromEvents() && DateTime.now().isAfter(event.endTime))
-    {
-      ToastHelper.Show("It is not possible to sign out from an event that has already taken place.", severity: ToastSeverity.NotOk);
-      return;
-    }
-
-    await _supabase
-        .from(Tb.event_users.table)
-        .delete()
-        .eq(Tb.event_users.event, event.id!)
-        .eq(Tb.event_users.user, finalId!);
-
-    if(participant == null) {
-      var trPrefix = _currentUser!.getGenderPrefix();
-      ToastHelper.Show("${trPrefix}You have been signed out.".tr());
-      return;
-    }
-    else{
-      var trPrefix = participant.getGenderPrefix();
-      ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
+    var result = await _supabase.rpc("sign_user_out_of_event",
+        params: {"ev": eventId, "usr": userId});
+    switch(result["code"]) {
+      case 200:
+        if(participant == null) {
+          var trPrefix = _currentUser!.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+          return;
+        }
+        else{
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
+        }
+        return;
+      case 201:
+        ToastHelper.Show("It is not possible to sign out from an event that has already taken place.".tr(), severity: ToastSeverity.NotOk);
+        return;
     }
   }
 
@@ -1188,7 +1239,7 @@ class DataService {
     ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String message, bool withNotification) async {
+  static insertNewsMessage(String heading, String message, bool withNotification, List<String>? to) async {
     await _supabase.from(Tb.news.table).insert(
         {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
 
@@ -1208,8 +1259,9 @@ class DataService {
       await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
+            Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: _currentUser!.name??AppConfig.appName
+            Tb.log_notifications.heading: heading
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());
@@ -1426,6 +1478,15 @@ class DataService {
     var messages = await getAllNewsMessages();
     OfflineDataHelper.saveAllMessages(messages);
 
+    if (!const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed )
+    {
+      await updateEventDescriptions();
+    }
+
+    await DataService.synchronizeMySchedule();
+  }
+
+  static Future<void> updateEventDescriptions() async {
     var needsUpdate = <int>[];
     var allEventsMeta = await getAllEventsMeta();
 
@@ -1440,8 +1501,6 @@ class DataService {
     for(var e in fullEvents) {
       OfflineDataHelper.saveEventDescription(e);
     }
-
-    await DataService.synchronizeMySchedule();
   }
 
   static Future<OccasionLinkModel> checkOccasionLink(String link) async {
@@ -1489,6 +1548,11 @@ class DataService {
       await _supabase.from(Tb.occasion_users.table).insert(usr.toUpdateJson());
     }
 
+  }
+
+  static Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+    var resp = await _supabase.functions.invoke("register", body: data);
+    return resp.data;
   }
 // static Future<List<ParticipantModel>> searchParticipants(String searchTerm) async {
 //   List<ParticipantModel> toReturn = [];

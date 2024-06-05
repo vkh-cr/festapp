@@ -1,8 +1,9 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/models/EventModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/widgets/ButtonsHelper.dart';
+import 'package:flutter/gestures.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/models/EventModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 
 class TimetableController {
@@ -31,6 +32,7 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
+  final double minimalPadding = 1.5;
   final double pixelsInHour = 200;
   final double placeTitleHeight = 40;
   final double timelineHeight = 30;
@@ -205,23 +207,44 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       );
       stackChildren.add(timeline);
 
-      return Stack(
-        children: [
-          GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanStart: panStarted,
-              onPanUpdate: enforceConstraints,
-              onPanEnd: panEnded,
-              child: SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.horizontal,
-                  child: SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      child: Stack(
-                        children: stackChildren,
-                      ))))
-        ],
+      return Listener(
+        onPointerSignal: (PointerSignalEvent event) {
+          if (event is PointerScrollEvent) {
+            _animationController.stop();
+            // var xOffset = matrixTimetable.row0.a;
+            // var yOffset = matrixTimetable.row1.a;
+
+            var constrained = constrainDeltaOffset(-event.scrollDelta.dx, -event.scrollDelta.dy);
+            setOffset(constrained);
+
+            // animationY = Tween<double>(begin: yOffset, end: constrained.dy).animate(
+            //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+            // animationX = Tween<double>(begin: xOffset, end: constrained.dx).animate(
+            //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
+            //
+            // _animationController.duration = Duration(milliseconds: scrollAnimationDuration);
+            // _animationController.reset();
+            // _animationController.forward();
+          }
+        },
+        child: Stack(
+          children: [
+            GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanStart: panStarted,
+                onPanUpdate: enforceConstraints,
+                onPanEnd: panEnded,
+                child: SingleChildScrollView(
+                    physics: const NeverScrollableScrollPhysics(),
+                    scrollDirection: Axis.horizontal,
+                    child: SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        child: Stack(
+                          children: stackChildren,
+                        ))))
+          ],
+        ),
       );
     });
   }
@@ -280,7 +303,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         var item = pItems[i];
         var timeBlock = Positioned(
           left: timeRangeLength(
-              pixelsInHour, firstEvent.startTime, item.startTime),
+              pixelsInHour, firstEvent.startTime, item.startTime)+minimalPadding,
           top: (placeTitleHeight + itemHeight) * p +
               placeTitleHeight +
               timelineHeight,
@@ -290,7 +313,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
             },
             child: Container(
               width:
-                  timeRangeLength(pixelsInHour, item.startTime, item.endTime),
+                  timeRangeLength(pixelsInHour, item.startTime, item.endTime)-minimalPadding*2,
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
@@ -406,6 +429,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     animationX = Tween<double>(begin: xOffset, end: offset.dx).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
 
+    _animationController.duration = Duration(milliseconds: animationDuration);
     _animationController.reset();
     _animationController.forward();
   }

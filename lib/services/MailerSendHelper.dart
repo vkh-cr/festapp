@@ -1,7 +1,7 @@
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 

@@ -1,16 +1,13 @@
-import 'dart:math';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/services/DialogHelper.dart';
-import 'package:festapp/services/ImportHelper.dart';
-import 'package:festapp/services/NavigationService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ImportHelper.dart';
+import 'package:fstapp/services/NavigationService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 
 class UserManagementHelper{
   static Future<void> import(BuildContext context) async {
@@ -105,29 +102,11 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing);
+          await DataService.deleteUser(existing.user!, existing.occasion!);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
     }
-  }
-
-  static Future<String> unsafeCreateNewUser(int occasion, String? email) async {
-    if(email == null)
-    {
-      throw Exception("User must have an e-mail!");
-    }
-
-    var random = Random();
-    var numberFormat = NumberFormat("####");
-    var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-
-    var newId = await DataService.unsafeCreateUser(occasion, email, pw);
-    if(newId==null)
-    {
-      throw Exception("Creating of user has failed.");
-    }
-    return newId;
   }
 
   static Future<bool> unsafeChangeUserPassword(OccasionUserModel user) async {

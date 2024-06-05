@@ -1,21 +1,21 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/dataGrids/DataGridAction.dart';
-import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
-import 'package:festapp/models/ExclusiveGroupModel.dart';
-import 'package:festapp/models/OccasionModel.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/PlaceModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserGroupInfoModel.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/dataGrids/DataGridHelper.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/MapIconService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/services/UserManagementHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/dataGrids/DataGridAction.dart';
+import 'package:fstapp/dataGrids/SingleTableDataGrid.dart';
+import 'package:fstapp/models/ExclusiveGroupModel.dart';
+import 'package:fstapp/models/OccasionModel.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/PlaceModel.dart';
+import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/models/UserGroupInfoModel.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/dataGrids/DataGridHelper.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/MapIconService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -45,7 +45,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    RightsHelper.ensureAccessProcedure(context);
+    await RightsHelper.ensureAccessProcedure(context);
     if(!RightsHelper.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
@@ -530,7 +530,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                       rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value = person;
                                       var cell = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                      context.pop();
+                                      RouterService.goBack(context);
                                     }), _allUsers, "Set".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
@@ -650,6 +650,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsHelper.canUpdateUsers())),
+                  DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) { _addExisting(p0); }),
                   DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
@@ -845,4 +846,24 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
     ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
   }
+
+  Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
+
+    if(_allUsers.isEmpty)
+    {
+      _allUsers = await DataService.getAllUsersBasics();
+    }
+    var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
+    DialogHelper.chooseUser(context, (person) async
+    {
+      await DataService.addUserToCurrentOccasion(person.id, RightsHelper.currentOccasion!);
+      ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
+    }, nonAdded, "Add".tr());
+
+    await dataGrid.reloadData();
+
+  }
+
 }

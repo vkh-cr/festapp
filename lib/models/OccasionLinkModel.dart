@@ -1,4 +1,4 @@
-import 'package:festapp/models/OccasionUserModel.dart';
+import 'package:fstapp/models/OccasionUserModel.dart';
 
 class OccasionLinkModel{
   int? code;

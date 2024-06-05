@@ -1,4 +1,4 @@
-package festapp.festapp
+package fstapp.fstapp
 
 import io.flutter.embedding.android.FlutterActivity
 

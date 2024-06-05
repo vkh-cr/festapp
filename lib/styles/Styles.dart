@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 
@@ -35,6 +35,8 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: AppConfig.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
+
+const Color bigButtonColor = Color.fromARGB(255, 220, 226, 237);
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;

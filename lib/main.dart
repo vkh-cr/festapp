@@ -1,22 +1,23 @@
 import 'dart:async';
 
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/pages/InfoPage.dart';
-import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/pages/NewsPage.dart';
-import 'package:festapp/pages/SongPage.dart';
-import 'package:festapp/pages/TimetablePage.dart';
-import 'package:festapp/pages/UserPage.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/NotificationHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/tests/DataServiceTests.dart';
-import 'package:festapp/widgets/ScheduleTabView.dart';
-import 'package:festapp/widgets/ScheduleTimeline.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/pages/InfoPage.dart';
+import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/pages/NewsPage.dart';
+import 'package:fstapp/pages/SongPage.dart';
+import 'package:fstapp/pages/TimetablePage.dart';
+import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/tests/DataServiceTests.dart';
+import 'package:fstapp/widgets/ScheduleTabView.dart';
+import 'package:fstapp/widgets/ScheduleTimeline.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -50,45 +51,82 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
+  print('Initialization started');
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  await GetStorage.init();
-  PWAInstall().setup();
-
-  initializeDateFormatting();
-
   WidgetsFlutterBinding.ensureInitialized();
-  await EasyLocalization.ensureInitialized();
+  print('Widgets binding initialized');
 
-  try{
+  try {
+    PWAInstall().setup();
+    print('PWA setup completed');
+  } catch (e) {
+    print('PWA setup failed: $e');
+  }
+
+  try {
+    initializeDateFormatting();
+    print('Date formatting initialized');
+  } catch (e) {
+    print('Date formatting initialization failed: $e');
+  }
+
+  try {
+    await EasyLocalization.ensureInitialized();
+    print('EasyLocalization initialized');
+  } catch (e) {
+    print('EasyLocalization initialization failed: $e');
+  }
+
+  try {
+    await GetStorage.init();
+    print('GetStorage initialized');
+  } catch (e) {
+    print('GetStorage initialization failed: $e');
+  }
+
+  try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
+    print('Supabase initialized');
     if (!DataService.isLoggedIn()) {
-      await DataService.tryAuthUser();
+      await DataService.refreshSession();
+      print('Session refreshed');
     }
-  }catch(e){}
+  } catch (e) {
+    print('Fetching current user info failed: $e');
+  }
 
-  try{
-    if(DataService.isLoggedIn()) {
+  try {
+    if (DataService.isLoggedIn()) {
       await DataService.getCurrentUserInfo();
+      print('Current user info fetched');
     }
-  }catch(e){}
+  } catch (e) {
+    print('Supabase initialization failed: $e');
+  }
 
   try {
     await OfflineDataHelper.initialize();
-    //load all offlineData
-
+    print('Offline data helper initialized');
     var settings = OfflineDataHelper.getGlobalSettings();
-    if(settings!=null){
+    if (settings != null) {
       DataService.globalSettingsModel = settings;
+      print('Global settings loaded');
     }
+  } catch (e) {
+    print('Offline data helper initialization failed: $e');
   }
-  catch(e){}
 
   try {
     NotificationHelper.Initialize();
-  } catch (e) {}
+    print('Notification helper initialized');
+  } catch (e) {
+    print('Notification helper initialization failed: $e');
+  }
+
+  print('Initialization completed');
 }
 
 class MyApp extends StatelessWidget {
@@ -108,7 +146,10 @@ class MyApp extends StatelessWidget {
       //     data: MediaQuery.of(context).copyWith(textScaleFactor: scale),
       //   );
       // },
-      localizationsDelegates: context.localizationDelegates,
+      localizationsDelegates: [
+        ...context.localizationDelegates,
+        FormBuilderLocalizations.delegate,
+      ],
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       title: MyHomePage.HOME_PAGE,
@@ -127,10 +168,10 @@ class MyApp extends StatelessWidget {
           scaffoldBackgroundColor: AppConfig.backgroundColor,
           secondaryHeaderColor: const Color(0xFFBA5D3F),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(background: AppConfig.backgroundColor)),
+              .copyWith(surface: AppConfig.backgroundColor)),
     ).animate().fadeIn(
-          duration: 300.ms,
-        );
+      duration: 300.ms,
+    );
   }
 }
 
@@ -209,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     child: SvgPicture.asset(
                       height: 112,
                       semanticsLabel: 'Festapp logo',
-                      'assets/icons/festapplogo.svg',
+                      'assets/icons/fstapplogo.svg',
                     ),
                   ),
                   const Spacer(),
@@ -293,7 +334,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                         child: const Icon(Icons.newspaper),
                       ),
                     ),
-                    Text("News".tr()),
+                    const Text("News").tr(),
                   ],
                 ),
                 Column(

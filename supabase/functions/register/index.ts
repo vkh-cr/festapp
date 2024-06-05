@@ -28,48 +28,52 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     console.log(reqData);
 
-    const emailField = reqData.fields.find(field => field.type === "email");
+    const userEmail = reqData.email;
+    console.log(userEmail);
 
     const userData = await _supabase
           .from("user_info")
           .select()
-          .eq("email_readonly", emailField.value)
+          .ilike("email_readonly", userEmail)
           .maybeSingle();
 
     if(userData.data != null) {
-        return new Response(JSON.stringify({"email":emailField.value}), {
+        return new Response(JSON.stringify({"email":userEmail, "code":409}), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
         });
     }
 
-    _supabase.
+//     const result = await _supabase.rpc("process_token_register",
+//                          { params: {'data': reqData}});
 
-    const userId = userData.data.id;
+//     if(result.code != 200){
+//         return new Response(JSON.stringify({"code":result.code}), {
+//           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+//           status: 200,
+//         })
+//     }
 
-    const token = crypto.randomUUID();
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    await _supabase
-          .from("user_reset_token")
-          .delete()
-          .eq("user", userId);
+    const { data } = await _supabase.rpc("create_user_with_data",
+            {oc: 1, email: userEmail, password: code, data: reqData});
 
-    await _supabase
-      .from("user_reset_token")
-      .insert({
-        "user":userId,
-        "token":token,
-    });
+    const userId = data;
+
+    console.log(userId);
+
 
     const template = await _supabase
       .from("email_templates")
       .select()
-      .eq("id", "RESET_PASSWORD")
+      .eq("id", "SIGN_IN_CODE")
       .single();
 
     console.log(template);
     let html = template.data.html;
-    html = html.replace(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
+    html = html.replaceAll(`{{code}}`, code);
+    html = html.replaceAll(`{{email}}`, userEmail);
 
     const client = new SMTPClient({
       connection: {
@@ -100,7 +104,7 @@ Deno.serve(async (req) => {
         "template":template.data.id
     });
 
-    return new Response(JSON.stringify({"email":userEmail}), {
+    return new Response(JSON.stringify({"email":userEmail, "code":200}), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })

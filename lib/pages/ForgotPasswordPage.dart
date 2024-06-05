@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/styles/Styles.dart';
-import 'package:festapp/widgets/FormFields.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/widgets/FormFields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -58,35 +59,29 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                       const SizedBox(
                         height: 16,
                       ),
-                      Container(
-                        height: 50,
-                        width: 380,
-                        decoration: BoxDecoration(
-                            color: _isSent == true ? Colors.black38 : AppConfig.color1,
-                            borderRadius: BorderRadius.circular(20)),
-                        child: TextButton(
-                          onPressed: _isSent == true ? null : () async {
-                            if (_formKey.currentState!.validate()) {
-                              TextInput.finishAutofillContext();
-                              await DataService
-                                  .resetPasswordForEmail(_emailController.text)
-                                  .then((value)  {
-                                    setState(() {
-                                      _isSent = true;
-                                    });
-                                    ToastHelper.Show("Password reset email has been sent.".tr());
-                                  })
-                                  .onError((error, stackTrace) {
-                                  ToastHelper.Show(error.toString());
-                              });
-                            }
-                          },
-                          child: const Text(
-                            "Send Reset Email",
-                            style: TextStyle(color: Colors.white, fontSize: 25),
-                          ).tr(),
-                        ),
-                      ),
+                      ButtonsHelper.bigButton(
+                        onPressed: _isSent == true ? null : () async {
+                          if (_formKey.currentState!.validate()) {
+                            TextInput.finishAutofillContext();
+                            setState(() {
+                              _isSent = true;
+                            });
+                            await DataService.resetPasswordForEmail(_emailController.text)
+                                .then((value) {
+                              ToastHelper.Show("Password reset email has been sent.".tr());
+                            })
+                                .onError((error, stackTrace) {
+                              ToastHelper.Show(error.toString());
+                            });
+                          }
+                        },
+                        label: "Send Reset Email".tr(),
+                        color: AppConfig.color1,
+                        textColor: Colors.white,
+                        isEnabled: !_isSent,
+                        height: 50.0,
+                        width: 380.0,
+                      )
                     ],
                   ),
                 ),
