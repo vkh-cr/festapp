@@ -180,7 +180,6 @@
   "I'm": "Ich bin",
   "First time?": "Zum ersten Mal?",
   "Add existing": "Bestehendes hinzufügen",
-  "Almost done! Confirm registration in your email {email}.": "Fast fertig! Bestätigen Sie die Registrierung in Ihrer E-Mail {email}.",
   "Registration is almost complete!": "Die Registrierung ist fast abgeschlossen!",
   "Delete account": "Konto löschen",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Fordern Sie die Löschung des Kontos an, indem Sie eine E-Mail mit Ihren Zugangsdaten an info@festapp.net senden.",
@@ -198,5 +197,11 @@
   "Send": "Senden",
   "Registration failed: Email {email} is already in use.": "Registrierung fehlgeschlagen: E-Mail {email} wird bereits verwendet.",
   "Registration has failed.": "Registrierung fehlgeschlagen.",
+  "Change Password Instructions": "Anweisungen zum Ändern des Passworts",
+  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "Sie erhalten eine E-Mail mit einem Link zum Zurücksetzen Ihres Passworts. Klicken Sie auf den Link, um zu einer sicheren Seite zu gelangen, auf der Sie ein neues Passwort festlegen können. Möchten Sie fortfahren?",
+  "Password Reset Link Sent": "Link zum Zurücksetzen des Passworts gesendet",
+  "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Ein Link zum Zurücksetzen des Passworts wurde an {email} gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen, um Ihr Passwort zurückzusetzen.",
+  "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Fast fertig! Ihre Anmeldeinformationen für die App wurden an Ihre E-Mail {email} gesendet. Bitte überprüfen Sie Ihren Posteingang, um die Registrierung abzuschließen.",
+
   "_": "_"
 }
