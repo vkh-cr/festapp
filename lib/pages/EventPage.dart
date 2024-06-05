@@ -70,7 +70,7 @@ class _EventPageState extends State<EventPage> {
           ),
           actions:[
             Visibility(
-              visible: RightsHelper.isApprover(),
+              visible: showLoginLogoutButton() && RightsHelper.isApprover(),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
