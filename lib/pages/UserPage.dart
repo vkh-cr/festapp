@@ -248,14 +248,44 @@ class _UserPageState extends State<UserPage> {
                     label: "Sign out".tr(),
                     color: AppConfig.color1,
                     textColor: Colors.white),
+                const SizedBox(
+                  height: 16,
+                ),
                 Container(
-                    padding: const EdgeInsets.all(8.0),
+                    alignment: Alignment.topCenter,
+                    child: TextButton(
+                        onPressed: () async {
+                          var answer = await DialogHelper.showConfirmationDialogAsync(
+                              context,
+                              "Change Password Instructions".tr(),
+                              "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?".tr(),
+                              confirmButtonMessage: "Proceed".tr());
+                          if (answer) {
+                            await DataService.resetPasswordForEmail(userData!.email!)
+                                .then((value) {
+                              ToastHelper.Show("Password reset email has been sent.".tr());
+                              DialogHelper.showInformationDialogAsync(
+                                  context,
+                                  "Password Reset Link Sent".tr(),
+                                  "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.".tr(namedArgs: {"email":userData!.email!}));
+                            });
+                          }
+                        },
+                        child: Text(
+                          "Change password".tr(),
+                          style: normalTextStyle,
+                        ).tr(),
+                    )),
+                const SizedBox(
+                  height: 8,
+                ),
+                Container(
                     alignment: Alignment.topCenter,
                     child: TextButton(
                         onPressed: () => DialogHelper.showInformationDialogAsync(
                             context,
                             "Delete account".tr(),
-                            "Request account deletion by sending email with your credentials to info@festapp.net."),
+                            "Request account deletion by sending email with your credentials to info@festapp.net.".tr()),
                         child: Text(
                           "Delete account".tr(),
                           style: normalTextStyle,

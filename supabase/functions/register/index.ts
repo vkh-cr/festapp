@@ -54,37 +54,26 @@ Deno.serve(async (req) => {
 //         })
 //     }
 
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
     const { data } = await _supabase.rpc("create_user_with_data",
-            {oc: 1, email: userEmail, password: "", data: reqData});
+            {oc: 1, email: userEmail, password: code, data: reqData});
 
     const userId = data;
 
     console.log(userId);
 
-    const token = crypto.randomUUID();
-
-    console.log(token);
-    await _supabase
-          .from("user_reset_token")
-          .delete()
-          .eq("user", userId);
-
-    await _supabase
-      .from("user_reset_token")
-      .insert({
-        "user":userId,
-        "token":token,
-    });
 
     const template = await _supabase
       .from("email_templates")
       .select()
-      .eq("id", "RESET_PASSWORD")
+      .eq("id", "SIGN_IN_CODE")
       .single();
 
     console.log(template);
     let html = template.data.html;
-    html = html.replaceAll(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
+    html = html.replaceAll(`{{code}}`, code);
+    html = html.replaceAll(`{{email}}`, userEmail);
 
     const client = new SMTPClient({
       connection: {
