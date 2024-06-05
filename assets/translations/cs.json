@@ -198,7 +198,7 @@
   "Registration failed: Email {email} is already in use.": "Registrace se nezdařila: Email {email} je již používán.",
   "Registration has failed.": "Registrace se nezdařila.",
   "Change Password Instructions": "Pokyny ke změně hesla",
-  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "Obdržíte e-mail s odkazem na resetování hesla. Klikněte na odkaz a přejděte na zabezpečenou stránku, kde můžete nastavit nové heslo. Chcete pokračovat?",
+  "You'll receive an email with a link to reset your password. Do you want to proceed?": "Obdržíte e-mail s odkazem na resetování hesla. Chcete pokračovat?",
   "Password Reset Link Sent": "Odkaz na resetování hesla byl odeslán",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Odkaz na resetování hesla byl odeslán na {email}. Zkontrolujte prosím svou schránku a postupujte podle pokynů pro resetování hesla.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Téměř hotovo! Vaše přihlašovací údaje do aplikace byly odeslány na váš e-mail {email}. Zkontrolujte prosím svou schránku a dokončete registraci.",

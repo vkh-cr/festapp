@@ -258,7 +258,7 @@ class _UserPageState extends State<UserPage> {
                           var answer = await DialogHelper.showConfirmationDialogAsync(
                               context,
                               "Change Password Instructions".tr(),
-                              "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?".tr(),
+                              "You'll receive an email with a link to reset your password. Do you want to proceed?".tr(),
                               confirmButtonMessage: "Proceed".tr());
                           if (answer) {
                             await DataService.resetPasswordForEmail(userData!.email!)

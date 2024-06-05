@@ -198,7 +198,7 @@
   "Registration failed: Email {email} is already in use.": "Registration failed: Email {email} is already in use.",
   "Registration has failed.": "Registration has failed.",
   "Change Password Instructions": "Change Password Instructions",
-  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?",
+  "You'll receive an email with a link to reset your password. Do you want to proceed?": "You'll receive an email with a link to reset your password. Do you want to proceed?",
   "Password Reset Link Sent": "Password Reset Link Sent",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",

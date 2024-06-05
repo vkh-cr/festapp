@@ -198,7 +198,7 @@
   "Registration failed: Email {email} is already in use.": "Registrácia zlyhala: Email {email} sa už používa.",
   "Registration has failed.": "Registrácia zlyhala.",
   "Change Password Instructions": "Pokyny na zmenu hesla",
-  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "Obdržíte e-mail s odkazom na resetovanie hesla. Kliknite na odkaz a prejdite na zabezpečenú stránku, kde môžete nastaviť nové heslo. Chcete pokračovať?",
+  "You'll receive an email with a link to reset your password. Do you want to proceed?": "Obdržíte e-mail s odkazom na resetovanie hesla. Chcete pokračovať?",
   "Password Reset Link Sent": "Odkaz na resetovanie hesla bol odoslaný",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Odkaz na resetovanie hesla bol odoslaný na {email}. Skontrolujte si prosím svoju schránku a postupujte podľa pokynov na resetovanie hesla.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Takmer hotovo! Vaše prihlasovacie údaje do aplikácie boli odoslané na váš e-mail {email}. Skontrolujte si prosím svoju schránku a dokončite registráciu.",
