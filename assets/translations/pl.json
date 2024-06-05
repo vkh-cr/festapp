@@ -198,7 +198,7 @@
   "Registration failed: Email {email} is already in use.": "Rejestracja nie powiodła się: Email {email} jest już używany.",
   "Registration has failed.": "Rejestracja nie powiodła się.",
   "Change Password Instructions": "Instrukcja zmiany hasła",
-  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "Otrzymasz e-mail z linkiem do zresetowania hasła. Kliknij link, aby przejść do zabezpieczonej strony, gdzie możesz ustawić nowe hasło. Czy chcesz kontynuować?",
+  "You'll receive an email with a link to reset your password. Do you want to proceed?": "Otrzymasz e-mail z linkiem do zresetowania hasła. Czy chcesz kontynuować?",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Link do resetowania hasła został wysłany na {email}. Sprawdź swoją skrzynkę odbiorczą i postępuj zgodnie z instrukcjami, aby zresetować hasło.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Prawie gotowe! Twoje dane logowania do aplikacji zostały wysłane na Twój e-mail {email}. Sprawdź swoją skrzynkę odbiorczą, aby dokończyć rejestrację.",
   "_": "_"

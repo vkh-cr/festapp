@@ -198,7 +198,7 @@
   "Registration failed: Email {email} is already in use.": "Реєстрація не вдалася: електронна адреса {email} вже використовується.",
   "Registration has failed.": "Реєстрація не вдалася.",
   "Change Password Instructions": "Інструкції зі зміни пароля",
-  "You'll receive an email with a link to reset your password. Click the link to go to a secure page where you can set a new password. Do you want to proceed?": "Ви отримаєте електронний лист із посиланням для скидання пароля. Натисніть на посилання, щоб перейти на захищену сторінку, де ви зможете встановити новий пароль. Ви хочете продовжити?",
+  "You'll receive an email with a link to reset your password. Do you want to proceed?": "Ви отримаєте електронний лист із посиланням для скидання пароля. Ви хочете продовжити?",
   "Password Reset Link Sent": "Посилання для скидання пароля надіслано",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Посилання для скидання пароля надіслано на {email}. Будь ласка, перевірте свою поштову скриньку та дотримуйтесь інструкцій для скидання пароля.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Майже готово! Ваші облікові дані для входу в додаток були надіслані на вашу електронну пошту {email}. Будь ласка, перевірте свою поштову скриньку, щоб завершити реєстрацію.",
