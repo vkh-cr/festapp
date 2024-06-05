@@ -266,7 +266,7 @@ class _UserPageState extends State<UserPage> {
                               ToastHelper.Show("Password reset email has been sent.".tr());
                               DialogHelper.showInformationDialogAsync(
                                   context,
-                                  "Password Reset Link Sent".tr(),
+                                  "Change Password Instructions".tr(),
                                   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.".tr(namedArgs: {"email":userData!.email!}));
                             });
                           }
