@@ -159,19 +159,26 @@ class _UserPageState extends State<UserPage> {
                             borderRadius: BorderRadius.circular(12),
                             color: Colors.grey[300]!,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0), // Increased padding
+                          child: IntrinsicWidth(
                             child: TextButton.icon(
                               onPressed: () => _showFullScreenDialog(context, userData!.name!, AppConfig.appName, userData!.id!),
                               iconAlignment: IconAlignment.end,
                               icon: const Icon(Icons.qr_code),
                               label: const Text(
-                                "Show my code", // Changed label
+                                "Show my code",
                                 style: TextStyle(
-                                  fontSize: 16, // Increased font size
-                                  fontWeight: FontWeight.bold, // Made text bold
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ).tr(),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.all(12.0),
+                                backgroundColor: bigButtonColor, // Set the background color
+                                minimumSize: const Size.fromHeight(60),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -209,8 +216,7 @@ class _UserPageState extends State<UserPage> {
                                         borderRadius: BorderRadius.circular(12),
                                         color: Colors.grey[300]!,
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
+                                      child: IntrinsicWidth(
                                         child: TextButton.icon(
                                           onPressed: () {
                                             _showFullScreenDialog(
@@ -223,6 +229,14 @@ class _UserPageState extends State<UserPage> {
                                           iconAlignment: IconAlignment.end,
                                           icon: const Icon(Icons.qr_code),
                                           label: const Text("Show Code").tr(),
+                                          style: TextButton.styleFrom(
+                                            padding: const EdgeInsets.all(12.0),
+                                            backgroundColor: bigButtonColor, // Set the background color
+                                            minimumSize: const Size.fromHeight(60),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
