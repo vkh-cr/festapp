@@ -78,5 +78,7 @@
     	<string>pl</string>
     	<string>de</string>
     </array>
+    <key>FlutterDeepLinkingEnabled</key>
+    <true/>
 </dict>
 </plist>
