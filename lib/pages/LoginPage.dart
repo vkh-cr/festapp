@@ -24,6 +24,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _isLoading = false;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -92,28 +94,26 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 16,
                     ),
-                    Container(
-                      height: 50,
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: AppConfig.color1,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: TextButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            TextInput.finishAutofillContext();
-                            await DataService.login(
-                                    _emailController.text, _passwordController.text)
-                                .then(_showToast)
-                                .then(_refreshSignedInStatus)
-                                .catchError(_onError);
-                          }
-                        },
-                        child: const Text(
-                          "Sign in",
-                          style: TextStyle(color: Colors.white, fontSize: 25),
-                        ).tr(),
-                      ),
+                    ButtonsHelper.bigButton(
+                      label: "Sign in".tr(),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          TextInput.finishAutofillContext();
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await DataService.login(_emailController.text, _passwordController.text)
+                              .then(_showToast)
+                              .then(_refreshSignedInStatus)
+                              .catchError(_onError);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      color: AppConfig.color1,
+                      textColor: Colors.white,
+                      isEnabled: !_isLoading,
                     ),
                     const SizedBox(
                       height: 8,

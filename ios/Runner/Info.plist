@@ -15,13 +15,13 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>cs</string>
-		<string>sk</string>
-		<string>pl</string>
-		<string>de</string>
-	</array>
+        <array>
+        	<string>en</string>
+        	<string>cs</string>
+        	<string>sk</string>
+        	<string>pl</string>
+        	<string>de</string>
+        </array>
 	<key>CFBundleName</key>
 	<string>festivalslunovrat</string>
 	<key>CFBundlePackageType</key>
