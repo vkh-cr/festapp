@@ -23,6 +23,7 @@ class UserInfoModel {
   OccasionUserModel? occasionUser;
   String? roleString;
   List<CompanionModel>? companions = [];
+  UserInfoModel? companionParent;
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
@@ -38,13 +39,8 @@ class UserInfoModel {
   static const String occasionUserColumn = "occasionUser";
   static const String roleStringColumn = "roleString";
   static const String userCompanionsColumn = "userCompanions";
+  static const String companionParentColumn = "companion_parent";
 
-
-  static const String isEditorReadOnlyColumn = "is_editor_readonly";
-  static const String isAdminReadOnlyColumn = "is_admin_readonly";
-
-  static const String userInfoTable = "user_info";
-  static const String userInfoPublicTable = "user_info_public";
   static const String userInfoOffline = "user_info";
 
   static const String birthDateJsonFormat = "yyyy-MM-dd";
@@ -80,7 +76,8 @@ class UserInfoModel {
      this.userGroup,
      this.occasionUser,
      this.roleString,
-     this.companions
+     this.companions,
+     this.companionParent
   });  
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
@@ -101,13 +98,10 @@ class UserInfoModel {
       occasionUser: json[occasionUserColumn]!=null?OccasionUserModel.fromJson(json[occasionUserColumn]):null,
       roleString: json[roleStringColumn],
       companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
+      companionParent: json[companionParentColumn] != null ? UserInfoModel.fromJson(json[companionParentColumn]):null,
       sex: json[sexColumn],
       //todo remove
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
-      //todo remove backward compatibility
-      isAdmin: json[isAdminReadOnlyColumn]??json["is_admin"],
-      //todo remove backward compatibility
-      isEditor: json[isEditorReadOnlyColumn]??json["is_reception_admin"],
     );
   }
 
@@ -125,8 +119,6 @@ class UserInfoModel {
     roleStringColumn: roleString,
     sexColumn: sex,
     birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
-    isAdminReadOnlyColumn: isAdmin,
-    isEditorReadOnlyColumn: isEditor,
     userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c)=>c.toJson())) : null,
     Tb.user_info.data: {Tb.occasion_users.data_email: email}
   };
@@ -134,7 +126,12 @@ class UserInfoModel {
   @override
   String toString() => toFullNameString();
 
-  String toFullNameString() => "${name??""} ${surname??""}".trim();
+  String toFullNameString() {
+    if(companionParent!=null){
+      return (name??"") + (" (${"Companion of".tr()}: ${companionParent!.toFullNameString()})");
+    }
+    return "${name??""} ${surname??""}".trim();
+  }
 
   String shortNameToString() {
     return "$name ${(surname!=null && surname!.isNotEmpty) ? "${surname![0]}." : "-"}";
