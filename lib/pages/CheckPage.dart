@@ -94,11 +94,11 @@ class _CheckPageState extends State<CheckPage> {
 
   Widget buildScannedUserDetails() {
     if (_scannedUser == null) {
-      return const Center(
+      return Center(
         child: Padding(
-            padding: EdgeInsets.fromLTRB(0, 24, 0, 12),
-            child: Text(
-                "Point the camera at the attendee's code for a entry verification.")),
+            padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
+            child: const Text(
+                "Point the camera at the attendee's code for a entry verification.").tr()),
       );
     }
 
