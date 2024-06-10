@@ -184,7 +184,7 @@
   "Delete account": "Delete account",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Request account deletion by sending email with your credentials to info@festapp.net.",
   "Delete companion": "Delete companion",
-  "By deleting your companion you will also sign him/her out of all registered sessions.": "By deleting your companion you will also sign him/her out of all registered sessions.",
+  "By deleting your companion you will also sign him/her out of all signed in sessions.": "By deleting your companion you will also sign him/her out of all signed in sessions.",
   "Companions": "Companions",
   "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",
   "Companion Name": "Companion Name",
@@ -202,5 +202,9 @@
   "Password Reset Link Sent": "Password Reset Link Sent",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",
+  "Companion's events will appear here.": "Companion's events will appear here.",
+  "Signed in events: {count}": "Signed in events: {count}",
+  "This event is fully booked.": "This event is fully booked.",
+  "Companion of": "Companion of",
   "_":"_"
 }

@@ -135,8 +135,8 @@ class EventModel extends IPlutoRowModel {
   }
 
   bool isFull() => currentParticipants !>= maxParticipants!;
-  static bool canSignIn(EventModel? event) => event != null && event.maxParticipants != null;
-
+  static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null;
+  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && event!.currentParticipants! >= event.maxParticipants!;
   @override
   String toString() {
     return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";

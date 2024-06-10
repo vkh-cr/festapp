@@ -99,7 +99,7 @@ class ButtonsHelper {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: Colors.grey[300]!,
+        color: Colors.transparent,
       ),
       child: IntrinsicWidth(
         child: TextButton.icon(

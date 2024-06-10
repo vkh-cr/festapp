@@ -269,30 +269,29 @@ END;
 $$;
 
 
-CREATE OR REPLACE FUNCTION get_user_companions(event_id BIGINT)
+CREATE OR REPLACE FUNCTION get_user_companions_data ()
 RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
 AS $$
 DECLARE
-    current_user TEXT;
     companions jsonb;
 BEGIN
-    -- Get the current user's ID from auth.uid
-    SELECT auth.uid() INTO current_user;
-
     -- Aggregate companion data into JSONB format
     SELECT jsonb_agg(
         jsonb_build_object(
             'id', ui.id,
             'name', ui.name,
-            'is_signed_in', CASE WHEN eu."user" IS NOT NULL THEN true ELSE false END
+            'event_ids', (
+                SELECT jsonb_agg(eu.event)
+                FROM public.event_users eu
+                WHERE eu."user" = ui.id
+            )
         )
     ) INTO companions
     FROM public.user_companions uc
     JOIN public.user_info ui ON uc.companion = ui.id
-    LEFT JOIN public.event_users eu ON ui.id = eu."user" AND eu.event = event_id
-    WHERE uc."user"::text = current_user::text;
+    WHERE uc."user"::text = auth.uid()::TEXT;
 
     -- If no companions are found, return an empty array
     IF companions IS NULL THEN
