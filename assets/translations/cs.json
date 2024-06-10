@@ -202,6 +202,8 @@
   "Password Reset Link Sent": "Odkaz na resetování hesla byl odeslán",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Odkaz na resetování hesla byl odeslán na {email}. Zkontrolujte prosím svou schránku a postupujte podle pokynů pro resetování hesla.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Téměř hotovo! Vaše přihlašovací údaje do aplikace byly odeslány na váš e-mail {email}. Zkontrolujte prosím svou schránku a dokončete registraci.",
-
+  "Companion's events will appear here.": "Události společníka se zobrazí zde.",
+  "Signed in events: {count}": "Přihlášené události: {count}",
+  "This event is fully booked.": "Tato událost je plně obsazena.",
   "_": "_"
 }

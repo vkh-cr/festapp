@@ -33,7 +33,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
       await CompanionHelper.create(_nameController.text);
       _nameController.clear();
       widget.companions =
-          await CompanionHelper.getAllCompanions(widget.eventId);
+          await CompanionHelper.getAllCompanions();
       setState(() {});
     }
   }
@@ -48,21 +48,21 @@ class _CompanionDialogState extends State<CompanionDialog> {
       return;
     }
     await CompanionHelper.delete(companion);
-    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    widget.companions = await CompanionHelper.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
     await CompanionHelper.signIn(context, widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    widget.companions = await CompanionHelper.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
     await CompanionHelper.signOut(widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions(widget.eventId);
+    widget.companions = await CompanionHelper.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
@@ -115,17 +115,17 @@ class _CompanionDialogState extends State<CompanionDialog> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
                       child: Row(
                         children: [
-                          if (companion.isSignedIn) const Icon(Icons.check_circle),
+                          if (companion.isSignedIn(widget.eventId)) const Icon(Icons.check_circle),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(companion.name),
                           ),
-                          if (!companion.isSignedIn)
+                          if (!companion.isSignedIn(widget.eventId))
                             ElevatedButton(
                               child: const Text("Sign in someone").tr(),
                               onPressed: () => _signInCompanion(companion),
                             ),
-                          if (companion.isSignedIn)
+                          if (companion.isSignedIn(widget.eventId))
                             ElevatedButton(
                               child: const Text("Sign out someone").tr(),
                               onPressed: () => _signOutCompanion(companion),

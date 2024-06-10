@@ -1,12 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
+import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -14,6 +17,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/LanguageButton.dart';
+import 'package:fstapp/widgets/ScheduleTimeline.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -32,11 +36,11 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   void _showFullScreenDialog(
-      BuildContext context,
-      String name,
-      String eventName,
-      String id,
-      ) {
+    BuildContext context,
+    String name,
+    String eventName,
+    String id,
+  ) {
     final ScreenshotController screenshotController = ScreenshotController();
 
     showDialog(
@@ -92,7 +96,8 @@ class _UserPageState extends State<UserPage> {
                     const SizedBox(height: 20),
                     Text(
                       "[$eventName]",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
                     QrImageView(
@@ -123,7 +128,6 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-
     List<Widget> actions = [const LanguageButton()];
     if (AppConfig.showPWAInstallOption && PWAInstall().installPromptEnabled) {
       actions.add(ButtonsHelper.pwaInstallButton());
@@ -149,13 +153,19 @@ class _UserPageState extends State<UserPage> {
                   height: 15,
                 ),
                 Visibility(
-                  visible: DataService.globalSettingsModel!.isEnabledEntryCode ?? false,
+                  visible:
+                      DataService.globalSettingsModel!.isEnabledEntryCode ??
+                          false,
                   child: Column(
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: ButtonsHelper.buildQRCodeButton(
-                          onPressed: () => _showFullScreenDialog(context, userData!.name!, AppConfig.appName, userData!.id!),
+                          onPressed: () => _showFullScreenDialog(
+                              context,
+                              userData!.name!,
+                              AppConfig.appName,
+                              userData!.id!),
                           label: "Show my code".tr(),
                         ),
                       ),
@@ -164,7 +174,8 @@ class _UserPageState extends State<UserPage> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                            border: Border(bottom: BorderSide(color: Colors.grey[300]!)),
+                            border: Border(
+                                bottom: BorderSide(color: Colors.grey[300]!)),
                           ),
                           child: ListView.builder(
                             shrinkWrap: true,
@@ -180,24 +191,94 @@ class _UserPageState extends State<UserPage> {
                                 );
                               }
 
-                              final companion = userData!.companions![index - 1];
+                              final companion =
+                                  userData!.companions![index - 1];
 
-                              return Column(
-                                children: [
-                                  const SizedBox(height: 10),
-                                  ListTile(
-                                    title: Text(companion.name),
-                                    trailing: ButtonsHelper.buildQRCodeButton(
-                                      onPressed: () => _showFullScreenDialog(
-                                        context,
-                                        companion.name,
-                                        AppConfig.appName,
-                                        companion.id,
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 10),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: bigButtonColor,
+                                        // Match the background color
+                                        borderRadius: BorderRadius.circular(
+                                            12), // Optional: Rounded corners
                                       ),
-                                      label: "Show Code".tr(),
+                                      child: ExpansionTile(
+                                        //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
+                                        shape: const Border(),
+                                        title: Text(companion.name, style: const TextStyle(
+                                            fontWeight: FontWeight.bold),),
+                                        subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
+                                            style: TextStyle(
+                                                color: Colors.grey[700]!,
+                                            fontSize: 13)),
+                                        trailing:
+                                            ButtonsHelper.buildQRCodeButton(
+                                          onPressed: () =>
+                                              _showFullScreenDialog(
+                                            context,
+                                            companion.name,
+                                            AppConfig.appName,
+                                            companion.id,
+                                          ),
+                                          label: "Show Code".tr(),
+                                        ),
+                                        expandedCrossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          SizedBox.fromSize(size: const Size.fromHeight(36)),
+                                          ConstrainedBox(
+                                            constraints: const BoxConstraints(
+                                              maxWidth: 600,
+                                            ),
+                                              child: ScheduleTimeline(
+                                                  events: companion.dots,
+                                                  onEventPressed: (eventId) async {
+                                                    await RouterService.navigateOccasion(
+                                                        context,
+                                                        "${EventPage.ROUTE}/$eventId",
+                                                        extra:
+                                                        eventId);
+                                                    await loadData();
+                                                  },
+                                                  splitByDay: true,
+                                                  nodePosition: 0.3,
+                                                  emptyContent: Center(child: Text("Companion's events will appear here.".tr()),),)),
+                                          SizedBox.fromSize(size: const Size.fromHeight(48)),
+                                          Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  var answer = await DialogHelper.showConfirmationDialogAsync(
+                                                      context,
+                                                      "Delete companion".tr(),
+                                                      "By deleting your companion you will also sign him/her out of all registered sessions."
+                                                          .tr());
+                                                  if (!answer) {
+                                                    return;
+                                                  }
+                                                  await CompanionHelper.delete(companion);
+                                                  await loadData();
+                                                },
+                                                child: const Text(
+                                                  "Delete companion",
+                                                  style: TextStyle(
+                                                      color: Colors.black), // Set the text color to black
+                                                ).tr(),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               );
                             },
                           ),
@@ -213,22 +294,28 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Name".tr(), userData?.name ?? ""),
                 buildTextField("Surname".tr(), userData?.surname ?? ""),
                 buildTextField("E-mail".tr(), userData?.email ?? ""),
-                buildTextField(
-                    "Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
+                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
                 buildTextField("Role".tr(), userData?.roleString ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                    const Text("Accommodation").tr(),
-                    Container(
-                      alignment: Alignment.topLeft,
-                      child: TextButton(
-                          onPressed: userData?.accommodationPlace == null ? null : () => RouterService.navigate(context, "${MapPage.ROUTE}/${userData!.accommodationPlace!.id!}"),
-                          child: Text(userData?.accommodationPlace?.title??"Without accommodation".tr(), style: const TextStyle(fontSize: 17))),
-                    )
-                  ],),
+                      const Text("Accommodation").tr(),
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: TextButton(
+                            onPressed: userData?.accommodationPlace == null
+                                ? null
+                                : () => RouterService.navigate(context,
+                                    "${MapPage.ROUTE}/${userData!.accommodationPlace!.id!}"),
+                            child: Text(
+                                userData?.accommodationPlace?.title ??
+                                    "Without accommodation".tr(),
+                                style: const TextStyle(fontSize: 17))),
+                      )
+                    ],
+                  ),
                 ),
                 const SizedBox(
                   height: 16,
@@ -254,27 +341,33 @@ class _UserPageState extends State<UserPage> {
                 Container(
                     alignment: Alignment.topCenter,
                     child: TextButton(
-                        onPressed: () async {
-                          var answer = await DialogHelper.showConfirmationDialogAsync(
-                              context,
-                              "Change Password Instructions".tr(),
-                              "You'll receive an email with a link to reset your password. Do you want to proceed?".tr(),
-                              confirmButtonMessage: "Proceed".tr());
-                          if (answer) {
-                            await DataService.resetPasswordForEmail(userData!.email!)
-                                .then((value) {
-                              ToastHelper.Show("Password reset email has been sent.".tr());
-                              DialogHelper.showInformationDialogAsync(
-                                  context,
-                                  "Change Password Instructions".tr(),
-                                  "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.".tr(namedArgs: {"email":userData!.email!}));
-                            });
-                          }
-                        },
-                        child: Text(
-                          "Change password".tr(),
-                          style: normalTextStyle,
-                        ).tr(),
+                      onPressed: () async {
+                        var answer = await DialogHelper.showConfirmationDialogAsync(
+                            context,
+                            "Change Password Instructions".tr(),
+                            "You'll receive an email with a link to reset your password. Do you want to proceed?"
+                                .tr(),
+                            confirmButtonMessage: "Proceed".tr());
+                        if (answer) {
+                          await DataService.resetPasswordForEmail(
+                                  userData!.email!)
+                              .then((value) {
+                            ToastHelper.Show(
+                                "Password reset email has been sent.".tr());
+                            DialogHelper.showInformationDialogAsync(
+                                context,
+                                "Change Password Instructions".tr(),
+                                "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
+                                    .tr(namedArgs: {
+                                  "email": userData!.email!
+                                }));
+                          });
+                        }
+                      },
+                      child: Text(
+                        "Change password".tr(),
+                        style: normalTextStyle,
+                      ).tr(),
                     )),
                 const SizedBox(
                   height: 8,
@@ -285,7 +378,8 @@ class _UserPageState extends State<UserPage> {
                         onPressed: () => DialogHelper.showInformationDialogAsync(
                             context,
                             "Delete account".tr(),
-                            "Request account deletion by sending email with your credentials to info@festapp.net.".tr()),
+                            "Request account deletion by sending email with your credentials to info@festapp.net."
+                                .tr()),
                         child: Text(
                           "Delete account".tr(),
                           style: normalTextStyle,
@@ -342,6 +436,7 @@ class _UserPageState extends State<UserPage> {
     loadDataOffline();
     var userInfo = await DataService.getFullUserInfo();
     OfflineDataHelper.saveUserInfo(userInfo);
+    addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
     });
@@ -349,9 +444,22 @@ class _UserPageState extends State<UserPage> {
 
   void loadDataOffline() {
     var userInfo = OfflineDataHelper.getUserInfo();
+    addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
     });
+  }
+
+  void addOfflineEventsToCompanions(UserInfoModel? userInfo) {
+    var events = OfflineDataHelper.getAllEvents();
+    userInfo?.companions?.forEach(
+            (c) {
+                for (var ei in c.eventIds) {
+                  var match = events.firstWhereOrNull((e) => e.id == ei);
+                  if (match != null) {c.schedule!.add(match);}
+                }
+                c.dots.addAll(c.schedule!.map((e) => TimeLineItem.forCompanion(e)));
+            });
   }
 }
 

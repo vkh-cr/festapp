@@ -113,7 +113,8 @@ class _EventPageState extends State<EventPage> {
                                 children: [
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          !(_event?.isSignedIn??false),
+                                          !(_event?.isSignedIn??false) &&
+                                          !EventModel.isEventFull(_event),
                                       child: ElevatedButton(
                                           onPressed: () => signIn(),
                                           child: const Text("Sign in").tr())),
@@ -229,18 +230,35 @@ class _EventPageState extends State<EventPage> {
                                     context,
                                     "${MapPage.ROUTE}/${_event!.place!.id}")
                                 .then((value) => loadData(_event!.id!)),
-                            child: Text(
-                              "${"Place".tr()}: ${_event?.place?.title ?? ""}",
-                              style: normalTextStyle,
+                            child: IntrinsicWidth(
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.place),
+                                  SizedBox.fromSize(size: Size(4.0, 4.0)),
+                                  Text(
+                                    "${"Place".tr()}: ${_event?.place?.title ?? ""}",
+                                    style: normalTextStyle,
+                                  )
+                                ],
+                              ),
                             )))),
                 Visibility(
-                    visible: EventModel.canSignIn(_event) &&
+                    visible: EventModel.isEventSupportingSignIn(_event) &&
                         !DataService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
                         "You need to have an account to sign in to the event.",
                         style: TextStyle(color: AppConfig.attentionColor),
+                      ).tr(),
+                    )),
+                Visibility(
+                    visible: EventModel.isEventFull(_event) &&
+                        DataService.isLoggedIn(),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        "This event is fully booked.",
                       ).tr(),
                     )),
                 Visibility(
@@ -372,7 +390,7 @@ class _EventPageState extends State<EventPage> {
   bool showLoginLogoutButton() {
     return DataService.isLoggedIn() &&
         !isLoadingEvent &&
-        EventModel.canSignIn(_event);
+        EventModel.isEventSupportingSignIn(_event);
   }
 
   Future<void> loadData(int id) async {
@@ -478,7 +496,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signInCompanion() async {
-    _companions = await CompanionHelper.getAllCompanions(_event!.id!);
+    _companions = await CompanionHelper.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext context) {

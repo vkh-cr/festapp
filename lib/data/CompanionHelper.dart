@@ -8,9 +8,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class CompanionHelper {
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<CompanionModel>> getAllCompanions(int eventId) async {
+  static Future<List<CompanionModel>> getAllCompanions() async {
     var data = await _supabase
-        .rpc("get_user_companions", params: {"event_id": eventId});
+        .rpc("get_user_companions_data");
     var companions = List<CompanionModel>.from(
         data["data"].map((x) => CompanionModel.fromJson(x)));
     return companions;

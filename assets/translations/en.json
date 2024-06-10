@@ -202,5 +202,8 @@
   "Password Reset Link Sent": "Password Reset Link Sent",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",
+  "Companion's events will appear here.": "Companion's events will appear here.",
+  "Signed in events: {count}": "Signed in events: {count}",
+  "This event is fully booked.": "This event is fully booked.",
   "_":"_"
 }

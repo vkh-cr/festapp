@@ -484,7 +484,7 @@ class TimetableItem {
         model.maxParticipants != null &&
         (!DataService.isLoggedIn() || model.isFull())) {
       return TimetableItemType.nothing;
-    } else if (EventModel.canSignIn(model)) {
+    } else if (EventModel.isEventSupportingSignIn(model)) {
       return TimetableItemType.nothing;
     }
     return TimetableItemType.canSave;

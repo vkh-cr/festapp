@@ -202,5 +202,8 @@
   "Password Reset Link Sent": "Посилання для скидання пароля надіслано",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Посилання для скидання пароля надіслано на {email}. Будь ласка, перевірте свою поштову скриньку та дотримуйтесь інструкцій для скидання пароля.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Майже готово! Ваші облікові дані для входу в додаток були надіслані на вашу електронну пошту {email}. Будь ласка, перевірте свою поштову скриньку, щоб завершити реєстрацію.",
+  "Companion's events will appear here.": "Події компаньйона з'являться тут.",
+  "Signed in events: {count}": "Авторизовані події: {count}",
+  "This event is fully booked.": "Ця подія повністю заброньована.",
   "_": "_"
 }

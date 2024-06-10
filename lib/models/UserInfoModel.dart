@@ -24,6 +24,7 @@ class UserInfoModel {
   String? roleString;
   List<CompanionModel>? companions = [];
   UserInfoModel? companionParent;
+  List<String>? eventIds;
 
   static const String idColumn = "id";
   static const String emailReadonlyColumn = "email_readonly";
@@ -40,6 +41,7 @@ class UserInfoModel {
   static const String roleStringColumn = "roleString";
   static const String userCompanionsColumn = "userCompanions";
   static const String companionParentColumn = "companion_parent";
+  static const String scheduleColumn = "schedule";
 
   static const String userInfoOffline = "user_info";
 
@@ -77,7 +79,8 @@ class UserInfoModel {
      this.occasionUser,
      this.roleString,
      this.companions,
-     this.companionParent
+     this.companionParent,
+     this.eventIds,
   });  
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
@@ -99,6 +102,7 @@ class UserInfoModel {
       roleString: json[roleStringColumn],
       companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
       companionParent: json[companionParentColumn] != null ? UserInfoModel.fromJson(json[companionParentColumn]):null,
+      eventIds: json[scheduleColumn] != null ? List<String>.from(json[scheduleColumn]!.map((s)=>s)) : null,
       sex: json[sexColumn],
       //todo remove
       birthDate: (json.containsKey(birthDateColumn) && json[birthDateColumn]!=null) ? DateTime.parse(json[birthDateColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
