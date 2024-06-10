@@ -209,7 +209,7 @@ class DataService {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
     if(globalSettingsModel!.isEnabledEntryCode??false) {
-      user.companions = await CompanionHelper.getAllCompanions(0);
+      user.companions = await CompanionHelper.getAllCompanions();
     }
 
     return user;

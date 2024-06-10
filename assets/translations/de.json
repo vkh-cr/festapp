@@ -202,6 +202,8 @@
   "Password Reset Link Sent": "Link zum Zurücksetzen des Passworts gesendet",
   "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password.": "Ein Link zum Zurücksetzen des Passworts wurde an {email} gesendet. Bitte überprüfen Sie Ihren Posteingang und folgen Sie den Anweisungen, um Ihr Passwort zurückzusetzen.",
   "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.": "Fast fertig! Ihre Anmeldeinformationen für die App wurden an Ihre E-Mail {email} gesendet. Bitte überprüfen Sie Ihren Posteingang, um die Registrierung abzuschließen.",
-
+  "Companion's events will appear here.": "Die Ereignisse des Begleiters werden hier angezeigt.",
+  "Signed in events: {count}": "Angemeldete Veranstaltungen: {count}",
+  "This event is fully booked.": "Diese Veranstaltung ist ausgebucht.",
   "_": "_"
 }
