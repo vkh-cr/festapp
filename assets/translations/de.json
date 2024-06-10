@@ -184,7 +184,7 @@
   "Delete account": "Konto löschen",
   "Request account deletion by sending email with your credentials to info@festapp.net.": "Fordern Sie die Löschung des Kontos an, indem Sie eine E-Mail mit Ihren Zugangsdaten an info@festapp.net senden.",
   "Delete companion": "Begleiter löschen",
-  "By deleting your companion you will also sign him/her out of all registered sessions.": "Durch das Löschen Ihres Begleiters melden Sie ihn auch von allen registrierten Sitzungen ab.",
+  "By deleting your companion you will also sign him/her out of all signed in sessions.": "Durch das Löschen Ihres Begleiters werden Sie ihn auch von allen angemeldeten Veranstaltungen abmelden.",
   "Companions": "Begleiter",
   "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "Wenn Sie ein Kind, einen Partner oder einen Freund ohne Telefon haben, können Sie ihn als Begleiter anmelden. Sie benötigen ein Festivalband, um die Veranstaltung zu betreten. Die maximale Anzahl an Begleitern beträgt {max_companions}.",
   "Companion Name": "Name des Begleiters",

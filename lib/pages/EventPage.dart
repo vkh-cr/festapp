@@ -234,7 +234,7 @@ class _EventPageState extends State<EventPage> {
                               child: Row(
                                 children: [
                                   const Icon(Icons.place),
-                                  SizedBox.fromSize(size: Size(4.0, 4.0)),
+                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
                                   Text(
                                     "${"Place".tr()}: ${_event?.place?.title ?? ""}",
                                     style: normalTextStyle,
