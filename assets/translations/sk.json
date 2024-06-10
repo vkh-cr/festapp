@@ -206,5 +206,8 @@
   "Signed in events: {count}": "Prihlásené udalosti: {count}",
   "This event is fully booked.": "Táto udalosť je úplne obsadená.",
   "Companion of": "Spoločník od",
+  "Point the camera at the attendee's code for a entry verification.": "Namierte kameru na kód účastníka na overenie vstupu.",
+  "Signed in companions": "Prihlásení spoločníci",
+  "Search Attendees": "Hľadať účastníkov",
   "_": "_"
 }

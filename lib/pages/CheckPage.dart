@@ -1,17 +1,18 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/CompanionModel.dart';
 import 'package:fstapp/models/EventModel.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-enum ScanState {
-  signedIn, notSignedIn, nothing
-}
+enum ScanState { signedIn, notSignedIn, nothing }
 
 class CheckPage extends StatefulWidget {
   static const ROUTE = "check";
@@ -26,8 +27,27 @@ class CheckPage extends StatefulWidget {
 class _CheckPageState extends State<CheckPage> {
   EventModel? _event;
   List<UserInfoModel>? _participants;
+  List<UserInfoModel>? _filteredParticipants;
   UserInfoModel? _scannedUser;
   ScanState _scanState = ScanState.nothing;
+  final TextEditingController _searchController = TextEditingController();
+
+  DraggableScrollableController? draggableController =
+      DraggableScrollableController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_filterParticipants);
+  }
+
+  @override
+  void dispose() {
+    _mobileScannerController.dispose();
+    _searchController.removeListener(_filterParticipants);
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Future<void> didChangeDependencies() async {
@@ -41,76 +61,257 @@ class _CheckPageState extends State<CheckPage> {
       return;
     }
     _event = await DataService.getEvent(eventId);
-    _participants = await DataService.getParticipantsPerEvent(eventId);
-    setState(() => {});
+    List<UserInfoModel> participants =
+        await DataService.getParticipantsPerEvent(eventId);
+
+    // Map participants to their companion parents
+    for (int i = 0; i < participants.length; i++) {
+      var participant = participants[i];
+      if (participant.companionParent != null) {
+        UserInfoModel? parent = participants
+            .firstWhereOrNull((p) => p.id! == participant.companionParent!.id!);
+        if (parent != null) {
+          parent.companions ??= [];
+          parent.companions!.add(CompanionModel(
+              id: participant.id!, name: participant.name!, eventIds: []));
+        }
+      }
+    }
+    _participants = participants;
+    _filteredParticipants = _participants;
+    setState(() {});
   }
 
-  MobileScannerController mobileScannerController = MobileScannerController(
-      formats: [BarcodeFormat.qrCode],
-      detectionSpeed: DetectionSpeed.noDuplicates);
+  void _filterParticipants() {
+    final query = _searchController.text.toLowerCase().withoutDiacriticalMarks;
+    setState(() {
+      _filteredParticipants = _participants?.where((participant) {
+        final fullName = participant.toFullNameString().toLowerCase().withoutDiacriticalMarks;
+        return fullName.contains(query);
+      }).toList();
+    });
+  }
 
+  Widget buildScannedUserDetails() {
+    if (_scannedUser == null) {
+      return const Center(
+        child: Padding(
+            padding: EdgeInsets.fromLTRB(0, 24, 0, 12),
+            child: Text(
+                "Point the camera at the attendee's code for a entry verification.")),
+      );
+    }
+
+    IconData icon;
+    if (_scanState == ScanState.signedIn) {
+      icon = Icons.check_circle;
+    } else if (_scanState == ScanState.notSignedIn) {
+      icon = Icons.cancel;
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                _scannedUser!.toFullNameString(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 5),
+              Icon(icon, color: Colors.black),
+            ],
+          ),
+          if (_scannedUser!.companionParent == null) ...[
+            Text(_scannedUser!.email!),
+            Text(UserInfoModel.sexToLocale(_scannedUser!.sex)),
+            if (_scannedUser!.companions != null) ...[
+              const SizedBox(height: 16),
+              Text("${'Signed in companions'.tr()}:"),
+              ..._scannedUser!.companions!.map((companion) => Row(
+                    children: [
+                      Text(companion.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          )),
+                      const SizedBox(width: 5),
+                      const Icon(Icons.check_circle, color: Colors.black),
+                    ],
+                  )),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+
+  final MobileScannerController _mobileScannerController =
+      MobileScannerController(
+          formats: [BarcodeFormat.qrCode],
+          detectionSpeed: DetectionSpeed.noDuplicates);
+
+  @override
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _scannedUser == null ? null : getResultColor(_scanState),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: AppConfig.color1,
-                  ),
-                  onPressed: () {
-                    RouterService.goBack(context);
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppConfig.color1,
+                      ),
+                      onPressed: () {
+                        RouterService.goBack(context);
+                      },
+                    ),
+                    Expanded(
+                      child: Text(
+                        _event?.title ?? "",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: AppConfig.color1,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              buildScannedUserDetails(), // Add this line
+              Expanded(
+                child: MobileScanner(
+                  fit: BoxFit.fitWidth,
+                  controller: _mobileScannerController,
+                  onDetect: (capture) async {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    var id = barcodes.firstOrNull;
+                    if (id == null) {
+                      return;
+                    }
+                    debugPrint(id.rawValue);
+                    await setupNewId(id.rawValue.toString());
                   },
                 ),
-                Expanded(
-                  child: Text(
-                    _event?.title ?? "",
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppConfig.color1,
+              ),
+            ],
+          ),
+          ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+              },
+            ),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.25,
+              minChildSize: 0.25,
+              maxChildSize: 0.8,
+              controller: draggableController,
+              builder: (context, scrollController) {
+                return GestureDetector(
+                  onVerticalDragUpdate: (details) {
+                    double newSize = draggableController!.size -
+                        details.primaryDelta! / context.size!.height;
+                    draggableController!.jumpTo(newSize.clamp(0.25, 0.8));
+                  },
+                  onVerticalDragEnd: (details) {
+                    var velocityDirection = (-1 * details.primaryVelocity!);
+                    if (velocityDirection != 0) {
+                      double nearestSize =
+                          draggableController!.size * velocityDirection;
+                      draggableController!.animateTo(
+                          nearestSize.clamp(0.25, 0.8),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut);
+                    }
+                  },
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
                     ),
-                    textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 40,
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          child: Container(
+                            height: 6,
+                            width: 60,
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              labelText: "Search Attendees".tr(),
+                              border: const OutlineInputBorder(),
+                              prefixIcon: const Icon(Icons.search),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _filteredParticipants != null
+                              ? ListView.builder(
+                                  controller: scrollController,
+                                  itemCount: _filteredParticipants!.length,
+                                  itemBuilder: (context, index) {
+                                    final participant =
+                                        _filteredParticipants![index];
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: ListTile(
+                                          title: Text(
+                                            participant.toFullNameString(),
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : const Center(
+                                  child: CircularProgressIndicator()),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(12.0),
-            child: Stack(
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 18),
-                    Text("${"Name".tr()}: ${_scannedUser?.toFullNameString() ?? ""}"),
-                    Text("${"Sex".tr()}: ${_scannedUser?.sex == null ? "" : UserInfoModel.sexToLocale(_scannedUser?.sex)}"),
-                    Text("${"E-mail".tr()}: ${_scannedUser?.email ?? ""}"),
-                    const SizedBox(height: 12),
-                  ],
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            child: MobileScanner(
-              fit: BoxFit.fitWidth,
-              controller: mobileScannerController,
-              onDetect: (capture) async {
-                final List<Barcode> barcodes = capture.barcodes;
-                var id = barcodes.firstOrNull;
-                if (id == null) {
-                  return;
-                }
-                debugPrint(id.rawValue);
-                await setupNewId(id.rawValue.toString());
+                );
               },
             ),
           ),

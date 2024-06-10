@@ -206,5 +206,8 @@
   "Signed in events: {count}": "Signed in events: {count}",
   "This event is fully booked.": "This event is fully booked.",
   "Companion of": "Companion of",
+  "Point the camera at the attendee's code for a entry verification.": "Point the camera at the attendee's code for a entry verification.",
+  "Signed in companions": "Signed in companions",
+  "Search Attendees": "Search Attendees",
   "_":"_"
 }
