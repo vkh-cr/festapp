@@ -8,6 +8,7 @@ import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/widgets/Timetable.dart';
+import 'package:fstapp/widgets/TimetableHelper.dart';
 
 import '../models/EventModel.dart';
 
