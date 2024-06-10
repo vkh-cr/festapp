@@ -161,6 +161,8 @@ class _CheckPageState extends State<CheckPage> {
   @override
   @override
   Widget build(BuildContext context) {
+    const minChildSize = 0.25;
+    const maxChildSize = 0.85;
     return Scaffold(
       backgroundColor: _scannedUser == null ? null : getResultColor(_scanState),
       body: Stack(
@@ -220,16 +222,16 @@ class _CheckPageState extends State<CheckPage> {
               },
             ),
             child: DraggableScrollableSheet(
-              initialChildSize: 0.25,
-              minChildSize: 0.25,
-              maxChildSize: 0.8,
+              initialChildSize: minChildSize,
+              minChildSize: minChildSize,
+              maxChildSize: maxChildSize,
               controller: draggableController,
               builder: (context, scrollController) {
                 return GestureDetector(
                   onVerticalDragUpdate: (details) {
                     double newSize = draggableController!.size -
                         details.primaryDelta! / context.size!.height;
-                    draggableController!.jumpTo(newSize.clamp(0.25, 0.8));
+                    draggableController!.jumpTo(newSize.clamp(minChildSize, maxChildSize));
                   },
                   onVerticalDragEnd: (details) {
                     var velocityDirection = (-1 * details.primaryVelocity!);
@@ -237,7 +239,7 @@ class _CheckPageState extends State<CheckPage> {
                       double nearestSize =
                           draggableController!.size * velocityDirection;
                       draggableController!.animateTo(
-                          nearestSize.clamp(0.25, 0.8),
+                          nearestSize.clamp(minChildSize, maxChildSize),
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut);
                     }
