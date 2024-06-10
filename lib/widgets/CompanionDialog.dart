@@ -42,7 +42,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
     var answer = await DialogHelper.showConfirmationDialogAsync(
         context,
         "Delete companion".tr(),
-        "By deleting your companion you will also sign him/her out of all registered sessions."
+        "By deleting your companion you will also sign him/her out of all signed in sessions."
             .tr());
     if (!answer) {
       return;

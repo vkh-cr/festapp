@@ -214,7 +214,7 @@ class _UserPageState extends State<UserPage> {
                                             fontWeight: FontWeight.bold),),
                                         subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
                                             style: TextStyle(
-                                                color: Colors.grey[700]!,
+                                                color: Colors.grey[800]!,
                                             fontSize: 13)),
                                         trailing:
                                             ButtonsHelper.buildQRCodeButton(
@@ -247,7 +247,11 @@ class _UserPageState extends State<UserPage> {
                                                   },
                                                   splitByDay: true,
                                                   nodePosition: 0.3,
-                                                  emptyContent: Center(child: Text("Companion's events will appear here.".tr()),),)),
+                                                  emptyContent: Center(child: Text(
+                                                    "Companion's events will appear here.",
+                                                      style: TextStyle(
+                                                          color: Colors.grey[600]!)
+                                                  ).tr(),),)),
                                           SizedBox.fromSize(size: const Size.fromHeight(48)),
                                           Column(
                                             mainAxisAlignment:
@@ -258,7 +262,7 @@ class _UserPageState extends State<UserPage> {
                                                   var answer = await DialogHelper.showConfirmationDialogAsync(
                                                       context,
                                                       "Delete companion".tr(),
-                                                      "By deleting your companion you will also sign him/her out of all registered sessions."
+                                                      "By deleting your companion you will also sign him/her out of all signed in sessions."
                                                           .tr());
                                                   if (!answer) {
                                                     return;
