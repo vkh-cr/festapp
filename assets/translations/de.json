@@ -206,5 +206,8 @@
   "Signed in events: {count}": "Angemeldete Veranstaltungen: {count}",
   "This event is fully booked.": "Diese Veranstaltung ist ausgebucht.",
   "Companion of": "Begleiter von",
+  "Point the camera at the attendee's code for a entry verification.": "Richten Sie die Kamera auf den Code des Teilnehmers, um den Eintritt zu überprüfen.",
+  "Signed in companions": "Angemeldete Begleiter",
+  "Search Attendees": "Teilnehmer suchen",
   "_": "_"
 }

@@ -206,5 +206,8 @@
   "Signed in events: {count}": "Авторизовані події: {count}",
   "This event is fully booked.": "Ця подія повністю заброньована.",
   "Companion of": "Супутник від",
+  "Point the camera at the attendee's code for a entry verification.": "Наведіть камеру на код учасника для перевірки входу.",
+  "Signed in companions": "Зареєстровані супутники",
+  "Search Attendees": "Пошук учасників",
   "_": "_"
 }
