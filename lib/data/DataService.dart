@@ -51,6 +51,9 @@ class DataService {
     if(response.session!=null){
       return true;
     }
+    if(await tryAuthUser()){
+      return true;
+    }
     return false;
   }
 
