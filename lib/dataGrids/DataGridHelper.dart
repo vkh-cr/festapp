@@ -1,3 +1,5 @@
+import 'package:collection/collection.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/models/PlaceModel.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/services/MapIconService.dart';
@@ -47,7 +49,7 @@ class DataGridHelper
         },
     );}
 
-  static Widget mapIconRenderer(rendererContext, void Function(Function() set) setState) {
+  static Widget mapIconRenderer(rendererContext, void Function(Function() set) setState, List<IconModel> icons) {
     String? value = rendererContext.cell.value;
 
       var iconLink = MapIconHelper.getIconAddress(value);
@@ -63,6 +65,20 @@ class DataGridHelper
         );
         return Row(children: [svgIcon, const SizedBox(width: 12,),Text(value!)],);
       }
+
+      var iconData = icons.firstWhereOrNull((i)=>i.link == value)?.data;
+      if(iconData!=null){
+        var svgIcon = SizedBox(
+          width: 20,
+          height: 20,
+          child: SvgPicture.string(
+            iconData,
+            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          ),
+        );
+        return Row(children: [svgIcon, const SizedBox(width: 12,),Text(value!)],);
+      }
+
       return const Text(PlaceModel.WithouValue);
     }
 

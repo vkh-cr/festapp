@@ -4,6 +4,7 @@ import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/models/OccasionLinkModel.dart';
 import 'package:fstapp/models/OccasionModel.dart';
 import 'package:fstapp/models/OccasionSettingsModel.dart';
@@ -376,6 +377,12 @@ class DataService {
     var data = await _supabase.from(Tb.places.table).select();
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
+    return toReturn;
+  }
+
+  static Future<List<IconModel>> getAllIcons() async {
+    var data = await _supabase.from(Tb.icons.table).select();
+    var toReturn = List<IconModel>.from(data.map((x) => IconModel.fromJson(x)));
     return toReturn;
   }
 
@@ -1474,6 +1481,9 @@ class DataService {
 
     var places = await getAllPlaces();
     OfflineDataHelper.saveAllPlaces(places);
+
+    var icons = await getAllIcons();
+    OfflineDataHelper.saveAllIcons(icons);
 
     var info = await getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(info);

@@ -23,6 +23,7 @@ class Tb {
   static EventRolesTb event_roles = const EventRolesTb();
   static RoleInfoTb role_info = const RoleInfoTb();
   static UserCompanionsTb user_companions = const UserCompanionsTb();
+  static IconsTb icons = const IconsTb();
 }
 class OccasionsTb{
   const OccasionsTb();
@@ -257,4 +258,10 @@ class UserCompanionsTb{
   String get table => "user_companions";
   String get user => "user";
   String get companion => "companion";
+}
+class IconsTb{
+  const IconsTb();
+  String get table => "icons";
+  String get link => "link";
+  String get data => "data";
 }
