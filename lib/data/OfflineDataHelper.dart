@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:fstapp/models/EventModel.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/models/InformationModel.dart';
 import 'package:fstapp/models/NewsModel.dart';
 import 'package:fstapp/models/OccasionSettingsModel.dart';
@@ -83,8 +84,14 @@ class OfflineDataHelper {
   static void saveAllPlaces(List<PlaceModel> toSave) =>
       saveAllOffline(PlaceModel.placesOffline, toSave);
 
+  static void saveAllIcons(List<IconModel> toSave) =>
+      saveAllOffline(IconModel.iconsOffline, toSave);
+
   static List<PlaceModel> getAllPlaces() =>
       getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
+
+  static List<IconModel> getAllIcons() =>
+      getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
 
   static void saveEventDescription(EventModel toSave) =>
       saveOffline(toSave.id!.toString(), toSave, eventsOfflineStorage);

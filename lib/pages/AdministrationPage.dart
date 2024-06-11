@@ -3,6 +3,7 @@ import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/dataGrids/DataGridAction.dart';
 import 'package:fstapp/dataGrids/SingleTableDataGrid.dart';
 import 'package:fstapp/models/ExclusiveGroupModel.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/models/OccasionModel.dart';
 import 'package:fstapp/models/OccasionUserModel.dart';
 import 'package:fstapp/models/PlaceModel.dart';
@@ -39,8 +40,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   List<String> places = [];
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
+  List<IconModel> svgIcons = [];
 
   late TabController _tabController;
+
 
   @override
   Future<void> didChangeDependencies() async {
@@ -59,7 +62,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     await loadPlaces();
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
-
+    svgIcons = await DataService.getAllIcons();
+    mapIcons.addAll(svgIcons.map((i)=>i.link!));
     setState(() {});
   }
 
@@ -415,7 +419,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     title: "Icon".tr(),
                     field: Tb.places.type,
                     type: PlutoColumnType.select(mapIcons),
-                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState, svgIcons),
                   ),
                   PlutoColumn(
                       width: 150,

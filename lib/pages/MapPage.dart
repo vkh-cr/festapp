@@ -4,6 +4,7 @@ import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/services/MapIconService.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -64,6 +65,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  List<IconModel> _icons = [];
   final List<MarkerWithText> _markers = [];
   final List<MarkerWithText> _selectedMarkers = [];
   static MarkerWithText? selectedMarker;
@@ -80,8 +82,6 @@ class _MapPageState extends State<MapPage> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    //todo clean offline access
-    //await RightsHelper.ensureAccessProcedure(context);
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
         : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"],
@@ -104,6 +104,18 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget type2icon(String? placeType) {
+    if(placeType == "accommodation")
+      {
+        placeType = "music_video";
+      }
+    if(placeType == "atm")
+    {
+      placeType = "soup_kitchen";
+    }
+    if(placeType == "coffee")
+    {
+      placeType = "theater_comedy";
+    }
     SvgPicture? fill;
     var iconLink = MapIconHelper.getIconAddress(placeType);
     if (iconLink != null) {
@@ -113,34 +125,70 @@ class _MapPageState extends State<MapPage> {
       );
     }
     if (fill != null) {
-      return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
-        Positioned(
-          top: 7.5,
-          left: 14.5,
-          child: Container(
-              width: 29.0,
-              height: 29.0,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              )),
-        ),
-        Positioned(
-            top: 12,
-            left: 19,
-            width: 19,
-            height: 19,
-            child: Container(alignment: Alignment.center, child: fill))
-      ]);
+      return locationPinOld(fill);
+    }
+    var iconData = _icons.firstWhereOrNull((i)=> i.link == placeType)?.data;
+    if(iconData!=null) {
+      fill = SvgPicture.string(
+        iconData,
+        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+      );
+      return locationPin(fill);
     }
     return const Icon(Icons.location_pin, size: 36, color: AppConfig.mapPinColor);
+  }
+
+  Stack locationPin(SvgPicture fill) {
+    return Stack(children: [
+      const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
+      Positioned(
+        top: 7.5,
+        left: 14.5,
+        child: Container(
+            width: 29.0,
+            height: 29.0,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            )),
+      ),
+      Positioned(
+          top: 12,
+          left: 18,
+          width: 21,
+          height: 21,
+          child: Container(alignment: Alignment.center, child: fill))
+    ]);
+  }
+
+  Stack locationPinOld(SvgPicture fill) {
+    return Stack(children: [
+      const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
+      Positioned(
+        top: 7.5,
+        left: 14.5,
+        child: Container(
+            width: 29.0,
+            height: 29.0,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            )),
+      ),
+      Positioned(
+          top: 12,
+          left: 19,
+          width: 19,
+          height: 19,
+          child: Container(alignment: Alignment.center, child: fill))
+    ]);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
     var offlinePlaces = OfflineDataHelper.getAllPlaces();
+    _icons = OfflineDataHelper.getAllIcons();
     offlinePlaces.sortPlaces();
     if (placeId != null && !loadOtherGroups) {
       var place = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
@@ -156,6 +204,7 @@ class _MapPageState extends State<MapPage> {
     }
     addPlacesToMap(mapOfflinePlaces);
 
+    _icons = await DataService.getAllIcons();
     List<PlaceModel> mapPlaces = [];
     if (placeId != null && !loadOtherGroups) {
       var place = await DataService.getPlace(placeId);
