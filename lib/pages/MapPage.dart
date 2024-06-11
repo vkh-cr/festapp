@@ -104,18 +104,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   Widget type2icon(String? placeType) {
-    if(placeType == "accommodation")
-      {
-        placeType = "music_video";
-      }
-    if(placeType == "atm")
-    {
-      placeType = "soup_kitchen";
-    }
-    if(placeType == "coffee")
-    {
-      placeType = "theater_comedy";
-    }
     SvgPicture? fill;
     var iconLink = MapIconHelper.getIconAddress(placeType);
     if (iconLink != null) {
