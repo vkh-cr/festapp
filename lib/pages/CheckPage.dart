@@ -237,14 +237,12 @@ class _CheckPageState extends State<CheckPage> {
                     },
                     onVerticalDragEnd: (details) {
                       var velocityDirection = (-1 * details.primaryVelocity!);
-                      if (velocityDirection != 0) {
                         double nearestSize =
                             draggableController!.size * velocityDirection;
                         draggableController!.animateTo(
                             nearestSize.clamp(minChildSize, maxChildSize),
                             duration: const Duration(milliseconds: 200),
                             curve: Curves.easeInOut);
-                      }
                     },
                     child: Container(
                       decoration: const BoxDecoration(
