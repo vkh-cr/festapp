@@ -2,7 +2,7 @@
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "",
+    "package_name": "fstapp.slunovratopava",
     "sha256_cert_fingerprints":
     [""]
   }

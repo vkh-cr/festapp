@@ -29,7 +29,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="" />
+                <data android:scheme="http" android:host="app.festivalslunovrat.cz" />
                 <data android:scheme="https" />
             </intent-filter>
         </activity>
