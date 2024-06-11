@@ -2,14 +2,11 @@ import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
-import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/NewsModel.dart';
 import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
@@ -30,9 +27,10 @@ class _NewsPageState extends State<NewsPage> {
         var data = value as Map<String, dynamic>;
         List<String>? to = data["to"];
         String message = data["content"]!;
-        String heading = data["heading"]!;
+        var heading = data["heading"];
+        String headingDefault = data["heading_default"]!;
         bool withNotification = data["with_notification"]!;
-        await DataService.insertNewsMessage(heading, message, withNotification, to);
+        await DataService.insertNewsMessage(heading, headingDefault, message, withNotification, to);
         await loadNewsMessages();
       }
     });

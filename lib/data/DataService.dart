@@ -1249,9 +1249,10 @@ class DataService {
     ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String heading, String message, bool withNotification, List<String>? to) async {
+  static insertNewsMessage(String? heading, String headingDefault, String message, bool withNotification, List<String>? to) async {
+    var messageForNews = heading !=null ? "<h4>$heading</h4><br>$message" : message;
     await _supabase.from(Tb.news.table).insert(
-        {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
+        {Tb.news.message: messageForNews, Tb.news.created_by: currentUserId()}).select();
 
     if(withNotification)
     {
@@ -1271,7 +1272,7 @@ class DataService {
           {
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: heading
+            Tb.log_notifications.heading: heading??headingDefault
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());
