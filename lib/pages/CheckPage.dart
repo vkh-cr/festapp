@@ -166,159 +166,161 @@ class _CheckPageState extends State<CheckPage> {
     const maxChildSize = 0.88;
     return Scaffold(
       backgroundColor: _scannedUser == null ? Colors.grey[200] : getResultColor(_scanState),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppConfig.color1,
-                      ),
-                      onPressed: () {
-                        RouterService.goBack(context);
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        _event?.toString() ?? "",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(
+                          Icons.arrow_back,
                           color: AppConfig.color1,
                         ),
-                        textAlign: TextAlign.center,
+                        onPressed: () {
+                          RouterService.goBack(context);
+                        },
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: Text(
+                          _event?.toString() ?? "",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppConfig.color1,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              buildScannedUserDetails(), // Add this line
-              Expanded(
-                child: MobileScanner(
-                  fit: BoxFit.fitWidth,
-                  controller: _mobileScannerController,
-                  onDetect: (capture) async {
-                    final List<Barcode> barcodes = capture.barcodes;
-                    var id = barcodes.firstOrNull;
-                    if (id == null) {
-                      return;
-                    }
-                    debugPrint(id.rawValue);
-                    await setupNewId(id.rawValue.toString());
-                  },
+                buildScannedUserDetails(), // Add this line
+                Expanded(
+                  child: MobileScanner(
+                    fit: BoxFit.fitWidth,
+                    controller: _mobileScannerController,
+                    onDetect: (capture) async {
+                      final List<Barcode> barcodes = capture.barcodes;
+                      var id = barcodes.firstOrNull;
+                      if (id == null) {
+                        return;
+                      }
+                      debugPrint(id.rawValue);
+                      await setupNewId(id.rawValue.toString());
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-          ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(
-              dragDevices: {
-                PointerDeviceKind.touch,
-                PointerDeviceKind.mouse,
-              },
+              ],
             ),
-            child: DraggableScrollableSheet(
-              initialChildSize: minChildSize,
-              minChildSize: minChildSize,
-              maxChildSize: maxChildSize,
-              controller: draggableController,
-              builder: (context, scrollController) {
-                return GestureDetector(
-                  onVerticalDragUpdate: (details) {
-                    double newSize = draggableController!.size -
-                        details.primaryDelta! / context.size!.height;
-                    draggableController!.jumpTo(newSize.clamp(minChildSize, maxChildSize));
-                  },
-                  onVerticalDragEnd: (details) {
-                    var velocityDirection = (-1 * details.primaryVelocity!);
-                    if (velocityDirection != 0) {
-                      double nearestSize =
-                          draggableController!.size * velocityDirection;
-                      draggableController!.animateTo(
-                          nearestSize.clamp(minChildSize, maxChildSize),
-                          duration: const Duration(milliseconds: 200),
-                          curve: Curves.easeInOut);
-                    }
-                  },
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(16)),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 40,
-                          width: double.infinity,
-                          alignment: Alignment.center,
-                          child: Container(
-                            height: 6,
-                            width: 60,
-                            margin: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[300],
-                              borderRadius: BorderRadius.circular(3),
+            ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                },
+              ),
+              child: DraggableScrollableSheet(
+                initialChildSize: minChildSize,
+                minChildSize: minChildSize,
+                maxChildSize: maxChildSize,
+                controller: draggableController,
+                builder: (context, scrollController) {
+                  return GestureDetector(
+                    onVerticalDragUpdate: (details) {
+                      double newSize = draggableController!.size -
+                          details.primaryDelta! / context.size!.height;
+                      draggableController!.jumpTo(newSize.clamp(minChildSize, maxChildSize));
+                    },
+                    onVerticalDragEnd: (details) {
+                      var velocityDirection = (-1 * details.primaryVelocity!);
+                      if (velocityDirection != 0) {
+                        double nearestSize =
+                            draggableController!.size * velocityDirection;
+                        draggableController!.animateTo(
+                            nearestSize.clamp(minChildSize, maxChildSize),
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeInOut);
+                      }
+                    },
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(16)),
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            height: 40,
+                            width: double.infinity,
+                            alignment: Alignment.center,
+                            child: Container(
+                              height: 6,
+                              width: 60,
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(3),
+                              ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: _searchController,
-                            decoration: InputDecoration(
-                              labelText: "Search Attendees".tr(),
-                              border: const OutlineInputBorder(),
-                              prefixIcon: const Icon(Icons.search),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                labelText: "Search Attendees".tr(),
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.search),
+                              ),
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: _filteredParticipants != null
-                              ? ListView.builder(
-                                  controller: scrollController,
-                                  itemCount: _filteredParticipants!.length,
-                                  itemBuilder: (context, index) {
-                                    final participant =
-                                        _filteredParticipants![index];
-                                    return Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                        ),
-                                        child: ListTile(
-                                          title: Text(
-                                            participant.toFullNameString(),
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: _filteredParticipants != null
+                                ? ListView.builder(
+                                    controller: scrollController,
+                                    itemCount: _filteredParticipants!.length,
+                                    itemBuilder: (context, index) {
+                                      final participant =
+                                          _filteredParticipants![index];
+                                      return Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 10, vertical: 5),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                          child: ListTile(
+                                            title: Text(
+                                              participant.toFullNameString(),
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : const Center(
-                                  child: CircularProgressIndicator()),
-                        ),
-                      ],
+                                      );
+                                    },
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator()),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
