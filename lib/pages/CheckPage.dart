@@ -77,6 +77,7 @@ class _CheckPageState extends State<CheckPage> {
         }
       }
     }
+    _event!.currentParticipants = participants.length;
     _participants = participants;
     _filteredParticipants = _participants;
     setState(() {});
@@ -162,9 +163,9 @@ class _CheckPageState extends State<CheckPage> {
   @override
   Widget build(BuildContext context) {
     const minChildSize = 0.25;
-    const maxChildSize = 0.85;
+    const maxChildSize = 0.88;
     return Scaffold(
-      backgroundColor: _scannedUser == null ? null : getResultColor(_scanState),
+      backgroundColor: _scannedUser == null ? Colors.grey[200] : getResultColor(_scanState),
       body: Stack(
         children: [
           Column(
@@ -184,7 +185,7 @@ class _CheckPageState extends State<CheckPage> {
                     ),
                     Expanded(
                       child: Text(
-                        _event?.title ?? "",
+                        _event?.toString() ?? "",
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -240,7 +241,7 @@ class _CheckPageState extends State<CheckPage> {
                           draggableController!.size * velocityDirection;
                       draggableController!.animateTo(
                           nearestSize.clamp(minChildSize, maxChildSize),
-                          duration: const Duration(milliseconds: 300),
+                          duration: const Duration(milliseconds: 200),
                           curve: Curves.easeInOut);
                     }
                   },
