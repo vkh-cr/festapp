@@ -1,43 +1,49 @@
 import 'dart:async';
 
-import 'package:fstapp/RouterService.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:fstapp/RouterService.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
-  HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode, super.textStyle});
+  HtmlWithAppLinksWidget(this.context, super.html,
+      {required ColumnMode renderMode, super.textStyle});
 
   final BuildContext context;
-@override
-  FutureOr<bool> Function(String p1)? get onTapUrl {
-  return (String url) {
-    if(url.startsWith("navigate:"))
-    {
-      var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      RouterService.navigateOccasion(context, navigateTo);
-      return true;
-    }
-    super.onTapUrl?.call(url);
-    return false;
-  };
 
-}
+  @override
+  FutureOr<bool> Function(String p1)? get onTapUrl {
+    return (String url) {
+      if (url.startsWith("navigate:")) {
+        var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
+        RouterService.navigateOccasion(context, navigateTo);
+        return true;
+      }
+      super.onTapUrl?.call(url);
+      return false;
+    };
+  }
+
+  @override
+  void Function(ImageMetadata p1)? get onTapImage {
+    return (ImageMetadata imgData) {
+      return;
+    };
+  }
 }
 
 class HtmlView extends StatefulWidget {
   final String html;
   double? fontSize;
 
-  HtmlView({super.key, required this.html, this.fontSize = 18 });
+  HtmlView({super.key, required this.html, this.fontSize = 18});
 
   @override
   _HtmlViewState createState() => _HtmlViewState();
 }
 
 class _HtmlViewState extends State<HtmlView> {
-
   _HtmlViewState();
+
   @override
   Widget build(BuildContext context) {
     return HtmlWithAppLinksWidget(
@@ -50,10 +56,10 @@ class _HtmlViewState extends State<HtmlView> {
       renderMode: RenderMode.column,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
-      fontFamily: "Futura",
-      color: Colors.black,
-      inherit: false,
+        fontFamily: "Futura",
+        color: Colors.black,
+        inherit: false,
       ),
     );
-    }
   }
+}

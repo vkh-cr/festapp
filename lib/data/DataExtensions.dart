@@ -50,3 +50,27 @@ extension InfoExtensions on List<InformationModel> {
     return where((element) => element.type == type).toList();
   }
 }
+
+extension DiacriticsAwareString on String {
+  static const diacritics =
+      'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
+  static const nonDiacritics =
+      'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
+
+  String get withoutDiacriticalMarks => this.splitMapJoin('',
+      onNonMatch: (char) => char.isNotEmpty && diacritics.contains(char)
+          ? nonDiacritics[diacritics.indexOf(char)]
+          : char);
+}
+extension removeHtmlBackgroundColor on String {
+  static const diacritics =
+      'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
+  static const nonDiacritics =
+      'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
+
+  String removeBackgroundColor() {
+    RegExp regExp = RegExp(r'background-color\s*:\s*[^;]+;?\s*', caseSensitive: false);
+    String cleanedHtmlString = replaceAll(regExp, '');
+    return cleanedHtmlString;
+  }
+}

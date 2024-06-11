@@ -4,6 +4,7 @@ import 'package:fstapp/data/CompanionHelper.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/models/IconModel.dart';
 import 'package:fstapp/models/OccasionLinkModel.dart';
 import 'package:fstapp/models/OccasionModel.dart';
 import 'package:fstapp/models/OccasionSettingsModel.dart';
@@ -376,6 +377,12 @@ class DataService {
     var data = await _supabase.from(Tb.places.table).select();
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
+    return toReturn;
+  }
+
+  static Future<List<IconModel>> getAllIcons() async {
+    var data = await _supabase.from(Tb.icons.table).select();
+    var toReturn = List<IconModel>.from(data.map((x) => IconModel.fromJson(x)));
     return toReturn;
   }
 
@@ -1242,9 +1249,10 @@ class DataService {
     ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String heading, String message, bool withNotification, List<String>? to) async {
+  static insertNewsMessage(String? heading, String headingDefault, String message, bool withNotification, List<String>? to) async {
+    var messageForNews = heading !=null ? "<h4>$heading</h4><br>$message" : message;
     await _supabase.from(Tb.news.table).insert(
-        {Tb.news.message: message, Tb.news.created_by: currentUserId()}).select();
+        {Tb.news.message: messageForNews, Tb.news.created_by: currentUserId()}).select();
 
     if(withNotification)
     {
@@ -1264,7 +1272,7 @@ class DataService {
           {
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: heading
+            Tb.log_notifications.heading: heading??headingDefault
           }).select();
 
       ToastHelper.Show("Message has been sent.".tr());
@@ -1474,6 +1482,9 @@ class DataService {
 
     var places = await getAllPlaces();
     OfflineDataHelper.saveAllPlaces(places);
+
+    var icons = await getAllIcons();
+    OfflineDataHelper.saveAllIcons(icons);
 
     var info = await getAllActiveInformation();
     OfflineDataHelper.saveAllInfo(info);

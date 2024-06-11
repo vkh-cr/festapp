@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
@@ -21,11 +23,18 @@ class _NewsFormPageState extends State<NewsFormPage> {
   late QuillEditorController _controller;
   final bool _sendWithNotification = true;
   final FocusNode _toFocusNode = FocusNode();
+  UserInfoModel? _currentUser;
 
   @override
   void initState() {
     super.initState();
     _controller = QuillEditorController();
+  }
+
+  @override
+  void didChangeDependencies() async {
+    _currentUser = await DataService.getCurrentUserInfo();
+    setState(() {});
   }
 
   @override
@@ -41,13 +50,15 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   void _sendPressed() async {
       var htmlContent = await _controller.getText();
+      htmlContent = htmlContent.removeBackgroundColor();
       if (htmlContent.isNotEmpty) {
 
-        var currentUser = await DataService.getCurrentUserInfo();
+
         var toReturn = {
           "to": null,
           "content": htmlContent,
-          "heading": currentUser.name,
+          "heading": _formKey.currentState?.fields["heading"]!.value,
+          "heading_default": _currentUser!.name,
           "with_notification": _formKey.currentState?.fields["with_notification"]!.value
         };
         Navigator.pop(context, toReturn);
@@ -79,21 +90,15 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        // FormBuilderTextField(
-                        //   name: 'to',
-                        //   focusNode: _toFocusNode,
-                        //   decoration: const InputDecoration(
-                        //     labelText: 'To',
-                        //   ),
-                        // ),
-                        // if (_isToFieldFocused)
-                        //   const Padding(
-                        //     padding: EdgeInsets.symmetric(vertical: 8.0),
-                        //     child: Text(
-                        //       "If the 'To' field remains empty, the message will be sent to all.",
-                        //       style: TextStyle(color: Colors.grey),
-                        //     ),
-                        //   ),
+                        FormBuilderTextField(
+                          name: "heading",
+                          focusNode: _toFocusNode,
+                          decoration: InputDecoration(
+                            labelText: "Heading".tr(),
+                            hintText: _currentUser?.name,
+                            floatingLabelBehavior: FloatingLabelBehavior.always
+                          ),
+                        ),
                         FormBuilderCheckbox(
                           name: 'with_notification',
                           initialValue: _sendWithNotification,
