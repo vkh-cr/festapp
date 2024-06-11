@@ -29,12 +29,13 @@ class _MySchedulePageState extends State<MySchedulePage> {
   Future<void> loadData() async {
     loadDataOffline();
 
-    DataService.updateEvents(_events, true).whenComplete(() async {
+    await DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
       _dots.addAll(_events.map((e) => TimeLineItem.fromEventModelAsChild(e)));
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
     });
+    setState(() {});
   }
 
   void loadDataOffline() {
