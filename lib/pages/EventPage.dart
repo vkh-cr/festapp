@@ -233,7 +233,9 @@ class _EventPageState extends State<EventPage> {
                             child: IntrinsicWidth(
                               child: Row(
                                 children: [
-                                  const Icon(Icons.place),
+                                  const Padding(
+                                    padding: EdgeInsets.fromLTRB(0, 0, 0, 2),
+                                      child: Icon(Icons.place)),
                                   SizedBox.fromSize(size: const Size(4.0, 4.0)),
                                   Text(
                                     "${"Place".tr()}: ${_event?.place?.title ?? ""}",
