@@ -10,6 +10,7 @@ import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/CompanionModel.dart';
 import 'package:fstapp/models/EventModel.dart';
 import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/services/VibrateService.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 enum ScanState { signedIn, notSignedIn, nothing }
@@ -332,12 +333,14 @@ class _CheckPageState extends State<CheckPage> {
     if (_scannedUser != null) {
       _scanState = ScanState.signedIn;
       setState(() {});
+      VibrateService.vibrateOk();
       return;
     }
 
     _scannedUser ??= await DataService.getUserInfo(newUserId);
     if (_scannedUser != null) {
       _scanState = ScanState.notSignedIn;
+      VibrateService.vibrateNotOk();
       setState(() {});
       return;
     }
