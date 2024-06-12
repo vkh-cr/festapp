@@ -218,11 +218,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         onPointerSignal: (PointerSignalEvent event) {
           if (event is PointerScrollEvent) {
             _animationController.stop();
-            // var xOffset = matrixTimetable.row0.a;
-            // var yOffset = matrixTimetable.row1.a;
+           var xOffset = matrixTimetable.row0.a;
+           var yOffset = matrixTimetable.row1.a;
 
-            var constrained = constrainDeltaOffset(-event.scrollDelta.dx, -event.scrollDelta.dy);
-            setOffset(constrained, currentScale);
+            var constrainedDelta = constrainNewOffset(xOffset-event.scrollDelta.dx, yOffset-event.scrollDelta.dy, currentScale);
+            setOffset(constrainedDelta, currentScale);
 
             // animationY = Tween<double>(begin: yOffset, end: constrained.dy).animate(
             //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
@@ -382,37 +382,27 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
   }
 
-  Offset constrainDeltaOffset(double deltaX, double deltaY) {
-    var xOffset = matrixTimetable.row0.a + deltaX;
-    var yOffset = matrixTimetable.row1.a + deltaY;
-    if (xOffset > 0) {
-      xOffset = 0;
-    }
+  Offset constrainNewOffset(double newX, double newY, double scale) {
+    double xOffset = newX > 0 ? 0 : newX;
+    double yOffset = newY > 0 ? 0 : newY;
 
-    if (yOffset > 0) {
-      yOffset = 0;
-    }
-
-    var timetableHeight = getTimetableHeight() * currentScale;
-    var timetableWidth = getTimetableWidth() * currentScale;
+    var timetableHeight = getTimetableHeight() * scale;
+    var timetableWidth = getTimetableWidth() * scale;
     var windowHeight = constraints.maxHeight;
     var windowWidth = constraints.maxWidth;
 
     if (timetableHeight <= windowHeight) {
       yOffset = 0;
+    } else if (yOffset + timetableHeight < windowHeight) {
+      yOffset = windowHeight - timetableHeight;
     }
 
     if (timetableWidth <= windowWidth) {
       xOffset = 0;
-    } else if (xOffset + timetableWidth - windowWidth < 0) {
+    } else if (xOffset + timetableWidth < windowWidth) {
       xOffset = windowWidth - timetableWidth;
     }
 
-    if (timetableHeight > windowHeight) {
-      if (yOffset + timetableHeight - windowHeight < 0) {
-        yOffset = windowHeight - timetableHeight;
-      }
-    }
     return Offset(xOffset, yOffset);
   }
 
@@ -433,12 +423,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void onScaleEnded(ScaleEndDetails details) {
+    var velocity = details.velocity;
+    if(velocity.pixelsPerSecond.dx == 0 && velocity.pixelsPerSecond.dy == 0){
+      return;
+    }
     var xOffset = matrixTimetable.row0.a;
     var yOffset = matrixTimetable.row1.a;
-    var velocity = details.velocity;
 
-    var offset = constrainDeltaOffset(
-        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, velocity.pixelsPerSecond.dy*velocityAnimationSpeed);
+    var offset = constrainNewOffset(xOffset+
+        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, yOffset+velocity.pixelsPerSecond.dy*velocityAnimationSpeed, currentScale);
     animationY = Tween<double>(begin: yOffset, end: offset.dy).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
     animationX = Tween<double>(begin: xOffset, end: offset.dx).animate(
@@ -453,9 +446,26 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     _animationController.stop();
   }
 
-  void onScaleUpdate(ScaleUpdateDetails details){
-    var offset = constrainDeltaOffset(details.focalPointDelta.dx, details.focalPointDelta.dy);
-    currentScale = ((1-((1-details.scale) * scaleSlowDownPercentage)) * currentScale).clamp(minScale, 1.0);
-    setOffset(offset, currentScale);
+  void onScaleUpdate(ScaleUpdateDetails details) {
+    Offset countedOffset = details.focalPointDelta;
+    Offset localPoint = details.localFocalPoint;
+    double scaleDelta = details.scale;
+    Offset currentTimetableOffset = Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
+
+    // Compute new scale
+    double newScale = ((1 - ((1 - scaleDelta) * scaleSlowDownPercentage)) * currentScale).clamp(minScale, 1.0);
+
+    // Calculate focal point relative to the timetable
+    Offset focalPoint = (localPoint - currentTimetableOffset) / currentScale;
+
+    // Compute the new offset to keep the focal point stable
+    Offset newOffset = localPoint - focalPoint * newScale + countedOffset;
+
+    // Constrain the new offset to ensure the timetable stays within bounds
+    Offset constrainedOffset = constrainNewOffset(newOffset.dx, newOffset.dy, newScale);
+
+    // Update the current scale and offset
+    currentScale = newScale;
+    setOffset(constrainedOffset, currentScale);
   }
 }
