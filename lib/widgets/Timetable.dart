@@ -42,6 +42,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   final double velocityAnimationSpeed = 0.5;
   final double globalMinimalScale = 0.2;
   final double globalMaximalScale = 1.0;
+  final double scaleSlowDownPercentage = 0.05;
 
   double currentScale = 1.0;
   double minScale = 1.0;
@@ -454,7 +455,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   void onScaleUpdate(ScaleUpdateDetails details){
     var offset = constrainDeltaOffset(details.focalPointDelta.dx, details.focalPointDelta.dy);
-    currentScale = (details.scale * currentScale).clamp(minScale, 1.0);
+    currentScale = ((1-((1-details.scale) * scaleSlowDownPercentage)) * currentScale).clamp(minScale, 1.0);
     setOffset(offset, currentScale);
   }
 }
