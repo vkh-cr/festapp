@@ -1,8 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/models/EventModel.dart';
-import 'package:fstapp/models/Tb.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/TimetableHelper.dart';
@@ -40,8 +40,12 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   final double itemHeight = 56;
   final int animationDuration = 1000;
   final double velocityAnimationSpeed = 0.5;
+  final double globalMinimalScale = 0.2;
+  final double globalMaximalScale = 1.0;
+  final double scaleSlowDownPercentage = 0.05;
 
-  Offset offset = const Offset(0, 0);
+  double currentScale = 1.0;
+  double minScale = 1.0;
 
   late TransformationController transformationController;
   late BoxConstraints constraints;
@@ -61,7 +65,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     if(timetableController!=null){
       timetableController.reset = () {
         _animationController.stop();
-        setOffset(const Offset(0,0));
+        setOffset(const Offset(0,0), currentScale);
       };
     }
   }
@@ -133,6 +137,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints cConstraints) {
       constraints = cConstraints;
+
+      updateScaleLimits();
 
       List<Widget> allItems = buildTimeline();
 
@@ -212,11 +218,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         onPointerSignal: (PointerSignalEvent event) {
           if (event is PointerScrollEvent) {
             _animationController.stop();
-            // var xOffset = matrixTimetable.row0.a;
-            // var yOffset = matrixTimetable.row1.a;
+           var xOffset = matrixTimetable.row0.a;
+           var yOffset = matrixTimetable.row1.a;
 
-            var constrained = constrainDeltaOffset(-event.scrollDelta.dx, -event.scrollDelta.dy);
-            setOffset(constrained);
+            var constrainedDelta = constrainNewOffset(xOffset-event.scrollDelta.dx, yOffset-event.scrollDelta.dy, currentScale);
+            setOffset(constrainedDelta, currentScale);
 
             // animationY = Tween<double>(begin: yOffset, end: constrained.dy).animate(
             //     CurvedAnimation(parent: _animationController, curve: Curves.easeOut));
@@ -232,9 +238,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
           children: [
             GestureDetector(
                 behavior: HitTestBehavior.translucent,
-                onPanStart: panStarted,
-                onPanUpdate: enforceConstraints,
-                onPanEnd: panEnded,
+                onScaleEnd: onScaleEnded,
+                onScaleStart: onScaleStarted,
+                onScaleUpdate: onScaleUpdate,
                 child: SingleChildScrollView(
                     physics: const NeverScrollableScrollPhysics(),
                     scrollDirection: Axis.horizontal,
@@ -248,6 +254,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ),
       );
     });
+  }
+
+  void updateScaleLimits() {
+    minScale = (constraints.maxHeight / getTimetableHeight()).clamp(globalMinimalScale, globalMaximalScale);
+    currentScale = currentScale.clamp(minScale, 1.0);
   }
 
   //support max 1 day skipping
@@ -371,60 +382,56 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
   }
 
-  Offset constrainDeltaOffset(double deltaX, double deltaY) {
-    var xOffset = matrixTimetable.row0.a + deltaX;
-    var yOffset = matrixTimetable.row1.a + deltaY;
-    if (xOffset > 0) {
-      xOffset = 0;
-    }
+  Offset constrainNewOffset(double newX, double newY, double scale) {
+    double xOffset = newX > 0 ? 0 : newX;
+    double yOffset = newY > 0 ? 0 : newY;
 
-    if (yOffset > 0) {
-      yOffset = 0;
-    }
-
-    var timetableHeight = getTimetableHeight();
-    var timetableWidth = getTimetableWidth();
+    var timetableHeight = getTimetableHeight() * scale;
+    var timetableWidth = getTimetableWidth() * scale;
     var windowHeight = constraints.maxHeight;
     var windowWidth = constraints.maxWidth;
 
-    if (timetableHeight < windowHeight) {
+    if (timetableHeight <= windowHeight) {
       yOffset = 0;
+    } else if (yOffset + timetableHeight < windowHeight) {
+      yOffset = windowHeight - timetableHeight;
     }
 
-    if (timetableWidth < windowWidth) {
+    if (timetableWidth <= windowWidth) {
       xOffset = 0;
-    } else if (xOffset + timetableWidth - windowWidth < 0) {
+    } else if (xOffset + timetableWidth < windowWidth) {
       xOffset = windowWidth - timetableWidth;
     }
 
-    if (timetableHeight > windowHeight) {
-      if (yOffset + timetableHeight - windowHeight < 0) {
-        yOffset = windowHeight - timetableHeight;
-      }
-    }
     return Offset(xOffset, yOffset);
   }
 
-  void enforceConstraints(DragUpdateDetails details) {
-    var offset = constrainDeltaOffset(details.delta.dx, details.delta.dy);
-    setOffset(offset);
-  }
-
-  void setOffset(Offset offset) {
+  void setOffset(Offset offset, double newScale) {
     setState(() {
-      matrixPlaceTitles.setTranslationRaw(0, offset.dy, 0);
-      matrixTimeline.setTranslationRaw(offset.dx, 0, 0);
-      matrixTimetable.setTranslationRaw(offset.dx, offset.dy, 0);
+      matrixTimetable = Matrix4.identity()
+        ..scale(newScale)
+        ..setTranslationRaw(offset.dx, offset.dy, 0);
+
+      matrixPlaceTitles = Matrix4.identity()
+        ..scale(newScale)
+        ..setTranslationRaw(0, offset.dy, 0);
+
+      matrixTimeline = Matrix4.identity()
+        ..scale(newScale)
+        ..setTranslationRaw(offset.dx, 0, 0);
     });
   }
 
-  void panEnded(DragEndDetails details) {
+  void onScaleEnded(ScaleEndDetails details) {
+    var velocity = details.velocity;
+    if(velocity.pixelsPerSecond.dx == 0 && velocity.pixelsPerSecond.dy == 0){
+      return;
+    }
     var xOffset = matrixTimetable.row0.a;
     var yOffset = matrixTimetable.row1.a;
-    var velocity = details.velocity;
 
-    var offset = constrainDeltaOffset(
-        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, velocity.pixelsPerSecond.dy*velocityAnimationSpeed);
+    var offset = constrainNewOffset(xOffset+
+        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, yOffset+velocity.pixelsPerSecond.dy*velocityAnimationSpeed, currentScale);
     animationY = Tween<double>(begin: yOffset, end: offset.dy).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
     animationX = Tween<double>(begin: xOffset, end: offset.dx).animate(
@@ -434,8 +441,31 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     _animationController.reset();
     _animationController.forward();
   }
-
-  void panStarted(DragStartDetails details) {
+  
+  void onScaleStarted(ScaleStartDetails details) {
     _animationController.stop();
+  }
+
+  void onScaleUpdate(ScaleUpdateDetails details) {
+    Offset countedOffset = details.focalPointDelta;
+    Offset localPoint = details.localFocalPoint;
+    double scaleDelta = details.scale;
+    Offset currentTimetableOffset = Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
+
+    // Compute new scale
+    double newScale = ((1 - ((1 - scaleDelta) * scaleSlowDownPercentage)) * currentScale).clamp(minScale, 1.0);
+
+    // Calculate focal point relative to the timetable
+    Offset focalPoint = (localPoint - currentTimetableOffset) / currentScale;
+
+    // Compute the new offset to keep the focal point stable
+    Offset newOffset = localPoint - focalPoint * newScale + countedOffset;
+
+    // Constrain the new offset to ensure the timetable stays within bounds
+    Offset constrainedOffset = constrainNewOffset(newOffset.dx, newOffset.dy, newScale);
+
+    // Update the current scale and offset
+    currentScale = newScale;
+    setOffset(constrainedOffset, currentScale);
   }
 }
