@@ -5,6 +5,7 @@ import 'package:fstapp/models/PlaceModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -90,7 +91,7 @@ class RouterService{
           path: "/",
           builder: (context, state) {
             currentOccasionLink = "";
-            return const MyHomePage(title: MyHomePage.HOME_PAGE);
+            return const HomePage(title: HomePage.HOME_PAGE);
           },
         ),
         GoRoute(
@@ -120,7 +121,7 @@ class RouterService{
           path: LINK_PATH,
           builder: (context, state) {
             currentOccasionLink = state.pathParameters[LINK]??"";
-            return const MyHomePage(title: MyHomePage.HOME_PAGE,);
+            return const HomePage(title: HomePage.HOME_PAGE,);
           },
           routes: <RouteBase>[
             GoRoute(
