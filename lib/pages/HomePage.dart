@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 12, 12),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -101,12 +101,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                               "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                         },
                         child: SvgPicture.asset(
-                          height: 112,
-                          semanticsLabel: 'Festapp logo',
+                          height: 82,
+                          semanticsLabel: 'Festival Slunovrat logo',
                           'assets/icons/fstapplogo.svg',
                         ),
                       ),
                       const Spacer(),
+                      Column(
+                        children: [
+                          SvgIconButton(
+                            onPressed: _mySchedulePressed, // do something,
+                            iconPath: 'assets/icons/ikona muj program.svg',
+                            iconSize: 42,
+                          ),
+                          Text("My schedule".tr()),
+                        ],
+                      ),
+                      const SizedBox.square(dimension: 12,),
                       Visibility(
                         visible: !DataService.isLoggedIn(),
                         child: Row(
@@ -152,20 +163,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     events: _dots,
                     onEventPressed: _eventPressed,
                   )),
-              Padding(
+              Container(
+                constraints: const BoxConstraints(
+                  maxWidth: 420,
+                ),
                 padding: const EdgeInsets.only(bottom: 6.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        MainPageButton(
-                          onPressed: _programPressed,
-                          backgroundColor: AppConfig.button1Color,
-                          child: const Icon(Icons.calendar_month),
+                      children: [
+                        SvgIconButton(
+                          onPressed: _programPressed, // do something,
+                          iconPath: 'assets/icons/ikona program.svg',
                         ),
-                        Text("My schedule".tr()),
+                        Text("Schedule".tr()),
                       ],
                     ),
                     Column(
@@ -181,33 +193,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     style: const TextStyle(
                                         color: Colors.white, fontSize: 16)),
                               )),
-                          child: MainPageButton(
-                            onPressed: _newsPressed,
-                            backgroundColor: AppConfig.button2Color,
-                            child: const Icon(Icons.newspaper),
+                          child: SvgIconButton(
+                            onPressed: _newsPressed, // do something,
+                            iconPath: 'assets/icons/ikona oznameni.svg',
                           ),
                         ),
                         const Text("News").tr(),
                       ],
                     ),
                     Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        MainPageButton(
-                          onPressed: _mapPressed,
-                          backgroundColor: AppConfig.button3Color,
-                          child: const Icon(Icons.map),
+                      children: [
+                        SvgIconButton(
+                          onPressed: _mapPressed, // do something,
+                          iconPath: 'assets/icons/ikona mapa.svg',
                         ),
                         Text("Map".tr()),
                       ],
                     ),
                     Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        MainPageButton(
-                          onPressed: _infoPressed,
-                          backgroundColor: AppConfig.button4Color,
-                          child: const Icon(Icons.info),
+                      children: [
+                        SvgIconButton(
+                          onPressed: _infoPressed, // do something,
+                          iconPath: 'assets/icons/ikona informace.svg',
                         ),
                         Text("Info".tr()),
                       ],
@@ -226,6 +233,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return;
     }
     RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+  }
+
+  Future<void> _mySchedulePressed() async {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
