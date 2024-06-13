@@ -24,8 +24,6 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
 
-import 'main.dart';
-
 class RouterService{
   static const LINK = "link";
   static const LINK_PATH = "/:$LINK";
