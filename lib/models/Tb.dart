@@ -201,6 +201,7 @@ class PlacesTb{
   String get type => "type";
   String get coordinates => "coordinates";
   String get order => "order";
+  String get icon => "icon";
 }
 class UserGroupInfoTb{
   const UserGroupInfoTb();
@@ -262,6 +263,9 @@ class UserCompanionsTb{
 class IconsTb{
   const IconsTb();
   String get table => "icons";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
   String get link => "link";
   String get data => "data";
 }

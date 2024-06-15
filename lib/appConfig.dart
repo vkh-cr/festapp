@@ -13,7 +13,6 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = false;
   static const String oneSignalAppId = '4c5b7280-510f-4628-8fb8-b4bdd4fed1b2';
-  static const String generatedPasswordPrefix = "fa";
   static const String defaultLink = "2024";
 
   //frosty style
@@ -26,6 +25,7 @@ class AppConfig {
   static const color5 = Color(0xFF40E0D0);
   static const attentionColor = Color(0xFF8B0000);
 
+  static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;

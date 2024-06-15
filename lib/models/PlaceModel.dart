@@ -11,6 +11,7 @@ class PlaceModel extends IPlutoRowModel {
   String? description;
   String? type;
   int? order;
+  int? icon;
   bool isHidden = false;
 
   static const String WithouValue = "---";
@@ -31,6 +32,7 @@ class PlaceModel extends IPlutoRowModel {
     type: json.containsKey(Tb.places.type) ? json[Tb.places.type] : null,
     isHidden: json.containsKey(Tb.places.is_hidden) ? json[Tb.places.is_hidden] : false,
     order: json[Tb.places.order],
+    icon: json[Tb.places.icon],
   );
   }
 
@@ -43,6 +45,7 @@ class PlaceModel extends IPlutoRowModel {
       type: json[Tb.places.type] == WithouValue ? null : json[Tb.places.type],
       isHidden: json[Tb.places.is_hidden] == "true" ? true : false,
       order: json[Tb.places.order],
+      icon: json[Tb.places.icon]
     );
   }
 
@@ -54,7 +57,8 @@ class PlaceModel extends IPlutoRowModel {
     Tb.places.description: description,
     Tb.places.type: type,
     Tb.places.is_hidden: isHidden,
-    Tb.places.order: order
+    Tb.places.order: order,
+    Tb.places.icon: icon,
   };
 
   PlaceModel({
@@ -64,6 +68,7 @@ class PlaceModel extends IPlutoRowModel {
     required this.description,
     required this.type,
     this.order,
+    this.icon,
     this.isHidden = false});
 
   String toPlutoSelectString() => "$id:$title";
@@ -88,6 +93,7 @@ class PlaceModel extends IPlutoRowModel {
       Tb.places.type: PlutoCell(value: type ?? WithouValue),
       Tb.places.is_hidden: PlutoCell(value: isHidden.toString()),
       Tb.places.order: PlutoCell(value: order),
+      Tb.places.icon: PlutoCell(value: icon),
     });
   }
 
