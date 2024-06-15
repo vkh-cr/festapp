@@ -190,7 +190,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               padding: EdgeInsets.fromLTRB(
                   i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
               child: Container(
-                color: AppConfig.color1,
+                color: AppConfig.timetableColor,
                 height: timelineHeight,
                 width: (i == hourCount! || i == 0)
                     ? pixelsInHour / 2
@@ -329,7 +329,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                    ? AppConfig.color2
+                    ? AppConfig.timetableSelectedColor
                     : Colors.black26,
                 borderRadius: BorderRadius.circular(6),
               ),
