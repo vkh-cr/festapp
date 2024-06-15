@@ -105,7 +105,7 @@ flutter:
         - asset: fonts/NimbusSanL-Bol.otf
   assets:
     - assets/icons/
-    - assets/map/
+    - assets/images/map/
     - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
