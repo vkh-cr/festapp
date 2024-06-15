@@ -13,7 +13,6 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
-  static const String generatedPasswordPrefix = "fa";
   static const String defaultLink = "conference2024";
 
   //frosty style
