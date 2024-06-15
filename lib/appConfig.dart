@@ -24,6 +24,7 @@ class AppConfig {
   static const color4 = Color(0xFF253759);
   static const attentionColor = Color(0xFF8B0000);
 
+  static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
