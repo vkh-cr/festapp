@@ -294,7 +294,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await DataService.updateEvents(_events).whenComplete(() async {
       if(AppConfig.isSplitByPlace)
       {
-        await loadPlacesForEvents(DataService.getPlacesIn);
+        await loadPlacesForEvents(_events, DataService.getPlacesIn);
       }
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
@@ -310,8 +310,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     OfflineDataHelper.saveAllEvents(_events);
   }
 
-  FutureOr<void> loadPlacesForEvents(FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
-    var placeIds = _events
+  FutureOr<void> loadPlacesForEvents(List<EventModel> events, FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
+    var placeIds = events
         .map((e) => e.place?.id)
         .where((id) => id != null)
         .cast<int>()
@@ -323,7 +323,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     var placesById = {for (var place in places) place.id: place};
 
     // Assign the loaded places to the corresponding events
-    for (var event in _events) {
+    for (var event in events) {
       if (event.place?.id != null && placesById.containsKey(event.place!.id)) {
         event.place = placesById[event.place!.id];
       }
@@ -335,7 +335,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       var offlineEvents = OfflineDataHelper.getAllEvents();
       OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
       if(AppConfig.isSplitByPlace) {
-        loadPlacesForEvents((ids) => OfflineDataHelper.getAllPlaces());
+        await loadPlacesForEvents(offlineEvents, (ids) => OfflineDataHelper.getAllPlaces());
       }
       _events.addAll(offlineEvents);
       _dots.clear();
