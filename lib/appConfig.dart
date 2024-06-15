@@ -40,6 +40,8 @@ class AppConfig {
   static const button3Color = color2;
   static const button4Color = color4;
 
+  static const bool isSplitByPlace = false;
+
   static Color eventTypeToColor(String? type)
   {
     switch (type){

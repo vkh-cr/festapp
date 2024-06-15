@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/models/EventModel.dart';
 
 class ScheduleTimelineHelper{
-  static List<EventGroup> splitEventsByAlternativeSplit(List<TimeLineItem> events) {
+  static List<EventGroup> splitEventsByAlternativeSplit(Iterable<TimeLineItem> events) {
     // Group events by AlternativeSplit.id, handling null case
     Map<int?, List<TimeLineItem>> groupedByAlternativeSplit = {};
     for (var event in events) {
@@ -52,7 +52,17 @@ class ScheduleTimelineHelper{
     }).toList();
   }
 
-  static List<EventGroup> splitEventsByTimeOfDay(List<TimeLineItem> events) {
+  static List<EventGroup> splitEvents(List<TimeLineItem> events) {
+    List<EventGroup> eventGroups;
+    if (events.any((a)=> a.alternativeSplit != null)) {
+      eventGroups = ScheduleTimelineHelper.splitEventsByAlternativeSplit(events.where((e)=>e.alternativeSplit!=null));
+    } else {
+      eventGroups = ScheduleTimelineHelper.splitEventsByTimeOfDay(events);
+    }
+    return eventGroups;
+  }
+
+    static List<EventGroup> splitEventsByTimeOfDay(List<TimeLineItem> events) {
     List<TimeLineItem> morningEvents = events.where((e) => e.startTime.hour <= 12).toList();
     List<TimeLineItem> afternoonEvents = events.where((e) => e.startTime.hour > 12 && e.startTime.hour < 18).toList();
     List<TimeLineItem> eveningEvents = events.where((e) => e.startTime.hour >= 18).toList();
@@ -122,13 +132,17 @@ class TimeLineItem {
     return DotType.dot;
   }
 
-  factory TimeLineItem.fromEventModel(EventModel model) {
+  factory TimeLineItem.fromEventModel(EventModel model, [bool useAlternativeSplit = false]) {
     return TimeLineItem(
       startTime: model.startTime,
       dotType: getIndicatorFromEvent(model),
       id: model.id!,
       leftText: model.startTimeString(),
       rightText: model.toString(),
+      alternativeSplit:
+        useAlternativeSplit && model.place != null && model.place!.id != null && model.place!.title != null && model.place!.order != null ?
+            AlternativeSplit(id: model.place!.id!, title: model.place!.title!, order: model.place!.order!)
+            : null
     );
   }
 

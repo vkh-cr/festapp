@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
@@ -6,6 +8,7 @@ import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/data/RightsHelper.dart';
 import 'package:fstapp/models/EventModel.dart';
+import 'package:fstapp/models/PlaceModel.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -289,8 +292,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
 
     await DataService.updateEvents(_events).whenComplete(() async {
+      if(AppConfig.isSplitByPlace)
+      {
+        await loadPlacesForEvents(DataService.getPlacesIn);
+      }
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
       if (DataService.isLoggedIn()) {
         DataService.countNewMessages().then((value) => {
           setState(() {
@@ -303,13 +310,36 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     OfflineDataHelper.saveAllEvents(_events);
   }
 
-  void loadOfflineData() {
-    if(_events.isEmpty) {
+  FutureOr<void> loadPlacesForEvents(FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
+    var placeIds = _events
+        .map((e) => e.place?.id)
+        .where((id) => id != null)
+        .cast<int>()
+        .toSet()
+        .toList();
+
+    var places = await fetchPlaces(placeIds);
+
+    var placesById = {for (var place in places) place.id: place};
+
+    // Assign the loaded places to the corresponding events
+    for (var event in _events) {
+      if (event.place?.id != null && placesById.containsKey(event.place!.id)) {
+        event.place = placesById[event.place!.id];
+      }
+    }
+  }
+
+  Future<void> loadOfflineData() async {
+    if (_events.isEmpty) {
       var offlineEvents = OfflineDataHelper.getAllEvents();
       OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+      if(AppConfig.isSplitByPlace) {
+        loadPlacesForEvents((ids) => OfflineDataHelper.getAllPlaces());
+      }
       _events.addAll(offlineEvents);
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
     }
     if (DataService.isLoggedIn()) {
       var userInfo = OfflineDataHelper.getUserInfo();

@@ -37,7 +37,7 @@ import 'ScheduleTimeline.dart';
       eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
       for(var eventsByDay in eventsMap.values)
       {
-        List<EventGroup> eventGroups = ScheduleTimelineHelper.splitEventsByTimeOfDay(eventsByDay);
+        var eventGroups = ScheduleTimelineHelper.splitEvents(eventsByDay);
         var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed, key: UniqueKey(),);
         programLineChildren.add(SingleChildScrollView(child: timeline));
       }
