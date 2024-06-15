@@ -14,6 +14,7 @@ import 'package:fstapp/models/UserInfoModel.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
 
@@ -274,7 +275,7 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: SingleChildScrollView(
                             child: ScheduleTimeline(
-                                events: _childDots,
+                                eventGroups: ScheduleTimelineHelper.splitEventsByDay(_childDots, context),
                                 onEventPressed: _eventPressed,
                                 nodePosition: 0.3)))),
                 Visibility(

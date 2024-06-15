@@ -1,5 +1,5 @@
 import 'package:fstapp/models/EventModel.dart';
-import 'package:fstapp/widgets/ScheduleTimeline.dart';
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 
 class CompanionModel {
   final String id;

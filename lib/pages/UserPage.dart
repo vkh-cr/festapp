@@ -13,6 +13,7 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -236,7 +237,7 @@ class _UserPageState extends State<UserPage> {
                                               maxWidth: 600,
                                             ),
                                               child: ScheduleTimeline(
-                                                  events: companion.dots,
+                                                  eventGroups: ScheduleTimelineHelper.splitEventsByDay(companion.dots, context),
                                                   onEventPressed: (eventId) async {
                                                     await RouterService.navigateOccasion(
                                                         context,
@@ -245,7 +246,6 @@ class _UserPageState extends State<UserPage> {
                                                         eventId);
                                                     await loadData();
                                                   },
-                                                  splitByDay: true,
                                                   nodePosition: 0.3,
                                                   emptyContent: Center(child: Text(
                                                     "Companion's events will appear here.",

@@ -1,3 +1,4 @@
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -34,9 +35,10 @@ import 'ScheduleTimeline.dart';
       List<Widget> programLineChildren = [];
 
       eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
-      for(var e in eventsMap.values)
+      for(var eventsByDay in eventsMap.values)
       {
-        var timeline = ScheduleTimeline(events: e, onEventPressed: onEventPressed, key: UniqueKey(),);
+        List<EventGroup> eventGroups = ScheduleTimelineHelper.splitEventsByTimeOfDay(eventsByDay);
+        var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed, key: UniqueKey(),);
         programLineChildren.add(SingleChildScrollView(child: timeline));
       }
       return Container(
