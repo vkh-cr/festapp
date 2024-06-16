@@ -57,7 +57,7 @@ import 'ScheduleTimeline.dart';
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
               tabs: [
                   for(var e in eventsMap.keys)
-                    Tab(child: Text(indexToDay(e), style: timeLineTabNameTextStyle,))
+                    Tab(child: Text(indexToDay(e), style: timeLineTabNameTextStyle, maxLines: 1,))
               ],
             ),
             body: TabBarView(
