@@ -109,7 +109,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.timetablePlaces.isEmpty || widget.timetablePlaces.isEmpty) {
+    if (widget.timetablePlaces.isEmpty || widget.timetablePlaces.isEmpty || widget.items.isEmpty) {
       return const SizedBox.shrink();
     }
 
