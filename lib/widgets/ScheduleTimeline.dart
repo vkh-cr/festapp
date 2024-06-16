@@ -1,89 +1,21 @@
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
-import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:timelines/timelines.dart';
 import 'package:fstapp/appConfig.dart';
 
-import '../models/EventModel.dart';
-
-enum DotType {
-  dot, open, closed
-}
-
-class TimeLineItem {
-  DateTime startTime;
-  DotType dotType;
-  String leftText;
-  String rightText;
-  int id;
-
-  TimeLineItem({
-    required this.dotType,
-    required this.startTime,
-    required this.leftText,
-    required this.rightText,
-    required this.id,
-  });
-
-  static DotType getIndicatorFromEvent(EventModel model) {
-    if (model.isSignedIn) {
-      return DotType.closed;
-    } else if (model.isGroupEvent && model.isMyGroupEvent) {
-      return DotType.closed;
-    } else if (model.currentParticipants != null && model.maxParticipants != null && model.isFull()) {
-      return DotType.dot;
-    } else if (EventModel.isEventSupportingSignIn(model)) {
-      return DotType.open;
-    }
-    return DotType.dot;
-  }
-
-  factory TimeLineItem.fromEventModel(EventModel model) {
-    return TimeLineItem(
-      startTime: model.startTime,
-      dotType: getIndicatorFromEvent(model),
-      id: model.id!,
-      leftText: model.startTimeString(),
-      rightText: model.toString(),
-    );
-  }
-
-  factory TimeLineItem.fromEventModelAsChild(EventModel model) {
-    return TimeLineItem(
-      startTime: model.startTime,
-      dotType: getIndicatorFromEvent(model),
-      id: model.id!,
-      leftText: model.durationTimeString(),
-      rightText: model.toString(),
-    );
-  }
-
-  factory TimeLineItem.forCompanion(EventModel model) {
-    return TimeLineItem(
-      startTime: model.startTime,
-      dotType: DotType.closed,
-      id: model.id!,
-      leftText: model.durationTimeString(),
-      rightText: model.toString(),
-    );
-  }
-}
 
 class ScheduleTimeline extends StatefulWidget {
-  Function(int)? onEventPressed;
-  List<TimeLineItem> events = [];
-  double? nodePosition;
-  bool? splitByDay;
-  Widget? emptyContent;
+  final Function(int)? onEventPressed;
+  final List<EventGroup> eventGroups;
+  final double? nodePosition;
+  final Widget? emptyContent;
 
-  ScheduleTimeline({
+  const ScheduleTimeline({
     super.key,
-    required this.events,
+    required this.eventGroups,
     this.onEventPressed,
     this.nodePosition = 0.24,
-    this.splitByDay = false,
     this.emptyContent,
   });
 
@@ -92,71 +24,36 @@ class ScheduleTimeline extends StatefulWidget {
 }
 
 class _ScheduleTimelineState extends State<ScheduleTimeline> {
-
   @override
   Widget build(BuildContext context) {
-    if (widget.splitByDay!) {
-      var groupByDay = widget.events.groupListsBy((element) => buildDayFormat(element));
-      List<Widget> children = [];
-      for (var group in groupByDay.entries) {
-        children.add(
-          Padding(
+    if (widget.eventGroups.isEmpty) {
+      return widget.emptyContent ?? const SizedBox.shrink();
+    }
+
+    List<Widget> children = [];
+    for (var group in widget.eventGroups) {
+      var timeLineItems = group.events.toList();
+      children.add(
+        Visibility(
+          visible: group.title.isNotEmpty,
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
             child: Text(
-              group.key,
+              group.title,
               style: timeLineSplitTextStyle,
             ),
           ),
-        );
-        children.add(createTimeline(group.value));
-      }
-
-      if (children.isEmpty) {
-        return widget.emptyContent ?? const SizedBox.shrink();
-      }
-      return SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
         ),
       );
+      children.add(createTimeline(timeLineItems));
     }
 
-    var morningEvents = widget.events.where((e) => e.startTime.hour <= 12).toList();
-    var afternoonEvents = widget.events.where((e) => e.startTime.hour > 12 && e.startTime.hour < 18).toList();
-    var eveningEvents = widget.events.where((e) => e.startTime.hour >= 18).toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        createTimeline(morningEvents),
-        afternoonEvents.isNotEmpty && morningEvents.isNotEmpty
-            ? Padding(
-          padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
-          child: Text(
-            "Afternoon".tr(),
-            style: timeLineSplitTextStyle,
-          ),
-        )
-            : const SizedBox.shrink(),
-        createTimeline(afternoonEvents),
-        eveningEvents.isNotEmpty && afternoonEvents.isNotEmpty
-            ? Padding(
-          padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
-          child: Text(
-            "Evening".tr(),
-            style: timeLineSplitTextStyle,
-          ),
-        )
-            : const SizedBox.shrink(),
-        createTimeline(eveningEvents),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
     );
-  }
-
-  String buildDayFormat(TimeLineItem element) {
-    var result = DateFormat("EEEE d. MMMM ", context.locale.languageCode).format(element.startTime);
-    result = result[0].toUpperCase() + result.substring(1);
-    return result;
   }
 
   Timeline createTimeline(List<TimeLineItem> events) {

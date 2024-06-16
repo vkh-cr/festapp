@@ -30,12 +30,18 @@ class AppConfig {
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
   static const mapPinColor = color1;
+  static const newsPageColor = color1;
   static const profileButtonColor = color1;
+
+  static const timetableColor = color1;
+  static const timetableSelectedColor = color2;
+
   static const button1Color = color1;
   static const button2Color = color3;
   static const button3Color = color2;
   static const button4Color = color4;
 
+  static const bool isSplitByPlace = false;
 
   static Color eventTypeToColor(String? type)
   {
