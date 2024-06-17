@@ -34,6 +34,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
     return GestureDetector(
       onTap: () {
         widget.onItemTap?.call(widget.item.id);
+        setState(() {});
       },
       child: Container(
         width: widget.timeRangeLength(widget.pixelsInHour, widget.item.startTime, widget.item.endTime) - widget.minimalPadding * 2,
@@ -52,10 +53,12 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                   TimetableItem.getTimetableItemTypeAsCanSignIn(widget.item.itemType), () async {
                 if (widget.addToMyProgram != null) {
                   await widget.addToMyProgram!(widget.item);
+                  setState(() {});
                 }
               }, () async {
                 if (widget.removeFromMyProgram != null) {
                   await widget.removeFromMyProgram!(widget.item);
+                  setState(() {});
                 }
               }, Colors.white),
             ),

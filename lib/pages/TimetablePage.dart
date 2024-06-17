@@ -71,6 +71,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         for (var e in eventsGrouped.values)
           e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
       });
+      timetableController.rebuild?.call();
 
       setupTabController(_days.length);
       await loadEventParticipants();
