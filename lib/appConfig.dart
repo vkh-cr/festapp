@@ -51,7 +51,7 @@ class AppConfig {
       case "other": return color4;
       case "children": return color5;
     }
-    return color1;
+    return AppConfig.timetableSelectedColor;
   }
 
   static List<LanguageModel> availableLanguages = [
