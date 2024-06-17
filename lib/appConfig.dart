@@ -49,7 +49,7 @@ class AppConfig {
       case "talk": return color3;
       case "other": return color4;
     }
-    return color1;
+    return AppConfig.timetableSelectedColor;
   }
 
   static List<LanguageModel> availableLanguages = [
