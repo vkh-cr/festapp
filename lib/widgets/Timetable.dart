@@ -4,13 +4,12 @@ import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/widgets/TimetableEventWidget.dart';
 import 'package:fstapp/widgets/TimetableHelper.dart';
 import 'package:fstapp/widgets/TimetableItemsWidget.dart';
 
 class TimetableController {
+  void Function()? rebuild;
   void Function()? reset;
   void Function(int)? onItemTap;
 
@@ -45,7 +44,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   final double velocityAnimationSpeed = 0.5;
   final double globalMinimalScale = 0.2;
   final double globalMaximalScale = 1.0;
-  final double scaleSlowDownPercentage = 0.05;
+  final double scaleSlowDownPercentage = 0.025;
 
   double currentScale = 1.0;
   double minScale = 1.0;
@@ -67,12 +66,17 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   List<TimetableItem> usedItems = [];
   List<TimetablePlace> usedPlaces = [];
 
+  late TimetableItemsWidget allItems;
+  late IgnorePointer timeNow;
+
   _TimetableState(TimetableController? timetableController) {
     if(timetableController!=null){
       timetableController.reset = () {
         _animationController.stop();
         setOffset(const Offset(0,0), currentScale);
+        rebuildTimetable();
       };
+      timetableController.rebuild = rebuildTimetable;
     }
   }
 
@@ -105,6 +109,67 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
             animationX.value, animationY.value, 0);
       });
     });
+
+    rebuildTimetable();
+  }
+
+  void rebuildTimetable() {
+    usedItems = <TimetableItem>[];
+    for(var item in widget.items) {
+      if(widget.timetablePlaces.map((e) => e.id).contains(item.placeId)) {
+        //remove invalid items
+        if(item.endTime.isBefore(item.startTime)) {
+          continue;
+        }
+        usedItems.add(item);
+      }
+    }
+
+    usedPlaces = <TimetablePlace>[];
+    for(var item in widget.timetablePlaces) {
+      if(usedItems.map((e) => e.placeId).contains(item.id)) {
+        usedPlaces.add(item);
+      }
+    }
+
+    var firstEvent = usedItems.reduce((current, next) =>
+    current.startTime.compareTo(next.startTime) < 0 ? current : next);
+
+    var lastEvent = usedItems.reduce((current, next) =>
+    current.endTime.compareTo(next.endTime) > 0 ? current : next);
+
+    var range = DateTimeRange(start: firstEvent.startTime, end: lastEvent.endTime);
+    if (range.duration.inHours > 48) {
+      throw Exception("Events range cannot exceed 48 hours.");
+    }
+
+    startTime = firstEvent.startTime.roundDown();
+    endTime = lastEvent.endTime.roundUp();
+
+    var lastHour = lastEvent.endTime.roundUp().hour;
+
+    bool isSkipping = firstEvent.startTime.day != lastEvent.endTime.day;
+    hourCount = isSkipping ? 24 - startTime!.hour + lastHour : lastHour - startTime!.hour;
+
+    allItems = TimetableItemsWidget(
+      usedItems: usedItems,
+      usedPlaces: usedPlaces,
+      pixelsInHour: pixelsInHour,
+      minimalPadding: minimalPadding,
+      placeTitleHeight: placeTitleHeight,
+      itemHeight: itemHeight,
+      timelineHeight: timelineHeight,
+      timeRangeLength: timeRangeLength,
+      height: getTimetableHeight(),
+      hourCount: hourCount!,
+      startTime: startTime!,
+      endTime: endTime!,
+      addToMyProgram: addToMyProgram,
+      removeFromMyProgram: removeFromMyProgram,
+      onItemTap: widget.controller?.onItemTap,
+    );
+
+    timeNow = IgnorePointer(child: buildTimeNow());
   }
 
   @override
@@ -119,73 +184,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       return const SizedBox.shrink();
     }
 
-    usedItems = <TimetableItem>[];
-    for(var item in widget.items) {
-        if(widget.timetablePlaces.map((e) => e.id).contains(item.placeId)) {
-          //remove invalid items
-          if(item.endTime.isBefore(item.startTime)) {
-            continue;
-          }
-          usedItems.add(item);
-        }
-    }
-
-    usedPlaces = <TimetablePlace>[];
-    for(var item in widget.timetablePlaces) {
-      if(usedItems.map((e) => e.placeId).contains(item.id)) {
-        usedPlaces.add(item);
-      }
-    }
-
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints cConstraints) {
       constraints = cConstraints;
 
       updateScaleLimits();
-
-
-      var firstEvent = usedItems.reduce((current, next) =>
-      current.startTime.compareTo(next.startTime) < 0 ? current : next);
-
-      var lastEvent = usedItems.reduce((current, next) =>
-      current.endTime.compareTo(next.endTime) > 0 ? current : next);
-
-      var range = DateTimeRange(start: firstEvent.startTime, end: lastEvent.endTime);
-      if (range.duration.inHours > 48) {
-        throw Exception("Events range cannot exceed 48 hours.");
-      }
-
-      var firstHour = firstEvent.startTime.hour;
-
-      startTime = firstEvent.startTime.roundDown(delta: const Duration(hours: 1));
-      endTime = lastEvent.endTime.roundUp(delta: const Duration(hours: 1));
-
-      var lastHour = lastEvent.endTime.minute > 0
-          ? lastEvent.endTime.hour + 1
-          : lastEvent.endTime.hour;
-
-      bool isSkipping = firstEvent.startTime.day != lastEvent.endTime.day;
-      hourCount = isSkipping ? 24 - firstHour + lastHour : lastHour - firstHour;
-
-      var allItems = TimetableItemsWidget(
-          usedItems: usedItems,
-          usedPlaces: usedPlaces,
-          pixelsInHour: pixelsInHour,
-          minimalPadding: minimalPadding,
-          placeTitleHeight: placeTitleHeight,
-          itemHeight: itemHeight,
-          timelineHeight: timelineHeight,
-          timeRangeLength: timeRangeLength,
-          height: getTimetableHeight(),
-          hourCount: hourCount!,
-          startTime: startTime!,
-          endTime: endTime!,
-        addToMyProgram: addToMyProgram,
-        removeFromMyProgram: removeFromMyProgram,
-        onItemTap: widget.controller?.onItemTap,
-      );
-
-      Widget timeNow = IgnorePointer(child: buildTimeNow());
 
       var timetableItems = Transform(
         transformHitTests: true,
@@ -227,7 +230,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         transform: matrixTimeline,
         child: Stack(
           children: List<Widget>.generate(hourCount! + 1, (i) {
-            var hour = firstHour + i;
+            var hour = startTime!.hour + i;
             if (hour > 23) {
               hour -= 24;
             }
@@ -315,7 +318,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   Widget buildTimeNow() {
     return const SizedBox.shrink();
-    var now = TimeHelper.Now().correctForEvents;
+    var now = TimeHelper.Now();
 
     Widget container;
     if(now.isAfter(endTime!)){
