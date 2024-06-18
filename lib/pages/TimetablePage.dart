@@ -46,8 +46,15 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     loadDataOffline();
 
     await DataService.updateEvents(_events).whenComplete(() async {
-      var places = await DataService.getAllPlaces();
-      OfflineDataHelper.saveAllPlaces(places);
+      var placeIds = _events
+          .map((e) => e.place?.id)
+          .where((id) => id != null)
+          .cast<int>()
+          .toSet()
+          .toList();
+
+      var places = await DataService.getPlacesIn(placeIds);
+
       var timetablePlaces = List<TimetablePlace>.from(places
           .where((element) => !element.isHidden)
           .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
@@ -64,6 +71,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         for (var e in eventsGrouped.values)
           e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
       });
+      timetableController.rebuild?.call();
 
       setupTabController(_days.length);
       await loadEventParticipants();

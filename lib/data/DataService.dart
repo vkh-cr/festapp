@@ -380,6 +380,15 @@ class DataService {
     return toReturn;
   }
 
+  static Future<List<PlaceModel>> getPlacesIn(List<int> ids) async {
+    var data = await _supabase.from(Tb.places.table)
+        .select()
+        .inFilter(Tb.places.id, ids);
+    var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
+    toReturn.sortPlaces();
+    return toReturn;
+  }
+
   static Future<List<IconModel>> getAllIcons() async {
     var data = await _supabase.from(Tb.icons.table).select();
     var toReturn = List<IconModel>.from(data.map((x) => IconModel.fromJson(x)));
@@ -1250,7 +1259,7 @@ class DataService {
   }
 
   static insertNewsMessage(String? heading, String headingDefault, String message, bool withNotification, List<String>? to) async {
-    var messageForNews = heading !=null ? "<h4>$heading</h4><br>$message" : message;
+    var messageForNews = heading !=null ? "<strong>$heading</strong><br>$message" : message;
     await _supabase.from(Tb.news.table).insert(
         {Tb.news.message: messageForNews, Tb.news.created_by: currentUserId()}).select();
 

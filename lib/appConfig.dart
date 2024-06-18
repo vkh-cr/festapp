@@ -13,7 +13,6 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '73f77f22-961a-4ded-9647-e33a7ac14f90';
-  static const String generatedPasswordPrefix = "fa";
   static const String defaultLink = "conference2024";
 
   //frosty style
@@ -25,15 +24,23 @@ class AppConfig {
   static const color4 = Color(0xFF253759);
   static const attentionColor = Color(0xFF8B0000);
 
+  static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
   static const mapPinColor = color1;
+  static const newsPageColor = color1;
   static const profileButtonColor = color1;
+
+  static const timetableColor = color1;
+  static const timetableSelectedColor = color2;
+
   static const button1Color = color1;
   static const button2Color = color3;
   static const button3Color = color2;
   static const button4Color = color4;
+
+  static const bool isSplitByPlace = false;
 
   static Color eventTypeToColor(String? type)
   {
@@ -42,7 +49,7 @@ class AppConfig {
       case "talk": return color3;
       case "other": return color4;
     }
-    return color1;
+    return AppConfig.timetableSelectedColor;
   }
 
   static List<LanguageModel> availableLanguages = [

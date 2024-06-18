@@ -5,6 +5,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/services/ScheduleTimelineHelper.dart';
 import 'package:fstapp/widgets/ScheduleTimeline.dart';
 
 import '../models/EventModel.dart';
@@ -72,9 +73,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
                 constraints: BoxConstraints(maxWidth: appMaxWidth),
                 child: SingleChildScrollView(
                     child: ScheduleTimeline(
-                  events: _dots,
+                  eventGroups: ScheduleTimelineHelper.splitEventsByDay(_dots, context),
                   onEventPressed: _eventPressed,
-                  splitByDay: true,
                   nodePosition: 0.3,
                   emptyContent: Center(
                     child: Padding(
