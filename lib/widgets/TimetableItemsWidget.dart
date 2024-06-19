@@ -61,7 +61,14 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
               left: BorderSide(width: 0.25, color: Colors.grey),
               right: BorderSide(width: 0.25, color: Colors.grey),
             ),
-            color: i % 2 == 0 ? Colors.white70 : Colors.white70,
+            color: i % 2 == 0 ? Colors.white60 : Colors.white,
+            // boxShadow: i % 2 == 0 ? [] : [
+            //   BoxShadow(
+            //     color: Colors.black26,
+            //     blurRadius: 10,
+            //     offset: Offset(0, 4),
+            //   ),
+            // ],
           ),
         ),
       ),
@@ -90,10 +97,6 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
         allItems.add(timeBlock);
       }
     }
-
-    setState(() {
-      // Update the state with the built timeline
-    });
 
     return allItems;
   }
