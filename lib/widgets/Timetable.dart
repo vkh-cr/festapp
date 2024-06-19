@@ -1,14 +1,18 @@
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/widgets/TimelineWidget.dart';
 import 'package:fstapp/widgets/TimetableHelper.dart';
 import 'package:fstapp/widgets/TimetableItemsWidget.dart';
 
 class TimetableController {
+  void Function()? autoSetPosition;
   void Function()? rebuild;
   void Function()? reset;
   void Function(int)? onItemTap;
@@ -45,12 +49,17 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   final double globalMinimalScale = 0.2;
   final double globalMaximalScale = 1.0;
   final double scaleSlowDownPercentage = 0.025;
+  final double scaleDownIfLowerThan = 600;
+  final double defaultTime = 16;
+
+  Offset currentOffset = const Offset(0, 0);
 
   double currentScale = 1.0;
   double minScale = 1.0;
+  bool initial = true;
 
   late TransformationController transformationController;
-  late BoxConstraints constraints;
+  BoxConstraints? constraints;
 
   Matrix4 matrixTimetable = Matrix4.translationValues(0, 0, 0);
   Matrix4 matrixPlaceTitles = Matrix4.translationValues(0, 0, 0);
@@ -68,15 +77,43 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   late TimetableItemsWidget allItems;
   late IgnorePointer timeNow;
+  late TimelineWidget timelineWidget;
 
   _TimetableState(TimetableController? timetableController) {
-    if(timetableController!=null){
+    if (timetableController != null) {
       timetableController.reset = () {
         _animationController.stop();
-        setOffset(const Offset(0,0), currentScale);
         rebuildTimetable();
       };
       timetableController.rebuild = rebuildTimetable;
+      timetableController.autoSetPosition = setNowTime;
+    }
+  }
+
+  void setNowTime() {
+    // Get the current time
+    var now = TimeHelper.now();
+
+    // Calculate the position of the current time
+    if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
+      var current = TimeHelper.differenceInHours(startTime!, now) * pixelsInHour * currentScale;
+      setOffsetFromTime(current);
+    } else {
+        setOffsetFromTime((defaultTime - startTime!.hourInDouble) * pixelsInHour * currentScale);
+    }
+  }
+
+  void setOffsetFromTime(double currentTimePosition, [bool animate = false]) {
+    double initialXOffset = constraints!.maxWidth / 2 - currentTimePosition;
+
+    // Constrain the initial offset
+    Offset initialOffset = constrainNewOffset(initialXOffset, 0, currentScale);
+    if (initialXOffset < 0) initialXOffset = 0;
+
+    if(animate) {
+      animateToOffset(currentOffset, initialOffset);
+    } else {
+      setOffset(initialOffset, currentScale);
     }
   }
 
@@ -86,9 +123,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   double getTimetableWidth() => (hourCount ?? 24) * pixelsInHour;
 
-  double getWidgetHeight() => getTimetableHeight() > constraints.maxHeight
+  double getWidgetHeight() => getTimetableHeight() > constraints!.maxHeight
       ? getTimetableHeight()
-      : constraints.maxHeight;
+      : constraints!.maxHeight;
+
+  double getWindowWidth(BuildContext context) {
+    return MediaQuery.of(context).size.width;
+  }
 
   late AnimationController _animationController;
   late Animation<double> animationX =
@@ -111,6 +152,17 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
 
     rebuildTimetable();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      if (getWindowWidth(context) < scaleDownIfLowerThan) {
+        currentScale = 0.75;
+      }
+
+      if(initial) {
+        initial = false;
+        setNowTime();
+      }
+    });
   }
 
   void rebuildTimetable() {
@@ -170,6 +222,14 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     );
 
     timeNow = IgnorePointer(child: buildTimeNow());
+
+    timelineWidget = TimelineWidget(
+      startTime: startTime!,
+      endTime: endTime!,
+      hourCount: hourCount!,
+      pixelsInHour: pixelsInHour,
+      timelineHeight: timelineHeight,
+    );
   }
 
   @override
@@ -225,40 +285,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ),
       );
       stackChildren.add(placeTitles);
+      var now = TimeHelper.now();
 
       var timeline = Transform(
         transform: matrixTimeline,
-        child: Stack(
-          children: List<Widget>.generate(hourCount! + 1, (i) {
-            var hour = startTime!.hour + i;
-            if (hour > 23) {
-              hour -= 24;
-            }
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                  i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
-              child: Container(
-                color: AppConfig.timetableColor,
-                height: timelineHeight,
-                width: (i == hourCount! || i == 0)
-                    ? pixelsInHour / 2
-                    : pixelsInHour,
-                alignment: i == 0
-                    ? Alignment.centerLeft
-                    : i == hourCount!
-                        ? Alignment.centerRight
-                        : Alignment.center,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "$hour:00",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
-            );
-          }),
-        ),
+        child: timelineWidget,
       );
       stackChildren.add(timeline);
 
@@ -305,7 +336,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void updateScaleLimits() {
-    minScale = (constraints.maxHeight / getTimetableHeight()).clamp(globalMinimalScale, globalMaximalScale);
+    minScale = (constraints!.maxHeight / getTimetableHeight()).clamp(globalMinimalScale, globalMaximalScale);
     currentScale = currentScale.clamp(minScale, 1.0);
   }
 
@@ -317,20 +348,51 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Widget buildTimeNow() {
-    return const SizedBox.shrink();
-    var now = TimeHelper.Now();
-
+    var now = TimeHelper.now();
     Widget container;
-    if(now.isAfter(endTime!)){
+    if (now.isAfter(endTime!)) {
       container = Container(
-        width: getTimetableWidth(), height: getTimetableHeight(), color: Colors.black.withOpacity(0.2),);
+        width: getTimetableWidth(),
+        height: getTimetableHeight(),
+        color: Colors.black.withOpacity(0.2),
+      );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
       container = Container(
-        width: (now.hourInDouble - startTime!.toLocal().hourInDouble) * pixelsInHour, height: getTimetableHeight(), color: Colors.black.withOpacity(0.2),);
+        width: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
+        height: getTimetableHeight(),
+        color: Colors.black.withOpacity(0.15),
+      );
     } else {
       container = const SizedBox.shrink();
     }
-    return container;
+
+    return Stack(
+      children: [
+        SizedBox(
+          width: getTimetableWidth(),
+          height: getTimetableHeight(),
+        ),
+        container,
+        if (now.isAfter(startTime!) && now.isBefore(endTime!))
+          Positioned(
+            left: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
+            child: Container(
+              width: 2,
+              height: getTimetableHeight(),
+              decoration: const BoxDecoration(
+                color: AppConfig.timetableTimeSplitColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
   }
 
   Future<void> addToMyProgram(TimetableItem item) async {
@@ -355,8 +417,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
     var timetableHeight = getTimetableHeight() * scale;
     var timetableWidth = getTimetableWidth() * scale;
-    var windowHeight = constraints.maxHeight;
-    var windowWidth = constraints.maxWidth;
+    var windowHeight = constraints!.maxHeight;
+    var windowWidth = constraints!.maxWidth;
 
     if (timetableHeight <= windowHeight) {
       yOffset = 0;
@@ -374,6 +436,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void setOffset(Offset offset, double newScale) {
+    currentOffset = offset;
     setState(() {
       matrixTimetable = Matrix4.identity()
         ..scale(newScale)
@@ -394,14 +457,17 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     if(velocity.pixelsPerSecond.dx == 0 && velocity.pixelsPerSecond.dy == 0){
       return;
     }
-    var xOffset = matrixTimetable.row0.a;
-    var yOffset = matrixTimetable.row1.a;
 
-    var offset = constrainNewOffset(xOffset+
-        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, yOffset+velocity.pixelsPerSecond.dy*velocityAnimationSpeed, currentScale);
-    animationY = Tween<double>(begin: yOffset, end: offset.dy).animate(
+    var start = Offset(matrixTimetable.row0.a, matrixTimetable.row1.a);
+    var end = constrainNewOffset(start.dx+
+        velocity.pixelsPerSecond.dx*velocityAnimationSpeed, start.dy+velocity.pixelsPerSecond.dy*velocityAnimationSpeed, currentScale);
+    animateToOffset(start, end);
+  }
+
+  void animateToOffset(Offset start, Offset end) {
+    animationY = Tween<double>(begin: start.dy, end: end.dy).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
-    animationX = Tween<double>(begin: xOffset, end: offset.dx).animate(
+    animationX = Tween<double>(begin: start.dx, end: end.dx).animate(
         CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
 
     _animationController.duration = Duration(milliseconds: animationDuration);
