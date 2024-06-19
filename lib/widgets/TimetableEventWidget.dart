@@ -40,13 +40,13 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(6),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
+          // boxShadow: const [
+          //   BoxShadow(
+          //     color: Colors.black26,
+          //     blurRadius: 10,
+          //     offset: Offset(0, 4),
+          //   ),
+          // ],
         ),
         child: Container(
           width: widget.timeRangeLength(widget.pixelsInHour, widget.item.startTime, widget.item.endTime) - widget.minimalPadding * 2,
@@ -78,6 +78,9 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                 padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
                 child: Text(widget.item.text,
                     style: TextStyle(
+                      fontWeight: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                         color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
                             ? Colors.white
                             : Colors.black),
