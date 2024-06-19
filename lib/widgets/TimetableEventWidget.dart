@@ -37,41 +37,54 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
         setState(() {});
       },
       child: Container(
-        width: widget.timeRangeLength(widget.pixelsInHour, widget.item.startTime, widget.item.endTime) - widget.minimalPadding * 2,
-        height: widget.itemHeight,
         decoration: BoxDecoration(
-          color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
-              ? AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(1)
-              : AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(0.3),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(6),
-        ),
-        child: Stack(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: ButtonsHelper.getAddToMyProgramButton(
-                  TimetableItem.getTimetableItemTypeAsCanSignIn(widget.item.itemType), () async {
-                if (widget.addToMyProgram != null) {
-                  await widget.addToMyProgram!(widget.item);
-                  setState(() {});
-                }
-              }, () async {
-                if (widget.removeFromMyProgram != null) {
-                  await widget.removeFromMyProgram!(widget.item);
-                  setState(() {});
-                }
-              }, Colors.white),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
-              child: Text(widget.item.text,
-                  style: TextStyle(
-                      color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
-                          ? Colors.white
-                          : Colors.black),
-                  overflow: TextOverflow.fade),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, 4),
             ),
           ],
+        ),
+        child: Container(
+          width: widget.timeRangeLength(widget.pixelsInHour, widget.item.startTime, widget.item.endTime) - widget.minimalPadding * 2,
+          height: widget.itemHeight,
+          decoration: BoxDecoration(
+            color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+                ? AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(1)
+                : AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(0.3),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Stack(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: ButtonsHelper.getAddToMyProgramButton(
+                    TimetableItem.getTimetableItemTypeAsCanSignIn(widget.item.itemType), () async {
+                  if (widget.addToMyProgram != null) {
+                    await widget.addToMyProgram!(widget.item);
+                    setState(() {});
+                  }
+                }, () async {
+                  if (widget.removeFromMyProgram != null) {
+                    await widget.removeFromMyProgram!(widget.item);
+                    setState(() {});
+                  }
+                }, Colors.white),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
+                child: Text(widget.item.text,
+                    style: TextStyle(
+                        color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+                            ? Colors.white
+                            : Colors.black),
+                    overflow: TextOverflow.fade),
+              ),
+            ],
+          ),
         ),
       ),
     );
