@@ -1,4 +1,5 @@
 import 'package:fstapp/services/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -68,14 +69,7 @@ import 'ScheduleTimeline.dart';
       );
     }
 
-  getInitialIndex() {
-      var index = eventsMap.keys.toList().indexOf(DateTime.now().weekday);
-      if(index == -1)
-      {
-        return 0;
-      }
-      return index;
-  }
+  getInitialIndex() => TimeHelper.getIndexFromDays(eventsMap.keys.toList());
 
   String indexToDay(int index)
   {

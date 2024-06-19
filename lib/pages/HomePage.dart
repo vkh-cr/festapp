@@ -18,6 +18,7 @@ import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/tests/DataServiceTests.dart';
@@ -102,6 +103,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           var packageInfo = await PackageInfo.fromPlatform();
                           ToastHelper.Show(
                               "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                          if(RightsHelper.isEditor()) {
+                            setState(() {
+                              TimeHelper.toggleTimeTravel?.call();
+                            });
+                          }
                         },
                         child: SvgPicture.asset(
                           height: 112,

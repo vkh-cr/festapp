@@ -11,6 +11,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fstapp/services/TimeHelper.dart';
+import 'package:fstapp/widgets/TimeTravelWidget.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -114,6 +116,8 @@ Future<void> initializeEverything() async {
 }
 
 class MyApp extends StatefulWidget {
+  bool isTimeTravelVisible = false;
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -124,6 +128,11 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    TimeHelper.toggleTimeTravel = () {
+      setState(() {
+        widget.isTimeTravelVisible = !widget.isTimeTravelVisible;
+      });
+    };
     return MaterialApp.router(
       routerConfig: RouterService.router,
       debugShowCheckedModeBanner: false,
@@ -137,12 +146,8 @@ class _MyAppState extends State<MyApp> {
               child: GestureDetector(
                 onPanUpdate: (d) => setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
                 child: Visibility(
-                  visible: false,
-                  child: FloatingActionButton(
-                    onPressed: () {},
-                    backgroundColor: Colors.black,
-                    child: const Icon(Icons.add),
-                  ),
+                  visible: widget.isTimeTravelVisible,
+                  child: TimeTravelWidget(),
                 ),
               ),
             ),

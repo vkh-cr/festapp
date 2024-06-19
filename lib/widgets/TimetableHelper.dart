@@ -1,7 +1,7 @@
 import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/models/EventModel.dart';
 import 'package:fstapp/models/Tb.dart';
-import 'package:fstapp/widgets/Timetable.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 
 class TimetableItem {
   DateTime startTime;
@@ -49,8 +49,8 @@ class TimetableItem {
 
   factory TimetableItem.fromEventModel(EventModel model) {
     return TimetableItem(
-      startTime: model.startTime,
-      endTime: model.endTime,
+      startTime: model.startTime.eventLocalTime(),
+      endTime: model.endTime.eventLocalTime(),
       itemType: getIndicatorFromEvent(model),
       id: model.id!,
       text: model.toString(),

@@ -1,9 +1,31 @@
+import 'package:fstapp/appConfig.dart';
+
 class TimeHelper {
-  static DateTime Now(){
-    return DateTime(2024,6,21,15,15,0).toLocal();
-    //return DateTime.now();
+  static DateTime? currentTime;
+
+  static void Function()? toggleTimeTravel;
+
+
+  static DateTime now(){
+    if(currentTime != null){
+      return currentTime!;
+    }
+    return DateTime.now();
   }
 
+  static int getIndexFromDays(List<int> weekdays) {
+    var index = weekdays.indexOf(now().weekday);
+    if(index == -1) {
+      return 0;
+    }
+    return index;
+  }
+
+  static double differenceInHours(DateTime start, DateTime end) {
+    int differenceInMillis = end.difference(start).inMilliseconds;
+    double hoursDifference = differenceInMillis / (1000 * 60 * 60);
+    return hoursDifference;
+  }
 }
 
 extension DateTimeExtension on DateTime {
@@ -22,7 +44,16 @@ extension DateTimeExtension on DateTime {
       );
     }
   }
+
   double get hourInDouble {
     return hour + minute / 60.0 + second / 3600.0;
+  }
+
+  DateTime eventLocalTime() {
+    if(AppConfig.isEventTimeUtc && isUtc) {
+      const int offsetHours = -2;
+      return add(const Duration(hours: offsetHours)).toLocal();
+    }
+    return toLocal();
   }
 }

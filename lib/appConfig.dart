@@ -15,6 +15,9 @@ class AppConfig {
   static const String oneSignalAppId = '73f77f22-961a-4ded-9647-e33a7ac14f90';
   static const String defaultLink = "conference2024";
 
+  static const bool isEventTimeUtc = true;
+
+
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
   static const backgroundColor = Color(0xFFFFFFFF);
@@ -34,6 +37,7 @@ class AppConfig {
 
   static const timetableColor = color1;
   static const timetableSelectedColor = color2;
+  static const timetableTimeSplitColor = Colors.red;
 
   static const button1Color = color1;
   static const button2Color = color3;
