@@ -84,11 +84,10 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       DateFormat("EEEE", context.locale.languageCode).format(e).toUpperCase();
 
   void setupTabController(Map<int, String> days) {
-    var currentDayIndex = TimeHelper.getIndexFromDays(days.keys.toList());
-    _currentIndex = currentDayIndex;
+    _currentIndex ??= TimeHelper.getIndexFromDays(days.keys.toList());
 
     if (_tabController?.length != days.length) {
-      _tabController = TabController(vsync: this, length: days.length, initialIndex: currentDayIndex);
+      _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);
     }
     _tabController!.animation?.removeListener(reactionOnIndexChanged);
     _tabController!.animation?.addListener(reactionOnIndexChanged);
@@ -205,7 +204,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
             items: _items
                 .where((element) =>
                     element.startTime.weekday ==
-                    _days.keys.toList()[_currentIndex])
+                    _days.keys.toList()[_currentIndex??0])
                 .toList(),
             timetablePlaces: _timetablePlaces));
   }
@@ -214,6 +213,6 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   final List<TimetableItem> _items = [];
   final Map<int, String> _days = {};
 
-  int _currentIndex = 0;
+  int? _currentIndex;
   final List<TimetablePlace> _timetablePlaces = [];
 }
