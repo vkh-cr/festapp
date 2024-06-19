@@ -84,7 +84,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  "Create your own schedule with button".tr(),
+                                  "Create your own schedule by tapping plus button in a program table".tr(),
                                   style: const TextStyle(fontSize: 18),
                                   textAlign: TextAlign.center,
                                 ),
