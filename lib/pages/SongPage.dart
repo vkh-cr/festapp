@@ -163,7 +163,7 @@ class _SongPageState extends State<SongPage> {
                   child: Container(
                       padding: const EdgeInsets.all(12),
                       alignment: Alignment.centerLeft,
-                      child: Text(_informationList![index].title, textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
+                      child: Text(_informationList![index].title??"-", textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
                 );
               }),
         ),

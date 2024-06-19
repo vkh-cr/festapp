@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/data/DataExtensions.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
@@ -61,7 +62,7 @@ class _InfoPageState extends State<InfoPage> {
                     backgroundColor: AppConfig.backgroundColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: Text(item.title),
+                        title: Text(item.title??""),
                       );
                     },
                     body: Column(
@@ -97,10 +98,36 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    loadDataOffline();
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);
+    if(DataService.canSaveBigData()){
+      await DataService.updateInfoDescription();
+      fillDescriptionsFromOffline();
+    } else {
+      var fullEvents = await DataService.getInfosDescription(_informationList!.map((i)=>i.id!));
+      for(var info in _informationList!) {
+        var infoDesc = fullEvents.firstWhereOrNull((i)=>i.id==info.id);
+        if(infoDesc != null) {
+          info.description = infoDesc.description!;
+        }
+      }
+    }
     setState(() {});
+  }
+
+  void fillDescriptionsFromOffline() {
+    for(var info in _informationList!) {
+      var infoDesc = OfflineDataHelper.getInfoDescription(info.id!.toString());
+      if(infoDesc != null) {
+        info.description = infoDesc.description!;
+      }
+    }
+  }
+
+  void loadDataOffline() {
+    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    fillDescriptionsFromOffline();
   }
 }

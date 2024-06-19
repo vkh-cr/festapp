@@ -154,10 +154,6 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     rebuildTimetable();
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      if (getWindowWidth(context) < scaleDownIfLowerThan) {
-        currentScale = 0.75;
-      }
-
       if(initial) {
         initial = false;
         setNowTime();
@@ -285,7 +281,6 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ),
       );
       stackChildren.add(placeTitles);
-      var now = TimeHelper.now();
 
       var timeline = Transform(
         transform: matrixTimeline,
