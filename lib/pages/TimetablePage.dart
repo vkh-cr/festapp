@@ -7,6 +7,7 @@ import 'package:fstapp/data/DataService.dart';
 import 'package:fstapp/data/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/Timetable.dart';
 import 'package:fstapp/widgets/TimetableHelper.dart';
 
@@ -73,7 +74,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       });
       timetableController.rebuild?.call();
 
-      setupTabController(_days.length);
+      setupTabController(_days);
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
     });
@@ -82,15 +83,23 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   String TimetableDateFormat(DateTime e) =>
       DateFormat("EEEE", context.locale.languageCode).format(e).toUpperCase();
 
-  void setupTabController(int daysCount) {
-    if (_tabController?.length != daysCount) {
-      _tabController = TabController(vsync: this, length: daysCount);
+  void setupTabController(Map<int, String> days) {
+    var currentDayIndex = TimeHelper.getIndexFromDays(days.keys.toList());
+    _currentIndex = currentDayIndex;
+
+    if (_tabController?.length != days.length) {
+      _tabController = TabController(vsync: this, length: days.length, initialIndex: currentDayIndex);
     }
-    _tabController!.addListener(() {
-      setState(() {
-        _currentIndex = _tabController!.index;
-        timetableController.reset?.call();
-      });
+    _tabController!.animation?.removeListener(reactionOnIndexChanged);
+    _tabController!.animation?.addListener(reactionOnIndexChanged);
+    timetableController.reset?.call();
+  }
+
+  void reactionOnIndexChanged() {
+    setState(() {
+      _currentIndex = _tabController!.index;
+      timetableController.reset?.call();
+      timetableController.autoSetPosition?.call();
     });
   }
 
@@ -113,7 +122,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _days.addAll(days);
     }
 
-    setupTabController(_days.length);
+    setupTabController(_days);
     OfflineDataHelper.updateEventsWithMySchedule(_events);
     OfflineDataHelper.updateEventsWithGroupName(_events);
 
