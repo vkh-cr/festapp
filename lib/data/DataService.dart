@@ -429,7 +429,7 @@ class DataService {
     var data = await _supabase.from(Tb.information.table).select();
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
-    infoList.sortBy((element) => element.title.toLowerCase());
+    infoList.sortBy((element) => element.title??"".toLowerCase());
     infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
     return infoList;
   }
@@ -437,11 +437,19 @@ class DataService {
   static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
         .from(Tb.information.table)
-        .select()
+        .select(
+          "${Tb.information.id},"
+          "${Tb.information.updated_at},"
+          "${Tb.information.order},"
+          "${Tb.information.type},"
+          "${Tb.information.title},"
+          "${Tb.information.id}"
+        )
         .eq(Tb.information.is_hidden, false);
+
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
-    infoList.sortBy((element) => element.title.toLowerCase());
+    infoList.sortBy((element) => element.title??"".toLowerCase());
     infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
     return infoList;
   }
@@ -656,6 +664,15 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
+  static Future<List<InformationModel>> getInfosDescription(Iterable<int> ids) async {
+    var data = await _supabase
+        .from(Tb.information.table)
+        .select("${Tb.information.id}, ${Tb.information.updated_at}, ${Tb.information.description}")
+        .inFilter(Tb.information.id, ids.toList());
+    return List<InformationModel>.from(
+        data.map((x) => InformationModel.fromJson(x)));
+  }
+
   static Future<List<EventModel>> getAllEventsMeta() async {
     var data = await _supabase
         .from(Tb.events.table)
@@ -663,6 +680,18 @@ class DataService {
             "${Tb.events.id},"
             "${Tb.events.updated_at}"
         );
+
+    return List<EventModel>.from(
+        data.map((x) => EventModel.fromJson(x)));
+  }
+
+  static Future<List<EventModel>> getAllInfoMeta() async {
+    var data = await _supabase
+        .from(Tb.information.table)
+        .select(
+          "${Tb.information.id},"
+          "${Tb.information.updated_at}"
+    );
 
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -1501,13 +1530,16 @@ class DataService {
     var messages = await getAllNewsMessages();
     OfflineDataHelper.saveAllMessages(messages);
 
-    if (!const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed )
+    if (canSaveBigData() )
     {
       await updateEventDescriptions();
+      await updateInfoDescription();
     }
 
     await DataService.synchronizeMySchedule();
   }
+
+  static bool canSaveBigData() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed ;
 
   static Future<void> updateEventDescriptions() async {
     var needsUpdate = <int>[];
@@ -1523,6 +1555,23 @@ class DataService {
     var fullEvents = await getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
       OfflineDataHelper.saveEventDescription(e);
+    }
+  }
+
+  static Future<void> updateInfoDescription() async {
+    var needsUpdate = <int>[];
+    var allMeta = await getAllInfoMeta();
+
+    for(var e in allMeta) {
+      var oe = OfflineDataHelper.getInfoDescription(e.id.toString());
+      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
+        needsUpdate.add(e.id!);
+      }
+    }
+
+    var fullEvents = await getInfosDescription(needsUpdate);
+    for(var e in fullEvents) {
+      OfflineDataHelper.saveInfoDescription(e);
     }
   }
 
