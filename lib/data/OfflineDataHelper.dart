@@ -13,6 +13,8 @@ import 'package:fstapp/services/StorageHelper.dart';
 class OfflineDataHelper {
   static const String myScheduleOffline = "mySchedule";
   static const String eventsOfflineStorage = "events";
+  static const String informationOfflineStorage = "information";
+
 
   static void saveMyScheduleData(List<int> offlineData) {
     var encoded = jsonEncode(offlineData);
@@ -98,6 +100,12 @@ class OfflineDataHelper {
 
   static EventModel? getEventDescription(String id) =>
       getOffline(id, EventModel.fromJson, eventsOfflineStorage);
+
+  static void saveInfoDescription(InformationModel toSave) =>
+      saveOffline(toSave.id!.toString(), toSave, informationOfflineStorage);
+
+  static InformationModel? getInfoDescription(String id) =>
+      getOffline(id, InformationModel.fromJson, informationOfflineStorage);
 
   static void saveUserInfo(UserInfoModel toSave) =>
       saveOffline(UserInfoModel.userInfoOffline, toSave);
