@@ -259,7 +259,7 @@ class _MapPageState extends State<MapPage> {
       });
       return;
     }
-    await DataService.saveLocation(selectedMarker!.place.id!,
+    await DataService.saveLocation(selectedMarker!.place.id,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove =

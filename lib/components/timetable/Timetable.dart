@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'dart:ui';
 
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';

@@ -38,7 +38,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              widget.marker.place.title!,
+              widget.marker.place.title,
               overflow: TextOverflow.fade,
               softWrap: true,
               style: const TextStyle(

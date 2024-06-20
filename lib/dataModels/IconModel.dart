@@ -1,5 +1,4 @@
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModels/Tb.dart';
 
 class IconModel {
   int? id;
