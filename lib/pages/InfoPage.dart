@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataExtensions.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/InformationModel.dart';
-import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';

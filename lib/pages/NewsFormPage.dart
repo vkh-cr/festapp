@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/data/DataExtensions.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';

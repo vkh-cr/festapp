@@ -1,14 +1,14 @@
-import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/dataModels/NewsModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/data/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../models/NewsModel.dart';
-import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {

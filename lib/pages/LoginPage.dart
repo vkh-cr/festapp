@@ -1,4 +1,5 @@
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -11,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:pwa_install/pwa_install.dart';
-import '../data/DataService.dart';
 import '../styles/Styles.dart';
 
 

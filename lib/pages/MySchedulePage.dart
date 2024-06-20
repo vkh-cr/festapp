@@ -2,13 +2,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/services/ScheduleTimelineHelper.dart';
-import 'package:fstapp/widgets/ScheduleTimeline.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 
-import '../models/EventModel.dart';
 import '../styles/Styles.dart';
 
 class MySchedulePage extends StatefulWidget {

@@ -2,16 +2,16 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/data/DataExtensions.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/widgets/Timetable.dart';
-import 'package:fstapp/widgets/TimetableHelper.dart';
+import 'package:fstapp/components/timetable/Timetable.dart';
+import 'package:fstapp/components/timetable/TimetableHelper.dart';
 
-import '../models/EventModel.dart';
 
 class ProgramViewPage extends StatefulWidget {
   static const ROUTE = "timetable";
