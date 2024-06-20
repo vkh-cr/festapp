@@ -1,31 +1,30 @@
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/dataGrids/DataGridAction.dart';
-import 'package:fstapp/dataGrids/SingleTableDataGrid.dart';
-import 'package:fstapp/models/ExclusiveGroupModel.dart';
-import 'package:fstapp/models/IconModel.dart';
-import 'package:fstapp/models/OccasionModel.dart';
-import 'package:fstapp/models/OccasionUserModel.dart';
-import 'package:fstapp/models/PlaceModel.dart';
-import 'package:fstapp/models/Tb.dart';
-import 'package:fstapp/models/UserGroupInfoModel.dart';
-import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
+import 'package:fstapp/dataModels/IconModel.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/pages/MapPage.dart';
-import 'package:fstapp/dataGrids/DataGridHelper.dart';
-import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/services/MapIconService.dart';
+import 'package:fstapp/components/map/MapIconService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
 import 'HtmlEditorPage.dart';
-import '../models/InformationModel.dart';
 
 class AdministrationPage extends StatefulWidget {
   static const ROUTE = "admin";

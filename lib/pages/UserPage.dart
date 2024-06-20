@@ -4,27 +4,27 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/CompanionHelper.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/LanguageButton.dart';
-import 'package:fstapp/widgets/ScheduleTimeline.dart';
+import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
-import '../data/DataService.dart';
 
 class UserPage extends StatefulWidget {
   static const ROUTE = "user";

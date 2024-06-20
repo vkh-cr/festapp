@@ -1,5 +1,6 @@
-import 'package:fstapp/models/LanguageModel.dart';
-import 'package:fstapp/models/UserGroupInfoModel.dart';
+import 'package:fstapp/dataModels/LanguageModel.dart';
+import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
@@ -9,7 +10,6 @@ import 'package:cross_file/cross_file.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
 
-import '../models/UserInfoModel.dart';
 import '../widgets/DropFile.dart';
 
 class DialogHelper{

@@ -1,6 +1,6 @@
-import 'package:fstapp/models/OccasionUserModel.dart';
-import 'package:fstapp/models/Tb.dart';
-import 'package:fstapp/data/DataService.dart';
+import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ImportHelper.dart';
 import 'package:fstapp/services/NavigationService.dart';

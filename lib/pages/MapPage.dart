@@ -1,57 +1,22 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataExtensions.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/IconModel.dart';
-import 'package:fstapp/services/MapIconService.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fstapp/components/map/MapDescriptionPopup.dart';
+import 'package:fstapp/components/map/MapLocationPinHelper.dart';
+import 'package:fstapp/components/map/MapMarkerWithText.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
-
-import '../models/PlaceModel.dart';
-
-class MarkerWithText extends Marker {
-  LatLng? oldPoint;
-  final PlaceModel place;
-  Function(MarkerWithText marker)? editAction;
-
-  MarkerWithText(
-      {required super.point,
-      required this.place,
-      super.key,
-      super.width,
-      super.height,
-      super.rotate,
-      super.alignment,
-      required super.child,
-      AlignmentGeometry? rotateAlignment,
-      this.editAction,
-      LatLng? oldPoint})
-      : super();
-
-  MarkerWithText cloneWithNewPoint(LatLng point) {
-    return MarkerWithText(
-      oldPoint: oldPoint,
-      place: place,
-      point: point,
-      width: width,
-      height: height,
-      child: child,
-      alignment: alignment,
-      editAction: editAction,
-    );
-  }
-}
 
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
@@ -66,9 +31,9 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   List<IconModel> _icons = [];
-  final List<MarkerWithText> _markers = [];
-  final List<MarkerWithText> _selectedMarkers = [];
-  static MarkerWithText? selectedMarker;
+  final List<MapMarkerWithText> _markers = [];
+  final List<MapMarkerWithText> _selectedMarkers = [];
+  static MapMarkerWithText? selectedMarker;
   String pageTitle = AppConfig.mapTitle;
   bool isOnlyEditMode = false;
 
@@ -101,75 +66,6 @@ class _MapPageState extends State<MapPage> {
       runEditPositionMode(_markers.single);
       isOnlyEditMode = true;
     }
-  }
-
-  Widget type2icon(String? placeType) {
-    SvgPicture? fill;
-    var iconLink = MapIconHelper.getIconAddress(placeType);
-    if (iconLink != null) {
-      fill = SvgPicture.asset(
-        iconLink,
-        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-      );
-    }
-    if (fill != null) {
-      return locationPinOld(fill);
-    }
-    var iconData = _icons.firstWhereOrNull((i)=> i.link == placeType)?.data;
-    if(iconData!=null) {
-      fill = SvgPicture.string(
-        iconData,
-        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-      );
-      return locationPin(fill);
-    }
-    return const Icon(Icons.location_pin, size: 36, color: AppConfig.mapPinColor);
-  }
-
-  Stack locationPin(SvgPicture fill) {
-    return Stack(children: [
-      const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
-      Positioned(
-        top: 7.5,
-        left: 14.5,
-        child: Container(
-            width: 29.0,
-            height: 29.0,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            )),
-      ),
-      Positioned(
-          top: 12,
-          left: 18,
-          width: 21,
-          height: 21,
-          child: Container(alignment: Alignment.center, child: fill))
-    ]);
-  }
-
-  Stack locationPinOld(SvgPicture fill) {
-    return Stack(children: [
-      const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
-      Positioned(
-        top: 7.5,
-        left: 14.5,
-        child: Container(
-            width: 29.0,
-            height: 29.0,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            )),
-      ),
-      Positioned(
-          top: 12,
-          left: 19,
-          width: 19,
-          height: 19,
-          child: Container(alignment: Alignment.center, child: fill))
-    ]);
   }
 
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
@@ -228,23 +124,23 @@ class _MapPageState extends State<MapPage> {
   void addPlacesToMap(List<PlaceModel> places) {
     var mappedMarkers = places
         .map(
-          (place) => MarkerWithText(
-            place: place,
-            point: LatLng(place.getLat(), place.getLng()),
-            width: 60,
-            height: 60,
-            child: type2icon(place.type),
-            alignment: Alignment.topCenter,
-            editAction: runEditPositionMode,
-          ),
-        )
+          (place) => MapMarkerWithText(
+        place: MapPlaceModel.fromPlaceModel(place),
+        point: LatLng(place.getLat(), place.getLng()),
+        width: 60,
+        height: 60,
+        child: MapLocationPinHelper.type2icon(place.type, _icons),
+        alignment: Alignment.topCenter,
+        editAction: runEditPositionMode,
+      ),
+    )
         .toList();
     setState(() {
       mappedMarkers.forEach((m) => _markers.add(m));
     });
   }
 
-  runEditPositionMode(MarkerWithText marker) {
+  runEditPositionMode(MapMarkerWithText marker) {
     _popupLayerController.hideAllPopups();
     marker.oldPoint = marker.point;
     setState(() {
@@ -294,8 +190,8 @@ class _MapPageState extends State<MapPage> {
                   popupDisplayOptions: PopupDisplayOptions(
                       snap: PopupSnap.markerTop,
                       builder: (BuildContext context, Marker marker) {
-                        if (marker is MarkerWithText) {
-                          return MapDescriptionPopup(marker);
+                        if (marker is MapMarkerWithText) {
+                          return MapDescriptionPopup(marker, selectedMarker);
                         }
                         return const SizedBox.shrink();
                       }),
@@ -392,69 +288,4 @@ class _MapPageState extends State<MapPage> {
     loadPlaces(loadOtherGroups: true);
     cancelNewPosition();
   }
-}
-
-class MapDescriptionPopup extends StatefulWidget {
-  final MarkerWithText marker;
-
-  const MapDescriptionPopup(this.marker, {super.key});
-
-  @override
-  State<StatefulWidget> createState() => _MapDescriptionPopupState();
-}
-
-class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _cardDescription(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _cardDescription(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              widget.marker.place.title!,
-              overflow: TextOverflow.fade,
-              softWrap: true,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14.0,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
-            Visibility(
-                visible: RightsHelper.isEditor() ||
-                    (DataService.isGroupLeader() &&
-                        DataService.currentUserGroup()!.place!.id ==
-                            widget.marker.place.id),
-                child: ElevatedButton(
-                    onPressed: _MapPageState.selectedMarker != null
-                        ? null
-                        : changePositionPressed,
-                    child: const Text("Change location").tr())),
-            Text(
-              widget.marker.place.description ?? "",
-              style: const TextStyle(fontSize: 12.0),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void changePositionPressed() => widget.marker.editAction!(widget.marker);
 }
