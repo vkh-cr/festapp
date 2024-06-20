@@ -104,6 +104,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
 
   void loadDataOffline() {
     var places = OfflineDataHelper.getAllPlaces();
+    places.sortPlaces();
     var timetablePlaces = List<TimetablePlace>.from(places
         .where((element) => !element.isHidden)
         .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
