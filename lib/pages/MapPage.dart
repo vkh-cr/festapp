@@ -1,3 +1,4 @@
+import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
@@ -30,7 +31,11 @@ class MapPage extends StatefulWidget {
   State<MapPage> createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
+class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
+
+  static const double singlePlaceZoom = 17.7;
+  late final _animatedMapController = AnimatedMapController(vsync: this);
+
   List<IconModel> _icons = [];
   final List<MapMarkerWithText> _markers = [];
   final List<MapMarkerWithText> _selectedMarkers = [];
@@ -42,7 +47,6 @@ class _MapPageState extends State<MapPage> {
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
 
-  final MapController mapController = MapController();
   FlutterMap? _map;
   LatLng? _mapCenter;
 
@@ -142,7 +146,7 @@ class _MapPageState extends State<MapPage> {
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_map != null) {
-      mapController.move(_mapCenter!, 17);
+      _animatedMapController.animateTo(dest: _mapCenter!, zoom: singlePlaceZoom);
     }
   }
 
@@ -187,7 +191,7 @@ class _MapPageState extends State<MapPage> {
       body: Stack(
         children: [
           _mapCenter == null ? const SizedBox.shrink() : _map = FlutterMap(
-            mapController: mapController,
+            mapController: _animatedMapController.mapController,
             options: MapOptions(
                 interactionOptions: const InteractionOptions(
                   flags: InteractiveFlag.doubleTapDragZoom |

@@ -75,6 +75,7 @@ dependencies:
   image_downloader_web: ^2.0.4
   mobile_scanner: ^5.1.1
   flutter_map_pmtiles: ^1.0.4
+  flutter_map_animations: ^0.7.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1
