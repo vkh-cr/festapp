@@ -1,4 +1,5 @@
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
@@ -18,6 +19,8 @@ class PlaceModel extends IPlutoRowModel {
 
   static const String placesOffline = "places";
   static const String placeObjectColumn = "placeObject";
+
+  List<EventModel> events = [];
 
 
   double getLat() => latLng["lat"];

@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/RightsHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
@@ -31,7 +33,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: Container(
-        constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
+        constraints: const BoxConstraints(minWidth: 100, maxWidth: 300),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -61,6 +63,16 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               widget.marker.place.description ?? "",
               style: const TextStyle(fontSize: 12.0),
             ),
+            if(widget.marker.place.events?.isNotEmpty??false)
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 500),
+                child: SingleChildScrollView(
+                  child: Column(children: [
+                    SizedBox.fromSize(size: const Size.square(12),),
+                    ScheduleTimeline(eventGroups: ScheduleTimelineHelper.splitEventsByDay(widget.marker.place.events!, context))
+                  ],),
+                ),
+              )
           ],
         ),
       ),
