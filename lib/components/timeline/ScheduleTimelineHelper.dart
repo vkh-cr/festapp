@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 
 class ScheduleTimelineHelper{
   static List<EventGroup> splitEventsByAlternativeSplit(Iterable<TimeLineItem> events) {
@@ -62,6 +64,26 @@ class ScheduleTimelineHelper{
     return eventGroups;
   }
 
+  static List<EventGroup> splitEventsByDate(List<TimeLineItem> events, BuildContext context) {
+    List<EventGroup> toReturn = [];
+    if(events.isEmpty){
+      return toReturn;
+    }
+    var fromD = events.first.startTime.subtract(const Duration(days: 1));
+    var fromDate = DateTime(fromD.year, fromD.month, fromD.day);
+    var tested = fromDate.add(const Duration(hours: AppConfig.daySplitHour));
+    
+    while(!tested.isAfter(events.last.startTime)) {
+      var testedPlusDay = tested.add(const Duration(days: 1));
+      var eventsFocused = events.where((e)=>e.startTime.isAfter(tested) && (e.startTime.isAtSameMomentAs(testedPlusDay) || e.startTime.isBefore(testedPlusDay))).toList();
+      if(eventsFocused.isNotEmpty) {
+        toReturn.add(EventGroup(title: eventsFocused.first.startTime.weekdayToString(context), events: eventsFocused, dateTime: tested));
+      }
+      tested = testedPlusDay;
+    }
+    return toReturn;
+  }
+
     static List<EventGroup> splitEventsByTimeOfDay(List<TimeLineItem> events) {
     List<TimeLineItem> morningEvents = events.where((e) => e.startTime.hour <= 12).toList();
     List<TimeLineItem> afternoonEvents = events.where((e) => e.startTime.hour > 12 && e.startTime.hour < 18).toList();
@@ -93,9 +115,10 @@ class AlternativeSplit {
 
 class EventGroup {
   final String title;
+  final DateTime? dateTime;
   final List<TimeLineItem> events;
 
-  EventGroup({required this.title, required this.events});
+  EventGroup({required this.title, required this.events, this.dateTime});
 }
 
 enum DotType {

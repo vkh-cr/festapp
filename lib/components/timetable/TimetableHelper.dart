@@ -1,3 +1,4 @@
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -57,6 +58,11 @@ class TimetableItem {
       eventType: model.type,
       placeId: model.place!.id!,
     );
+  }
+
+  @override
+  DateTime getDateTime() {
+    return startTime;
   }
 }
 

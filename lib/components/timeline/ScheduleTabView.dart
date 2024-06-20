@@ -21,7 +21,7 @@ import 'ScheduleTimeline.dart';
 
   class _ScheduleTabViewState extends State<ScheduleTabView> {
 
-    Map<int, List<TimeLineItem>> eventsMap = {};
+    List<EventGroup> datedEvents = [];
     final List<TimeLineItem> events;
     Function(int)? onEventPressed;
 
@@ -33,10 +33,10 @@ import 'ScheduleTimeline.dart';
 
       List<Widget> programLineChildren = [];
 
-      eventsMap = events.groupListsBy((e)=>e.startTime.weekday);
-      for(var eventsByDay in eventsMap.values)
+      datedEvents = ScheduleTimelineHelper.splitEventsByDate(events, context);
+      for(var eventsByDay in datedEvents)
       {
-        var eventGroups = ScheduleTimelineHelper.splitEvents(eventsByDay);
+        var eventGroups = ScheduleTimelineHelper.splitEvents(eventsByDay.events);
         var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed, key: UniqueKey(),);
         programLineChildren.add(SingleChildScrollView(child: timeline));
       }
@@ -44,10 +44,10 @@ import 'ScheduleTimeline.dart';
         constraints: const BoxConstraints(maxWidth: 400),
         child: DefaultTabController(
           initialIndex: getInitialIndex(),
-          length: eventsMap.length,
+          length: datedEvents.length,
           child: Scaffold(
             appBar: TabBar(
-              isScrollable: eventsMap.length > 4 ? true : false,
+              isScrollable: datedEvents.length > 4 ? true : false,
               unselectedLabelColor: Colors.grey,
               labelColor: AppConfig.timelineTabLabelColor,
               indicatorColor: AppConfig.timelineTabIndicatorColor,
@@ -55,8 +55,8 @@ import 'ScheduleTimeline.dart';
               indicatorSize: TabBarIndicatorSize.label,
               indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
               tabs: [
-                  for(var e in eventsMap.keys)
-                    Tab(child: Text(indexToDay(e), style: timeLineTabNameTextStyle, maxLines: 1,))
+                  for(var e in datedEvents)
+                    Tab(child: Text(indexToDay(e.dateTime!.weekday), style: timeLineTabNameTextStyle, maxLines: 1,))
               ],
             ),
             body: TabBarView(
@@ -67,7 +67,7 @@ import 'ScheduleTimeline.dart';
       );
     }
 
-  getInitialIndex() => TimeHelper.getIndexFromDays(eventsMap.keys.toList());
+  getInitialIndex() => TimeHelper.getIndexFromDays(datedEvents.map((e)=>e.dateTime!.weekday));
 
   String indexToDay(int index)
   {

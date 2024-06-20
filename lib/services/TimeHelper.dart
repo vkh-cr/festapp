@@ -1,4 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:intl/intl.dart';
 
 class TimeHelper {
   static DateTime? currentTime;
@@ -13,8 +16,8 @@ class TimeHelper {
     return DateTime.now();
   }
 
-  static int getIndexFromDays(List<int> weekdays) {
-    var index = weekdays.indexOf(now().weekday);
+  static int getIndexFromDays(Iterable<int> weekdays) {
+    var index = weekdays.toList().indexOf(now().weekday);
     if(index == -1) {
       return 0;
     }
@@ -55,5 +58,9 @@ extension DateTimeExtension on DateTime {
       return add(const Duration(hours: offsetHours)).toLocal();
     }
     return toLocal();
+  }
+
+  String weekdayToString(BuildContext context) {
+    return DateFormat("EEEE", context.locale.languageCode).format(this);
   }
 }

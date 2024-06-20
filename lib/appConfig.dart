@@ -17,6 +17,7 @@ class AppConfig {
 
   static const bool isEventTimeUtc = true;
 
+  static const int daySplitHour = 4;
 
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
