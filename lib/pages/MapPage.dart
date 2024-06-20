@@ -1,5 +1,6 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -33,6 +34,7 @@ class _MapPageState extends State<MapPage> {
   List<IconModel> _icons = [];
   final List<MapMarkerWithText> _markers = [];
   final List<MapMarkerWithText> _selectedMarkers = [];
+  static MapMarkerWithText? focusedMarker;
   static MapMarkerWithText? selectedMarker;
   String pageTitle = AppConfig.mapTitle;
   bool isOnlyEditMode = false;
@@ -73,28 +75,28 @@ class _MapPageState extends State<MapPage> {
     List<PlaceModel> mapOfflinePlaces = [];
     var offlinePlaces = OfflineDataHelper.getAllPlaces();
     _icons = OfflineDataHelper.getAllIcons();
-    offlinePlaces.sortPlaces();
-    if (placeId != null && !loadOtherGroups) {
-      var place = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (place != null) {
-        mapOfflinePlaces = [place];
-        setMapToOnePlace(place);
-      }
-    } else if (loadOtherGroups) {
+    offlinePlaces.sortPlaces(false);
+
+    if (loadOtherGroups) {
       mapOfflinePlaces = offlinePlaces;
     } else {
       mapOfflinePlaces =
           offlinePlaces.where((element) => !element.isHidden).toList();
     }
+
+    addEventsToPlace(mapOfflinePlaces);
     addPlacesToMap(mapOfflinePlaces);
+
+    if(placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p!=null){
+        setMapToOnePlace(p);
+      }
+    }
 
     _icons = await DataService.getAllIcons();
     List<PlaceModel> mapPlaces = [];
-    if (placeId != null && !loadOtherGroups) {
-      var place = await DataService.getPlace(placeId);
-      mapPlaces = [place];
-      setMapToOnePlace(place);
-    } else if (loadOtherGroups) {
+    if (loadOtherGroups) {
       var groups = await DataService.getGroupsWithPlaces();
       for (var element in groups) {
         if (element.place == null) {
@@ -104,39 +106,62 @@ class _MapPageState extends State<MapPage> {
         mapPlaces.add(element.place!);
       }
     } else {
-      mapPlaces = await DataService.getMapPlaces();
+      mapPlaces = await DataService.getAllPlaces();
+      mapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
+      mapPlaces.sortPlaces(false);
+      OfflineDataHelper.saveAllPlaces(mapPlaces);
     }
 
     if (mapPlaces.isNotEmpty) {
       _markers.clear();
+      addEventsToPlace(mapPlaces);
       addPlacesToMap(mapPlaces);
+    }
+
+    if(placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
+        var m = _markers.firstWhere((m)=>m.place.id == placeId);
+        _markers.remove(m);
+        _markers.add(m);
+        focusedMarker = m;
+        _popupLayerController.showPopupsOnlyFor([m]);
+        setMapToOnePlace(p);
+      }
+    }
+  }
+
+  void addEventsToPlace(List<PlaceModel> places) {
+    var events = OfflineDataHelper.getAllEvents();
+    for (var p in places) {
+      var matches = events.where((e) => e.place?.id == p.id);
+      p.events.addAll(matches);
     }
   }
 
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_map != null) {
-      mapController.move(_mapCenter!, mapController.camera.zoom);
+      mapController.move(_mapCenter!, 17);
     }
-    pageTitle = place.title!;
   }
 
   void addPlacesToMap(List<PlaceModel> places) {
-    var mappedMarkers = places
-        .map(
-          (place) => MapMarkerWithText(
-        place: MapPlaceModel.fromPlaceModel(place),
-        point: LatLng(place.getLat(), place.getLng()),
+    var mappedMarkers = places.map((place) {
+      var mapPlace = MapPlaceModel.fromPlaceModel(place);
+      return MapMarkerWithText(
+        place: mapPlace,
+        point: mapPlace.latLng,
         width: 60,
         height: 60,
-        child: MapLocationPinHelper.type2icon(place.type, _icons),
+        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(mapPlace.type, _icons) : null,
         alignment: Alignment.topCenter,
         editAction: runEditPositionMode,
-      ),
-    )
-        .toList();
+      );
+    }).toList();
+
     setState(() {
-      mappedMarkers.forEach((m) => _markers.add(m));
+      _markers.addAll(mappedMarkers);
     });
   }
 
@@ -287,5 +312,9 @@ class _MapPageState extends State<MapPage> {
   void showAllGroups() {
     loadPlaces(loadOtherGroups: true);
     cancelNewPosition();
+  }
+
+  bool isIconVisible(PlaceModel place) {
+    return true;
   }
 }
