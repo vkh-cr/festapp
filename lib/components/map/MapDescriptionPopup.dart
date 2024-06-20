@@ -63,16 +63,16 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               widget.marker.place.description ?? "",
               style: const TextStyle(fontSize: 12.0),
             ),
-            if(widget.marker.place.events?.isNotEmpty??false)
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 500),
-                child: SingleChildScrollView(
-                  child: Column(children: [
-                    SizedBox.fromSize(size: const Size.square(12),),
-                    ScheduleTimeline(eventGroups: ScheduleTimelineHelper.splitEventsByDay(widget.marker.place.events!, context))
-                  ],),
-                ),
-              )
+            // if(widget.marker.place.events?.isNotEmpty??false)
+            //   ConstrainedBox(
+            //     constraints: const BoxConstraints(maxHeight: 500),
+            //     child: SingleChildScrollView(
+            //       child: Column(children: [
+            //         SizedBox.fromSize(size: const Size.square(12),),
+            //         ScheduleTimeline(eventGroups: ScheduleTimelineHelper.splitEventsByDay(widget.marker.place.events!, context))
+            //       ],),
+            //     ),
+            //   )
           ],
         ),
       ),
