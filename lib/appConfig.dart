@@ -39,6 +39,8 @@ class AppConfig {
   static const timetableColor = color1;
   static const timetableSelectedColor = color2;
   static const timetableTimeSplitColor = Colors.red;
+  static const timetableBackground1 = Colors.white60;
+  static const timetableBackground2 = Colors.white;
 
   static const button1Color = color1;
   static const button2Color = color3;
