@@ -41,6 +41,7 @@ class AppConfig {
   static const timetableTimeSplitColor = Colors.red;
   static const timetableBackground1 = Colors.white60;
   static const timetableBackground2 = Colors.white;
+  static const double timetableTimeSplitOpacity = 0.15;
 
   static const button1Color = color1;
   static const button2Color = color3;
