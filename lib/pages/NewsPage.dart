@@ -100,7 +100,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppConfig.newsPageColor.withOpacity(0.10)
+                        color: AppConfig.color1.withOpacity(0.10)
                       ),
                       child: Column(
                         children: [
