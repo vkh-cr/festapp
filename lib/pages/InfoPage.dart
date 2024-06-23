@@ -37,6 +37,7 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.infoPageColor,
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
@@ -59,7 +60,6 @@ class _InfoPageState extends State<InfoPage> {
               children:
                 _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
-                    backgroundColor: AppConfig.infoPageColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
                         title: Text(item.title??"",),
