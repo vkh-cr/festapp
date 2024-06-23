@@ -4,26 +4,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/CompanionHelper.dart';
-import 'package:fstapp/data/DataExtensions.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/CompanionModel.dart';
-import 'package:fstapp/models/UserInfoModel.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/CompanionModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
 
-import '../models/EventModel.dart';
-import '../models/UserGroupInfoModel.dart';
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
 import '../widgets/HtmlView.dart';
-import '../widgets/ScheduleTimeline.dart';
+import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
 class EventPage extends StatefulWidget {
@@ -37,7 +37,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  final List<TimeLineItem> _childDots = [];
+  final List<TimeBlockItem> _childDots = [];
   EventModel? _event;
   UserGroupInfoModel? _groupInfoModel;
 
@@ -275,7 +275,7 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: SingleChildScrollView(
                             child: ScheduleTimeline(
-                                eventGroups: ScheduleTimelineHelper.splitEventsByDay(_childDots, context),
+                                eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
                                 onEventPressed: _eventPressed,
                                 nodePosition: 0.3)))),
                 Visibility(
@@ -439,7 +439,7 @@ class _EventPageState extends State<EventPage> {
       event.childEvents = childEvents;
       _childDots.clear();
       _childDots.addAll(
-          event.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+          event.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
 
       setState(() {
         _event = event;
@@ -477,7 +477,7 @@ class _EventPageState extends State<EventPage> {
     _event = event;
     _childDots.clear();
     _childDots.addAll(
-        _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+        _event!.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
     setState(() {});
   }
 

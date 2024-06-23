@@ -4,11 +4,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/EventModel.dart';
-import 'package:fstapp/models/PlaceModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -17,15 +17,15 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
-import 'package:fstapp/services/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/tests/DataServiceTests.dart';
-import 'package:fstapp/widgets/ScheduleTabView.dart';
+import 'package:fstapp/components/timeline/ScheduleTabView.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -261,7 +261,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 
-  final List<TimeLineItem> _dots = [];
+  final List<TimeBlockItem> _dots = [];
   final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
@@ -270,8 +270,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     for (var e in _events.filterRootEvents()) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
-        dot.rightText = e.toString();
-        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+        dot.data["rightText"] = e.toString();
+        dot.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
       });
     }
     setState(() {});
@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         await loadPlacesForEvents(_events, DataService.getPlacesIn);
       }
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       if (DataService.isLoggedIn()) {
         DataService.countNewMessages().then((value) => {
           setState(() {
@@ -345,7 +345,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       _events.addAll(offlineEvents);
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
     }
     if (DataService.isLoggedIn()) {
       var userInfo = OfflineDataHelper.getUserInfo();

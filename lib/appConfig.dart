@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'models/LanguageModel.dart';
+import 'package:fstapp/dataModels/LanguageModel.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
@@ -17,6 +17,7 @@ class AppConfig {
 
   static const bool isEventTimeUtc = true;
 
+  static const int daySplitHour = 4;
 
   //frosty style
   static const primaryColor = 0xFF0D0D0D;
@@ -45,6 +46,8 @@ class AppConfig {
   static const button4Color = color4;
 
   static const bool isSplitByPlace = false;
+
+  static const int offsetHours = -1;
 
   static Color eventTypeToColor(String? type)
   {

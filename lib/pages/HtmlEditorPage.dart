@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/data/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';

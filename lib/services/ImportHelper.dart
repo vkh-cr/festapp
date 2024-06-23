@@ -1,9 +1,8 @@
-import 'package:fstapp/models/Tb.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:csv/csv.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:intl/intl.dart';
-
-import '../models/UserInfoModel.dart';
 
 class ImportHelper {
 static int getIndex(String s, List<String> row)

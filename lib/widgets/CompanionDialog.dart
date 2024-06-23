@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/data/CompanionHelper.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/models/CompanionModel.dart';
+import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 
 class CompanionDialog extends StatefulWidget {

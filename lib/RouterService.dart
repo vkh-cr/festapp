@@ -1,7 +1,7 @@
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/RightsHelper.dart';
-import 'package:fstapp/models/PlaceModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';

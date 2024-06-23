@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/data/DataService.dart';
-import 'package:fstapp/data/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
