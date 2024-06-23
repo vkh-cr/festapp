@@ -34,6 +34,8 @@ class AppConfig {
   static const timelineColor = color1;
   static const mapPinColor = color1;
   static const newsPageColor = color1;
+  static const infoPageColor = backgroundColor;
+
   static const profileButtonColor = color1;
 
   static const timetableColor = color1;

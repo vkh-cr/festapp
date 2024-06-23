@@ -59,10 +59,10 @@ class _InfoPageState extends State<InfoPage> {
               children:
                 _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
-                    backgroundColor: AppConfig.color1,
+                    backgroundColor: AppConfig.infoPageColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: Text(item.title??"", style: const TextStyle(color: Colors.white),),
+                        title: Text(item.title??"",),
                       );
                     },
                     body: Column(
@@ -83,7 +83,7 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? "", color: Colors.white,),
+                        child: HtmlView(html: item.description ?? ""),
                       )],
                     ),
                     isExpanded: item.isExpanded,
