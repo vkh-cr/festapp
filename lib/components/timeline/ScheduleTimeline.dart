@@ -97,12 +97,12 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           if(event.timeBlockType == TimeBlockType.signedIn) {
             return const OutlinedDotIndicator(
               color: AppConfig.timelineColor,
-              borderWidth: 2,
+              borderWidth: 6,
             );
           } else if(event.timeBlockType == TimeBlockType.canSignIn) {
             return const OutlinedDotIndicator(
               color: AppConfig.timelineColor,
-              borderWidth: 6,
+              borderWidth: 2,
             );
           } else {
             return const Padding(
