@@ -33,7 +33,7 @@ class AppConfig {
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
   static const mapPinColor = color1;
-  static const newsPageColor = color1;
+  static const newsPageColor = backgroundColor;
   static const infoPageColor = backgroundColor;
 
   static const profileButtonColor = color1;
