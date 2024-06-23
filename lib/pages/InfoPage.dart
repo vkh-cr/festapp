@@ -60,6 +60,7 @@ class _InfoPageState extends State<InfoPage> {
               children:
                 _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
+                    backgroundColor: AppConfig.color1,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
                         title: Text(item.title??"",),
