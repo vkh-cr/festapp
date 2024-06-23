@@ -237,7 +237,7 @@ class _UserPageState extends State<UserPage> {
                                               maxWidth: 600,
                                             ),
                                               child: ScheduleTimeline(
-                                                  eventGroups: ScheduleTimelineHelper.splitEventsByDay(companion.dots, context),
+                                                  eventGroups: TimeBlockHelper.splitTimeBlocksByDay(companion.timeBlocks, context),
                                                   onEventPressed: (eventId) async {
                                                     await RouterService.navigateOccasion(
                                                         context,
@@ -462,7 +462,7 @@ class _UserPageState extends State<UserPage> {
                   var match = events.firstWhereOrNull((e) => e.id == ei);
                   if (match != null) {c.schedule!.add(match);}
                 }
-                c.dots.addAll(c.schedule!.map((e) => TimeLineItem.forCompanion(e)));
+                c.timeBlocks.addAll(c.schedule!.map((e) => TimeBlockItem.forCompanion(e)));
             });
   }
 }

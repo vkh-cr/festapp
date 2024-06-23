@@ -37,7 +37,7 @@ class EventPage extends StatefulWidget {
 }
 
 class _EventPageState extends State<EventPage> {
-  final List<TimeLineItem> _childDots = [];
+  final List<TimeBlockItem> _childDots = [];
   EventModel? _event;
   UserGroupInfoModel? _groupInfoModel;
 
@@ -275,7 +275,7 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: SingleChildScrollView(
                             child: ScheduleTimeline(
-                                eventGroups: ScheduleTimelineHelper.splitEventsByDay(_childDots, context),
+                                eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
                                 onEventPressed: _eventPressed,
                                 nodePosition: 0.3)))),
                 Visibility(
@@ -439,7 +439,7 @@ class _EventPageState extends State<EventPage> {
       event.childEvents = childEvents;
       _childDots.clear();
       _childDots.addAll(
-          event.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+          event.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
 
       setState(() {
         _event = event;
@@ -477,7 +477,7 @@ class _EventPageState extends State<EventPage> {
     _event = event;
     _childDots.clear();
     _childDots.addAll(
-        _event!.childEvents.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+        _event!.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
     setState(() {});
   }
 

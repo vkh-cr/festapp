@@ -2,11 +2,11 @@ import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timetable/TimelineWidget.dart';
-import 'package:fstapp/components/timetable/TimetableHelper.dart';
 import 'package:fstapp/components/timetable/TimetableItemsWidget.dart';
 
 class TimetableController {
@@ -29,8 +29,8 @@ class Timetable extends StatefulWidget {
     this.controller
   });
 
-  final List<TimetableItem> items;
-  final List<TimetablePlace> timetablePlaces;
+  final List<TimeBlockItem> items;
+  final List<TimeBlockPlace> timetablePlaces;
 
   @override
   State<Timetable> createState() => _TimetableState(controller);
@@ -70,8 +70,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   DateTime? startTime;
   DateTime? endTime;
 
-  List<TimetableItem> usedItems = [];
-  List<TimetablePlace> usedPlaces = [];
+  List<TimeBlockItem> usedItems = [];
+  List<TimeBlockPlace> usedPlaces = [];
 
   late TimetableItemsWidget allItems;
   late IgnorePointer timeNow;
@@ -160,9 +160,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void rebuildTimetable() {
-    usedItems = <TimetableItem>[];
+    usedItems = <TimeBlockItem>[];
     for(var item in widget.items) {
-      if(widget.timetablePlaces.map((e) => e.id).contains(item.placeId)) {
+      if(widget.timetablePlaces.map((e) => e.id).contains(item.timeBlockPlace?.id)) {
         //remove invalid items
         if(item.endTime.isBefore(item.startTime)) {
           continue;
@@ -171,9 +171,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       }
     }
 
-    usedPlaces = <TimetablePlace>[];
+    usedPlaces = <TimeBlockPlace>[];
     for(var item in widget.timetablePlaces) {
-      if(usedItems.map((e) => e.placeId).contains(item.id)) {
+      if(usedItems.map((e) => e.timeBlockPlace?.id).contains(item.id)) {
         usedPlaces.add(item);
       }
     }
@@ -388,19 +388,19 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     );
   }
 
-  Future<void> addToMyProgram(TimetableItem item) async {
+  Future<void> addToMyProgram(TimeBlockItem item) async {
     if(!await DataService.addToMySchedule(item.id)) {
       return;
     }
     setState(() {
-      item.itemType = TimetableItemType.saved;
+      item.timeBlockType = TimeBlockType.saved;
     });
   }
 
-  Future<void> removeFromMyProgram(TimetableItem item) async {
+  Future<void> removeFromMyProgram(TimeBlockItem item) async {
     await DataService.removeFromMySchedule(item.id);
     setState(() {
-      item.itemType = TimetableItemType.canSave;
+      item.timeBlockType = TimeBlockType.canSave;
     });
   }
 

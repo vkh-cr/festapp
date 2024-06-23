@@ -54,7 +54,7 @@ extension DateTimeExtension on DateTime {
 
   DateTime eventLocalTime() {
     if(AppConfig.isEventTimeUtc && isUtc) {
-      const int offsetHours = -2;
+      const int offsetHours = AppConfig.offsetHours;
       return add(const Duration(hours: offsetHours)).toLocal();
     }
     return toLocal();

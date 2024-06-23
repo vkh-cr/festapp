@@ -47,6 +47,8 @@ class AppConfig {
 
   static const bool isSplitByPlace = false;
 
+  static const int offsetHours = -1;
+
   static Color eventTypeToColor(String? type)
   {
     switch (type){

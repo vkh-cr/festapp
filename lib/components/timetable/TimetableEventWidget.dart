@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/components/timetable/TimetableHelper.dart';
 
 class TimetableEventWidget extends StatefulWidget {
-  final TimetableItem item;
+  final TimeBlockItem item;
   final double pixelsInHour;
   final double minimalPadding;
   final double itemHeight;
   final Function(int)? onItemTap;
-  final Future<void> Function(TimetableItem)? addToMyProgram;
-  final Future<void> Function(TimetableItem)? removeFromMyProgram;
+  final Future<void> Function(TimeBlockItem)? addToMyProgram;
+  final Future<void> Function(TimeBlockItem)? removeFromMyProgram;
   final double Function(double, DateTime, DateTime) timeRangeLength;
 
   const TimetableEventWidget({super.key,
@@ -52,7 +52,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           width: widget.timeRangeLength(widget.pixelsInHour, widget.item.startTime, widget.item.endTime) - widget.minimalPadding * 2,
           height: widget.itemHeight,
           decoration: BoxDecoration(
-            color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+            color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
                 ? AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(1)
                 : AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(0.3),
             borderRadius: BorderRadius.circular(6),
@@ -62,7 +62,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: ButtonsHelper.getAddToMyProgramButton(
-                    TimetableItem.getTimetableItemTypeAsCanSignIn(widget.item.itemType), () async {
+                    TimeBlockHelper.getTimetableItemTypeAsCanSignIn(widget.item.timeBlockType), () async {
                   if (widget.addToMyProgram != null) {
                     await widget.addToMyProgram!(widget.item);
                     setState(() {});
@@ -76,12 +76,12 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
-                child: Text(widget.item.text,
+                child: Text(widget.item.data.toString(),
                     style: TextStyle(
-                      fontWeight: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+                      fontWeight: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
                             ? FontWeight.bold
                             : FontWeight.normal,
-                        color: (widget.item.itemType == TimetableItemType.saved || widget.item.itemType == TimetableItemType.signedIn)
+                        color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
                             ? Colors.white
                             : Colors.black),
                     overflow: TextOverflow.fade),

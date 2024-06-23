@@ -261,7 +261,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
   }
 
-  final List<TimeLineItem> _dots = [];
+  final List<TimeBlockItem> _dots = [];
   final List<EventModel> _events = [];
 
   Future<void> loadEventParticipants() async {
@@ -270,8 +270,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     for (var e in _events.filterRootEvents()) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
-        dot.rightText = e.toString();
-        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+        dot.data["rightText"] = e.toString();
+        dot.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
       });
     }
     setState(() {});
@@ -303,7 +303,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         await loadPlacesForEvents(_events, DataService.getPlacesIn);
       }
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       if (DataService.isLoggedIn()) {
         DataService.countNewMessages().then((value) => {
           setState(() {
@@ -345,7 +345,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       _events.addAll(offlineEvents);
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeLineItem.fromEventModel(e, AppConfig.isSplitByPlace)));
+      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
     }
     if (DataService.isLoggedIn()) {
       var userInfo = OfflineDataHelper.getUserInfo();
