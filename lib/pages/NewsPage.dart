@@ -58,8 +58,8 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.newsPageColor,
       appBar: AppBar(
-        backgroundColor: AppConfig.newsPageColor,
         title: const Text("News").tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),

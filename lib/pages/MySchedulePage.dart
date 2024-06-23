@@ -32,7 +32,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     await DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
-      _dots.addAll(_events.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+      _dots.addAll(_events.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
     });
@@ -54,7 +54,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
     _events.addAll(myEvents);
 
     _dots.clear();
-    _dots.addAll(_events.map((e) => TimeLineItem.fromEventModelAsChild(e)));
+    _dots.addAll(_events.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
     setState(() {});
   }
 
@@ -73,7 +73,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
                 constraints: BoxConstraints(maxWidth: appMaxWidth),
                 child: SingleChildScrollView(
                     child: ScheduleTimeline(
-                  eventGroups: ScheduleTimelineHelper.splitEventsByDay(_dots, context),
+                  eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots, context),
                   onEventPressed: _eventPressed,
                   nodePosition: 0.3,
                   emptyContent: Center(
@@ -102,16 +102,16 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   final List<EventModel> _events = [];
-  final List<TimeLineItem> _dots = [];
+  final List<TimeBlockItem> _dots = [];
 
   Future<void> loadEventParticipants() async {
     await DataService.loadEventsParticipantsAndStatus(_events);
     for (var e in _events) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
-        dot.rightText = e.toString();
-        dot.leftText = e.durationTimeString();
-        dot.dotType = TimeLineItem.getIndicatorFromEvent(e);
+        dot.data["rightText"] = e.toString();
+        dot.data["leftText"] = e.durationTimeString();
+        dot.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
       });
     }
   }

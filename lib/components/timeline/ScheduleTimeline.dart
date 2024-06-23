@@ -7,7 +7,7 @@ import 'package:fstapp/appConfig.dart';
 
 class ScheduleTimeline extends StatefulWidget {
   final Function(int)? onEventPressed;
-  final List<EventGroup> eventGroups;
+  final List<TimeBlockGroup> eventGroups;
   final double? nodePosition;
   final Widget? emptyContent;
 
@@ -56,7 +56,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
     );
   }
 
-  Timeline createTimeline(List<TimeLineItem> events) {
+  Timeline createTimeline(List<TimeBlockItem> events) {
     return Timeline.tileBuilder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -73,7 +73,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              event.leftText,
+              event.data["leftText"],
               style: timeLineSmallTextStyle,
             ),
           );
@@ -87,22 +87,29 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               alignment: Alignment.centerLeft,
             ),
             child: Text(
-              event.rightText,
+              event.data["rightText"],
               style: timeLineSmallTextStyle,
             ),
           );
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
-          return event.dotType != DotType.dot
-              ? OutlinedDotIndicator(
-            color: AppConfig.timelineColor,
-            borderWidth: event.dotType == DotType.closed ? 6 : 2,
-          )
-              : const Padding(
-            padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-            child: DotIndicator(color: AppConfig.timelineColor, size: 8),
-          );
+          if(event.timeBlockType == TimeBlockType.signedIn) {
+            return const OutlinedDotIndicator(
+              color: AppConfig.timelineColor,
+              borderWidth: 2,
+            );
+          } else if(event.timeBlockType == TimeBlockType.canSignIn) {
+            return const OutlinedDotIndicator(
+              color: AppConfig.timelineColor,
+              borderWidth: 6,
+            );
+          } else {
+            return const Padding(
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
+              child: DotIndicator(color: AppConfig.timelineColor, size: 8),
+            );
+          }
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

@@ -1,7 +1,8 @@
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -10,7 +11,6 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/components/timetable/Timetable.dart';
-import 'package:fstapp/components/timetable/TimetableHelper.dart';
 
 
 class ProgramViewPage extends StatefulWidget {
@@ -56,24 +56,21 @@ class _ProgramViewPageState extends State<ProgramViewPage>
 
       var places = await DataService.getPlacesIn(placeIds);
 
-      var timetablePlaces = List<TimetablePlace>.from(places
+      var timetablePlaces = List<TimeBlockPlace>.from(places
           .where((element) => !element.isHidden)
-          .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
+          .map((x) => TimeBlockPlace.fromPlaceModel(x)));
       _timetablePlaces.clear();
       _timetablePlaces.addAll(timetablePlaces);
 
       _items.clear();
       _items.addAll(_events
           .timetableEventsFilter(Timetable.minimalDurationMinutes)
-          .map((e) => TimetableItem.fromEventModel(e)));
-      _days.clear();
-      var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
-      _days.addAll({
-        for (var e in eventsGrouped.values)
-          e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
-      });
+          .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
+
       timetableController.rebuild?.call();
 
+      _days.clear();
+      _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
       setupTabController(_days);
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
@@ -81,10 +78,10 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   String TimetableDateFormat(DateTime e) =>
-      DateFormat("EEEE", context.locale.languageCode).format(e).toUpperCase();
+      DateFormat("EEEE", context.locale.languageCode).format(e);
 
-  void setupTabController(Map<int, String> days) {
-    _currentIndex ??= TimeHelper.getIndexFromDays(days.keys.toList());
+  void setupTabController(List<TimeBlockGroup> days) {
+    _currentIndex ??= TimeHelper.getIndexFromDays(days.map((d)=>d.dateTime!.weekday));
 
     if (_tabController?.length != days.length) {
       _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);
@@ -105,42 +102,38 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   void loadDataOffline() {
     var places = OfflineDataHelper.getAllPlaces();
     places.sortPlaces();
-    var timetablePlaces = List<TimetablePlace>.from(places
+    var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
-        .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
+        .map((x) => TimeBlockPlace.fromPlaceModel(x)));
     _timetablePlaces.clear();
     _timetablePlaces.addAll(timetablePlaces);
 
     if (_events.isEmpty) {
       var offlineEvents = OfflineDataHelper.getAllEvents();
       _events.addAll(offlineEvents);
-      var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
-      var days = {
-        for (var e in eventsGrouped.values)
-          e.first.startTime.weekday: TimetableDateFormat(e.first.startTime)
-      };
-      _days.addAll(days);
     }
 
-    setupTabController(_days);
     OfflineDataHelper.updateEventsWithMySchedule(_events);
     OfflineDataHelper.updateEventsWithGroupName(_events);
 
     _items.clear();
-    _items.addAll(_events
+    var items = _events
         .timetableEventsFilter(Timetable.minimalDurationMinutes)
-        .map((e) => TimetableItem.fromEventModel(e)));
+        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)).toList();
+
+    _days.clear();
+    _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour));
+    setupTabController(_days);
     setState(() {});
   }
 
   Future<void> loadEventParticipants() async {
     await DataService.loadEventsParticipantsAndStatus(_events);
-    for (var e
-        in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
+    for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
-        item.text = e.toString();
-        item.itemType = TimetableItem.getIndicatorFromEvent(e);
+        item.data = e.toString();
+        item.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
       });
     }
   }
@@ -169,7 +162,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                         (i) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: Text(
-                              _days.values.toList()[i],
+                              _days[i].title,
                             )))),
               );
             }),
@@ -202,18 +195,14 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         ),
         body: Timetable(
             controller: timetableController,
-            items: _items
-                .where((element) =>
-                    element.startTime.weekday ==
-                    _days.keys.toList()[_currentIndex??0])
-                .toList(),
+            items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces));
   }
 
   final List<EventModel> _events = [];
-  final List<TimetableItem> _items = [];
-  final Map<int, String> _days = {};
+  final List<TimeBlockItem> _items = [];
+  final List<TimeBlockGroup> _days = [];
 
   int? _currentIndex;
-  final List<TimetablePlace> _timetablePlaces = [];
+  final List<TimeBlockPlace> _timetablePlaces = [];
 }

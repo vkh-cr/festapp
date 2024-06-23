@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timetable/TimetableHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/components/timetable/TimetableEventWidget.dart';
 
 class TimetableItemsWidget extends StatefulWidget {
-  final List<TimetableItem> usedItems;
-  final List<TimetablePlace> usedPlaces;
+  final List<TimeBlockItem> usedItems;
+  final List<TimeBlockPlace> usedPlaces;
   final double pixelsInHour;
   final double minimalPadding;
   final double placeTitleHeight;
@@ -12,8 +13,8 @@ class TimetableItemsWidget extends StatefulWidget {
   final double timelineHeight;
   final double height;
   final Function(int)? onItemTap;
-  final Future<void> Function(TimetableItem)? addToMyProgram;
-  final Future<void> Function(TimetableItem)? removeFromMyProgram;
+  final Future<void> Function(TimeBlockItem)? addToMyProgram;
+  final Future<void> Function(TimeBlockItem)? removeFromMyProgram;
   final double Function(double, DateTime, DateTime) timeRangeLength;
   final DateTime startTime;
   final DateTime endTime;
@@ -61,7 +62,7 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
               left: BorderSide(width: 0.25, color: Colors.grey),
               right: BorderSide(width: 0.25, color: Colors.grey),
             ),
-            color: i % 2 == 0 ? Colors.white60 : Colors.white,
+            color: i % 2 == 0 ? AppConfig.timetableBackground1 : AppConfig.timetableBackground2,
             // boxShadow: i % 2 == 0 ? [] : [
             //   BoxShadow(
             //     color: Colors.black26,
@@ -76,7 +77,7 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
 
     for (var p = 0; p < widget.usedPlaces.length; p++) {
       var pItems = widget.usedItems
-          .where((element) => element.placeId == widget.usedPlaces[p].id)
+          .where((element) => element.timeBlockPlace?.id == widget.usedPlaces[p].id)
           .toList();
       for (var i = 0; i < pItems.length; i++) {
         var item = pItems[i];

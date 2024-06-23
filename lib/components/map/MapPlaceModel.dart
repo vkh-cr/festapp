@@ -9,7 +9,7 @@ class MapPlaceModel {
   final String? type;
   final LatLng latLng;
   final int? icon;
-  final List<TimeLineItem>? events;
+  final List<TimeBlockItem>? events;
 
   MapPlaceModel({
     required this.id,
@@ -29,7 +29,7 @@ class MapPlaceModel {
       type: place.type,
       latLng: LatLng(place.getLat(), place.getLng()),
       icon: place.icon,
-      events: place.events != null ? List<TimeLineItem>.from(place.events.map((e)=>TimeLineItem.fromEventModel(e))) : null
+      events: place.events != null ? List<TimeBlockItem>.from(place.events.map((e)=>TimeBlockItem.fromEventModel(e))) : null
     );
   }
 }

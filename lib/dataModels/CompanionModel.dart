@@ -6,7 +6,7 @@ class CompanionModel {
   final String name;
   List<int> eventIds;
   List<EventModel>? schedule = [];
-  List<TimeLineItem> dots = [];
+  List<TimeBlockItem> timeBlocks = [];
 
   CompanionModel({required this.id, required this.name, required this.eventIds});
 

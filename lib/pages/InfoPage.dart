@@ -37,6 +37,7 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.infoPageColor,
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
@@ -59,10 +60,10 @@ class _InfoPageState extends State<InfoPage> {
               children:
                 _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
                   return ExpansionPanel(
-                    backgroundColor: AppConfig.backgroundColor,
+                    backgroundColor: AppConfig.color1,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: Text(item.title??""),
+                        title: Text(item.title??"",),
                       );
                     },
                     body: Column(
@@ -86,8 +87,8 @@ class _InfoPageState extends State<InfoPage> {
                         child: HtmlView(html: item.description ?? ""),
                       )],
                     ),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true
+                    isExpanded: item.isExpanded,
+                    canTapOnHeader: true
                   );
                 }).toList(),
             ),
