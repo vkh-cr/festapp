@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html,
-      {required ColumnMode renderMode, super.textStyle});
+      {required ColumnMode renderMode, super.textStyle, super.customStylesBuilder});
 
   final BuildContext context;
 
@@ -33,9 +34,15 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
 
 class HtmlView extends StatefulWidget {
   final String html;
-  double? fontSize;
+  final double? fontSize;
+  Color? color;
 
-  HtmlView({super.key, required this.html, this.fontSize = 18});
+  HtmlView({
+    Key? key,
+    required this.html,
+    this.fontSize = 18,
+    this.color = AppConfig.defaultHtmlViewColor,
+  }) : super(key: key);
 
   @override
   _HtmlViewState createState() => _HtmlViewState();
@@ -46,20 +53,32 @@ class _HtmlViewState extends State<HtmlView> {
 
   @override
   Widget build(BuildContext context) {
+    String widgetColor;
+    if (widget.color != null) {
+      widgetColor = '#${widget.color?.value.toRadixString(16)}';
+    } else {
+      widgetColor = "";
+    }
+
     return HtmlWithAppLinksWidget(
-      // the first parameter (`html`) is required
       context,
       widget.html,
-      // select the render mode for HTML body
-      // by default, a simple `Column` is rendered
-      // consider using `ListView` or `SliverList` for better performance
       renderMode: RenderMode.column,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
         fontFamily: "Futura",
-        color: Colors.black,
+        color: widget.color,
         inherit: false,
       ),
+      customStylesBuilder: (element) {
+        final tagName = element.localName;
+        if (tagName == 'a') {
+          return {
+            'color': widgetColor,
+          };
+        }
+        return null;
+      },
     );
   }
 }
