@@ -162,7 +162,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                         (i) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: Text(
-                              _days[i].title,
+                              _days[i].title.toUpperCase(),
                             )))),
               );
             }),
