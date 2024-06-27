@@ -52,13 +52,32 @@ Links to Appstore/Play Store versions are usually saved in info section.
 ---
 ## Latest development
 
+**2024.06**
+- Optimized data usage for events and information.
+- Enabled custom icons for map places.
+- Zooming in/out for Timetable.
+- Displaying current time in Timetable and Time Travel component.
+- Generated QR code for users and companions.
+- Approver page for checking QR codes and workshop attendees.
+
+**2024.05**
+- User registration flow and sign-up page.
+- Companion feature: Users can create a limited number of companions and assign them to workshops.
+
+**2024.04**
+- Reset password flow.
+- Enabled event type and hiding.
+
+**2024.03**
+- Specialized page for song lyrics.
+- Database and URL support for multiple events.
+
 **2024.01**
 - Full support for offline display mode (if connection is not available, data from cache will be used). Simply open the application once and data will be loaded in the background.
 - Timetable display of the program (scrollable page with a time axis and locations).
 - Creation of my program using the + button (even without the need to log in).
 - Full support for URLs (ability to link to pages in the web version of the application).
 - Ukrainian language added among the languages.
-- Minor bug fixes.
 
 ---
 ## About
