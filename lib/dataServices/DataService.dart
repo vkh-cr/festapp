@@ -608,7 +608,7 @@ class DataService {
   }
 
   static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
-    var events = OfflineDataHelper.getMyScheduleData();
+    var events = await OfflineDataHelper.getMyScheduleData();
     var localData = await _supabase.from(Tb.events.table)
         .select("${Tb.events.id},"
         "${Tb.events.title},"
@@ -870,7 +870,7 @@ class DataService {
         .single();
     var event = EventModel.fromJson(data);
 
-    var cachedEvent = OfflineDataHelper.getEventDescription(eventId.toString());
+    var cachedEvent = await OfflineDataHelper.getEventDescription(eventId.toString());
     if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
       var descrEvent = await getEventsDescription([event.id!]);
       event.description = descrEvent[0].description;
@@ -882,7 +882,7 @@ class DataService {
       event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
       event.isSignedIn = await isCurrentUserSignedToEvent(event.id!);
     } else {
-      event.isEventInMySchedule = OfflineDataHelper.isEventSaved(event.id!);
+      event.isEventInMySchedule = await OfflineDataHelper.isEventSaved(event.id!);
     }
 
     if(event.childEventIds!=null)
@@ -1545,7 +1545,7 @@ class DataService {
     var allEventsMeta = await getAllEventsMeta();
 
     for(var e in allEventsMeta) {
-      var oe = OfflineDataHelper.getEventDescription(e.id.toString());
+      var oe = await OfflineDataHelper.getEventDescription(e.id.toString());
       if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
           needsUpdate.add(e.id!);
       }
@@ -1562,7 +1562,7 @@ class DataService {
     var allMeta = await getAllInfoMeta();
 
     for(var e in allMeta) {
-      var oe = OfflineDataHelper.getInfoDescription(e.id.toString());
+      var oe = await OfflineDataHelper.getInfoDescription(e.id.toString());
       if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
         needsUpdate.add(e.id!);
       }

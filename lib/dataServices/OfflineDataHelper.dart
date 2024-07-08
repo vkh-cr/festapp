@@ -15,14 +15,13 @@ class OfflineDataHelper {
   static const String eventsOfflineStorage = "events";
   static const String informationOfflineStorage = "information";
 
-
-  static void saveMyScheduleData(List<int> offlineData) {
+  static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
-    StorageHelper.Set(myScheduleOffline, encoded);
+    await StorageHelper.set(myScheduleOffline, encoded);
   }
 
-  static List<int> getMyScheduleData() {
-    var eventData = StorageHelper.Get(myScheduleOffline);
+  static Future<List<int>> getMyScheduleData() async {
+    var eventData = await StorageHelper.get(myScheduleOffline);
     if (eventData == null) {
       return <int>[];
     }
@@ -30,44 +29,39 @@ class OfflineDataHelper {
     return List<int>.from(offlineData.map((x) => x));
   }
 
-  static void addToMySchedule(int id) {
-    var offlineData = getMyScheduleData();
+  static Future<void> addToMySchedule(int id) async {
+    var offlineData = await getMyScheduleData();
     offlineData.add(id);
-    saveMyScheduleData(offlineData);
+    await saveMyScheduleData(offlineData);
   }
 
-  static void addAllToMySchedule(List<int> ids) {
-    var offlineData = getMyScheduleData();
+  static Future<void> addAllToMySchedule(List<int> ids) async {
+    var offlineData = await getMyScheduleData();
     offlineData.addAll(ids);
-    saveMyScheduleData(offlineData);
+    await saveMyScheduleData(offlineData);
   }
 
-  static void removeFromMySchedule(int id) {
-    var offlineData = getMyScheduleData();
+  static Future<void> removeFromMySchedule(int id) async {
+    var offlineData = await getMyScheduleData();
     offlineData.remove(id);
-    saveMyScheduleData(offlineData);
+    await saveMyScheduleData(offlineData);
   }
 
-  static bool isEventSaved(int id) {
-    var offlineData = getMyScheduleData();
+  static Future<bool> isEventSaved(int id) async {
+    var offlineData = await getMyScheduleData();
     return offlineData.contains(id);
   }
 
-  static void updateEventsWithMySchedule(Iterable<EventModel> events) {
-    var myScheduleIds = getMyScheduleData();
+  static Future<void> updateEventsWithMySchedule(Iterable<EventModel> events) async {
+    var myScheduleIds = await getMyScheduleData();
     for (var e in events) {
-      if (myScheduleIds.contains(e.id!)) {
-        e.isEventInMySchedule = true;
-      }
-      else{
-        e.isEventInMySchedule = false;
-      }
+      e.isEventInMySchedule = myScheduleIds.contains(e.id!);
     }
   }
 
-  static void updateEventsWithGroupName(Iterable<EventModel> events) {
-    var me = getUserInfo();
-    if(me?.userGroup!=null) {
+  static Future<void> updateEventsWithGroupName(Iterable<EventModel> events) async {
+    var me = await getUserInfo();
+    if (me?.userGroup != null) {
       for (var e in events) {
         if (e.isGroupEvent) {
           e.title = me!.userGroup!.title;
@@ -77,104 +71,103 @@ class OfflineDataHelper {
     }
   }
 
-  static void saveAllMessages(List<NewsModel> toSave) =>
+  static Future<void> saveAllMessages(List<NewsModel> toSave) =>
       saveAllOffline(NewsModel.newsOffline, toSave);
 
-  static List<NewsModel> getAllMessages() =>
+  static Future<List<NewsModel>> getAllMessages() =>
       getAllOffline(NewsModel.newsOffline, NewsModel.fromJson);
 
-  static void saveAllPlaces(List<PlaceModel> toSave) =>
+  static Future<void> saveAllPlaces(List<PlaceModel> toSave) =>
       saveAllOffline(PlaceModel.placesOffline, toSave);
 
-  static void saveAllIcons(List<IconModel> toSave) =>
+  static Future<void> saveAllIcons(List<IconModel> toSave) =>
       saveAllOffline(IconModel.iconsOffline, toSave);
 
-  static List<PlaceModel> getAllPlaces() =>
+  static Future<List<PlaceModel>> getAllPlaces() =>
       getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
 
-  static List<IconModel> getAllIcons() =>
+  static Future<List<IconModel>> getAllIcons() =>
       getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
 
-  static void saveEventDescription(EventModel toSave) =>
+  static Future<void> saveEventDescription(EventModel toSave) =>
       saveOffline(toSave.id!.toString(), toSave, eventsOfflineStorage);
 
-  static EventModel? getEventDescription(String id) =>
+  static Future<EventModel?> getEventDescription(String id) =>
       getOffline(id, EventModel.fromJson, eventsOfflineStorage);
 
-  static void saveInfoDescription(InformationModel toSave) =>
+  static Future<void> saveInfoDescription(InformationModel toSave) =>
       saveOffline(toSave.id!.toString(), toSave, informationOfflineStorage);
 
-  static InformationModel? getInfoDescription(String id) =>
+  static Future<InformationModel?> getInfoDescription(String id) =>
       getOffline(id, InformationModel.fromJson, informationOfflineStorage);
 
-  static void saveUserInfo(UserInfoModel toSave) =>
+  static Future<void> saveUserInfo(UserInfoModel toSave) =>
       saveOffline(UserInfoModel.userInfoOffline, toSave);
 
-  static void deleteUserInfo() =>
+  static Future<void> deleteUserInfo() =>
       deleteOffline(UserInfoModel.userInfoOffline);
 
-  static UserInfoModel? getUserInfo() =>
+  static Future<UserInfoModel?> getUserInfo() =>
       getOffline(UserInfoModel.userInfoOffline, UserInfoModel.fromJson);
 
-  static void saveGlobalSettings(OccasionSettingsModel toSave) =>
+  static Future<void> saveGlobalSettings(OccasionSettingsModel toSave) =>
       saveOffline(OccasionSettingsModel.globalSettingsOffline, toSave);
 
-  static OccasionSettingsModel? getGlobalSettings() =>
+  static Future<OccasionSettingsModel?> getGlobalSettings() =>
       getOffline(OccasionSettingsModel.globalSettingsOffline, OccasionSettingsModel.fromJson);
 
-  static void saveAllEvents(List<EventModel> toSave) =>
+  static Future<void> saveAllEvents(List<EventModel> toSave) =>
       saveAllOffline(eventsOfflineStorage, toSave);
 
-  static List<EventModel> getAllEvents() =>
+  static Future<List<EventModel>> getAllEvents() =>
       getAllOffline(eventsOfflineStorage, EventModel.fromJson);
 
-  static void saveAllInfo(List<InformationModel> toSave) =>
+  static Future<void> saveAllInfo(List<InformationModel> toSave) =>
       saveAllOffline(InformationModel.informationOffline, toSave);
 
-  static List<InformationModel> getAllInfo() => getAllOffline(
-      InformationModel.informationOffline, InformationModel.fromJson);
+  static Future<List<InformationModel>> getAllInfo() =>
+      getAllOffline(InformationModel.informationOffline, InformationModel.fromJson);
 
-  static void clearUserData() {
-    deleteOffline(UserInfoModel.userInfoOffline);
-    deleteOffline(myScheduleOffline);
+  static Future<void> clearUserData() async {
+    await deleteOffline(UserInfoModel.userInfoOffline);
+    await deleteOffline(myScheduleOffline);
   }
 
-  static void saveAllOffline<T>(String offlineTable, List<T> toSave) {
+  static Future<void> saveAllOffline<T>(String offlineTable, List<T> toSave) async {
     var encoded = jsonEncode(toSave);
-    StorageHelper.Set(offlineTable, encoded);
+    await StorageHelper.set(offlineTable, encoded);
   }
 
-  static void deleteOffline<T>(String id, [String? storage]) {
-    StorageHelper.Remove(id, storage);
+  static Future<void> deleteOffline<T>(String id, [String? storage]) async {
+    await StorageHelper.remove(id, storage);
   }
 
-  static void saveOffline<T>(String id, T toSave, [String? storage]) {
+  static Future<void> saveOffline<T>(String id, T toSave, [String? storage]) async {
     var encoded = jsonEncode(toSave);
-    StorageHelper.Set(id, encoded, storage);
+    await StorageHelper.set(id, encoded, storage);
   }
 
-  static T? getOffline<T>(
-      String id, T Function(Map<String, dynamic>) fromJson, [String? storage]) {
-    T? toReturn;
+  static Future<T?> getOffline<T>(
+      String id, T Function(Map<String, dynamic>) fromJson, [String? storage]) async {
     try {
-      var data = StorageHelper.Get(id, storage);
+      var data = await StorageHelper.get(id, storage);
       if (data == null) {
-        return toReturn;
+        return null;
       }
       var js = json.decode(data);
       return fromJson(js);
     } catch (e) {
       //catch incompatibility fails
+      return null;
     }
-    return toReturn;
   }
 
-  static List<T> getAllOffline<T>(
-    String offlineTable, T Function(Map<String, dynamic>) fromJson) {
+  static Future<List<T>> getAllOffline<T>(
+      String offlineTable, T Function(Map<String, dynamic>) fromJson) async {
     List<T> toReturn = [];
 
     try {
-      var data = StorageHelper.Get(offlineTable);
+      var data = await StorageHelper.get(offlineTable);
       if (data == null) {
         return toReturn;
       }
@@ -184,10 +177,5 @@ class OfflineDataHelper {
       //catch incompatibility fails
     }
     return toReturn;
-  }
-
-  static Future<void> initialize() async {
-    await StorageHelper.Initialize();
-    await StorageHelper.Initialize(eventsOfflineStorage);
   }
 }

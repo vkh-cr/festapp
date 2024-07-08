@@ -439,23 +439,23 @@ class _UserPageState extends State<UserPage> {
   Future<void> loadData() async {
     loadDataOffline();
     var userInfo = await DataService.getFullUserInfo();
-    OfflineDataHelper.saveUserInfo(userInfo);
+    await OfflineDataHelper.saveUserInfo(userInfo);
+    await addOfflineEventsToCompanions(userInfo);
+    setState(() {
+      userData = userInfo;
+    });
+  }
+
+  Future<void> loadDataOffline() async {
+    var userInfo = await OfflineDataHelper.getUserInfo();
     addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
     });
   }
 
-  void loadDataOffline() {
-    var userInfo = OfflineDataHelper.getUserInfo();
-    addOfflineEventsToCompanions(userInfo);
-    setState(() {
-      userData = userInfo;
-    });
-  }
-
-  void addOfflineEventsToCompanions(UserInfoModel? userInfo) {
-    var events = OfflineDataHelper.getAllEvents();
+  Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
+    var events = await OfflineDataHelper.getAllEvents();
     userInfo?.companions?.forEach(
             (c) {
                 for (var ei in c.eventIds) {

@@ -395,7 +395,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadData(int id) async {
-    loadOfflineData(widget.id!);
+    await loadOfflineData(widget.id!);
 
     await loadEvent(id);
     isLoadingEvent = false;
@@ -405,12 +405,12 @@ class _EventPageState extends State<EventPage> {
     }
   }
 
-  void loadOfflineData(int id) {
-    var allEvents = OfflineDataHelper.getAllEvents();
+  Future<void> loadOfflineData(int id) async {
+    var allEvents = await OfflineDataHelper.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
       if (event.isGroupEvent && DataService.isLoggedIn()) {
-        var userInfo = OfflineDataHelper.getUserInfo();
+        var userInfo = await OfflineDataHelper.getUserInfo();
         if (userInfo?.userGroup != null) {
           event.title = userInfo!.userGroup!.title;
           event.isMyGroupEvent = true;
@@ -419,17 +419,17 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.userGroup;
         }
       } else {
-        var descr = OfflineDataHelper.getEventDescription(id.toString());
+        var descr = await OfflineDataHelper.getEventDescription(id.toString());
         event.description = descr?.description;
 
         if (event.place?.id != null) {
-          var place = OfflineDataHelper.getAllPlaces()
+          var place = (await OfflineDataHelper.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
           event.place = place;
         } else {
           event.place = null;
         }
-        event.isEventInMySchedule = OfflineDataHelper.isEventSaved(id);
+        event.isEventInMySchedule = await OfflineDataHelper.isEventSaved(id);
       }
 
       var childEvents = allEvents
