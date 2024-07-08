@@ -44,7 +44,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadData() async {
-    loadDataOffline();
+    await loadDataOffline();
 
     await DataService.updateEvents(_events).whenComplete(() async {
       var placeIds = _events
@@ -99,8 +99,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     });
   }
 
-  void loadDataOffline() {
-    var places = OfflineDataHelper.getAllPlaces();
+  Future<void> loadDataOffline() async {
+    var places = await OfflineDataHelper.getAllPlaces();
     places.sortPlaces();
     var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
@@ -109,7 +109,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     _timetablePlaces.addAll(timetablePlaces);
 
     if (_events.isEmpty) {
-      var offlineEvents = OfflineDataHelper.getAllEvents();
+      var offlineEvents = await OfflineDataHelper.getAllEvents();
       _events.addAll(offlineEvents);
     }
 

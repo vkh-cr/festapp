@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> loadOfflineData() async {
     if (_events.isEmpty) {
-      var offlineEvents = OfflineDataHelper.getAllEvents();
+      var offlineEvents = await OfflineDataHelper.getAllEvents();
       OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
       if(AppConfig.isSplitByPlace) {
         await loadPlacesForEvents(offlineEvents, (ids) => OfflineDataHelper.getAllPlaces());
@@ -348,7 +348,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
     }
     if (DataService.isLoggedIn()) {
-      var userInfo = OfflineDataHelper.getUserInfo();
+      var userInfo = await OfflineDataHelper.getUserInfo();
       setState(() {
         userName = userInfo?.name??"";
       });

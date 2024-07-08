@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/TimeTravelWidget.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
@@ -64,13 +63,6 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await GetStorage.init();
-    print('GetStorage initialized');
-  } catch (e) {
-    print('GetStorage initialization failed: $e');
-  }
-
-  try {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       anonKey: AppConfig.anonKey,
@@ -94,9 +86,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await OfflineDataHelper.initialize();
-    print('Offline data helper initialized');
-    var settings = OfflineDataHelper.getGlobalSettings();
+    var settings = await OfflineDataHelper.getGlobalSettings();
     if (settings != null) {
       DataService.globalSettingsModel = settings;
       print('Global settings loaded');
