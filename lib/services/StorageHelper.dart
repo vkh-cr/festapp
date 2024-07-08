@@ -1,55 +1,43 @@
-import 'package:get_storage/get_storage.dart';
+import 'package:sembast/sembast.dart';
+import 'package:sembast/sembast_io.dart';
+import 'package:sembast_web/sembast_web.dart';
 
-class StorageHelper
-{
-  static final Map<String, GetStorage> storages = {};
-  static final box = GetStorage("GetStorage");
-  static Future<void> Initialize([String? storage]) async
-  {
-    if(storage == null)
-    {
-      await box.initStorage;
-      return;
-    }
-    if(!storages.containsKey(storage))
-    {
-      storages[storage] = GetStorage(storage);
-    }
-    await storages[storage]!.initStorage;
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
+
+class StorageHelper {
+  static final Map<String, Database> _databases = {};
+  static Database? _defaultDb;
+  static Future<Database> get _database async => _defaultDb ??= await _databaseFactory.openDatabase('default');
+
+  static DatabaseFactory get _databaseFactory {
+    return kIsWeb ? databaseFactoryWeb : databaseFactoryIo;
   }
-  static String? Get(String key, [String? storage]){
-    if(storage == null)
-    {
-      return box.read(key);
+
+  static Future<Database> _getDatabase([String? dbPath]) async {
+    if (dbPath == null) {
+      return await _database;
     }
-    if(!storages.containsKey(storage))
-    {
-      storages[storage] = GetStorage(storage);
+    if (!_databases.containsKey(dbPath)) {
+      _databases[dbPath] = await _databaseFactory.openDatabase(dbPath);
     }
-    return storages[storage]!.read(key);
+    return _databases[dbPath]!;
   }
-  static void Set(String key, String value, [String? storage]){
-    if(storage == null)
-    {
-      box.write(key, value);
-      return;
-    }
-    if(!storages.containsKey(storage))
-    {
-      storages[storage] = GetStorage(storage);
-    }
-    storages[storage]!.write(key, value);
+
+  static Future<String?> get(String key, [String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    return await store.record(key).get(db) as String?;
   }
-  static void Remove(String key, [String? storage]){
-    if(storage == null)
-    {
-      box.remove(key);
-      return;
-    }
-    if(!storages.containsKey(storage))
-    {
-      storages[storage] = GetStorage(storage);
-    }
-    storages[storage]!.remove(key);
+
+  static Future<void> set(String key, String value, [String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    await store.record(key).put(db, value);
+  }
+
+  static Future<void> remove(String key, [String? dbPath]) async {
+    final store = StoreRef.main();
+    final db = await _getDatabase(dbPath);
+    await store.record(key).delete(db);
   }
 }

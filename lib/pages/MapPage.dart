@@ -77,8 +77,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
-    var offlinePlaces = OfflineDataHelper.getAllPlaces();
-    _icons = OfflineDataHelper.getAllIcons();
+    var offlinePlaces = await OfflineDataHelper.getAllPlaces();
+    _icons = await OfflineDataHelper.getAllIcons();
     offlinePlaces.sortPlaces(false);
 
     if (loadOtherGroups) {
@@ -88,7 +88,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           offlinePlaces.where((element) => !element.isHidden).toList();
     }
 
-    addEventsToPlace(mapOfflinePlaces);
+    await addEventsToPlace(mapOfflinePlaces);
     addPlacesToMap(mapOfflinePlaces);
 
     if(placeId != null) {
@@ -118,7 +118,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
     if (mapPlaces.isNotEmpty) {
       _markers.clear();
-      addEventsToPlace(mapPlaces);
+      await addEventsToPlace(mapPlaces);
       addPlacesToMap(mapPlaces);
     }
 
@@ -135,8 +135,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
   }
 
-  void addEventsToPlace(List<PlaceModel> places) {
-    var events = OfflineDataHelper.getAllEvents();
+  Future<void> addEventsToPlace(List<PlaceModel> places) async {
+    var events = await OfflineDataHelper.getAllEvents();
     for (var p in places) {
       var matches = events.where((e) => e.place?.id == p.id);
       p.events.addAll(matches);
