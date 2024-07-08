@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/components/timetable/TimetableEventWidget.dart';
 
@@ -61,7 +62,7 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
               left: BorderSide(width: 0.25, color: Colors.grey),
               right: BorderSide(width: 0.25, color: Colors.grey),
             ),
-            color: i % 2 == 0 ? Colors.white60 : Colors.white,
+            color: i % 2 == 0 ? AppConfig.timetableBackground1 : AppConfig.timetableBackground2,
             // boxShadow: i % 2 == 0 ? [] : [
             //   BoxShadow(
             //     color: Colors.black26,

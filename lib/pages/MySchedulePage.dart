@@ -28,7 +28,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   Future<void> loadData() async {
-    loadDataOffline();
+    await loadDataOffline();
 
     await DataService.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
@@ -39,11 +39,11 @@ class _MySchedulePageState extends State<MySchedulePage> {
     setState(() {});
   }
 
-  void loadDataOffline() {
-    var offlineEvents = OfflineDataHelper.getAllEvents();
+  Future<void> loadDataOffline() async {
+    var offlineEvents = await OfflineDataHelper.getAllEvents();
     OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
     OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
-    var userInfo = OfflineDataHelper.getUserInfo();
+    var userInfo = await OfflineDataHelper.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
         e.isEventInMySchedule == true ||

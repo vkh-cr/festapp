@@ -353,7 +353,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       container = Container(
         width: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
         height: getTimetableHeight(),
-        color: Colors.black.withOpacity(0.15),
+        color: Colors.black.withOpacity(AppConfig.timetableTimeSplitOpacity),
       );
     } else {
       container = const SizedBox.shrink();

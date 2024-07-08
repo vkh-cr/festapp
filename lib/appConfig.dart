@@ -33,17 +33,24 @@ class AppConfig {
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
   static const mapPinColor = color1;
-  static const newsPageColor = color1;
+  static const newsPageColor = backgroundColor;
+  static const infoPageColor = backgroundColor;
+
   static const profileButtonColor = color1;
 
   static const timetableColor = color1;
   static const timetableSelectedColor = color2;
   static const timetableTimeSplitColor = Colors.red;
+  static const timetableBackground1 = Colors.white60;
+  static const timetableBackground2 = Colors.white;
+  static const double timetableTimeSplitOpacity = 0.15;
 
   static const button1Color = color1;
   static const button2Color = color3;
   static const button3Color = color2;
   static const button4Color = color4;
+
+  static const defaultHtmlViewColor = Colors.black;
 
   static const bool isSplitByPlace = false;
 

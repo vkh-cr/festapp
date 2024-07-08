@@ -25,7 +25,7 @@ class InformationModel extends IPlutoRowModel {
       title: json[Tb.information.title],
       description: json[Tb.information.description],
       type: json[Tb.information.type],
-      isHidden: json[Tb.information.is_hidden],
+      isHidden: json[Tb.information.is_hidden]??false,
       order: json[Tb.information.order]??0,
       updatedAt: json[Tb.occasions.updated_at]!=null ? DateTime.parse(json[Tb.occasions.updated_at]):null,
     );

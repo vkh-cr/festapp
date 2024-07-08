@@ -50,7 +50,7 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    newsMessages = OfflineDataHelper.getAllMessages();
+    newsMessages = await OfflineDataHelper.getAllMessages();
     await loadNewsMessages();
     OfflineDataHelper.saveAllMessages(newsMessages);
   }
@@ -58,8 +58,8 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.newsPageColor,
       appBar: AppBar(
-        backgroundColor: AppConfig.newsPageColor,
         title: const Text("News").tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrHome(context),
@@ -100,7 +100,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppConfig.newsPageColor.withOpacity(0.10)
+                        color: AppConfig.color1.withOpacity(0.10)
                       ),
                       child: Column(
                         children: [

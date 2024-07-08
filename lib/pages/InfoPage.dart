@@ -37,6 +37,7 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.infoPageColor,
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
@@ -62,7 +63,7 @@ class _InfoPageState extends State<InfoPage> {
                     backgroundColor: AppConfig.backgroundColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: Text(item.title??""),
+                        title: Text(item.title??"",),
                       );
                     },
                     body: Column(
@@ -86,8 +87,8 @@ class _InfoPageState extends State<InfoPage> {
                         child: HtmlView(html: item.description ?? ""),
                       )],
                     ),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true
+                    isExpanded: item.isExpanded,
+                    canTapOnHeader: true
                   );
                 }).toList(),
             ),
@@ -98,7 +99,7 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    loadDataOffline();
+    await loadDataOffline();
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);
@@ -117,17 +118,17 @@ class _InfoPageState extends State<InfoPage> {
     setState(() {});
   }
 
-  void fillDescriptionsFromOffline() {
+  Future<void> fillDescriptionsFromOffline() async {
     for(var info in _informationList!) {
-      var infoDesc = OfflineDataHelper.getInfoDescription(info.id!.toString());
+      var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
       if(infoDesc != null) {
         info.description = infoDesc.description!;
       }
     }
   }
 
-  void loadDataOffline() {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+  Future<void> loadDataOffline() async {
+    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
     fillDescriptionsFromOffline();
   }
 }

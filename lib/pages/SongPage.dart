@@ -172,7 +172,7 @@ class _SongPageState extends State<SongPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);
