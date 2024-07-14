@@ -58,7 +58,10 @@ class _HtmlViewState extends State<HtmlView> {
   Widget build(BuildContext context) {
     String widgetColor;
     if (widget.color != null) {
-      widgetColor = '#${widget.color?.value.toRadixString(16)}';
+      final int r = widget.color!.red;
+      final int g = widget.color!.green;
+      final int b = widget.color!.blue;
+      widgetColor = 'rgb($r, $g, $b)';
     } else {
       widgetColor = "";
     }
