@@ -346,6 +346,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _events.addAll(offlineEvents);
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
+      setState(() {});
     }
     if (DataService.isLoggedIn()) {
       var userInfo = await OfflineDataHelper.getUserInfo();
