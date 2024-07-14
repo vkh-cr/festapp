@@ -104,7 +104,7 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                       child: Column(
                         children: [
-                          Padding(padding: const EdgeInsets.all(16), child: HtmlView(html: message.message!)),
+                          Padding(padding: const EdgeInsets.all(16), child: HtmlView(html: message.message!, isSelectable: true,)),
                           Visibility(
                             visible: DataService.isLoggedIn(),
                             child: Padding(padding: const EdgeInsets.all(8), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54,), const SizedBox(width: 6), Text(message.views.toString(), style: readTextStyle,), const SizedBox(width: 10),],)))
