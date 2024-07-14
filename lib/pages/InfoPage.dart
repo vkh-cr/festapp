@@ -84,7 +84,7 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? ""),
+                        child: HtmlView(html: item.description ?? "", isSelectable: true,),
                       )],
                     ),
                     isExpanded: item.isExpanded,

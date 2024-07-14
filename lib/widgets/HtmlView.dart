@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fstapp/RouterService.dart';
@@ -7,7 +6,9 @@ import 'package:fstapp/appConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html,
-      {required ColumnMode renderMode, super.textStyle, super.customStylesBuilder});
+      {required ColumnMode renderMode,
+        super.textStyle,
+        super.customStylesBuilder});
 
   final BuildContext context;
 
@@ -35,6 +36,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
 class HtmlView extends StatefulWidget {
   final String html;
   final double? fontSize;
+  final bool isSelectable;
   Color? color;
 
   HtmlView({
@@ -42,6 +44,7 @@ class HtmlView extends StatefulWidget {
     required this.html,
     this.fontSize = 18,
     this.color = AppConfig.defaultHtmlViewColor,
+    this.isSelectable = false,
   }) : super(key: key);
 
   @override
@@ -55,12 +58,15 @@ class _HtmlViewState extends State<HtmlView> {
   Widget build(BuildContext context) {
     String widgetColor;
     if (widget.color != null) {
-      widgetColor = '#${widget.color?.value.toRadixString(16)}';
+      final int r = widget.color!.red;
+      final int g = widget.color!.green;
+      final int b = widget.color!.blue;
+      widgetColor = 'rgb($r, $g, $b)';
     } else {
       widgetColor = "";
     }
 
-    return HtmlWithAppLinksWidget(
+    Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
       widget.html,
       renderMode: RenderMode.column,
@@ -80,5 +86,13 @@ class _HtmlViewState extends State<HtmlView> {
         return null;
       },
     );
+
+    return widget.isSelectable
+        ? SelectableRegion(
+      focusNode: FocusNode(),
+      selectionControls: materialTextSelectionControls,
+      child: htmlWidget,
+    )
+        : htmlWidget;
   }
 }
