@@ -28,12 +28,12 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     console.log(reqData);
 
-    const userEmail = reqData.email != null ? reqData.email : "bujnmi@gmail.com";
+    const userEmail = reqData.email != null ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
 
     const userData = await _supabase
           .from("user_info")
           .select()
-          .eq("email_readonly", userEmail)
+          .ilike("email_readonly", userEmail)
           .maybeSingle();
 
     if(userData.data == null)
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
 
     console.log(template);
     let html = template.data.html;
-    html = html.replace(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
+    html = html.replaceAll(`{{.ResetPasswordLink}}`, _DEFAULT_URL+"/#/resetPassword?token="+token);
 
     const client = new SMTPClient({
       connection: {

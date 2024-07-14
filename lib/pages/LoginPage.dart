@@ -1,15 +1,17 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/pages/ForgotPassword.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/widgets/ButtonsHelper.dart';
-import 'package:festapp/widgets/FormFields.dart';
-import 'package:festapp/widgets/LanguageButton.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SignupPage.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/widgets/FormFields.dart';
+import 'package:fstapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:festapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:pwa_install/pwa_install.dart';
-import '../data/DataService.dart';
 import '../styles/Styles.dart';
 
 
@@ -22,6 +24,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _isLoading = false;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -62,6 +66,22 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 200,
                     ),
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("First time?".tr(), style: TextStyle(fontSize: 18),),
+                          const SizedBox(
+                            width: 16,
+                          ),
+                          TextButton(
+                              onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                              child: Text("Sign up", style: normalTextStyle,).tr())
+                        ]
+
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: FormFields.email(_emailController),
@@ -69,33 +89,31 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      child: FormFields.password(_passwordController),
+                      child: PasswordField(label: "Password".tr(), controller:  _passwordController, passwordType: AutofillHints.password),
                     ),
                     const SizedBox(
                       height: 16,
                     ),
-                    Container(
-                      height: 50,
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: AppConfig.color1,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: TextButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            TextInput.finishAutofillContext();
-                            await DataService.login(
-                                    _emailController.text, _passwordController.text)
-                                .then(_showToast)
-                                .then(_refreshSignedInStatus)
-                                .catchError(_onError);
-                          }
-                        },
-                        child: const Text(
-                          "Sign in",
-                          style: TextStyle(color: Colors.white, fontSize: 25),
-                        ).tr(),
-                      ),
+                    ButtonsHelper.bigButton(
+                      label: "Sign in".tr(),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          TextInput.finishAutofillContext();
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await DataService.login(_emailController.text, _passwordController.text)
+                              .then(_showToast)
+                              .then(_refreshSignedInStatus)
+                              .catchError(_onError);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      color: AppConfig.color1,
+                      textColor: Colors.white,
+                      isEnabled: !_isLoading,
                     ),
                     const SizedBox(
                       height: 8,
@@ -106,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextButton(
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
                             child: Text("Forgot your password?", style: normalTextStyle,).tr())
-                    )
+                    ),
                   ],
                 ),
               ),

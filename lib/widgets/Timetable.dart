@@ -294,8 +294,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                    ? AppConfig.color2
-                    : Colors.black26,
+                    ? AppConfig.eventTypeToColor(item.eventType).withOpacity(1)
+                    : AppConfig.eventTypeToColor(item.eventType).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Stack(
@@ -332,9 +332,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimetableItem item) async {
-    if(!await DataService.addToMySchedule(item.id)) {
-      return;
-    }
+    await DataService.addToMySchedule(item.id);
     setState(() {
       item.itemType = TimetableItemType.saved;
     });

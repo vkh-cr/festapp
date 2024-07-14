@@ -34,7 +34,9 @@ Mobile solution for your festival, conference or event.
  
 ---
 ## Architecture
-Solution is based on Flutter framework with language dart. As a backend is used serverless service Supabase.
+The solution is based on the [Flutter](https://github.com/flutter/flutter) framework with the Dart language.
+As a backend, the serverless service [Supabase](https://github.com/supabase/supabase) is used. 
+Both technologies were chosen to speed up development, and they have effectively met this requirement.
 
 ---
 ## Currently in production
@@ -43,11 +45,32 @@ Solution is based on Flutter framework with language dart. As a backend is used 
 - [Člověk a Víra](https://ff23.cz)
 - [BISCUP](https://biscup23.app)
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app/#/csa2024)
+- [Festival Slunovrat](https://app.festivalslunovrat.cz/#/2024)
 
 Links to Appstore/Play Store versions are usually saved in info section.
 
 ---
 ## Latest development
+
+**2024.06**
+- Optimized data usage for events and information.
+- Enabled custom icons for map places.
+- Zooming in/out for Timetable.
+- Displaying current time in Timetable and Time Travel component.
+- Generated QR code for users and companions.
+- Approver page for checking QR codes and workshop attendees.
+
+**2024.05**
+- User registration flow and sign-up page.
+- Companion feature: Users can create a limited number of companions and assign them to workshops.
+
+**2024.04**
+- Reset password flow.
+- Enabled event type and hiding.
+
+**2024.03**
+- Specialized page for song lyrics.
+- Database and URL support for multiple events.
 
 **2024.01**
 - Full support for offline display mode (if connection is not available, data from cache will be used). Simply open the application once and data will be loaded in the background.
@@ -55,10 +78,9 @@ Links to Appstore/Play Store versions are usually saved in info section.
 - Creation of my program using the + button (even without the need to log in).
 - Full support for URLs (ability to link to pages in the web version of the application).
 - Ukrainian language added among the languages.
-- Minor bug fixes.
 
 ---
-## Credits
+## About
 The app was originally developed by a team of volunteers for [Absolventský Velehrad](https://absolventskyvelehrad.cz) event in 2023.
 
 

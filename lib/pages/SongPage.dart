@@ -1,10 +1,10 @@
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/models/InformationModel.dart';
-import 'package:festapp/styles/Styles.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -163,7 +163,7 @@ class _SongPageState extends State<SongPage> {
                   child: Container(
                       padding: const EdgeInsets.all(12),
                       alignment: Alignment.centerLeft,
-                      child: Text(_informationList![index].title, textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
+                      child: Text(_informationList![index].title??"-", textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
                 );
               }),
         ),
@@ -172,7 +172,7 @@ class _SongPageState extends State<SongPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);

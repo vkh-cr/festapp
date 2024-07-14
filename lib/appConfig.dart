@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'models/LanguageModel.dart';
+import 'package:fstapp/dataModels/LanguageModel.dart';
 
 class AppConfig {
   static const String supabaseUrl = 'https://lwfpdjxsdmkfyrzqbrlk.supabase.co';
@@ -13,8 +13,11 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
-  static const String generatedPasswordPrefix = "fa";
   static const String defaultLink = "csa2024";
+
+  static const bool isEventTimeUtc = true;
+
+  static const int daySplitHour = 4;
 
   static const primaryColor = 0xFF2c366f;
   static const backgroundColor = Color(0xFFE3E2D3);
@@ -24,15 +27,33 @@ class AppConfig {
   static const color4 = Color(0xFF233182);
   static const attentionColor = Color(0xFF8B0000);
 
+  static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
   static const mapPinColor = color1;
+  static const newsPageColor = backgroundColor;
+  static const infoPageColor = backgroundColor;
+
   static const profileButtonColor = color1;
+
+  static const timetableColor = color1;
+  static const timetableSelectedColor = color2;
+  static const timetableTimeSplitColor = Colors.red;
+  static const timetableBackground1 = Colors.white60;
+  static const timetableBackground2 = Colors.white;
+  static const double timetableTimeSplitOpacity = 0.15;
+
   static const button1Color = color1;
   static const button2Color = color2;
   static const button3Color = color3;
   static const button4Color = color4;
+
+  static const defaultHtmlViewColor = Colors.black;
+
+  static const bool isSplitByPlace = false;
+
+  static const int offsetHours = -1;
 
   static Color eventTypeToColor(String? type)
   {
@@ -41,7 +62,7 @@ class AppConfig {
       case "talk": return color3;
       case "other": return color4;
     }
-    return color1;
+    return AppConfig.timetableSelectedColor;
   }
 
   static List<LanguageModel> availableLanguages = [

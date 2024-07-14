@@ -9,6 +9,6 @@ flutter_launcher_icons:
   # for web use https://realfavicongenerator.net/
 #  web:
 #    generate: false
-#    image_path: "assets/icons/festappicon-transparent.png"
+#    image_path: "assets/icons/fstappicon-transparent.png"
 #    background_color: "#FFFFFF"
 #    theme_color: "#FFFFFF"

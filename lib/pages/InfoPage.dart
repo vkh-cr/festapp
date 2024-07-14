@@ -1,11 +1,12 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/InformationModel.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/styles/Styles.dart';
+import 'package:collection/collection.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../services/ToastHelper.dart';
@@ -36,6 +37,7 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.infoPageColor,
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
@@ -61,7 +63,7 @@ class _InfoPageState extends State<InfoPage> {
                     backgroundColor: AppConfig.backgroundColor,
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return ListTile(
-                        title: Text(item.title),
+                        title: Text(item.title??"",),
                       );
                     },
                     body: Column(
@@ -82,11 +84,11 @@ class _InfoPageState extends State<InfoPage> {
                                 child: const Text("Edit content").tr())),
                         Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? ""),
+                        child: HtmlView(html: item.description ?? "", isSelectable: true,),
                       )],
                     ),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true
+                    isExpanded: item.isExpanded,
+                    canTapOnHeader: true
                   );
                 }).toList(),
             ),
@@ -97,10 +99,37 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
+    await loadDataOffline();
+    setState(() {});
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);
+    if(DataService.canSaveBigData()){
+      await DataService.updateInfoDescription();
+      fillDescriptionsFromOffline();
+    } else {
+      var fullEvents = await DataService.getInfosDescription(_informationList!.map((i)=>i.id!));
+      for(var info in _informationList!) {
+        var infoDesc = fullEvents.firstWhereOrNull((i)=>i.id==info.id);
+        if(infoDesc != null) {
+          info.description = infoDesc.description!;
+        }
+      }
+    }
     setState(() {});
+  }
+
+  Future<void> fillDescriptionsFromOffline() async {
+    for(var info in _informationList!) {
+      var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
+      if(infoDesc != null) {
+        info.description = infoDesc.description!;
+      }
+    }
+  }
+
+  Future<void> loadDataOffline() async {
+    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
+    fillDescriptionsFromOffline();
   }
 }

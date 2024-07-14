@@ -1,15 +1,17 @@
-import 'package:festapp/data/DataExtensions.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/pages/EventPage.dart';
-import 'package:festapp/pages/MySchedulePage.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/widgets/Timetable.dart';
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/MySchedulePage.dart';
+import 'package:fstapp/services/TimeHelper.dart';
+import 'package:fstapp/components/timetable/Timetable.dart';
 
-import '../models/EventModel.dart';
 
 class ProgramViewPage extends StatefulWidget {
   static const ROUTE = "timetable";
@@ -30,7 +32,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   void initState() {
     super.initState();
     timetableController = TimetableController(onItemTap: (id) {
-      RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((value) => loadData());
+      RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+          .then((value) => loadData());
     });
   }
 
@@ -41,79 +44,86 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadData() async {
-    loadDataOffline();
+    await loadDataOffline();
 
     await DataService.updateEvents(_events).whenComplete(() async {
-      var places = await DataService.getAllPlaces();
-      OfflineDataHelper.saveAllPlaces(places);
-      var timetablePlaces = List<TimetablePlace>.from(places
+      var placeIds = _events
+          .map((e) => e.place?.id)
+          .where((id) => id != null)
+          .cast<int>()
+          .toSet()
+          .toList();
+
+      var places = await DataService.getPlacesIn(placeIds);
+
+      var timetablePlaces = List<TimeBlockPlace>.from(places
           .where((element) => !element.isHidden)
-          .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
+          .map((x) => TimeBlockPlace.fromPlaceModel(x)));
       _timetablePlaces.clear();
       _timetablePlaces.addAll(timetablePlaces);
 
       _items.clear();
       _items.addAll(_events
           .timetableEventsFilter(Timetable.minimalDurationMinutes)
-          .map((e) => TimetableItem.fromEventModel(e)));
-      _days.clear();
-      var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
-      _days.addAll({
-        for (var e in eventsGrouped.values)
-          e.first.startTime.weekday:
-              DateFormat("EEE d. MMM", context.locale.languageCode)
-                  .format(e.first.startTime)
-                  .toUpperCase()
-      });
+          .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
 
-      setupTabController(_days.length);
+      timetableController.rebuild?.call();
+
+      _days.clear();
+      _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
+      setupTabController(_days);
       await loadEventParticipants();
       await DataService.synchronizeMySchedule();
     });
   }
 
-  void setupTabController(int daysCount) {
-    if(_tabController?.length != daysCount) {
-        _tabController = TabController(vsync: this, length: daysCount);
+  String TimetableDateFormat(DateTime e) =>
+      DateFormat("EEEE", context.locale.languageCode).format(e);
+
+  void setupTabController(List<TimeBlockGroup> days) {
+    _currentIndex ??= TimeHelper.getIndexFromDays(days.map((d)=>d.dateTime!.weekday));
+
+    if (_tabController?.length != days.length) {
+      _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);
     }
-    _tabController!.addListener(() {
-      setState(() {
-        _currentIndex = _tabController!.index;
-        timetableController.reset?.call();
-      });
+    _tabController!.animation?.removeListener(reactionOnIndexChanged);
+    _tabController!.animation?.addListener(reactionOnIndexChanged);
+    timetableController.reset?.call();
+  }
+
+  void reactionOnIndexChanged() {
+    setState(() {
+      _currentIndex = _tabController!.index;
+      timetableController.reset?.call();
+      timetableController.autoSetPosition?.call();
     });
   }
 
-  void loadDataOffline() {
-    var places = OfflineDataHelper.getAllPlaces();
-    var timetablePlaces = List<TimetablePlace>.from(places
+  Future<void> loadDataOffline() async {
+    var places = await OfflineDataHelper.getAllPlaces();
+    places.sortPlaces();
+    var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
-        .map((x) => TimetablePlace(title: x.title!, id: x.id!)));
+        .map((x) => TimeBlockPlace.fromPlaceModel(x)));
     _timetablePlaces.clear();
     _timetablePlaces.addAll(timetablePlaces);
 
     if (_events.isEmpty) {
-      var offlineEvents = OfflineDataHelper.getAllEvents();
+      var offlineEvents = await OfflineDataHelper.getAllEvents();
       _events.addAll(offlineEvents);
-      var eventsGrouped = _events.groupListsBy((e) => e.startTime.weekday);
-      var days = {
-        for (var e in eventsGrouped.values)
-          e.first.startTime.weekday:
-              DateFormat("EEE d. MMM", context.locale.languageCode)
-                  .format(e.first.startTime)
-                  .toUpperCase()
-      };
-      _days.addAll(days);
     }
 
-    setupTabController(_days.length);
     OfflineDataHelper.updateEventsWithMySchedule(_events);
     OfflineDataHelper.updateEventsWithGroupName(_events);
 
     _items.clear();
-    _items.addAll(_events
+    var items = _events
         .timetableEventsFilter(Timetable.minimalDurationMinutes)
-        .map((e) => TimetableItem.fromEventModel(e)));
+        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)).toList();
+
+    _days.clear();
+    _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour));
+    setupTabController(_days);
     setState(() {});
   }
 
@@ -122,8 +132,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
-        item.text = e.toString();
-        item.itemType = TimetableItem.getIndicatorFromEvent(e);
+        item.data = e.toString();
+        item.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
       });
     }
   }
@@ -152,17 +162,18 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                         (i) => Padding(
                             padding: const EdgeInsets.all(12),
                             child: Text(
-                              _days.values.toList()[i],
+                              _days[i].title.toUpperCase(),
                             )))),
               );
             }),
           ),
           actions: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(6,6,6,0),
+              padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
               child: TextButton(
                 onPressed: () async {
-                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
+                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
+                      .then((value) => loadData());
                 },
                 child: FittedBox(
                   child: Column(
@@ -173,8 +184,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                         color: Colors.white,
                       ),
                       Text("My schedule".tr(),
-                          style:
-                              const TextStyle(color: Colors.white, fontSize: 9)),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 9)),
                     ],
                   ),
                 ),
@@ -184,18 +195,14 @@ class _ProgramViewPageState extends State<ProgramViewPage>
         ),
         body: Timetable(
             controller: timetableController,
-            items: _items
-                .where((element) =>
-                    element.startTime.weekday ==
-                    _days.keys.toList()[_currentIndex])
-                .toList(),
+            items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces));
   }
 
   final List<EventModel> _events = [];
-  final List<TimetableItem> _items = [];
-  final Map<int, String> _days = {};
+  final List<TimeBlockItem> _items = [];
+  final List<TimeBlockGroup> _days = [];
 
-  int _currentIndex = 0;
-  final List<TimetablePlace> _timetablePlaces = [];
+  int? _currentIndex;
+  final List<TimeBlockPlace> _timetablePlaces = [];
 }

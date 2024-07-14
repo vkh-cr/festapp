@@ -1,17 +1,14 @@
-import 'package:festapp/data/OfflineDataHelper.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/styles/Styles.dart';
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/widgets/HtmlView.dart';
+import 'package:fstapp/dataModels/NewsModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/pages/NewsFormPage.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:intl/intl.dart';
-import '../models/NewsModel.dart';
-import '../data/DataService.dart';
 import 'HtmlEditorPage.dart';
 
 class NewsPage extends StatefulWidget {
@@ -24,17 +21,16 @@ class NewsPage extends StatefulWidget {
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
 
-  void _showMessageDialog(BuildContext context, [bool withNotification = true]) {
-    if(!AppConfig.isNotificationsSupported && withNotification)
-    {
-      ToastHelper.Show("Notifications are not supported. Send message without notification.".tr(), severity: ToastSeverity.NotOk);
-      return;
-    }
-    RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE).then((value) async {
-      if(value != null)
-      {
-        var message = value as String;
-        await DataService.insertNewsMessage(message, withNotification);
+  void _showMessageDialog(BuildContext context) {
+    RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
+      if(value != null) {
+        var data = value as Map<String, dynamic>;
+        List<String>? to = data["to"];
+        String message = data["content"]!;
+        var heading = data["heading"];
+        String headingDefault = data["heading_default"]!;
+        bool withNotification = data["with_notification"]!;
+        await DataService.insertNewsMessage(heading, headingDefault, message, withNotification, to);
         await loadNewsMessages();
       }
     });
@@ -54,7 +50,8 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    newsMessages = OfflineDataHelper.getAllMessages();
+    newsMessages = await OfflineDataHelper.getAllMessages();
+    setState(() {});
     await loadNewsMessages();
     OfflineDataHelper.saveAllMessages(newsMessages);
   }
@@ -62,6 +59,7 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppConfig.newsPageColor,
       appBar: AppBar(
         title: const Text("News").tr(),
         leading: BackButton(
@@ -107,7 +105,7 @@ class _NewsPageState extends State<NewsPage> {
                       ),
                       child: Column(
                         children: [
-                          Padding(padding: const EdgeInsets.all(16), child: HtmlView(html: message.message!)),
+                          Padding(padding: const EdgeInsets.all(16), child: HtmlView(html: message.message!, isSelectable: true,)),
                           Visibility(
                             visible: DataService.isLoggedIn(),
                             child: Padding(padding: const EdgeInsets.all(8), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54,), const SizedBox(width: 6), Text(message.views.toString(), style: readTextStyle,), const SizedBox(width: 10),],)))
@@ -133,7 +131,7 @@ class _NewsPageState extends State<NewsPage> {
                             }
                           });
                         }
-                        loadNewsMessages();
+                        await loadNewsMessages();
                       },
                       icon:  const Icon(Icons.more_horiz),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
@@ -156,14 +154,9 @@ class _NewsPageState extends State<NewsPage> {
       ),
       floatingActionButton: Visibility(
         visible: RightsHelper.isEditor(),
-        child: SpeedDial(
-          direction: SpeedDialDirection.up,
-          spaceBetweenChildren: 20,
-          children: [
-            SpeedDialChild(child: const Icon(Icons.notifications_off), label: "Send without notification".tr(), onTap: () => _showMessageDialog(context, false)),
-            SpeedDialChild(child: const Icon(Icons.message), label: "Send message".tr(), onTap: () => _showMessageDialog(context)),
-          ],
-          icon: Icons.add,
+        child: FloatingActionButton(
+          onPressed: () => _showMessageDialog(context),
+          child: const Icon(Icons.add),
         ),
       ),
     );

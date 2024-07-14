@@ -107,18 +107,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         return Center(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24,88,24,24),
-            child: AppConfig.isOwnProgramSupported ?
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-              Text("Create your own schedule with button".tr(), style: const TextStyle(fontSize: 18), textAlign: TextAlign.center,),
-              const SizedBox.square(dimension: 12,),
-              const Icon(Icons.add_circle_outline)
-            ],) :
-             const Text(
-              "There will appear your events.",
-                style: TextStyle(fontSize: 20)
-              ).tr(),
+            child: const Text(
+              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
+              style: TextStyle(fontSize: 20),).tr(),
           ),
         );
       }
@@ -138,7 +129,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
     createTimeline(morningEvents),
-    afternoonEvents.isNotEmpty && morningEvents.isNotEmpty
+    afternoonEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
@@ -148,7 +139,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           )
         : const SizedBox.shrink(),
     createTimeline(afternoonEvents),
-    eveningEvents.isNotEmpty && afternoonEvents.isNotEmpty
+    eveningEvents.isNotEmpty
         ? Padding(
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
@@ -186,7 +177,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(event.leftText, style: timeLineSmallTextStyle,),
+            child: Text(event.leftText, style: const TextStyle(fontSize: 15),),
           );
         },
         contentsBuilder: (_, index) {

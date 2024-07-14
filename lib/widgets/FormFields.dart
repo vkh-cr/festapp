@@ -17,22 +17,4 @@ class FormFields{
       },
     );
   }
-
-  static TextFormField password(TextEditingController controller) {
-    return TextFormField(
-      controller: controller,
-      autofillHints: const [AutofillHints.password],
-      keyboardType: TextInputType.text,
-      obscureText: true,
-      decoration: InputDecoration(
-          border: const OutlineInputBorder(),
-          labelText: "Password".tr()),
-      validator: (String? value) {
-        if (value!.isEmpty) {
-          return "Fill the password!".tr();
-        }
-      },
-    );
-  }
-
 }

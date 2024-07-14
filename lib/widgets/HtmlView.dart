@@ -1,59 +1,98 @@
 import 'dart:async';
-
-import 'package:festapp/RouterService.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
-  HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode, super.textStyle});
+  HtmlWithAppLinksWidget(this.context, super.html,
+      {required ColumnMode renderMode,
+        super.textStyle,
+        super.customStylesBuilder});
 
   final BuildContext context;
-@override
-  FutureOr<bool> Function(String p1)? get onTapUrl {
-  return (String url) {
-    if(url.startsWith("navigate:"))
-    {
-      var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      RouterService.navigateOccasion(context, navigateTo);
-      return true;
-    }
-    super.onTapUrl?.call(url);
-    return false;
-  };
 
-}
+  @override
+  FutureOr<bool> Function(String p1)? get onTapUrl {
+    return (String url) {
+      if (url.startsWith("navigate:")) {
+        var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
+        RouterService.navigateOccasion(context, navigateTo);
+        return true;
+      }
+      super.onTapUrl?.call(url);
+      return false;
+    };
+  }
+
+  @override
+  void Function(ImageMetadata p1)? get onTapImage {
+    return (ImageMetadata imgData) {
+      return;
+    };
+  }
 }
 
 class HtmlView extends StatefulWidget {
   final String html;
-  double? fontSize;
+  final double? fontSize;
+  final bool isSelectable;
+  Color? color;
 
-  HtmlView({super.key, required this.html, this.fontSize = 18 });
+  HtmlView({
+    Key? key,
+    required this.html,
+    this.fontSize = 18,
+    this.color = AppConfig.defaultHtmlViewColor,
+    this.isSelectable = false,
+  }) : super(key: key);
 
   @override
   _HtmlViewState createState() => _HtmlViewState();
 }
 
 class _HtmlViewState extends State<HtmlView> {
-
   _HtmlViewState();
+
   @override
   Widget build(BuildContext context) {
-    return HtmlWithAppLinksWidget(
-      // the first parameter (`html`) is required
+    String widgetColor;
+    if (widget.color != null) {
+      final int r = widget.color!.red;
+      final int g = widget.color!.green;
+      final int b = widget.color!.blue;
+      widgetColor = 'rgb($r, $g, $b)';
+    } else {
+      widgetColor = "";
+    }
+
+    Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
       widget.html,
-      // select the render mode for HTML body
-      // by default, a simple `Column` is rendered
-      // consider using `ListView` or `SliverList` for better performance
       renderMode: RenderMode.column,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
-      fontFamily: "Futura",
-      color: Colors.black,
-      inherit: false,
+        fontFamily: "Futura",
+        color: widget.color,
+        inherit: false,
       ),
+      customStylesBuilder: (element) {
+        final tagName = element.localName;
+        if (tagName == 'a') {
+          return {
+            'color': widgetColor,
+          };
+        }
+        return null;
+      },
     );
-    }
+
+    return widget.isSelectable
+        ? SelectableRegion(
+      focusNode: FocusNode(),
+      selectionControls: materialTextSelectionControls,
+      child: htmlWidget,
+    )
+        : htmlWidget;
   }
+}

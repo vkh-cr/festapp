@@ -1,30 +1,30 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/dataGrids/DataGridAction.dart';
-import 'package:festapp/dataGrids/SingleTableDataGrid.dart';
-import 'package:festapp/models/ExclusiveGroupModel.dart';
-import 'package:festapp/models/OccasionModel.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/PlaceModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/models/UserGroupInfoModel.dart';
-import 'package:festapp/models/UserInfoModel.dart';
-import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/dataGrids/DataGridHelper.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/RouterService.dart';
-import 'package:festapp/services/MapIconService.dart';
-import 'package:festapp/services/ToastHelper.dart';
-import 'package:festapp/services/UserManagementHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
+import 'package:fstapp/dataModels/IconModel.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/components/map/MapIconService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-import '../models/EventModel.dart';
 import '../services/DialogHelper.dart';
 import 'HtmlEditorPage.dart';
-import '../models/InformationModel.dart';
 
 class AdministrationPage extends StatefulWidget {
   static const ROUTE = "admin";
@@ -39,13 +39,15 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   List<String> places = [];
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
+  List<IconModel> svgIcons = [];
 
   late TabController _tabController;
+
 
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    RightsHelper.ensureAccessProcedure(context);
+    await RightsHelper.ensureAccessProcedure(context);
     if(!RightsHelper.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
@@ -59,7 +61,8 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     await loadPlaces();
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
-
+    svgIcons = await DataService.getAllIcons();
+    mapIcons.addAll(svgIcons.map((i)=>i.link!));
     setState(() {});
   }
 
@@ -231,11 +234,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
                   ),
                   PlutoColumn(
-                    hide: true,
                     title: "Interest".tr(),
                     field: Tb.event_users.table,
                     readOnly: true,
-                    type: PlutoColumnType.number(negative: false, defaultValue: null),
+                    type: PlutoColumnType.number(negative: false, defaultValue: 0),
                     width: 100,
                   ),
                   PlutoColumn(
@@ -402,7 +404,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     title: "Icon".tr(),
                     field: Tb.places.type,
                     type: PlutoColumnType.select(mapIcons),
-                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState),
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState, svgIcons),
                   ),
                   PlutoColumn(
                       width: 150,
@@ -427,6 +429,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
                         );
                       }),
+                  PlutoColumn(
+                    title: "Order".tr(),
+                    field: Tb.places.order,
+                    type: PlutoColumnType.number(defaultValue: null),
+                    applyFormatterInEditing: true,
+                    width: 100,
+                  ),
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
                 context,
@@ -479,7 +488,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                       rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value = person;
                                       var cell = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]!;
                                       rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                      context.pop();
+                                      RouterService.goBack(context);
                                     }), _allUsers, "Set".tr());
                                   },
                                   icon: const Icon(Icons.add_circle_rounded)),
@@ -599,6 +608,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
                 headerChildren: [
                   DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsHelper.canUpdateUsers())),
+                  DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) { _addExisting(p0); }),
                   DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
@@ -754,4 +764,24 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
     ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
   }
+
+  Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
+    var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
+    users = users.where((element) => element.user != null).toList();
+
+    if(_allUsers.isEmpty)
+    {
+      _allUsers = await DataService.getAllUsersBasics();
+    }
+    var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
+    DialogHelper.chooseUser(context, (person) async
+    {
+      await DataService.addUserToCurrentOccasion(person.id, RightsHelper.currentOccasion!);
+      ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
+    }, nonAdded, "Add".tr());
+
+    await dataGrid.reloadData();
+
+  }
+
 }

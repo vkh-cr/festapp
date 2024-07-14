@@ -1,27 +1,28 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/data/RightsHelper.dart';
-import 'package:festapp/models/OccasionUserModel.dart';
-import 'package:festapp/models/PlaceModel.dart';
-import 'package:festapp/pages/AdministrationPage.dart';
-import 'package:festapp/pages/EventPage.dart';
-import 'package:festapp/pages/HtmlEditorPage.dart';
-import 'package:festapp/pages/InfoPage.dart';
-import 'package:festapp/pages/LoginPage.dart';
-import 'package:festapp/pages/MapPage.dart';
-import 'package:festapp/pages/NewsPage.dart';
-import 'package:festapp/pages/MySchedulePage.dart';
-import 'package:festapp/pages/ResetPasswordPage.dart';
-import 'package:festapp/pages/ForgotPassword.dart';
-import 'package:festapp/pages/SongPage.dart';
-import 'package:festapp/pages/TimetablePage.dart';
-import 'package:festapp/pages/UserPage.dart';
-import 'package:festapp/services/NavigationService.dart';
-import 'package:festapp/services/ToastHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/pages/AdministrationPage.dart';
+import 'package:fstapp/pages/CheckPage.dart';
+import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/HomePage.dart';
+import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/InfoPage.dart';
+import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/pages/NewsFormPage.dart';
+import 'package:fstapp/pages/NewsPage.dart';
+import 'package:fstapp/pages/MySchedulePage.dart';
+import 'package:fstapp/pages/ResetPasswordPage.dart';
+import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SignupPage.dart';
+import 'package:fstapp/pages/SongPage.dart';
+import 'package:fstapp/pages/TimetablePage.dart';
+import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/services/NavigationService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
-
-import 'main.dart';
 
 class RouterService{
   static const LINK = "link";
@@ -56,7 +57,7 @@ class RouterService{
       navigate(context, "");
       return;
     }
-    context.pop();
+    Router.neglect(context, () => context.pop());
   }
 
   static void goBackOrInitial(BuildContext context){
@@ -65,7 +66,11 @@ class RouterService{
       goToInitial(context);
       return;
     }
-    context.pop();
+    Router.neglect(context, () => context.pop());
+  }
+
+  static void goBack(BuildContext context, [dynamic object]){
+    Router.neglect(context, () => context.pop(object));
   }
 
   static void goToInitial(BuildContext context){
@@ -84,7 +89,7 @@ class RouterService{
           path: "/",
           builder: (context, state) {
             currentOccasionLink = "";
-            return const MyHomePage(title: MyHomePage.HOME_PAGE);
+            return const HomePage(title: HomePage.HOME_PAGE);
           },
         ),
         GoRoute(
@@ -100,10 +105,21 @@ class RouterService{
           builder: (context, state) => const LoginPage(),
         ),
         GoRoute(
+          path: "/${SignupPage.ROUTE}",
+          builder: (context, state) => const SignupPage(),
+        ),
+        GoRoute(
+          path: "/${CheckPage.ROUTE}/:id",
+          builder: (context, state) {
+            var id = int.parse(state.pathParameters["id"] ?? "0");
+            return CheckPage(id: id);
+          },
+        ),
+        GoRoute(
           path: LINK_PATH,
           builder: (context, state) {
             currentOccasionLink = state.pathParameters[LINK]??"";
-            return const MyHomePage(title: MyHomePage.HOME_PAGE,);
+            return const HomePage(title: HomePage.HOME_PAGE,);
           },
           routes: <RouteBase>[
             GoRoute(
@@ -167,6 +183,10 @@ class RouterService{
             GoRoute(
               path: ProgramViewPage.ROUTE,
               builder: (context, state) => const ProgramViewPage.TimetablePage(),
+            ),
+            GoRoute(
+              path: NewsFormPage.ROUTE,
+              builder: (context, state) => const NewsFormPage(),
             ),
           ]
       ),
