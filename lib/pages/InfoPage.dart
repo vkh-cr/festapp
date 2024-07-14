@@ -100,6 +100,7 @@ class _InfoPageState extends State<InfoPage> {
 
   Future<void> loadData() async {
     await loadDataOffline();
+    setState(() {});
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataHelper.saveAllInfo(allInfo);

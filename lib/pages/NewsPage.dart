@@ -51,6 +51,7 @@ class _NewsPageState extends State<NewsPage> {
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     newsMessages = await OfflineDataHelper.getAllMessages();
+    setState(() {});
     await loadNewsMessages();
     OfflineDataHelper.saveAllMessages(newsMessages);
   }
@@ -130,7 +131,7 @@ class _NewsPageState extends State<NewsPage> {
                             }
                           });
                         }
-                        loadNewsMessages();
+                        await loadNewsMessages();
                       },
                       icon:  const Icon(Icons.more_horiz),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
