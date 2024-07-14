@@ -289,7 +289,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //await DataService.ImportFromSingleToMultipleEventType();
     //DataServiceTests.test_has_event_allowed_role();
 
-    loadOfflineData();
+    await loadOfflineData();
     await RightsHelper.ensureAccessProcedure(context);
 
     if (DataService.isLoggedIn()) {
