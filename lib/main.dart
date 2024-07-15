@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -123,6 +124,7 @@ class _MyAppState extends State<MyApp> {
         widget.isTimeTravelVisible = !widget.isTimeTravelVisible;
       });
     };
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: AppConfig.color1));
     return MaterialApp.router(
       routerConfig: RouterService.router,
       debugShowCheckedModeBanner: false,
