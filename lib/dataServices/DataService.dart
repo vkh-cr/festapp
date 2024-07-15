@@ -684,7 +684,7 @@ class DataService {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<EventModel>> getAllInfoMeta() async {
+  static Future<List<InformationModel>> getAllInfoMeta() async {
     var data = await _supabase
         .from(Tb.information.table)
         .select(
@@ -692,8 +692,8 @@ class DataService {
           "${Tb.information.updated_at}"
     );
 
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
+    return List<InformationModel>.from(
+        data.map((x) => InformationModel.fromJson(x)));
   }
 
   static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
@@ -1557,22 +1557,36 @@ class DataService {
     }
   }
 
-  static Future<void> updateInfoDescription() async {
+  static Future<void> updateInfoDescription([List<int>? infoIds]) async {
     var needsUpdate = <int>[];
     var allMeta = await getAllInfoMeta();
 
-    for(var e in allMeta) {
-      var oe = await OfflineDataHelper.getInfoDescription(e.id.toString());
-      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
-        needsUpdate.add(e.id!);
-      }
+    List<InformationModel> infosToCheck;
+    if (infoIds != null) {
+      infosToCheck = allMeta.where((e) => infoIds.contains(e.id)).toList();
+    } else {
+      infosToCheck = allMeta;
     }
 
-    var fullEvents = await getInfosDescription(needsUpdate);
-    for(var e in fullEvents) {
-      OfflineDataHelper.saveInfoDescription(e);
+    await _checkForUpdates(infosToCheck, needsUpdate);
+
+    if (needsUpdate.isNotEmpty) {
+      var fullEvents = await getInfosDescription(needsUpdate);
+      for (var e in fullEvents) {
+        await OfflineDataHelper.saveInfoDescription(e);
+      }
     }
   }
+
+  static Future<void> _checkForUpdates(List<InformationModel> infosToCheck, List<int> needsUpdate) async {
+    for (var infoMeta in infosToCheck) {
+      var oe = await OfflineDataHelper.getInfoDescription(infoMeta.id.toString());
+      if (oe == null || oe.updatedAt == null || oe.updatedAt!.isBefore(infoMeta.updatedAt!)) {
+        needsUpdate.add(infoMeta.id!);
+      }
+    }
+  }
+
 
   static Future<OccasionLinkModel> checkOccasionLink(String link) async {
     var data = await _supabase.rpc("check_occasion_link",

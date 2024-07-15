@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/OfflineDataHelper.dart';
@@ -14,9 +13,9 @@ import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
 class InfoPage extends StatefulWidget {
-  String? type;
+  final String? type;
   static const ROUTE = "info";
-  InfoPage({this.type, super.key});
+  const InfoPage({this.type, super.key});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -24,7 +23,7 @@ class InfoPage extends StatefulWidget {
 
 class _InfoPageState extends State<InfoPage> {
   List<InformationModel>? _informationList;
-  _InfoPageState();
+  Map<int, bool> _isItemLoading = {};
 
   String title = "Information".tr();
 
@@ -50,47 +49,63 @@ class _InfoPageState extends State<InfoPage> {
           constraints: BoxConstraints(maxWidth: appMaxWidth),
           child: SingleChildScrollView(
             child: ExpansionPanelList(
-              expansionCallback: (panelIndex, isExpanded) {
-                for (var element in _informationList!) { element.isExpanded = false; }
-                _informationList![panelIndex].isExpanded = isExpanded;
+              expansionCallback: (panelIndex, isExpanded) async {
                 setState(() {
+                  for (var element in _informationList!) {
+                    element.isExpanded = false;
+                  }
+                  _informationList![panelIndex].isExpanded = isExpanded;
                 });
 
+                if (_informationList![panelIndex].description == null &&
+                    !_isItemLoading[panelIndex]!) {
+                  await loadItemDescription(panelIndex);
+                }
               },
-              children:
-                _informationList == null ? [] : _informationList!.map<ExpansionPanel>((InformationModel item) {
-                  return ExpansionPanel(
-                    backgroundColor: AppConfig.backgroundColor,
-                    headerBuilder: (BuildContext context, bool isExpanded) {
-                      return ListTile(
-                        title: Text(item.title??"",),
-                      );
-                    },
-                    body: Column(
-                      children: [
-                        Visibility(
-                            visible: RightsHelper.isEditor(),
-                            child: ElevatedButton(
-                                onPressed: () => RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: item.description).then((value) async {
-                                  if(value != null)
-                                  {
-                                    setState(() {
-                                      item.description = value as String;
-                                    });
-                                    await DataService.updateInformation(item);
-                                    ToastHelper.Show("Content has been changed.".tr());
-                                  }
-                                }),
-                                child: const Text("Edit content").tr())),
-                        Padding(
+              children: _informationList == null
+                  ? []
+                  : _informationList!.map<ExpansionPanel>((InformationModel item) {
+                int index = _informationList!.indexOf(item);
+                return ExpansionPanel(
+                  backgroundColor: AppConfig.backgroundColor,
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return ListTile(
+                      title: Text(item.title ?? ""),
+                    );
+                  },
+                  body: _isItemLoading[index] ?? false
+                      ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                      : Column(
+                    children: [
+                      if (RightsHelper.isEditor())
+                        ElevatedButton(
+                          onPressed: () async {
+                            var result = await RouterService.navigateOccasion(
+                                context, HtmlEditorPage.ROUTE,
+                                extra: item.description);
+                            if (result != null) {
+                              setState(() {
+                                item.description = result as String;
+                              });
+                              await DataService.updateInformation(item);
+                              ToastHelper.Show("Content has been changed.".tr());
+                            }
+                          },
+                          child: const Text("Edit content").tr(),
+                        ),
+                      Padding(
                         padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? "", isSelectable: true,),
-                      )],
-                    ),
-                    isExpanded: item.isExpanded,
-                    canTapOnHeader: true
-                  );
-                }).toList(),
+                        child: HtmlView(html: item.description ?? "", isSelectable: true),
+                      )
+                    ],
+                  ),
+                  isExpanded: item.isExpanded,
+                  canTapOnHeader: true,
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -102,34 +117,41 @@ class _InfoPageState extends State<InfoPage> {
     await loadDataOffline();
     setState(() {});
     var allInfo = await DataService.getAllActiveInformation();
-    _informationList = allInfo.filterByType(widget.type);
-    OfflineDataHelper.saveAllInfo(allInfo);
-    if(DataService.canSaveBigData()){
-      await DataService.updateInfoDescription();
-      fillDescriptionsFromOffline();
-    } else {
-      var fullEvents = await DataService.getInfosDescription(_informationList!.map((i)=>i.id!));
-      for(var info in _informationList!) {
-        var infoDesc = fullEvents.firstWhereOrNull((i)=>i.id==info.id);
-        if(infoDesc != null) {
-          info.description = infoDesc.description!;
-        }
-      }
-    }
+    await OfflineDataHelper.saveAllInfo(allInfo);
+    await loadDataOffline();
     setState(() {});
   }
 
-  Future<void> fillDescriptionsFromOffline() async {
-    for(var info in _informationList!) {
-      var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
-      if(infoDesc != null) {
-        info.description = infoDesc.description!;
+  Future<void> loadItemDescription(int index) async {
+    setState(() {
+      _isItemLoading[index] = true;
+    });
+
+    var info = _informationList![index];
+    await fillDescriptionFromOffline(info);
+    setState(() {
+      if(info.description != null){
+        _isItemLoading[index] = false;
       }
+    });
+    await DataService.updateInfoDescription([info.id!]);
+    await fillDescriptionFromOffline(info);
+    setState(() {
+        _isItemLoading[index] = false;
+    });
+  }
+
+  Future<void> fillDescriptionFromOffline(InformationModel info) async {
+    var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
+    if (infoDesc != null) {
+      setState(() {
+        info.description = infoDesc.description!;
+      });
     }
   }
 
   Future<void> loadDataOffline() async {
     _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
-    fillDescriptionsFromOffline();
+    _isItemLoading = {for (int i = 0; i < _informationList!.length; i++) i: false};
   }
 }
