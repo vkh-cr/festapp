@@ -304,27 +304,31 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION create_user_with_data(oc bigint, email text, password text, data jsonb)
- RETURNS uuid
- LANGUAGE plpgsql
- SECURITY DEFINER
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
-  declare
-  occasion_open BOOLEAN;
-  usr uuid;
-  encrypted_pw text;
-  user_meta_data jsonb;
-  _key   text;
-  _value text;
-  usr_info user_info%rowtype;
+DECLARE
+    occasion_open BOOLEAN;
+    usr uuid;
+    encrypted_pw text;
+    user_meta_data jsonb := '{}';
+    _key   text;
+    _value text;
+    trimmed_data jsonb := '{}';
 BEGIN
     -- Trim and lower the email input
     email := lower(trim(email));
 
-    -- Trim all values in the data JSONB object
+    -- Trim all values in the data JSONB object and build a new trimmed_data JSONB object
     FOR _key, _value IN
-        SELECT key, trim(value) FROM jsonb_each_text(data)
+        SELECT key, value FROM jsonb_each_text(data)
     LOOP
-        data := jsonb_set(data, array[_key], to_jsonb(_value));
+        IF _value IS NOT NULL THEN
+            trimmed_data := jsonb_set(trimmed_data, array[_key], to_jsonb(trim(_value)), true);
+        ELSE
+            trimmed_data := jsonb_set(trimmed_data, array[_key], 'null'::jsonb, true);
+        END IF;
     END LOOP;
 
     -- Check if the occasion is open
@@ -342,39 +346,19 @@ BEGIN
     usr := gen_random_uuid();
     encrypted_pw := crypt(password, gen_salt('bf'));
 
-    user_meta_data := NULL;
-
     INSERT INTO auth.users
       (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
     VALUES
-      ('00000000-0000-0000-0000-000000000000', usr, 'authenticated', 'authenticated', email, encrypted_pw, now(), NULL, NULL, '{"provider":"email","providers":["email"]}', user_meta_data, now(), now(), '', '', '', '');
+      ('00000000-0000-0000-0000-000000000000', usr, 'authenticated', 'authenticated', email, encrypted_pw, now(), NULL, NULL,
+      '{"provider":"email","providers":["email"]}', user_meta_data, now(), now(), '', '', '', '');
 
     INSERT INTO auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
     VALUES
       (gen_random_uuid(), usr, usr, format('{"sub":"%s","email":"%s"}', usr::text, email)::jsonb, 'email', NULL, now(), now());
 
-    --update user_info
-    INSERT INTO user_info (id, email_readonly, name, surname, sex) VALUES (usr, '', '', '', '');
-    select * into usr_info from user_info where id = usr;
-
-    --Initialize usr_info.data
-    usr_info.data := '{}'::jsonb;
-
-    FOR _key, _value IN
-        SELECT * FROM jsonb_each_text(data)
-    LOOP
-        usr_info.data := jsonb_set(usr_info.data, array[_key], to_jsonb(_value));
-        IF _key = 'name' THEN
-          UPDATE user_info SET name = _value where id = usr;
-        ELSIF _key = 'surname' THEN
-          UPDATE user_info SET surname = _value where id = usr;
-        ELSIF _key = 'sex' THEN
-          UPDATE user_info SET sex = _value where id = usr;
-        END IF;
-    END LOOP;
-
-    UPDATE user_info SET data = usr_info.data where id = usr;
-    UPDATE user_info SET email_readonly = email where id = usr;
+    -- Insert into user_info ensuring non-null values from trimmed_data JSONB
+    INSERT INTO user_info (id, email_readonly, name, surname, sex, data)
+    VALUES (usr, email, COALESCE(trimmed_data->>'name', ''), COALESCE(trimmed_data->>'surname', ''), COALESCE(trimmed_data->>'sex', ''), trimmed_data);
 
     PERFORM add_user_to_occasion(oc, usr);
 
