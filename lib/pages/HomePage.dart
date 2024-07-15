@@ -110,9 +110,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           }
                         },
                         child: SvgPicture.asset(
-                          height: 112,
-                          semanticsLabel: 'Festapp logo',
-                          'assets/icons/fstapplogo.svg',
+                          height: 72,
+                          semanticsLabel: 'CSA logo',
+                          'assets/icons/LOGO CSA APP.svg',
                         ),
                       ),
                       const Spacer(),
@@ -234,7 +234,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {

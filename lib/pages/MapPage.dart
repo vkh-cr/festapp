@@ -33,7 +33,7 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
-  static const double singlePlaceZoom = 17.7;
+  static const double singlePlaceZoom = 20.0;
   late final _animatedMapController = AnimatedMapController(vsync: this);
 
   List<IconModel> _icons = [];
