@@ -309,8 +309,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
 
     await DataService.updateEvents(_events).whenComplete(() async {
-      if(AppConfig.isSplitByPlace)
-      {
+      if(AppConfig.isSplitByPlace) {
         await loadPlacesForEvents(_events, DataService.getPlacesIn);
       }
       _dots.clear();
@@ -324,7 +323,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     });
     await loadEventParticipants();
-    OfflineDataHelper.saveAllEvents(_events);
+    await OfflineDataHelper.saveAllEvents(_events);
   }
 
   FutureOr<void> loadPlacesForEvents(List<EventModel> events, FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
@@ -350,9 +349,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> loadOfflineData() async {
     if (_events.isEmpty) {
       var offlineEvents = await OfflineDataHelper.getAllEvents();
-      OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+      await OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
       if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(offlineEvents, (ids) => OfflineDataHelper.getAllPlaces());
+        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataHelper.getAllPlaces()));
       }
       _events.addAll(offlineEvents);
       _dots.clear();

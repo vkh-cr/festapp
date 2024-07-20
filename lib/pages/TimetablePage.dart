@@ -113,8 +113,8 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _events.addAll(offlineEvents);
     }
 
-    OfflineDataHelper.updateEventsWithMySchedule(_events);
-    OfflineDataHelper.updateEventsWithGroupName(_events);
+    await OfflineDataHelper.updateEventsWithMySchedule(_events);
+    await OfflineDataHelper.updateEventsWithGroupName(_events);
 
     _items.clear();
     var items = _events

@@ -17,7 +17,7 @@ class RightsHelper{
         throw Exception("Cannot continue.");
       }
       var globalSettings = await DataService.loadOrInitGlobalSettings();
-      OfflineDataHelper.saveGlobalSettings(globalSettings);
+      await OfflineDataHelper.saveGlobalSettings(globalSettings);
 
       DataService.refreshOfflineData();
     }
