@@ -49,8 +49,6 @@ class DataService {
   static Future<bool> refreshSession() async {
     var response = await _supabase.auth.refreshSession();
     if(response.session!=null){
-      //todo possibly remove later
-      await NotificationHelper.login(DataService.currentUserId());
       return true;
     }
     if(await tryAuthUser()){
