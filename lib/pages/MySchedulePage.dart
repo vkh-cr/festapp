@@ -41,8 +41,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   Future<void> loadDataOffline() async {
     var offlineEvents = await OfflineDataHelper.getAllEvents();
-    OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
-    OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+    await OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
+    await OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataHelper.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
