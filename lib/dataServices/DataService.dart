@@ -49,6 +49,8 @@ class DataService {
   static Future<bool> refreshSession() async {
     var response = await _supabase.auth.refreshSession();
     if(response.session!=null){
+      //todo possibly remove later
+      await NotificationHelper.login(DataService.currentUserId());
       return true;
     }
     if(await tryAuthUser()){
@@ -65,13 +67,13 @@ class DataService {
     try{
       var result = await _supabase.auth.setSession(refresh.toString());
       if (result.user != null) {
-        NotificationHelper.Login(DataService.currentUserId());
+        await NotificationHelper.login(DataService.currentUserId());
         await _secureStorage.write(
             key: REFRESH_TOKEN_KEY,
             value: _supabase.auth.currentSession!.refreshToken.toString());
         return true;
       } else {
-        NotificationHelper.Logout();
+        await NotificationHelper.logout();
       }
     }
     catch(e)
@@ -165,7 +167,7 @@ class DataService {
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
     synchronizeMySchedule(true);
     refreshOfflineData();
-    NotificationHelper.Login(currentUserId());
+    await NotificationHelper.login(currentUserId());
   }
 
   static Future<void> logout() async {
@@ -173,7 +175,7 @@ class DataService {
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
     await OfflineDataHelper.clearUserData();
-    NotificationHelper.Logout();
+    await NotificationHelper.logout();
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {

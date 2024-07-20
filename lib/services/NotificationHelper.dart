@@ -11,30 +11,30 @@ import 'NavigationService.dart';
 
 class NotificationHelper
 {
-  static Future<void> initializeOneSignal() async {
+  static Future<void> initializeOneSignalWeb() async {
     await js.context.callMethod('eval', ['initializeOneSignal()']);
   }
 
-  static Future<void> requestNotificationPermission() async {
+  static Future<void> requestNotificationPermissionWeb() async {
     await js.context.callMethod('eval', ['requestNotificationPermission()']);
   }
 
-  static Future<void> logout() async {
+  static Future<void> logoutOneSignalWeb() async {
     await js.context.callMethod('eval', ['logout()']);
   }
 
-  static Future<void> login(String externalId) async {
+  static Future<void> loginOneSignalWeb(String externalId) async {
     await js.context.callMethod('eval', ['login("$externalId")']);
   }
 
-  static void Initialize() async {
+  static void initialize() async {
     if(!AppConfig.isNotificationsSupported) {
         return;
     }
 
     if (kIsWeb) {
-      await initializeOneSignal();
-      await requestNotificationPermission();
+      await initializeOneSignalWeb();
+      await requestNotificationPermissionWeb();
 
     } else{
       OneSignal.initialize(AppConfig.oneSignalAppId);
@@ -49,12 +49,12 @@ class NotificationHelper
     }
   }
 
-  static Future<void> Login(String currentUserId) async {
+  static Future<void> login(String currentUserId) async {
     if(!AppConfig.isNotificationsSupported) {
       return;
     }
     if (kIsWeb) {
-      await login(currentUserId);
+      await loginOneSignalWeb(currentUserId);
       return;
     }
 
@@ -62,15 +62,15 @@ class NotificationHelper
     {
       return;
     }
-    OneSignal.login(currentUserId);
+    await OneSignal.login(currentUserId);
   }
 
-  static Future<void> Logout() async {
+  static Future<void> logout() async {
     if(!AppConfig.isNotificationsSupported) {
       return;
     }
     if (kIsWeb) {
-      await logout();
+      await logoutOneSignalWeb();
       return;
     }
 
