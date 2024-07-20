@@ -53,7 +53,7 @@ class _NewsPageState extends State<NewsPage> {
     newsMessages = await OfflineDataHelper.getAllMessages();
     setState(() {});
     await loadNewsMessages();
-    OfflineDataHelper.saveAllMessages(newsMessages);
+    await OfflineDataHelper.saveAllMessages(newsMessages);
   }
 
   @override

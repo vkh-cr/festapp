@@ -172,7 +172,7 @@ class DataService {
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
-    OfflineDataHelper.clearUserData();
+    await OfflineDataHelper.clearUserData();
     NotificationHelper.Logout();
   }
 
@@ -1453,7 +1453,7 @@ class DataService {
           .eq(Tb.event_users_saved.event, id)
           .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
     }
-    OfflineDataHelper.removeFromMySchedule(id);
+    await OfflineDataHelper.removeFromMySchedule(id);
     ToastHelper.Show("Removed from My schedule.".tr());
   }
 
@@ -1467,7 +1467,7 @@ class DataService {
             .from(Tb.event_users_saved.table)
             .insert({Tb.event_users_saved.event: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
     }
-    OfflineDataHelper.addToMySchedule(id);
+    await OfflineDataHelper.addToMySchedule(id);
     ToastHelper.Show("Added to My schedule.".tr());
     return true;
   }
@@ -1491,7 +1491,7 @@ class DataService {
     }
 
     var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    OfflineDataHelper.saveMyScheduleData(currentUserEventIds);
+    await OfflineDataHelper.saveMyScheduleData(currentUserEventIds);
 
     var values = [];
     for(var v in currentUserEventIds)
@@ -1511,23 +1511,23 @@ class DataService {
   static Future<void> refreshOfflineData() async {
     if(DataService.isLoggedIn()) {
       var userInfo = await getFullUserInfo();
-      OfflineDataHelper.saveUserInfo(userInfo);
+      await OfflineDataHelper.saveUserInfo(userInfo);
     }
     else {
-      OfflineDataHelper.deleteUserInfo();
+      await OfflineDataHelper.deleteUserInfo();
     }
 
     var places = await getAllPlaces();
-    OfflineDataHelper.saveAllPlaces(places);
+    await OfflineDataHelper.saveAllPlaces(places);
 
     var icons = await getAllIcons();
-    OfflineDataHelper.saveAllIcons(icons);
+    await OfflineDataHelper.saveAllIcons(icons);
 
     var info = await getAllActiveInformation();
-    OfflineDataHelper.saveAllInfo(info);
+    await OfflineDataHelper.saveAllInfo(info);
 
     var messages = await getAllNewsMessages();
-    OfflineDataHelper.saveAllMessages(messages);
+    await OfflineDataHelper.saveAllMessages(messages);
 
     if (canSaveBigData() )
     {
@@ -1553,7 +1553,7 @@ class DataService {
 
     var fullEvents = await getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
-      OfflineDataHelper.saveEventDescription(e);
+      await OfflineDataHelper.saveEventDescription(e);
     }
   }
 
