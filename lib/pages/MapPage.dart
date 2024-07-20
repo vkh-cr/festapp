@@ -113,7 +113,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       mapPlaces = await DataService.getAllPlaces();
       mapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
       mapPlaces.sortPlaces(false);
-      OfflineDataHelper.saveAllPlaces(mapPlaces);
+      await OfflineDataHelper.saveAllPlaces(mapPlaces);
     }
 
     if (mapPlaces.isNotEmpty) {

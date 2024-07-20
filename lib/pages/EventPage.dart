@@ -399,7 +399,7 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     isLoadingEvent = false;
-    OfflineDataHelper.saveEventDescription(_event!);
+    await OfflineDataHelper.saveEventDescription(_event!);
     if (RightsHelper.isEditor()) {
       await loadParticipants(id);
     }
