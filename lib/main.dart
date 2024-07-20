@@ -78,6 +78,8 @@ Future<void> initializeEverything() async {
 
   try {
     if (DataService.isLoggedIn()) {
+      //todo remove later
+      await NotificationHelper.login(DataService.currentUserId());
       await DataService.getCurrentUserInfo();
       print('Current user info fetched');
     }

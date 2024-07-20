@@ -64,14 +64,14 @@
   async function logout() {
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.logout();
-      console.log("Logged out successfully.");
+      console.log("User has been logged out from OneSignal.");
     });
   }
 
   async function login(externalId) {
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.login(externalId);
-      console.log("Logged in successfully with externalId:", externalId);
+      console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
     });
   }
   </script>
