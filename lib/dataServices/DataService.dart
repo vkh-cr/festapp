@@ -1286,22 +1286,26 @@ class DataService {
     ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String? heading, String headingDefault, String message, bool withNotification, List<String>? to) async {
-    var messageForNews = heading !=null ? "<strong>$heading</strong><br>$message" : message;
-    await _supabase.from(Tb.news.table).insert(
-        {Tb.news.message: messageForNews, Tb.news.created_by: currentUserId()}).select();
+  static insertNewsMessage(String? heading, String headingDefault, String message, bool addToNews, bool withNotification, List<String>? to) async {
+    if (addToNews) {
+      var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
+      await _supabase.from(Tb.news.table).insert(
+          {
+            Tb.news.message: messageForNews,
+            Tb.news.created_by: currentUserId()
+          }
+      ).select();
+    }
 
-    if(withNotification)
-    {
+    if (withNotification) {
       String basicMessage = "";
       var document = parse(message);
-      for(var child in document.getElementsByTagName("p")){
-          var innerText = "${child.text}\n";
-          if(innerText.trim().isEmpty)
-          {
-            continue;
-          }
-          basicMessage+=innerText;
+      for (var child in document.getElementsByTagName("p")) {
+        var innerText = "${child.text}\n";
+        if (innerText.trim().isEmpty) {
+          continue;
+        }
+        basicMessage += innerText;
       }
       basicMessage = basicMessage.trim();
       await _supabase.from(Tb.log_notifications.table)
@@ -1309,14 +1313,17 @@ class DataService {
           {
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: heading??headingDefault
-          }).select();
+            Tb.log_notifications.heading: heading ?? headingDefault
+          }
+      );
 
       ToastHelper.Show("Message has been sent.".tr());
       return;
     }
-    ToastHelper.Show("Message has been created.".tr());
 
+    if (addToNews) {
+      ToastHelper.Show("Message has been created.".tr());
+    }
   }
 
   static Future<int> countNewMessages() async {

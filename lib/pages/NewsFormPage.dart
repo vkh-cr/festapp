@@ -33,6 +33,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   @override
   void didChangeDependencies() async {
+    super.didChangeDependencies();
     _currentUser = await DataService.getCurrentUserInfo();
     setState(() {});
   }
@@ -48,23 +49,26 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  void _sendPressed() async {
-      var htmlContent = await _controller.getText();
-      htmlContent = htmlContent.removeBackgroundColor();
-      if (htmlContent.isNotEmpty) {
+  Future<void> _sendPressed({bool isTest = false}) async {
+    var htmlContent = await _controller.getText();
+    htmlContent = htmlContent.removeBackgroundColor();
+    if (htmlContent.isNotEmpty) {
+      var toReturn = {
+        "content": htmlContent,
+        "heading": _formKey.currentState?.fields["heading"]!.value,
+        "heading_default": _currentUser!.name,
+        "with_notification": _formKey.currentState?.fields["with_notification"]!.value,
+        if (isTest) "to": [DataService.currentUserId()],
+        if (isTest) "add_to_news": false,
+      };
+      Navigator.pop(context, toReturn);
+    } else {
+      debugPrint('Content is required');
+    }
+  }
 
-
-        var toReturn = {
-          "to": null,
-          "content": htmlContent,
-          "heading": _formKey.currentState?.fields["heading"]!.value,
-          "heading_default": _currentUser!.name,
-          "with_notification": _formKey.currentState?.fields["with_notification"]!.value
-        };
-        Navigator.pop(context, toReturn);
-      } else {
-        debugPrint('Content is required');
-      }
+  Future<void> _testPressed() async {
+    _sendPressed(isTest: true);
   }
 
   @override
@@ -94,9 +98,9 @@ class _NewsFormPageState extends State<NewsFormPage> {
                           name: "heading",
                           focusNode: _toFocusNode,
                           decoration: InputDecoration(
-                            labelText: "Heading".tr(),
-                            hintText: _currentUser?.name,
-                            floatingLabelBehavior: FloatingLabelBehavior.always
+                              labelText: "Heading".tr(),
+                              hintText: _currentUser?.name,
+                              floatingLabelBehavior: FloatingLabelBehavior.always
                           ),
                         ),
                         FormBuilderCheckbox(
@@ -127,7 +131,11 @@ class _NewsFormPageState extends State<NewsFormPage> {
                 text: "Storno".tr(),
               ),
               ButtonsHelper.bottomBarButton(
-                onPressed: _sendPressed,
+                onPressed: _testPressed,
+                text: "Test".tr(),
+              ),
+              ButtonsHelper.bottomBarButton(
+                onPressed: () => _sendPressed(),
                 text: "Send".tr(),
               ),
             ],
