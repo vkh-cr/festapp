@@ -69,6 +69,7 @@
   }
 
   async function login(externalId) {
+    console.log("User is logging to OneSignal with Id:", externalId);
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.login(externalId);
       console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
