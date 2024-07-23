@@ -50,7 +50,7 @@
           });
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
-            console.log("Received notification: ", event.getNotification());
+            console.log("Received notification: ", event.notification.body);
             console.log("FOREGROUND WILL DISPLAY LISTENER CALLED: ", event.detail);
             // Prevent the notification from displaying
             event.preventDefault();
