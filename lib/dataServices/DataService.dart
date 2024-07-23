@@ -65,7 +65,6 @@ class DataService {
     try{
       var result = await _supabase.auth.setSession(refresh.toString());
       if (result.user != null) {
-        await NotificationHelper.login(DataService.currentUserId());
         await _secureStorage.write(
             key: REFRESH_TOKEN_KEY,
             value: _supabase.auth.currentSession!.refreshToken.toString());

@@ -2,6 +2,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
@@ -139,6 +140,7 @@ class _LoginPageState extends State<LoginPage> {
     var loggedIn = await DataService.tryAuthUser();
     if(loggedIn)
     {
+      NotificationHelper.login(DataService.currentUserId());
       RouterService.checkOccasionLinkAndRedirect(context);
       RouterService.goBackOrHome(context);
     }
