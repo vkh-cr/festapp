@@ -50,7 +50,7 @@
           });
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
-            console.log("Received notification: ", event.getNotification());
+            console.log("Received notification: ", event.notification.body);
             console.log("FOREGROUND WILL DISPLAY LISTENER CALLED: ", event.detail);
             // Prevent the notification from displaying
             event.preventDefault();
@@ -202,7 +202,7 @@ _flutter.buildConfig = {"engineRevision":"235db911ba279722f5e685f38b0ed30fa7e857
       // Download main.dart.js
       _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: "1307710484",
+          serviceWorkerVersion: "3032686174",
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
