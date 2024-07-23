@@ -78,8 +78,6 @@ Future<void> initializeEverything() async {
 
   try {
     if (DataService.isLoggedIn()) {
-      //todo remove later
-      await NotificationHelper.login(DataService.currentUserId());
       await DataService.getCurrentUserInfo();
       print('Current user info fetched');
     }
@@ -99,6 +97,9 @@ Future<void> initializeEverything() async {
 
   try {
     NotificationHelper.initialize();
+    if (DataService.isLoggedIn()) {
+      await NotificationHelper.login(DataService.currentUserId());
+    }
     print('Notification helper initialized');
   } catch (e) {
     print('Notification helper initialization failed: $e');
