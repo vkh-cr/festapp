@@ -51,13 +51,10 @@
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
             console.log("Received notification: ", event.notification.title, event.notification.body);
-            // Prevent the notification from displaying
-            event.preventDefault();
+            // Prevent the notification from auto-hid
+            // event.preventDefault();
 
             // Show SnackBar or do async work
-
-            // Display the notification after preventing default
-            OneSignal.Notifications.display(event.notification);
           });
         });
       }
