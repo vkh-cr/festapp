@@ -51,13 +51,10 @@
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
             console.log("Received notification: ", event.notification.title, event.notification.body);
-            // Prevent the notification from displaying
-            event.preventDefault();
+            // Prevent the notification from auto-hid
+            // event.preventDefault();
 
             // Show SnackBar or do async work
-
-            // Display the notification after preventing default
-            OneSignal.Notifications.display(event.notification);
           });
         });
       }
@@ -201,7 +198,7 @@ _flutter.buildConfig = {"engineRevision":"235db911ba279722f5e685f38b0ed30fa7e857
       // Download main.dart.js
       _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: "2545526153",
+          serviceWorkerVersion: "2232878292",
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
