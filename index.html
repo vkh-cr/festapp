@@ -52,9 +52,6 @@
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
             console.log("Received notification: ", event.notification.title, event.notification.body);
-            // Prevent the notification from auto-hid
-            // event.preventDefault();
-
             // Show SnackBar or do async work
           });
         });
@@ -83,6 +80,10 @@
         await OneSignal.login(externalId);
         console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
       });
+    }
+
+    function getNotificationPermission() {
+      return OneSignal.Notifications.permission;
     }
   </script>
 </head>
@@ -199,7 +200,7 @@ _flutter.buildConfig = {"engineRevision":"235db911ba279722f5e685f38b0ed30fa7e857
       // Download main.dart.js
       _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: "1801777649",
+          serviceWorkerVersion: "1833412176",
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
