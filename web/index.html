@@ -52,9 +52,6 @@
 
           OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
             console.log("Received notification: ", event.notification.title, event.notification.body);
-            // Prevent the notification from auto-hid
-            // event.preventDefault();
-
             // Show SnackBar or do async work
           });
         });
@@ -83,6 +80,10 @@
         await OneSignal.login(externalId);
         console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
       });
+    }
+
+    function getNotificationPermission() {
+      return OneSignal.Notifications.permission;
     }
   </script>
 </head>
