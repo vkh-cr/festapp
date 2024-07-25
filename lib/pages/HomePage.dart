@@ -18,6 +18,7 @@ import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -313,6 +314,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
     await loadEventParticipants();
     await OfflineDataHelper.saveAllEvents(_events);
+    await NotificationHelper.checkForNotificationPermission(context);
   }
 
   FutureOr<void> loadPlacesForEvents(List<EventModel> events, FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {

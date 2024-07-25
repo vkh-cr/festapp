@@ -99,9 +99,6 @@ Future<void> initializeEverything() async {
 
   try {
     NotificationHelper.initialize();
-    if (DataService.isLoggedIn()) {
-      await NotificationHelper.login(DataService.currentUserId());
-    }
     print('Notification helper initialized');
   } catch (e) {
     print('Notification helper initialization failed: $e');
