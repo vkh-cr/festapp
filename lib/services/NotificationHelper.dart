@@ -1,43 +1,56 @@
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/StorageHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/js/js_interop.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:fstapp/appConfig.dart';
-import 'dart:js' as js;
-
 import 'NavigationService.dart';
 
-class NotificationHelper
-{
+class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
+  static final JSInterop jsInterop = JSInterop();
+
   static Future<void> initializeOneSignalWeb() async {
-    await js.context.callMethod('eval', ['initializeOneSignal()']);
+    if (kIsWeb) {
+      await jsInterop.callMethod('initializeOneSignal', []);
+    }
   }
 
   static Future<bool> requestNotificationPermissionWeb() async {
-    return await js.context.callMethod('eval', ['requestNotificationPermission()']);
+    if (kIsWeb) {
+      return jsInterop.callBoolMethod('requestNotificationPermission', []);
+    }
+    return false;
   }
 
   static Future<void> logoutOneSignalWeb() async {
-    await js.context.callMethod('eval', ['logout()']);
+    if (kIsWeb) {
+      await jsInterop.callMethod('logout', []);
+    }
   }
 
   static Future<void> loginOneSignalWeb(String externalId) async {
-    await js.context.callMethod('eval', ['login("$externalId")']);
+    if (kIsWeb) {
+      await jsInterop.callMethod('login', [externalId]);
+    }
   }
 
   static bool getNotificationPermission() {
-    return js.context.callMethod('eval', ['getNotificationPermission()']);
+    if (kIsWeb) {
+      return jsInterop.callBoolMethod('getNotificationPermission', []);
+    }
+    return false;
   }
 
   static void initialize() async {
-    if(!AppConfig.isNotificationsSupported) {
-        return;
+    if (!AppConfig.isNotificationsSupported) {
+      return;
     }
 
     if (kIsWeb) {
@@ -61,6 +74,12 @@ class NotificationHelper
       if (wasAsked == null) {
         var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
         await StorageHelper.set(notificationAllowedAsked, dialogResult.toString());
+        var requestResult = await requestNotificationPermission();
+        if (requestResult) {
+          ToastHelper.Show("Notifications have been allowed.");
+        } else {
+          ToastHelper.Show("Notifications have been disabled.");
+        }
       }
     }
   }
@@ -73,7 +92,7 @@ class NotificationHelper
   }
 
   static Future<void> login(String currentUserId) async {
-    if(!AppConfig.isNotificationsSupported || !OneSignal.Notifications.permission) {
+    if (!AppConfig.isNotificationsSupported || !OneSignal.Notifications.permission) {
       return;
     }
     if (kIsWeb) {
@@ -85,7 +104,7 @@ class NotificationHelper
   }
 
   static Future<void> logout() async {
-    if(!AppConfig.isNotificationsSupported) {
+    if (!AppConfig.isNotificationsSupported) {
       return;
     }
     if (kIsWeb) {
@@ -95,5 +114,4 @@ class NotificationHelper
 
     OneSignal.logout();
   }
-
 }
