@@ -138,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await DataService.tryAuthUser();
     if (loggedIn) {
-      NotificationHelper.login();
+      await NotificationHelper.login();
       RouterService.checkOccasionLinkAndRedirect(context);
       RouterService.goBackOrHome(context);
     }
