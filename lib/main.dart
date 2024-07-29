@@ -53,7 +53,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    initializeDateFormatting();
+    await initializeDateFormatting();
     print('Date formatting initialized');
   } catch (e) {
     print('Date formatting initialization failed: $e');
