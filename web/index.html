@@ -98,7 +98,7 @@
 
     async function optIn() {
         try {
-            await OneSignal.User.pushSubscription.optIn();
+            await OneSignal.User.PushSubscription.optIn();
             console.log("User has opted in for notifications.");
         } catch (error) {
             console.error("Opt-in for notifications failed:", error);
@@ -107,7 +107,7 @@
 
     async function optOut() {
         try {
-            await OneSignal.User.pushSubscription.optOut();
+            await OneSignal.User.PushSubscription.optOut();
             console.log("User has opted out of notifications.");
         } catch (error) {
             console.error("Opt-out of notifications failed:", error);
