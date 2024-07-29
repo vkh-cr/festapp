@@ -21,8 +21,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'styles/Styles.dart';
 
 Future<void> main() async {
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
   debugProfileBuildsEnabled = true;
   await initializeEverything();
   runApp(
