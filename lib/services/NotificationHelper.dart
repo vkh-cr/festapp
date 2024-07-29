@@ -16,18 +16,6 @@ class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
   static final JSInterop jsInterop = JSInterop();
 
-  static Future<void> logoutOneSignalWeb() async {
-    if (kIsWeb) {
-      await jsInterop.callMethod('logout', []);
-    }
-  }
-
-  static Future<void> loginOneSignalWeb(String externalId) async {
-    if (kIsWeb) {
-      await jsInterop.callMethod('login', [externalId]);
-    }
-  }
-
   static Future<bool> isNotificationOnOff() async {
     var isPermissionOn = getNotificationPermission();
     var isSetupAsOn = await StorageHelper.get(notificationAllowedAsked);
@@ -44,7 +32,7 @@ class NotificationHelper {
 
   static Future<void> optInNotifications() async {
     if (kIsWeb) {
-      await jsInterop.callMethod('optIn', []);
+      await jsInterop.callFutureMethod('optIn', []);
     } else {
       await OneSignal.User.pushSubscription.optIn();
     }
@@ -52,7 +40,7 @@ class NotificationHelper {
 
   static Future<void> optOutNotifications() async {
     if (kIsWeb) {
-      await jsInterop.callMethod('optOut', []);
+      await jsInterop.callFutureMethod('optOut', []);
     } else {
       await OneSignal.User.pushSubscription.optOut();
     }
@@ -64,7 +52,7 @@ class NotificationHelper {
     }
 
     if (kIsWeb) {
-      await jsInterop.callMethod('initializeOneSignal', []);
+      await jsInterop.callFutureMethod('initializeOneSignal', []);
     } else {
       OneSignal.initialize(AppConfig.oneSignalAppId);
       OneSignal.Notifications.addClickListener((event) {
@@ -125,7 +113,7 @@ class NotificationHelper {
     }
 
     if (kIsWeb) {
-      await loginOneSignalWeb(DataService.currentUserId());
+      await jsInterop.callFutureMethod('login', [DataService.currentUserId()]);
       return;
     }
 
@@ -137,7 +125,7 @@ class NotificationHelper {
       return;
     }
     if (kIsWeb) {
-      await logoutOneSignalWeb();
+      await jsInterop.callFutureMethod('logout', []);
       return;
     }
 

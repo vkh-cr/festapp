@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:js' as js;
 
 class JSInterop {
-  Future<void> callMethod(String method, List args) async {
+  void callMethod(String method, List args) async {
     js.context.callMethod(method, args);
   }
 
@@ -18,6 +18,18 @@ class JSInterop {
           ...args,
           (result) => completer.complete(result),
           (error) => completer.complete(false),
+    ]);
+
+    return completer.future;
+  }
+
+  Future<dynamic> callFutureMethod(String method, List args) async {
+    final completer = Completer<dynamic>();
+
+    js.context.callMethod(method, [
+      ...args,
+      (result) => completer.complete(result),
+      (error) => completer.complete(error),
     ]);
 
     return completer.future;
