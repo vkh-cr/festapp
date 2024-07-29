@@ -98,7 +98,7 @@
 
     async function optIn() {
         try {
-            await OneSignal.User.pushSubscription.optIn();
+            await OneSignal.User.PushSubscription.optIn();
             console.log("User has opted in for notifications.");
         } catch (error) {
             console.error("Opt-in for notifications failed:", error);
@@ -107,7 +107,7 @@
 
     async function optOut() {
         try {
-            await OneSignal.User.pushSubscription.optOut();
+            await OneSignal.User.PushSubscription.optOut();
             console.log("User has opted out of notifications.");
         } catch (error) {
             console.error("Opt-out of notifications failed:", error);
@@ -228,7 +228,7 @@ _flutter.buildConfig = {"engineRevision":"235db911ba279722f5e685f38b0ed30fa7e857
       // Download main.dart.js
       _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: "496709918",
+          serviceWorkerVersion: "3629891816",
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
