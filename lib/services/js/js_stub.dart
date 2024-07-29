@@ -7,4 +7,8 @@ class JSInterop {
   bool callBoolMethod(String method, List args) {
     throw UnsupportedError('JS interop is not supported on this platform');
   }
+
+  Future<bool> callFutureBoolMethod(String method, List args) {
+    throw UnsupportedError('JS interop is not supported on this platform');
+  }
 }

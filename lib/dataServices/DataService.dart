@@ -164,7 +164,7 @@ class DataService {
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
     synchronizeMySchedule(true);
     refreshOfflineData();
-    await NotificationHelper.login(currentUserId());
+    await NotificationHelper.login();
   }
 
   static Future<void> logout() async {

@@ -100,7 +100,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    NotificationHelper.initialize();
+    await NotificationHelper.initialize();
     print('Notification helper initialized');
   } catch (e) {
     print('Notification helper initialization failed: $e');
