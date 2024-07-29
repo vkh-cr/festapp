@@ -91,6 +91,7 @@ class NotificationHelper {
     await StorageHelper.set(notificationAllowedAsked, currentPermission.toString());
     if (currentPermission) {
       await optInNotifications();
+      await NotificationHelper.login();
     }
     return currentPermission;
   }
