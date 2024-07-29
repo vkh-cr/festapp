@@ -16,19 +16,6 @@ class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
   static final JSInterop jsInterop = JSInterop();
 
-  static Future<void> initializeOneSignalWeb() async {
-    if (kIsWeb) {
-      await jsInterop.callMethod('initializeOneSignal', []);
-    }
-  }
-
-  static Future<bool> requestNotificationPermissionWeb() async {
-    if (kIsWeb) {
-      return jsInterop.callBoolMethod('requestNotificationPermission', []);
-    }
-    return false;
-  }
-
   static Future<void> logoutOneSignalWeb() async {
     if (kIsWeb) {
       await jsInterop.callMethod('logout', []);
@@ -41,30 +28,50 @@ class NotificationHelper {
     }
   }
 
+  static Future<bool> isNotificationOnOff() async {
+    var isPermissionOn = getNotificationPermission();
+    var isSetupAsOn = await StorageHelper.get(notificationAllowedAsked);
+    return isPermissionOn && isSetupAsOn == "true";
+  }
+
   static bool getNotificationPermission() {
     if (kIsWeb) {
       return jsInterop.callBoolMethod('getNotificationPermission', []);
+    } else {
+      return OneSignal.Notifications.permission;
     }
-    return false;
   }
 
-  static void initialize() async {
+  static Future<void> optInNotifications() async {
+    if (kIsWeb) {
+      await jsInterop.callMethod('optIn', []);
+    } else {
+      await OneSignal.User.pushSubscription.optIn();
+    }
+  }
+
+  static Future<void> optOutNotifications() async {
+    if (kIsWeb) {
+      await jsInterop.callMethod('optOut', []);
+    } else {
+      await OneSignal.User.pushSubscription.optOut();
+    }
+  }
+
+  static Future<void> initialize() async {
     if (!AppConfig.isNotificationsSupported) {
       return;
     }
 
     if (kIsWeb) {
-      await initializeOneSignalWeb();
+      await jsInterop.callMethod('initializeOneSignal', []);
     } else {
       OneSignal.initialize(AppConfig.oneSignalAppId);
-
       OneSignal.Notifications.addClickListener((event) {
         RouterService.navigateOccasion(NavigationService.navigatorKey.currentContext!, NewsPage.ROUTE);
       });
     }
-    if (DataService.isLoggedIn()) {
-      await NotificationHelper.login(DataService.currentUserId());
-    }
+    await NotificationHelper.login();
   }
 
   static Future<void> checkForNotificationPermission(BuildContext context) async {
@@ -73,8 +80,12 @@ class NotificationHelper {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
       if (wasAsked == null) {
         var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
-        await StorageHelper.set(notificationAllowedAsked, dialogResult.toString());
+        if(!dialogResult) {
+          ToastHelper.Show("Notifications have been disabled.");
+          return;
+        }
         var requestResult = await requestNotificationPermission();
+        await StorageHelper.set(notificationAllowedAsked, requestResult.toString());
         if (requestResult) {
           ToastHelper.Show("Notifications have been allowed.");
         } else {
@@ -84,27 +95,45 @@ class NotificationHelper {
     }
   }
 
+  static Future<bool> turnNotificationOn() async {
+    var currentPermission = getNotificationPermission();
+    if(!currentPermission){
+      currentPermission = await requestNotificationPermission();
+    }
+    await StorageHelper.set(notificationAllowedAsked, currentPermission.toString());
+    if (currentPermission) {
+      await optInNotifications();
+    }
+    return currentPermission;
+  }
+
+  static Future<void> turnNotificationOff() async {
+    await StorageHelper.set(notificationAllowedAsked, false.toString());
+    await optOutNotifications();
+  }
+
   static Future<bool> requestNotificationPermission() async {
     if (kIsWeb) {
-      return await requestNotificationPermissionWeb();
+      return await jsInterop.callFutureBoolMethod('requestNotificationPermission', []);
     }
     return await OneSignal.Notifications.requestPermission(false);
   }
 
-  static Future<void> login(String currentUserId) async {
-    if (!AppConfig.isNotificationsSupported || !OneSignal.Notifications.permission) {
-      return;
-    }
-    if (kIsWeb) {
-      await loginOneSignalWeb(currentUserId);
+  static Future<void> login() async {
+    if (!AppConfig.isNotificationsSupported || !OneSignal.Notifications.permission || !DataService.isLoggedIn()) {
       return;
     }
 
-    await OneSignal.login(currentUserId);
+    if (kIsWeb) {
+      await loginOneSignalWeb(DataService.currentUserId());
+      return;
+    }
+
+    await OneSignal.login(DataService.currentUserId());
   }
 
   static Future<void> logout() async {
-    if (!AppConfig.isNotificationsSupported) {
+    if (!AppConfig.isNotificationsSupported || !DataService.isLoggedIn()) {
       return;
     }
     if (kIsWeb) {

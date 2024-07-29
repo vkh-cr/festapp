@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -97,7 +98,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    NotificationHelper.initialize();
+    await NotificationHelper.initialize();
     print('Notification helper initialized');
   } catch (e) {
     print('Notification helper initialization failed: $e');

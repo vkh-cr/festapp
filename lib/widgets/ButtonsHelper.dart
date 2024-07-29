@@ -5,21 +5,6 @@ import 'package:fstapp/styles/Styles.dart';
 import 'package:pwa_install/pwa_install.dart';
 
 class ButtonsHelper {
-  static PopupMenuButton<String> pwaInstallButton() {
-    return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
-      onSelected: (t){PWAInstall().promptInstall_();},
-      itemBuilder: (BuildContext context) {
-        return {"Install".tr()}.map((String choice) {
-          return PopupMenuItem<String>(
-            value: choice,
-            child: Text(choice),
-          );
-        }).toList();
-      },
-    );
-  }
-
   static getAddToMyProgramButton(
       bool? canSaveToMyProgram,
       Future<void> Function() addToMyProgram,

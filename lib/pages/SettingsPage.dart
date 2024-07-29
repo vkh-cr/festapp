@@ -1,0 +1,172 @@
+import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataModels/LanguageModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:pwa_install/pwa_install.dart';
+
+class SettingsPage extends StatefulWidget {
+  static const ROUTE = "settings";
+  const SettingsPage({super.key});
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _notificationsEnabled = false;
+  bool _isAppInstalled = false;
+  bool _isPlatformSupported = true;
+  bool _notificationError = false;
+  LanguageModel? _currentLanguage;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    bool isEnabled = await NotificationHelper.isNotificationOnOff();
+    Locale currentLocale = context.locale;
+    LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale == currentLocale);
+    bool isAppInstalled = DataService.canSaveBigData();
+
+    setState(() {
+      _notificationsEnabled = isEnabled;
+      _currentLanguage = currentLanguage;
+      _isAppInstalled = isAppInstalled;
+    });
+  }
+
+  Future<void> handleInstallButtonPress() async {
+    try {
+      PWAInstall().promptInstall_();
+    } catch (e) {
+      setState(() {
+        _isPlatformSupported = false;
+      });
+    }
+    await loadSettings();
+  }
+
+  bool get _canInstallPWA => !_isAppInstalled && _isPlatformSupported;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Settings").tr(),
+        leading: BackButton(
+          onPressed: () => RouterService.goBackOrInitial(context),
+        ),
+      ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (AppConfig.availableLanguages.length > 1) ...[
+                  Text("Language Settings", style: TextStyle(fontSize: 20)).tr(),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Current Language: ${_currentLanguage?.name ?? 'Unknown'}",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          await DialogHelper.chooseLanguage(context);
+                          await loadSettings();
+                        },
+                        icon: Icon(Icons.translate),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
+                Text("Notification Settings", style: TextStyle(fontSize: 20)).tr(),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Enable Notifications", style: TextStyle(fontSize: 16)),
+                    Switch(
+                      value: _notificationsEnabled,
+                      onChanged: (value) async {
+                        bool success;
+                        if (value) {
+                          success = await NotificationHelper.turnNotificationOn();
+                        } else {
+                          await NotificationHelper.turnNotificationOff();
+                          success = true;
+                        }
+                        if (!success) {
+                          setState(() {
+                            _notificationError = true;
+                          });
+                        }
+                        await loadSettings();
+                      },
+                    ),
+                  ],
+                ),
+                if (_notificationError)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      "Failed to enable notifications.",
+                      style: TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                Center(
+                  child: Column(
+                    children: [
+                      ButtonsHelper.bigButton(
+                        label: "Install App",
+                        onPressed: _canInstallPWA ? handleInstallButtonPress : null,
+                        color: _canInstallPWA ? AppConfig.color1 : Colors.grey,
+                        textColor: Colors.white,
+                      ),
+                      if (!_isPlatformSupported)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "This platform or browser does not support the PWA install prompt.",
+                            style: TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      if (_isAppInstalled)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
+                            "App is installed.",
+                            style: TextStyle(fontSize: 16, color: AppConfig.color1),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

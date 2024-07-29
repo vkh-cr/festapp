@@ -2,19 +2,17 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
+import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
-import 'package:fstapp/widgets/LanguageButton.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
-import 'package:pwa_install/pwa_install.dart';
 import '../styles/Styles.dart';
-
 
 class LoginPage extends StatefulWidget {
   static const ROUTE = "login";
@@ -40,10 +38,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> actions = [const LanguageButton()];
-    if(AppConfig.showPWAInstallOption && PWAInstall().installPromptEnabled){
-      actions.add(ButtonsHelper.pwaInstallButton());
-    }
+    List<Widget> actions = [
+      IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -70,17 +70,16 @@ class _LoginPageState extends State<LoginPage> {
                     Container(
                       padding: const EdgeInsets.all(12.0),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("First time?".tr(), style: TextStyle(fontSize: 18),),
-                          const SizedBox(
-                            width: 16,
-                          ),
-                          TextButton(
-                              onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                              child: Text("Sign up", style: normalTextStyle,).tr())
-                        ]
-
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("First time?".tr(), style: TextStyle(fontSize: 18)),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            TextButton(
+                                onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                                child: Text("Sign up", style: normalTextStyle).tr())
+                          ]
                       ),
                     ),
                     Padding(
@@ -124,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.topRight,
                         child: TextButton(
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
-                            child: Text("Forgot your password?", style: normalTextStyle,).tr())
+                            child: Text("Forgot your password?", style: normalTextStyle).tr())
                     ),
                   ],
                 ),
@@ -138,9 +137,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await DataService.tryAuthUser();
-    if(loggedIn)
-    {
-      NotificationHelper.login(DataService.currentUserId());
+    if (loggedIn) {
+      NotificationHelper.login();
       RouterService.checkOccasionLinkAndRedirect(context);
       RouterService.goBackOrHome(context);
     }

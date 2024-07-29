@@ -13,15 +13,14 @@ import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
+import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/widgets/LanguageButton.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
-import 'package:pwa_install/pwa_install.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -129,10 +128,13 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> actions = [const LanguageButton()];
-    if (AppConfig.showPWAInstallOption && PWAInstall().installPromptEnabled) {
-      actions.add(ButtonsHelper.pwaInstallButton());
-    }
+
+    List<Widget> actions = [
+      IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
+      ),
+    ];
 
     return Scaffold(
       appBar: AppBar(
