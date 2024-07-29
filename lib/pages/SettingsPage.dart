@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
-                            "This platform or browser does not support the PWA install prompt.",
+                            "This platform or browser does not support the PWA install prompt or the app is already installed.",
                             style: TextStyle(color: Colors.red),
                             textAlign: TextAlign.center,
                           ),
