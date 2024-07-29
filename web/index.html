@@ -39,7 +39,7 @@
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
 
-    async function initializeOneSignal() {
+    async function initializeOneSignal(callback, errorCallback) {
         if (!window.OneSignalInitialized) {
             window.OneSignalInitialized = true;
             OneSignalDeferred.push(async function(OneSignal) {
@@ -58,6 +58,8 @@
                     console.log("Received notification: ", event.notification.title, event.notification.body);
                     // Show SnackBar or do async work
                 });
+
+                if (callback) callback(null);
             });
         }
     }
@@ -73,19 +75,21 @@
         }
     }
 
-    async function logout() {
+    async function logout(callback, errorCallback) {
         OneSignalDeferred.push(async function(OneSignal) {
             await OneSignal.logout();
             console.log("User has been logged out from OneSignal.");
         });
+        if (callback) callback(null);
     }
 
-    async function login(externalId) {
+    async function login(externalId, callback, errorCallback) {
         console.log("User is logging to OneSignal with Id:", externalId);
         OneSignalDeferred.push(async function(OneSignal) {
             await OneSignal.login(externalId);
             console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
         });
+        if (callback) callback(null);
     }
 
     function getNotificationPermission() {
@@ -96,22 +100,24 @@
       return false;
     }
 
-    async function optIn() {
+    async function optIn(callback, errorCallback) {
         try {
             await OneSignal.User.PushSubscription.optIn();
             console.log("User has opted in for notifications.");
         } catch (error) {
             console.error("Opt-in for notifications failed:", error);
         }
+        if (callback) callback(null);
     }
 
-    async function optOut() {
+    async function optOut(callback, errorCallback) {
         try {
             await OneSignal.User.PushSubscription.optOut();
             console.log("User has opted out of notifications.");
         } catch (error) {
             console.error("Opt-out of notifications failed:", error);
         }
+        if (callback) callback(null);
     }
   </script>
 </head>
