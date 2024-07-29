@@ -104,7 +104,7 @@ Future<void> initializeEverything() async {
     print('Notification helper initialization failed: $e');
   }
 
-  print('Initialization completed');
+  print('Notification helper initialization completed');
 }
 
 class MyApp extends StatefulWidget {
