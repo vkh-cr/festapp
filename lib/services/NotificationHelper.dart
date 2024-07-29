@@ -120,7 +120,7 @@ class NotificationHelper {
   }
 
   static Future<void> login() async {
-    if (!AppConfig.isNotificationsSupported || !OneSignal.Notifications.permission || !DataService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsSupported || !getNotificationPermission() || !DataService.isLoggedIn()) {
       return;
     }
 
