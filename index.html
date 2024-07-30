@@ -103,8 +103,21 @@
    }
 
    function getNotificationPermission() {
-     return Notification.permission === "granted";
-   }
+    // Check if the Notification API is supported
+    if (!("Notification" in window)) {
+      console.error("This browser does not support desktop notifications.");
+      return false;
+    }
+
+    // Check if the site is served over HTTPS
+    if (window.location.protocol !== 'https:') {
+      console.error("Notifications require a secure context (HTTPS).");
+      return false;
+    }
+
+    // Return the permission status
+    return Notification.permission === "granted";
+  }
 
    async function optIn(callback, errorCallback) {
        try {
@@ -240,7 +253,7 @@ _flutter.buildConfig = {"engineRevision":"235db911ba279722f5e685f38b0ed30fa7e857
       // Download main.dart.js
       _flutter.loader.load({
         serviceWorker: {
-          serviceWorkerVersion: "2229375562",
+          serviceWorkerVersion: "2073889604",
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(async function(appRunner) {
