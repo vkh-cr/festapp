@@ -101,8 +101,21 @@
    }
 
    function getNotificationPermission() {
-     return Notification.permission === "granted";
-   }
+    // Check if the Notification API is supported
+    if (!("Notification" in window)) {
+      console.error("This browser does not support desktop notifications.");
+      return false;
+    }
+
+    // Check if the site is served over HTTPS
+    if (window.location.protocol !== 'https:') {
+      console.error("Notifications require a secure context (HTTPS).");
+      return false;
+    }
+
+    // Return the permission status
+    return Notification.permission === "granted";
+  }
 
    async function optIn(callback, errorCallback) {
        try {
