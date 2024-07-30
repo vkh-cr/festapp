@@ -11,6 +11,7 @@ import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/TimeTravelWidget.dart';
 import 'package:go_router/go_router.dart';
@@ -39,8 +40,7 @@ Future<void> initializeEverything() async {
   print('Initialization started');
   GoRouter.optionURLReflectsImperativeAPIs = true;
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [SystemUiOverlay.bottom]);
+  StylesHelper.setMetaThemeColor(Colors.red);
   print('Widgets binding initialized');
 
   try {
