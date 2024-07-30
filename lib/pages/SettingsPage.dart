@@ -21,6 +21,7 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = false;
   bool _isAppInstalled = false;
+  bool _isPromptEnabled = false;
   bool _isPlatformSupported = true;
   bool _notificationError = false;
   LanguageModel? _currentLanguage;
@@ -41,6 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationsEnabled = isEnabled;
       _currentLanguage = currentLanguage;
       _isAppInstalled = isAppInstalled;
+      _isPromptEnabled = PWAInstall().installPromptEnabled;
     });
   }
 
@@ -55,7 +57,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await loadSettings();
   }
 
-  bool get _canInstallPWA => !_isAppInstalled && _isPlatformSupported;
+  bool get _canInstallPWA => !_isAppInstalled && _isPlatformSupported && _isPromptEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -150,11 +152,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             textAlign: TextAlign.center,
                           ),
                         ),
-                      if (_isAppInstalled)
+                      if (_isAppInstalled || !_isPromptEnabled)
                         Padding(
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Text(
-                            "App is installed.",
+                            "The app is already installed.",
                             style: TextStyle(fontSize: 16, color: AppConfig.color1),
                             textAlign: TextAlign.center,
                           ),
