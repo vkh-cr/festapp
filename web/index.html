@@ -71,11 +71,6 @@
    async function requestNotificationPermission(callback, errorCallback) {
        try {
            await OneSignal.Notifications.requestPermission()
-           //var permission = await Notification.requestPermission();
-           //var granted = permission === "granted";
-           //if (granted) {
-           // OneSignal.Notifications.requestPermission();
-           //}
            console.log("Notification permission request sent.");
            if (callback) callback(getNotificationPermission());
        } catch (error) {
