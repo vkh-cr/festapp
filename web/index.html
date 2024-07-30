@@ -70,13 +70,14 @@
 
    async function requestNotificationPermission(callback, errorCallback) {
        try {
-           var permission = await Notification.requestPermission();
-           var granted = permission === "granted";
-           if (granted) {
-            OneSignal.Notifications.requestPermission();
-           }
+           await OneSignal.Notifications.requestPermission()
+           //var permission = await Notification.requestPermission();
+           //var granted = permission === "granted";
+           //if (granted) {
+           // OneSignal.Notifications.requestPermission();
+           //}
            console.log("Notification permission request sent.");
-           if (callback) callback(granted);
+           if (callback) callback(getNotificationPermission());
        } catch (error) {
            console.error("Notification permission request failed:", error);
            if (errorCallback) errorCallback(error);
@@ -114,7 +115,7 @@
     }
 
     // Return the permission status
-    return Notification.permission === "granted";
+    return OneSignal.Notifications.permission;
   }
 
    async function optIn(callback, errorCallback) {
