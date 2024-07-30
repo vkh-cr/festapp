@@ -75,7 +75,7 @@ Future<void> initializeEverything() async {
       print('Session refreshed');
     }
   } catch (e) {
-    print('Fetching current user info failed: $e');
+    print('Supabase initialization failed: $e');
   }
 
   try {
@@ -84,7 +84,7 @@ Future<void> initializeEverything() async {
       print('Current user info fetched');
     }
   } catch (e) {
-    print('Supabase initialization failed: $e');
+    print('Fetching current user info failed: $e');
   }
 
   try {
