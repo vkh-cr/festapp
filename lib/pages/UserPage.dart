@@ -16,6 +16,7 @@ import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -401,6 +402,7 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    StylesHelper.setMetaThemeColor(AppConfig.color1);
     if (!DataService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
     }

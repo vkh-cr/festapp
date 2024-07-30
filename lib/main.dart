@@ -40,7 +40,6 @@ Future<void> initializeEverything() async {
   print('Initialization started');
   GoRouter.optionURLReflectsImperativeAPIs = true;
   WidgetsFlutterBinding.ensureInitialized();
-  StylesHelper.setMetaThemeColor(Colors.red);
   print('Widgets binding initialized');
 
   try {

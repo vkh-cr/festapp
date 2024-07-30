@@ -19,6 +19,7 @@ import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -65,6 +66,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    StylesHelper.setMetaThemeColor(AppConfig.backgroundColor);
     loadData();
   }
 
