@@ -235,27 +235,21 @@
       return new Promise(resolve => setTimeout(resolve, time));
     }
 
-    window.addEventListener('load', function(ev) {
-      {{flutter_js}}
-      {{flutter_build_config}}
+    {{flutter_js}}
+    {{flutter_build_config}}
 
-      var loaderContent = document.querySelector('#loader-content');
+    // Download main.dart.js
+    _flutter.loader.load({
+      serviceWorker: {
+        serviceWorkerVersion: {{flutter_service_worker_version}},
+      },
+      onEntrypointLoaded: async function(engineInitializer) {
+         const appRunner = await engineInitializer.initializeEngine();
+          //await delay(5000);
 
-      // Download main.dart.js
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: {{flutter_service_worker_version}},
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(async function(appRunner) {
-            //await delay(5000);
-
-            loaderContent.style.opacity = "0";
-            //await delay(200);
-            appRunner.runApp();
-          });
-        }
-      });
+          //await delay(200);
+          appRunner.runApp();
+      }
     });
   </script>
   <div class="main-content" id="loader-content">
