@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _notificationsEnabled = isEnabled;
       _currentLanguage = currentLanguage;
       _isAppInstalled = isAppInstalled;
-      _isPromptEnabled = PWAInstall().installPromptEnabled;
+      _isPromptEnabled = true; //PWAInstall().installPromptEnabled;
     });
   }
 

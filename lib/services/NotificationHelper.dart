@@ -68,8 +68,9 @@ class NotificationHelper {
     if (!allowed) {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
       if (wasAsked == null) {
-        await StorageHelper.set(notificationAllowedAsked, false.toString());
         var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
+        // save default so user don't get ask again, event if later code fails
+        await StorageHelper.set(notificationAllowedAsked, false.toString());
         if(!dialogResult) {
           ToastHelper.Show("Notifications have been disabled.".tr());
           return;
