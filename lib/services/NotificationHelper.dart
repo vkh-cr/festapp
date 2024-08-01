@@ -16,6 +16,7 @@ import 'NavigationService.dart';
 class NotificationHelper {
   static const notificationAllowedAsked = "NotificationAllowed";
   static final JSInterop jsInterop = JSInterop();
+  static bool _isNotificationDialogShown = false;
 
   static Future<bool> isNotificationOnOff() async {
     var isPermissionOn = getNotificationPermission();
@@ -63,15 +64,22 @@ class NotificationHelper {
     await NotificationHelper.login();
   }
 
-  static Future<void> checkForNotificationPermission(BuildContext context) async {
+  static Future<void> checkForNotificationPermission(BuildContext context, [bool forceIsPWA = false]) async {
+    if (!DataService.isPwaInstalledOrNative() && !forceIsPWA) {
+      return;
+    }
     var allowed = getNotificationPermission();
     if (!allowed) {
       var wasAsked = await StorageHelper.get(notificationAllowedAsked);
-      if (wasAsked == null) {
+      if (wasAsked == null && !_isNotificationDialogShown) {
+        _isNotificationDialogShown = true;
         var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
-        // save default so user don't get ask again, event if later code fails
+        _isNotificationDialogShown = false;
+
+        // save default so user don't get ask again, even if later code fails
         await StorageHelper.set(notificationAllowedAsked, false.toString());
-        if(!dialogResult) {
+
+        if (!dialogResult) {
           ToastHelper.Show("Notifications have been disabled.".tr());
           return;
         }
@@ -88,7 +96,7 @@ class NotificationHelper {
 
   static Future<bool> turnNotificationOn() async {
     var currentPermission = getNotificationPermission();
-    if(!currentPermission){
+    if (!currentPermission) {
       currentPermission = await requestNotificationPermission();
     }
     await StorageHelper.set(notificationAllowedAsked, currentPermission.toString());
