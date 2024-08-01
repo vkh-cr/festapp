@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'js/js_interop.dart';
@@ -11,6 +12,8 @@ extension ColorString on Color {
 class StylesHelper{
   static final JSInterop jsInterop = JSInterop();
   static void setMetaThemeColor(Color color) {
-    jsInterop.callMethod("setMetaThemeColor", [color.toHexString()]);
+    if(kIsWeb) {
+      jsInterop.callMethod("setMetaThemeColor", [color.toHexString()]);
+    }
   }
 }
