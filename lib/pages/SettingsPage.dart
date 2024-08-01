@@ -35,7 +35,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> loadSettings() async {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
-    LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale == currentLocale);
+    LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
     bool isAppInstalled = DataService.canSaveBigData();
 
     setState(() {
