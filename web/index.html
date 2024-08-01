@@ -53,6 +53,7 @@
                          title: "Notifikace",
                          message: "Děkujeme za povolení notifikací.",
                        },
+                       serviceWorkerPath: "./OneSignalSDKWorker.js",
                    });
 
                    OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
