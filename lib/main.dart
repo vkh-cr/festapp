@@ -70,20 +70,11 @@ Future<void> initializeEverything() async {
     ).timeout(const Duration(seconds: 2));
     print('Supabase initialized');
     if (!DataService.isLoggedIn()) {
-      await DataService.refreshSession();
+      await DataService.refreshSession().timeout(const Duration(seconds: 2));
       print('Session refreshed');
     }
   } catch (e) {
     print('Supabase initialization failed: $e');
-  }
-
-  try {
-    if (DataService.isLoggedIn()) {
-      await DataService.getCurrentUserInfo();
-      print('Current user info fetched');
-    }
-  } catch (e) {
-    print('Fetching current user info failed: $e');
   }
 
   try {
@@ -97,13 +88,15 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await NotificationHelper.initialize();
+    await NotificationHelper.initialize().timeout(const Duration(seconds: 2));
     print('Notification helper initialized');
   } catch (e) {
     print('Notification helper initialization failed: $e');
   }
 
   print('Notification helper initialization completed');
+
+  print('Initialization completed');
 }
 
 class MyApp extends StatefulWidget {
