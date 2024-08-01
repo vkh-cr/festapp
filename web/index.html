@@ -103,11 +103,11 @@
         return false;
       }
 
-      // Check if the site is served over HTTPS
-      if (window.location.protocol !== 'https:') {
-        console.error("Notifications require a secure context (HTTPS).");
-        return false;
-      }
+    // Check if the site is served over HTTPS or is running on localhost
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      console.error("Notifications require a secure context (HTTPS).");
+      return false;
+    }
 
       // Return the permission status
       return OneSignal.Notifications.permission;

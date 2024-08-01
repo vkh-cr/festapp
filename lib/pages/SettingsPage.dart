@@ -27,6 +27,15 @@ class _SettingsPageState extends State<SettingsPage> {
   LanguageModel? _currentLanguage;
 
   @override
+  void initState() {
+    super.initState();
+    PWAInstall().onAppInstalled = () async {
+      await Future.delayed(const Duration(seconds: 3));
+      NotificationHelper.checkForNotificationPermission(context, true);
+    };
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadSettings();
@@ -36,7 +45,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
     LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
-    bool isAppInstalled = DataService.canSaveBigData();
+    bool isAppInstalled = DataService.isPwaInstalledOrNative();
 
     setState(() {
       _notificationsEnabled = isEnabled;
