@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   )),
               Expanded(
                   child: ScheduleTabView(
-                    key: UniqueKey(),
+                    key: _dots.isEmpty ? UniqueKey() : null,
                     events: _dots,
                     onEventPressed: _eventPressed,
                   )),
