@@ -161,28 +161,9 @@
   }
 
 </style>
-  <script>
-    function delay(time) {
-      return new Promise(resolve => setTimeout(resolve, time));
-    }
 
-    {{flutter_js}}
-    {{flutter_build_config}}
+<script src="flutter_bootstrap.js" async></script>
 
-    // Download main.dart.js
-    _flutter.loader.load({
-      serviceWorker: {
-        serviceWorkerVersion: {{flutter_service_worker_version}},
-      },
-      onEntrypointLoaded: async function(engineInitializer) {
-         const appRunner = await engineInitializer.initializeEngine();
-          //await delay(5000);
-
-          //await delay(200);
-          appRunner.runApp();
-      }
-    });
-  </script>
   <div class="main-content" id="loader-content">
     <svg id="Vrstva_1" data-name="Vrstva 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 462.04 247.12">
       <defs>
