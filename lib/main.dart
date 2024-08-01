@@ -87,12 +87,9 @@ Future<void> initializeEverything() async {
     print('Offline data helper initialization failed: $e');
   }
 
-  try {
-    await NotificationHelper.initialize().timeout(const Duration(seconds: 2));
-    print('Notification helper initialized');
-  } catch (e) {
-    print('Notification helper initialization failed: $e');
-  }
+  NotificationHelper.initialize().then(
+          (f){ print('Notification helper initialized'); },
+          onError: (e){ print('Notification helper initialization failed: $e'); });
 
   print('Notification helper initialization completed');
 
