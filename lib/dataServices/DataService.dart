@@ -1535,7 +1535,7 @@ class DataService {
     var messages = await getAllNewsMessages();
     await OfflineDataHelper.saveAllMessages(messages);
 
-    if (canSaveBigData() )
+    if (isPwaInstalledOrNative() )
     {
       await updateEventDescriptions();
       await updateInfoDescription();
@@ -1544,7 +1544,7 @@ class DataService {
     await DataService.synchronizeMySchedule();
   }
 
-  static bool canSaveBigData() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed ;
+  static bool isPwaInstalledOrNative() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed ;
 
   static Future<void> updateEventDescriptions() async {
     var needsUpdate = <int>[];
