@@ -168,11 +168,11 @@ class DataService {
   }
 
   static Future<void> logout() async {
+    await NotificationHelper.logout().timeout(const Duration(seconds: 2));
+    await OfflineDataHelper.clearUserData();
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
-    await OfflineDataHelper.clearUserData();
-    await NotificationHelper.logout();
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
