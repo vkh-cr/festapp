@@ -265,4 +265,42 @@ class DialogHelper{
     );
     return filePath;
   }
+
+
+  static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Notifications").tr(),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text("Stay updated with the latest changes in schedule, notices, and other news.").tr(),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Don\'t Allow").tr(),
+              onPressed: () {
+                result = false;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text("Allow").tr(),
+              onPressed: () async {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
+  }
 }

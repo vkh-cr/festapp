@@ -18,6 +18,8 @@ import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -30,21 +32,10 @@ import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 
-
-
 class HomePage extends StatefulWidget {
   static const HOME_PAGE = AppConfig.appName;
 
   const HomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -64,6 +55,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    StylesHelper.setMetaThemeColor(AppConfig.backgroundColor);
     loadData();
   }
 
@@ -82,12 +74,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
         body: SafeArea(
           child: Column(
@@ -169,6 +155,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   )),
               Expanded(
                   child: ScheduleTabView(
+                    key: UniqueKey(),
                     events: _dots,
                     onEventPressed: _eventPressed,
                   )),
@@ -324,6 +311,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
     await loadEventParticipants();
     await OfflineDataHelper.saveAllEvents(_events);
+    await NotificationHelper.checkForNotificationPermission(context);
   }
 
   FutureOr<void> loadPlacesForEvents(List<EventModel> events, FutureOr<List<PlaceModel>> Function(List<int>) fetchPlaces) async {

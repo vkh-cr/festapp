@@ -35,18 +35,83 @@
   <meta name="theme-color" content="#ffffff">
 
   <title>Festival Slunovrat</title>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
 
+       async function initializeOneSignal(callback, errorCallback) {
+           if (!window.OneSignalInitialized) {
+               window.OneSignalInitialized = true;
+               OneSignalDeferred.push(async function(OneSignal) {
+                   try {
+                     await OneSignal.init({
+                           appId: "73f77f22-961a-4ded-9647-e33a7ac14f90",
+                           safari_web_id: "web.onesignal.auto.34cabfa2-ddd9-46d0-b8b2-6fad793020e0",
+                           allowLocalhostAsSecureOrigin: true,
+                           persistNotification: false,
+                           welcomeNotification: {
+                             title: "Notifikace",
+                             message: "Děkujeme za povolení notifikací.",
+                           },
+                       });
+
+                       OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
+                           console.log("Received notification: ", event.notification.title, event.notification.body);
+                           // Show SnackBar or do async work
+                       });
+                   } catch (error) {
+                     console.log("OneSignal initialization failed:", error);
+                   }
+
+                   if (callback) callback(null);
+               });
+           }
+       }
+
+       async function requestNotificationPermission(callback, errorCallback) {
+           try {
+               await OneSignal.Notifications.requestPermission()
+               console.log("Notification permission request sent.");
+               if (callback) callback(getNotificationPermission());
+           } catch (error) {
+               console.error("Notification permission request failed:", error);
+               if (errorCallback) errorCallback(error);
+           }
+       }
+
+       async function logout(callback, errorCallback) {
+           OneSignalDeferred.push(async function(OneSignal) {
+               await OneSignal.logout();
+               console.log("User has been logged out from OneSignal.");
+           });
+           if (callback) callback(null);
+       }
+
+       async function login(externalId, callback, errorCallback) {
+           console.log("User is logging to OneSignal with Id:", externalId);
+           OneSignalDeferred.push(async function(OneSignal) {
+               await OneSignal.login(externalId);
+               console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
+           });
+           if (callback) callback(null);
+       }
+    </script>
+    <script>
+        function setMetaThemeColor(color) {
+            document.querySelector('meta[name="theme-color"]').setAttribute("content", color);
+          }
+    </script>
+</head>
 <body>
-<!--<script src="flutter_bootstrap.js" async></script>-->
 
 <script>
   let deferredPrompt;
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      deferredPrompt = e;
-      e.preventDefault();
-      return false;
-    });
+  window.addEventListener('beforeinstallprompt', (e) => {
+    deferredPrompt = e;
+    e.preventDefault();
+    return false;
+  });
 
   function promptInstall(){
      deferredPrompt.prompt();
@@ -101,27 +166,21 @@
       return new Promise(resolve => setTimeout(resolve, time));
     }
 
-    window.addEventListener('load', function(ev) {
-      {{flutter_js}}
-      {{flutter_build_config}}
+    {{flutter_js}}
+    {{flutter_build_config}}
 
-      var loaderContent = document.querySelector('#loader-content');
+    // Download main.dart.js
+    _flutter.loader.load({
+      serviceWorker: {
+        serviceWorkerVersion: {{flutter_service_worker_version}},
+      },
+      onEntrypointLoaded: async function(engineInitializer) {
+         const appRunner = await engineInitializer.initializeEngine();
+          //await delay(5000);
 
-      // Download main.dart.js
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: {{flutter_service_worker_version}},
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(async function(appRunner) {
-            //await delay(5000);
-
-            loaderContent.style.opacity = "0";
-            //await delay(200);
-            appRunner.runApp();
-          });
-        }
-      });
+          //await delay(200);
+          appRunner.runApp();
+      }
     });
   </script>
   <div class="main-content" id="loader-content">

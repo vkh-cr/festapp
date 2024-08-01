@@ -15,6 +15,7 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
@@ -107,6 +108,10 @@ class RouterService{
         GoRoute(
           path: "/${SignupPage.ROUTE}",
           builder: (context, state) => const SignupPage(),
+        ),
+        GoRoute(
+          path: "/${SettingsPage.ROUTE}",
+          builder: (context, state) => const SettingsPage(),
         ),
         GoRoute(
           path: "/${CheckPage.ROUTE}/:id",
