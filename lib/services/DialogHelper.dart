@@ -274,24 +274,24 @@ class DialogHelper{
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Notifications'),
-          content: const SingleChildScrollView(
+          title: Text("Notifications").tr(),
+          content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Stay updated with the latest changes in schedule, notices, and other news.'),
+                const Text("Stay updated with the latest changes in schedule, notices, and other news.").tr(),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Don\'t Allow'),
+              child: Text("Don\'t Allow").tr(),
               onPressed: () {
                 result = false;
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text('Allow'),
+              child: Text("Allow").tr(),
               onPressed: () async {
                 result = true;
                 Navigator.of(context).pop();

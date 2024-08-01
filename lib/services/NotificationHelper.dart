@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -70,15 +71,15 @@ class NotificationHelper {
         await StorageHelper.set(notificationAllowedAsked, false.toString());
         var dialogResult = await DialogHelper.showNotificationPermissionDialog(context);
         if(!dialogResult) {
-          ToastHelper.Show("Notifications have been disabled.");
+          ToastHelper.Show("Notifications have been disabled.".tr());
           return;
         }
         var requestResult = await requestNotificationPermission();
         await StorageHelper.set(notificationAllowedAsked, requestResult.toString());
         if (requestResult) {
-          ToastHelper.Show("Notifications have been allowed.");
+          ToastHelper.Show("Notifications have been allowed.".tr());
         } else {
-          ToastHelper.Show("Notifications have been disabled.");
+          ToastHelper.Show("Notifications have been disabled.".tr());
         }
       }
     }
