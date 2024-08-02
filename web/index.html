@@ -186,7 +186,18 @@
   }
 </script>
 
-<script src="flutter_bootstrap.js" async></script>
+<script>
+  window.addEventListener('load', function(ev) {
+      {{flutter_js}}
+      {{flutter_build_config}}
+
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          serviceWorkerVersion: {{flutter_service_worker_version}},
+        }
+      });
+    });
+</script>
 
 <style>
   body {
