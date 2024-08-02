@@ -37,7 +37,7 @@
   <title>Festapp</title>
   <script>
     if (typeof navigator.serviceWorker !== 'undefined') {
-        navigator.serviceWorker.register('OneSignalSDKWorker.js?v=2')
+        navigator.serviceWorker.register('./push/OneSignalSDKWorker.js?v=2')
         .then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
         })
@@ -64,7 +64,8 @@
                          title: "Notifikace",
                          message: "Děkujeme za povolení notifikací.",
                        },
-                       serviceWorkerPath: "./OneSignalSDKWorker.js",
+                       serviceWorkerParam: { scope: "/push/" },
+                       serviceWorkerPath: "./push/OneSignalSDKWorker.js",
                    });
 
                    OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
