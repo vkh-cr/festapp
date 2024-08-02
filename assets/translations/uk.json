@@ -228,5 +228,8 @@
   "Download App": "Завантажити додаток",
   "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Не вдалося встановити. Спробуйте відкрити це посилання в браузері Chrome, Edge або іншому.",
   "Copied to clipboard": "Скопійовано до буфера обміну",
+  "Install for Apple": "Встановити для Apple",
+  "Install for Android": "Встановити для Android",
+  "Install for PC/Mac": "Встановити для ПК/Mac",
   "_": "_"
 }
