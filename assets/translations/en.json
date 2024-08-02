@@ -228,5 +228,8 @@
   "Download App": "Download App",
   "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",
   "Copied to clipboard": "Copied to clipboard",
+  "Install for Apple": "Install for Apple",
+  "Install for Android": "Install for Android",
+  "Install for PC/Mac": "Install for PC/Mac",
   "_":"_"
 }
