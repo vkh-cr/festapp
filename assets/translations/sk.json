@@ -225,5 +225,8 @@
   "Install App": "Nainštalovať aplikáciu",
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Táto platforma alebo prehliadač nepodporuje inštaláciu PWA alebo je aplikácia už nainštalovaná.",
   "The app is already installed.": "Aplikácia je už nainštalovaná.",
+  "Download App": "Stiahnite si aplikáciu",
+  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Inštalácia zlyhala. Skúste prosím otvoriť tento odkaz v prehliadači Chrome, Edge alebo v inom.",
+  "Copied to clipboard": "Skopírované do schránky",
   "_": "_"
 }

@@ -1,6 +1,7 @@
 // js_web.dart
 import 'dart:async';
 import 'dart:js' as js;
+import 'dart:html' as html;
 
 class JSInterop {
   void callMethod(String method, List args) async {
@@ -33,5 +34,16 @@ class JSInterop {
     ]);
 
     return completer.future;
+  }
+
+  String getOSInsideWeb() {
+    final userAgent = html.window.navigator.userAgent.toString().toLowerCase();
+    if (userAgent.contains("iphone") || userAgent.contains("ipad")) return "ios";
+    if (userAgent.contains("android")) return "android";
+    return "web";
+  }
+
+  void openLinkInNewTab(String link) {
+    html.window.open(link, "_blank");
   }
 }

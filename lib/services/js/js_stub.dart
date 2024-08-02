@@ -15,4 +15,12 @@ class JSInterop {
   Future<bool> callFutureMethod(String method, List args) {
     throw UnsupportedError('JS interop is not supported on this platform');
   }
+
+  String getOSInsideWeb() {
+    throw UnsupportedError('JS interop is not supported on this platform');
+  }
+
+  void openLinkInNewTab(String link) {
+    throw UnsupportedError('JS interop is not supported on this platform');
+  }
 }
