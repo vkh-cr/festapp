@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "eb9212eb2ce9466e7c449263f31ab926",
+const RESOURCES = {"flutter_bootstrap.js": "596bfc5a85248f8668c0beaebc9542ff",
 "assets/assets/images/map/atm.svg": "693a9abb7145add2961453afa3f0ac4c",
 "assets/assets/images/map/card.svg": "77d6cd4a052dbdaad1c5da8a5e3f1375",
 "assets/assets/images/map/bed.svg": "c930d46ac91a70932bd61e2e17033744",
@@ -57,11 +57,11 @@ const RESOURCES = {"flutter_bootstrap.js": "eb9212eb2ce9466e7c449263f31ab926",
 "assets/packages/fluttertoast/assets/toastify.css": "a85675050054f179444bc5ad70ffc635",
 "site.webmanifest": "68f54bdc321df4be45aae846e9f367d2",
 "flutter.js": "383e55f7f3cce5be08fcf1f3881f585c",
-"OneSignalSDKWorker.js": "31291a4c291b8d736cb6173c9112ab0f",
-"index.html": "c55771cc3920b869cd8e9e0a3fdcd8b0",
-"/": "c55771cc3920b869cd8e9e0a3fdcd8b0",
+"index.html": "07456f9e7c23abe87d87e06413208604",
+"/": "07456f9e7c23abe87d87e06413208604",
 "favicon.ico": "f3f4b2a26513ca4805474cf194bd9242",
 "mstile-150x150.png": "a31808c097aa4e0809b887446490e6b1",
+"push/OneSignalSDKWorker.js": "31291a4c291b8d736cb6173c9112ab0f",
 ".well-known/assetlinks.json": "dd19f93a45d846318572c0a65b7164e3",
 "android-chrome-512x512.png": "43661cc1c4cd6d25de716924dc00601a",
 "canvaskit/skwasm.worker.js": "bfb704a6c714a75da9ef320991e88b03",
