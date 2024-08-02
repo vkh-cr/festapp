@@ -228,5 +228,8 @@
   "Download App": "Stáhnout aplikaci",
   "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Instalace se nezdařila. Zkuste prosím otevřít tento odkaz v prohlížeči Chrome, Edge nebo v jiném.",
   "Copied to clipboard": "Zkopírováno do schránky",
+  "Install for Apple": "Nainstalovat pro Apple",
+  "Install for Android": "Nainstalovat pro Android",
+  "Install for PC/Mac": "Nainstalovat pro PC/Mac",
   "_": "_"
 }
