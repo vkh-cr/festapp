@@ -36,15 +36,15 @@
 
   <title>Festival Slunovrat</title>
   <script>
-      if (typeof navigator.serviceWorker !== 'undefined') {
-              navigator.serviceWorker.register('OneSignalSDKWorker.js?v=2')
-              .then(function(registration) {
-              console.log('Service Worker registered with scope:', registration.scope);
-              })
-              .catch(function(error) {
-              console.error('Service Worker registration failed:', error);
-              });
-          }
+    if (typeof navigator.serviceWorker !== 'undefined') {
+        navigator.serviceWorker.register('./push/OneSignalSDKWorker.js?v=2')
+        .then(function(registration) {
+        console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch(function(error) {
+        console.error('Service Worker registration failed:', error);
+        });
+    }
   </script>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
@@ -64,7 +64,8 @@
                              title: "Notifikace",
                              message: "Děkujeme za povolení notifikací.",
                            },
-                           serviceWorkerPath: "./OneSignalSDKWorker.js",
+                           serviceWorkerParam: { scope: "/push/" },
+                           serviceWorkerPath: "./push/OneSignalSDKWorker.js",
                        });
 
                        OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
