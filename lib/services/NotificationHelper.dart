@@ -49,7 +49,7 @@ class NotificationHelper {
   }
 
   static Future<void> initialize() async {
-    if (!AppConfig.isNotificationsSupported) {
+    if (!AppConfig.isNotificationsCurrentlySupported()) {
       return;
     }
 
@@ -64,8 +64,8 @@ class NotificationHelper {
     await NotificationHelper.login();
   }
 
-  static Future<void> checkForNotificationPermission(BuildContext context, [bool forceIsPWA = false]) async {
-    if (!DataService.isPwaInstalledOrNative() && !forceIsPWA) {
+  static Future<void> checkForNotificationPermission(BuildContext context, [bool forceAsk = false]) async {
+    if (!DataService.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
     var allowed = getNotificationPermission();
@@ -120,7 +120,7 @@ class NotificationHelper {
   }
 
   static Future<void> login() async {
-    if (!AppConfig.isNotificationsSupported || !getNotificationPermission() || !DataService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() || !getNotificationPermission() || !DataService.isLoggedIn()) {
       return;
     }
 
@@ -133,7 +133,7 @@ class NotificationHelper {
   }
 
   static Future<void> logout() async {
-    if (!AppConfig.isNotificationsSupported || !DataService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() || !DataService.isLoggedIn()) {
       return;
     }
     if (kIsWeb) {
