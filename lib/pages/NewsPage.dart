@@ -23,15 +23,20 @@ class _NewsPageState extends State<NewsPage> {
 
   void _showMessageDialog(BuildContext context) {
     RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
-      if(value != null) {
+      if (value != null) {
         var data = value as Map<String, dynamic>;
+        bool addToNews = data["add_to_news"] ?? true;
+        bool withNotification = data["with_notification"]!;
         List<String>? to = data["to"];
         String message = data["content"]!;
         var heading = data["heading"];
         String headingDefault = data["heading_default"]!;
-        bool withNotification = data["with_notification"]!;
-        await DataService.insertNewsMessage(heading, headingDefault, message, withNotification, to);
-        await loadNewsMessages();
+
+        await DataService.insertNewsMessage(heading, headingDefault, message, addToNews, withNotification, to);
+
+        if (addToNews) {
+          await loadNewsMessages();
+        }
       }
     });
   }
@@ -41,8 +46,7 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = loadedMessages;
     });
-    if(DataService.isLoggedIn() && newsMessages.isNotEmpty)
-    {
+    if (DataService.isLoggedIn() && newsMessages.isNotEmpty) {
       DataService.setMessagesAsRead(newsMessages.first.id);
     }
   }
@@ -84,46 +88,64 @@ class _NewsPageState extends State<NewsPage> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  if (index != 0 && !isSameDay)
-                    const Divider(),
+                  if (index != 0 && !isSameDay) const Divider(),
                   if (index == 0 || !isSameDay)
                     Container(
                       padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
                       alignment: Alignment.topRight,
                       child: Text(
                         DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt!),
-                        style: message.isRead?readTextStyle:unReadTextStyle,
+                        style: message.isRead ? readTextStyle : unReadTextStyle,
                       ),
                     ),
-                  Padding(padding: const EdgeInsets.symmetric(horizontal: 12), child: Text(message.createdBy??"", style: message.isRead?readTextStyle:unReadTextStyle,)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text(
+                      message.createdBy ?? "",
+                      style: message.isRead ? readTextStyle : unReadTextStyle,
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppConfig.color1.withOpacity(0.10)
+                        color: AppConfig.color1.withOpacity(0.10),
                       ),
                       child: Column(
                         children: [
-                          Padding(padding: const EdgeInsets.all(16), child: HtmlView(html: message.message!, isSelectable: true,)),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: HtmlView(html: message.message!, isSelectable: true),
+                          ),
                           Visibility(
                             visible: DataService.isLoggedIn(),
-                            child: Padding(padding: const EdgeInsets.all(8), child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54,), const SizedBox(width: 6), Text(message.views.toString(), style: readTextStyle,), const SizedBox(width: 10),],)))
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54),
+                                  const SizedBox(width: 6),
+                                  Text(message.views.toString(), style: readTextStyle),
+                                  const SizedBox(width: 10),
+                                ],
+                              ),
+                            ),
+                          )
                         ],
                       ),
-                    )),
+                    ),
+                  ),
                   Visibility(
                     visible: RightsHelper.isEditor(),
                     child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
-                        if(choice == ContextMenuChoice.delete)
-                        {
+                        if (choice == ContextMenuChoice.delete) {
                           await DataService.deleteNewsMessage(message);
-                        }
-                        else{
+                        } else {
                           RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
-                            if(value != null)
-                            {
+                            if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DataService.updateNewsMessage(message);
@@ -133,11 +155,11 @@ class _NewsPageState extends State<NewsPage> {
                         }
                         await loadNewsMessages();
                       },
-                      icon:  const Icon(Icons.more_horiz),
+                      icon: const Icon(Icons.more_horiz),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
                         PopupMenuItem<ContextMenuChoice>(
-                        value: ContextMenuChoice.edit,
-                        child: const Text("Edit").tr(),
+                          value: ContextMenuChoice.edit,
+                          child: const Text("Edit").tr(),
                         ),
                         PopupMenuItem<ContextMenuChoice>(
                           value: ContextMenuChoice.delete,
@@ -161,9 +183,9 @@ class _NewsPageState extends State<NewsPage> {
       ),
     );
   }
+
   TextStyle unReadTextStyle = const TextStyle(fontWeight: FontWeight.bold);
   TextStyle readTextStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54);
-
 }
 
 enum ContextMenuChoice { delete, edit }

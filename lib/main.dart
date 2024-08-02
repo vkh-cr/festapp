@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -8,9 +9,9 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/TimeTravelWidget.dart';
 import 'package:go_router/go_router.dart';
@@ -49,7 +50,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    initializeDateFormatting();
+    await initializeDateFormatting();
     print('Date formatting initialized');
   } catch (e) {
     print('Date formatting initialization failed: $e');
@@ -69,17 +70,8 @@ Future<void> initializeEverything() async {
     ).timeout(const Duration(seconds: 2));
     print('Supabase initialized');
     if (!DataService.isLoggedIn()) {
-      await DataService.refreshSession();
+      await DataService.refreshSession().timeout(const Duration(seconds: 2));
       print('Session refreshed');
-    }
-  } catch (e) {
-    print('Fetching current user info failed: $e');
-  }
-
-  try {
-    if (DataService.isLoggedIn()) {
-      await DataService.getCurrentUserInfo();
-      print('Current user info fetched');
     }
   } catch (e) {
     print('Supabase initialization failed: $e');
@@ -95,12 +87,12 @@ Future<void> initializeEverything() async {
     print('Offline data helper initialization failed: $e');
   }
 
-  try {
-    NotificationHelper.Initialize();
-    print('Notification helper initialized');
-  } catch (e) {
-    print('Notification helper initialization failed: $e');
-  }
+  print('Notification helper initializing');
+
+  NotificationHelper.initialize().then(
+          (f){ print('Notification helper initialized'); },
+          onError: (e){ print('Notification helper initialization failed: $e'); });
+
 
   print('Initialization completed');
 }

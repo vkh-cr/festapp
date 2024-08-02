@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/LanguageModel.dart';
 
@@ -11,9 +12,15 @@ class AppConfig {
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
+  static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
   static const String defaultLink = "csa2024";
+
+  static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
+  static const String playStoreLink = "";
+  static const String desktopAppLink = "";
+
 
   static const bool isEventTimeUtc = true;
 
@@ -54,6 +61,13 @@ class AppConfig {
   static const bool isSplitByPlace = false;
 
   static const int offsetHours = -1;
+
+  static bool isNotificationsCurrentlySupported() {
+    if(kIsWeb) {
+      return isNotificationsSupported && isWebNotificationsSupported;
+    }
+    return isNotificationsSupported;
+  }
 
   static Color eventTypeToColor(String? type)
   {

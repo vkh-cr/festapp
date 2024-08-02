@@ -36,7 +36,7 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
     for (var eventsByDay in datedEvents)
     {
       var eventGroups = TimeBlockHelper.splitTimeBlocks(eventsByDay.events);
-      var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed, key: UniqueKey(),);
+      var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed,);
       programLineChildren.add(SingleChildScrollView(child: timeline));
     }
     return Container(
