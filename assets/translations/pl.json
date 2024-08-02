@@ -224,5 +224,8 @@
   "Install App": "Zainstaluj aplikację",
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Ta platforma lub przeglądarka nie obsługuje instalacji PWA lub aplikacja jest już zainstalowana.",
   "The app is already installed.": "Aplikacja jest już zainstalowana.",
+  "Download App": "Pobierz aplikację",
+  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Instalacja nie powiodła się. Spróbuj otworzyć ten link w przeglądarce Chrome, Edge lub innej.",
+  "Copied to clipboard": "Skopiowane do schowka",
   "_": "_"
 }

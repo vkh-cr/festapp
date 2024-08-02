@@ -8,6 +8,7 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
+import 'package:fstapp/pages/InstallPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
@@ -80,6 +81,7 @@ class RouterService{
 
   static Uri getCurrentUri(){
     return Uri.base;
+    //GoRouterState.of(context).uri.toString()
   }
 
   static final router = GoRouter(
@@ -112,6 +114,10 @@ class RouterService{
         GoRoute(
           path: "/${SettingsPage.ROUTE}",
           builder: (context, state) => const SettingsPage(),
+        ),
+        GoRoute(
+          path: "/${InstallPage.ROUTE}",
+          builder: (context, state) => const InstallPage(),
         ),
         GoRoute(
           path: "/${CheckPage.ROUTE}/:id",

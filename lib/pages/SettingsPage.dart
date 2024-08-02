@@ -27,15 +27,6 @@ class _SettingsPageState extends State<SettingsPage> {
   LanguageModel? _currentLanguage;
 
   @override
-  void initState() {
-    super.initState();
-    PWAInstall().onAppInstalled = () async {
-      await Future.delayed(const Duration(seconds: 3));
-      NotificationHelper.checkForNotificationPermission(context, true);
-    };
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     loadSettings();
