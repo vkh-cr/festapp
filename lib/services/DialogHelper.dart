@@ -284,14 +284,14 @@ class DialogHelper{
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("Don\'t Allow").tr(),
+              child: Text("Disable").tr(),
               onPressed: () {
                 result = false;
                 Navigator.of(context).pop();
               },
             ),
             ElevatedButton(
-              child: Text("Allow").tr(),
+              child: Text("Enable").tr(),
               onPressed: () async {
                 result = true;
                 Navigator.of(context).pop();

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/LanguageModel.dart';
 
@@ -11,6 +12,7 @@ class AppConfig {
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
+  static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '73f77f22-961a-4ded-9647-e33a7ac14f90';
   static const String defaultLink = "conference2024";
@@ -55,6 +57,13 @@ class AppConfig {
   static const bool isSplitByPlace = false;
 
   static const int offsetHours = -1;
+
+  static bool isNotificationsCurrentlySupported() {
+    if(kIsWeb) {
+      return isNotificationsSupported && isWebNotificationsSupported;
+    }
+    return isNotificationsSupported;
+  }
 
   static Color eventTypeToColor(String? type)
   {
