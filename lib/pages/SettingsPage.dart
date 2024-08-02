@@ -107,41 +107,42 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   const SizedBox(height: 24),
                 ],
-                const Text("Notification Settings", style: TextStyle(fontSize: 20)).tr(),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Enable Notifications", style: TextStyle(fontSize: 16)).tr(),
-                    Switch(
-                      value: _notificationsEnabled,
-                      onChanged: (value) async {
-                        bool success;
-                        if (value) {
-                          success = await NotificationHelper.turnNotificationOn();
-                        } else {
-                          await NotificationHelper.turnNotificationOff();
-                          success = true;
-                        }
-                        if (!success) {
-                          setState(() {
-                            _notificationError = true;
-                          });
-                        }
-                        await loadSettings();
-                      },
-                    ),
-                  ],
-                ),
-                if (_notificationError)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: const Text(
-                      "Failed to enable notifications.",
-                      style: TextStyle(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ).tr(),
+                if (AppConfig.isNotificationsCurrentlySupported()) ...[
+                  const Text("Notification Settings", style: TextStyle(fontSize: 20)).tr(),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Enable Notifications", style: TextStyle(fontSize: 16)).tr(),
+                      Switch(
+                        value: _notificationsEnabled,
+                        onChanged: (value) async {
+                          bool success;
+                          if (value) {
+                            success = await NotificationHelper.turnNotificationOn();
+                          } else {
+                            await NotificationHelper.turnNotificationOff();
+                            success = true;
+                          }
+                          if (!success) {
+                            setState(() {
+                              _notificationError = true;
+                            });
+                          }
+                          await loadSettings();
+                        },
+                      ),
+                    ],
                   ),
+                  if (_notificationError)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: const Text(
+                        "Failed to enable notifications.",
+                        style: TextStyle(color: Colors.red),
+                        textAlign: TextAlign.center,
+                      ).tr(),
+                    ),],
                 const SizedBox(height: 24),
                 Center(
                   child: Column(
