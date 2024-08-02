@@ -77,7 +77,7 @@ class _InstallPageState extends State<InstallPage> {
               children: [
                 buildInstallSection(
                   context,
-                  "Install for Apple",
+                  "Install for Apple".tr(),
                   Icons.apple,
                   AppConfig.appStoreLink,
                   platform == "ios",
@@ -85,14 +85,14 @@ class _InstallPageState extends State<InstallPage> {
                 ),
                 buildInstallSection(
                   context,
-                  "Install for Android",
+                  "Install for Android".tr(),
                   Icons.android,
                   AppConfig.playStoreLink,
                   platform == "android",
                 ),
                 buildInstallSection(
                   context,
-                  "Install for PC/Mac",
+                  "Install for PC/Mac".tr(),
                   Icons.desktop_windows,
                   AppConfig.desktopAppLink,
                   platform == "web",

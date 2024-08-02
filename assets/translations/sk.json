@@ -228,5 +228,8 @@
   "Download App": "Stiahnite si aplikáciu",
   "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Inštalácia zlyhala. Skúste prosím otvoriť tento odkaz v prehliadači Chrome, Edge alebo v inom.",
   "Copied to clipboard": "Skopírované do schránky",
+  "Install for Apple": "Nainštalovať pre Apple",
+  "Install for Android": "Nainštalovať pre Android",
+  "Install for PC/Mac": "Nainštalovať pre PC/Mac",
   "_": "_"
 }
