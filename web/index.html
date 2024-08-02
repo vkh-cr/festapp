@@ -35,17 +35,6 @@
   <meta name="theme-color" content="#ffffff">
 
   <title>Festapp</title>
-  <script>
-    if (typeof navigator.serviceWorker !== 'undefined') {
-        navigator.serviceWorker.register('./push/OneSignalSDKWorker.js?v=2')
-        .then(function(registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch(function(error) {
-        console.error('Service Worker registration failed:', error);
-        });
-    }
-  </script>
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
