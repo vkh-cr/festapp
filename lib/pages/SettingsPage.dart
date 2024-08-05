@@ -9,6 +9,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:pwa_install/pwa_install.dart';
+import 'package:flutter/foundation.dart'; // Add this import
 
 class SettingsPage extends StatefulWidget {
   static const ROUTE = "settings";
@@ -135,36 +136,37 @@ class _SettingsPageState extends State<SettingsPage> {
                       ).tr(),
                     ),],
                 const SizedBox(height: 24),
-                Center(
-                  child: Column(
-                    children: [
-                      ButtonsHelper.bigButton(
-                        label: "Install App".tr(),
-                        onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                        color: _canInstallPWA ? AppConfig.color1 : Colors.grey,
-                        textColor: Colors.white,
-                      ),
-                      if (!_isPlatformSupported)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: const Text(
-                            "This platform or browser does not support the PWA install prompt or the app is already installed.",
-                            style: TextStyle(color: Colors.red),
-                            textAlign: TextAlign.center,
-                          ).tr(),
+                if (kIsWeb) // Only show if running on web
+                  Center(
+                    child: Column(
+                      children: [
+                        ButtonsHelper.bigButton(
+                          label: "Install App".tr(),
+                          onPressed: _canInstallPWA ? handleInstallButtonPress : null,
+                          color: _canInstallPWA ? AppConfig.color1 : Colors.grey,
+                          textColor: Colors.white,
                         ),
-                      if (_isAppInstalled || !_isPromptEnabled)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: const Text(
-                            "The app is already installed.",
-                            style: TextStyle(fontSize: 16, color: AppConfig.color1),
-                            textAlign: TextAlign.center,
-                          ).tr(),
-                        ),
-                    ],
+                        if (!_isPlatformSupported)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: const Text(
+                              "This platform or browser does not support the PWA install prompt or the app is already installed.",
+                              style: TextStyle(color: Colors.red),
+                              textAlign: TextAlign.center,
+                            ).tr(),
+                          ),
+                        if (_isAppInstalled || !_isPromptEnabled)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: const Text(
+                              "The app is already installed.",
+                              style: TextStyle(fontSize: 16, color: AppConfig.color1),
+                              textAlign: TextAlign.center,
+                            ).tr(),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),
