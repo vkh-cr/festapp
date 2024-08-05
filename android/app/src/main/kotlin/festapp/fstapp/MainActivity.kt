@@ -1,4 +1,4 @@
-package festapp.aksmcz
+package fstapp.csa
 
 import io.flutter.embedding.android.FlutterActivity
 
