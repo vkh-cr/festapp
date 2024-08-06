@@ -19,9 +19,14 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
         var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
         RouterService.navigateOccasion(context, navigateTo);
         return true;
+      } else if (url.startsWith(AppConfig.webLink) || url.contains("localhost")) {
+        var path = url.split('/#/').last;
+        RouterService.navigate(context, path);
+        return true;
+      } else {
+        super.onTapUrl?.call(url);
+        return false;
       }
-      super.onTapUrl?.call(url);
-      return false;
     };
   }
 
