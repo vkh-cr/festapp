@@ -17,6 +17,7 @@ class AppConfig {
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
   static const String defaultLink = "csa2024";
 
+  static const String webLink = "https://aksmcz.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/csa-2024/id6479449613";
   static const String playStoreLink = "";
   static const String desktopAppLink = "";
