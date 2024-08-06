@@ -38,6 +38,11 @@ class RouterService{
     return context.push(RouterService.getCurrentLink()+location, extra: extra);
   }
 
+  static Future<T?> changeOnOccasion<T extends Object?>(BuildContext context, String location, {Object? extra})
+  {
+    return context.push(RouterService.getCurrentLink()+location, extra: extra);
+  }
+
   static Future<T?> navigate<T extends Object?>(BuildContext context, String location, {Object? extra})
   {
     return context.push("/$location", extra: extra);
@@ -81,7 +86,10 @@ class RouterService{
 
   static Uri getCurrentUri(){
     return Uri.base;
-    //GoRouterState.of(context).uri.toString()
+  }
+
+  static String getCurrentUriWithOccasion(){
+    return "${Uri.base.origin}/#${getCurrentLink()}";
   }
 
   static final router = GoRouter(
@@ -158,10 +166,10 @@ class RouterService{
               builder: (context, state) => InfoPage(),
               routes: <RouteBase>[
                 GoRoute(
-                  path: ":type",
+                  path: ":id",
                   builder: (context, state) {
-                    var type = state.pathParameters["type"];
-                    return InfoPage(type: type);
+                    var id = int.parse(state.pathParameters["id"] ?? "0");
+                    return InfoPage(id: id);
                   },
                 )
               ],
