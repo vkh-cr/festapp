@@ -46,4 +46,8 @@ class JSInterop {
   void openLinkInNewTab(String link) {
     html.window.open(link, "_blank");
   }
+
+  void changeUrl(String newUrl) {
+    html.window.history.replaceState(null, "", newUrl);
+  }
 }

@@ -24,8 +24,11 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
 
   static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
     return PlutoGridConfiguration(
+      scrollbar: const PlutoGridScrollbarConfig(
+        scrollbarThickness: 16.0,
+      ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
-      style: PlutoGridStyleConfig(
+      style: const PlutoGridStyleConfig(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white70
       ),
