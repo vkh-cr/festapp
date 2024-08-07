@@ -89,7 +89,10 @@ class RouterService{
   }
 
   static String getCurrentUriWithOccasion(){
-    return "${Uri.base.origin}/#${getCurrentLink()}";
+    if(Uri.base.scheme == "http" || Uri.base.scheme == "https"){
+      return "${Uri.base.origin}/#${getCurrentLink()}";
+    }
+    return "${Uri.base}/#${getCurrentLink()}";
   }
 
   static final router = GoRouter(

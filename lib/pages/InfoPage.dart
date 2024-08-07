@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/OfflineDataHelper.dart';
@@ -133,11 +134,14 @@ class _InfoPageState extends State<InfoPage> {
       _informationList![panelIndex].isExpanded = isExpanded;
     });
 
-    if (_informationList![panelIndex].isExpanded) {
-      jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}/${_informationList![panelIndex].id}");
-    } else {
-      jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
+    if (kIsWeb) {
+      if (_informationList![panelIndex].isExpanded) {
+        jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}/${_informationList![panelIndex].id}");
+      } else {
+        jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
+      }
     }
+
 
     if (_informationList![panelIndex].description == null &&
         !_isItemLoading[panelIndex]!) {
