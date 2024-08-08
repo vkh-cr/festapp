@@ -37,6 +37,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
 
     controller = QuillEditorController();
     var firstLoad = (t) async {
+      //if function before content loaded, then it will be set via function inside _loadHtmlContent
+      if(_isContentLoading) {_isTextSet = true;}
       if(_isTextSet){return;}
       await setHtmlText(_originalHtml ?? _html);
       _isTextSet = true;
@@ -50,8 +52,6 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
   Future<void> _loadHtmlContent() async {
     setState(() {
       _isContentLoading = true;
-      //avoid double setting of text
-      _isTextSet = true;
     });
     try {
       _originalHtml = await widget.content?[HtmlEditorPage.parLoad]();
