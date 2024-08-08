@@ -172,7 +172,7 @@ class _InfoPageState extends State<InfoPage> {
     var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
     if (infoDesc != null) {
       setState(() {
-        info.description = infoDesc.description!;
+        info.description = infoDesc.description ?? "";
       });
     }
   }
