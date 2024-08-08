@@ -158,7 +158,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           children: [
             SingleTableDataGrid<InformationModel>(
                 context,
-                DataService.getAllInformation,
+                DataService.getAllInformationForDataGrid,
                 InformationModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.information.id,
@@ -192,15 +192,33 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async{
-                              var oldText = rendererContext.row.cells[Tb.information.description]?.value;
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              String? textToEdit;
+                              String? oldText = rendererContext.row.cells[Tb.information.description]?.value;
+                              if(oldText!=null)
+                              {
+                                textToEdit = oldText;
+                              }
+                              if(textToEdit == null)
+                              {
+                                var id = rendererContext.row.cells[Tb.information.id]!.value;
+
+                                if(id!=null)
+                                {
+                                  var infoDescription = await DataService.getInfosDescription([id]);
+                                  if(infoDescription.isNotEmpty){
+                                    textToEdit = infoDescription[0].description;
+                                  }
+                                }
+                              }
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
-                                  if(newText!=oldText)
+                                  if(newText!=textToEdit)
                                   {
+                                    rendererContext.row.cells[Tb.information.description]?.value = newText;
                                     var cell = rendererContext.row.cells[Tb.information.description]!;
-                                    rendererContext.stateManager.changeCellValue(cell, newText, force: true);
+                                    rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   }
                                 }
                               });},
@@ -321,7 +339,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       type: PlutoColumnType.text(defaultValue: ""),
                       renderer: (rendererContext) {
                         return ElevatedButton(
-                            onPressed: () async{
+                            onPressed: () async {
                               String? textToEdit;
                               String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
                               if(oldText!=null)

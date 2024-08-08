@@ -432,6 +432,24 @@ class DataService {
     return infoList;
   }
 
+  static Future<List<InformationModel>> getAllInformationForDataGrid() async {
+    var data = await _supabase.from(Tb.information.table).select(
+        "${Tb.information.id},"
+        "${Tb.information.occasion},"
+        "${Tb.information.created_at},"
+        "${Tb.information.updated_at},"
+        "${Tb.information.is_hidden},"
+        "${Tb.information.title},"
+        "${Tb.information.order},"
+        "${Tb.information.type}"
+    );
+    var infoList = List<InformationModel>.from(
+        data.map((x) => InformationModel.fromJson(x)));
+    infoList.sortBy((element) => element.title??"".toLowerCase());
+    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
+    return infoList;
+  }
+
   static Future<List<InformationModel>> getAllActiveInformation() async {
     var data = await _supabase
         .from(Tb.information.table)
@@ -1194,25 +1212,23 @@ class DataService {
   }
 
   static Future<void> updateInformation(InformationModel info) async {
-    if(info.id == null)
-    {
-      await _supabase.from(Tb.information.table).insert({
-        Tb.information.title: info.title,
-        Tb.information.description: info.description,
-        Tb.information.type: info.type,
-        Tb.information.is_hidden: info.isHidden,
-        Tb.information.order: info.order
-      });
-      return;
-    }
-    await _supabase.from(Tb.information.table).upsert({
+    var upsertObj = {
       Tb.information.title: info.title,
-      Tb.information.id: info.id,
-      Tb.information.description: info.description,
       Tb.information.type: info.type,
       Tb.information.is_hidden: info.isHidden,
       Tb.information.order: info.order
-    }).select();
+    };
+    if(info.description!=null) {
+      upsertObj.addAll({Tb.information.description: info.description});
+    }
+    if(info.id!=null) {
+      upsertObj.addAll({Tb.information.id: info.id});
+      await _supabase.from(Tb.information.table).update(upsertObj).eq(Tb.information.id, info.id!);
+    }
+    else
+    {
+      await _supabase.from(Tb.information.table).insert(upsertObj);
+    }
   }
 
   static Future<void> deleteInformation(InformationModel info) async {
