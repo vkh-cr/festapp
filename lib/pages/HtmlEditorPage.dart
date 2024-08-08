@@ -21,8 +21,8 @@ class HtmlEditorPage extends StatefulWidget {
 class _HtmlEditorPageState extends State<HtmlEditorPage> {
   final String _html = "";
   String? _originalHtml;
-  bool _loaded = false;
-  bool _isLoading = false;
+  bool _isTextSet = false;
+  bool _isContentLoading = false;
 
   Map<String, dynamic>? parameters;
   late QuillEditorController controller;
@@ -37,9 +37,9 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
 
     controller = QuillEditorController();
     var firstLoad = (t) async {
-      if(_loaded){return;}
+      if(_isTextSet){return;}
       await setHtmlText(_originalHtml ?? _html);
-      _loaded = true;
+      _isTextSet = true;
     };
     controller.onTextChanged(firstLoad);
     if (_originalHtml == null) {
@@ -49,7 +49,9 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
 
   Future<void> _loadHtmlContent() async {
     setState(() {
-      _isLoading = true;
+      _isContentLoading = true;
+      //avoid double setting of text
+      _isTextSet = true;
     });
     try {
       _originalHtml = await widget.content?[HtmlEditorPage.parLoad]();
@@ -60,7 +62,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       // Handle error
     }
     setState(() {
-      _isLoading = false;
+      _isContentLoading = false;
     });
   }
 
@@ -89,7 +91,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                 ),
               ),
             ),
-            if (_isLoading)
+            if (_isContentLoading)
               Container(
                 color: Colors.black54,
                 child: Center(
