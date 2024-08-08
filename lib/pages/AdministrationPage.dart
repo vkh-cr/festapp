@@ -198,19 +198,20 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               {
                                 textToEdit = oldText;
                               }
-                              if(textToEdit == null)
-                              {
+                              Future<String?> Function() load = () async {
                                 var id = rendererContext.row.cells[Tb.information.id]!.value;
 
                                 if(id!=null)
                                 {
                                   var infoDescription = await DataService.getInfosDescription([id]);
                                   if(infoDescription.isNotEmpty){
-                                    textToEdit = infoDescription[0].description;
+                                    return infoDescription[0].description;
                                   }
                                 }
-                              }
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
+                                return null;
+                              };
+                              Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: param).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -346,17 +347,17 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               {
                                 textToEdit = oldText;
                               }
-                              if(textToEdit == null)
-                              {
+                              Future<String?> Function() load = () async {
                                 var eventId = rendererContext.row.cells[Tb.events.id]!.value;
-
                                 if(eventId!=null)
                                 {
                                   var fullEvent = await DataService.getEvent(eventId);
-                                  textToEdit = fullEvent.description;
+                                  return fullEvent.description;
                                 }
-                              }
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: textToEdit).then((value) async {
+                                return null;
+                              };
+                              Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: param).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -613,7 +614,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: oldText).then((value) async {
+                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: {HtmlEditorPage.parContent: oldText}).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;

@@ -188,7 +188,7 @@ class RouterService{
             GoRoute(
               path: HtmlEditorPage.ROUTE,
               builder: (context, state) =>
-                  HtmlEditorPage(content: state.extra as String?),
+                  HtmlEditorPage(content: state.extra as Map<String, dynamic>),
             ),
             GoRoute(
               path: AdministrationPage.ROUTE,

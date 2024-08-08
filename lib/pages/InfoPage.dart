@@ -81,7 +81,7 @@ class _InfoPageState extends State<InfoPage> {
                           onPressed: () async {
                             var result = await RouterService.navigateOccasion(
                                 context, HtmlEditorPage.ROUTE,
-                                extra: item.description);
+                                extra: {HtmlEditorPage.parContent: item.description});
                             if (result != null) {
                               setState(() {
                                 item.description = result as String;

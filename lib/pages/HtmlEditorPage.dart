@@ -4,13 +4,14 @@ import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
-import 'package:go_router/go_router.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter/material.dart';
 
 class HtmlEditorPage extends StatefulWidget {
+  static const String parContent = "content";
+  static const String parLoad = "load";
   static const ROUTE = "htmlEditor";
-  String? content;
+  Map<String, dynamic>? content;
   HtmlEditorPage({this.content, super.key});
 
   @override
@@ -18,14 +19,49 @@ class HtmlEditorPage extends StatefulWidget {
 }
 
 class _HtmlEditorPageState extends State<HtmlEditorPage> {
-  late String _html;
+  final String _html = "";
+  String? _originalHtml;
+  bool _loaded = false;
+  bool _isLoading = false;
+
+  Map<String, dynamic>? parameters;
   late QuillEditorController controller;
 
   @override
   void initState() {
     super.initState();
-    _html = widget.content ?? "";
+    if (widget.content != null) {
+      _originalHtml = widget.content?[HtmlEditorPage.parContent];
+    }
+
+
     controller = QuillEditorController();
+    var firstLoad = (t) async {
+      if(_loaded){return;}
+      await setHtmlText(_originalHtml ?? _html);
+      _loaded = true;
+    };
+    controller.onTextChanged(firstLoad);
+    if (_originalHtml == null) {
+      _loadHtmlContent();
+    }
+  }
+
+  Future<void> _loadHtmlContent() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      _originalHtml = await widget.content?[HtmlEditorPage.parLoad]();
+      if (_originalHtml != null) {
+        await setHtmlText(_originalHtml!);
+      }
+    } catch (e) {
+      // Handle error
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -40,16 +76,27 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
-            child: HtmlEditorWidget(
-              initialContent: _html,
-              controller: controller,
-              onTextChanged: (text) => debugPrint('listening to $text'),
+        body: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: appMaxWidth),
+                child: HtmlEditorWidget(
+                  initialContent: _html,
+                  controller: controller,
+                  onTextChanged: (text) => debugPrint('listening to $text'),
+                ),
+              ),
             ),
-          ),
+            if (_isLoading)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
         ),
         bottomNavigationBar: Container(
           width: double.maxFinite,
@@ -59,8 +106,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
             children: [
               ButtonsHelper.bottomBarButton(
                 text: "Reset".tr(),
-                onPressed: () {
-                  setHtmlText(_html);
+                onPressed: () async {
+                  await setHtmlText(_originalHtml ?? _html);
                 },
               ),
               ButtonsHelper.bottomBarButton(
@@ -88,7 +135,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
     RouterService.goBack(context);
   }
 
-  void setHtmlText(String text) async {
+  Future<void> setHtmlText(String text) async {
     await controller.setText(text);
   }
 }

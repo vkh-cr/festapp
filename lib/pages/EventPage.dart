@@ -179,8 +179,8 @@ class _EventPageState extends State<EventPage> {
                                               RouterService.navigateOccasion(
                                                       context,
                                                       HtmlEditorPage.ROUTE,
-                                                      extra:
-                                                          _event!.description)
+                                                      extra: {HtmlEditorPage.parContent:
+                                                          _event!.description})
                                                   .then((value) async {
                                                 if (value != null) {
                                                   var changed = value as String;
