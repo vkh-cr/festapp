@@ -144,7 +144,7 @@ class _NewsPageState extends State<NewsPage> {
                         if (choice == ContextMenuChoice.delete) {
                           await DataService.deleteNewsMessage(message);
                         } else {
-                          RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: message.message).then((value) async {
+                          RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: {HtmlEditorPage.parContent: message.message}).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
