@@ -93,7 +93,7 @@ class _HtmlViewState extends State<HtmlView> {
     );
 
     return widget.isSelectable
-        ? SelectableRegion(
+        ? SelectionArea(
       focusNode: FocusNode(),
       selectionControls: materialTextSelectionControls,
       child: htmlWidget,
