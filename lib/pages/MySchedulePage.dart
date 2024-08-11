@@ -79,23 +79,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
                   emptyContent: Center(
                     child: Padding(
                       padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-                      child: AppConfig.isOwnProgramSupported
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Create your own schedule by tapping plus button in a program table".tr(),
-                                  style: const TextStyle(fontSize: 18),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox.square(dimension: 12),
-                                const Icon(Icons.add_circle_outline),
-                              ],
-                            )
-                          : const Text(
-                              "There will appear your events.",
-                              style: TextStyle(fontSize: 20),
-                            ).tr(),
+                      child: const Text(
+                        "There will appear your events.",
+                        style: TextStyle(fontSize: 20),
+                      ).tr(),
                     ),
                   ),
                 )))));
