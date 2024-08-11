@@ -1,7 +1,7 @@
 # Festapp
 
 Mobile solution for your festival, conference or event. 
-- Try now on [live.festapp.net](https://live.festapp.net) or [Android](https://play.google.com/store/apps/details?id=festapp.festapp) or [iOS](https://apps.apple.com/us/app/festapp/id6474078383)
+- Try now on [live.festapp.net](https://live.festapp.net) or install to your phone [here](https://live.festapp.net/#/install).
 - Visit us on website: [festapp.net](https://festapp.net)</br></br>
 ![Alt text](repo-data/festapp-showcase.png?raw=true "Showcase")
 
@@ -47,10 +47,16 @@ Both technologies were chosen to speed up development, and they have effectively
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app/#/csa2024)
 - [Festival Slunovrat](https://app.festivalslunovrat.cz/#/2024)
 
-Links to Appstore/Play Store versions are usually saved in info section.
+Links to phone install are usually saved in info section.
 
 ---
 ## Latest development
+
+**2024.07**
+- Full support for offline display mode on web (and pwa app).
+- Notifications support for web (and pwa app).
+- Settings page (enable notifications, language).
+- Install page with links to install app on phone or PC (example: [https://live.festapp.net/#/install](https://live.festapp.net/#/install) ).
 
 **2024.06**
 - Optimized data usage for events and information.
