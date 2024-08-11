@@ -278,7 +278,7 @@ class DialogHelper{
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text("Stay updated with the latest changes in schedule, notices, and other news.").tr(),
+                const Text("Notifications will inform you about schedule changes and other selected news.").tr(),
               ],
             ),
           ),
