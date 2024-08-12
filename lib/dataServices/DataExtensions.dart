@@ -62,15 +62,3 @@ extension DiacriticsAwareString on String {
           ? nonDiacritics[diacritics.indexOf(char)]
           : char);
 }
-extension removeHtmlBackgroundColor on String {
-  static const diacritics =
-      'ÀÁÂÃÄÅàáâãäåÒÓÔÕÕÖØòóôõöøÈÉÊËĚèéêëěðČÇçčÐĎďÌÍÎÏìíîïĽľÙÚÛÜŮùúûüůŇÑñňŘřŠšŤťŸÝÿýŽž';
-  static const nonDiacritics =
-      'AAAAAAaaaaaaOOOOOOOooooooEEEEEeeeeeeCCccDDdIIIIiiiiLlUUUUUuuuuuNNnnRrSsTtYYyyZz';
-
-  String removeBackgroundColor() {
-    RegExp regExp = RegExp(r'background-color\s*:\s*[^;]+;?\s*', caseSensitive: false);
-    String cleanedHtmlString = replaceAll(regExp, '');
-    return cleanedHtmlString;
-  }
-}

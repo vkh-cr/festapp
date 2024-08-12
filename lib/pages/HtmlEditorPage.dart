@@ -1,11 +1,12 @@
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
-import 'package:flutter/material.dart';
 
 class HtmlEditorPage extends StatefulWidget {
   static const String parContent = "content";
@@ -23,8 +24,13 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
   String? _originalHtml;
   bool _isTextSet = false;
   bool _isContentLoading = false;
+  bool _isSaving = false;
+  bool _showOverlay = false;
+  double? _progress;
 
-  Map<String, dynamic>? parameters;
+  int processedCount = 0;
+  List<String> imagesToProcess = [];
+
   late QuillEditorController controller;
 
   @override
@@ -34,12 +40,14 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       _originalHtml = widget.content?[HtmlEditorPage.parContent];
     }
 
-
     controller = QuillEditorController();
     var firstLoad = (t) async {
-      //if function before content loaded, then it will be set via function inside _loadHtmlContent
-      if(_isContentLoading) {_isTextSet = true;}
-      if(_isTextSet){return;}
+      if (_isContentLoading) {
+        _isTextSet = true;
+      }
+      if (_isTextSet) {
+        return;
+      }
       await setHtmlText(_originalHtml ?? _html);
       _isTextSet = true;
     };
@@ -80,27 +88,63 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         resizeToAvoidBottomInset: true,
         body: Stack(
           children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: appMaxWidth),
-                child: HtmlEditorWidget(
-                  initialContent: _html,
-                  controller: controller,
-                  onTextChanged: (text) => debugPrint('listening to $text'),
+            if (!_isSaving && !_showOverlay)
+              Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: appMaxWidth),
+                  child: HtmlEditorWidget(
+                    initialContent: _html,
+                    controller: controller,
+                  ),
                 ),
               ),
-            ),
             if (_isContentLoading)
               Container(
                 color: Colors.black54,
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(),
+                ),
+              ),
+            if (_showOverlay)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_progress == null) ...[
+                          const Text('Processing and detecting large images...', style: TextStyle(color: Colors.white, fontSize: 16)).tr(),
+                        ] else ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            color: Colors.white,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Reducing Images Size...', style: TextStyle(color: Colors.black, fontSize: 16)).tr(),
+                                const SizedBox(height: 20),
+                                LinearProgressIndicator(value: _progress),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '$processedCount / ${imagesToProcess.length}',
+                                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
           ],
         ),
-        bottomNavigationBar: Container(
+        bottomNavigationBar: !_isSaving && !_showOverlay
+            ? Container(
           width: double.maxFinite,
           color: Colors.grey.shade200,
           child: Wrap(
@@ -108,28 +152,87 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
             children: [
               ButtonsHelper.bottomBarButton(
                 text: "Reset".tr(),
-                onPressed: () async {
+                onPressed: _isSaving
+                    ? null
+                    : () async {
                   await setHtmlText(_originalHtml ?? _html);
                 },
               ),
               ButtonsHelper.bottomBarButton(
                 text: "Storno".tr(),
-                onPressed: cancelPressed,
+                onPressed: _isSaving ? null : cancelPressed,
+              ),
+              ButtonsHelper.bottomBarButton(
+                text: "Process and Save".tr(),
+                onPressed: _isSaving ? null : savePressed,
               ),
               ButtonsHelper.bottomBarButton(
                 text: "Save".tr(),
-                onPressed: savePressed,
+                onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
               ),
             ],
           ),
-        ),
+        )
+            : null,
       ),
     );
   }
 
-  void savePressed() async {
+  Future<void> savePressed() async {
     String? htmlTextEdited = await controller.getText();
-    var htmlText = htmlTextEdited.removeBackgroundColor();
+    var htmlText = HtmlHelper.removeBackgroundColor(htmlTextEdited);
+    htmlText = HtmlHelper.detectAndReplaceLinks(htmlTextEdited);
+
+    setState(() {
+      _isSaving = true;
+      _showOverlay = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    imagesToProcess = HtmlHelper.detectImagesToProcess(htmlText);
+    bool hasLargeImages = imagesToProcess.isNotEmpty;
+
+    if (hasLargeImages) {
+      bool compress = await showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Large Images Detected"),
+          content: const Text("Some images are large and may slow down the app. Press OK to convert them into optimal size."),
+          actions: [
+            TextButton(
+              child: const Text("Ok").tr(),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
+
+      if (compress) {
+        setState(() {
+          _progress = 0.0;
+        });
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        for (String imageSrc in imagesToProcess) {
+          htmlText = await HtmlHelper.compressImage(htmlText, imageSrc, () {
+            setState(() {
+              processedCount++;
+              _progress = processedCount / imagesToProcess.length;
+            });
+          });
+        }
+      }
+    }
+
+    setState(() {
+      _isSaving = false;
+    });
+    RouterService.goBack(context, htmlText);
+  }
+
+  Future<void> saveRawPressed() async {
+    String? htmlText = await controller.getText();
     RouterService.goBack(context, htmlText);
   }
 
