@@ -230,5 +230,11 @@
   "Install for Apple": "Für Apple installieren",
   "Install for Android": "Für Android installieren",
   "Install for PC/Mac": "Für PC/Mac installieren",
+  "Process and Send": "Verarbeiten und Senden",
+  "Process and Save": "Verarbeiten und Speichern",
+  "Processing and detecting large images...": "Verarbeitung und Erkennung großer Bilder...",
+  "Reducing Images Size...": "Größenreduzierung der Bilder...",
+  "Large Images Detected": "Große Bilder erkannt",
+  "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Einige Bilder sind groß und können die App verlangsamen. Drücken Sie OK, um sie in die optimale Größe zu konvertieren.",
   "_": "_"
 }

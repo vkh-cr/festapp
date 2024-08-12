@@ -229,5 +229,11 @@
   "Install for Apple": "Zainstaluj dla Apple",
   "Install for Android": "Zainstaluj dla Android",
   "Install for PC/Mac": "Zainstaluj dla PC/Mac",
+  "Process and Send": "Przetwórz i wyślij",
+  "Process and Save": "Przetwórz i zapisz",
+  "Processing and detecting large images...": "Przetwarzanie i wykrywanie dużych obrazów...",
+  "Reducing Images Size...": "Zmniejszanie rozmiaru obrazów...",
+  "Large Images Detected": "Wykryto duże obrazy",
+  "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Niektóre obrazy są duże i mogą spowolnić aplikację. Naciśnij OK, aby przekonwertować je na optymalny rozmiar.",
   "_": "_"
 }
