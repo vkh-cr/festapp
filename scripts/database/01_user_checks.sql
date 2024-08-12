@@ -12,6 +12,22 @@ CREATE OR REPLACE FUNCTION get_is_editor_on_occasion(oc bigint) RETURNS bool
     occasion = oc), false)
 $$;
 
+CREATE OR REPLACE FUNCTION get_is_editor_on_any_occasion() RETURNS bool
+    LANGUAGE "sql" STABLE
+    SECURITY DEFINER
+    AS $$
+  SELECT coalesce((
+    SELECT
+      true
+    FROM
+      occasion_users
+    WHERE
+      "user" = auth.uid() AND
+      is_editor = true
+    LIMIT 1
+  ), false)
+$$;
+
 CREATE OR REPLACE FUNCTION get_last_sign_in_at_for_users(user_ids uuid[], oc bigint)
 RETURNS jsonb
 SECURITY definer

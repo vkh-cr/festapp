@@ -21,7 +21,7 @@ class AppConfig {
   static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
   static const String playStoreLink = "";
   static const String desktopAppLink = "";
-
+  static bool isProLicense = true;
 
   static const bool isEventTimeUtc = true;
 

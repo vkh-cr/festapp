@@ -65,7 +65,7 @@ class ButtonsHelper {
     );
   }
 
-  static Widget bottomBarButton({required String text, required VoidCallback onPressed}) {
+  static Widget bottomBarButton({required String text, required VoidCallback? onPressed}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: MaterialButton(
