@@ -147,30 +147,33 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
             ? Container(
           width: double.maxFinite,
           color: Colors.grey.shade200,
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            children: [
-              ButtonsHelper.bottomBarButton(
-                text: "Reset".tr(),
-                onPressed: _isSaving
-                    ? null
-                    : () async {
-                  await setHtmlText(_originalHtml ?? _html);
-                },
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: IntrinsicWidth(
+              child: Row(children: [
+                ButtonsHelper.bottomBarButton(
+                  text: "Reset".tr(),
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                    await setHtmlText(_originalHtml ?? _html);
+                  },
+                ),
+                ButtonsHelper.bottomBarButton(
+                  text: "Storno".tr(),
+                  onPressed: _isSaving ? null : cancelPressed,
+                ),
+                ButtonsHelper.bottomBarButton(
+                  text: "Process and Save".tr(),
+                  onPressed: _isSaving ? null : savePressed,
+                ),
+                ButtonsHelper.bottomBarButton(
+                  text: "Save".tr(),
+                  onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
+                ),
+              ],
               ),
-              ButtonsHelper.bottomBarButton(
-                text: "Storno".tr(),
-                onPressed: _isSaving ? null : cancelPressed,
-              ),
-              ButtonsHelper.bottomBarButton(
-                text: "Process and Save".tr(),
-                onPressed: _isSaving ? null : savePressed,
-              ),
-              ButtonsHelper.bottomBarButton(
-                text: "Save".tr(),
-                onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
-              ),
-            ],
+            ),
           ),
         )
             : null,

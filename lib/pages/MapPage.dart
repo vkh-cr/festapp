@@ -94,7 +94,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if(placeId != null) {
       var p = mapOfflinePlaces.firstWhereOrNull((p)=>p.id == placeId);
       if(p!=null){
-        setMapToOnePlace(p);
+        setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
 
@@ -125,14 +125,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     if(placeId != null) {
       var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
-        var m = _markers.firstWhere((m)=>m.place.id == placeId);
-        _markers.remove(m);
-        _markers.add(m);
-        focusedMarker = m;
-        _popupLayerController.showPopupsOnlyFor([m]);
-        setMapToOnePlace(p);
+        setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
+  }
+
+  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
+    var m = _markers.firstWhere((m)=>m.place.id == placeId);
+    _markers.remove(m);
+    _markers.add(m);
+    focusedMarker = m;
+    _popupLayerController.showPopupsOnlyFor([m]);
+    setMapToOnePlace(p);
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
