@@ -402,7 +402,6 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    StylesHelper.setMetaThemeColor(AppConfig.color1);
     if (!DataService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
     }
