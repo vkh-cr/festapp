@@ -1,18 +1,19 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
-  const NewsFormPage({Key? key}) : super(key: key);
+
+  const NewsFormPage({super.key});
 
   @override
   _NewsFormPageState createState() => _NewsFormPageState();
@@ -49,15 +50,19 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  Future<void> _sendPressed({bool isTest = false}) async {
+  Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
     var htmlContent = await _controller.getText();
-    htmlContent = htmlContent.removeBackgroundColor();
+    htmlContent = HtmlHelper.removeBackgroundColor(htmlContent);
+    if (process == true) {
+      htmlContent = HtmlHelper.detectAndReplaceLinks(htmlContent);
+    }
     if (htmlContent.isNotEmpty) {
       var toReturn = {
         "content": htmlContent,
         "heading": _formKey.currentState?.fields["heading"]!.value,
         "heading_default": _currentUser!.name,
-        "with_notification": _formKey.currentState?.fields["with_notification"]!.value,
+        "with_notification":
+            _formKey.currentState?.fields["with_notification"]!.value,
         if (isTest) "to": [DataService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
@@ -68,7 +73,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   }
 
   Future<void> _testPressed() async {
-    _sendPressed(isTest: true);
+    _sendPressed(process: true);
   }
 
   @override
@@ -100,8 +105,8 @@ class _NewsFormPageState extends State<NewsFormPage> {
                           decoration: InputDecoration(
                               labelText: "Heading".tr(),
                               hintText: _currentUser?.name,
-                              floatingLabelBehavior: FloatingLabelBehavior.always
-                          ),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always),
                         ),
                         FormBuilderCheckbox(
                           name: 'with_notification',
@@ -123,22 +128,26 @@ class _NewsFormPageState extends State<NewsFormPage> {
         bottomNavigationBar: Container(
           width: double.maxFinite,
           color: Colors.grey.shade200,
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            children: [
-              ButtonsHelper.bottomBarButton(
-                onPressed: _stornoPressed,
-                text: "Storno".tr(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: IntrinsicWidth(
+              child: Row(
+                children: [
+                  ButtonsHelper.bottomBarButton(
+                    onPressed: _stornoPressed,
+                    text: "Storno".tr(),
+                  ),
+                  ButtonsHelper.bottomBarButton(
+                    onPressed: _testPressed,
+                    text: "Process and Send".tr(),
+                  ),
+                  ButtonsHelper.bottomBarButton(
+                    onPressed: () => _sendPressed(),
+                    text: "Send".tr(),
+                  ),
+                ],
               ),
-              ButtonsHelper.bottomBarButton(
-                onPressed: _testPressed,
-                text: "Test".tr(),
-              ),
-              ButtonsHelper.bottomBarButton(
-                onPressed: () => _sendPressed(),
-                text: "Send".tr(),
-              ),
-            ],
+            ),
           ),
         ),
       ),

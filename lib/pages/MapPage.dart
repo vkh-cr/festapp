@@ -88,18 +88,27 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           offlinePlaces.where((element) => !element.isHidden).toList();
     }
 
+    if(placeId != null) {
+      var p = offlinePlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p != null) {
+        mapOfflinePlaces.add(p);
+      }
+    }
+
     await addEventsToPlace(mapOfflinePlaces);
     addPlacesToMap(mapOfflinePlaces);
 
     if(placeId != null) {
       var p = mapOfflinePlaces.firstWhereOrNull((p)=>p.id == placeId);
       if(p!=null){
-        setMapToOnePlace(p);
+        setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
 
     _icons = await DataService.getAllIcons();
     List<PlaceModel> mapPlaces = [];
+    List<PlaceModel> showMapPlaces = [];
+
     if (loadOtherGroups) {
       var groups = await DataService.getGroupsWithPlaces();
       for (var element in groups) {
@@ -111,28 +120,39 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     } else {
       mapPlaces = await DataService.getAllPlaces();
-      mapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
-      mapPlaces.sortPlaces(false);
+      showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
+      showMapPlaces.sortPlaces(false);
       await OfflineDataHelper.saveAllPlaces(mapPlaces);
     }
 
-    if (mapPlaces.isNotEmpty) {
+    if(placeId != null) {
+      var p = mapPlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p != null) {
+        showMapPlaces.add(p);
+      }
+    }
+
+    if (showMapPlaces.isNotEmpty) {
       _markers.clear();
-      await addEventsToPlace(mapPlaces);
-      addPlacesToMap(mapPlaces);
+      await addEventsToPlace(showMapPlaces);
+      addPlacesToMap(showMapPlaces);
     }
 
     if(placeId != null) {
       var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
-        var m = _markers.firstWhere((m)=>m.place.id == placeId);
-        _markers.remove(m);
-        _markers.add(m);
-        focusedMarker = m;
-        _popupLayerController.showPopupsOnlyFor([m]);
-        setMapToOnePlace(p);
+        setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
+  }
+
+  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
+    var m = _markers.firstWhere((m)=>m.place.id == placeId);
+    _markers.remove(m);
+    _markers.add(m);
+    focusedMarker = m;
+    _popupLayerController.showPopupsOnlyFor([m]);
+    setMapToOnePlace(p);
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
