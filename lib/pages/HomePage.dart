@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    StylesHelper.setMetaThemeColor(AppConfig.backgroundColor);
+    StylesHelper.setMetaThemeColor(AppConfig.color1);
     loadData();
   }
 
