@@ -9,6 +9,7 @@ import 'package:html/dom.dart';
 class HtmlHelper {
   static const int jpegThreshold = 1200;
   static const int pngThreshold = 1000;
+  static int maxImageSize = (0.5 * 1024 * 1024) as int;
 
   static const String jpegBase64Prefix = 'data:image/jpeg;base64,';
   static const String pngBase64Prefix = 'data:image/png;base64,';
@@ -25,17 +26,23 @@ class HtmlHelper {
             ? src.replaceFirst(jpegBase64Prefix, '')
             : src.replaceFirst(pngBase64Prefix, '');
 
-        Uint8List imageData = base64.decode(base64Data);
+        // Calculate the approximate size of the base64 data in bytes
+        int base64Length = base64Data.length;
+        int imageSizeInBytes = (base64Length * 3) ~/ 4; // ~75% of base64 string length
 
-        if (src.startsWith(jpegBase64Prefix)) {
-          img.Image? originalImage = img.decodeImage(imageData);
-          if (originalImage != null && originalImage.width > 1200) {
-            imagesToProcess.add(src);
-          }
-        } else if (src.startsWith(pngBase64Prefix)) {
-          img.Image? originalImage = img.decodeImage(imageData);
-          if (originalImage != null && originalImage.width > 1000) {
-            imagesToProcess.add(src);
+        if (imageSizeInBytes > maxImageSize) {
+          Uint8List imageData = base64.decode(base64Data);
+
+          if (src.startsWith(jpegBase64Prefix)) {
+            img.Image? originalImage = img.decodeImage(imageData);
+            if (originalImage != null && originalImage.width > 1200) {
+              imagesToProcess.add(src);
+            }
+          } else if (src.startsWith(pngBase64Prefix)) {
+            img.Image? originalImage = img.decodeImage(imageData);
+            if (originalImage != null && originalImage.width > 1000) {
+              imagesToProcess.add(src);
+            }
           }
         }
       }

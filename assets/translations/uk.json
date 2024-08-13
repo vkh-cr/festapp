@@ -232,7 +232,7 @@
   "Install for PC/Mac": "Встановити для ПК/Mac",
   "Process and Send": "Обробити та надіслати",
   "Process and Save": "Обробити та зберегти",
-  "Processing and detecting large images...": "Обробка та виявлення великих зображень...",
+  "Processing content and detecting large images...": "Обробка вмісту та виявлення великих зображень...",
   "Reducing Images Size...": "Зменшення розміру зображень...",
   "Large Images Detected": "Виявлено великі зображення",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Деякі зображення великі і можуть уповільнити роботу програми. Натисніть OK, щоб перетворити їх на оптимальний розмір.",
