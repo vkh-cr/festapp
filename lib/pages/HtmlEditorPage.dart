@@ -116,7 +116,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (_progress == null) ...[
-                          const Text('Processing and detecting large images...', style: TextStyle(color: Colors.white, fontSize: 16)).tr(),
+                          const Text('Processing content and detecting large images...', style: TextStyle(color: Colors.white, fontSize: 16)).tr(),
                         ] else ...[
                           Container(
                             padding: const EdgeInsets.all(16),
