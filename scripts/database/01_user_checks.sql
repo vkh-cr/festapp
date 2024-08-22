@@ -1,3 +1,41 @@
+CREATE OR REPLACE FUNCTION get_is_admin_on_organization(org bigint) RETURNS bool
+    LANGUAGE "sql" STABLE
+    SECURITY DEFINER
+    AS $$
+  select coalesce((
+  select
+    is_admin
+  from
+    organization_users
+  where
+    "user" = auth.uid() and
+    organization = org), false)
+$$;
+
+CREATE OR REPLACE FUNCTION get_is_admin_on_occasion(oc bigint) RETURNS boolean
+LANGUAGE plpgsql STABLE
+SECURITY DEFINER
+AS $$
+DECLARE
+    is_admin_var boolean;
+    organization_id bigint;
+BEGIN
+    -- Retrieve the organization ID associated with the given occasion
+    SELECT organization INTO organization_id
+    FROM occasions
+    WHERE id = oc;
+
+    -- Check if the current authenticated user is an admin in the organization
+    SELECT is_admin INTO is_admin_var
+    FROM organization_users
+    WHERE organization = organization_id
+      AND "user" = auth.uid();
+
+    -- Return true if the user is an admin, otherwise false
+    RETURN COALESCE(is_admin_var, false);
+END;
+$$;
+
 CREATE OR REPLACE FUNCTION get_is_editor_on_occasion(oc bigint) RETURNS bool
     LANGUAGE "sql" STABLE
     SECURITY DEFINER

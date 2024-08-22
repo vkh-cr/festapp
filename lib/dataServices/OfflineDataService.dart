@@ -10,7 +10,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/StorageHelper.dart';
 
-class OfflineDataHelper {
+class OfflineDataService {
   static const String myScheduleOffline = "mySchedule";
   static const String eventsOfflineStorage = "events";
   static const String informationOfflineStorage = "information";

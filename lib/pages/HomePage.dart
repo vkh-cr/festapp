@@ -4,11 +4,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbNews.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -89,7 +94,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           var packageInfo = await PackageInfo.fromPlatform();
                           ToastHelper.Show(
                               "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                          if(RightsHelper.isEditor()) {
+                          if(RightsService.isEditor()) {
                             setState(() {
                               TimeHelper.toggleTimeTravel?.call();
                             });
@@ -103,7 +108,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                       const Spacer(),
                       Visibility(
-                        visible: !DataService.isLoggedIn(),
+                        visible: !AuthService.isLoggedIn(),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -122,7 +127,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                       ),
                       Visibility(
-                        visible: DataService.isLoggedIn(),
+                        visible: AuthService.isLoggedIn(),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -217,7 +222,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
+    if (!AppConfig.isOwnProgramSupported && !AuthService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
@@ -253,7 +258,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> loadEventParticipants() async {
     // update sign in status / current participants for events
-    await DataService.loadEventsParticipantsAndStatus(_events);
+    await DbEvents.loadEventsParticipantsAndStatus(_events);
     for (var e in _events.filterRootEvents()) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
@@ -277,21 +282,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //DataServiceTests.test_has_event_allowed_role();
 
     await loadOfflineData();
-    await RightsHelper.ensureAccessProcedure(context);
+    await RightsService.ensureAccessProcedure(context);
 
-    if (DataService.isLoggedIn()) {
-      DataService.getCurrentUserInfo()
+    if (AuthService.isLoggedIn()) {
+      DbUsers.getCurrentUserInfo()
           .then((value) => userName = value.name!);
     }
 
-    await DataService.updateEvents(_events).whenComplete(() async {
+    await DbEvents.updateEvents(_events).whenComplete(() async {
       if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(_events, DataService.getPlacesIn);
+        await loadPlacesForEvents(_events, DbPlaces.getPlacesIn);
       }
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
-      if (DataService.isLoggedIn()) {
-        DataService.countNewMessages().then((value) => {
+      if (AuthService.isLoggedIn()) {
+        DbNews.countNewMessages().then((value) => {
           setState(() {
             _messageCount = value;
           })
@@ -299,7 +304,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     });
     await loadEventParticipants();
-    await OfflineDataHelper.saveAllEvents(_events);
+    await OfflineDataService.saveAllEvents(_events);
     await NotificationHelper.checkForNotificationPermission(context);
   }
 
@@ -325,18 +330,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> loadOfflineData() async {
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataHelper.getAllEvents();
-      await OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+      var offlineEvents = await OfflineDataService.getAllEvents();
+      await OfflineDataService.updateEventsWithGroupName(offlineEvents);
       if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataHelper.getAllPlaces()));
+        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataService.getAllPlaces()));
       }
       _events.addAll(offlineEvents);
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       setState(() {});
     }
-    if (DataService.isLoggedIn()) {
-      var userInfo = await OfflineDataHelper.getUserInfo();
+    if (AuthService.isLoggedIn()) {
+      var userInfo = await OfflineDataService.getUserInfo();
       setState(() {
         userName = userInfo?.name??"";
       });

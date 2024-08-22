@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -57,13 +58,13 @@ class _CheckPageState extends State<CheckPage> {
   }
 
   Future<void> loadData(int eventId) async {
-    if (!RightsHelper.isApprover()) {
+    if (!RightsService.isApprover()) {
       RouterService.goBackOrHome(context);
       return;
     }
-    _event = await DataService.getEvent(eventId);
+    _event = await DbEvents.getEvent(eventId);
     List<UserInfoModel> participants =
-        await DataService.getParticipantsPerEvent(eventId);
+        await DbEvents.getParticipantsPerEvent(eventId);
 
     // Map participants to their companion parents
     for (int i = 0; i < participants.length; i++) {
@@ -337,7 +338,7 @@ class _CheckPageState extends State<CheckPage> {
       return;
     }
 
-    _scannedUser ??= await DataService.getUserInfo(newUserId);
+    _scannedUser ??= await DbUsers.getUserInfo(newUserId);
     if (_scannedUser != null) {
       _scanState = ScanState.notSignedIn;
       VibrateService.vibrateNotOk();

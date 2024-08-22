@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -158,7 +160,7 @@ class _UserPageState extends State<UserPage> {
                 ),
                 Visibility(
                   visible:
-                      DataService.globalSettingsModel!.isEnabledEntryCode ??
+                      SynchroService.globalSettingsModel!.isEnabledEntryCode ??
                           false,
                   child: Column(
                     children: [
@@ -270,7 +272,7 @@ class _UserPageState extends State<UserPage> {
                                                   if (!answer) {
                                                     return;
                                                   }
-                                                  await CompanionHelper.delete(companion);
+                                                  await DbCompanions.delete(companion);
                                                   await loadData();
                                                 },
                                                 child: const Text(
@@ -328,7 +330,7 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 Visibility(
-                  visible: RightsHelper.canSeeAdmin(),
+                  visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
                     onPressed: () async => _redirectToAdminPage(),
                     label: "Administration".tr(),
@@ -356,7 +358,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr(),
                             confirmButtonMessage: "Proceed".tr());
                         if (answer) {
-                          await DataService.resetPasswordForEmail(
+                          await AuthService.resetPasswordForEmail(
                                   userData!.email!)
                               .then((value) {
                             ToastHelper.Show(
@@ -402,7 +404,7 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!DataService.isLoggedIn()) {
+    if (!AuthService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
     }
     loadData();
@@ -429,8 +431,8 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _logout() async {
-    var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
-    await DataService.logout();
+    var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
+    await AuthService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
     RouterService.goBackOrHome(context);
   }
@@ -441,8 +443,8 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> loadData() async {
     loadDataOffline();
-    var userInfo = await DataService.getFullUserInfo();
-    await OfflineDataHelper.saveUserInfo(userInfo);
+    var userInfo = await AuthService.getFullUserInfo();
+    await OfflineDataService.saveUserInfo(userInfo);
     await addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
@@ -450,7 +452,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadDataOffline() async {
-    var userInfo = await OfflineDataHelper.getUserInfo();
+    var userInfo = await OfflineDataService.getUserInfo();
     addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
@@ -458,7 +460,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
-    var events = await OfflineDataHelper.getAllEvents();
+    var events = await OfflineDataService.getAllEvents();
     userInfo?.companions?.forEach(
             (c) {
                 for (var ei in c.eventIds) {

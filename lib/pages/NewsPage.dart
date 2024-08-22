@@ -1,8 +1,9 @@
 import 'package:fstapp/dataModels/NewsModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbNews.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/appConfig.dart';
@@ -32,7 +33,7 @@ class _NewsPageState extends State<NewsPage> {
         var heading = data["heading"];
         String headingDefault = data["heading_default"]!;
 
-        await DataService.insertNewsMessage(heading, headingDefault, message, addToNews, withNotification, to);
+        await DbNews.insertNewsMessage(heading, headingDefault, message, addToNews, withNotification, to);
 
         if (addToNews) {
           await loadNewsMessages();
@@ -42,22 +43,22 @@ class _NewsPageState extends State<NewsPage> {
   }
 
   Future<void> loadNewsMessages() async {
-    var loadedMessages = await DataService.getAllNewsMessages();
+    var loadedMessages = await DbNews.getAllNewsMessages();
     setState(() {
       newsMessages = loadedMessages;
     });
-    if (DataService.isLoggedIn() && newsMessages.isNotEmpty) {
-      DataService.setMessagesAsRead(newsMessages.first.id);
+    if (AuthService.isLoggedIn() && newsMessages.isNotEmpty) {
+      DbNews.setMessagesAsRead(newsMessages.first.id);
     }
   }
 
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    newsMessages = await OfflineDataHelper.getAllMessages();
+    newsMessages = await OfflineDataService.getAllMessages();
     setState(() {});
     await loadNewsMessages();
-    await OfflineDataHelper.saveAllMessages(newsMessages);
+    await OfflineDataService.saveAllMessages(newsMessages);
   }
 
   @override
@@ -119,7 +120,7 @@ class _NewsPageState extends State<NewsPage> {
                             child: HtmlView(html: message.message!, isSelectable: true),
                           ),
                           Visibility(
-                            visible: DataService.isLoggedIn(),
+                            visible: AuthService.isLoggedIn(),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
                               child: Row(
@@ -138,17 +139,17 @@ class _NewsPageState extends State<NewsPage> {
                     ),
                   ),
                   Visibility(
-                    visible: RightsHelper.isEditor(),
+                    visible: RightsService.isEditor(),
                     child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
                         if (choice == ContextMenuChoice.delete) {
-                          await DataService.deleteNewsMessage(message);
+                          await DbNews.deleteNewsMessage(message);
                         } else {
                           RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: {HtmlEditorPage.parContent: message.message}).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
-                              await DataService.updateNewsMessage(message);
+                              await DbNews.updateNewsMessage(message);
                               RouterService.pushReplacementOccasion(context, NewsPage.ROUTE);
                             }
                           });
@@ -175,7 +176,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: RightsHelper.isEditor(),
+        visible: RightsService.isEditor(),
         child: FloatingActionButton(
           onPressed: () => _showMessageDialog(context),
           child: const Icon(Icons.add),

@@ -69,3 +69,30 @@ BEGIN
     RETURN json_build_object('code', 200, 'occasion_user', row_to_json(occasion_user)::jsonb, 'link', link_txt, 'occasion', occasionId);
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION get_current_organization_data(oc bigint) RETURNS jsonb
+LANGUAGE plpgsql STABLE
+SECURITY DEFINER
+AS $$
+DECLARE
+    organization_id bigint;
+    org_data jsonb;
+BEGIN
+    -- Retrieve the organization ID associated with the given occasion
+    SELECT organization INTO organization_id
+    FROM occasions
+    WHERE id = oc;
+
+    -- Retrieve the organization data as jsonb
+    SELECT jsonb_build_object(
+        'id', id,
+        'title', title,
+        'data', data
+    ) INTO org_data
+    FROM organizations
+    WHERE id = organization_id;
+
+    -- Return the organization data as jsonb
+    RETURN org_data;
+END;
+$$;

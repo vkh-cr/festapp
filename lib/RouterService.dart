@@ -1,7 +1,8 @@
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
@@ -131,6 +132,10 @@ class RouterService{
           builder: (context, state) => const InstallPage(),
         ),
         GoRoute(
+          path: "/${AdminDashboardPage.ROUTE}",
+          builder: (context, state) => const AdminDashboardPage(),
+        ),
+        GoRoute(
           path: "/${CheckPage.ROUTE}/:id",
           builder: (context, state) {
             var id = int.parse(state.pathParameters["id"] ?? "0");
@@ -217,10 +222,10 @@ class RouterService{
 
   static Future<bool> checkOccasionLinkAndRedirect(BuildContext context) async {
     bool canContinue = true;
-    var checkedObject = await DataService.checkOccasionLink(RouterService.currentOccasionLink);
-    RightsHelper.currentUserOccasion = checkedObject.user;
-    RightsHelper.currentOccasion = checkedObject.occasionId;
-    RightsHelper.currentLink = checkedObject.link;
+    var checkedObject = await SynchroService.checkOccasionLink(RouterService.currentOccasionLink);
+    RightsService.currentUserOccasion = checkedObject.user;
+    RightsService.currentOccasion = checkedObject.occasionId;
+    RightsService.currentLink = checkedObject.link;
 
     if(checkedObject.link!=RouterService.currentOccasionLink && checkedObject.isAvailable())
     {

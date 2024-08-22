@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timetable/TimelineWidget.dart';
@@ -389,7 +389,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimeBlockItem item) async {
-    if(!await DataService.addToMySchedule(item.id)) {
+    if(!await DbEvents.addToMySchedule(item.id)) {
       return;
     }
     setState(() {
@@ -398,7 +398,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> removeFromMyProgram(TimeBlockItem item) async {
-    await DataService.removeFromMySchedule(item.id);
+    await DbEvents.removeFromMySchedule(item.id);
     setState(() {
       item.timeBlockType = TimeBlockType.canSave;
     });

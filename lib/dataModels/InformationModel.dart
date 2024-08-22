@@ -1,6 +1,6 @@
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 
@@ -67,12 +67,12 @@ class InformationModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteInformation(this);
+    await DbInformation.deleteInformation(this);
   }
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateInformation(this);
+    await DbInformation.updateInformation(this);
   }
 
   @override

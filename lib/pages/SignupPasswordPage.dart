@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
@@ -101,13 +100,13 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               TextInput.finishAutofillContext();
-                              await DataService.changePassword(token!, _passwordController.text)
+                              await ImportService.changePassword(token!, _passwordController.text)
                                   .then((value) async {
                                 if(value["code"] == 403 || value["code"] == 404) {
                                   ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
                                 }
                                 else if(value["code"] == 200) {
-                                  await DataService.login(value["email"], _passwordController.text);
+                                  await ImportService.login(value["email"], _passwordController.text);
                                   ToastHelper.Show("Password has been changed.".tr());
                                   RouterService.goBackOrInitial(context);
                                 }

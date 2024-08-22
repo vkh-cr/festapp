@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:pwa_install/pwa_install.dart';
@@ -34,7 +34,7 @@ class _InstallPageState extends State<InstallPage> {
   }
 
   Future<void> loadSettings() async {
-    bool isAppInstalled = DataService.isPwaInstalledOrNative();
+    bool isAppInstalled = SynchroService.isPwaInstalledOrNative();
 
     setState(() {
       _isAppInstalled = isAppInstalled;

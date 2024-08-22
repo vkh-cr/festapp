@@ -1,10 +1,11 @@
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
-import '../styles/Styles.dart';
 
 class LoginPage extends StatefulWidget {
   static const ROUTE = "login";
@@ -102,7 +102,7 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await DataService.login(_emailController.text, _passwordController.text)
+                          await AuthService.login(_emailController.text, _passwordController.text)
                               .then(_showToast)
                               .then(_refreshSignedInStatus)
                               .catchError(_onError);
@@ -136,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _refreshSignedInStatus(value) async {
-    var loggedIn = await DataService.tryAuthUser();
+    var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
       RouterService.checkOccasionLinkAndRedirect(context);
       RouterService.goBackOrHome(context);
