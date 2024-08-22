@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -63,7 +64,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "heading_default": _currentUser!.name,
         "with_notification":
             _formKey.currentState?.fields["with_notification"]!.value,
-        if (isTest) "to": [DataService.currentUserId()],
+        if (isTest) "to": [AuthService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
       Navigator.pop(context, toReturn);

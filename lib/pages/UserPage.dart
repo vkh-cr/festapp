@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
@@ -356,7 +357,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr(),
                             confirmButtonMessage: "Proceed".tr());
                         if (answer) {
-                          await DataService.resetPasswordForEmail(
+                          await AuthService.resetPasswordForEmail(
                                   userData!.email!)
                               .then((value) {
                             ToastHelper.Show(
@@ -402,7 +403,7 @@ class _UserPageState extends State<UserPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!DataService.isLoggedIn()) {
+    if (!AuthService.isLoggedIn()) {
       RouterService.navigateOccasion(context, LoginPage.ROUTE);
     }
     loadData();
@@ -430,7 +431,7 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> _logout() async {
     var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
-    await DataService.logout();
+    await AuthService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
     RouterService.goBackOrHome(context);
   }
@@ -441,7 +442,7 @@ class _UserPageState extends State<UserPage> {
 
   Future<void> loadData() async {
     loadDataOffline();
-    var userInfo = await DataService.getFullUserInfo();
+    var userInfo = await AuthService.getFullUserInfo();
     await OfflineDataService.saveUserInfo(userInfo);
     await addOfflineEventsToCompanions(userInfo);
     setState(() {

@@ -456,7 +456,7 @@ class TimetableItem {
       return TimetableItemType.signedIn;
     } else if (model.currentParticipants != null &&
         model.maxParticipants != null &&
-        (!DataService.isLoggedIn() || model.isFull())) {
+        (!AuthService.isLoggedIn() || model.isFull())) {
       return TimetableItemType.nothing;
     } else if (EventModel.canSignIn(model)) {
       return TimetableItemType.nothing;

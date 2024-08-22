@@ -1,6 +1,8 @@
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
@@ -255,7 +257,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<EventModel>(
                 context,
-                DataService.getAllEventsForDatagrid,
+                DbEvents.getAllEventsForDatagrid,
                 EventModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.events.id,
@@ -366,7 +368,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                 var eventId = rendererContext.row.cells[Tb.events.id]!.value;
                                 if(eventId!=null)
                                 {
-                                  var fullEvent = await DataService.getEvent(eventId);
+                                  var fullEvent = await DbEvents.getEvent(eventId);
                                   return fullEvent.description;
                                 }
                                 return null;
@@ -837,7 +839,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
 
     for(OccasionUserModel u in users) {
-      await DataService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
+      await AuthService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
       u.data![Tb.occasion_users.data_isInvited] = true;
       await DataService.updateOccasionUser(u);
       ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));

@@ -4,8 +4,10 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
@@ -46,7 +48,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   Future<void> loadData() async {
     await loadDataOffline();
 
-    await DataService.updateEvents(_events).whenComplete(() async {
+    await DbEvents.updateEvents(_events).whenComplete(() async {
       var placeIds = _events
           .map((e) => e.place?.id)
           .where((id) => id != null)
@@ -73,7 +75,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
       setupTabController(_days);
       await loadEventParticipants();
-      await DataService.synchronizeMySchedule();
+      await DbEvents.synchronizeMySchedule();
     });
   }
 
@@ -128,7 +130,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadEventParticipants() async {
-    await DataService.loadEventsParticipantsAndStatus(_events);
+    await DbEvents.loadEventsParticipantsAndStatus(_events);
     for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {

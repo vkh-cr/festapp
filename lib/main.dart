@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
@@ -69,8 +70,8 @@ Future<void> initializeEverything() async {
       anonKey: AppConfig.anonKey,
     ).timeout(const Duration(seconds: 2));
     print('Supabase initialized');
-    if (!DataService.isLoggedIn()) {
-      await DataService.refreshSession().timeout(const Duration(seconds: 2));
+    if (!AuthService.isLoggedIn()) {
+      await AuthService.refreshSession().timeout(const Duration(seconds: 2));
       print('Session refreshed');
     }
   } catch (e) {

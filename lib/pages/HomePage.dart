@@ -4,7 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
@@ -104,7 +106,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       ),
                       const Spacer(),
                       Visibility(
-                        visible: !DataService.isLoggedIn(),
+                        visible: !AuthService.isLoggedIn(),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -123,7 +125,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         ),
                       ),
                       Visibility(
-                        visible: DataService.isLoggedIn(),
+                        visible: AuthService.isLoggedIn(),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
@@ -218,7 +220,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
+    if (!AppConfig.isOwnProgramSupported && !AuthService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
@@ -254,7 +256,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> loadEventParticipants() async {
     // update sign in status / current participants for events
-    await DataService.loadEventsParticipantsAndStatus(_events);
+    await DbEvents.loadEventsParticipantsAndStatus(_events);
     for (var e in _events.filterRootEvents()) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
@@ -280,18 +282,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await loadOfflineData();
     await RightsService.ensureAccessProcedure(context);
 
-    if (DataService.isLoggedIn()) {
+    if (AuthService.isLoggedIn()) {
       DataService.getCurrentUserInfo()
           .then((value) => userName = value.name!);
     }
 
-    await DataService.updateEvents(_events).whenComplete(() async {
+    await DbEvents.updateEvents(_events).whenComplete(() async {
       if(AppConfig.isSplitByPlace) {
         await loadPlacesForEvents(_events, DataService.getPlacesIn);
       }
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
-      if (DataService.isLoggedIn()) {
+      if (AuthService.isLoggedIn()) {
         DataService.countNewMessages().then((value) => {
           setState(() {
             _messageCount = value;
@@ -336,7 +338,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       setState(() {});
     }
-    if (DataService.isLoggedIn()) {
+    if (AuthService.isLoggedIn()) {
       var userInfo = await OfflineDataService.getUserInfo();
       setState(() {
         userName = userInfo?.name??"";

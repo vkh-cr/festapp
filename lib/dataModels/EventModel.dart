@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 
@@ -253,19 +254,19 @@ class EventModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    var participants = await DataService.getParticipantsPerEvent(id!);
+    var participants = await DbEvents.getParticipantsPerEvent(id!);
     for(var p in participants)
     {
       await DataService.signOutFromEvent(id!, p);
     }
-    await DataService.removeEventFromSaved(this);
-    await DataService.removeEventFromEventGroups(this);
-    await DataService.deleteEvent(this);
+    await DbEvents.removeEventFromSaved(this);
+    await DbEvents.removeEventFromEventGroups(this);
+    await DbEvents.deleteEvent(this);
   }
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateEventFromDataGrid(this);
+    await DbEvents.updateEventFromDataGrid(this);
   }
 
   @override

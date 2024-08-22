@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
@@ -51,8 +52,8 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
                 visible: RightsService.isEditor() ||
-                    (DataService.isGroupLeader() &&
-                        DataService.currentUserGroup()!.place!.id ==
+                    (AuthService.isGroupLeader() &&
+                        AuthService.currentUserGroup()!.place!.id ==
                             widget.marker.place.id),
                 child: ElevatedButton(
                     onPressed: widget.selectedMarker != null

@@ -1,4 +1,5 @@
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
@@ -102,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await DataService.login(_emailController.text, _passwordController.text)
+                          await AuthService.login(_emailController.text, _passwordController.text)
                               .then(_showToast)
                               .then(_refreshSignedInStatus)
                               .catchError(_onError);
@@ -136,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _refreshSignedInStatus(value) async {
-    var loggedIn = await DataService.tryAuthUser();
+    var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
       RouterService.checkOccasionLinkAndRedirect(context);
       RouterService.goBackOrHome(context);

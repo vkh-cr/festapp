@@ -4,8 +4,10 @@ import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -35,9 +37,6 @@ import 'package:html/parser.dart';
 class DataService {
   static final _supabase = Supabase.instance.client;
 
-  static const _secureStorage = FlutterSecureStorage();
-  static const REFRESH_TOKEN_KEY = 'refresh';
-
   static Future<void> emailMailerSend(String recipient, String templateId, List<Map<String, String>> variables)
   async {
     await _supabase.rpc("send_email_mailersend",
@@ -46,64 +45,6 @@ class DataService {
           "recipient": recipient,
           "template_id": templateId
         }, "subs": variables});
-  }
-
-  static Future<bool> refreshSession() async {
-    var response = await _supabase.auth.refreshSession();
-    if(response.session!=null){
-      return true;
-    }
-    if(await tryAuthUser()){
-      return true;
-    }
-    return false;
-  }
-
-  static Future<bool> tryAuthUser() async {
-    if (!await _secureStorage.containsKey(key: REFRESH_TOKEN_KEY)) {
-      return false;
-    }
-    var refresh = await _secureStorage.read(key: REFRESH_TOKEN_KEY);
-    try{
-      var result = await _supabase.auth.setSession(refresh.toString());
-      if (result.user != null) {
-        await _secureStorage.write(
-            key: REFRESH_TOKEN_KEY,
-            value: _supabase.auth.currentSession!.refreshToken.toString());
-        return true;
-      } else {
-        await NotificationHelper.logout();
-      }
-    }
-    catch(e)
-    {
-      //invalid refresh token
-    }
-    return false;
-  }
-
-  static isLoggedIn() {
-    return _supabase.auth.currentSession != null;
-  }
-
-  static UserGroupInfoModel? currentUserGroup() {
-    return _currentUser?.userGroup;
-  }
-
-  static hasGroup() {
-    return _currentUser?.userGroup != null;
-  }
-
-  static isGroupLeader() {
-    return hasGroup() && _currentUser?.userGroup?.leader?.id == currentUserId();
-  }
-
-  static String? currentUserEmail() {
-    return _supabase.auth.currentUser?.email;
-  }
-
-  static String currentUserId() {
-    return _supabase.auth.currentUser!.id;
   }
 
   static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.DefaultSettings;
@@ -128,10 +69,10 @@ class DataService {
   }
 
   static Future<UserInfoModel> getCurrentUserInfo() async {
-    if(_currentUser == null){
-      return await loadCurrentUserData();
+    if(AuthService.currentUser == null){
+      return await AuthService.loadCurrentUserData();
     }
-    return _currentUser!;
+    return AuthService.currentUser!;
   }
 
   static Future<void> deleteUser(String user, int occasion) async {
@@ -159,87 +100,7 @@ class DataService {
     return data;
   }
 
-  static Future<void> login(String email, String password) async {
-    var data = await _supabase.auth
-        .signInWithPassword(email: email, password: password);
-    await _secureStorage.write(
-        key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    synchronizeMySchedule(true);
-    refreshOfflineData();
-    await NotificationHelper.login();
-  }
-
-  static Future<void> logout() async {
-    await NotificationHelper.logout().timeout(const Duration(seconds: 2));
-    await OfflineDataService.clearUserData();
-    await _supabase.auth.signOut(scope: SignOutScope.local);
-    _secureStorage.delete(key: REFRESH_TOKEN_KEY);
-    _currentUser = null;
-  }
-
-  static Future<dynamic> resetPasswordForEmail(String email) async {
-    return await _supabase.functions.invoke("email", body: {"email": email});
-  }
-
-  static UserInfoModel? _currentUser;
-  static Future<UserInfoModel> loadCurrentUserData() async {
-    ensureUserIsLoggedIn();
-    var jsonUser = await _supabase
-        .from(Tb.user_info.table)
-        .select()
-        .eq(Tb.user_info.id, _supabase.auth.currentUser!.id)
-        .single();
-    _currentUser = UserInfoModel.fromJson(jsonUser);
-    _currentUser!.userGroup = await getCurrentUserGroup();
-    return _currentUser!;
-  }
-
-  static String gText(String male, String female)
-  {
-    if(_currentUser?.sex != "male")
-    {
-      return female;
-    }
-    return male;
-  }
-
-  static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await DataService.getCurrentUserInfo();
-    if(RightsService.currentUserOccasion?.role != null) {
-      user.roleString = await DataService.getRoleInfo(RightsService.currentUserOccasion!.role!);
-    }
-    var myGroup = await getCurrentUserGroup();
-    if(myGroup!=null) {
-      user.userGroup = await getUserGroupInfo(myGroup.id!);
-    }
-    if(globalSettingsModel!.isEnabledEntryCode??false) {
-      user.companions = await DbCompanions.getAllCompanions();
-    }
-
-    return user;
-  }
-
-  static Future<String> getRoleInfo(int role) async {
-    var data = await _supabase
-        .from(Tb.role_info.table)
-        .select(Tb.role_info.title)
-        .eq(Tb.role_info.id, role)
-        .single();
-    return data[Tb.role_info.title];
-  }
-
-  static Future<PlaceModel?> getUserAccommodation(
-      String accommodationType) async {
-    var data = await _supabase
-        .from(Tb.accommodation_places.table)
-        .select("${Tb.places.table}(${Tb.places.id}, ${Tb.places.title})")
-        .eq(Tb.accommodation_places.accommodation_type, accommodationType)
-        .maybeSingle();
-    if (data == null) {
-      return null;
-    }
-    return PlaceModel.fromJson(data[Tb.places.table]);
-  }
+  
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
     var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
@@ -367,7 +228,7 @@ class DataService {
   static Future<void> ensureCanUpdateUsers(OccasionUserModel oum) async {
     if(!RightsService.canUpdateUsers())
     {
-      await refreshSession();
+      await AuthService.refreshSession();
       if(!RightsService.canUpdateUsers())
       {
         var errorText = "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
@@ -492,216 +353,6 @@ class DataService {
     return infoList;
   }
 
-  static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
-  async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.event_users.table}(count)")
-        .inFilter(Tb.events.id, events.map((e)=>e.id).toList());
-
-    var eventList = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    if(isLoggedIn())
-    {
-      await loadIsCurrentUserSignedIn(eventList);
-    }
-
-    for(var e in events)
-    {
-      var eq = eventList.firstWhere((element) => element.id == e.id);
-      e.currentParticipants = eq.currentParticipants;
-      e.isSignedIn = eq.isSignedIn;
-    }
-
-    if(AppConfig.isOwnProgramSupported)
-    {
-      await loadIsInMySchedule(events);
-    }
-  }
-
-  static Future<void> loadIsInMySchedule(List<EventModel> events) async {
-    var set = EventModel.CreateEventModelSet();
-    var local = await loadAllMyScheduleOffline();
-    set.addAll(local);
-    if(isLoggedIn())
-    {
-      var remote = await loadAllMySchedule();
-      set.addAll(remote);
-    }
-
-    for(var e in set)
-    {
-      var eq = events.firstWhere((element) => element.id == e.id);
-      eq.isEventInMySchedule = e.isEventInMySchedule;
-    }
-  }
-
-  static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
-    if(onlyForSignedIn)
-    {
-      List<EventModel> data = [];
-      if(AppConfig.isOwnProgramSupported)
-      {
-        data = (await loadAllMyScheduleOffline()).toList();
-
-        if(!isLoggedIn()) {
-          return data.toList();
-        }
-
-        var remote = await loadAllMySchedule();
-        data.addAll(remote);
-      } else if(!isLoggedIn()) {
-        return data;
-      }
-
-      var dataSignedIn = await _supabase
-          .from(Tb.events.table)
-          .select("${Tb.events.id},"
-          "${Tb.events.title},"
-          "${Tb.events.start_time},"
-          "${Tb.events.end_time},"
-          "${Tb.events.place},"
-          "${Tb.events.type},"
-          "${Tb.events.max_participants},"
-          "${Tb.events.is_group_event},"
-          "${Tb.event_users.table}!inner(*)")
-          .eq("${Tb.event_users.table}.${Tb.event_users.user}", currentUserId())
-          .eq(Tb.events.is_hidden, false)
-          .order(Tb.events.start_time, ascending: true)
-          .order(Tb.events.max_participants, ascending: false);
-
-      data.addAll(List<EventModel>.from(
-          dataSignedIn.map((x) => EventModel.fromJson(x))));
-
-      //join group events
-      if(hasGroup())
-      {
-        var groupData = await _supabase
-            .from(Tb.events.table)
-            .select(
-            "${Tb.events.id},"
-            "${Tb.events.title},"
-            "${Tb.events.start_time},"
-            "${Tb.events.end_time},"
-            "${Tb.events.place},"
-            "${Tb.events.type},"
-            "${Tb.events.max_participants},"
-            "${Tb.events.is_group_event}")
-            .eq(EventModel.isGroupEventColumn, true)
-            .eq(Tb.events.is_hidden, false)
-            .order(Tb.events.start_time, ascending: true);
-        data.addAll(List<EventModel>.from(
-            groupData.map((x) => EventModel.fromJson(x))));
-      }
-
-      return data.toList();
-    }
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-            "${Tb.events.id},"
-            "${Tb.events.title},"
-            "${Tb.events.start_time},"
-            "${Tb.events.end_time},"
-            "${Tb.events.place},"
-            "${Tb.events.type},"
-            "${Tb.events.max_participants},"
-            "${Tb.events.is_group_event}, "
-            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
-        .eq(Tb.events.is_hidden, false)
-        .order(Tb.events.start_time, ascending: true)
-        .order(Tb.events.max_participants, ascending: false);
-
-    var events = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    return events;
-  }
-
-  static Future<HashSet<EventModel>> loadAllMySchedule() async {
-    var dataEventUsersSaved = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id},"
-        "${Tb.events.title},"
-        "${Tb.events.start_time},"
-        "${Tb.events.end_time},"
-        "${Tb.events.place},"
-        "${Tb.events.type},"
-        "${Tb.events.max_participants},"
-        "${Tb.events.is_group_event},"
-        "${Tb.event_users_saved.table}!inner(*)")
-        .eq("${Tb.event_users_saved.table}.${Tb.event_users_saved.user}", currentUserId())
-        .eq(Tb.events.is_hidden, false)
-        .order(Tb.events.start_time, ascending: true)
-        .order(Tb.events.max_participants, ascending: false);
-
-    var remoteEvents = List<EventModel>.from(
-        dataEventUsersSaved.map((x) => EventModel.fromJson(x)));
-    for (var element in remoteEvents) {
-      element.isEventInMySchedule = true;
-    }
-    var toReturn = EventModel.CreateEventModelSet();
-    toReturn.addAll(remoteEvents);
-    return toReturn;
-  }
-
-  static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
-    var events = await OfflineDataService.getMyScheduleData();
-    var localData = await _supabase.from(Tb.events.table)
-        .select("${Tb.events.id},"
-        "${Tb.events.title},"
-        "${Tb.events.start_time},"
-        "${Tb.events.end_time},"
-        "${Tb.events.place},"
-        "${Tb.events.type},"
-        "${Tb.events.max_participants},"
-        "${Tb.events.is_group_event}")
-        .inFilter(Tb.events.id, events)
-        .eq(Tb.events.is_hidden, false)
-        .order(Tb.events.start_time, ascending: true)
-        .order(Tb.events.max_participants, ascending: false);
-    var localEvents = List<EventModel>.from(
-        localData.map((x) => EventModel.fromJson(x)));
-    for (var element in localEvents) {
-      element.isEventInMySchedule = true;
-    }
-    var toReturn = EventModel.CreateEventModelSet();
-    toReturn.addAll(localEvents);
-    return toReturn;
-  }
-
-  static Future<List<EventModel>> getAllEventsForDatagrid() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id},"
-        "${Tb.events.is_hidden},"
-        "${Tb.events.title},"
-        "${Tb.events.start_time},"
-        "${Tb.events.end_time},"
-        "${Tb.events.max_participants},"
-        "${Tb.events.split_for_men_women},"
-        "${Tb.events.is_group_event},"
-        "${Tb.events.type},"
-        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-        "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
-        "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
-        "${Tb.event_users_saved.table}(count),"
-        "${Tb.event_users.table}(count)")
-        .order(Tb.events.start_time, ascending: true);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
-        .inFilter(Tb.events.id, ids);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
   static Future<List<InformationModel>> getInfosDescription(Iterable<int> ids) async {
     var data = await _supabase
         .from(Tb.information.table)
@@ -710,19 +361,7 @@ class DataService {
     return List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
   }
-
-  static Future<List<EventModel>> getAllEventsMeta() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-            "${Tb.events.id},"
-            "${Tb.events.updated_at}"
-        );
-
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
+  
   static Future<List<InformationModel>> getAllInfoMeta() async {
     var data = await _supabase
         .from(Tb.information.table)
@@ -777,7 +416,7 @@ class DataService {
   }
 
   static updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsService.isEditor() || model.leader!.id == currentUserId()))
+    if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId()))
     {
       throw Exception("Must be leader or admin to change the group.");
     }
@@ -889,258 +528,16 @@ class DataService {
         .eq(Tb.exclusive_groups.id, data.id!);
   }
 
-  static Future<EventModel> getEvent(int eventId) async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-            "${Tb.events.id},"
-            "${Tb.events.updated_at},"
-            "${Tb.events.title},"
-            "${Tb.events.start_time},"
-            "${Tb.events.end_time},"
-            "${Tb.events.max_participants},"
-            "${Tb.events.split_for_men_women},"
-            "${Tb.events.is_group_event},"
-            "${Tb.events.is_hidden},"
-            "${Tb.events.type},"
-            "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
-        .eq(Tb.events.id, eventId)
-        .single();
-    var event = EventModel.fromJson(data);
-
-    var cachedEvent = await OfflineDataService.getEventDescription(eventId.toString());
-    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
-      var descrEvent = await getEventsDescription([event.id!]);
-      event.description = descrEvent[0].description;
-    } else {
-      event.description = cachedEvent?.description;
-    }
-
-    if(isLoggedIn()) {
-      event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
-      event.isSignedIn = await isCurrentUserSignedToEvent(event.id!);
-    } else {
-      event.isEventInMySchedule = await OfflineDataService.isEventSaved(event.id!);
-    }
-
-    if(event.childEventIds!=null)
-    {
-      var childEventsData = await _supabase
-          .from(Tb.events.table)
-          .select("${Tb.events.id},"
-                  "${Tb.events.title},"
-                  "${Tb.events.start_time},"
-                  "${Tb.events.end_time},"
-                  "${Tb.events.max_participants},"
-                  "${Tb.event_users.table}(count)")
-          .inFilter(Tb.events.id, event.childEventIds!)
-          .eq(Tb.events.is_hidden, false);
-
-      event.childEvents = List<EventModel>.from(
-          childEventsData.map((x) => EventModel.fromJson(x))).sortEvents();
-
-      if(isLoggedIn())
-      {
-        await loadIsCurrentUserSignedIn(event.childEvents);
-      }
-    }
-    if(event.isGroupEvent && hasGroup())
-    {
-      event.isMyGroupEvent = true;
-    }
-
-    return event;
-  }
-
-  static Future<void> loadIsCurrentUserSignedIn(List<EventModel> events) async {
-    List<dynamic> currentUserStatePerEventData = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.event_users.table}!inner(count)")
-        .eq("${Tb.event_users.table}.${Tb.event_users.user}", currentUserId())
-        .inFilter(Tb.events.id, events.map((e) => e.id).toList());
-
-    Set<int> userSignedInEvents = currentUserStatePerEventData.where((c)=>c[Tb.event_users.table][0]["count"]>0).map((c)=>c["id"] as int).toSet();
-    for(var e in events)
-    {
-      e.isSignedIn = userSignedInEvents.contains(e.id!) ? true : false;
-    }
-  }
-
-  static Future<UserGroupInfoModel?> getCurrentUserGroup() async {
-    UserGroupInfoModel? group;
-    var partOfGroup = await _supabase
-    .from(Tb.user_group_info.table)
-    .select("${Tb.user_group_info.id},"
-        "${Tb.user_group_info.title},"
-        "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}),"
-        "${Tb.places.table}(${Tb.places.id})")
-    .eq(Tb.user_group_info.leader, currentUserId())
-    .limit(1)
-    .maybeSingle();
-    if(partOfGroup!=null)
-    {
-      group = UserGroupInfoModel.fromJson(partOfGroup);
-    }
-    if(group==null)
-    {
-      partOfGroup = await _supabase
-          .from(Tb.user_groups.table)
-          .select("${Tb.user_group_info.table}(${Tb.user_group_info.id}, ${Tb.user_group_info.title})")
-          .eq(Tb.user_groups.user, currentUserId())
-          .limit(1)
-          .maybeSingle();
-      if(partOfGroup!=null)
-      {
-        group = UserGroupInfoModel.fromJson(partOfGroup[Tb.user_group_info.table]);
-      }
-    }
-    return group;
-  }
-
-  static Future<List<UserInfoModel>> getParticipantsPerEvent(int eventId) async {
-    var data = await _supabase
-      .from(Tb.event_users.table)
-      .select(Tb.event_users.user)
-      .eq(Tb.event_users.event, eventId);
-    var listOfIds = List<String>.from(data.map((par) => par[Tb.event_users.user]));
-    var users = await DbUsers.getUsersInfo(listOfIds);
-    return users;
-  }
-
-  static Future<int> getParticipantsPerEventCount(int eventId) async {
-    var result = await _supabase
-        .from(Tb.event_users.table)
-        .select()
-        .eq(Tb.event_users.event, eventId)
-        .count();
-    return result.count;
-  }
-
-  static Future<List<EventModel>> getParticipantEventTimes(String id) async {
-    var data = await _supabase
-        .from(Tb.event_users.table)
-        .select("${Tb.events.table}"
-        "("
-          "${Tb.events.id},"
-          "${Tb.events.start_time},"
-          "${Tb.events.end_time}"
-        ")")
-        .eq(Tb.event_users.user, id);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x[Tb.events.table])));
-  }
-
-  static Future<bool> isCurrentUserSignedToEvent(int eventId) async {
-    ensureUserIsLoggedIn();
-    var result = await _supabase
-        .from(Tb.event_users.table)
-        .select()
-        .eq(Tb.event_users.event, eventId)
-        .eq(Tb.event_users.user, currentUserId())
-        .count();
-    return result.count > 0;
-  }
-
-  static signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
-    ensureUserIsLoggedIn();
-    var userId = participant?.id ?? currentUserId();
-
-    var result = await _supabase.rpc("sign_user_to_event",
-        params: {"ev": eventId, "usr": userId});
-
-    switch(result["code"])
-    {
-      case 200: {
-        if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
-          ToastHelper.Show("${trPrefix}You have been signed in.".tr());
-        }
-        else{
-          var trPrefix = participant.getGenderPrefix();
-          ToastHelper.Show("${trPrefix}{user} has been signed in.".tr(namedArgs: {"user":participant.toString()}));
-        }
-        return;
-      }
-      case 403:
-        ToastHelper.Show("Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
-        return;
-      case 100: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk); return;
-      case 101: ToastHelper.Show("${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
-      case 102: {
-        if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
-          var message = "${trPrefix}You are already signed in at an event of this type.".tr();
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        else{
-          var trPrefix = participant.getGenderPrefix();
-          var message = "${trPrefix}{user} is already signed in at an event of this type.".tr(namedArgs: {"user":participant.toString()});
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        return;
-      }
-      case 103: {
-        if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
-          var message = "${trPrefix}You are already signed in.".tr();
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        else {
-          var trPrefix = participant.getGenderPrefix();
-          var message = "${trPrefix}{user} is already signed in.".tr(namedArgs: {"user":participant.toString()});
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        return;
-      }
-      case 107: {
-        if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
-          var message = "${trPrefix}You are already signed in at another event at the same time.".tr();
-          ToastHelper.Show("${"Cannot sign in!".tr()} $message", severity: ToastSeverity.NotOk);
-        }
-        else{
-          var trPrefix = participant.getGenderPrefix();
-          ToastHelper.Show("${trPrefix}{user} is already signed in at another event at the same time.".tr(namedArgs: {"user":participant.toString()}));
-        }
-        return;
-      }
-      case 104: {
-        String answerWhy = "It's too soon!".tr();
-        if(result["events_registration_start"]!=null)
-        {
-          var start = DateTime.parse(result["events_registration_start"]).toLocal();
-          var datePart = DateFormat.MMMMEEEEd(context.locale.languageCode).format(start);
-          var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
-          String startString = "$datePart $timePart";
-          answerWhy = "You can sign in from {time}.".tr(namedArgs: {"time":startString});
-        }
-
-        ToastHelper.Show("${"Cannot sign in!".tr()} $answerWhy",
-          severity: ToastSeverity.NotOk); return;
-      }
-      case 105: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
-      case 106: ToastHelper.Show("${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
-    }
-  }
-
-  static ensureUserIsLoggedIn(){
-    if(!DataService.isLoggedIn())
-    {
-      throw Exception("User must be logged in.");
-    }
-  }
-
   static Future<void> signOutFromEvent(int eventId, [UserInfoModel? participant]) async {
-    ensureUserIsLoggedIn();
-    var userId = participant?.id ?? currentUserId();
+    AuthService.ensureUserIsLoggedIn();
+    var userId = participant?.id ?? AuthService.currentUserId();
 
     var result = await _supabase.rpc("sign_user_out_of_event",
         params: {"ev": eventId, "usr": userId});
     switch(result["code"]) {
       case 200:
         if(participant == null) {
-          var trPrefix = _currentUser!.getGenderPrefix();
+          var trPrefix = AuthService.currentUser!.getGenderPrefix();
           ToastHelper.Show("${trPrefix}You have been signed out.".tr());
           return;
         }
@@ -1153,84 +550,6 @@ class DataService {
         ToastHelper.Show("It is not possible to sign out from an event that has already taken place.".tr(), severity: ToastSeverity.NotOk);
         return;
     }
-  }
-
-  static Future<EventModel> updateEvent(EventModel event) async
-   {
-    var upsertObj = {
-      Tb.events.start_time: event.startTime.toIso8601String(),
-      Tb.events.end_time: event.endTime.toIso8601String(),
-      Tb.events.title: event.title,
-      Tb.events.max_participants: event.maxParticipants,
-      Tb.events.place: event.place?.id,
-      Tb.events.split_for_men_women: event.splitForMenWomen,
-      Tb.events.is_group_event: event.isGroupEvent,
-      Tb.events.is_hidden: event.isHidden,
-      Tb.events.type: event.type,
-    };
-    if(event.description!=null) {
-      upsertObj.addAll({Tb.events.description: event.description});
-    }
-    dynamic eventData;
-    if(event.id!=null) {
-      upsertObj.addAll({Tb.events.id: event.id});
-      eventData = await _supabase.from(Tb.events.table).update(upsertObj).eq(Tb.events.id, event.id!).select().single();
-    }
-    else
-    {
-      eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
-    }
-    return EventModel.fromJson(eventData);
-  }
-
-  static updateEventFromDataGrid(EventModel event) async {
-    var updatedEvent = await updateEvent(event);
-    await removeEventFromEventGroups(updatedEvent);
-
-    var insert = [];
-    for(var eParent in event.parentEventIds!)
-    {
-      insert.add({Tb.event_groups.event_child:updatedEvent.id, Tb.event_groups.event_parent:eParent});
-    }
-    await _supabase
-        .from(Tb.event_groups.table)
-        .insert(insert);
-
-    var insertRoles = [];
-    for(var eParent in event.eventRolesIds!)
-    {
-      insertRoles.add({Tb.event_roles.event:updatedEvent.id, Tb.event_roles.role:eParent});
-    }
-
-    await _supabase
-        .from(Tb.event_roles.table)
-        .delete()
-        .eq(Tb.event_roles.event, updatedEvent.id!);
-
-    await _supabase
-        .from(Tb.event_roles.table)
-        .insert(insertRoles);
-  }
-
-  static Future<void> removeEventFromSaved(EventModel updatedEvent) async {
-    await _supabase
-        .from(Tb.event_users_saved.table)
-        .delete()
-        .eq(Tb.event_users_saved.event, updatedEvent.id!);
-  }
-
-  static Future<void> removeEventFromEventGroups(EventModel updatedEvent) async {
-    await _supabase
-        .from(Tb.event_groups.table)
-        .delete()
-        .eq(Tb.event_groups.event_child, updatedEvent.id!);
-  }
-
-  static Future<void> deleteEvent(EventModel data) async {
-    await _supabase
-        .from(Tb.events.table)
-        .delete()
-        .eq(Tb.events.id, data.id!);
   }
 
   static Future<void> updateInformation(InformationModel info) async {
@@ -1319,7 +638,7 @@ class DataService {
       await _supabase.from(Tb.news.table).insert(
           {
             Tb.news.message: messageForNews,
-            Tb.news.created_by: currentUserId()
+            Tb.news.created_by: AuthService.currentUserId()
           }
       ).select();
     }
@@ -1354,7 +673,7 @@ class DataService {
   }
 
   static Future<int> countNewMessages() async {
-    ensureUserIsLoggedIn();
+    AuthService.ensureUserIsLoggedIn();
     int lastMessageId = await getLastReadMessage();
     var result = await _supabase
         .from(Tb.news.table)
@@ -1365,12 +684,12 @@ class DataService {
   }
 
   static Future<int> getLastReadMessage() async {
-    ensureUserIsLoggedIn();
+    AuthService.ensureUserIsLoggedIn();
     int lastMessageId = 0;
     var lastMessage = await _supabase
         .from(Tb.user_news.table)
         .select(Tb.user_news.news_id)
-        .eq(Tb.user_news.user, currentUserId())
+        .eq(Tb.user_news.user, AuthService.currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
       lastMessageId = lastMessage[Tb.user_news.news_id];
@@ -1379,15 +698,15 @@ class DataService {
   }
 
   static void setMessagesAsRead(int newsId) async {
-    ensureUserIsLoggedIn();
+    AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
-        .upsert({Tb.user_news.user: currentUserId(), Tb.user_news.news_id: newsId}).select();
+        .upsert({Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newsId}).select();
   }
 
   static Future<List<NewsModel>> getAllNewsMessages() async {
     int lastReadMessageId = 0;
-    if (isLoggedIn()) {
+    if (AuthService.isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
     var data = await _supabase
@@ -1406,58 +725,15 @@ class DataService {
     for (var message in loadedMessages) {
       viewsAggregate += message.views;
       message.views = viewsAggregate;
-      if (isLoggedIn()) {
+      if (AuthService.isLoggedIn()) {
         message.isRead = lastReadMessageId >= message.id;
       }
     }
     return loadedMessages;
   }
 
-  //avoid loosing participant count by updating each event individually
-  static Future<void> updateEvents(List<EventModel> events, [bool onlyForSignedIn = false]) async {
-    var updatedEvents = await DataService.getEventsForTimeline(onlyForSignedIn);
-    for (var e in updatedEvents) {
-      var eventToChange =
-          events.firstWhereOrNull((eve) => eve.id == e.id);
-      if (eventToChange != null) {
-        eventToChange.copyFromEvent(e);
-      } else {
-        events.add(e);
-      }
-    }
-    var remove = events.where((d) => !updatedEvents.any((e)=>d.id == e.id)).toList();
-    for(var r in remove)
-    {
-      events.remove(r);
-    }
-
-    //rewrite group names for group events
-    for(var e in events)
-    {
-      if(e.isGroupEvent && hasGroup())
-      {
-        e.title = currentUserGroup()!.title;
-        e.isMyGroupEvent = true;
-      }
-    }
-
-    events.sort((a, b)
-    {
-      var cmp = a.startTime.compareTo(b.startTime);
-      if (cmp == 0)
-      {
-        cmp = b.maxParticipantsNumber().compareTo(a.maxParticipantsNumber());
-      }
-      if (cmp == 0)
-      {
-        cmp = a.title!.compareTo(b.title!);
-      }
-      return cmp;
-    });
-  }
-
   static Future<void> saveLocation(int placeId, double lat, double lng) async {
-    if(!(RightsService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
+    if(!(RightsService.isEditor() || (AuthService.isGroupLeader() && AuthService.currentUserGroup()!.place!.id == placeId)))
     {
       throw Exception("You cannot change this place.");
     }
@@ -1469,82 +745,9 @@ class DataService {
     ToastHelper.Show("Place has been changed.".tr());
   }
 
-  static Future<bool> isEventSaved(int id) async {
-    var data = await _supabase
-        .from(Tb.event_users_saved.table)
-        .select()
-        .eq(Tb.event_users_saved.event, id)
-        .eq(Tb.event_users_saved.user, currentUserId())
-        .maybeSingle();
-    return data != null;
-  }
-
-  static Future<void> removeFromMySchedule(int id) async {
-    if(isLoggedIn()) {
-      await _supabase
-          .from(Tb.event_users_saved.table)
-          .delete()
-          .eq(Tb.event_users_saved.event, id)
-          .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
-    }
-    await OfflineDataService.removeFromMySchedule(id);
-    ToastHelper.Show("Removed from My schedule.".tr());
-  }
-
-  static Future<bool> addToMySchedule(int id) async {
-    if(!AppConfig.isOwnProgramSupportedWithoutSignIn && !isLoggedIn()) {
-      ToastHelper.Show("Before adding to 'My schedule', please sign in first.".tr());
-      return false;
-    }
-    if(isLoggedIn()) {
-        await _supabase
-            .from(Tb.event_users_saved.table)
-            .insert({Tb.event_users_saved.event: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
-    }
-    await OfflineDataService.addToMySchedule(id);
-    ToastHelper.Show("Added to My schedule.".tr());
-    return true;
-  }
-  
-  static Future<void> synchronizeMySchedule([bool join = false])
-  async {
-    if(!isLoggedIn() || !AppConfig.isOwnProgramSupported){
-      return;
-    }
-    HashSet<EventModel> data = EventModel.CreateEventModelSet();
-
-    var remote = await loadAllMySchedule();
-    var local = await loadAllMyScheduleOffline();
-
-    if (join) {
-      data.addAll(remote);
-      data.addAll(local);
-    }
-    else {
-      data = remote;
-    }
-
-    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    await OfflineDataService.saveMyScheduleData(currentUserEventIds);
-
-    var values = [];
-    for(var v in currentUserEventIds)
-    {
-      values.add({
-        EventModel.eventUsersSavedUserColumn: currentUserId(),
-        Tb.event_users_saved.event: v
-      });
-    }
-    if(join)
-    {
-      await _supabase.from(Tb.event_users_saved.table)
-          .upsert(values);
-    }
-  }
-
   static Future<void> refreshOfflineData() async {
-    if(DataService.isLoggedIn()) {
-      var userInfo = await getFullUserInfo();
+    if(AuthService.isLoggedIn()) {
+      var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
     }
     else {
@@ -1569,14 +772,14 @@ class DataService {
       await updateInfoDescription();
     }
 
-    await DataService.synchronizeMySchedule();
+    await DbEvents.synchronizeMySchedule();
   }
 
   static bool isPwaInstalledOrNative() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed ;
 
   static Future<void> updateEventDescriptions() async {
     var needsUpdate = <int>[];
-    var allEventsMeta = await getAllEventsMeta();
+    var allEventsMeta = await DbEvents.getAllEventsMeta();
 
     for(var e in allEventsMeta) {
       var oe = await OfflineDataService.getEventDescription(e.id.toString());
@@ -1585,7 +788,7 @@ class DataService {
       }
     }
 
-    var fullEvents = await getEventsDescription(needsUpdate);
+    var fullEvents = await DbEvents.getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
       await OfflineDataService.saveEventDescription(e);
     }

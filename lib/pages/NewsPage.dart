@@ -1,4 +1,5 @@
 import 'package:fstapp/dataModels/NewsModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
@@ -46,7 +47,7 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = loadedMessages;
     });
-    if (DataService.isLoggedIn() && newsMessages.isNotEmpty) {
+    if (AuthService.isLoggedIn() && newsMessages.isNotEmpty) {
       DataService.setMessagesAsRead(newsMessages.first.id);
     }
   }
@@ -119,7 +120,7 @@ class _NewsPageState extends State<NewsPage> {
                             child: HtmlView(html: message.message!, isSelectable: true),
                           ),
                           Visibility(
-                            visible: DataService.isLoggedIn(),
+                            visible: AuthService.isLoggedIn(),
                             child: Padding(
                               padding: const EdgeInsets.all(8),
                               child: Row(

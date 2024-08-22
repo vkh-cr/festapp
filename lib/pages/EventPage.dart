@@ -6,9 +6,11 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -172,7 +174,7 @@ class _EventPageState extends State<EventPage> {
                                   ),
                                   Visibility(
                                       visible: RightsService.isEditor() ||
-                                          (DataService.isGroupLeader() &&
+                                          (AuthService.isGroupLeader() &&
                                               _event != null &&
                                               _event!.isGroupEvent),
                                       child: ElevatedButton(
@@ -196,7 +198,7 @@ class _EventPageState extends State<EventPage> {
                                                       _event!.description =
                                                           changed;
                                                     });
-                                                    await DataService
+                                                    await DbEvents
                                                         .updateEvent(_event!);
                                                   }
                                                   await loadData(_event!.id!);
@@ -246,7 +248,7 @@ class _EventPageState extends State<EventPage> {
                             )))),
                 Visibility(
                     visible: EventModel.isEventSupportingSignIn(_event) &&
-                        !DataService.isLoggedIn(),
+                        !AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -256,7 +258,7 @@ class _EventPageState extends State<EventPage> {
                     )),
                 Visibility(
                     visible: EventModel.isEventFull(_event) &&
-                        DataService.isLoggedIn(),
+                        AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -374,7 +376,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> addToMySchedule() async {
-    if (!await DataService.addToMySchedule(_event!.id!)) {
+    if (!await DbEvents.addToMySchedule(_event!.id!)) {
       return;
     }
     setState(() {
@@ -383,14 +385,14 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> removeFromMySchedule() async {
-    await DataService.removeFromMySchedule(_event!.id!);
+    await DbEvents.removeFromMySchedule(_event!.id!);
     setState(() {
       _event!.isEventInMySchedule = false;
     });
   }
 
   bool showLoginLogoutButton() {
-    return DataService.isLoggedIn() &&
+    return AuthService.isLoggedIn() &&
         !isLoadingEvent &&
         EventModel.isEventSupportingSignIn(_event);
   }
@@ -410,7 +412,7 @@ class _EventPageState extends State<EventPage> {
     var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
-      if (event.isGroupEvent && DataService.isLoggedIn()) {
+      if (event.isGroupEvent && AuthService.isLoggedIn()) {
         var userInfo = await OfflineDataService.getUserInfo();
         if (userInfo?.userGroup != null) {
           event.title = userInfo!.userGroup!.title;
@@ -449,16 +451,16 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadParticipants(int id) async {
-    _participants = await DataService.getParticipantsPerEvent(id);
+    _participants = await DbEvents.getParticipantsPerEvent(id);
     setState(() => {});
   }
 
   Future<void> loadEvent(int eventId) async {
-    var event = await DataService.getEvent(eventId);
+    var event = await DbEvents.getEvent(eventId);
 
     if (event.isGroupEvent && event.isMyGroupEvent) {
       var group = await DataService.getUserGroupInfo(
-          DataService.currentUserGroup()!.id!);
+          AuthService.currentUserGroup()!.id!);
       if (group == null) {
         RouterService.goBack(context);
         return;
@@ -473,7 +475,7 @@ class _EventPageState extends State<EventPage> {
     }
 
     var currentParticipants =
-        await DataService.getParticipantsPerEventCount(eventId);
+        await DbEvents.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
     _event = event;
     _childDots.clear();
@@ -488,7 +490,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {
-    await DataService.signInToEvent(context, _event!.id!, participant);
+    await DbEvents.signInToEvent(context, _event!.id!, participant);
     await loadData(_event!.id!);
   }
 

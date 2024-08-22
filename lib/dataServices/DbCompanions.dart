@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -18,7 +19,7 @@ class DbCompanions {
 
   static Future<void> signIn(
       BuildContext context, int eventId, CompanionModel companion) async {
-    await DataService.signInToEvent(context, eventId,
+    await DbEvents.signInToEvent(context, eventId,
         UserInfoModel(name: companion.name, id: companion.id));
   }
 

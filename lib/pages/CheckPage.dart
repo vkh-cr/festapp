@@ -6,6 +6,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
@@ -62,9 +63,9 @@ class _CheckPageState extends State<CheckPage> {
       RouterService.goBackOrHome(context);
       return;
     }
-    _event = await DataService.getEvent(eventId);
+    _event = await DbEvents.getEvent(eventId);
     List<UserInfoModel> participants =
-        await DataService.getParticipantsPerEvent(eventId);
+        await DbEvents.getParticipantsPerEvent(eventId);
 
     // Map participants to their companion parents
     for (int i = 0; i < participants.length; i++) {

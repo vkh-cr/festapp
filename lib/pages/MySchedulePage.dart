@@ -4,6 +4,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
@@ -30,11 +31,11 @@ class _MySchedulePageState extends State<MySchedulePage> {
   Future<void> loadData() async {
     await loadDataOffline();
 
-    await DataService.updateEvents(_events, true).whenComplete(() async {
+    await DbEvents.updateEvents(_events, true).whenComplete(() async {
       _dots.clear();
       _dots.addAll(_events.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
       await loadEventParticipants();
-      await DataService.synchronizeMySchedule();
+      await DbEvents.synchronizeMySchedule();
     });
     setState(() {});
   }
@@ -92,7 +93,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
   final List<TimeBlockItem> _dots = [];
 
   Future<void> loadEventParticipants() async {
-    await DataService.loadEventsParticipantsAndStatus(_events);
+    await DbEvents.loadEventsParticipantsAndStatus(_events);
     for (var e in _events) {
       var dot = _dots.singleWhere((element) => element.id == e.id!);
       setState(() {
