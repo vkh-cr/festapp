@@ -9,6 +9,7 @@ import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
@@ -148,7 +149,7 @@ class _EventPageState extends State<EventPage> {
                                       child: ElevatedButton(
                                           onPressed: () async {
                                             _queriedParticipants =
-                                                await DataService
+                                                await DbUsers
                                                     .getAllUsersBasics();
                                             _queriedParticipants
                                                 .forEach((q) => {

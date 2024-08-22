@@ -1,6 +1,7 @@
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
@@ -558,7 +559,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   onPressed: () async{
                                     if(_allUsers.isEmpty)
                                     {
-                                      _allUsers = await DataService.getAllUsersBasics();
+                                      _allUsers = await DbUsers.getAllUsersBasics();
                                     }
                                     DialogHelper.chooseUser(context, (person) =>
                                     setState(() {
@@ -596,7 +597,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                   onPressed: () async{
                                     if(_allUsers.isEmpty)
                                     {
-                                      _allUsers = await DataService.getAllUsersBasics();
+                                      _allUsers = await DbUsers.getAllUsersBasics();
                                     }
                                     DialogHelper.chooseUser(context, (person) =>
                                         setState(() {
@@ -888,7 +889,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
     if(_allUsers.isEmpty)
     {
-      _allUsers = await DataService.getAllUsersBasics();
+      _allUsers = await DbUsers.getAllUsersBasics();
     }
     var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
     DialogHelper.chooseUser(context, (person) async

@@ -6,6 +6,7 @@ import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
@@ -248,28 +249,6 @@ class DataService {
   static Future<OccasionModel> getOccasion(int id) async {
     var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, id).single();
     return OccasionModel.fromJson(data);
-  }
-
-  static Future<UserInfoModel> getUser(String id) async {
-    var data = await _supabase.from(Tb.user_info.table).select().eq(Tb.user_info.id, id).single();
-    return UserInfoModel.fromJson(data);
-  }
-
-  static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
-    var result = await _supabase.rpc("get_user_info_for_users",
-        params: {"oc": RightsService.currentOccasion, "user_ids": userIds});
-    if(result["code"] == 200) {
-      return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
-    }
-    return [];
-  }
-
-  static Future<UserInfoModel?> getUserInfo(String userId) async {
-    var list = await getUsersInfo([userId]);
-    if(list.length == 1){
-      return list[0];
-    }
-    return null;
   }
 
   static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
@@ -1025,7 +1004,7 @@ class DataService {
       .select(Tb.event_users.user)
       .eq(Tb.event_users.event, eventId);
     var listOfIds = List<String>.from(data.map((par) => par[Tb.event_users.user]));
-    var users = await getUsersInfo(listOfIds);
+    var users = await DbUsers.getUsersInfo(listOfIds);
     return users;
   }
 
@@ -1279,16 +1258,6 @@ class DataService {
         .from(Tb.information.table)
         .delete()
         .eq(Tb.information.id, info.id!);
-  }
-
-  static Future<List<UserInfoModel>> getAllUsersBasics() async {
-    var data = await _supabase.from(Tb.user_info_public.table)
-        .select([Tb.user_info_public.id,
-                Tb.user_info_public.name,
-                Tb.user_info_public.surname,
-                Tb.user_info.sex].join(", "));
-    return List<UserInfoModel>.from(
-        data.map((x) => UserInfoModel.fromJson(x)));
   }
 
   static Future<void> deleteNewsMessage(NewsModel message) async {

@@ -6,6 +6,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
@@ -337,7 +338,7 @@ class _CheckPageState extends State<CheckPage> {
       return;
     }
 
-    _scannedUser ??= await DataService.getUserInfo(newUserId);
+    _scannedUser ??= await DbUsers.getUserInfo(newUserId);
     if (_scannedUser != null) {
       _scanState = ScanState.notSignedIn;
       VibrateService.vibrateNotOk();
