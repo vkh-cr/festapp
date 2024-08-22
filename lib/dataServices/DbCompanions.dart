@@ -5,7 +5,7 @@ import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CompanionService {
+class DbCompanions {
   static final _supabase = Supabase.instance.client;
 
   static Future<List<CompanionModel>> getAllCompanions() async {

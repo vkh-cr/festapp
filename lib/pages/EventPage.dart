@@ -6,7 +6,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
-import 'package:fstapp/dataServices/CompanionService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
@@ -497,7 +497,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signInCompanion() async {
-    _companions = await CompanionService.getAllCompanions();
+    _companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext context) {

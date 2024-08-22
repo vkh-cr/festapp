@@ -4,7 +4,7 @@ import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/dataServices/CompanionService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -212,7 +212,7 @@ class DataService {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
     if(globalSettingsModel!.isEnabledEntryCode??false) {
-      user.companions = await CompanionService.getAllCompanions();
+      user.companions = await DbCompanions.getAllCompanions();
     }
 
     return user;

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/dataServices/CompanionService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -30,10 +30,10 @@ class _CompanionDialogState extends State<CompanionDialog> {
   Future<void> _createCompanion() async {
     if (widget.companions.length < widget.maxCompanions &&
         _nameController.text.isNotEmpty) {
-      await CompanionService.create(_nameController.text);
+      await DbCompanions.create(_nameController.text);
       _nameController.clear();
       widget.companions =
-          await CompanionService.getAllCompanions();
+          await DbCompanions.getAllCompanions();
       setState(() {});
     }
   }
@@ -47,22 +47,22 @@ class _CompanionDialogState extends State<CompanionDialog> {
     if (!answer) {
       return;
     }
-    await CompanionService.delete(companion);
-    widget.companions = await CompanionService.getAllCompanions();
+    await DbCompanions.delete(companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
-    await CompanionService.signIn(context, widget.eventId, companion);
-    widget.companions = await CompanionService.getAllCompanions();
+    await DbCompanions.signIn(context, widget.eventId, companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
-    await CompanionService.signOut(widget.eventId, companion);
-    widget.companions = await CompanionService.getAllCompanions();
+    await DbCompanions.signOut(widget.eventId, companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }

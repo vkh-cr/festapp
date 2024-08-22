@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/CompanionService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -270,7 +270,7 @@ class _UserPageState extends State<UserPage> {
                                                   if (!answer) {
                                                     return;
                                                   }
-                                                  await CompanionService.delete(companion);
+                                                  await DbCompanions.delete(companion);
                                                   await loadData();
                                                 },
                                                 child: const Text(
