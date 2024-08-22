@@ -9,6 +9,7 @@ import 'package:fstapp/dataServices/OfflineDataHelper.dart';
 import 'package:fstapp/dataServices/RightsHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -217,6 +218,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
+    RouterService.navigate(context, AdminDashboardPage.ROUTE).then((value) => loadData());
+    return;
     if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;

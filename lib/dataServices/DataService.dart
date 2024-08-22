@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
+import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/CompanionHelper.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
@@ -305,6 +306,48 @@ class DataService {
       throw Exception("Creating of user has failed.");
     }
     return newId;
+  }
+
+  static Future<OrganizationModel?> getCurrentOrganization() async {
+    var result = await _supabase.rpc("get_current_organization_data");
+
+    if (result != null && result["code"] == 200) {
+      return OrganizationModel.fromJson(result["data"]);
+    } else if (result != null && result["code"] == 403) {
+      print("User is not authorized or found (admin rights required)");
+    }
+
+    // Return null if no organization data is found or unauthorized
+    return null;
+  }
+
+  static Future<List<OccasionModel>> getAllOccasions(int org) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.organization, org);
+    var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
+    return toReturn;
+  }
+
+  static Future<OccasionModel> updateOccasion(OccasionModel occasionModel) async {
+    var json = occasionModel.toJson();
+    Map<String, dynamic> data;
+
+    if (occasionModel.id != null) {
+      data = await _supabase
+          .from(Tb.occasions.table)
+          .update(json)
+          .eq(Tb.occasions.id, occasionModel.id!)
+          .select()
+          .single();
+    } else {
+      json.remove(Tb.occasions.id);
+      data = await _supabase
+          .from(Tb.occasions.table)
+          .insert(json)
+          .select()
+          .single();
+    }
+
+    return OccasionModel.fromJson(data);
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {

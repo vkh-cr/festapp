@@ -2,6 +2,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/RightsHelper.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
@@ -129,6 +130,10 @@ class RouterService{
         GoRoute(
           path: "/${InstallPage.ROUTE}",
           builder: (context, state) => const InstallPage(),
+        ),
+        GoRoute(
+          path: "/${AdminDashboardPage.ROUTE}",
+          builder: (context, state) => const AdminDashboardPage(),
         ),
         GoRoute(
           path: "/${CheckPage.ROUTE}/:id",

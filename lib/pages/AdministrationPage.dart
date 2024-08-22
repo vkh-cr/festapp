@@ -12,6 +12,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataServices/DataService.dart';
@@ -40,7 +41,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   List<PlutoColumn> columns = [];
   List<String> mapIcons = [];
   List<IconModel> svgIcons = [];
-
+  bool isAdmin = false;
   late TabController _tabController;
 
 
@@ -53,6 +54,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       RouterService.goBackOrHome(context);
       return;
     }
+    RightsHelper.getIsAdmin().then((b)=>{
+      setState(() {
+        isAdmin = b;
+      })
+    });
+
     loadData();
   }
 
@@ -98,6 +105,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           leading: BackButton(
             onPressed: () => RouterService.goBackOrHome(context),
           ),
+          actions: [if (isAdmin)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () {
+                RouterService.navigate(context, AdminDashboardPage.ROUTE);
+              },
+            ),],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
             child: Align(

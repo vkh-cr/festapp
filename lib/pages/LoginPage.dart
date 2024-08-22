@@ -5,6 +5,7 @@ import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -12,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
-import '../styles/Styles.dart';
 
 class LoginPage extends StatefulWidget {
   static const ROUTE = "login";

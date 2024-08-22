@@ -24,6 +24,12 @@ class RightsHelper{
     return true;
   }
 
+  static Future<bool> getIsAdmin() async {
+    var data = await _supabase.rpc("get_is_admin_on_occasion",
+        params: {"oc": RightsHelper.currentOccasion!});
+    return data;
+  }
+
   static bool canSeeAdmin(){
     return (currentUserOccasion?.isEditor??false) || (currentUserOccasion?.isManager??false) || isAdmin();
   }
