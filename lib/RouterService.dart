@@ -1,6 +1,6 @@
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
@@ -223,9 +223,9 @@ class RouterService{
   static Future<bool> checkOccasionLinkAndRedirect(BuildContext context) async {
     bool canContinue = true;
     var checkedObject = await DataService.checkOccasionLink(RouterService.currentOccasionLink);
-    RightsHelper.currentUserOccasion = checkedObject.user;
-    RightsHelper.currentOccasion = checkedObject.occasionId;
-    RightsHelper.currentLink = checkedObject.link;
+    RightsService.currentUserOccasion = checkedObject.user;
+    RightsService.currentOccasion = checkedObject.occasionId;
+    RightsService.currentLink = checkedObject.link;
 
     if(checkedObject.link!=RouterService.currentOccasionLink && checkedObject.isAvailable())
     {

@@ -1,8 +1,8 @@
 import 'package:fstapp/dataModels/NewsModel.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/appConfig.dart';
@@ -54,10 +54,10 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    newsMessages = await OfflineDataHelper.getAllMessages();
+    newsMessages = await OfflineDataService.getAllMessages();
     setState(() {});
     await loadNewsMessages();
-    await OfflineDataHelper.saveAllMessages(newsMessages);
+    await OfflineDataService.saveAllMessages(newsMessages);
   }
 
   @override
@@ -138,7 +138,7 @@ class _NewsPageState extends State<NewsPage> {
                     ),
                   ),
                   Visibility(
-                    visible: RightsHelper.isEditor(),
+                    visible: RightsService.isEditor(),
                     child: PopupMenuButton<ContextMenuChoice>(
                       onSelected: (choice) async {
                         if (choice == ContextMenuChoice.delete) {
@@ -175,7 +175,7 @@ class _NewsPageState extends State<NewsPage> {
         ),
       ),
       floatingActionButton: Visibility(
-        visible: RightsHelper.isEditor(),
+        visible: RightsService.isEditor(),
         child: FloatingActionButton(
           onPressed: () => _showMessageDialog(context),
           child: const Icon(Icons.add),

@@ -1,7 +1,7 @@
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
@@ -48,13 +48,13 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    await RightsHelper.ensureAccessProcedure(context);
-    if(!RightsHelper.canSeeAdmin())
+    await RightsService.ensureAccessProcedure(context);
+    if(!RightsService.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
       return;
     }
-    RightsHelper.getIsAdmin().then((b)=>{
+    RightsService.getIsAdmin().then((b)=>{
       setState(() {
         isAdmin = b;
       })
@@ -64,7 +64,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Future<void> loadData() async {
-    occasionModel = await DataService.getOccasion(RightsHelper.currentOccasion!);
+    occasionModel = await DataService.getOccasion(RightsService.currentOccasion!);
     await loadPlaces();
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
@@ -682,12 +682,12 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         await action!();
                         _allUsers = [];
                       }
-                  ), areAllActionsEnabled: RightsHelper.canUpdateUsers),
+                  ), areAllActionsEnabled: RightsService.canUpdateUsers),
                 headerChildren: [
-                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsHelper.canUpdateUsers())),
+                  DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) { _import(p0); }, isEnabled: () => (AppConfig.isUsersImportSupported && RightsService.canUpdateUsers())),
                   DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) { _addExisting(p0); }),
-                  DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsHelper.canUpdateUsers),
-                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsHelper.canUpdateUsers),
+                  DataGridAction(name: "Invite".tr(), action:  (SingleTableDataGrid p0, [_]) { _invite(p0); }, isEnabled: RightsService.canUpdateUsers),
+                  DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) { _setPassword(p0); }, isEnabled: RightsService.canUpdateUsers),
                   DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) { _addToGroup(p0); }),
                 ],
                 columns: [
@@ -710,21 +710,21 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Name".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.user_info_public.name,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Surname".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.user_info_public.surname,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Sex".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.user_info_public.sex,
                     type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
                     formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
@@ -733,7 +733,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Accommodation".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.occasion_users.data_accommodation,
                     type: PlutoColumnType.text(),
                     readOnly: false,
@@ -741,21 +741,21 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Phone".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.occasion_users.data_phone,
                     type: PlutoColumnType.text(),
                     width: 200,
                   ),
                   PlutoColumn(
                     title: "Birthday".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.occasion_users.data_birthDate,
                     type: PlutoColumnType.date(defaultValue: DateTime.now()),
                     width: 140,
                   ),
                   PlutoColumn(
                     title: "Role".tr(),
-                    enableEditingMode: RightsHelper.canUpdateUsers(),
+                    enableEditingMode: RightsService.canUpdateUsers(),
                     field: Tb.user_info.role,
                     type: PlutoColumnType.text(),
                     width: 100,
@@ -767,7 +767,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_manager, RightsHelper.canUpdateUsers),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_manager, RightsService.canUpdateUsers),
                   ),
                   PlutoColumn(
                     title: "Editor".tr(),
@@ -776,7 +776,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_editor, RightsHelper.canUpdateUsers),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_editor, RightsService.canUpdateUsers),
                   ),
                   PlutoColumn(
                     title: "Approver".tr(),
@@ -785,7 +785,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approver, RightsHelper.canUpdateUsers),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approver, RightsService.canUpdateUsers),
                   ),
                   PlutoColumn(
                     title: "Approved".tr(),
@@ -794,7 +794,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     applyFormatterInEditing: true,
                     enableEditingMode: false,
                     width: 100,
-                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approved, RightsHelper.canUpdateUsers),
+                    renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.occasion_users.is_approved, RightsService.canUpdateUsers),
                   ),
                   PlutoColumn(
                     title: "Invited".tr(),
@@ -893,7 +893,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
     DialogHelper.chooseUser(context, (person) async
     {
-      await DataService.addUserToCurrentOccasion(person.id, RightsHelper.currentOccasion!);
+      await DataService.addUserToCurrentOccasion(person.id, RightsService.currentOccasion!);
       ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
     }, nonAdded, "Add".tr());
 

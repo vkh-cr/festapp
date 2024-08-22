@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
@@ -78,7 +78,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    var settings = await OfflineDataHelper.getGlobalSettings();
+    var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       DataService.globalSettingsModel = settings;
       print('Global settings loaded');

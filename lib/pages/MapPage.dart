@@ -5,7 +5,7 @@ import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -77,8 +77,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
-    var offlinePlaces = await OfflineDataHelper.getAllPlaces();
-    _icons = await OfflineDataHelper.getAllIcons();
+    var offlinePlaces = await OfflineDataService.getAllPlaces();
+    _icons = await OfflineDataService.getAllIcons();
     offlinePlaces.sortPlaces(false);
 
     if (loadOtherGroups) {
@@ -122,7 +122,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       mapPlaces = await DataService.getAllPlaces();
       showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
       showMapPlaces.sortPlaces(false);
-      await OfflineDataHelper.saveAllPlaces(mapPlaces);
+      await OfflineDataService.saveAllPlaces(mapPlaces);
     }
 
     if(placeId != null) {
@@ -156,7 +156,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
-    var events = await OfflineDataHelper.getAllEvents();
+    var events = await OfflineDataService.getAllEvents();
     for (var p in places) {
       var matches = events.where((e) => e.place?.id == p.id);
       p.events.addAll(matches);

@@ -6,11 +6,11 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/CompanionService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/pages/CheckPage.dart';
@@ -71,7 +71,7 @@ class _EventPageState extends State<EventPage> {
           ),
           actions:[
             Visibility(
-              visible: showLoginLogoutButton() && RightsHelper.isApprover(),
+              visible: showLoginLogoutButton() && RightsService.isApprover(),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
@@ -142,7 +142,7 @@ class _EventPageState extends State<EventPage> {
                                       )),
                                   Visibility(
                                     visible: showLoginLogoutButton() &&
-                                        (RightsHelper.isEditor()),
+                                        (RightsService.isEditor()),
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: ElevatedButton(
@@ -170,7 +170,7 @@ class _EventPageState extends State<EventPage> {
                                     ),
                                   ),
                                   Visibility(
-                                      visible: RightsHelper.isEditor() ||
+                                      visible: RightsService.isEditor() ||
                                           (DataService.isGroupLeader() &&
                                               _event != null &&
                                               _event!.isGroupEvent),
@@ -279,7 +279,7 @@ class _EventPageState extends State<EventPage> {
                                 onEventPressed: _eventPressed,
                                 nodePosition: 0.3)))),
                 Visibility(
-                  visible: RightsHelper.isEditor() &&
+                  visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
                   child: ExpansionTile(
                     title: Row(children: [
@@ -399,18 +399,18 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     isLoadingEvent = false;
-    await OfflineDataHelper.saveEventDescription(_event!);
-    if (RightsHelper.isEditor()) {
+    await OfflineDataService.saveEventDescription(_event!);
+    if (RightsService.isEditor()) {
       await loadParticipants(id);
     }
   }
 
   Future<void> loadOfflineData(int id) async {
-    var allEvents = await OfflineDataHelper.getAllEvents();
+    var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
       if (event.isGroupEvent && DataService.isLoggedIn()) {
-        var userInfo = await OfflineDataHelper.getUserInfo();
+        var userInfo = await OfflineDataService.getUserInfo();
         if (userInfo?.userGroup != null) {
           event.title = userInfo!.userGroup!.title;
           event.isMyGroupEvent = true;
@@ -419,17 +419,17 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.userGroup;
         }
       } else {
-        var descr = await OfflineDataHelper.getEventDescription(id.toString());
+        var descr = await OfflineDataService.getEventDescription(id.toString());
         event.description = descr?.description;
 
         if (event.place?.id != null) {
-          var place = (await OfflineDataHelper.getAllPlaces())
+          var place = (await OfflineDataService.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
           event.place = place;
         } else {
           event.place = null;
         }
-        event.isEventInMySchedule = await OfflineDataHelper.isEventSaved(id);
+        event.isEventInMySchedule = await OfflineDataService.isEventSaved(id);
       }
 
       var childEvents = allEvents
@@ -497,7 +497,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signInCompanion() async {
-    _companions = await CompanionHelper.getAllCompanions();
+    _companions = await CompanionService.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext context) {

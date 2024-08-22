@@ -6,7 +6,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -57,7 +57,7 @@ class _CheckPageState extends State<CheckPage> {
   }
 
   Future<void> loadData(int eventId) async {
-    if (!RightsHelper.isApprover()) {
+    if (!RightsService.isApprover()) {
       RouterService.goBackOrHome(context);
       return;
     }

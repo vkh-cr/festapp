@@ -4,7 +4,7 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -35,7 +35,7 @@ class _UsersScreenState extends State<UsersScreen> {
             await action!();
           },
         ),
-        areAllActionsEnabled: RightsHelper.canUpdateUsers,
+        areAllActionsEnabled: RightsService.canUpdateUsers,
       ),
       headerChildren: [
         DataGridAction(
@@ -43,7 +43,7 @@ class _UsersScreenState extends State<UsersScreen> {
           action: (SingleTableDataGrid p0, [_]) {
             _setPassword(p0);
           },
-          isEnabled: RightsHelper.canUpdateUsers,
+          isEnabled: RightsService.canUpdateUsers,
         ),
       ],
       columns: [

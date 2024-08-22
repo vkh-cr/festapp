@@ -6,7 +6,7 @@ import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
@@ -100,7 +100,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadDataOffline() async {
-    var places = await OfflineDataHelper.getAllPlaces();
+    var places = await OfflineDataService.getAllPlaces();
     places.sortPlaces();
     var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
@@ -109,12 +109,12 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     _timetablePlaces.addAll(timetablePlaces);
 
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataHelper.getAllEvents();
+      var offlineEvents = await OfflineDataService.getAllEvents();
       _events.addAll(offlineEvents);
     }
 
-    await OfflineDataHelper.updateEventsWithMySchedule(_events);
-    await OfflineDataHelper.updateEventsWithGroupName(_events);
+    await OfflineDataService.updateEventsWithMySchedule(_events);
+    await OfflineDataService.updateEventsWithGroupName(_events);
 
     _items.clear();
     var items = _events

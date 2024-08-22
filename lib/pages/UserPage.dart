@@ -4,10 +4,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/CompanionService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
@@ -270,7 +270,7 @@ class _UserPageState extends State<UserPage> {
                                                   if (!answer) {
                                                     return;
                                                   }
-                                                  await CompanionHelper.delete(companion);
+                                                  await CompanionService.delete(companion);
                                                   await loadData();
                                                 },
                                                 child: const Text(
@@ -328,7 +328,7 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 Visibility(
-                  visible: RightsHelper.canSeeAdmin(),
+                  visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
                     onPressed: () async => _redirectToAdminPage(),
                     label: "Administration".tr(),
@@ -442,7 +442,7 @@ class _UserPageState extends State<UserPage> {
   Future<void> loadData() async {
     loadDataOffline();
     var userInfo = await DataService.getFullUserInfo();
-    await OfflineDataHelper.saveUserInfo(userInfo);
+    await OfflineDataService.saveUserInfo(userInfo);
     await addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
@@ -450,7 +450,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> loadDataOffline() async {
-    var userInfo = await OfflineDataHelper.getUserInfo();
+    var userInfo = await OfflineDataService.getUserInfo();
     addOfflineEventsToCompanions(userInfo);
     setState(() {
       userData = userInfo;
@@ -458,7 +458,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> addOfflineEventsToCompanions(UserInfoModel? userInfo) async {
-    var events = await OfflineDataHelper.getAllEvents();
+    var events = await OfflineDataService.getAllEvents();
     userInfo?.companions?.forEach(
             (c) {
                 for (var ei in c.eventIds) {

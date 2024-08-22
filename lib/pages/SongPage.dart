@@ -2,7 +2,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -172,10 +172,10 @@ class _SongPageState extends State<SongPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(widget.type);
+    _informationList = (await OfflineDataService.getAllInfo()).filterByType(widget.type);
     var allInfo = await DataService.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
-    OfflineDataHelper.saveAllInfo(allInfo);
+    OfflineDataService.saveAllInfo(allInfo);
     setState(() {});
   }
 }

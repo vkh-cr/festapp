@@ -1,11 +1,11 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class RightsHelper{
+class RightsService{
   static final _supabase = Supabase.instance.client;
   static OccasionUserModel? currentUserOccasion;
   static int? currentOccasion;
@@ -17,7 +17,7 @@ class RightsHelper{
         throw Exception("Cannot continue.");
       }
       var globalSettings = await DataService.loadOrInitGlobalSettings();
-      await OfflineDataHelper.saveGlobalSettings(globalSettings);
+      await OfflineDataService.saveGlobalSettings(globalSettings);
 
       DataService.refreshOfflineData();
     }
@@ -26,7 +26,7 @@ class RightsHelper{
 
   static Future<bool> getIsAdmin() async {
     var data = await _supabase.rpc("get_is_admin_on_occasion",
-        params: {"oc": RightsHelper.currentOccasion!});
+        params: {"oc": RightsService.currentOccasion!});
     return data;
   }
 

@@ -1,11 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CompanionHelper {
+class CompanionService {
   static final _supabase = Supabase.instance.client;
 
   static Future<List<CompanionModel>> getAllCompanions() async {
@@ -29,13 +29,13 @@ class CompanionHelper {
 
   static Future<void> create(String name) async {
     await _supabase.rpc("create_companion", params: {
-      'oc': RightsHelper.currentOccasion,
-      'usr': RightsHelper.currentUserOccasion!.user!,
+      'oc': RightsService.currentOccasion,
+      'usr': RightsService.currentUserOccasion!.user!,
       'c_name': name,
     });
   }
 
   static Future<void> delete(CompanionModel companion) async {
-    await DataService.deleteUser(companion.id, RightsHelper.currentOccasion!);
+    await DataService.deleteUser(companion.id, RightsService.currentOccasion!);
   }
 }

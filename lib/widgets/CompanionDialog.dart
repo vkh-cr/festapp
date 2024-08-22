@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/CompanionService.dart';
 import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -30,10 +30,10 @@ class _CompanionDialogState extends State<CompanionDialog> {
   Future<void> _createCompanion() async {
     if (widget.companions.length < widget.maxCompanions &&
         _nameController.text.isNotEmpty) {
-      await CompanionHelper.create(_nameController.text);
+      await CompanionService.create(_nameController.text);
       _nameController.clear();
       widget.companions =
-          await CompanionHelper.getAllCompanions();
+          await CompanionService.getAllCompanions();
       setState(() {});
     }
   }
@@ -47,22 +47,22 @@ class _CompanionDialogState extends State<CompanionDialog> {
     if (!answer) {
       return;
     }
-    await CompanionHelper.delete(companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await CompanionService.delete(companion);
+    widget.companions = await CompanionService.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
-    await CompanionHelper.signIn(context, widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await CompanionService.signIn(context, widget.eventId, companion);
+    widget.companions = await CompanionService.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
-    await CompanionHelper.signOut(widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await CompanionService.signOut(widget.eventId, companion);
+    widget.companions = await CompanionService.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }

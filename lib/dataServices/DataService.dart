@@ -4,10 +4,10 @@ import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/CompanionService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:fstapp/dataModels/OccasionLinkModel.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
@@ -109,14 +109,14 @@ class DataService {
 
   static Future<OccasionSettingsModel> loadOrInitGlobalSettings() async {
     OccasionSettingsModel toReturn;
-    if(RightsHelper.currentOccasion == null) {
+    if(RightsService.currentOccasion == null) {
       toReturn =  OccasionSettingsModel.DefaultSettings;
     }
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
           .select(Tb.occasions.data)
-          .eq(Tb.occasions.id, RightsHelper.currentOccasion!)
+          .eq(Tb.occasions.id, RightsService.currentOccasion!)
           .single();
 
       toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
@@ -170,7 +170,7 @@ class DataService {
 
   static Future<void> logout() async {
     await NotificationHelper.logout().timeout(const Duration(seconds: 2));
-    await OfflineDataHelper.clearUserData();
+    await OfflineDataService.clearUserData();
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     _currentUser = null;
@@ -204,15 +204,15 @@ class DataService {
 
   static Future<UserInfoModel> getFullUserInfo() async {
     var user = await DataService.getCurrentUserInfo();
-    if(RightsHelper.currentUserOccasion?.role != null) {
-      user.roleString = await DataService.getRoleInfo(RightsHelper.currentUserOccasion!.role!);
+    if(RightsService.currentUserOccasion?.role != null) {
+      user.roleString = await DataService.getRoleInfo(RightsService.currentUserOccasion!.role!);
     }
     var myGroup = await getCurrentUserGroup();
     if(myGroup!=null) {
       user.userGroup = await getUserGroupInfo(myGroup.id!);
     }
     if(globalSettingsModel!.isEnabledEntryCode??false) {
-      user.companions = await CompanionHelper.getAllCompanions();
+      user.companions = await CompanionService.getAllCompanions();
     }
 
     return user;
@@ -241,7 +241,7 @@ class DataService {
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsHelper.currentOccasion!);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
   }
 
@@ -257,7 +257,7 @@ class DataService {
 
   static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
     var result = await _supabase.rpc("get_user_info_for_users",
-        params: {"oc": RightsHelper.currentOccasion, "user_ids": userIds});
+        params: {"oc": RightsService.currentOccasion, "user_ids": userIds});
     if(result["code"] == 200) {
       return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
     }
@@ -277,7 +277,7 @@ class DataService {
       params:
       {
         "usr": occasionUserModel.user,
-        "oc": occasionUserModel.occasion??RightsHelper.currentOccasion,
+        "oc": occasionUserModel.occasion??RightsService.currentOccasion,
         "password": pwd
       });
   }
@@ -386,10 +386,10 @@ class DataService {
   }
 
   static Future<void> ensureCanUpdateUsers(OccasionUserModel oum) async {
-    if(!RightsHelper.canUpdateUsers())
+    if(!RightsService.canUpdateUsers())
     {
       await refreshSession();
-      if(!RightsHelper.canUpdateUsers())
+      if(!RightsService.canUpdateUsers())
       {
         var errorText = "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
         throw Exception(errorText);
@@ -668,7 +668,7 @@ class DataService {
   }
 
   static Future<HashSet<EventModel>> loadAllMyScheduleOffline() async {
-    var events = await OfflineDataHelper.getMyScheduleData();
+    var events = await OfflineDataService.getMyScheduleData();
     var localData = await _supabase.from(Tb.events.table)
         .select("${Tb.events.id},"
         "${Tb.events.title},"
@@ -798,7 +798,7 @@ class DataService {
   }
 
   static updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsHelper.isEditor() || model.leader!.id == currentUserId()))
+    if(!(RightsService.isEditor() || model.leader!.id == currentUserId()))
     {
       throw Exception("Must be leader or admin to change the group.");
     }
@@ -930,7 +930,7 @@ class DataService {
         .single();
     var event = EventModel.fromJson(data);
 
-    var cachedEvent = await OfflineDataHelper.getEventDescription(eventId.toString());
+    var cachedEvent = await OfflineDataService.getEventDescription(eventId.toString());
     if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
       var descrEvent = await getEventsDescription([event.id!]);
       event.description = descrEvent[0].description;
@@ -942,7 +942,7 @@ class DataService {
       event.isEventInMySchedule = await DataService.isEventSaved(event.id!);
       event.isSignedIn = await isCurrentUserSignedToEvent(event.id!);
     } else {
-      event.isEventInMySchedule = await OfflineDataHelper.isEventSaved(event.id!);
+      event.isEventInMySchedule = await OfflineDataService.isEventSaved(event.id!);
     }
 
     if(event.childEventIds!=null)
@@ -1488,7 +1488,7 @@ class DataService {
   }
 
   static Future<void> saveLocation(int placeId, double lat, double lng) async {
-    if(!(RightsHelper.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
+    if(!(RightsService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == placeId)))
     {
       throw Exception("You cannot change this place.");
     }
@@ -1518,7 +1518,7 @@ class DataService {
           .eq(Tb.event_users_saved.event, id)
           .eq(EventModel.eventUsersSavedUserColumn, currentUserId());
     }
-    await OfflineDataHelper.removeFromMySchedule(id);
+    await OfflineDataService.removeFromMySchedule(id);
     ToastHelper.Show("Removed from My schedule.".tr());
   }
 
@@ -1532,7 +1532,7 @@ class DataService {
             .from(Tb.event_users_saved.table)
             .insert({Tb.event_users_saved.event: id, EventModel.eventUsersSavedUserColumn: currentUserId()});
     }
-    await OfflineDataHelper.addToMySchedule(id);
+    await OfflineDataService.addToMySchedule(id);
     ToastHelper.Show("Added to My schedule.".tr());
     return true;
   }
@@ -1556,7 +1556,7 @@ class DataService {
     }
 
     var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    await OfflineDataHelper.saveMyScheduleData(currentUserEventIds);
+    await OfflineDataService.saveMyScheduleData(currentUserEventIds);
 
     var values = [];
     for(var v in currentUserEventIds)
@@ -1576,23 +1576,23 @@ class DataService {
   static Future<void> refreshOfflineData() async {
     if(DataService.isLoggedIn()) {
       var userInfo = await getFullUserInfo();
-      await OfflineDataHelper.saveUserInfo(userInfo);
+      await OfflineDataService.saveUserInfo(userInfo);
     }
     else {
-      await OfflineDataHelper.deleteUserInfo();
+      await OfflineDataService.deleteUserInfo();
     }
 
     var places = await getAllPlaces();
-    await OfflineDataHelper.saveAllPlaces(places);
+    await OfflineDataService.saveAllPlaces(places);
 
     var icons = await getAllIcons();
-    await OfflineDataHelper.saveAllIcons(icons);
+    await OfflineDataService.saveAllIcons(icons);
 
     var info = await getAllActiveInformation();
-    await OfflineDataHelper.saveAllInfo(info);
+    await OfflineDataService.saveAllInfo(info);
 
     var messages = await getAllNewsMessages();
-    await OfflineDataHelper.saveAllMessages(messages);
+    await OfflineDataService.saveAllMessages(messages);
 
     if (isPwaInstalledOrNative() )
     {
@@ -1610,7 +1610,7 @@ class DataService {
     var allEventsMeta = await getAllEventsMeta();
 
     for(var e in allEventsMeta) {
-      var oe = await OfflineDataHelper.getEventDescription(e.id.toString());
+      var oe = await OfflineDataService.getEventDescription(e.id.toString());
       if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
           needsUpdate.add(e.id!);
       }
@@ -1618,7 +1618,7 @@ class DataService {
 
     var fullEvents = await getEventsDescription(needsUpdate);
     for(var e in fullEvents) {
-      await OfflineDataHelper.saveEventDescription(e);
+      await OfflineDataService.saveEventDescription(e);
     }
   }
 
@@ -1638,14 +1638,14 @@ class DataService {
     if (needsUpdate.isNotEmpty) {
       var fullEvents = await getInfosDescription(needsUpdate);
       for (var e in fullEvents) {
-        await OfflineDataHelper.saveInfoDescription(e);
+        await OfflineDataService.saveInfoDescription(e);
       }
     }
   }
 
   static Future<void> _checkForUpdates(List<InformationModel> infosToCheck, List<int> needsUpdate) async {
     for (var infoMeta in infosToCheck) {
-      var oe = await OfflineDataHelper.getInfoDescription(infoMeta.id.toString());
+      var oe = await OfflineDataService.getInfoDescription(infoMeta.id.toString());
       if (oe == null || oe.updatedAt == null || oe.updatedAt!.isBefore(infoMeta.updatedAt!)) {
         needsUpdate.add(infoMeta.id!);
       }

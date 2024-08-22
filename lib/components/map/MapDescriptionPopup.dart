@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
@@ -50,7 +50,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
             Visibility(
-                visible: RightsHelper.isEditor() ||
+                visible: RightsService.isEditor() ||
                     (DataService.isGroupLeader() &&
                         DataService.currentUserGroup()!.place!.id ==
                             widget.marker.place.id),

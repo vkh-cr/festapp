@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           var packageInfo = await PackageInfo.fromPlatform();
                           ToastHelper.Show(
                               "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                          if(RightsHelper.isEditor()) {
+                          if(RightsService.isEditor()) {
                             setState(() {
                               TimeHelper.toggleTimeTravel?.call();
                             });
@@ -218,8 +218,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _programPressed() {
-    RouterService.navigate(context, AdminDashboardPage.ROUTE).then((value) => loadData());
-    return;
     if (!AppConfig.isOwnProgramSupported && !DataService.isLoggedIn()) {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
@@ -280,7 +278,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //DataServiceTests.test_has_event_allowed_role();
 
     await loadOfflineData();
-    await RightsHelper.ensureAccessProcedure(context);
+    await RightsService.ensureAccessProcedure(context);
 
     if (DataService.isLoggedIn()) {
       DataService.getCurrentUserInfo()
@@ -302,7 +300,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
     });
     await loadEventParticipants();
-    await OfflineDataHelper.saveAllEvents(_events);
+    await OfflineDataService.saveAllEvents(_events);
     await NotificationHelper.checkForNotificationPermission(context);
   }
 
@@ -328,10 +326,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> loadOfflineData() async {
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataHelper.getAllEvents();
-      await OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
+      var offlineEvents = await OfflineDataService.getAllEvents();
+      await OfflineDataService.updateEventsWithGroupName(offlineEvents);
       if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataHelper.getAllPlaces()));
+        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataService.getAllPlaces()));
       }
       _events.addAll(offlineEvents);
       _dots.clear();
@@ -339,7 +337,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       setState(() {});
     }
     if (DataService.isLoggedIn()) {
-      var userInfo = await OfflineDataHelper.getUserInfo();
+      var userInfo = await OfflineDataService.getUserInfo();
       setState(() {
         userName = userInfo?.name??"";
       });

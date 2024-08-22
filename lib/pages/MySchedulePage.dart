@@ -4,7 +4,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
@@ -40,10 +40,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
   Future<void> loadDataOffline() async {
-    var offlineEvents = await OfflineDataHelper.getAllEvents();
-    await OfflineDataHelper.updateEventsWithMySchedule(offlineEvents);
-    await OfflineDataHelper.updateEventsWithGroupName(offlineEvents);
-    var userInfo = await OfflineDataHelper.getUserInfo();
+    var offlineEvents = await OfflineDataService.getAllEvents();
+    await OfflineDataService.updateEventsWithMySchedule(offlineEvents);
+    await OfflineDataService.updateEventsWithGroupName(offlineEvents);
+    var userInfo = await OfflineDataService.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
         e.isEventInMySchedule == true ||
