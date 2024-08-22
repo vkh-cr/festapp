@@ -1,8 +1,8 @@
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
@@ -16,10 +16,10 @@ class RightsService{
       if(!await RouterService.checkOccasionLinkAndRedirect(context)){
         throw Exception("Cannot continue.");
       }
-      var globalSettings = await DataService.loadOrInitGlobalSettings();
+      var globalSettings = await SynchroService.loadOrInitGlobalSettings();
       await OfflineDataService.saveGlobalSettings(globalSettings);
 
-      DataService.refreshOfflineData();
+      SynchroService.refreshOfflineData();
     }
     return true;
   }

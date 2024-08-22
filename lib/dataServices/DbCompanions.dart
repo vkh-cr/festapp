@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -24,7 +24,7 @@ class DbCompanions {
   }
 
   static Future<void> signOut(int eventId, CompanionModel companion) async {
-    await DataService.signOutFromEvent(
+    await DbEvents.signOutFromEvent(
         eventId, UserInfoModel(name: companion.name, id: companion.id));
   }
 
@@ -37,6 +37,6 @@ class DbCompanions {
   }
 
   static Future<void> delete(CompanionModel companion) async {
-    await DataService.deleteUser(companion.id, RightsService.currentOccasion!);
+    await DbUsers.deleteUser(companion.id, RightsService.currentOccasion!);
   }
 }

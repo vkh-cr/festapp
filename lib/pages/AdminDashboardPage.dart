@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/pages/AdminDashboard/OccasionScreen.dart';
 import 'package:fstapp/pages/AdminDashboard/UsersScreen.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
@@ -33,7 +33,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Future<void> _loadOrganization() async {
-    _currentOrganization = await DataService.getCurrentOrganization();
+    _currentOrganization = await DbUsers.getCurrentOrganization();
     if (_currentOrganization != null) {
       _setCurrentScreen(OccasionsScreen(organizationId: _currentOrganization!.id!), "Occasions");
     }

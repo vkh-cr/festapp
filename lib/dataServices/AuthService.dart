@@ -1,15 +1,16 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,7 +25,7 @@ class AuthService {
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
     DbEvents.synchronizeMySchedule(true);
-    DataService.refreshOfflineData();
+    SynchroService.refreshOfflineData();
     await NotificationHelper.login();
   }
 
@@ -63,15 +64,15 @@ class AuthService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await DataService.getCurrentUserInfo();
+    var user = await DbUsers.getCurrentUserInfo();
     if(RightsService.currentUserOccasion?.role != null) {
       user.roleString = await getRoleInfo(RightsService.currentUserOccasion!.role!);
     }
     var myGroup = await getCurrentUserGroup();
     if(myGroup!=null) {
-      user.userGroup = await DataService.getUserGroupInfo(myGroup.id!);
+      user.userGroup = await DbGroups.getUserGroupInfo(myGroup.id!);
     }
-    if(DataService.globalSettingsModel!.isEnabledEntryCode??false) {
+    if(SynchroService.globalSettingsModel!.isEnabledEntryCode??false) {
       user.companions = await DbCompanions.getAllCompanions();
     }
 
@@ -194,5 +195,48 @@ class AuthService {
     {
       throw Exception("User must be logged in.");
     }
+  }
+
+  static Future<void> ensureCanUpdateUsers(OccasionUserModel oum) async {
+    if(!RightsService.canUpdateUsers())
+    {
+      await AuthService.refreshSession();
+      if(!RightsService.canUpdateUsers())
+      {
+        var errorText = "Elevated permission is required. Changes to user ${oum.data?[Tb.occasion_users.data_email]} could not be saved.";
+        throw Exception(errorText);
+      }
+    }
+  }
+
+  static Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+    var resp = await _supabase.functions.invoke("register", body: data);
+    return resp.data;
+  }
+
+  static Future<String?> unsafeChangeUserPassword(OccasionUserModel occasionUserModel, String pwd) async {
+    return await _supabase.rpc("set_user_password",
+        params:
+        {
+          "usr": occasionUserModel.user,
+          "oc": occasionUserModel.occasion??RightsService.currentOccasion,
+          "password": pwd
+        });
+  }
+
+  static Future<void> changeMyPassword(String pw) async {
+    await _supabase.auth.updateUser(
+        UserAttributes(
+          password: pw,
+        ));
+  }
+
+  static Future<dynamic> changePassword(String token, String pw) async {
+    return await _supabase.rpc("set_user_password_token",
+        params:
+        {
+          "token": token,
+          "password": pw,
+        });
   }
 }

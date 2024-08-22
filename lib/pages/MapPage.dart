@@ -4,7 +4,8 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:collection/collection.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:fstapp/components/map/MapDescriptionPopup.dart';
 import 'package:fstapp/components/map/MapLocationPinHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
@@ -55,8 +57,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     super.didChangeDependencies();
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
-        : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"],
-        DataService.globalSettingsModel!.defaultMapLocation["lng"]);
+        : LatLng(SynchroService.globalSettingsModel!.defaultMapLocation["lat"],
+        SynchroService.globalSettingsModel!.defaultMapLocation["lng"]);
     //reset static values
     selectedMarker = null;
     var placeModel = widget.place;
@@ -65,7 +67,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     } else {
       //new place
       if (placeModel.latLng.toString().isEmpty) {
-        placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
+        placeModel.latLng = SynchroService.globalSettingsModel!.defaultMapLocation;
       }
       pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
@@ -105,12 +107,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     }
 
-    _icons = await DataService.getAllIcons();
+    _icons = await DbPlaces.getAllIcons();
     List<PlaceModel> mapPlaces = [];
     List<PlaceModel> showMapPlaces = [];
 
     if (loadOtherGroups) {
-      var groups = await DataService.getGroupsWithPlaces();
+      var groups = await DbGroups.getGroupsWithPlaces();
       for (var element in groups) {
         if (element.place == null) {
           continue;
@@ -119,7 +121,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         mapPlaces.add(element.place!);
       }
     } else {
-      mapPlaces = await DataService.getAllPlaces();
+      mapPlaces = await DbPlaces.getAllPlaces();
       showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
       showMapPlaces.sortPlaces(false);
       await OfflineDataService.saveAllPlaces(mapPlaces);
@@ -221,7 +223,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   InteractiveFlag.flingAnimation |
                   InteractiveFlag.drag |
                   InteractiveFlag.scrollWheelZoom),
-                initialZoom: DataService.globalSettingsModel!.defaultMapZoom,
+                initialZoom: SynchroService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
                 initialCenter: _mapCenter!,
                 onTap: (_, location) => onMapTap(location)),
@@ -308,7 +310,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       return;
     }
-    await DataService.saveLocation(selectedMarker!.place.id,
+    await DbPlaces.saveLocation(selectedMarker!.place.id,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove =

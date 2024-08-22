@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
 

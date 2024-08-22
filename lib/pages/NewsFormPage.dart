@@ -4,7 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -36,7 +36,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    _currentUser = await DataService.getCurrentUserInfo();
+    _currentUser = await DbUsers.getCurrentUserInfo();
     setState(() {});
   }
 

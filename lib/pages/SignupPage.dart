@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
@@ -96,7 +96,7 @@ class _SignupPageState extends State<SignupPage> {
                             });
                             var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
                             fieldsData = data;
-                            var resp = await DataService.register(data);
+                            var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {
                               ToastHelper.Show("Registration is almost complete!".tr());
                               setState(() {

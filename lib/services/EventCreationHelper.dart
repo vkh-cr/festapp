@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 
 class EventCreationHelper {
@@ -158,7 +158,7 @@ class EventCreationHelper {
                     organization: organizationId, // Add organization ID
                   );
 
-                  await DataService.updateOccasion(newOccasion);
+                  await DbUsers.updateOccasion(newOccasion);
                   onEventCreated(); // Callback to refresh or reload the events
                   Navigator.of(context).pop();
                 } else {

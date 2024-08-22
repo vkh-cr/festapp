@@ -2,10 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -86,7 +86,7 @@ class _InfoPageState extends State<InfoPage> {
                               setState(() {
                                 item.description = result as String;
                               });
-                              await DataService.updateInformation(item);
+                              await DbInformation.updateInformation(item);
                               ToastHelper.Show("Content has been changed.".tr());
                             }
                           },
@@ -112,7 +112,7 @@ class _InfoPageState extends State<InfoPage> {
   Future<void> loadData() async {
     await loadDataOffline();
     setState(() {});
-    var allInfo = await DataService.getAllActiveInformation();
+    var allInfo = await DbInformation.getAllActiveInformation();
     await OfflineDataService.saveAllInfo(allInfo);
     await loadDataOffline();
     if (widget.id != null) {
@@ -161,7 +161,7 @@ class _InfoPageState extends State<InfoPage> {
         _isItemLoading[index] = false;
       }
     });
-    await DataService.updateInfoDescription([info.id!]);
+    await DbInformation.updateInfoDescription([info.id!]);
     await fillDescriptionFromOffline(info);
     setState(() {
       _isItemLoading[index] = false;

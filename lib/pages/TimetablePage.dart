@@ -6,8 +6,8 @@ import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
@@ -56,7 +56,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
           .toSet()
           .toList();
 
-      var places = await DataService.getPlacesIn(placeIds);
+      var places = await DbPlaces.getPlacesIn(placeIds);
 
       var timetablePlaces = List<TimeBlockPlace>.from(places
           .where((element) => !element.isHidden)

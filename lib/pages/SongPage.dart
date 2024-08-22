@@ -1,7 +1,7 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -173,7 +173,7 @@ class _SongPageState extends State<SongPage> {
 
   Future<void> loadData() async {
     _informationList = (await OfflineDataService.getAllInfo()).filterByType(widget.type);
-    var allInfo = await DataService.getAllActiveInformation();
+    var allInfo = await DbInformation.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataService.saveAllInfo(allInfo);
     setState(() {});

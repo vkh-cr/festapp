@@ -3,6 +3,9 @@ import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
@@ -15,10 +18,10 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/map/MapIconService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -67,17 +70,17 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   }
 
   Future<void> loadData() async {
-    occasionModel = await DataService.getOccasion(RightsService.currentOccasion!);
+    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
     await loadPlaces();
     mapIcons = MapIconHelper.type2Icon.keys.toList();
     mapIcons.add(PlaceModel.WithouValue);
-    svgIcons = await DataService.getAllIcons();
+    svgIcons = await DbPlaces.getAllIcons();
     mapIcons.addAll(svgIcons.map((i)=>i.link!));
     setState(() {});
   }
 
   Future<void> loadPlaces() async {
-    var placesRaws =  await DataService.getMapPlaces();
+    var placesRaws =  await DbPlaces.getMapPlaces();
     var placesStrings = placesRaws.map((p)=>p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouValue);
     setState(() {
@@ -175,7 +178,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           children: [
             SingleTableDataGrid<InformationModel>(
                 context,
-                DataService.getAllInformationForDataGrid,
+                DbInformation.getAllInformationForDataGrid,
                 InformationModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.information.id,
@@ -220,7 +223,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
 
                                 if(id!=null)
                                 {
-                                  var infoDescription = await DataService.getInfosDescription([id]);
+                                  var infoDescription = await DbInformation.getInfosDescription([id]);
                                   if(infoDescription.isNotEmpty){
                                     return infoDescription[0].description;
                                   }
@@ -408,7 +411,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<PlaceModel>(
                 context,
-                DataService.getAllPlaces,
+                DbPlaces.getAllPlaces,
                 PlaceModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndDuplicate,
                 Tb.places.id,
@@ -463,7 +466,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                       enableContextMenu: false,
                       enableSorting: false,
                       field: Tb.places.coordinates,
-                      type: PlutoColumnType.text(defaultValue: DataService.globalSettingsModel!.defaultMapLocation),
+                      type: PlutoColumnType.text(defaultValue: SynchroService.globalSettingsModel!.defaultMapLocation),
                       renderer: (rendererContext) {
                         return ElevatedButton(
                             onPressed: () async {
@@ -489,7 +492,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<ExclusiveGroupModel>(
                 context,
-                DataService.getAllExclusiveGroups,
+                DbEvents.getAllExclusiveGroups,
                 ExclusiveGroupModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 Tb.exclusive_groups.id,
@@ -519,7 +522,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<UserGroupInfoModel>(
                 context,
-                DataService.getAllUserGroupInfo,
+                DbGroups.getAllUserGroupInfo,
                 UserGroupInfoModel.fromPlutoJson,
                 DataGridFirstColumn.delete,
                 Tb.user_group_info.id,
@@ -658,7 +661,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                             onPressed: () async {
                               var title = rendererContext.row.cells[Tb.user_group_info.title]?.value;
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
-                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: DataService.globalSettingsModel!.defaultMapLocation);
+                              placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: SynchroService.globalSettingsModel!.defaultMapLocation);
 
                               RouterService.navigateOccasion(context, MapPage.ROUTE, extra: placeModel).then((value) async {
                                 if(value != null)
@@ -675,7 +678,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                 ]).DataGrid(),
             SingleTableDataGrid<OccasionUserModel>(
                 context,
-                DataService.getOccasionUsers,
+                DbUsers.getOccasionUsers,
                 OccasionUserModel.fromPlutoJson,
                 DataGridFirstColumn.deleteAndCheck,
                 Tb.occasion_users.user,
@@ -841,7 +844,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     for(OccasionUserModel u in users) {
       await AuthService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
       u.data![Tb.occasion_users.data_isInvited] = true;
-      await DataService.updateOccasionUser(u);
+      await DbUsers.updateOccasionUser(u);
       ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
     await dataGrid.reloadData();
@@ -869,14 +872,14 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {
     var users = List<OccasionUserModel>.from(dataGrid.stateManager.refRows.originalList.where((element) => element.checked == true).map((x) => OccasionUserModel.fromPlutoJson(x.toJson())));
     users = users.where((element) => element.user != null).toList();
-    var allGroups = await DataService.getAllUserGroupInfo();
+    var allGroups = await DbGroups.getAllUserGroupInfo();
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, allGroups);
     if(chosenGroup == null)
     {
       return;
     }
     chosenGroup.participants!.addAll(users.map((e) => UserInfoModel(id: e.user)));
-    await DataService.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
+    await DbGroups.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
 
     for (var value in dataGrid.stateManager.refRows.originalList) {
       value.setChecked(false);
@@ -896,7 +899,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     var nonAdded = _allUsers.where((a)=>!users.any((u)=>(u.user==a.id))).toList();
     DialogHelper.chooseUser(context, (person) async
     {
-      await DataService.addUserToCurrentOccasion(person.id, RightsService.currentOccasion!);
+      await DbUsers.addUserToCurrentOccasion(person.id, RightsService.currentOccasion!);
       ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
     }, nonAdded, "Add".tr());
 

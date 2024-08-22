@@ -6,7 +6,6 @@ import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -257,7 +256,7 @@ class EventModel extends IPlutoRowModel {
     var participants = await DbEvents.getParticipantsPerEvent(id!);
     for(var p in participants)
     {
-      await DataService.signOutFromEvent(id!, p);
+      await DbEvents.signOutFromEvent(id!, p);
     }
     await DbEvents.removeEventFromSaved(this);
     await DbEvents.removeEventFromEventGroups(this);

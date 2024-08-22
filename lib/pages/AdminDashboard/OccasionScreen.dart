@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/services/EventCreationHelper.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
@@ -26,7 +26,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _loadOccasions() async {
-    var occasions = await DataService.getAllOccasions(widget.organizationId);
+    var occasions = await DbUsers.getAllOccasions(widget.organizationId);
     setState(() {
       _occasions = occasions;
     });

@@ -6,10 +6,11 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -159,7 +160,7 @@ class _UserPageState extends State<UserPage> {
                 ),
                 Visibility(
                   visible:
-                      DataService.globalSettingsModel!.isEnabledEntryCode ??
+                      SynchroService.globalSettingsModel!.isEnabledEntryCode ??
                           false,
                   child: Column(
                     children: [
@@ -430,7 +431,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   Future<void> _logout() async {
-    var trPrefix = (await DataService.getCurrentUserInfo()).getGenderPrefix();
+    var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
     await AuthService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
     RouterService.goBackOrHome(context);

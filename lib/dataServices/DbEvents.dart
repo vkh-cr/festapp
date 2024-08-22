@@ -5,11 +5,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -637,4 +637,103 @@ class DbEvents {
         .eq(Tb.events.id, data.id!);
   }
 
+  static Future<List<ExclusiveGroupModel>> getAllExclusiveGroups() async {
+    var data = await _supabase
+        .from(Tb.exclusive_groups.table)
+        .select("${Tb.exclusive_groups.id}, ${Tb.exclusive_groups.title}, ${Tb.exclusive_events.table}(${Tb.exclusive_events.event})");
+    return List<ExclusiveGroupModel>.from(
+        data.map((x) => ExclusiveGroupModel.fromJson(x)));
+  }
+
+  static updateExclusiveGroup(ExclusiveGroupModel model) async {
+    var upsertObj = {
+      Tb.exclusive_groups.title: model.title,
+    };
+
+    dynamic eventData;
+    if(model.id!=null) {
+      upsertObj.addAll({Tb.exclusive_groups.id: model.id.toString()});
+      eventData = await _supabase.from(Tb.exclusive_groups.table).update(upsertObj).eq(Tb.exclusive_groups.id, model.id!).select().single();
+    }
+    else
+    {
+      eventData = await _supabase.from(Tb.exclusive_groups.table).insert(upsertObj).select().single();
+    }
+    var updated = ExclusiveGroupModel.fromJson(eventData);
+
+    await _supabase
+        .from(Tb.exclusive_events.table)
+        .delete()
+        .eq(Tb.exclusive_events.group, updated.id!);
+
+    var insert = [];
+    for(var e in model.events!)
+    {
+      insert.add(
+          {Tb.exclusive_events.group:updated.id,
+            Tb.exclusive_events.event:e});
+    }
+    await _supabase
+        .from(Tb.exclusive_events.table)
+        .insert(insert)
+        .select();
+  }
+
+  static Future<void> deleteExclusiveGroup(ExclusiveGroupModel data) async {
+    await _supabase
+        .from(Tb.exclusive_events.table)
+        .delete()
+        .eq(Tb.exclusive_events.group, data.id!);
+    await _supabase
+        .from(Tb.exclusive_groups.table)
+        .delete()
+        .eq(Tb.exclusive_groups.id, data.id!);
+  }
+
+  static Future<void> signOutFromEvent(int eventId, [UserInfoModel? participant]) async {
+    AuthService.ensureUserIsLoggedIn();
+    var userId = participant?.id ?? AuthService.currentUserId();
+
+    var result = await _supabase.rpc("sign_user_out_of_event",
+        params: {"ev": eventId, "usr": userId});
+    switch(result["code"]) {
+      case 200:
+        if(participant == null) {
+          var trPrefix = AuthService.currentUser!.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+          return;
+        }
+        else{
+          var trPrefix = participant.getGenderPrefix();
+          ToastHelper.Show("${trPrefix}{user} has been signed out.".tr(namedArgs: {"user":participant.toString()}));
+        }
+        return;
+      case 201:
+        ToastHelper.Show("It is not possible to sign out from an event that has already taken place.".tr(), severity: ToastSeverity.NotOk);
+        return;
+    }
+  }
+
+  static Future<void> updateEventDescriptions() async {
+    var needsUpdate = <int>[];
+    var allEventsMeta = await DbEvents.getAllEventsMeta();
+
+    for(var e in allEventsMeta) {
+      var oe = await OfflineDataService.getEventDescription(e.id.toString());
+      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
+        needsUpdate.add(e.id!);
+      }
+    }
+
+    var fullEvents = await DbEvents.getEventsDescription(needsUpdate);
+    for(var e in fullEvents) {
+      await OfflineDataService.saveEventDescription(e);
+    }
+  }
+
+  static Future<bool> hasEventAllowedRole(int eventId) async {
+    var data = await _supabase.rpc("get_is_event_allowed",
+        params: {"ev": eventId});
+    return data;
+  }
 }

@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbNews.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
@@ -283,18 +285,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await RightsService.ensureAccessProcedure(context);
 
     if (AuthService.isLoggedIn()) {
-      DataService.getCurrentUserInfo()
+      DbUsers.getCurrentUserInfo()
           .then((value) => userName = value.name!);
     }
 
     await DbEvents.updateEvents(_events).whenComplete(() async {
       if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(_events, DataService.getPlacesIn);
+        await loadPlacesForEvents(_events, DbPlaces.getPlacesIn);
       }
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       if (AuthService.isLoggedIn()) {
-        DataService.countNewMessages().then((value) => {
+        DbNews.countNewMessages().then((value) => {
           setState(() {
             _messageCount = value;
           })

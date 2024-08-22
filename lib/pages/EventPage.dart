@@ -9,13 +9,14 @@ import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -130,7 +131,7 @@ class _EventPageState extends State<EventPage> {
                                           child: const Text("Sign out").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          ((DataService.globalSettingsModel
+                                          ((SynchroService.globalSettingsModel
                                                       ?.maxCompanions ??
                                                   0) >
                                               0),
@@ -190,7 +191,7 @@ class _EventPageState extends State<EventPage> {
                                                   if (_groupInfoModel != null) {
                                                     _groupInfoModel!
                                                         .description = changed;
-                                                    await DataService
+                                                    await DbGroups
                                                         .updateUserGroupInfo(
                                                             _groupInfoModel!);
                                                   } else {
@@ -459,7 +460,7 @@ class _EventPageState extends State<EventPage> {
     var event = await DbEvents.getEvent(eventId);
 
     if (event.isGroupEvent && event.isMyGroupEvent) {
-      var group = await DataService.getUserGroupInfo(
+      var group = await DbGroups.getUserGroupInfo(
           AuthService.currentUserGroup()!.id!);
       if (group == null) {
         RouterService.goBack(context);
@@ -495,7 +496,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event!.id!);
+    await DbEvents.signOutFromEvent(_event!.id!);
     await loadData(_event!.id!);
   }
 
@@ -506,7 +507,7 @@ class _EventPageState extends State<EventPage> {
       builder: (BuildContext context) {
         return CompanionDialog(
           eventId: _event!.id!,
-          maxCompanions: DataService.globalSettingsModel!.maxCompanions!,
+          maxCompanions: SynchroService.globalSettingsModel!.maxCompanions!,
           companions: _companions,
           refreshData: () async {
             await loadData(widget.id!);
@@ -535,7 +536,7 @@ class _EventPageState extends State<EventPage> {
                 TextButton(
                   onPressed: () async {
                     RouterService.goBack(context);
-                    await DataService.signOutFromEvent(
+                    await DbEvents.signOutFromEvent(
                         _event!.id!, participant);
                     await loadData(_event!.id!);
                   },

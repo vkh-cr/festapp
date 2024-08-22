@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';

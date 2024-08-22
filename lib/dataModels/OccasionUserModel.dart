@@ -1,4 +1,5 @@
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -73,7 +74,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteUser(user!, occasion!);
+    await DbUsers.deleteUser(user!, occasion!);
   }
 
   @override
@@ -134,7 +135,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateOccasionUser(this);
+    await DbUsers.updateOccasionUser(this);
   }
 
   bool importedEquals(Map<String, dynamic> u) {

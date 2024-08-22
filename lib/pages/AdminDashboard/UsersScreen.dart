@@ -3,7 +3,7 @@ import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
@@ -25,7 +25,7 @@ class _UsersScreenState extends State<UsersScreen> {
   Widget build(BuildContext context) {
     return SingleTableDataGrid<OccasionUserModel>(
       context,
-      DataService.getOccasionUsers,
+      DbUsers.getOccasionUsers,
       OccasionUserModel.fromPlutoJson,
       DataGridFirstColumn.deleteAndCheck,
       Tb.occasion_users.user,
