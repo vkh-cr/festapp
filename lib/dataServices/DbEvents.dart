@@ -241,6 +241,7 @@ class DbEvents {
         .select(
         "${Tb.events.id},"
         "${Tb.events.updated_at}")
+        .eq(Tb.events.is_hidden, false)
         .eq(Tb.events.occasion, RightsService.currentOccasion!);
 
     return List<EventModel>.from(

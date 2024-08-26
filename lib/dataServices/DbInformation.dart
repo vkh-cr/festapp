@@ -14,26 +14,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbInformation {
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<InformationModel>> getAllInformation() async {
-    var data = await _supabase.from(Tb.information.table).select();
-    var infoList = List<InformationModel>.from(
-        data.map((x) => InformationModel.fromJson(x)));
-    infoList.sortBy((element) => element.title??"".toLowerCase());
-    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
-    return infoList;
-  }
-
   static Future<List<InformationModel>> getAllInformationForDataGrid() async {
     var data = await _supabase.from(Tb.information.table).select(
         "${Tb.information.id},"
-            "${Tb.information.occasion},"
-            "${Tb.information.created_at},"
-            "${Tb.information.updated_at},"
-            "${Tb.information.is_hidden},"
-            "${Tb.information.title},"
-            "${Tb.information.order},"
-            "${Tb.information.type}"
-    );
+        "${Tb.information.occasion},"
+        "${Tb.information.created_at},"
+        "${Tb.information.updated_at},"
+        "${Tb.information.is_hidden},"
+        "${Tb.information.title},"
+        "${Tb.information.order},"
+        "${Tb.information.type}")
+    .eq(Tb.information.occasion, RightsService.currentOccasion!);
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title??"".toLowerCase());
@@ -52,7 +43,8 @@ class DbInformation {
             "${Tb.information.title},"
             "${Tb.information.id}"
     )
-        .eq(Tb.information.is_hidden, false);
+        .eq(Tb.information.is_hidden, false)
+        .eq(Tb.information.occasion, RightsService.currentOccasion!);
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -74,9 +66,10 @@ class DbInformation {
     var data = await _supabase
         .from(Tb.information.table)
         .select(
-        "${Tb.information.id},"
-            "${Tb.information.updated_at}"
-    );
+          "${Tb.information.id},"
+          "${Tb.information.updated_at}")
+        .eq(Tb.information.is_hidden, false)
+        .eq(Tb.information.occasion, RightsService.currentOccasion!);
 
     return List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -98,6 +91,7 @@ class DbInformation {
     }
     else
     {
+      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasion});
       await _supabase.from(Tb.information.table).insert(upsertObj);
     }
   }
@@ -138,5 +132,4 @@ class DbInformation {
       }
     }
   }
-
 }
