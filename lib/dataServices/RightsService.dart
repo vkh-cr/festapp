@@ -13,7 +13,7 @@ class RightsService{
 
   static Future<bool> ensureAccessProcedure(BuildContext context) async {
     if(currentOccasion==null || RouterService.currentOccasionLink != currentLink) {
-      if(!await RouterService.checkOccasionLinkAndRedirect(context, RouterService.currentOccasionLink)){
+      if(!await RouterService.updateOccasionFromLink(context, RouterService.currentOccasionLink)){
         throw Exception("Cannot continue.");
       }
       var globalSettings = await SynchroService.loadOrInitGlobalSettings();
