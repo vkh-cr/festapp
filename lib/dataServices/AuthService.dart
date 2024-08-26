@@ -88,19 +88,6 @@ class AuthService {
     return data[Tb.role_info.title];
   }
 
-  static Future<PlaceModel?> getUserAccommodation(
-      String accommodationType) async {
-    var data = await _supabase
-        .from(Tb.accommodation_places.table)
-        .select("${Tb.places.table}(${Tb.places.id}, ${Tb.places.title})")
-        .eq(Tb.accommodation_places.accommodation_type, accommodationType)
-        .maybeSingle();
-    if (data == null) {
-      return null;
-    }
-    return PlaceModel.fromJson(data[Tb.places.table]);
-  }
-
   static Future<UserGroupInfoModel?> getCurrentUserGroup() async {
     UserGroupInfoModel? group;
     var partOfGroup = await _supabase
