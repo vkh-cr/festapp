@@ -148,6 +148,7 @@ class EventsTb{
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get occasion => "occasion";
   String get is_hidden => "is_hidden";
   String get title => "title";
   String get start_time => "start_time";
@@ -183,6 +184,7 @@ class ExclusiveGroupTb{
   const ExclusiveGroupTb();
   String get table => "exclusive_groups";
   String get id => "id";
+  String get occasion => "occasion";
   String get title => "title";
 }
 class ExclusiveEventsTb{
