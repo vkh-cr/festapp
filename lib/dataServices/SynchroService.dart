@@ -27,7 +27,11 @@ class SynchroService {
           .eq(Tb.occasions.id, RightsService.currentOccasion!)
           .single();
 
-      toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
+      if(data[Tb.occasions.data] == null) {
+        toReturn = OccasionSettingsModel.DefaultSettings;
+      } else {
+        toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
+      }
     }
 
     globalSettingsModel = toReturn;
