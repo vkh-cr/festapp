@@ -148,7 +148,7 @@ class RouterService{
             var newLink = state.pathParameters[LINK]??"";
             if (currentOccasionLink != newLink) {
               currentOccasionLink = newLink;
-              checkOccasionLinkAndRedirect(context, currentOccasionLink);
+              updateOccasionFromLink(context, currentOccasionLink);
             }
             return const HomePage(title: HomePage.HOME_PAGE,);
           },
@@ -224,7 +224,7 @@ class RouterService{
     ],
   );
 
-  static Future<bool> checkOccasionLinkAndRedirect(BuildContext context, String newLink) async {
+  static Future<bool> updateOccasionFromLink(BuildContext context, String newLink) async {
     bool canContinue = true;
     var checkedObject = await SynchroService.checkOccasionLink(newLink);
     RightsService.currentUserOccasion = checkedObject.user;
@@ -233,7 +233,6 @@ class RouterService{
 
     if(checkedObject.link!=RouterService.currentOccasionLink && checkedObject.isAvailable())
     {
-      RouterService.pushReplacementFull(context, checkedObject.link!);
       canContinue = false;
     }
     else if(checkedObject.isAccessDenied())
