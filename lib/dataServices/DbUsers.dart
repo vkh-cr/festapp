@@ -112,7 +112,7 @@ class DbUsers {
     } else {
       await _supabase.rpc("update_user",
           params: {"oc": oum.occasion!, "usr": oum.user!, "data": oum.data!});
-      await addUserToCurrentOccasion(oum.user!, oum.occasion!);
+      await addUserToOccasion(oum.user!, oum.occasion!);
     }
 
     if(oum.user!=null){
@@ -122,7 +122,7 @@ class DbUsers {
     }
   }
 
-  static Future<void> addUserToCurrentOccasion(String id, int occasion) async {
+  static Future<void> addUserToOccasion(String id, int occasion) async {
     await _supabase.rpc("add_user_to_occasion",
         params:
         {
