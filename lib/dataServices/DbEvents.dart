@@ -241,6 +241,7 @@ class DbEvents {
         .select(
         "${Tb.events.id},"
         "${Tb.events.updated_at}")
+        .eq(Tb.events.is_hidden, false)
         .eq(Tb.events.occasion, RightsService.currentOccasion!);
 
     return List<EventModel>.from(
@@ -574,7 +575,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasion});
+      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasion!});
       eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
     }
     return EventModel.fromJson(eventData);
@@ -654,7 +655,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasion});
+      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasion!});
       eventData = await _supabase.from(Tb.exclusive_groups.table).insert(upsertObj).select().single();
     }
     var updated = ExclusiveGroupModel.fromJson(eventData);

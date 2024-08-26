@@ -11,14 +11,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbPlaces {
   static final _supabase = Supabase.instance.client;
   static Future<List<PlaceModel>> getMapPlaces() async {
-    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.is_hidden, false);
+    var data = await _supabase
+        .from(Tb.places.table)
+        .select()
+        .eq(Tb.places.is_hidden, false)
+        .eq(Tb.places.occasion, RightsService.currentOccasion!);
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces(false);
     return toReturn;
   }
 
   static Future<List<PlaceModel>> getAllPlaces() async {
-    var data = await _supabase.from(Tb.places.table).select();
+    var data = await _supabase
+        .from(Tb.places.table)
+        .select()
+        .eq(Tb.places.occasion, RightsService.currentOccasion!);
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
@@ -40,7 +47,11 @@ class DbPlaces {
   }
 
   static Future<PlaceModel> getPlace(int id) async {
-    var data = await _supabase.from(Tb.places.table).select().eq(Tb.places.id, id).single();
+    var data = await _supabase
+        .from(Tb.places.table)
+        .select()
+        .eq(Tb.places.id, id)
+        .single();
     return PlaceModel.fromJson(data);
   }
 
@@ -50,15 +61,16 @@ class DbPlaces {
 
   static Future<PlaceModel> updatePlace(PlaceModel placeModel) async
   {
-    var json = placeModel.toJson();
+    var upsertObj = placeModel.toJson();
     Map<String, dynamic> data;
     if(placeModel.id!=null) {
-      data = await _supabase.from(Tb.places.table).update(json).eq(Tb.places.id, placeModel.id!).select().single();
+      data = await _supabase.from(Tb.places.table).update(upsertObj).eq(Tb.places.id, placeModel.id!).select().single();
     }
     else
     {
-      json.remove(Tb.places.id);
-      data = await _supabase.from(Tb.places.table).insert(json).select().single();
+      upsertObj.remove(Tb.places.id);
+      upsertObj.addAll({Tb.places.occasion: RightsService.currentOccasion!});
+      data = await _supabase.from(Tb.places.table).insert(upsertObj).select().single();
     }
     return PlaceModel.fromJson(data);
   }
