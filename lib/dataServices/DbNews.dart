@@ -121,31 +121,32 @@ class DbNews {
     AuthService.ensureUserIsLoggedIn();
     int lastMessageId = 0;
     var lastMessage = await _supabase
-        .from(Tb.user_news.table)
+        .from(Tb.news.table)
         .select(
-        "${Tb.user_news.news_id},"
-        "${Tb.news.table}!inner(id)")
-        .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq("${Tb.news.table}.${Tb.news.occasion}", RightsService.currentOccasion!)
+        "${Tb.news.id},"
+        "${Tb.user_news.table}!inner(${Tb.user_news.news_id})"
+        )
+        .eq(Tb.news.occasion, RightsService.currentOccasion!)
+        .eq("${Tb.user_news.table}.${Tb.user_news.user}", AuthService.currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
-      lastMessageId = lastMessage[Tb.user_news.news_id];
+      lastMessageId = lastMessage[Tb.news.id];
     }
     return lastMessageId;
   }
 
-  static void setMessagesAsRead(int newsId) async {
+  static void setMessagesAsRead(int newId, int oldId) async {
     AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
         .delete()
         .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq("${Tb.news.table}.${Tb.news.occasion}", RightsService.currentOccasion!);
+        .eq(Tb.user_news.news_id, oldId);
 
     await _supabase
         .from(Tb.user_news.table)
         .insert(
-        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newsId}
+        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId}
     ).select();
   }
 
@@ -175,6 +176,11 @@ class DbNews {
         message.isRead = lastReadMessageId >= message.id;
       }
     }
+
+    if (AuthService.isLoggedIn() && loadedMessages.isNotEmpty) {
+      DbNews.setMessagesAsRead(loadedMessages.first.id, lastReadMessageId);
+    }
+
     return loadedMessages;
   }
 
