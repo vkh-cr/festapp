@@ -145,7 +145,11 @@ class RouterService{
         GoRoute(
           path: LINK_PATH,
           builder: (context, state) {
-            currentOccasionLink = state.pathParameters[LINK]??"";
+            var newLink = state.pathParameters[LINK]??"";
+            if (currentOccasionLink != newLink) {
+              currentOccasionLink = newLink;
+              checkOccasionLinkAndRedirect(context, currentOccasionLink);
+            }
             return const HomePage(title: HomePage.HOME_PAGE,);
           },
           routes: <RouteBase>[
@@ -220,9 +224,9 @@ class RouterService{
     ],
   );
 
-  static Future<bool> checkOccasionLinkAndRedirect(BuildContext context) async {
+  static Future<bool> checkOccasionLinkAndRedirect(BuildContext context, String newLink) async {
     bool canContinue = true;
-    var checkedObject = await SynchroService.checkOccasionLink(RouterService.currentOccasionLink);
+    var checkedObject = await SynchroService.checkOccasionLink(newLink);
     RightsService.currentUserOccasion = checkedObject.user;
     RightsService.currentOccasion = checkedObject.occasionId;
     RightsService.currentLink = checkedObject.link;

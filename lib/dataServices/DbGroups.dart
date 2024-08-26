@@ -24,7 +24,8 @@ class DbGroups {
             "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}),"
             "${Tb.places.table}(*),"
             "${Tb.user_group_info.description},"
-            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))");
+            "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
+    .eq(Tb.user_group_info.occasion, RightsService.currentOccasion!);
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
@@ -54,7 +55,7 @@ class DbGroups {
       throw Exception("Must be leader or admin to change the group.");
     }
 
-    var upsertObj = {
+    Map<String, dynamic> upsertObj = {
       Tb.user_group_info.title: model.title,
       Tb.user_group_info.leader: model.leader?.id,
     };
@@ -75,6 +76,7 @@ class DbGroups {
     }
     else
     {
+      upsertObj.addAll({Tb.user_group_info.occasion: RightsService.currentOccasion!});
       eventData = await _supabase.from(Tb.user_group_info.table).insert(upsertObj).select().single();
     }
     var updated = UserGroupInfoModel.fromJson(eventData);

@@ -47,9 +47,6 @@ class _NewsPageState extends State<NewsPage> {
     setState(() {
       newsMessages = loadedMessages;
     });
-    if (AuthService.isLoggedIn() && newsMessages.isNotEmpty) {
-      DbNews.setMessagesAsRead(newsMessages.first.id);
-    }
   }
 
   @override

@@ -13,7 +13,7 @@ class RightsService{
 
   static Future<bool> ensureAccessProcedure(BuildContext context) async {
     if(currentOccasion==null || RouterService.currentOccasionLink != currentLink) {
-      if(!await RouterService.checkOccasionLinkAndRedirect(context)){
+      if(!await RouterService.checkOccasionLinkAndRedirect(context, RouterService.currentOccasionLink)){
         throw Exception("Cannot continue.");
       }
       var globalSettings = await SynchroService.loadOrInitGlobalSettings();
@@ -43,6 +43,7 @@ class RightsService{
   }
 
   static bool isAdmin() {
+    return false;
     var containsAdminField = _supabase.auth.currentUser?.appMetadata.containsKey("is_admin");
     return containsAdminField != null && _supabase.auth.currentUser!.appMetadata["is_admin"] == true;
   }
