@@ -91,7 +91,7 @@ class DbInformation {
     }
     else
     {
-      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasion});
+      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasion!});
       await _supabase.from(Tb.information.table).insert(upsertObj);
     }
   }
