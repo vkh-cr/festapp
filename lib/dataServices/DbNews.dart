@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/NewsModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:html/parser.dart';
@@ -16,6 +17,7 @@ class DbNews {
 // from some reason lower than is behaving like lower and equal than on web platform
 // therefore additional check
         .neq(Tb.news.id, message.id)
+        .eq(Tb.news.occasion, RightsService.currentOccasion!)
         .order(Tb.news.created_at)
         .limit(1)
         .maybeSingle();
@@ -66,6 +68,7 @@ class DbNews {
       var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
       await _supabase.from(Tb.news.table).insert(
           {
+            Tb.news.occasion: RightsService.currentOccasion!,
             Tb.news.message: messageForNews,
             Tb.news.created_by: AuthService.currentUserId()
           }
@@ -86,6 +89,7 @@ class DbNews {
       await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
+            Tb.log_notifications.occasion: RightsService.currentOccasion!,
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
             Tb.log_notifications.heading: heading ?? headingDefault
@@ -107,6 +111,7 @@ class DbNews {
     var result = await _supabase
         .from(Tb.news.table)
         .select()
+        .eq(Tb.news.occasion, RightsService.currentOccasion!)
         .gt(Tb.news.id, lastMessageId)
         .count();
     return result.count;
@@ -117,8 +122,11 @@ class DbNews {
     int lastMessageId = 0;
     var lastMessage = await _supabase
         .from(Tb.user_news.table)
-        .select(Tb.user_news.news_id)
+        .select(
+        "${Tb.user_news.news_id},"
+        "${Tb.news.table}!inner(id)")
         .eq(Tb.user_news.user, AuthService.currentUserId())
+        .eq("${Tb.news.table}.${Tb.news.occasion}", RightsService.currentOccasion!)
         .maybeSingle();
     if (lastMessage != null) {
       lastMessageId = lastMessage[Tb.user_news.news_id];
@@ -130,7 +138,15 @@ class DbNews {
     AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
-        .upsert({Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newsId}).select();
+        .delete()
+        .eq(Tb.user_news.user, AuthService.currentUserId())
+        .eq("${Tb.news.table}.${Tb.news.occasion}", RightsService.currentOccasion!);
+
+    await _supabase
+        .from(Tb.user_news.table)
+        .insert(
+        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newsId}
+    ).select();
   }
 
   static Future<List<NewsModel>> getAllNewsMessages() async {
@@ -141,11 +157,12 @@ class DbNews {
     var data = await _supabase
         .from(Tb.news.table)
         .select(
-        "${Tb.news.id},"
+            "${Tb.news.id},"
             "${Tb.news.created_at},"
             "${Tb.news.message},"
             "${Tb.user_info_public.table}(${Tb.user_info_public.name},${Tb.user_info_public.surname}),"
             "${Tb.user_news_views.table}(count)")
+        .eq(Tb.news.occasion, RightsService.currentOccasion!)
         .order(Tb.news.created_at);
 
     List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
