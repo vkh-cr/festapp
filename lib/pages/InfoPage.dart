@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
@@ -15,10 +17,11 @@ import '../services/js/js_interop.dart';
 import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
+@RoutePage()
 class InfoPage extends StatefulWidget {
-  final int? id;
+  int? id;
   static const ROUTE = "info";
-  const InfoPage({this.id, super.key});
+  InfoPage({@pathParam this.id, super.key});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -35,6 +38,9 @@ class _InfoPageState extends State<InfoPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if(widget.id == null && context.routeData.hasPendingChildren){
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
     loadData();
   }
 
@@ -79,9 +85,8 @@ class _InfoPageState extends State<InfoPage> {
                       if (RightsService.isEditor())
                         ElevatedButton(
                           onPressed: () async {
-                            var result = await RouterService.navigateOccasion(
-                                context, HtmlEditorPage.ROUTE,
-                                extra: {HtmlEditorPage.parContent: item.description});
+                            var result = await RouterService.navigatePageInfo(
+                                context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
                             if (result != null) {
                               setState(() {
                                 item.description = result as String;

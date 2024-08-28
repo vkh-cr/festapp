@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
@@ -30,11 +32,12 @@ import '../widgets/HtmlView.dart';
 import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
+@RoutePage()
 class EventPage extends StatefulWidget {
   static const ROUTE = "event";
   int? id;
 
-  EventPage({this.id, super.key});
+  EventPage({@pathParam this.id, super.key});
 
   @override
   _EventPageState createState() => _EventPageState();
@@ -80,11 +83,9 @@ class _EventPageState extends State<EventPage> {
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
                     onPressed: () async {
-                      RouterService.navigate(
+                      RouterService.navigatePageInfo(
                           context,
-                          "${CheckPage.ROUTE}/${_event!.id!}",
-                          extra:
-                          _event!.id!);
+                          CheckRoute(id: _event!.id!));
                     },
                     icon: const Icon(
                       Icons.qr_code_scanner,
@@ -180,11 +181,10 @@ class _EventPageState extends State<EventPage> {
                                               _event!.isGroupEvent),
                                       child: ElevatedButton(
                                           onPressed: () =>
-                                              RouterService.navigateOccasion(
+                                              RouterService.navigatePageInfo(
                                                       context,
-                                                      HtmlEditorPage.ROUTE,
-                                                      extra: {HtmlEditorPage.parContent:
-                                                          _event!.description})
+                                                      HtmlEditorRoute(content: {HtmlEditorPage.parContent:
+                                                      _event!.description}))
                                                   .then((value) async {
                                                 if (value != null) {
                                                   var changed = value as String;

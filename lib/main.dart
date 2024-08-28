@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/HomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
@@ -15,7 +17,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/TimeTravelWidget.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -28,7 +29,7 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
         supportedLocales:
-            AppConfig.availableLanguages.map((e) => e.locale).toList(),
+        AppConfig.availableLanguages.map((e) => e.locale).toList(),
         path: "assets/translations",
         fallbackLocale: AppConfig.availableLanguages.map((e) => e.locale).first,
         useOnlyLangCode: true,
@@ -39,7 +40,7 @@ Future<void> main() async {
 
 Future<void> initializeEverything() async {
   print('Initialization started');
-  GoRouter.optionURLReflectsImperativeAPIs = true;
+  //GoRouter.optionURLReflectsImperativeAPIs = true;
   WidgetsFlutterBinding.ensureInitialized();
   print('Widgets binding initialized');
 
@@ -88,12 +89,18 @@ Future<void> initializeEverything() async {
     print('Offline data helper initialization failed: $e');
   }
 
+  try {
+    await RightsService.updateOccasionData();
+    print('Occasion loaded');
+  } catch (e) {
+    print('Occasion loading failed: $e');
+  }
+
   print('Notification helper initializing');
 
   NotificationHelper.initialize().then(
           (f){ print('Notification helper initialized'); },
           onError: (e){ print('Notification helper initialization failed: $e'); });
-
 
   print('Initialization completed');
 }
@@ -117,7 +124,7 @@ class _MyAppState extends State<MyApp> {
       });
     };
     return MaterialApp.router(
-      routerConfig: RouterService.router,
+      routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return Stack(

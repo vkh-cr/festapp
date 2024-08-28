@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
@@ -13,7 +14,6 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -36,13 +36,13 @@ import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-
+@RoutePage()
 class HomePage extends StatefulWidget {
   static const HOME_PAGE = AppConfig.appName;
 
-  const HomePage({super.key, required this.title});
+  const HomePage({super.key});
 
-  final String title;
+  final String title = AppConfig.appName;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -282,7 +282,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //DataServiceTests.test_has_event_allowed_role();
 
     await loadOfflineData();
-    await RightsService.ensureAccessProcedure(context);
+    //await RightsService.ensureAccessProcedure(context);
 
     if (AuthService.isLoggedIn()) {
       DbUsers.getCurrentUserInfo()

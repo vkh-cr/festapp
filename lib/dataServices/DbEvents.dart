@@ -59,7 +59,10 @@ class DbEvents {
 
     for(var e in set)
     {
-      var eq = events.firstWhere((element) => element.id == e.id);
+      var eq = events.firstWhereOrNull((element) => element.id == e.id);
+      if(eq == null) {
+        continue;
+      }
       eq.isEventInMySchedule = e.isEventInMySchedule;
     }
   }

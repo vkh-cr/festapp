@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -27,7 +28,7 @@ import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
-
+@RoutePage()
 class UserPage extends StatefulWidget {
   static const ROUTE = "user";
 
@@ -246,9 +247,7 @@ class _UserPageState extends State<UserPage> {
                                                   onEventPressed: (eventId) async {
                                                     await RouterService.navigateOccasion(
                                                         context,
-                                                        "${EventPage.ROUTE}/$eventId",
-                                                        extra:
-                                                        eventId);
+                                                        "${EventPage.ROUTE}/$eventId");
                                                     await loadData();
                                                   },
                                                   nodePosition: 0.3,

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
@@ -21,13 +22,13 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
-
+@RoutePage()
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
-  final int? id;
+   int? id;
   final PlaceModel? place;
 
-  const MapPage({this.id, this.place, super.key});
+  MapPage({@pathParam this.id, this.place, super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -55,6 +56,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+    if(widget.id == null && context.routeData.hasPendingChildren){
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
         : LatLng(SynchroService.globalSettingsModel!.defaultMapLocation["lat"],
@@ -310,7 +314,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       return;
     }
-    await DbPlaces.saveLocation(selectedMarker!.place.id,
+    await DbPlaces.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove =
