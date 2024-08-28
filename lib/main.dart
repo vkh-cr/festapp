@@ -126,6 +126,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp.router(
       routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
       debugShowCheckedModeBanner: false,
+      themeMode: ThemeMode.dark,
       builder: (context, child) {
         return Stack(
           children: [
