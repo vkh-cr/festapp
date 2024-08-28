@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
@@ -10,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/HtmlView.dart';
 
+@RoutePage()
 class SongPage extends StatefulWidget {
   final String? type = "song";
 

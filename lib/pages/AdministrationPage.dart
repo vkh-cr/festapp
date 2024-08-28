@@ -1,3 +1,5 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
@@ -33,6 +35,7 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import '../services/DialogHelper.dart';
 import 'HtmlEditorPage.dart';
 
+@RoutePage()
 class AdministrationPage extends StatefulWidget {
   static const ROUTE = "admin";
   const AdministrationPage({Key? key}) : super(key: key);
@@ -54,7 +57,6 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
-    await RightsService.ensureAccessProcedure(context);
     if(!RightsService.canSeeAdmin())
     {
       RouterService.goBackOrHome(context);
@@ -231,7 +233,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                 return null;
                               };
                               Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: param).then((value) async {
+                              RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -377,7 +379,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                                 return null;
                               };
                               Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: param).then((value) async {
+                              RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -471,7 +473,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async {
                               var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                              RouterService.navigateOccasion(context, MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigatePageInfo(context, MapRoute(place: placeModel)).then((value) async {
                                   if(value != null)
                                   {
                                     var cell = rendererContext.row.cells[Tb.places.coordinates]!;
@@ -634,7 +636,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                         return ElevatedButton(
                             onPressed: () async{
                               var oldText = rendererContext.row.cells[Tb.user_group_info.description]!.value as String?;
-                              RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: {HtmlEditorPage.parContent: oldText}).then((value) async {
+                              RouterService.navigatePageInfo(context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: oldText})).then((value) async {
                                 if(value != null)
                                 {
                                   var newText = value as String;
@@ -663,7 +665,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                               var placeModel = rendererContext.row.cells[Tb.user_group_info.place]?.value as PlaceModel?;
                               placeModel ??= PlaceModel(id: null, title: title, description: "", type: "group", isHidden: true, latLng: SynchroService.globalSettingsModel!.defaultMapLocation);
 
-                              RouterService.navigateOccasion(context, MapPage.ROUTE, extra: placeModel).then((value) async {
+                              RouterService.navigatePageInfo(context, MapRoute(place: placeModel)).then((value) async {
                                 if(value != null)
                                 {
                                   placeModel!.latLng = value;

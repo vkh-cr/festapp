@@ -5,6 +5,7 @@ class OccasionLinkModel{
   int? occasionId;
   String? link;
   OccasionUserModel? user;
+  bool? isAdmin = false;
 
   bool isAvailable() => code == 200;
   bool isAccessDenied() => code == 403;
@@ -16,8 +17,9 @@ class OccasionLinkModel{
       user: json["occasion_user"]!=null ? OccasionUserModel.fromJson(json["occasion_user"]):null,
       link: json["link"],
       occasionId: json["occasion"],
+      isAdmin: json["is_admin"]
     );
   }
 
-  OccasionLinkModel({this.code, this.user, this.link, this.occasionId});
+  OccasionLinkModel({this.code, this.user, this.link, this.occasionId, this.isAdmin});
 }

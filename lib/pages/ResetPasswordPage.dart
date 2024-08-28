@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 
+@RoutePage()
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
 

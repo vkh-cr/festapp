@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
@@ -11,6 +12,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/foundation.dart'; // Add this import
 
+@RoutePage()
 class SettingsPage extends StatefulWidget {
   static const ROUTE = "settings";
   const SettingsPage({super.key});

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
@@ -6,6 +7,7 @@ import 'package:fstapp/pages/AdminDashboard/UsersScreen.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+@RoutePage()
 class AdminDashboardPage extends StatefulWidget {
   static const ROUTE = "adminDashboard";
   const AdminDashboardPage({super.key});

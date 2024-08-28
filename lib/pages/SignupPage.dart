@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
@@ -11,7 +12,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import '../styles/Styles.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-
+@RoutePage()
 class SignupPage extends StatefulWidget {
   static const ROUTE = "signup";
   const SignupPage({super.key});

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 
+@RoutePage()
 class LoginPage extends StatefulWidget {
   static const ROUTE = "login";
   const LoginPage({Key? key}) : super(key: key);
@@ -138,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      RouterService.updateOccasionFromLink(context, RouterService.currentOccasionLink);
+      RouterService.updateOccasionFromLink(RouterService.currentOccasionLink);
       RouterService.goBackOrHome(context);
     }
   }

@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
@@ -16,11 +17,12 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 
 enum ScanState { signedIn, notSignedIn, nothing }
 
+@RoutePage()
 class CheckPage extends StatefulWidget {
   static const ROUTE = "check";
   final int id;
 
-  const CheckPage({required this.id, Key? key}) : super(key: key);
+  const CheckPage({@pathParam required this.id, Key? key}) : super(key: key);
 
   @override
   _CheckPageState createState() => _CheckPageState();

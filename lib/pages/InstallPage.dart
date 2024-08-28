@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
@@ -9,6 +10,7 @@ import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/services.dart';
 import '../services/js/js_interop.dart';
 
+@RoutePage()
 class InstallPage extends StatefulWidget {
   static final JSInterop jsInterop = JSInterop();
   static const ROUTE = "install";

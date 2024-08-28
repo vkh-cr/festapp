@@ -1,3 +1,5 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataModels/NewsModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbNews.dart';
@@ -12,6 +14,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'HtmlEditorPage.dart';
 
+@RoutePage()
 class NewsPage extends StatefulWidget {
   static const ROUTE = "news";
   const NewsPage({Key? key}) : super(key: key);
@@ -142,12 +145,11 @@ class _NewsPageState extends State<NewsPage> {
                         if (choice == ContextMenuChoice.delete) {
                           await DbNews.deleteNewsMessage(message);
                         } else {
-                          RouterService.navigateOccasion(context, HtmlEditorPage.ROUTE, extra: {HtmlEditorPage.parContent: message.message}).then((value) async {
+                          await RouterService.navigatePageInfo(context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: message.message})).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DbNews.updateNewsMessage(message);
-                              RouterService.pushReplacementOccasion(context, NewsPage.ROUTE);
                             }
                           });
                         }
