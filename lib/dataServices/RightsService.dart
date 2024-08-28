@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
@@ -19,6 +19,9 @@ class RightsService{
       if (toUpdate.isEmpty) {
         toUpdate = extractOccasionLink(Uri.base.toString());
 
+        if(toUpdate.isEmpty) {
+          toUpdate = AppConfig.defaultLink;
+        }
         var rootLinks = AppRouter.getRootLinks();
 
         if (rootLinks.any((rootLink) => toUpdate == rootLink)) {
