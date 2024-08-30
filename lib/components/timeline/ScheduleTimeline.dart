@@ -83,7 +83,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           return TextButton(
             onPressed: () => widget.onEventPressed!(event.id),
             style: TextButton.styleFrom(
-              foregroundColor: Colors.black,
+              foregroundColor: AppConfig.timelineTextColor,
               alignment: Alignment.centerLeft,
             ),
             child: Text(
