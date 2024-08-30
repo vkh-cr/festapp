@@ -28,17 +28,18 @@ class AppConfig {
   static const int daySplitHour = 4;
 
   static const primaryColor = 0xFF0F2940;
-  static const backgroundColor = Color(0xFF081826);
+  static const backgroundColor = Color(0xFFD6DEEE);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFF347EBF);
   static const color3 = Color(0xFF1F4C73);
-  static const color4 = Color(0xFF57AAF2);
+  static const color4 = Color(0xFF081826);
   static const attentionColor = Color(0xFF8B0000);
 
   static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
+  static const timelineTextColor = Colors.black;
   static const mapPinColor = color1;
   static const newsPageColor = backgroundColor;
   static const infoPageColor = backgroundColor;

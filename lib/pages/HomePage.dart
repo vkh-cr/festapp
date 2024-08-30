@@ -100,11 +100,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             });
                           }
                         },
-                        child: SvgPicture.asset(
-                          height: 112,
-                          semanticsLabel: 'Festapp logo',
-                          'assets/icons/fstapplogo.svg',
-                        ),
+                        child: Container(height: 112,)
+                        // child: SvgPicture.asset(
+                        //   height: 112,
+                        //   semanticsLabel: 'Festapp logo',
+                        //   'assets/icons/fstapplogo.svg',
+                        // ),
                       ),
                       const Spacer(),
                       Visibility(
@@ -226,7 +227,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ToastHelper.Show("Sign in to view My schedule!".tr());
       return;
     }
-    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   Future<void> _newsPressed() async {
