@@ -24,7 +24,7 @@
   "Role": "Role",
   "Accommodation": "Ubytování",
   "Without accommodation": "Bez ubytování",
-  "Administration": "Administrace",
+  "Event management": "Správa události",
   "Sign out": "Odhlásit se",
   "MYou have been signed out.": "Byl jsi odhlášen.",
   "FYou have been signed out.": "Byla jsi odhlášena.",
@@ -236,5 +236,6 @@
   "Reducing Images Size...": "Probíhá zmenšování velikosti obrázků...",
   "Large Images Detected": "Zjištěny velké obrázky",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Některé obrázky jsou velké a mohou zpomalit aplikaci. Stiskněte OK pro jejich převod na optimální velikost.",
+  "Workspace": "Workspace",
   "_": "_"
 }
