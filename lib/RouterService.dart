@@ -1,10 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.dart';
-import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/main.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 
 class RouterService {
