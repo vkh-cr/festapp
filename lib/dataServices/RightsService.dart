@@ -65,7 +65,7 @@ class RightsService{
   }
 
   static bool canUpdateUsers() {
-    return currentUserOccasion?.isManager??false;
+    return isEditor() || isAdmin();
   }
 
   static bool canSignInOutUsersFromEvents() {

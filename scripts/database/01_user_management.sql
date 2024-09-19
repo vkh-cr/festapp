@@ -6,7 +6,7 @@ AS $$
   declare
   encrypted_pw text;
 BEGIN
-    IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+    IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE OR (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
         RETURN NULL;
     END IF;
 
@@ -68,8 +68,8 @@ DECLARE
     _value text;
     usr_info user_info%rowtype;
 BEGIN
-    -- Check if the caller is a manager for the occasion
-    IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE THEN
+    -- Check if the caller is a manager or admin for the occasion
+    IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403);
     END IF;
 
@@ -122,7 +122,7 @@ AS $$
 BEGIN
     -- Check if the current user has a record in user_companions where companion = usr
     IF NOT EXISTS (SELECT 1 FROM user_companions WHERE "user" = auth.uid() AND companion = usr) THEN
-        IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
         IF (select get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
@@ -163,7 +163,7 @@ BEGIN
 
     -- If the occasion is not open, raise an exception
     IF NOT occasion_open THEN
-        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE THEN
+        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
     END IF;
@@ -336,9 +336,8 @@ BEGIN
     FROM occasions
     WHERE id = oc;
 
-    -- If the occasion is not open, raise an exception
     IF NOT occasion_open THEN
-        IF (select get_is_manager_on_occasion(oc)) <> TRUE THEN
+        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE OR (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
     END IF;
