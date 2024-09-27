@@ -15,6 +15,6 @@ case 1:return"ColorFilter.matrix("+A.o(y.c)+")"
 case 2:return"ColorFilter.linearToSrgbGamma()"
 case 3:return"ColorFilter.srgbToLinearGamma()"}}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(B.UG,A.A)})()};
+y(B.UG,A.z)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_137",e:"endPart",h:b})})($__dart_deferred_initializers__,"67+y/hTEyPSolALGoUqWDWAl8fc=");
+a.eventLog.push({p:"main.dart.js_137",e:"endPart",h:b})})($__dart_deferred_initializers__,"/yzILez+v899UQWRwO7akKHy4ac=");
