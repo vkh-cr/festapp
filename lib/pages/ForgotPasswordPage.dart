@@ -1,7 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -9,6 +10,7 @@ import 'package:fstapp/widgets/FormFields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+@RoutePage()
 class ForgotPasswordPage extends StatefulWidget {
   static const ROUTE = "forgotPassword";
 
@@ -66,7 +68,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             setState(() {
                               _isSent = true;
                             });
-                            await DataService.resetPasswordForEmail(_emailController.text)
+                            await AuthService.resetPasswordForEmail(_emailController.text)
                                 .then((value) {
                               ToastHelper.Show("Password reset email has been sent.".tr());
                             })

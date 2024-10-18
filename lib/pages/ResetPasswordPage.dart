@@ -1,7 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 
+@RoutePage()
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
 
@@ -48,12 +50,12 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
   Future<void> _changePassword(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       TextInput.finishAutofillContext();
-      await DataService.changePassword(token!, _passwordController.text)
+      await AuthService.changePassword(token!, _passwordController.text)
           .then((value) async {
         if (value["code"] == 403 || value["code"] == 404) {
           ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
         } else if (value["code"] == 200) {
-          await DataService.login(value["email"], _passwordController.text);
+          await AuthService.login(value["email"], _passwordController.text);
           ToastHelper.Show("Password has been changed.".tr());
           RouterService.goBackOrInitial(context);
         }

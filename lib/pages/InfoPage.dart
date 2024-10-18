@@ -1,11 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -15,10 +17,11 @@ import '../services/js/js_interop.dart';
 import '../widgets/HtmlView.dart';
 import 'HtmlEditorPage.dart';
 
+@RoutePage()
 class InfoPage extends StatefulWidget {
-  final int? id;
+  int? id;
   static const ROUTE = "info";
-  const InfoPage({this.id, super.key});
+  InfoPage({@pathParam this.id, super.key});
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -35,6 +38,9 @@ class _InfoPageState extends State<InfoPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if(widget.id == null && context.routeData.hasPendingChildren){
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
     loadData();
   }
 
@@ -76,17 +82,16 @@ class _InfoPageState extends State<InfoPage> {
                   )
                       : Column(
                     children: [
-                      if (RightsHelper.isEditor())
+                      if (RightsService.isEditor())
                         ElevatedButton(
                           onPressed: () async {
-                            var result = await RouterService.navigateOccasion(
-                                context, HtmlEditorPage.ROUTE,
-                                extra: {HtmlEditorPage.parContent: item.description});
+                            var result = await RouterService.navigatePageInfo(
+                                context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
                             if (result != null) {
                               setState(() {
                                 item.description = result as String;
                               });
-                              await DataService.updateInformation(item);
+                              await DbInformation.updateInformation(item);
                               ToastHelper.Show("Content has been changed.".tr());
                             }
                           },
@@ -112,8 +117,8 @@ class _InfoPageState extends State<InfoPage> {
   Future<void> loadData() async {
     await loadDataOffline();
     setState(() {});
-    var allInfo = await DataService.getAllActiveInformation();
-    await OfflineDataHelper.saveAllInfo(allInfo);
+    var allInfo = await DbInformation.getAllActiveInformation();
+    await OfflineDataService.saveAllInfo(allInfo);
     await loadDataOffline();
     if (widget.id != null) {
       var focused = allInfo.firstWhereOrNull((b) => b.id == widget.id);
@@ -161,7 +166,7 @@ class _InfoPageState extends State<InfoPage> {
         _isItemLoading[index] = false;
       }
     });
-    await DataService.updateInfoDescription([info.id!]);
+    await DbInformation.updateInfoDescription([info.id!]);
     await fillDescriptionFromOffline(info);
     setState(() {
       _isItemLoading[index] = false;
@@ -169,7 +174,7 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> fillDescriptionFromOffline(InformationModel info) async {
-    var infoDesc = await OfflineDataHelper.getInfoDescription(info.id!.toString());
+    var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
     if (infoDesc != null) {
       setState(() {
         info.description = infoDesc.description ?? "";
@@ -178,7 +183,7 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   Future<void> loadDataOffline() async {
-    _informationList = (await OfflineDataHelper.getAllInfo()).filterByType(null);
+    _informationList = (await OfflineDataService.getAllInfo()).filterByType(null);
     _isItemLoading = {for (int i = 0; i < _informationList!.length; i++) i: false};
   }
 

@@ -3,7 +3,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapPlaceModel {
-  final int id;
+  final int? id;
   final String title;
   final String? description;
   final String? type;
@@ -23,7 +23,7 @@ class MapPlaceModel {
 
   factory MapPlaceModel.fromPlaceModel(PlaceModel place) {
     return MapPlaceModel(
-      id: place.id!,
+      id: place.id,
       title: place.title!,
       description: place.description,
       type: place.type,

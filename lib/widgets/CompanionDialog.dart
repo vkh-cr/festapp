@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 
 class CompanionDialog extends StatefulWidget {
@@ -30,10 +30,10 @@ class _CompanionDialogState extends State<CompanionDialog> {
   Future<void> _createCompanion() async {
     if (widget.companions.length < widget.maxCompanions &&
         _nameController.text.isNotEmpty) {
-      await CompanionHelper.create(_nameController.text);
+      await DbCompanions.create(_nameController.text);
       _nameController.clear();
       widget.companions =
-          await CompanionHelper.getAllCompanions();
+          await DbCompanions.getAllCompanions();
       setState(() {});
     }
   }
@@ -47,22 +47,22 @@ class _CompanionDialogState extends State<CompanionDialog> {
     if (!answer) {
       return;
     }
-    await CompanionHelper.delete(companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await DbCompanions.delete(companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
-    await CompanionHelper.signIn(context, widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await DbCompanions.signIn(context, widget.eventId, companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
-    await CompanionHelper.signOut(widget.eventId, companion);
-    widget.companions = await CompanionHelper.getAllCompanions();
+    await DbCompanions.signOut(widget.eventId, companion);
+    widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();
   }
@@ -79,7 +79,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
             children: [
               const Text(
                       "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.", )
-                  .tr(namedArgs: {"max_companions": DataService.globalSettingsModel!.maxCompanions!.toString()}),
+                  .tr(namedArgs: {"max_companions": SynchroService.globalSettingsModel!.maxCompanions!.toString()}),
               const SizedBox(height: 20),
               Visibility(
                 visible: widget.companions.length < widget.maxCompanions,

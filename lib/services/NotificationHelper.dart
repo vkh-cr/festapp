@@ -2,7 +2,8 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -65,7 +66,7 @@ class NotificationHelper {
   }
 
   static Future<void> checkForNotificationPermission(BuildContext context, [bool forceAsk = false]) async {
-    if (!DataService.isPwaInstalledOrNative() && !forceAsk) {
+    if (!SynchroService.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
     var allowed = getNotificationPermission();
@@ -120,20 +121,20 @@ class NotificationHelper {
   }
 
   static Future<void> login() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() || !getNotificationPermission() || !DataService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() || !getNotificationPermission() || !AuthService.isLoggedIn()) {
       return;
     }
 
     if (kIsWeb) {
-      await jsInterop.callFutureMethod('login', [DataService.currentUserId()]);
+      await jsInterop.callFutureMethod('login', [AuthService.currentUserId()]);
       return;
     }
 
-    await OneSignal.login(DataService.currentUserId());
+    await OneSignal.login(AuthService.currentUserId());
   }
 
   static Future<void> logout() async {
-    if (!AppConfig.isNotificationsCurrentlySupported() || !DataService.isLoggedIn()) {
+    if (!AppConfig.isNotificationsCurrentlySupported() || !AuthService.isLoggedIn()) {
       return;
     }
     if (kIsWeb) {

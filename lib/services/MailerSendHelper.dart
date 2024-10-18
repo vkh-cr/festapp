@@ -1,5 +1,4 @@
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -13,7 +12,7 @@ class MailerSendHelper{
     ];
 
     allVars.addAll(_getSalutationPresalutation(recipient));
-    await DataService.emailMailerSend(recipient.email!, "templateid", allVars);
+    await ImportService.emailMailerSend(recipient.email!, "templateid", allVars);
     ToastHelper.Show("E-mail with credentials was sent to: {email}.".tr(namedArgs: {"email":recipient.email!}));
     await Future.delayed(const Duration(milliseconds: 6000));
   }

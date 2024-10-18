@@ -1,11 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -16,16 +18,17 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:fstapp/components/map/MapDescriptionPopup.dart';
 import 'package:fstapp/components/map/MapLocationPinHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
-
+@RoutePage()
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
-  final int? id;
+   int? id;
   final PlaceModel? place;
 
-  const MapPage({this.id, this.place, super.key});
+  MapPage({@pathParam this.id, this.place, super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
@@ -53,10 +56,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+    if(widget.id == null && context.routeData.hasPendingChildren){
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
-        : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"],
-        DataService.globalSettingsModel!.defaultMapLocation["lng"]);
+        : LatLng(SynchroService.globalSettingsModel!.defaultMapLocation["lat"],
+        SynchroService.globalSettingsModel!.defaultMapLocation["lng"]);
     //reset static values
     selectedMarker = null;
     var placeModel = widget.place;
@@ -65,7 +71,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     } else {
       //new place
       if (placeModel.latLng.toString().isEmpty) {
-        placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
+        placeModel.latLng = SynchroService.globalSettingsModel!.defaultMapLocation;
       }
       pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
@@ -77,8 +83,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
     _markers.clear();
     List<PlaceModel> mapOfflinePlaces = [];
-    var offlinePlaces = await OfflineDataHelper.getAllPlaces();
-    _icons = await OfflineDataHelper.getAllIcons();
+    var offlinePlaces = await OfflineDataService.getAllPlaces();
+    _icons = await OfflineDataService.getAllIcons();
     offlinePlaces.sortPlaces(false);
 
     if (loadOtherGroups) {
@@ -105,12 +111,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     }
 
-    _icons = await DataService.getAllIcons();
+    _icons = await DbPlaces.getAllIcons();
     List<PlaceModel> mapPlaces = [];
     List<PlaceModel> showMapPlaces = [];
 
     if (loadOtherGroups) {
-      var groups = await DataService.getGroupsWithPlaces();
+      var groups = await DbGroups.getGroupsWithPlaces();
       for (var element in groups) {
         if (element.place == null) {
           continue;
@@ -119,10 +125,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         mapPlaces.add(element.place!);
       }
     } else {
-      mapPlaces = await DataService.getAllPlaces();
+      mapPlaces = await DbPlaces.getAllPlaces();
       showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
       showMapPlaces.sortPlaces(false);
-      await OfflineDataHelper.saveAllPlaces(mapPlaces);
+      await OfflineDataService.saveAllPlaces(mapPlaces);
     }
 
     if(placeId != null) {
@@ -156,7 +162,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   Future<void> addEventsToPlace(List<PlaceModel> places) async {
-    var events = await OfflineDataHelper.getAllEvents();
+    var events = await OfflineDataService.getAllEvents();
     for (var p in places) {
       var matches = events.where((e) => e.place?.id == p.id);
       p.events.addAll(matches);
@@ -221,7 +227,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   InteractiveFlag.flingAnimation |
                   InteractiveFlag.drag |
                   InteractiveFlag.scrollWheelZoom),
-                initialZoom: DataService.globalSettingsModel!.defaultMapZoom,
+                initialZoom: SynchroService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
                 initialCenter: _mapCenter!,
                 onTap: (_, location) => onMapTap(location)),
@@ -308,7 +314,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       return;
     }
-    await DataService.saveLocation(selectedMarker!.place.id,
+    await DbPlaces.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
     var markerToRemove =
