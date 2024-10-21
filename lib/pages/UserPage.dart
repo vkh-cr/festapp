@@ -304,7 +304,6 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Surname".tr(), userData?.surname ?? ""),
                 buildTextField("E-mail".tr(), userData?.email ?? ""),
                 buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), userData?.roleString ?? ""),
                 const SizedBox(
                   height: 16,
                 ),
