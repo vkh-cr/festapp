@@ -19,11 +19,7 @@ class RightsService{
       if (toUpdate.isEmpty) {
         toUpdate = extractOccasionLink(Uri.base.toString());
 
-        if(toUpdate.isEmpty) {
-          toUpdate = AppConfig.defaultLink;
-        }
         var rootLinks = AppRouter.getRootLinks();
-
         if (rootLinks.any((rootLink) => toUpdate == rootLink)) {
           toUpdate = "";
         }

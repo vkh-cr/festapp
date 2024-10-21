@@ -1,3 +1,4 @@
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionLinkModel.dart';
 import 'package:fstapp/dataModels/OccasionSettingsModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -70,9 +71,9 @@ class SynchroService {
 
   static bool isPwaInstalledOrNative() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed;
 
-  static Future<OccasionLinkModel> checkOccasionLink(String link) async {
-    var data = await _supabase.rpc("check_occasion_link",
-        params: {"link_txt": link});
+  static Future<OccasionLinkModel> getOccasionFromLink(String link) async {
+    var data = await _supabase.rpc("get_occasion_from_link",
+        params: {"link_txt": link, "org_id": AppConfig.organization});
     return OccasionLinkModel.fromJson(data);
   }
 

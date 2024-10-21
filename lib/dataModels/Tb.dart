@@ -81,6 +81,7 @@ class NewsTb{
 class UserNewsTb{
   const UserNewsTb();
   String get table => "user_news";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get news_id => "news_id";
   String get user => "user";
