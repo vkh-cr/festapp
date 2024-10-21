@@ -103,23 +103,21 @@ class TimeBlockHelper {
     return toReturn;
   }
 
-    static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(Iterable<TimeBlockItem> events) {
+  static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(Iterable<TimeBlockItem> events) {
     List<TimeBlockItem> morningEvents = events.where((e) => e.startTime.hour <= 12).toList();
     List<TimeBlockItem> afternoonEvents = events.where((e) => e.startTime.hour > 12 && e.startTime.hour < 18).toList();
     List<TimeBlockItem> eveningEvents = events.where((e) => e.startTime.hour >= 18).toList();
 
-    bool hasMultipleGroups = [
-      morningEvents,
-      afternoonEvents,
-      eveningEvents
-    ].where((group) => group.isNotEmpty).length > 1;
+    bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents].where((group) => group.isNotEmpty).length > 1;
+
+    TimeBlockGroup createGroup(String title, List<TimeBlockItem> events) {
+      return TimeBlockGroup(title: hasMultipleGroups ? title.tr() : "", events: events);
+    }
 
     return [
-      TimeBlockGroup(title: "", events: morningEvents), // No title for morning
-      if (hasMultipleGroups && afternoonEvents.isNotEmpty)
-        TimeBlockGroup(title: "Afternoon".tr(), events: afternoonEvents),
-      if (hasMultipleGroups && eveningEvents.isNotEmpty)
-        TimeBlockGroup(title: "Evening".tr(), events: eveningEvents),
+      createGroup("", morningEvents),
+      if (afternoonEvents.isNotEmpty) createGroup("Afternoon".tr(), afternoonEvents),
+      if (eveningEvents.isNotEmpty) createGroup("Evening".tr(), eveningEvents),
     ];
   }
 

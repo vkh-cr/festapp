@@ -146,7 +146,7 @@ class DbNews {
     await _supabase
         .from(Tb.user_news.table)
         .insert(
-        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId}
+        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId, Tb.user_news.occasion: RightsService.currentOccasion}
     ).select();
   }
 
