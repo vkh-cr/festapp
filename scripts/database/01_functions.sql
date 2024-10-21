@@ -21,9 +21,24 @@ declare
 
 begin
 
-  -- Existing checks for occasion user and editor
+  -- Check if the user already exists on the occasion
   IF (SELECT get_exists_on_occasion_user(usr, (SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
-      RETURN json_build_object('code', 403);
+
+      -- Check if the occasion is open
+      IF (SELECT is_open FROM occasions WHERE id = (SELECT occasion FROM events WHERE id = ev)) = TRUE THEN
+
+          -- Add the user to the occasion
+          PERFORM add_user_to_occasion((SELECT occasion FROM events WHERE id = ev), usr);
+
+          -- Recheck if the user now exists on the occasion
+          IF (SELECT get_exists_on_occasion_user(usr, (SELECT occasion FROM events WHERE id = ev))) <> TRUE THEN
+              -- If user still doesn't exist, return a 403 response
+              RETURN json_build_object('code', 403, 'message', 'Failed to add user to occasion');
+          END IF;
+      ELSE
+          -- If the occasion is not open, return a 403 response
+          RETURN json_build_object('code', 403, 'message', 'Occasion is not open');
+      END IF;
   END IF;
 
   IF auth.uid() <> usr THEN
