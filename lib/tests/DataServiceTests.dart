@@ -7,7 +7,7 @@ class DataServiceTests {
   static Future<void> test_check_occasion_link()
   async {
     await AuthService.login("bujnmi@gmail.com", "");
-    var tstData = await SynchroService.checkOccasionLink("conference2024");
+    var tstData = await SynchroService.getOccasionFromLink("conference2024");
   }
   static Future<void> test_has_event_allowed_role()
   async {

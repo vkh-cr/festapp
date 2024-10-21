@@ -15,7 +15,8 @@ class AppConfig {
   static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = false;
   static const String oneSignalAppId = '4c5b7280-510f-4628-8fb8-b4bdd4fed1b2';
-  static const String defaultLink = "2024";
+
+  static const int organization = 1;
 
   static const String webLink = "https://app.festivalslunovrat.cz";
   static const String appStoreLink = "https://apps.apple.com/us/app/festival-slunovrat/id6481703402";
