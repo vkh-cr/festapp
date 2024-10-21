@@ -59,7 +59,7 @@ return A.c(A.Tw(),$async$Dl)
 case 6:o.F(n,f)
 s=$.fv()
 u=s.bQ("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cr("event_users.user",u.gcY().c.a).cr("is_hidden",!1)
-r=$.ex
+r=$.en
 r.toString
 q=y.b
 p=y.u
@@ -70,10 +70,10 @@ l=J
 x=7
 return A.c(u.cr("occasion",r).rw(0,"start_time",!0).rw(0,"max_participants",!1),$async$Dl)
 case 7:o.F(n,m.bd(l.cd(f,new B.aTz(),q),!0,p))
-x=E.bY8()?8:9
+x=E.bY9()?8:9
 break
 case 8:u=s.bQ("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cr("is_group_event",!0).cr("is_hidden",!1)
-s=$.ex
+s=$.en
 s.toString
 o=C.b
 n=t
@@ -87,7 +87,7 @@ v=u
 x=1
 break
 case 4:u=$.fv().bQ("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cr("is_hidden",!1)
-s=$.ex
+s=$.en
 s.toString
 o=A
 n=J
@@ -178,7 +178,7 @@ B.aTS.prototype={
 $1(d){return d.b==this.a.b},
 $S:36}
 B.aTT.prototype={
-$1(d){return!J.bXQ(this.a,new B.aTR(d))},
+$1(d){return!J.bXR(this.a,new B.aTR(d))},
 $S:36}
 B.aTR.prototype={
 $1(d){return this.a.b==d.b},
@@ -198,4 +198,4 @@ x(A.c1,[B.aTI,B.aTJ,B.aTK,B.aTO,B.aTz,B.aTA,B.aTB,B.aTS,B.aTT,B.aTR])
 w(B.aTU,A.e3)})()
 var y={u:A.A("cW"),F:A.A("p<cW>"),c:A.A("y<cW>"),p:A.A("e7"),b:A.A("@"),v:A.A("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_215",e:"endPart",h:b})})($__dart_deferred_initializers__,"Dzp83cBKR+zvv7Bk/xtMuja6L8w=");
+a.eventLog.push({p:"main.dart.js_215",e:"endPart",h:b})})($__dart_deferred_initializers__,"XNsVpgL9saMdifAQM9w0lD5tUaA=");
