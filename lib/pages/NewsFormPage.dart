@@ -75,8 +75,8 @@ class _NewsFormPageState extends State<NewsFormPage> {
     }
   }
 
-  Future<void> _testPressed() async {
-    _sendPressed(process: true);
+  Future<void> _processAndSendPressed() async {
+    _sendPressed(process: true, isTest: true);
   }
 
   @override
@@ -141,7 +141,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     text: "Storno".tr(),
                   ),
                   ButtonsHelper.bottomBarButton(
-                    onPressed: _testPressed,
+                    onPressed: _processAndSendPressed,
                     text: "Process and Send".tr(),
                   ),
                   ButtonsHelper.bottomBarButton(
