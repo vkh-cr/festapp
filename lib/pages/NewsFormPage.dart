@@ -76,7 +76,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   }
 
   Future<void> _processAndSendPressed() async {
-    _sendPressed(process: true, isTest: true);
+    _sendPressed(process: true);
   }
 
   @override
