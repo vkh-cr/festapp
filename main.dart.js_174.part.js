@@ -14,8 +14,8 @@ C=c[0]
 A=c[2]
 B=a.updateHolder(c[74],B)
 B.wB.prototype={
-gBN(){return this.a},
-gB5(){return!1},
+gBO(){return this.a},
+gB6(){return!1},
 j(d){var y=this.c.j(0)
 return"Route{name: "+this.a+",  params: "+y+"}, children: null"},
 k(d,e){var y,x=this
@@ -31,4 +31,4 @@ y(B.wB,C.z)
 y(B.aiZ,B.wB)})()
 C.bQ(b.typeUniverse,JSON.parse('{"aiZ":{"wB":["zi"]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_174",e:"endPart",h:b})})($__dart_deferred_initializers__,"Vh0rWdvYmTd2rW67sOKClEv5nlY=");
+a.eventLog.push({p:"main.dart.js_174",e:"endPart",h:b})})($__dart_deferred_initializers__,"vZC4GWbd7uB5iNx/+nXsdysEi6k=");
