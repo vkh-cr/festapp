@@ -11,9 +11,19 @@ DECLARE
     _key   text;
     _value text;
     trimmed_data jsonb := '{}';
+    org bigint;
+    original_email text;
 BEGIN
     -- Trim and lower the email input
-    email := lower(trim(email));
+    original_email := lower(trim(email));
+
+    -- Retrieve organization from the occasion
+    SELECT organization INTO org
+    FROM occasions
+    WHERE id = oc;
+
+    -- Add organization prefix to the email for auth tables
+    email := format('%s+%s', org, original_email);
 
     -- Trim all values in the data JSONB object and build a new trimmed_data JSONB object
     FOR _key, _value IN
@@ -40,20 +50,23 @@ BEGIN
     usr := gen_random_uuid();
     encrypted_pw := crypt(password, gen_salt('bf'));
 
+    -- Insert into auth.users with the email prefixed with organization
     INSERT INTO auth.users
       (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, recovery_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token, email_change, email_change_token_new, recovery_token)
     VALUES
       ('00000000-0000-0000-0000-000000000000', usr, 'authenticated', 'authenticated', email, encrypted_pw, now(), NULL, NULL,
       '{"provider":"email","providers":["email"]}', user_meta_data, now(), now(), '', '', '', '');
 
+    -- Insert into auth.identities with the email prefixed with organization
     INSERT INTO auth.identities (id, provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at)
     VALUES
       (gen_random_uuid(), usr, usr, format('{"sub":"%s","email":"%s"}', usr::text, email)::jsonb, 'email', NULL, now(), now());
 
-    -- Insert into user_info ensuring non-null values from trimmed_data JSONB
-    INSERT INTO user_info (id, email_readonly, name, surname, sex, data)
-    VALUES (usr, email, COALESCE(trimmed_data->>'name', ''), COALESCE(trimmed_data->>'surname', ''), COALESCE(trimmed_data->>'sex', ''), trimmed_data);
+    -- Insert into user_info with the original email (without prefix)
+    INSERT INTO user_info (id, email_readonly, name, surname, sex, data, organization)
+    VALUES (usr, original_email, COALESCE(trimmed_data->>'name', ''), COALESCE(trimmed_data->>'surname', ''), COALESCE(trimmed_data->>'sex', ''), trimmed_data, org);
 
+    -- Add the user to the occasion
     PERFORM add_user_to_occasion(oc, usr);
 
     RETURN usr;

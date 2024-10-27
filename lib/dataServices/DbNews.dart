@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/NewsModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
@@ -92,7 +93,8 @@ class DbNews {
             Tb.log_notifications.occasion: RightsService.currentOccasion!,
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
-            Tb.log_notifications.heading: heading ?? headingDefault
+            Tb.log_notifications.heading: heading ?? headingDefault,
+            Tb.log_notifications.organization: AppConfig.organization,
           }
       );
 
