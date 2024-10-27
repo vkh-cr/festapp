@@ -92,7 +92,7 @@ t=$.yd().bQ("log_notifications")
 s=$.en
 s.toString
 x=8
-return A.c(t.jR(0,A.I(["occasion",s,"to",i,"content",r,"heading",d==null?e:d],y.N,y.X)),$async$afO)
+return A.c(t.jR(0,A.I(["occasion",s,"to",i,"content",r,"heading",d==null?e:d,"organization",1],y.N,y.X)),$async$afO)
 case 8:A.cJ(A.a1("Message has been sent.",null),C.aq)
 x=1
 break
@@ -342,4 +342,4 @@ D.aU0=new A.aT(6,null,null,null)
 D.Bn=new A.U(!0,C.ag,null,null,null,null,null,C.bf,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b_m=new A.bN("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_170",e:"endPart",h:b})})($__dart_deferred_initializers__,"9Wko7Ap+TVxklBgPDN64Wl2Q7bw=");
+a.eventLog.push({p:"main.dart.js_170",e:"endPart",h:b})})($__dart_deferred_initializers__,"u4RHPyhqCGd4B4sM4upKgLarBCw=");
