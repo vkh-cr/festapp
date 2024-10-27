@@ -91,6 +91,7 @@ class UserInfoTb{
   const UserInfoTb();
   String get table => "user_info";
   String get id => "id";
+  String get organization => "organization";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
@@ -240,6 +241,7 @@ class LogNotificationsTb{
   String get table => "log_notifications";
   String get id => "id";
   String get occasion => "occasion";
+  String get organization => "organization";
   String get created_at => "created_at";
   String get user_id => "user_id";
   String get heading => "heading";

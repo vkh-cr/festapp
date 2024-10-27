@@ -104,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                           setState(() {
                             _isLoading = true;
                           });
-                          await AuthService.login(_emailController.text, _passwordController.text)
+                          await AuthService.login(AppConfig.getUserPrefix(_emailController.text), _passwordController.text)
                               .then(_showToast)
                               .then(_refreshSignedInStatus)
                               .catchError(_onError);

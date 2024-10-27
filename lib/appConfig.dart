@@ -91,4 +91,8 @@ class AppConfig {
     LanguageModel(const Locale("de"), "Deutsch"),
     LanguageModel(const Locale("uk"), "українська"),
   ];
+
+  static String getUserPrefix(String email){
+      return "$organization+$email";
+  }
 }

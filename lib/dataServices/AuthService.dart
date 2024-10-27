@@ -1,4 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -38,7 +39,7 @@ class AuthService {
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
-    return await _supabase.functions.invoke("email", body: {"email": email});
+    return await _supabase.functions.invoke("email", body: {"email": email, "organization": AppConfig.organization});
   }
 
   static UserInfoModel? currentUser;
@@ -197,6 +198,7 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>> register(Map<String, dynamic> data) async {
+    data["organization"] = AppConfig.organization;
     var resp = await _supabase.functions.invoke("register", body: data);
     return resp.data;
   }
