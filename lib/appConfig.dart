@@ -80,8 +80,9 @@ class AppConfig {
       case "other": return color4;
     }
     return AppConfig.timetableSelectedColor;
+  }
 
-  static List<LanguageModel> AvailableLanguages = [
+  static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
 

@@ -101,9 +101,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                           }
                         },
                         child: SvgPicture.asset(
-                          height: 112,
-                          semanticsLabel: 'Festapp logo',
-                          'assets/icons/fstapplogo.svg',
+                          width: 200,
+                          semanticsLabel: 'BISCUP',
+                          'assets/icons/biscuplogo.svg',
                         ),
                       ),
                       const Spacer(),
