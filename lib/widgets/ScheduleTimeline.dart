@@ -35,11 +35,11 @@ class TimeLineItem{
       {
         return DotType.closed;
       }
-      else if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
+      else if(model.maxParticipantsNumber() > 0 && model.isFull())
       {
         return DotType.dot;
       }
-      else if (EventModel.canSignIn(model))
+      else if (model.maxParticipantsNumber() > 0 && !model.isFull())
       {
         return DotType.open;
       }
