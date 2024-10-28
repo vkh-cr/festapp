@@ -1,8 +1,9 @@
-import 'package:festapp/appConfig.dart';
-import 'package:festapp/data/DataService.dart';
-import 'package:festapp/models/EventModel.dart';
-import 'package:festapp/models/Tb.dart';
-import 'package:festapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 
 class TimetableController {
@@ -332,14 +333,14 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimetableItem item) async {
-    await DataService.addToMySchedule(item.id);
+    await DbEvents.addToMySchedule(item.id);
     setState(() {
       item.itemType = TimetableItemType.saved;
     });
   }
 
   Future<void> removeFromMyProgram(TimetableItem item) async {
-    await DataService.removeFromMySchedule(item.id);
+    await DbEvents.removeFromMySchedule(item.id);
     setState(() {
       item.itemType = TimetableItemType.canSave;
     });
@@ -454,11 +455,7 @@ class TimetableItem {
       return TimetableItemType.saved;
     } else if (model.isGroupEvent && model.isMyGroupEvent) {
       return TimetableItemType.signedIn;
-    } else if (model.currentParticipants != null &&
-        model.maxParticipants != null &&
-        (!AuthService.isLoggedIn() || model.isFull())) {
-      return TimetableItemType.nothing;
-    } else if (EventModel.canSignIn(model)) {
+    } else if (model.maxParticipantsNumber() > 0) {
       return TimetableItemType.nothing;
     }
     return TimetableItemType.canSave;
