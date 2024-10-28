@@ -1,12 +1,11 @@
-import 'package:festapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:timelines/timelines.dart';
-import 'package:festapp/appConfig.dart';
 
-import '../models/EventModel.dart';
 
 enum DotType {
   dot, open, closed
@@ -36,11 +35,11 @@ class TimeLineItem{
       {
         return DotType.closed;
       }
-      else if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
+      else if(model.maxParticipantsNumber() > 0 && model.isFull())
       {
         return DotType.dot;
       }
-      else if (EventModel.canSignIn(model))
+      else if (model.maxParticipantsNumber() > 0 && !model.isFull())
       {
         return DotType.open;
       }

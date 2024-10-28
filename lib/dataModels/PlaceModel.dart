@@ -1,7 +1,7 @@
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 
@@ -78,7 +78,7 @@ class PlaceModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deletePlace(this);
+    await DbPlaces.deletePlace(this);
   }
 
   @override
@@ -102,6 +102,6 @@ class PlaceModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updatePlace(this);
+    await DbPlaces.updatePlace(this);
   }
 }

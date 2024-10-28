@@ -1,22 +1,25 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/components/timetable/Timetable.dart';
 
-
+@RoutePage()
 class ProgramViewPage extends StatefulWidget {
   static const ROUTE = "timetable";
 
-  const ProgramViewPage.TimetablePage({Key? key}) : super(key: key);
+  const ProgramViewPage({super.key});
 
   @override
   _ProgramViewPageState createState() => _ProgramViewPageState();
@@ -46,7 +49,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   Future<void> loadData() async {
     await loadDataOffline();
 
-    await DataService.updateEvents(_events).whenComplete(() async {
+    await DbEvents.updateEvents(_events).whenComplete(() async {
       var placeIds = _events
           .map((e) => e.place?.id)
           .where((id) => id != null)
@@ -54,7 +57,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
           .toSet()
           .toList();
 
-      var places = await DataService.getPlacesIn(placeIds);
+      var places = await DbPlaces.getPlacesIn(placeIds);
 
       var timetablePlaces = List<TimeBlockPlace>.from(places
           .where((element) => !element.isHidden)
@@ -73,7 +76,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
       _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
       setupTabController(_days);
       await loadEventParticipants();
-      await DataService.synchronizeMySchedule();
+      await DbEvents.synchronizeMySchedule();
     });
   }
 
@@ -100,7 +103,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadDataOffline() async {
-    var places = await OfflineDataHelper.getAllPlaces();
+    var places = await OfflineDataService.getAllPlaces();
     places.sortPlaces();
     var timetablePlaces = List<TimeBlockPlace>.from(places
         .where((element) => !element.isHidden)
@@ -109,12 +112,12 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     _timetablePlaces.addAll(timetablePlaces);
 
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataHelper.getAllEvents();
+      var offlineEvents = await OfflineDataService.getAllEvents();
       _events.addAll(offlineEvents);
     }
 
-    await OfflineDataHelper.updateEventsWithMySchedule(_events);
-    await OfflineDataHelper.updateEventsWithGroupName(_events);
+    await OfflineDataService.updateEventsWithMySchedule(_events);
+    await OfflineDataService.updateEventsWithGroupName(_events);
 
     _items.clear();
     var items = _events
@@ -128,7 +131,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
   }
 
   Future<void> loadEventParticipants() async {
-    await DataService.loadEventsParticipantsAndStatus(_events);
+    await DbEvents.loadEventsParticipantsAndStatus(_events);
     for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {

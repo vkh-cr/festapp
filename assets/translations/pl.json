@@ -24,7 +24,7 @@
   "Role": "Rola",
   "Accommodation": "Zakwaterowanie",
   "Without accommodation": "Bez zakwaterowania",
-  "Administration": "Administracja",
+  "Event management": "Zarządzanie wydarzeniem",
   "Sign out": "Wyloguj się",
   "MYou have been signed out.": "Zostałeś wylogowany.",
   "FYou have been signed out.": "Zostałaś wylogowana.",
@@ -235,5 +235,6 @@
   "Reducing Images Size...": "Zmniejszanie rozmiaru obrazów...",
   "Large Images Detected": "Wykryto duże obrazy",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Niektóre obrazy są duże i mogą spowolnić aplikację. Naciśnij OK, aby przekonwertować je na optymalny rozmiar.",
+  "Workspace": "Workspace",
   "_": "_"
 }

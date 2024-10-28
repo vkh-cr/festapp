@@ -1,8 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/LanguageModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/appConfig.dart';
@@ -11,6 +12,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/foundation.dart'; // Add this import
 
+@RoutePage()
 class SettingsPage extends StatefulWidget {
   static const ROUTE = "settings";
   const SettingsPage({super.key});
@@ -37,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
     LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
-    bool isAppInstalled = DataService.isPwaInstalledOrNative();
+    bool isAppInstalled = SynchroService.isPwaInstalledOrNative();
 
     setState(() {
       _notificationsEnabled = isEnabled;

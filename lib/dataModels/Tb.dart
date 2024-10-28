@@ -24,6 +24,8 @@ class Tb {
   static RoleInfoTb role_info = const RoleInfoTb();
   static UserCompanionsTb user_companions = const UserCompanionsTb();
   static IconsTb icons = const IconsTb();
+  static OrganizationsTb organizations = const OrganizationsTb();
+  static OrganizationUsersTb organization_users = const OrganizationUsersTb();
 }
 class OccasionsTb{
   const OccasionsTb();
@@ -31,6 +33,7 @@ class OccasionsTb{
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get organization => "organization";
   String get is_hidden => "is_hidden";
   String get start_time => "start_time";
   String get end_time => "end_time";
@@ -60,9 +63,9 @@ class OccasionUsersTb{
   String get data_name => "name";
   String get data_surname => "surname";
   String get data_sex => "sex";
+  String get data_birthDate => "birthDate";
   String get data_phone => "phone";
   String get data_accommodation => "accommodation";
-  String get data_birthDate => "birthDate";
   String get data_isInvited => "is_invited";
 }
 class NewsTb{
@@ -78,6 +81,7 @@ class NewsTb{
 class UserNewsTb{
   const UserNewsTb();
   String get table => "user_news";
+  String get occasion => "occasion";
   String get created_at => "created_at";
   String get news_id => "news_id";
   String get user => "user";
@@ -87,6 +91,7 @@ class UserInfoTb{
   const UserInfoTb();
   String get table => "user_info";
   String get id => "id";
+  String get organization => "organization";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get email_readonly => "email_readonly";
@@ -145,6 +150,7 @@ class EventsTb{
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get occasion => "occasion";
   String get is_hidden => "is_hidden";
   String get title => "title";
   String get start_time => "start_time";
@@ -180,6 +186,7 @@ class ExclusiveGroupTb{
   const ExclusiveGroupTb();
   String get table => "exclusive_groups";
   String get id => "id";
+  String get occasion => "occasion";
   String get title => "title";
 }
 class ExclusiveEventsTb{
@@ -234,6 +241,7 @@ class LogNotificationsTb{
   String get table => "log_notifications";
   String get id => "id";
   String get occasion => "occasion";
+  String get organization => "organization";
   String get created_at => "created_at";
   String get user_id => "user_id";
   String get heading => "heading";
@@ -268,4 +276,23 @@ class IconsTb{
   String get updated_at => "updated_at";
   String get link => "link";
   String get data => "data";
+}
+class OrganizationsTb{
+  const OrganizationsTb();
+  String get table => "organizations";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get title => "title";
+  String get data => "data";
+}
+class OrganizationUsersTb{
+  const OrganizationUsersTb();
+  String get table => "organization_users";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get organization => "organization";
+  String get user => "user";
+  String get is_admin => "is_admin";
 }

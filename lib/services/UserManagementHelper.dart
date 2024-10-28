@@ -1,6 +1,7 @@
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ImportHelper.dart';
 import 'package:fstapp/services/NavigationService.dart';
@@ -29,7 +30,7 @@ class UserManagementHelper{
       return;
     }
 
-    var existingUsers = await DataService.getOccasionUsers();
+    var existingUsers = await DbUsers.getOccasionUsers();
 
     List<Map<String, dynamic>> toBeCreated = [];
     List<Map<String, dynamic>> toBeUpdated = [];
@@ -59,7 +60,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeCreated.forEach((u) async {
-          await DataService.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
+          await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
@@ -75,7 +76,7 @@ class UserManagementHelper{
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
+          await DbUsers.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
           ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
@@ -102,14 +103,14 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.user!, existing.occasion!);
+          await DbUsers.deleteUser(existing.user!, existing.occasion!);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
     }
   }
 
-  static Future<bool> unsafeChangeUserPassword(OccasionUserModel user) async {
+  static Future<bool> unsafeChangeUserPassword(BuildContext context, OccasionUserModel user) async {
     if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
@@ -118,12 +119,12 @@ class UserManagementHelper{
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
+    var pw = await DialogHelper.showPasswordInputDialog(context, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
     if(pw==null || pw.isEmpty)
     {
       throw Exception("Password has not been set.");
     }
-    var newId = await DataService.unsafeChangeUserPassword(user, pw);
+    var newId = await AuthService.unsafeChangeUserPassword(user, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");

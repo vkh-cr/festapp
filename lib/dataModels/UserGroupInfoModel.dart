@@ -1,6 +1,6 @@
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import 'PlaceModel.dart';
@@ -101,12 +101,12 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
   @override
   Future<void> deleteMethod() async {
-    await DataService.deleteUserGroupInfo(this);
+    await DbGroups.deleteUserGroupInfo(this);
   }
 
   @override
   Future<void> updateMethod() async {
-    await DataService.updateUserGroupInfo(this);
+    await DbGroups.updateUserGroupInfo(this);
   }
 
   @override

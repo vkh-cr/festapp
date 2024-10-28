@@ -15,7 +15,8 @@ class AppConfig {
   static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
-  static const String defaultLink = "csa2024";
+
+  static const int organization = 1;
 
   static const String webLink = "https://aksmcz.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/csa-2024/id6479449613";
@@ -39,6 +40,7 @@ class AppConfig {
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
+  static const timelineTextColor = Colors.black;
   static const mapPinColor = color1;
   static const newsPageColor = backgroundColor;
   static const infoPageColor = backgroundColor;
@@ -83,4 +85,8 @@ class AppConfig {
   static List<LanguageModel> availableLanguages = [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
+
+  static String getUserPrefix(String email){
+      return "$organization+$email";
+  }
 }

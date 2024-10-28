@@ -1,18 +1,24 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
-import 'package:fstapp/dataServices/CompanionHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
-import 'package:fstapp/dataServices/DataService.dart';
-import 'package:fstapp/dataServices/OfflineDataHelper.dart';
-import 'package:fstapp/dataServices/RightsHelper.dart';
+import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -26,11 +32,12 @@ import '../widgets/HtmlView.dart';
 import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
+@RoutePage()
 class EventPage extends StatefulWidget {
   static const ROUTE = "event";
   int? id;
 
-  EventPage({this.id, super.key});
+  EventPage({@pathParam this.id, super.key});
 
   @override
   _EventPageState createState() => _EventPageState();
@@ -71,16 +78,14 @@ class _EventPageState extends State<EventPage> {
           ),
           actions:[
             Visibility(
-              visible: showLoginLogoutButton() && RightsHelper.isApprover(),
+              visible: showLoginLogoutButton() && RightsService.isApprover(),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
                     onPressed: () async {
-                      RouterService.navigate(
+                      RouterService.navigatePageInfo(
                           context,
-                          "${CheckPage.ROUTE}/${_event!.id!}",
-                          extra:
-                          _event!.id!);
+                          CheckRoute(id: _event!.id!));
                     },
                     icon: const Icon(
                       Icons.qr_code_scanner,
@@ -127,7 +132,7 @@ class _EventPageState extends State<EventPage> {
                                           child: const Text("Sign out").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          ((DataService.globalSettingsModel
+                                          ((SynchroService.globalSettingsModel
                                                       ?.maxCompanions ??
                                                   0) >
                                               0),
@@ -142,13 +147,13 @@ class _EventPageState extends State<EventPage> {
                                       )),
                                   Visibility(
                                     visible: showLoginLogoutButton() &&
-                                        (RightsHelper.isEditor()),
+                                        (RightsService.isEditor()),
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: ElevatedButton(
                                           onPressed: () async {
                                             _queriedParticipants =
-                                                await DataService
+                                                await DbUsers
                                                     .getAllUsersBasics();
                                             _queriedParticipants
                                                 .forEach((q) => {
@@ -170,24 +175,23 @@ class _EventPageState extends State<EventPage> {
                                     ),
                                   ),
                                   Visibility(
-                                      visible: RightsHelper.isEditor() ||
-                                          (DataService.isGroupLeader() &&
+                                      visible: RightsService.isEditor() ||
+                                          (AuthService.isGroupLeader() &&
                                               _event != null &&
                                               _event!.isGroupEvent),
                                       child: ElevatedButton(
                                           onPressed: () =>
-                                              RouterService.navigateOccasion(
+                                              RouterService.navigatePageInfo(
                                                       context,
-                                                      HtmlEditorPage.ROUTE,
-                                                      extra: {HtmlEditorPage.parContent:
-                                                          _event!.description})
+                                                      HtmlEditorRoute(content: {HtmlEditorPage.parContent:
+                                                      _event!.description}))
                                                   .then((value) async {
                                                 if (value != null) {
                                                   var changed = value as String;
                                                   if (_groupInfoModel != null) {
                                                     _groupInfoModel!
                                                         .description = changed;
-                                                    await DataService
+                                                    await DbGroups
                                                         .updateUserGroupInfo(
                                                             _groupInfoModel!);
                                                   } else {
@@ -195,7 +199,7 @@ class _EventPageState extends State<EventPage> {
                                                       _event!.description =
                                                           changed;
                                                     });
-                                                    await DataService
+                                                    await DbEvents
                                                         .updateEvent(_event!);
                                                   }
                                                   await loadData(_event!.id!);
@@ -245,7 +249,7 @@ class _EventPageState extends State<EventPage> {
                             )))),
                 Visibility(
                     visible: EventModel.isEventSupportingSignIn(_event) &&
-                        !DataService.isLoggedIn(),
+                        !AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -255,7 +259,7 @@ class _EventPageState extends State<EventPage> {
                     )),
                 Visibility(
                     visible: EventModel.isEventFull(_event) &&
-                        DataService.isLoggedIn(),
+                        AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -279,7 +283,7 @@ class _EventPageState extends State<EventPage> {
                                 onEventPressed: _eventPressed,
                                 nodePosition: 0.3)))),
                 Visibility(
-                  visible: RightsHelper.isEditor() &&
+                  visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
                   child: ExpansionTile(
                     title: Row(children: [
@@ -373,7 +377,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> addToMySchedule() async {
-    if (!await DataService.addToMySchedule(_event!.id!)) {
+    if (!await DbEvents.addToMySchedule(_event!.id!)) {
       return;
     }
     setState(() {
@@ -382,14 +386,14 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> removeFromMySchedule() async {
-    await DataService.removeFromMySchedule(_event!.id!);
+    await DbEvents.removeFromMySchedule(_event!.id!);
     setState(() {
       _event!.isEventInMySchedule = false;
     });
   }
 
   bool showLoginLogoutButton() {
-    return DataService.isLoggedIn() &&
+    return AuthService.isLoggedIn() &&
         !isLoadingEvent &&
         EventModel.isEventSupportingSignIn(_event);
   }
@@ -399,18 +403,18 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     isLoadingEvent = false;
-    await OfflineDataHelper.saveEventDescription(_event!);
-    if (RightsHelper.isEditor()) {
+    await OfflineDataService.saveEventDescription(_event!);
+    if (RightsService.isEditor()) {
       await loadParticipants(id);
     }
   }
 
   Future<void> loadOfflineData(int id) async {
-    var allEvents = await OfflineDataHelper.getAllEvents();
+    var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
-      if (event.isGroupEvent && DataService.isLoggedIn()) {
-        var userInfo = await OfflineDataHelper.getUserInfo();
+      if (event.isGroupEvent && AuthService.isLoggedIn()) {
+        var userInfo = await OfflineDataService.getUserInfo();
         if (userInfo?.userGroup != null) {
           event.title = userInfo!.userGroup!.title;
           event.isMyGroupEvent = true;
@@ -419,17 +423,17 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.userGroup;
         }
       } else {
-        var descr = await OfflineDataHelper.getEventDescription(id.toString());
+        var descr = await OfflineDataService.getEventDescription(id.toString());
         event.description = descr?.description;
 
         if (event.place?.id != null) {
-          var place = (await OfflineDataHelper.getAllPlaces())
+          var place = (await OfflineDataService.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
           event.place = place;
         } else {
           event.place = null;
         }
-        event.isEventInMySchedule = await OfflineDataHelper.isEventSaved(id);
+        event.isEventInMySchedule = await OfflineDataService.isEventSaved(id);
       }
 
       var childEvents = allEvents
@@ -448,16 +452,16 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> loadParticipants(int id) async {
-    _participants = await DataService.getParticipantsPerEvent(id);
+    _participants = await DbEvents.getParticipantsPerEvent(id);
     setState(() => {});
   }
 
   Future<void> loadEvent(int eventId) async {
-    var event = await DataService.getEvent(eventId);
+    var event = await DbEvents.getEvent(eventId);
 
     if (event.isGroupEvent && event.isMyGroupEvent) {
-      var group = await DataService.getUserGroupInfo(
-          DataService.currentUserGroup()!.id!);
+      var group = await DbGroups.getUserGroupInfo(
+          AuthService.currentUserGroup()!.id!);
       if (group == null) {
         RouterService.goBack(context);
         return;
@@ -472,7 +476,7 @@ class _EventPageState extends State<EventPage> {
     }
 
     var currentParticipants =
-        await DataService.getParticipantsPerEventCount(eventId);
+        await DbEvents.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
     _event = event;
     _childDots.clear();
@@ -487,23 +491,23 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signIn([UserInfoModel? participant]) async {
-    await DataService.signInToEvent(context, _event!.id!, participant);
+    await DbEvents.signInToEvent(context, _event!.id!, participant);
     await loadData(_event!.id!);
   }
 
   Future<void> signOut() async {
-    await DataService.signOutFromEvent(_event!.id!);
+    await DbEvents.signOutFromEvent(_event!.id!);
     await loadData(_event!.id!);
   }
 
   Future<void> signInCompanion() async {
-    _companions = await CompanionHelper.getAllCompanions();
+    _companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return CompanionDialog(
           eventId: _event!.id!,
-          maxCompanions: DataService.globalSettingsModel!.maxCompanions!,
+          maxCompanions: SynchroService.globalSettingsModel!.maxCompanions!,
           companions: _companions,
           refreshData: () async {
             await loadData(widget.id!);
@@ -532,7 +536,7 @@ class _EventPageState extends State<EventPage> {
                 TextButton(
                   onPressed: () async {
                     RouterService.goBack(context);
-                    await DataService.signOutFromEvent(
+                    await DbEvents.signOutFromEvent(
                         _event!.id!, participant);
                     await loadData(_event!.id!);
                   },

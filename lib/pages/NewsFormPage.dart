@@ -1,15 +1,18 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/DataService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
 
+@RoutePage()
 class NewsFormPage extends StatefulWidget {
   static const ROUTE = "newsForm";
 
@@ -35,7 +38,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    _currentUser = await DataService.getCurrentUserInfo();
+    _currentUser = await DbUsers.getCurrentUserInfo();
     setState(() {});
   }
 
@@ -63,7 +66,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "heading_default": _currentUser!.name,
         "with_notification":
             _formKey.currentState?.fields["with_notification"]!.value,
-        if (isTest) "to": [DataService.currentUserId()],
+        if (isTest) "to": [AuthService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
       Navigator.pop(context, toReturn);
@@ -72,7 +75,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
     }
   }
 
-  Future<void> _testPressed() async {
+  Future<void> _processAndSendPressed() async {
     _sendPressed(process: true);
   }
 
@@ -138,7 +141,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     text: "Storno".tr(),
                   ),
                   ButtonsHelper.bottomBarButton(
-                    onPressed: _testPressed,
+                    onPressed: _processAndSendPressed,
                     text: "Process and Send".tr(),
                   ),
                   ButtonsHelper.bottomBarButton(
