@@ -110,7 +110,7 @@ class UserManagementHelper{
     }
   }
 
-  static Future<bool> unsafeChangeUserPassword(OccasionUserModel user) async {
+  static Future<bool> unsafeChangeUserPassword(BuildContext context, OccasionUserModel user) async {
     if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
@@ -119,7 +119,7 @@ class UserManagementHelper{
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
+    var pw = await DialogHelper.showPasswordInputDialog(context, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
     if(pw==null || pw.isEmpty)
     {
       throw Exception("Password has not been set.");

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/OrganizationModel.dart';
@@ -54,12 +55,14 @@ class DbUsers {
   }
 
   static Future<String?> unsafeCreateUser(int occasion, String email, String pw, dynamic data) async {
-    var newId = await _supabase.rpc("create_user_with_data",
-        params: {"oc": occasion, "email": email, "password": pw, "data": data});
+    var newId = await _supabase.rpc("create_user_in_organization_with_data",
+        params: {"org": AppConfig.organization, "email": email, "password": pw, "data": data});
     if (newId==null)
     {
       throw Exception("Creating of user has failed.");
     }
+    await _supabase.rpc("add_user_to_occasion",
+        params: {"oc": occasion, "usr": newId});
     return newId;
   }
 

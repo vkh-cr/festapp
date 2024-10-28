@@ -35,7 +35,7 @@ class DialogHelper{
           ],
           builder: (person) => ListTile(
             title: Text(person.name!),
-            subtitle: Text(person.surname!),
+            subtitle: Text(person.surname??""),
             trailing: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
