@@ -1,29 +1,33 @@
-CREATE OR REPLACE FUNCTION create_user_with_data(oc bigint, email text, password text, data jsonb)
+CREATE OR REPLACE FUNCTION create_user_in_organization_with_data(org bigint, email text, password text, data jsonb)
 RETURNS uuid
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-    occasion_open BOOLEAN;
+    is_registration_enabled BOOLEAN;
     usr uuid;
     encrypted_pw text;
     user_meta_data jsonb := '{}';
     _key   text;
     _value text;
     trimmed_data jsonb := '{}';
-    org bigint;
     original_email text;
 BEGIN
     -- Trim and lower the email input
     original_email := lower(trim(email));
 
-    -- Retrieve organization from the occasion
-    SELECT organization INTO org
-    FROM occasions
-    WHERE id = oc;
-
     -- Add organization prefix to the email for auth tables
     email := format('%s+%s', org, original_email);
+
+    -- Retrieve IS_REGISTRATION_ENABLED value from organizations.data JSON
+    SELECT (organizations.data->>'IS_REGISTRATION_ENABLED')::boolean INTO is_registration_enabled
+    FROM organizations
+    WHERE id = org;
+
+    -- Check if registration is enabled or if the user is a manager on any occasion
+    IF NOT is_registration_enabled AND NOT get_is_manager_on_any_occasion() THEN
+        RETURN jsonb_build_object('code', 403, 'error', 'Registration is disabled for this organization');
+    END IF;
 
     -- Trim all values in the data JSONB object and build a new trimmed_data JSONB object
     FOR _key, _value IN
@@ -35,17 +39,6 @@ BEGIN
             trimmed_data := jsonb_set(trimmed_data, array[_key], 'null'::jsonb, true);
         END IF;
     END LOOP;
-
-    -- Check if the occasion is open
-    SELECT is_open INTO occasion_open
-    FROM occasions
-    WHERE id = oc;
-
-    IF NOT occasion_open THEN
-        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE OR (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
-            RETURN jsonb_build_object('code', 403);
-        END IF;
-    END IF;
 
     usr := gen_random_uuid();
     encrypted_pw := crypt(password, gen_salt('bf'));
@@ -65,9 +58,6 @@ BEGIN
     -- Insert into user_info with the original email (without prefix)
     INSERT INTO user_info (id, email_readonly, name, surname, sex, data, organization)
     VALUES (usr, original_email, COALESCE(trimmed_data->>'name', ''), COALESCE(trimmed_data->>'surname', ''), COALESCE(trimmed_data->>'sex', ''), trimmed_data, org);
-
-    -- Add the user to the occasion
-    PERFORM add_user_to_occasion(oc, usr);
 
     RETURN usr;
 END;

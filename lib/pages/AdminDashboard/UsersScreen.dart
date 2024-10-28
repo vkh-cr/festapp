@@ -99,7 +99,7 @@ class _UsersScreenState extends State<UsersScreen> {
 
     try {
       for (var u in users) {
-        await UserManagementHelper.unsafeChangeUserPassword(u);
+        await UserManagementHelper.unsafeChangeUserPassword(context, u);
         ToastHelper.Show("Password has been changed.".tr());
       }
     } on Exception catch (e) {

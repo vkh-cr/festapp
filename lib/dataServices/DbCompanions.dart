@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -29,7 +30,8 @@ class DbCompanions {
   }
 
   static Future<void> create(String name) async {
-    await _supabase.rpc("create_companion", params: {
+    await _supabase.rpc("create_companion_in_organization", params: {
+      'org': AppConfig.organization,
       'oc': RightsService.currentOccasion,
       'usr': RightsService.currentUserOccasion!.user!,
       'c_name': name,
