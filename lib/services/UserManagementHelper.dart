@@ -1,16 +1,14 @@
-import 'dart:math';
-import 'package:avapp/models/UserInfoModel.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/services/DialogHelper.dart';
-import 'package:avapp/services/ImportHelper.dart';
-import 'package:avapp/services/MailerSendHelper.dart';
-import 'package:avapp/services/NavigationService.dart';
-import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ImportHelper.dart';
+import 'package:fstapp/services/NavigationService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 
 class UserManagementHelper{
   static Future<void> import(BuildContext context) async {
@@ -19,12 +17,12 @@ class UserManagementHelper{
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element[UserInfoModel.accommodationColumn]?.toLowerCase() == "storno");
+    var addOrUpdateUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Importing users".tr(),
-        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
         confirmButtonMessage: "Proceed".tr());
 
     if(!really)
@@ -32,13 +30,13 @@ class UserManagementHelper{
       return;
     }
 
-    var existingUsers = await DataService.getUsers();
+    var existingUsers = await DbUsers.getOccasionUsers();
 
     List<Map<String, dynamic>> toBeCreated = [];
     List<Map<String, dynamic>> toBeUpdated = [];
     for(var u in addOrUpdateUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email!.toLowerCase() == u[UserInfoModel.emailReadonlyColumn]!.toLowerCase());
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email]!.toLowerCase() == u[Tb.user_info.email_readonly]!.toLowerCase());
       if(existing == null) {
         toBeCreated.add(u);
         continue;
@@ -47,7 +45,7 @@ class UserManagementHelper{
         continue;
       }
       else{
-        u[UserInfoModel.idColumn] = existing.id;
+        u[Tb.occasion_users.user] = existing.user;
         toBeUpdated.add(u);
       }
     }
@@ -57,13 +55,13 @@ class UserManagementHelper{
           "Creating users".tr(),
           "New users found. Do you want to create them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeCreated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
+          await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
+          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
@@ -73,22 +71,22 @@ class UserManagementHelper{
           "Updating users".tr(),
           "These users have some changes. Do you want to update them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[UserInfoModel.emailReadonlyColumn]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DataService.updateUserAsJson(u);
-          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[UserInfoModel.emailReadonlyColumn]}));
+          await DbUsers.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
+          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
 
-    List<UserInfoModel> toBeDeleted = [];
+    List<OccasionUserModel> toBeDeleted = [];
     for(var u in deleteUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.email == u[UserInfoModel.emailReadonlyColumn]);
-      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[UserInfoModel.emailReadonlyColumn] == u[UserInfoModel.emailReadonlyColumn]);
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email] == u[Tb.user_info.email_readonly]);
+      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[Tb.user_info.email_readonly] == u[Tb.user_info.email_readonly]);
 
       if(existing != null && duplicated == null) {
         toBeDeleted.add(existing);
@@ -105,74 +103,33 @@ class UserManagementHelper{
 
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
-          await DataService.deleteUser(existing.id!);
+          await DbUsers.deleteUser(existing.user!, existing.occasion!);
           ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
     }
   }
 
-  static Future<void> generateAndUpdatePasswordFromUser(UserInfoModel u, bool ignoreIfAlreadySignedIn)
-  async {
-    //ignore already signed users
-    if(ignoreIfAlreadySignedIn)
-    {
-      var time = await DataService.getLastTimeSignIn(u.id!);
-      if(time!=null)
-      {
-        ToastHelper.Show("Password from {user} was not changed because it was already used to sign in.".tr(namedArgs: {"user":u.email!}));
-        return;
-      }
-    }
-
-    var random = Random();
-    var numberFormat = NumberFormat("####");
-
-    var password = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-    await DataService.updateUserPassword(u, password);
-    ToastHelper.Show("Password from {user} has been changed.".tr(namedArgs: {"user":u.email!}));
-    await MailerSendHelper.sendPassword(u, password);
-  }
-
-  static Future<String> unsafeCreateNewUser(String? email) async {
-    if(email == null)
+  static Future<bool> unsafeChangeUserPassword(BuildContext context, OccasionUserModel user) async {
+    if(user.data?[Tb.occasion_users.data_email] == null)
     {
       throw Exception("User must have an e-mail!");
     }
-
-    var random = Random();
-    var numberFormat = NumberFormat("####");
-    var pw = "${AppConfig.generatedPasswordPrefix}${numberFormat.format((random.nextInt(8999)+1000))}";
-
-    var newId = await DataService.unsafeCreateUser(email, pw);
-    if(newId==null)
-    {
-      throw Exception("Creating of user has failed.");
-    }
-    return newId;
-  }
-
-  static Future<String> unsafeChangeUserPassword(UserInfoModel user) async {
-    if(user.email == null)
-    {
-      throw Exception("User must have an e-mail!");
-    }
-    if(user.id == null)
+    if(user.user == null)
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(NavigationService.navigatorKey.currentContext!, "Zadej heslo pro uživatele ${user.email}. Uživatel obdrží e-mail s přihlašovacími údaji.", "vlož zde", "Storno", "Ok");
-    if(pw==null)
+    var pw = await DialogHelper.showPasswordInputDialog(context, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
+    if(pw==null || pw.isEmpty)
     {
-      throw Exception("You must set password!");
+      throw Exception("Password has not been set.");
     }
-
-    var newId = await DataService.unsafeChangeUserPassword(user.email!, pw);
+    var newId = await AuthService.unsafeChangeUserPassword(user, pw);
     if(newId==null)
     {
       throw Exception("Changing of the password has failed.");
     }
-    return pw;
+    return true;
   }
 
 }

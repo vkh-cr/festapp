@@ -1,193 +1,201 @@
-import 'package:avapp/appConfig.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/services/MapIconService.dart';
-import 'package:avapp/services/NavigationHelper.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/map/MapPlaceModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataModels/IconModel.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fstapp/components/map/MapDescriptionPopup.dart';
+import 'package:fstapp/components/map/MapLocationPinHelper.dart';
+import 'package:fstapp/components/map/MapMarkerWithText.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
-import '../models/PlaceModel.dart';
-
-class MarkerWithText extends Marker {
-  LatLng? oldPoint;
-  final PlaceModel place;
-  Function(MarkerWithText marker)? editAction;
-
-  MarkerWithText(
-      {required LatLng point,
-      required WidgetBuilder builder,
-      required this.place,
-      Key? key,
-      double width = 30.0,
-      double height = 30.0,
-      bool? rotate,
-      Offset? rotateOrigin,
-      AlignmentGeometry? rotateAlignment,
-      AnchorPos? anchorPos,
-      this.editAction,
-      LatLng? oldPoint})
-      : super(
-          point: point,
-          builder: builder,
-          key: key,
-          width: width,
-          height: height,
-          rotate: rotate,
-          rotateOrigin: rotateOrigin,
-          rotateAlignment: rotateAlignment,
-          anchorPos: anchorPos,
-        );
-
-  MarkerWithText cloneWithNewPoint(LatLng point) {
-    return MarkerWithText(
-      oldPoint: oldPoint,
-      place: place,
-      point: point,
-      width: width,
-      height: height,
-      builder: builder,
-      anchorPos: anchorPos,
-      editAction: editAction,
-    );
-  }
-}
-
+@RoutePage()
 class MapPage extends StatefulWidget {
-  static const ROUTE = "/map";
-  int? id;
-  PlaceModel? place;
+  static const ROUTE = "map";
+   int? id;
+  final PlaceModel? place;
 
-  MapPage({this.id, this.place,  Key? key}) : super(key: key);
+  MapPage({@pathParam this.id, this.place, super.key});
 
   @override
   State<MapPage> createState() => _MapPageState();
 }
 
-class _MapPageState extends State<MapPage> {
-  final List<MarkerWithText> _markers = [];
-  final List<MarkerWithText> _selectedMarkers = [];
-  static MarkerWithText? selectedMarker;
-  String pageTitle = AppConfig.map_page;
+class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
+
+  static const double singlePlaceZoom = 17.7;
+  late final _animatedMapController = AnimatedMapController(vsync: this);
+
+  List<IconModel> _icons = [];
+  final List<MapMarkerWithText> _markers = [];
+  final List<MapMarkerWithText> _selectedMarkers = [];
+  static MapMarkerWithText? focusedMarker;
+  static MapMarkerWithText? selectedMarker;
+  String pageTitle = AppConfig.mapTitle;
   bool isOnlyEditMode = false;
 
   /// Used to trigger showing/hiding of popups.
   final PopupController _popupLayerController = PopupController();
 
-  final MapController mapController = MapController();
+  FlutterMap? _map;
+  LatLng? _mapCenter;
 
-  void didChangeDependencies() {
+  @override
+  void didChangeDependencies() async {
     super.didChangeDependencies();
+    if(widget.id == null && context.routeData.hasPendingChildren){
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
+    _mapCenter = widget.place != null
+        ? LatLng(widget.place!.getLat(), widget.place!.getLng())
+        : LatLng(SynchroService.globalSettingsModel!.defaultMapLocation["lat"],
+        SynchroService.globalSettingsModel!.defaultMapLocation["lng"]);
     //reset static values
     selectedMarker = null;
     var placeModel = widget.place;
-    if(placeModel == null || placeModel.latLng == null) {
+    if (placeModel == null || placeModel.latLng == null) {
       loadPlaces(placeId: widget.id);
-    }
-    else{
-      if(placeModel.latLng.toString().isEmpty)
-      {
-        placeModel.latLng = DataService.globalSettingsModel!.defaultMapLocation;
+    } else {
+      //new place
+      if (placeModel.latLng.toString().isEmpty) {
+        placeModel.latLng = SynchroService.globalSettingsModel!.defaultMapLocation;
       }
-      pageTitle = placeModel.title ?? AppConfig.map_page;
+      pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
       runEditPositionMode(_markers.single);
       isOnlyEditMode = true;
     }
   }
 
-  Widget type2icon(String? placeType) {
-    SvgPicture? fill;
-    var iconLink = MapIconHelper.getIconAddress(placeType);
-    if (iconLink != null) {
-      fill = SvgPicture.asset(
-        iconLink,
-        colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-      );
-    }
-    if (fill != null) {
-      return Stack(children: [
-        const Icon(Icons.location_pin, size: 58, color: AppConfig.color1),
-        Positioned(
-          top: 7.5,
-          left: 14.5,
-          child: Container(
-              width: 29.0,
-              height: 29.0,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              )),
-        ),
-        Positioned(
-            top: 12,
-            left: 19,
-            width: 19,
-            height: 19,
-            child: Container(alignment: Alignment.center, child: fill))
-      ]);
-    }
-    return const Icon(Icons.location_pin, size: 36, color: AppConfig.color1);
-  }
-
   Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
-
     _markers.clear();
-    List<PlaceModel> places = [];
-    if (placeId != null && !loadOtherGroups) {
-      var place = await DataService.getPlace(placeId);
-      places = [place];
-      setMapToOnePlace(place);
+    List<PlaceModel> mapOfflinePlaces = [];
+    var offlinePlaces = await OfflineDataService.getAllPlaces();
+    _icons = await OfflineDataService.getAllIcons();
+    offlinePlaces.sortPlaces(false);
+
+    if (loadOtherGroups) {
+      mapOfflinePlaces = offlinePlaces;
+    } else {
+      mapOfflinePlaces =
+          offlinePlaces.where((element) => !element.isHidden).toList();
     }
-    else if (loadOtherGroups)
-    {
-      var groups = await DataService.getGroupsWithPlaces();
+
+    if(placeId != null) {
+      var p = offlinePlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p != null) {
+        mapOfflinePlaces.add(p);
+      }
+    }
+
+    await addEventsToPlace(mapOfflinePlaces);
+    addPlacesToMap(mapOfflinePlaces);
+
+    if(placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p!=null){
+        setMapToOnePlaceAndShowPopup(placeId, p);
+      }
+    }
+
+    _icons = await DbPlaces.getAllIcons();
+    List<PlaceModel> mapPlaces = [];
+    List<PlaceModel> showMapPlaces = [];
+
+    if (loadOtherGroups) {
+      var groups = await DbGroups.getGroupsWithPlaces();
       for (var element in groups) {
-        if(element.place == null) {
+        if (element.place == null) {
           continue;
         }
         element.place!.title = element.title;
-        places.add(element.place!);
+        mapPlaces.add(element.place!);
+      }
+    } else {
+      mapPlaces = await DbPlaces.getAllPlaces();
+      showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
+      showMapPlaces.sortPlaces(false);
+      await OfflineDataService.saveAllPlaces(mapPlaces);
+    }
+
+    if(placeId != null) {
+      var p = mapPlaces.firstWhereOrNull((p)=>p.id == placeId);
+      if(p != null) {
+        showMapPlaces.add(p);
       }
     }
-    else {
-      places = await DataService.getMapPlaces();
+
+    if (showMapPlaces.isNotEmpty) {
+      _markers.clear();
+      await addEventsToPlace(showMapPlaces);
+      addPlacesToMap(showMapPlaces);
     }
-    addPlacesToMap(places);
+
+    if(placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
+        setMapToOnePlaceAndShowPopup(placeId, p);
+      }
+    }
+  }
+
+  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
+    var m = _markers.firstWhere((m)=>m.place.id == placeId);
+    _markers.remove(m);
+    _markers.add(m);
+    focusedMarker = m;
+    _popupLayerController.showPopupsOnlyFor([m]);
+    setMapToOnePlace(p);
+  }
+
+  Future<void> addEventsToPlace(List<PlaceModel> places) async {
+    var events = await OfflineDataService.getAllEvents();
+    for (var p in places) {
+      var matches = events.where((e) => e.place?.id == p.id);
+      p.events.addAll(matches);
+    }
   }
 
   void setMapToOnePlace(PlaceModel place) {
-    setState(() {
-      mapController.move(LatLng(place.getLat(), place.getLng()),
-          mapController.zoom);
-      pageTitle = place.title!;
-    });
+    _mapCenter = LatLng(place.getLat(), place.getLng());
+    if (_map != null) {
+      _animatedMapController.animateTo(dest: _mapCenter!, zoom: singlePlaceZoom);
+    }
   }
 
   void addPlacesToMap(List<PlaceModel> places) {
-    var mappedMarkers = places
-        .map(
-          (place) => MarkerWithText(
-            place: place,
-            point: LatLng(place.getLat(), place.getLng()),
-            width: 60,
-            height: 60,
-            builder: (_) => type2icon(place.type),
-            anchorPos: AnchorPos.align(AnchorAlign.top),
-            editAction: runEditPositionMode,
-          ),
-        )
-        .toList();
+    var mappedMarkers = places.map((place) {
+      var mapPlace = MapPlaceModel.fromPlaceModel(place);
+      return MapMarkerWithText(
+        place: mapPlace,
+        point: mapPlace.latLng,
+        width: 60,
+        height: 60,
+        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(mapPlace.type, _icons) : null,
+        alignment: Alignment.topCenter,
+        editAction: runEditPositionMode,
+      );
+    }).toList();
+
     setState(() {
-      mappedMarkers.forEach((m) => _markers.add(m));
+      _markers.addAll(mappedMarkers);
     });
   }
 
-  runEditPositionMode(MarkerWithText marker) {
+  runEditPositionMode(MapMarkerWithText marker) {
     _popupLayerController.hideAllPopups();
     marker.oldPoint = marker.point;
     setState(() {
@@ -203,25 +211,31 @@ class _MapPageState extends State<MapPage> {
       appBar: AppBar(
         title: Text(pageTitle),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.goBackOrHome(context),
         ),
       ),
       body: Stack(
         children: [
-          FlutterMap(
-            mapController: mapController,
+          _mapCenter == null ? const SizedBox.shrink() : _map = FlutterMap(
+            mapController: _animatedMapController.mapController,
             options: MapOptions(
-                interactiveFlags: InteractiveFlag.pinchZoom | InteractiveFlag.drag,
-                zoom: DataService.globalSettingsModel!.defaultMapZoom,
+                interactionOptions: const InteractionOptions(
+                  flags: InteractiveFlag.doubleTapDragZoom |
+                  InteractiveFlag.doubleTapZoom |
+                  InteractiveFlag.pinchMove |
+                  InteractiveFlag.pinchZoom |
+                  InteractiveFlag.flingAnimation |
+                  InteractiveFlag.drag |
+                  InteractiveFlag.scrollWheelZoom),
+                initialZoom: SynchroService.globalSettingsModel!.defaultMapZoom,
                 maxZoom: 19,
-                center: widget.place != null ? LatLng(widget.place!.getLat(), widget.place!.getLng()) : LatLng(DataService.globalSettingsModel!.defaultMapLocation["lat"], DataService.globalSettingsModel!.defaultMapLocation["lng"]),
+                initialCenter: _mapCenter!,
                 onTap: (_, location) => onMapTap(location)),
             children: [
               TileLayer(
+                tileProvider: CancellableNetworkTileProvider(),
                 maxZoom: 19,
-                urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               ),
               CurrentLocationLayer(),
               PopupMarkerLayer(
@@ -231,8 +245,8 @@ class _MapPageState extends State<MapPage> {
                   popupDisplayOptions: PopupDisplayOptions(
                       snap: PopupSnap.markerTop,
                       builder: (BuildContext context, Marker marker) {
-                        if (marker is MarkerWithText) {
-                          return MapDescriptionPopup(marker);
+                        if (marker is MapMarkerWithText) {
+                          return MapDescriptionPopup(marker, selectedMarker);
                         }
                         return const SizedBox.shrink();
                       }),
@@ -268,7 +282,9 @@ class _MapPageState extends State<MapPage> {
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Text("You can change location by tapping on the map.").tr(),
+                  child: const Text(
+                          "You can change location by tapping on the map.")
+                      .tr(),
                 ),
                 Expanded(child: Container()),
               ],
@@ -291,16 +307,18 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> saveNewPosition() async {
-    if(isOnlyEditMode)
-    {
-      context.pop({"lat": selectedMarker!.point.latitude, "lng": selectedMarker!.point.longitude});
+    if (isOnlyEditMode) {
+      RouterService.goBack(context, {
+        "lat": selectedMarker!.point.latitude,
+        "lng": selectedMarker!.point.longitude
+      });
       return;
     }
-    await DataService.saveLocation(selectedMarker!.place.id!,
+    await DbPlaces.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
 
-    var markerToRemove = _markers
-        .firstWhere((m) => m.place.id == selectedMarker!.place.id);
+    var markerToRemove =
+        _markers.firstWhere((m) => m.place.id == selectedMarker!.place.id);
     //var newMarker = selectedMarker!.cloneWithNewPoint(selectedMarker!.point!);
     _markers.remove(markerToRemove);
     _markers.add(selectedMarker!);
@@ -312,79 +330,21 @@ class _MapPageState extends State<MapPage> {
   }
 
   void cancelNewPosition() {
-    if(isOnlyEditMode)
-    {
-      context.pop();
+    if (isOnlyEditMode) {
+      RouterService.goBack(context);
       return;
     }
     setState(() {
       selectedMarker = null;
     });
   }
+
   void showAllGroups() {
     loadPlaces(loadOtherGroups: true);
     cancelNewPosition();
   }
-}
 
-class MapDescriptionPopup extends StatefulWidget {
-  final MarkerWithText marker;
-
-  const MapDescriptionPopup(this.marker, {super.key});
-
-  @override
-  State<StatefulWidget> createState() => _MapDescriptionPopupState();
-}
-
-class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _cardDescription(context),
-        ],
-      ),
-    );
+  bool isIconVisible(PlaceModel place) {
+    return true;
   }
-
-  Widget _cardDescription(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 100, maxWidth: 200),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              widget.marker.place.title!,
-              overflow: TextOverflow.fade,
-              softWrap: true,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 14.0,
-              ),
-            ),
-            const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
-            Visibility(
-                visible: DataService.isEditor() || (DataService.isGroupLeader() && DataService.currentUserGroup()!.place!.id == widget.marker.place.id),
-                child: ElevatedButton(
-                    onPressed: _MapPageState.selectedMarker != null
-                        ? null
-                        : changePositionPressed,
-                    child: const Text("Change location").tr())),
-            Text(
-              widget.marker.place.description ?? "",
-              style: const TextStyle(fontSize: 12.0),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void changePositionPressed() => widget.marker.editAction!(widget.marker);
 }

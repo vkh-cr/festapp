@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:simple_shadow/simple_shadow.dart';
 
 MaterialColor primarySwatch = const MaterialColor(
   AppConfig.primaryColor,
@@ -20,7 +22,7 @@ MaterialColor primarySwatch = const MaterialColor(
 TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSplitTextStyle = const TextStyle(
-    color: AppConfig.color1, fontWeight: FontWeight.bold, fontSize: 15);
+    color: AppConfig.timelineSplitLabelColor, fontWeight: FontWeight.bold, fontSize: 15);
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
@@ -33,6 +35,8 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: AppConfig.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
+
+const Color bigButtonColor = Color.fromARGB(255, 220, 226, 237);
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -92,6 +96,39 @@ class CircularButton extends MainPageButton {
         ),
         child: child,
       ),
+    );
+  }
+}
+
+class SvgIconButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final String iconPath;
+  final double splashRadius;
+  final double iconSize;
+
+
+  const SvgIconButton({
+    required this.onPressed,
+    required this.iconPath,
+    this.splashRadius = 32,
+    this.iconSize = 60,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        padding: const EdgeInsets.all(0),
+        splashRadius: splashRadius,
+        iconSize: iconSize,
+        icon: SimpleShadow(
+          opacity: 0.2,
+          offset: const Offset(0,2),
+          //sigma: 10,
+          child: SvgPicture.asset(
+            iconPath,
+          ),
+        ),
+        onPressed: onPressed,
     );
   }
 }
