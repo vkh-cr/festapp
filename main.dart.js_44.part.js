@@ -1,21 +1,22 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_44",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-S0(d){var x=0,w=A.l(y.b),v,u
-var $async$S0=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:u=$.dP().Q
-u===$&&A.b()
-x=3
-return A.c(u.tQ("email",A.I(["email",d,"organization",1],y.g,y.o)),$async$S0)
-case 3:v=f
-x=1
-break
-case 1:return A.j(v,w)}})
-return A.k($async$S0,w)}}
-A=c[0]
-B=a.updateHolder(c[57],B)
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,D,E,F,G,A={
+c8j(d){var y=null
+return D.a1H(H.Mm,!1,d,E.iG(y,G.lX,y,y,y,y,y,y,!0,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,y,B.a1("E-mail",y),y,y,y,y,y,y,y,y,y,y,y,y,y),y,F.aVu,y,!1,y,y,y,!1,new A.b18())},
+b18:function b18(){}},H
+B=c[0]
+C=c[2]
+D=c[106]
+E=c[135]
+F=c[169]
+G=c[170]
+A=a.updateHolder(c[41],A)
+H=c[253]
 var z=a.updateTypes([])
-var y={o:A.A("z"),g:A.A("f"),b:A.A("@")}};
+A.b18.prototype={
+$1(d){if(d.length===0||!C.e.p(d,"@"))return B.a1("E-mail is not valid!",null)},
+$S:110};(function inheritance(){var y=a.inherit
+y(A.b18,B.bY)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_44",e:"endPart",h:b})})($__dart_deferred_initializers__,"DekwPBldaJ5zg0n5yjb1wOLB+wM=");
+a.eventLog.push({p:"main.dart.js_44",e:"endPart",h:b})})($__dart_deferred_initializers__,"gArm+DlroVIq7c+MBQ0t910Ce7k=");

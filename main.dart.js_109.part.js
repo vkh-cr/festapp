@@ -1,16 +1,13 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_109",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var C,A={WH:function WH(d,e){this.a=d
-this.b=e}},B
-C=c[0]
-A=a.updateHolder(c[76],A)
-B=c[226]
-A.WH.prototype={
-G(){return"ListTileControlAffinity."+this.b}}
-var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(A.WH,C.dU)})();(function constants(){B.o8=new A.WH(0,"leading")
-B.y7=new A.WH(1,"trailing")
-B.akb=new A.WH(2,"platform")})()};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A
+B=c[0]
+C=c[2]
+A=c[224]
+var z=a.updateTypes([]);(function constants(){A.le=new B.ar(0,8,0,0)
+A.Bo=new B.U(!0,C.ee,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+A.aZ8=new B.U(!0,C.aR,null,null,null,null,16,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+A.a1s=new B.bM("The app is already installed.",null,A.aZ8,null,C.cC,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_109",e:"endPart",h:b})})($__dart_deferred_initializers__,"FKVH6etzrHg0aPb66VM6u5DpVM8=");
+a.eventLog.push({p:"main.dart.js_109",e:"endPart",h:b})})($__dart_deferred_initializers__,"BX3UqO0tXd+fq5G1eNx1EJUPMA0=");
