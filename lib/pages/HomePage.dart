@@ -97,8 +97,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 label: "Home".tr(),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_month),
-                activeIcon: Icon(Icons.calendar_month_outlined),
+                icon: Icon(Icons.calendar_month_outlined),
+                activeIcon: Icon(Icons.calendar_month),
                 label: "Schedule".tr(),
               ),
               BottomNavigationBarItem(
