@@ -15,6 +15,7 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SchedulePage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
@@ -39,29 +40,30 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
-    AutoRoute(page: NewsRoute.page, path: "/:{$LINK}/${NewsPage.ROUTE}"),
-    AutoRoute(page: SongRoute.page, path: "/:{$LINK}/${SongPage.ROUTE}"),
-    AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: UserRoute.page, path: "/:{$LINK}/${UserPage.ROUTE}"),
+    AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
-    AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
-    AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
     AutoRoute(page: AdministrationRoute.page, path: "/:{$LINK}/${AdministrationPage.ROUTE}"),
-    AutoRoute(page: EventRoute.page, path: "/:{$LINK}/${EventPage.ROUTE}/:id"),
-    AutoRoute(page: MapRoute.page, path: "/:{$LINK}/${MapPage.ROUTE}", children: [
-      AutoRoute(
-        path: ':id',
-        page: MapRoute.page,
-      ),
+    AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
+          AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
+                  AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
+                  AutoRoute(page: EventRoute.page, path: ":id")
+                  ]),
+      AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}"),
+      AutoRoute(page: ProgramViewRoute.page, path: "${ProgramViewPage.ROUTE}"),
+      AutoRoute(page: SongRoute.page, path: "${SongPage.ROUTE}"),
+      AutoRoute(page: MyScheduleRoute.page, path: "${MySchedulePage.ROUTE}"),
+      AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", children: [
+        AutoRoute(path: ':id', page: MapRoute.page,),
+      ]),
+      AutoRoute(page: InfoRoute.page, path: "${InfoPage.ROUTE}", children: [
+        AutoRoute(
+          path: ':id',
+          page: InfoRoute.page,
+        ),
+      ]),
     ]),
-    AutoRoute(page: InfoRoute.page, path: "/:{$LINK}/${InfoPage.ROUTE}", children: [
-      AutoRoute(
-        path: ':id',
-        page: InfoRoute.page,
-      ),
-    ]),
-    AutoRoute(page: HomeRoute.page, path: "/:{$LINK}"),
     RedirectRoute(path: '*', redirectTo: "/${RightsService.currentLink}"),
   ];
 

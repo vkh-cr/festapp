@@ -25,6 +25,7 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
+import 'package:fstapp/widgets/NavigateBackButton.dart';
 
 import '../services/ToastHelper.dart';
 import '../styles/Styles.dart';
@@ -73,9 +74,7 @@ class _EventPageState extends State<EventPage> {
             _event == null ? "Event".tr() : _event.toString(),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          leading: BackButton(
-            onPressed: () => RouterService.goBackOrHome(context),
-          ),
+          leading: ScheduleBackButton(color: Colors.white),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover(),

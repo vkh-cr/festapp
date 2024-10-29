@@ -12,6 +12,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/widgets/PopButton.dart';
 import 'HtmlEditorPage.dart';
 
 @RoutePage()
@@ -67,9 +68,7 @@ class _NewsPageState extends State<NewsPage> {
       backgroundColor: AppConfig.newsPageColor,
       appBar: AppBar(
         title: const Text("News").tr(),
-        leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
-        ),
+        leading: PopButton(color: Colors.white),
       ),
       body: Align(
         alignment: Alignment.topCenter,

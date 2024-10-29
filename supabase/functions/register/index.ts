@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   }
 
   const reqData = await req.json();
-  const userEmail = reqData.email;
+  const userEmail = reqData.email.trim();;
   const organizationId = reqData.organization;
 
   // Retrieve organization-specific settings for APP_NAME and DEFAULT_URL
@@ -56,19 +56,20 @@ Deno.serve(async (req) => {
     );
   }
 
-  // Check if the email already exists in user_info
-  const userData = await _supabase
-    .from("user_info")
-    .select()
-    .ilike("email_readonly", userEmail)
-    .maybeSingle();
+    // Check if the email already exists in user_info
+    const userData = await _supabase
+      .from("user_info")
+      .select()
+      .eq("email_readonly", userEmail)
+      .eq("organization", organizationId) // Add organization ID condition
+      .maybeSingle();
 
-  if (userData.data != null) {
-    return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
-  }
+    if (userData.data != null) {
+      return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 

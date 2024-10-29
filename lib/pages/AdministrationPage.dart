@@ -58,7 +58,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     super.didChangeDependencies();
     if(!RightsService.canSeeAdmin())
     {
-      RouterService.goBackOrHome(context);
+      RouterService.popOrHome(context);
       return;
     }
 
@@ -105,7 +105,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
           appBar: AppBar(
           title: const Text("Admin").tr(),
           leading: BackButton(
-            onPressed: () => RouterService.goBackOrHome(context),
+            onPressed: () => RouterService.popOrHome(context),
           ),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),

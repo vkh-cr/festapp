@@ -74,7 +74,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               event.data["leftText"],
-              style: timeLineSmallTextStyle,
+              style: timeLineSmallTextStyle.copyWith(color: AppConfig.timelineTextColor),
             ),
           );
         },

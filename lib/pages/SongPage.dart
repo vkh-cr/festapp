@@ -47,7 +47,7 @@ class _SongPageState extends State<SongPage> {
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
       ),
       body: Align(
