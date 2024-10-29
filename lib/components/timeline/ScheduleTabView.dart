@@ -55,7 +55,7 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
             indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
             tabs: [
                 for(var e in datedEvents)
-                  Tab(child: Text(e.dateTime!.weekdayToString(context), style: timeLineTabNameTextStyle, maxLines: 1))
+                  Tab(child: Text(e.dateTime!.weekdayToString(context).toUpperCase(), style: timeLineTabNameTextStyle, maxLines: 1))
             ],
           ),
           body: TabBarView(

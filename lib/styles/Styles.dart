@@ -19,10 +19,10 @@ MaterialColor primarySwatch = const MaterialColor(
   },
 );
 
-TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
+TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 18, fontWeight: FontWeight.w900);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSplitTextStyle = const TextStyle(
-    color: AppConfig.timelineSplitLabelColor, fontWeight: FontWeight.bold, fontSize: 15);
+    color: AppConfig.timelineSplitLabelColor, fontWeight: FontWeight.w900, fontSize: 15);
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
