@@ -19,7 +19,7 @@ aOI(d,e){var x=0,w=A.l(y.b),v,u
 var $async$aOI=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.dZ().nY("set_user_password_token",A.I(["token",d,"password",e],y.w,u),u),$async$aOI)
+return A.c($.dZ().nf("set_user_password_token",A.I(["token",d,"password",e],y.w,u),u),$async$aOI)
 case 3:v=g
 x=1
 break
@@ -53,7 +53,7 @@ l(){this.an()},
 bf(){var x=0,w=A.l(y.v),v=this,u,t,s,r,q
 var $async$bf=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:v.cT()
-s=A.uR()
+s=A.uS()
 u=A.bt("token=(?<token>[^&]+)",!0,!1,!1).pZ(s.j(0))
 if(u!=null)try{r=u.bu5("token")
 r.toString
@@ -76,7 +76,7 @@ $S:0}
 B.bNw.prototype={
 $1(d){if(d.length===0)return A.a1("Fill the password!",null)
 return null},
-$S:110}
+$S:97}
 B.bNx.prototype={
 $0(){var x=0,w=A.l(y.v),v=this,u,t,s
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
@@ -109,10 +109,10 @@ case 7:A.cJ(A.a1("Password has been changed.",null),C.aq)
 K.arC(v.b)
 case 6:case 3:return A.j(null,w)}})
 return A.k($async$$1,w)},
-$S:74}
+$S:71}
 B.bNu.prototype={
 $2(d,e){A.cJ(J.aD(d),C.aq)},
-$S:317};(function inheritance(){var x=a.inherit,w=a.inheritMany
+$S:316};(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.B_,A.H)
 x(B.aG2,A.J)
 w(A.cK,[B.bNv,B.bNx])
@@ -127,4 +127,4 @@ D.aW1=new A.U(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b_O=new A.bM("Change Password",null,D.aW1,null,null,null,null,null,null,null,null,null,null,null)
 D.b_Y=new A.bM("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"/SjzLt69KSFH0scsOOxtkpBEnQ8=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"eSei0l3YnsxYvc4DwqPvdTR97uE=");

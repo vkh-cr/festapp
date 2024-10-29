@@ -7,7 +7,7 @@ var $async$ag0=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:r=A.W(d).h("R<1,q?>")
 q=J
 x=2
-return A.c($.fy().bQ("events").h9(0,"id, event_users!inner(count)").cr("event_users.user",$.dZ().gd6().c.a).Bn("id",A.F(new A.R(d,new B.aUo(),r),!0,r.h("ae.E"))),$async$ag0)
+return A.c($.fy().bR("events").hl(0,"id, event_users!inner(count)").cr("event_users.user",$.dZ().gd6().c.a).Bn("id",A.F(new A.R(d,new B.aUo(),r),!0,r.h("ae.E"))),$async$ag0)
 case 2:r=q.k6(f,new B.aUp())
 v=r.$ti.h("dI<1,q>")
 u=A.fv(new A.dI(r,new B.aUq(),v),v.h("t.E"))
@@ -26,14 +26,14 @@ B=a.updateHolder(c[100],B)
 var z=a.updateTypes([])
 B.aUo.prototype={
 $1(d){return d.b},
-$S:137}
+$S:146}
 B.aUp.prototype={
 $1(d){return J.cnf(J.u(J.u(J.u(d,"event_users"),0),"count"),0)},
-$S:46}
+$S:44}
 B.aUq.prototype={
 $1(d){return A.b2(J.u(d,"id"))},
-$S:184};(function inheritance(){var x=a.inheritMany
+$S:183};(function inheritance(){var x=a.inheritMany
 x(A.bY,[B.aUo,B.aUp,B.aUq])})()
 var y={b:A.x("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_198",e:"endPart",h:b})})($__dart_deferred_initializers__,"hMD6c9YOMXLLbPeDPJf/SAERLR4=");
+a.eventLog.push({p:"main.dart.js_198",e:"endPart",h:b})})($__dart_deferred_initializers__,"MD1KCx/1Uggpp3xu1gmgN2SXPl0=");

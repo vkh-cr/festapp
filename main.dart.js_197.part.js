@@ -11,7 +11,7 @@ var $async$pg=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:s=$.fy()
 n=A
 x=3
-return A.c(s.bQ("events").h9(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),event_groups!event_groups_event_parent_fkey(event_child)").cr("id",d).lt(0),$async$pg)
+return A.c(s.bR("events").hl(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),event_groups!event_groups_event_parent_fkey(event_child)").cr("id",d).lt(0),$async$pg)
 case 3:r=n.pn(f)
 q=y.u
 x=4
@@ -58,7 +58,7 @@ return A.c(B.ao9(u),$async$pg)
 case 14:n.cx=f
 case 10:x=r.y!=null?15:16
 break
-case 15:s=s.bQ("events").h9(0,"id,title,start_time,end_time,max_participants,event_users(count)")
+case 15:s=s.bR("events").hl(0,"id,title,start_time,end_time,max_participants,event_users(count)")
 u=r.y
 u.toString
 n=r
@@ -67,7 +67,7 @@ l=A
 k=J
 x=17
 return A.c(s.Bn("id",u).cr("is_hidden",!1),$async$pg)
-case 17:n.r=m.c6M(l.bj(k.cd(f,new B.aUa(),y.b),!0,q))
+case 17:n.r=m.c6M(l.bj(k.cf(f,new B.aUa(),y.b),!0,q))
 x=o.gd6().d!=null?18:19
 break
 case 18:x=20
@@ -81,7 +81,7 @@ return A.k($async$pg,w)},
 aUh(d){var x=0,w=A.l(y.e),v
 var $async$aUh=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fy().bQ("event_users").i1(0).cr("event",d).cr("user",$.dZ().gd6().c.a).a5m(0),$async$aUh)
+return A.c($.fy().bR("event_users").i1(0).cr("event",d).cr("user",$.dZ().gd6().c.a).a5m(0),$async$aUh)
 case 3:v=f.b>0
 x=1
 break
@@ -90,7 +90,7 @@ return A.k($async$aUh,w)},
 aUi(d){var x=0,w=A.l(y.e),v
 var $async$aUi=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fy().bQ("event_users_saved").i1(0).cr("event",d).cr("user",$.dZ().gd6().c.a).G0(),$async$aUi)
+return A.c($.fy().bR("event_users_saved").i1(0).cr("event",d).cr("user",$.dZ().gd6().c.a).G0(),$async$aUi)
 case 3:v=f!=null
 x=1
 break
@@ -118,14 +118,14 @@ var z=a.updateTypes([])
 B.aTr.prototype={
 $1(d){var x=d.as
 return x==null?"":x},
-$S:867}
+$S:866}
 B.aTs.prototype={
 $1(d){return d.cy},
-$S:868}
+$S:867}
 B.aUa.prototype={
 $1(d){return A.pn(d)},
-$S:47};(function inheritance(){var x=a.inheritMany
+$S:50};(function inheritance(){var x=a.inheritMany
 x(A.bY,[B.aTr,B.aTs,B.aUa])})()
 var y={f:A.x("bx"),u:A.x("cY"),r:A.x("p<q>"),w:A.x("f"),e:A.x("v"),b:A.x("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_197",e:"endPart",h:b})})($__dart_deferred_initializers__,"ZptvRCFvaAsjU5GEs36Ipo+DvAI=");
+a.eventLog.push({p:"main.dart.js_197",e:"endPart",h:b})})($__dart_deferred_initializers__,"lxvhbtv7nW6BHDP3yiny4OWrgE4=");
