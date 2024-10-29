@@ -142,9 +142,9 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                   }
                 },
                 child: SvgPicture.asset(
-                  height: 112,
-                  semanticsLabel: 'Festapp logo',
-                  'assets/icons/fstapplogo.svg',
+                  height: 72,
+                  semanticsLabel: 'CSA logo',
+                  'assets/icons/LOGO CSA APP.svg',
                 ),
               ),
               const Spacer(),

@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return AutoTabsRouter(
       routes: [
         ScheduleNavigationRoute(),
-        ProgramViewRoute(),
+        MyScheduleRoute(),
         NewsRoute(),
         MapRoute(),
         InfoRoute(),
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               BottomNavigationBarItem(
                 icon: Icon(Icons.calendar_month),
                 activeIcon: Icon(Icons.calendar_month_outlined),
-                label: "Schedule".tr(),
+                label: "My schedule".tr(),
               ),
               BottomNavigationBarItem(
                 icon: badges.Badge(
