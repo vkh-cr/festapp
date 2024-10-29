@@ -35,13 +35,13 @@ class DbUsers {
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
-    var data = await _supabase.from(Tb.user_info_public.table)
-        .select([Tb.user_info_public.id,
-      Tb.user_info_public.name,
-      Tb.user_info_public.surname,
-      Tb.user_info.sex].join(", "));
-    return List<UserInfoModel>.from(
-        data.map((x) => UserInfoModel.fromJson(x)));
+    var result = await _supabase.rpc("get_all_user_basics_from_occasion",
+        params: {"oc": RightsService.currentOccasion});
+    if(result["code"] == 200) {
+      var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+      return t;
+    }
+    return [];
   }
 
   static Future<void> updateUserInfo(OccasionUserModel data) async {
