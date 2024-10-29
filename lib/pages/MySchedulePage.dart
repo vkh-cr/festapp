@@ -66,7 +66,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
         appBar: AppBar(
           title: const Text("My schedule").tr(),
           leading: BackButton(
-            onPressed: () => RouterService.goBackOrHome(context),
+            onPressed: () => RouterService.popOrHome(context),
           ),
         ),
         body: Align(

@@ -19,6 +19,7 @@ import 'package:fstapp/components/map/MapDescriptionPopup.dart';
 import 'package:fstapp/components/map/MapLocationPinHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/widgets/PopButton.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
@@ -210,9 +211,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(pageTitle),
-        leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
-        ),
+          leading: PopButton(color: Colors.white),
       ),
       body: Stack(
         children: [

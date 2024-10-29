@@ -33,7 +33,7 @@ BEGIN
             -- Get the link for the default occasion
             SELECT link INTO occasion_link
             FROM occasions
-            WHERE id = occasionId;
+            WHERE id = occasionId AND organization = org_id;
         END IF;
     ELSE
         -- Get the occasion ID and link for the provided link within the specified organization

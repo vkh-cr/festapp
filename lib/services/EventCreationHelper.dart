@@ -49,6 +49,7 @@ class EventCreationHelper {
                     controller: titleController,
                     decoration: InputDecoration(labelText: 'Title'.tr()),
                     onChanged: (value) {
+                      title = value;
                       setState(() {});
                     },
                   ),

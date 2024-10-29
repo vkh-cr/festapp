@@ -14,6 +14,7 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/components/timetable/Timetable.dart';
+import 'package:fstapp/widgets/PopButton.dart';
 
 @RoutePage()
 class ProgramViewPage extends StatefulWidget {
@@ -146,9 +147,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     return Scaffold(
         appBar: AppBar(
           title: Text("Schedule".tr()),
-          leading: BackButton(
-            onPressed: () => RouterService.goBackOrHome(context),
-          ),
+          leading: PopButton(color: Colors.white),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
             child: Builder(builder: (context) {
