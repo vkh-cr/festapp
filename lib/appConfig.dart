@@ -29,7 +29,7 @@ class AppConfig {
   static const int daySplitHour = 4;
 
   static const primaryColor = 0xFFFFA33C;
-  static const backgroundColor = Color(0xFF3D30A2);
+  static const backgroundColor = Color(0xFF1e1e1e);
   static const color1 = Color(primaryColor);
   static const color2 = Color(0xFFB15EFF);
   static const color3 = Color(0xFF3D30A2);
