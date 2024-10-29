@@ -104,9 +104,9 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: Montserrat
+    - family: Cerebri
       fonts:
-        - asset: fonts/Montserrat-Medium.ttf
+        - asset: fonts/Cerebri-Sans-Bold.ttf
   assets:
     - assets/icons/
     - assets/images/map/

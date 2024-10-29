@@ -161,7 +161,7 @@ class _MyAppState extends State<MyApp> {
           // or simply save your changes to "hot reload" in a Flutter IDE).
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
-          fontFamily: 'Montserrat',
+          fontFamily: 'Cerebri',
           useMaterial3: false,
           scaffoldBackgroundColor: AppConfig.backgroundColor,
           secondaryHeaderColor: const Color(0xFFBA5D3F),

@@ -28,19 +28,19 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
-  static const primaryColor = 0xFF1C6758;
-  static const backgroundColor = Color(0xFFF5F5F5);
+  static const primaryColor = 0xFFFFA33C;
+  static const backgroundColor = Color(0xFF3D30A2);
   static const color1 = Color(primaryColor);
-  static const color2 = Color(0xFFD6CDA4);
-  static const color3 = Color(0xFF3D8361);
-  static const color4 = Color(0xFF115448);
+  static const color2 = Color(0xFFB15EFF);
+  static const color3 = Color(0xFF3D30A2);
+  static const color4 = Color(0xFFFFFB73);
   static const attentionColor = Color(0xFF8B0000);
 
   static const timelineSplitLabelColor = color1;
   static const timelineTabLabelColor = color1;
   static const timelineTabIndicatorColor = color1;
   static const timelineColor = color1;
-  static const timelineTextColor = Colors.black;
+  static const timelineTextColor = color1;
   static const mapPinColor = color1;
   static const newsPageColor = backgroundColor;
   static const infoPageColor = backgroundColor;
@@ -79,7 +79,7 @@ class AppConfig {
       case "talk": return color3;
       case "other": return color4;
     }
-    return AppConfig.timetableSelectedColor;
+    return color1;
   }
 
   static List<LanguageModel> availableLanguages = [

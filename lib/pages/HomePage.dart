@@ -100,10 +100,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             });
                           }
                         },
-                        child: SvgPicture.asset(
+                        child: Image.asset(
+                          'assets/icons/fstapplogo.png', // path to the PNG file
                           width: 200,
-                          semanticsLabel: 'BISCUP',
-                          'assets/icons/biscuplogo.svg',
+                          semanticLabel: 'BISCUP',
                         ),
                       ),
                       const Spacer(),
