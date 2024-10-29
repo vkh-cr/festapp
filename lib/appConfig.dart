@@ -47,8 +47,8 @@ class AppConfig {
 
   static const profileButtonColor = color1;
 
-  static const bottomNavBackgroundColor = color1;
-  static const bottomNavSelectedItemColor = color3;
+  static const bottomNavBackgroundColor = Colors.black;
+  static const bottomNavSelectedItemColor = color1;
   static const bottomNavUnselectedItemColor = Colors.grey;
 
   static const timetableColor = color1;

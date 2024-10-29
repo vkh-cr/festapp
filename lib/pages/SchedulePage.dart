@@ -141,10 +141,10 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     });
                   }
                 },
-                child: SvgPicture.asset(
-                  height: 112,
-                  semanticsLabel: 'Festapp logo',
-                  'assets/icons/fstapplogo.svg',
+                child: Image.asset(
+                  'assets/icons/fstapplogo.png',
+                  width: 200,
+                  semanticLabel: 'BISCUP',
                 ),
               ),
               const Spacer(),
