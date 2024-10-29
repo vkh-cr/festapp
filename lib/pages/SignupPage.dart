@@ -50,7 +50,7 @@ class _SignupPageState extends State<SignupPage> {
         centerTitle: true,
         title: const Text("Sign up").tr(),
         leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
       ),
       body: Align(

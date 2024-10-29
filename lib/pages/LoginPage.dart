@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
         centerTitle: true,
         title: const Text("Sign in").tr(),
         leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
         actions: actions,
       ),
@@ -141,7 +141,7 @@ class _LoginPageState extends State<LoginPage> {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
       RouterService.updateOccasionFromLink(RouterService.currentOccasionLink);
-      RouterService.goBackOrHome(context);
+      RouterService.popOrHome(context);
     }
   }
 
