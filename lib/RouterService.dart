@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.dart';
+import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -51,13 +52,23 @@ class RouterService {
     context.router.replaceNamed(getCurrentLink() + path);
   }
 
-  static void goBackOrHome(BuildContext context) {
-    if (!context.router.canPop()) {
-      navigateOccasion(context, "");
-    } else {
+  static void popOrHome(BuildContext context) {
+    if (context.router.canPop()) {
       context.router.maybePop();
+    } else {
+      navigateOccasion(context, "");
     }
   }
+
+  static void scheduleBack(BuildContext context) {
+    if(context.router.canNavigateBack){
+      context.router.replace(ScheduleRoute());
+      context.router.maybePopTop();
+    }
+  }
+
+  static bool canPop(BuildContext context) => context.router.canPop();
+  static bool canNavigateBack(BuildContext context) => context.router.canNavigateBack;
 
   static void goBackOrInitial(BuildContext context) {
     if (!context.router.canPop()) {

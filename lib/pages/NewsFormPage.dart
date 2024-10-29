@@ -87,7 +87,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
           centerTitle: true,
           title: const Text("Create news").tr(),
           leading: BackButton(
-            onPressed: () => RouterService.goBackOrHome(context),
+            onPressed: () => RouterService.popOrHome(context),
           ),
         ),
         body: Align(

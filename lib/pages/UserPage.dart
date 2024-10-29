@@ -146,7 +146,7 @@ class _UserPageState extends State<UserPage> {
         centerTitle: true,
         title: const Text("Profile").tr(),
         leading: BackButton(
-          onPressed: () => RouterService.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
         actions: actions,
       ),
@@ -444,7 +444,7 @@ class _UserPageState extends State<UserPage> {
     var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
     await AuthService.logout();
     ToastHelper.Show("${trPrefix}You have been signed out.".tr());
-    RouterService.goBackOrHome(context);
+    RouterService.popOrHome(context);
   }
 
   void _redirectToAdminPage() {

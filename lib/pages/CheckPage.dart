@@ -61,7 +61,7 @@ class _CheckPageState extends State<CheckPage> {
 
   Future<void> loadData(int eventId) async {
     if (!RightsService.isApprover()) {
-      RouterService.goBackOrHome(context);
+      RouterService.popOrHome(context);
       return;
     }
     _event = await DbEvents.getEvent(eventId);

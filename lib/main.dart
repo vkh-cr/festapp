@@ -165,6 +165,10 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: false,
           scaffoldBackgroundColor: AppConfig.backgroundColor,
           secondaryHeaderColor: const Color(0xFFBA5D3F),
+          bottomNavigationBarTheme: BottomNavigationBarThemeData(
+            selectedItemColor: AppConfig.color1,
+            unselectedItemColor: Colors.black26,
+          ),
           colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
               .copyWith(surface: AppConfig.backgroundColor)),
     ).animate().fadeIn(
