@@ -36,7 +36,7 @@ return A.c(A.TI(),$async$ag1)
 case 5:q.G(0,f)
 case 4:for(v=A.r(r),u=new A.jY(r,r.wF(),v.h("jY<1>")),v=v.c;u.q();){t=u.d
 if(t==null)t=v.a(t)
-s=A.fO(d,new B.aUr(t))
+s=A.fD(d,new B.aUr(t))
 if(s==null)continue
 s.cx=t.cx}return A.j(null,w)}})
 return A.k($async$ag1,w)},
@@ -47,7 +47,7 @@ break
 case 3:x=5
 return A.c(A.Ka(),$async$Dq)
 case 5:u=f
-t=A.F(u,!0,A.r(u).h("cu.E"))
+t=A.F(u,!0,A.r(u).h("cv.E"))
 u=$.dZ()
 if(u.gd6().d==null){u=A.a(t.slice(0),A.W(t))
 v=u
@@ -58,7 +58,7 @@ x=6
 return A.c(A.TI(),$async$Dq)
 case 6:o.G(n,f)
 s=$.fy()
-u=s.bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cr("event_users.user",u.gd6().c.a).cr("is_hidden",!1)
+u=s.bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cp("event_users.user",u.gd6().c.a).cp("is_hidden",!1)
 r=$.ei
 r.toString
 q=y.b
@@ -68,11 +68,11 @@ n=t
 m=A
 l=J
 x=7
-return A.c(u.cr("occasion",r).rA(0,"start_time",!0).rA(0,"max_participants",!1),$async$Dq)
+return A.c(u.cp("occasion",r).rA(0,"start_time",!0).rA(0,"max_participants",!1),$async$Dq)
 case 7:o.G(n,m.bj(l.cf(f,new B.aUc(),q),!0,p))
-x=E.bZe()?8:9
+x=E.bZg()?8:9
 break
-case 8:u=s.bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cr("is_group_event",!0).cr("is_hidden",!1)
+case 8:u=s.bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cp("is_group_event",!0).cp("is_hidden",!1)
 s=$.ei
 s.toString
 o=C.b
@@ -80,19 +80,19 @@ n=t
 m=A
 l=J
 x=10
-return A.c(u.cr("occasion",s).rA(0,"start_time",!0),$async$Dq)
+return A.c(u.cp("occasion",s).rA(0,"start_time",!0),$async$Dq)
 case 10:o.G(n,m.bj(l.cf(f,new B.aUd(),q),!0,p))
 case 9:u=A.a(t.slice(0),A.W(t))
 v=u
 x=1
 break
-case 4:u=$.fy().bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cr("is_hidden",!1)
+case 4:u=$.fy().bR("events").hl(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cp("is_hidden",!1)
 s=$.ei
 s.toString
 o=A
 n=J
 x=11
-return A.c(u.cr("occasion",s).rA(0,"start_time",!0).rA(0,"max_participants",!1),$async$Dq)
+return A.c(u.cp("occasion",s).rA(0,"start_time",!0).rA(0,"max_participants",!1),$async$Dq)
 case 11:v=o.bj(n.cf(f,new B.aUe(),y.b),!0,y.u)
 x=1
 break
@@ -104,7 +104,7 @@ while(true)switch(x){case 0:x=2
 return A.c(B.Dq(e),$async$TL)
 case 2:n=g
 for(v=J.ah(n),u=y.F;v.q();){t=v.gJ(v)
-s=A.fO(d,new B.aUv(t))
+s=A.fD(d,new B.aUv(t))
 if(s!=null){s.cy=t.cy
 s.db=t.db
 s.as=t.as
@@ -140,7 +140,7 @@ aUx:function aUx(){},
 Yo(d){var x=0,w=A.l(y.v),v,u,t
 var $async$Yo=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=2
-return A.c(A.pF("user_info",A.bu1(),null,y.p),$async$Yo)
+return A.c(A.pG("user_info",A.bu3(),null,y.p),$async$Yo)
 case 2:t=f
 if((t==null?null:t.as)!=null)for(v=J.ah(d);v.q();){u=v.gJ(v)
 if(u.ch){u.as=t.as.b
@@ -149,16 +149,16 @@ return A.k($async$Yo,w)}}
 J=c[1]
 A=c[0]
 C=c[2]
-D=c[100]
-E=c[108]
-B=a.updateHolder(c[71],B)
+D=c[99]
+E=c[107]
+B=a.updateHolder(c[70],B)
 var z=a.updateTypes([])
 B.aUl.prototype={
 $1(d){return d.b},
-$S:146}
+$S:142}
 B.aUm.prototype={
-$1(d){return A.pn(d)},
-$S:50}
+$1(d){return A.po(d)},
+$S:51}
 B.aUn.prototype={
 $1(d){return d.b==this.a.b},
 $S:37}
@@ -166,19 +166,19 @@ B.aUr.prototype={
 $1(d){return d.b==this.a.b},
 $S:37}
 B.aUc.prototype={
-$1(d){return A.pn(d)},
-$S:50}
+$1(d){return A.po(d)},
+$S:51}
 B.aUd.prototype={
-$1(d){return A.pn(d)},
-$S:50}
+$1(d){return A.po(d)},
+$S:51}
 B.aUe.prototype={
-$1(d){return A.pn(d)},
-$S:50}
+$1(d){return A.po(d)},
+$S:51}
 B.aUv.prototype={
 $1(d){return d.b==this.a.b},
 $S:37}
 B.aUw.prototype={
-$1(d){return!J.bYW(this.a,new B.aUu(d))},
+$1(d){return!J.bYY(this.a,new B.aUu(d))},
 $S:37}
 B.aUu.prototype={
 $1(d){return this.a.b==d.b},
@@ -193,9 +193,9 @@ x.toString
 w=e.as
 w.toString
 v=C.e.bU(x,w)}return v},
-$S:868};(function inheritance(){var x=a.inheritMany,w=a.inherit
+$S:869};(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(A.bY,[B.aUl,B.aUm,B.aUn,B.aUr,B.aUc,B.aUd,B.aUe,B.aUv,B.aUw,B.aUu])
 w(B.aUx,A.dW)})()
 var y={u:A.x("cY"),F:A.x("p<cY>"),c:A.x("y<cY>"),p:A.x("e7"),b:A.x("@"),v:A.x("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_236",e:"endPart",h:b})})($__dart_deferred_initializers__,"+INdrdgwaK3XMyjHoK66kGJhOus=");
+a.eventLog.push({p:"main.dart.js_236",e:"endPart",h:b})})($__dart_deferred_initializers__,"PbE03erraYjctsKCIGDNw9pvwPI=");

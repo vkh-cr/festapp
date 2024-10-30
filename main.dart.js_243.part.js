@@ -2,20 +2,20 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_243",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,D,E,H,I,F,B={
-c63(d,e,f,g){var x=null,w=A.fk(new A.an(G.es,E.dG(x,x,x,x,x,C.aiW,x,x,new B.aQe(e),x,x,x,x,x),x),d===!0)
-return A.a([w,A.fk(new A.an(G.es,E.dG(x,x,x,x,x,H.cM(K.nX,g,x,x),x,x,new B.aQf(f),x,x,x,x,x),x),d===!1)],y.p)},
+c64(d,e,f,g){var x=null,w=A.fk(new A.an(G.es,E.dG(x,x,x,x,x,C.aiV,x,x,new B.aQe(e),x,x,x,x,x),x),d===!0)
+return A.a([w,A.fk(new A.an(G.es,E.dG(x,x,x,x,x,H.cM(K.nW,g,x,x),x,x,new B.aQf(f),x,x,x,x,x),x),d===!1)],y.p)},
 aQe:function aQe(d){this.a=d},
 aQf:function aQf(d){this.a=d},
-bZc(d){switch(d){case"music":return F.iZ
-case"talk":return I.E3
-case"other":return C.aai}return F.iZ},
+bZe(d){switch(d){case"music":return F.iZ
+case"talk":return I.E2
+case"other":return C.aah}return F.iZ},
 TJ(d){var x=0,w=A.l(y.f),v
 var $async$TJ=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:v=$.dZ()
 x=v.gd6().d!=null?2:3
 break
 case 2:x=4
-return A.c($.fy().bR("event_users_saved").jK(0).cr("event",d).cr("user",v.gd6().c.a),$async$TJ)
+return A.c($.fy().bR("event_users_saved").jK(0).cp("event",d).cp("user",v.gd6().c.a),$async$TJ)
 case 4:case 3:x=5
 return A.c(B.aoa(d),$async$TJ)
 case 5:A.cJ(A.a1("Removed from My schedule.",null),D.aq)
@@ -59,14 +59,14 @@ return A.k($async$aoa,w)}},C,G,K
 J=c[1]
 A=c[0]
 D=c[2]
-E=c[150]
-H=c[152]
-I=c[215]
-F=c[244]
+E=c[149]
+H=c[151]
+I=c[214]
+F=c[243]
 B=a.updateHolder(c[39],B)
-C=c[267]
-G=c[184]
-K=c[191]
+C=c[266]
+G=c[183]
+K=c[190]
 var z=a.updateTypes([])
 B.aQe.prototype={
 $0(){var x=0,w=A.l(y.f),v=this
@@ -85,8 +85,8 @@ case 2:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2};(function inheritance(){var x=a.inheritMany
 x(A.cK,[B.aQe,B.aQf])})()
-var y={p:A.x("p<xx>"),o:A.x("A"),g:A.x("f"),e:A.x("v"),f:A.x("~")};(function constants(){C.aai=new A.D(4280629081)
-C.ahe=new A.aW(57424,"MaterialIcons",null,!1)
-C.aiW=new A.cS(C.ahe,null,null,null,null)})()};
+var y={p:A.x("p<xx>"),o:A.x("A"),g:A.x("f"),e:A.x("v"),f:A.x("~")};(function constants(){C.aah=new A.D(4280629081)
+C.ahd=new A.aW(57424,"MaterialIcons",null,!1)
+C.aiV=new A.cS(C.ahd,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"pTcnzax9JJF0PwpC6g4y0OUvtws=");
+a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"lAy+Ic1MFvcIgk4J6OI4N+NheuI=");
