@@ -70,17 +70,17 @@ class DataGridHelper
         children: [
           svgIcon,
           const SizedBox(width: 12),
-          Text(icon.link!),
+          Text(icon.link!, style: TextStyle(color: Colors.black)),
         ],
       );
     }
 
-    return const Text(PlaceModel.WithouValue);
+    return const Text(PlaceModel.WithouValue, style: TextStyle(color: Colors.black));
   }
 
   static Widget idRenderer(rendererContext) {
     var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();
-    return Text(value);
+    return Text(value, style: TextStyle(color: Colors.black));
   }
 
   static PlutoGridLocaleText getPlutoLocaleFromLangCode(String langCode)
