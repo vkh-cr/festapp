@@ -2,13 +2,15 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 
 class MapLocationPinHelper {
-  static Widget? type2icon(String? placeType, List<IconModel> source) {
+  static Widget? type2icon(MapPlaceModel placeType, List<IconModel> source) {
     SvgPicture? fill;
 
-    var iconData = source.firstWhereOrNull((i) => i.link == placeType)?.data;
+    var iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
+    iconData ??= source.firstWhereOrNull((i) => i.link == placeType.type)?.data;
     if (iconData != null) {
       fill = SvgPicture.string(
         iconData,
