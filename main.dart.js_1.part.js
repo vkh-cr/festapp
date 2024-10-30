@@ -61,14 +61,14 @@ v.f=r}catch(p){r=A.ac(p)
 if(y.g.b(r)){t=r
 A.cJ(J.aD(t),C.aq)}else throw p}return A.j(null,w)}})
 return A.k($async$bf,w)},
-D(d){var x,w,v,u,t=null,s=I.bN(D.b_Y,t)
+D(d){var x,w,v,u,t=null,s=I.bN(D.b_X,t)
 s=N.ku(t,!0,t,t,!0,t,t,O.qD(new B.bNv(d)),t,s)
 x=y.w
-x=A.aA(A.a1("Welcome in {name}!",A.I(["name","Fstapp"],x,x)),t,t,t,t,t,t,t,D.aY4,t,t,t,t)
+x=A.aA(A.a1("Welcome in {name}!",A.I(["name","Fstapp"],x,x)),t,t,t,t,t,t,t,D.aY3,t,t,t,t)
 w=A.aA(A.a1("Create a new password to continue.",t),t,t,t,t,t,t,t,S.dF,t,t,t,t)
-v=R.a1H(D.axu,!1,this.e,F.iG(t,U.lX,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.a1("New Password",t),t,t,t,t,t,t,t,t,t,t,t,t,t),t,H.Bj,t,!0,t,t,t,!1,new B.bNw())
+v=R.a1H(D.axt,!1,this.e,F.iG(t,U.lY,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.a1("New Password",t),t,t,t,t,t,t,t,t,t,t,t,t,t),t,H.Bj,t,!0,t,t,t,!1,new B.bNw())
 u=A.fc(20)
-return M.i_(s,t,new A.cX(C.F,t,t,new A.dE(new A.ab(0,820,0,1/0),P.eV(Q.Vn(t,t,new E.yv(A.bO(A.a([x,G.cW,w,D.aUc,new A.an(T.xx,v,t),G.cW,A.aQ(t,A.eA(!1,I.bN(D.b_O,t),t,t,C.Q,t,t,t,t,new B.bNx(this,d),t,t),C.h,t,t,new A.c_(C.aR,t,t,u,t,t,t,C.X),t,50,t,t,t,t,250)],y.u),C.n,C.p,C.q,t,C.B),t),this.d,t,t),t,C.w,t,t,C.E),t),t),t,t,t,t)}}
+return M.i_(s,t,new A.cX(C.F,t,t,new A.dE(new A.ab(0,820,0,1/0),P.eV(Q.Vn(t,t,new E.yv(A.bO(A.a([x,G.cW,w,D.aUb,new A.an(T.xx,v,t),G.cW,A.aQ(t,A.eA(!1,I.bN(D.b_N,t),t,t,C.Q,t,t,t,t,new B.bNx(this,d),t,t),C.h,t,t,new A.c_(C.aR,t,t,u,t,t,t,C.X),t,50,t,t,t,t,250)],y.u),C.n,C.p,C.q,t,C.B),t),this.d,t,t),t,C.w,t,t,C.E),t),t),t,t,t,t)}}
 var z=a.updateTypes([])
 B.bNv.prototype={
 $0(){return K.arC(this.a)},
@@ -120,11 +120,11 @@ w(A.bY,[B.bNw,B.bNt])
 x(B.bNu,A.dW)})()
 A.bE(b.typeUniverse,JSON.parse('{"B_":{"H":[],"e":[]},"aG2":{"J":["B_"]}}'))
 var y={g:A.x("aT"),u:A.x("p<e>"),o:A.x("aM<r_>"),F:A.x("aH"),E:A.x("A"),w:A.x("f"),b:A.x("@"),v:A.x("~")};(function constants(){var x=a.makeConstList
-D.axu=A.a(x(["password"]),A.x("p<f>"))
-D.aUc=new A.aV(null,64,null,null)
-D.aY4=new A.U(!0,null,null,null,null,null,20,C.bg,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.aW1=new A.U(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b_O=new A.bM("Change Password",null,D.aW1,null,null,null,null,null,null,null,null,null,null,null)
-D.b_Y=new A.bM("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+D.axt=A.a(x(["password"]),A.x("p<f>"))
+D.aUb=new A.aV(null,64,null,null)
+D.aY3=new A.U(!0,null,null,null,null,null,20,C.bg,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.aW0=new A.U(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b_N=new A.bM("Change Password",null,D.aW0,null,null,null,null,null,null,null,null,null,null,null)
+D.b_X=new A.bM("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"eSei0l3YnsxYvc4DwqPvdTR97uE=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"mvMrLOZb3DYEDsrBOVZGjw/s4GE=");
