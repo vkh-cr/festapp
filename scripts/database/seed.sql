@@ -14,5 +14,10 @@ VALUES
   'sex', 'male'
   ), true);
 
-
 --select set_claim((select get_user_id_by_email('bujnmi@gmail.com')), 'is_admin', 'true');
+
+--copy icons for organization
+INSERT INTO public.icons (link, created_at, data, updated_at, organization)
+SELECT link, created_at, data, updated_at, 2 AS organization
+FROM public.icons
+WHERE organization = 1;

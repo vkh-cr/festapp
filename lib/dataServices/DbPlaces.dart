@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -41,7 +42,7 @@ class DbPlaces {
   }
 
   static Future<List<IconModel>> getAllIcons() async {
-    var data = await _supabase.from(Tb.icons.table).select();
+    var data = await _supabase.from(Tb.icons.table).select().eq(Tb.icons.organization, AppConfig.organization);
     var toReturn = List<IconModel>.from(data.map((x) => IconModel.fromJson(x)));
     return toReturn;
   }

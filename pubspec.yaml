@@ -110,7 +110,6 @@ flutter:
         - asset: fonts/Futura PT Medium.ttf
   assets:
     - assets/icons/
-    - assets/images/map/
     - assets/translations/
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -24,7 +24,6 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/components/map/MapIconService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,7 +46,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   OccasionModel? occasionModel;
   List<String> places = [];
   List<PlutoColumn> columns = [];
-  List<String> mapIcons = [];
+  List<int?> mapIcons = [];
   List<IconModel> svgIcons = [];
   bool isAdmin = false;
   late TabController _tabController;
@@ -68,10 +67,9 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   Future<void> loadData() async {
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
     await loadPlaces();
-    mapIcons = MapIconHelper.type2Icon.keys.toList();
-    mapIcons.add(PlaceModel.WithouValue);
     svgIcons = await DbPlaces.getAllIcons();
-    mapIcons.addAll(svgIcons.map((i)=>i.link!));
+    mapIcons.addAll(svgIcons.map((s)=>s.id));
+    mapIcons.add(null);
     setState(() {});
   }
 
@@ -444,9 +442,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Icon".tr(),
-                    field: Tb.places.type,
-                    type: PlutoColumnType.select(mapIcons),
-                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState, svgIcons),
+                    field: Tb.places.icon,
+                    type: PlutoColumnType.select(mapIcons, builder: (icon) {
+                      return DataGridHelper.iconToRow(icon, svgIcons);
+                    }),
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, svgIcons),
                   ),
                   PlutoColumn(
                       width: 150,
