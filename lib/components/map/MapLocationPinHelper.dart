@@ -3,28 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
-import 'package:fstapp/components/map/MapIconService.dart';
 
 class MapLocationPinHelper {
   static Widget? type2icon(String? placeType, List<IconModel> source) {
     SvgPicture? fill;
-    var iconLink = MapIconHelper.getIconAddress(placeType);
 
-    if (iconLink != null) {
-      fill = SvgPicture.asset(
-        iconLink,
+    var iconData = source.firstWhereOrNull((i) => i.link == placeType)?.data;
+    if (iconData != null) {
+      fill = SvgPicture.string(
+        iconData,
         colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
       );
       return _locationPin(fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 19, iconWidth: 19, iconHeight: 19);
-    } else {
-      var iconData = source.firstWhereOrNull((i) => i.link == placeType)?.data;
-      if (iconData != null) {
-        fill = SvgPicture.string(
-          iconData,
-          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-        );
-        return _locationPin(fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 18, iconWidth: 21, iconHeight: 21);
-      }
     }
 
     return null;

@@ -26,4 +26,9 @@ class IconModel {
     this.link,
     this.data,
     this.id});
+
+  @override
+  String toString() {
+    return link??"";
+  }
 }
