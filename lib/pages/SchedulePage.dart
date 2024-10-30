@@ -123,70 +123,76 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GestureDetector(
-                onDoubleTap: () async {
-                  var packageInfo = await PackageInfo.fromPlatform();
-                  ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                  if(RightsService.isEditor()) {
-                    setState(() {
-                      TimeHelper.toggleTimeTravel?.call();
-                    });
-                  }
-                },
-                child: SvgPicture.asset(
-                  height: 112,
-                  semanticsLabel: 'Festapp logo',
-                  'assets/icons/fstapplogo.svg',
+    return SafeArea(
+      top: true,
+      bottom: false,
+      left: false,
+      right: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                  onDoubleTap: () async {
+                    var packageInfo = await PackageInfo.fromPlatform();
+                    ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                    if(RightsService.isEditor()) {
+                      setState(() {
+                        TimeHelper.toggleTimeTravel?.call();
+                      });
+                    }
+                  },
+                  child: SvgPicture.asset(
+                    height: 112,
+                    semanticsLabel: 'Festapp logo',
+                    'assets/icons/fstapplogo.svg',
+                  ),
                 ),
-              ),
-              const Spacer(),
-              Visibility(
-                visible: !AuthService.isLoggedIn(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    CircularButton(
-                      onPressed: _loginPressed,
-                      backgroundColor: AppConfig.button1Color,
-                      child: const Icon(Icons.login),
-                    ),
-                    Text("Sign in".tr()),
-                  ],
+                const Spacer(),
+                Visibility(
+                  visible: !AuthService.isLoggedIn(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      CircularButton(
+                        onPressed: _loginPressed,
+                        backgroundColor: AppConfig.button1Color,
+                        child: const Icon(Icons.login),
+                      ),
+                      Text("Sign in".tr()),
+                    ],
+                  ),
                 ),
-              ),
-              Visibility(
-                visible: AuthService.isLoggedIn(),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    CircularButton(
-                      onPressed: _profileButtonPressed,
-                      backgroundColor: AppConfig.profileButtonColor,
-                      child: const Icon(Icons.account_circle_rounded),
-                    ),
-                    Text(AuthService.currentUser?.name??""),
-                  ],
+                Visibility(
+                  visible: AuthService.isLoggedIn(),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      CircularButton(
+                        onPressed: _profileButtonPressed,
+                        backgroundColor: AppConfig.profileButtonColor,
+                        child: const Icon(Icons.account_circle_rounded),
+                      ),
+                      Text(AuthService.currentUser?.name??""),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: ScheduleTabView(
-            key: _dots.isEmpty ? UniqueKey() : null,
-            events: _dots,
-            onEventPressed: _eventPressed,
+          Expanded(
+            child: ScheduleTabView(
+              key: _dots.isEmpty ? UniqueKey() : null,
+              events: _dots,
+              onEventPressed: _eventPressed,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
