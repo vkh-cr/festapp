@@ -63,7 +63,7 @@ class AppConfig {
   static const button3Color = color2;
   static const button4Color = color4;
 
-  static const defaultHtmlViewColor = Colors.black;
+  static const defaultHtmlViewColor = Colors.white;
 
   static const bool isSplitByPlace = false;
 
