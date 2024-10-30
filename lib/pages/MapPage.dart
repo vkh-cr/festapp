@@ -185,7 +185,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         point: mapPlace.latLng,
         width: 60,
         height: 60,
-        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(mapPlace.type, _icons) : null,
+        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(mapPlace, _icons) : null,
         alignment: Alignment.topCenter,
         editAction: runEditPositionMode,
       );
