@@ -1,28 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:simple_shadow/simple_shadow.dart';
-
-MaterialColor primarySwatch = const MaterialColor(
-  AppConfig.primaryColor,
-  <int, Color>{
-    50: Color(0xFFE1F0F4),
-    100: Color(0xFFB4D9E4),
-    200: Color(0xFF84BFD3),
-    300: Color(0xFF55A5C2),
-    400: Color(0xFF3994B6),
-    500: Color(0xFF1D838A),
-    600: Color(0xFF176E6F),
-    700: Color(0xFF125954),
-    800: Color(0xFF0C4239),
-    900: Color(0xFF062E1E),
-  },
-);
 
 TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
-TextStyle timeLineSplitTextStyle = const TextStyle(
-    color: AppConfig.timelineSplitLabelColor, fontWeight: FontWeight.bold, fontSize: 15);
+TextStyle timeLineSplitTextStyle = TextStyle(
+    color: ThemeConfig.timelineSplitLabelColor, fontWeight: FontWeight.bold, fontSize: 15);
+double normalClickableFontSize = 18;
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
@@ -33,33 +18,32 @@ ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
 
     maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
-    backgroundColor: AppConfig.color2,
+    backgroundColor: ThemeConfig.color2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
-
-const Color bigButtonColor = Color.fromARGB(255, 220, 226, 237);
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Widget child;
   final EdgeInsets margin;
-  final Color backgroundColor;
+  Color? backgroundColor;
 
-  const MainPageButton({
-    Key? key,
+  MainPageButton({
+    super.key,
     required this.onPressed,
     required this.child,
-    this.backgroundColor = AppConfig.color2,
+    this.backgroundColor,
     this.margin = const EdgeInsets.symmetric(horizontal: 8.0),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
+    backgroundColor ??= ThemeConfig.color2;
     return Container(
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
         style: mainPageButtonStyle.copyWith(
-          backgroundColor: MaterialStateProperty.all(backgroundColor),
+          backgroundColor: WidgetStatePropertyAll(backgroundColor),
         ),
         child: child,
       ),
@@ -70,29 +54,25 @@ class MainPageButton extends StatelessWidget {
 class CircularButton extends MainPageButton {
   final Size size;
 
-  const CircularButton({
-    Key? key,
-    required VoidCallback onPressed,
-    required Widget child,
-    backgroundColor = AppConfig.color2,
+  CircularButton({
+    super.key,
+    required super.onPressed,
+    required super.child,
+    super.backgroundColor,
     this.size = const Size(50, 50),
-  }) : super(
-          key: key,
-          onPressed: onPressed,
-          child: child,
-          backgroundColor: backgroundColor,
-        );
+  });
 
   @override
   Widget build(BuildContext context) {
+    backgroundColor ??= ThemeConfig.color2;
     return Container(
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
         style: mainPageButtonStyle.copyWith(
-          backgroundColor: MaterialStateProperty.all(backgroundColor),
-          shape: MaterialStateProperty.all(const CircleBorder()),
-          minimumSize: MaterialStateProperty.all(size),
+          backgroundColor: WidgetStateProperty.all(backgroundColor),
+          shape: WidgetStateProperty.all(const CircleBorder()),
+          minimumSize: WidgetStateProperty.all(size),
         ),
         child: child,
       ),

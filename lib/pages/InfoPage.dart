@@ -12,6 +12,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import '../services/ToastHelper.dart';
 import '../services/js/js_interop.dart';
@@ -48,10 +49,10 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConfig.infoPageColor,
+      backgroundColor: ThemeConfig.infoPageColor,
       appBar: AppBar(
         title: Text(title),
-        leading: PopButton(color: Colors.white),
+        leading: PopButton(),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -68,7 +69,7 @@ class _InfoPageState extends State<InfoPage> {
                   : _informationList!.map<ExpansionPanel>((InformationModel item) {
                 int index = _informationList!.indexOf(item);
                 return ExpansionPanel(
-                  backgroundColor: AppConfig.backgroundColor,
+                  backgroundColor: ThemeConfig.backgroundColor,
                   headerBuilder: (BuildContext context, bool isExpanded) {
                     return ListTile(
                       title: Text(item.title ?? ""),

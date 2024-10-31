@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 import 'PlutoAbstract.dart';
@@ -28,9 +29,12 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
         scrollbarThickness: 16.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
-      style: const PlutoGridStyleConfig(
+      style: ThemeConfig.isDarkMode ? PlutoGridStyleConfig.dark(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white70
+      ) : PlutoGridStyleConfig(
+          rowHeight: 36,
+          cellColorInReadOnlyState: Colors.white70
       ),
     );
   }

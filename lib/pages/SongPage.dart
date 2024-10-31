@@ -8,6 +8,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/themeConfig.dart';
 
 import '../widgets/HtmlView.dart';
 
@@ -112,8 +113,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.color1,
+                                      foregroundColor: ThemeConfig.color2,
                                     ),
                                   ),
                                 ),
@@ -133,8 +134,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.color1,
+                                      foregroundColor: ThemeConfig.color2,
                                     ),
                                     child: const Icon(Icons.remove,
                                         color: Colors.white),
@@ -150,8 +151,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.color1,
+                                      foregroundColor: ThemeConfig.color2,
                                     ),
                                     child: Icon(Icons.adaptive.arrow_back,
                                         color: Colors.white),

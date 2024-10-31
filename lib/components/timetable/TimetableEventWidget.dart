@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 
 class TimetableEventWidget extends StatefulWidget {
@@ -38,7 +38,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onSurface,
           borderRadius: BorderRadius.circular(6),
           // boxShadow: const [
           //   BoxShadow(
@@ -53,8 +53,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           height: widget.itemHeight,
           decoration: BoxDecoration(
             color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                ? AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(1)
-                : AppConfig.eventTypeToColor(widget.item.eventType).withOpacity(0.3),
+                ? ThemeConfig.eventTypeToColor(widget.item.eventType).withOpacityUniversal(context, 1)
+                : ThemeConfig.eventTypeToColor(widget.item.eventType).withOpacityUniversal(context, 0.3),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Stack(
@@ -72,7 +72,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                     await widget.removeFromMyProgram!(widget.item);
                     setState(() {});
                   }
-                }, Colors.white),
+                }, ThemeConfig.whiteColor, ThemeConfig.darkColor),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
@@ -82,8 +82,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                             ? FontWeight.bold
                             : FontWeight.normal,
                         color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                            ? Colors.white
-                            : Colors.black),
+                            ? ThemeConfig.whiteColor
+                            : ThemeConfig.blackColor),
                     overflow: TextOverflow.fade),
               ),
             ],

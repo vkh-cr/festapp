@@ -3,11 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DataService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
 class ResetPasswordPage extends StatefulWidget {
@@ -98,7 +98,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         height: 50,
                         width: 250,
                         decoration: BoxDecoration(
-                            color: AppConfig.color1,
+                            color: ThemeConfig.color1,
                             borderRadius: BorderRadius.circular(20)),
                         child: TextButton(
                           onPressed: () async {

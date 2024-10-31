@@ -8,9 +8,10 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:pwa_install/pwa_install.dart';
-import 'package:flutter/foundation.dart'; // Add this import
+import 'package:flutter/foundation.dart';
 
 @RoutePage()
 class SettingsPage extends StatefulWidget {
@@ -145,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ButtonsHelper.bigButton(
                           label: "Install App".tr(),
                           onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA ? AppConfig.color1 : Colors.grey,
+                          color: _canInstallPWA ? ThemeConfig.color1 : Colors.grey,
                           textColor: Colors.white,
                         ),
                         if (!_isPlatformSupported)
@@ -160,9 +161,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         if (_isAppInstalled || !_isPromptEnabled)
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: const Text(
+                            child: Text(
                               "The app is already installed.",
-                              style: TextStyle(fontSize: 16, color: AppConfig.color1),
+                              style: TextStyle(fontSize: 16, color: ThemeConfig.color1),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),

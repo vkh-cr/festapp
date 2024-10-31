@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:pwa_install/pwa_install.dart';
@@ -143,15 +144,15 @@ class _InstallPageState extends State<InstallPage> {
               ButtonsHelper.bigButton(
                 label: isApple ? "Download App".tr() : "Install App".tr(),
                 onPressed: isApple ? () => InstallPage.jsInterop.openLinkInNewTab(link) : _canInstallPWA ? handleInstallButtonPress : null,
-                color: isApple || _canInstallPWA ? AppConfig.color1 : Colors.grey,
+                color: isApple || _canInstallPWA ? ThemeConfig.color1 : Colors.grey,
                 textColor: Colors.white,
               ),
               if (_isAppInstalled)
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: const Text(
+                  child: Text(
                     "The app is already installed.",
-                    style: TextStyle(fontSize: 16, color: AppConfig.color1),
+                    style: TextStyle(fontSize: 16, color: ThemeConfig.color1),
                     textAlign: TextAlign.center,
                   ).tr(),
                 ),

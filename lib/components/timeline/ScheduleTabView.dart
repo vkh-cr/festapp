@@ -1,9 +1,9 @@
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 
 import 'ScheduleTimeline.dart';
 
@@ -48,8 +48,8 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
           appBar: TabBar(
             isScrollable: datedEvents.length > 4 ? true : false,
             unselectedLabelColor: Colors.grey,
-            labelColor: AppConfig.timelineTabLabelColor,
-            indicatorColor: AppConfig.timelineTabIndicatorColor,
+            labelColor: ThemeConfig.timelineTabLabelColor,
+            indicatorColor: ThemeConfig.timelineTabIndicatorColor,
             indicatorWeight: 3.0,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),

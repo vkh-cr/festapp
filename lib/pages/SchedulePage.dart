@@ -20,6 +20,7 @@ import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
@@ -160,7 +161,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _loginPressed,
-                        backgroundColor: AppConfig.button1Color,
+                        backgroundColor: ThemeConfig.profileButtonColor,
                         child: const Icon(Icons.login),
                       ),
                       Text("Sign in".tr()),
@@ -174,7 +175,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _profileButtonPressed,
-                        backgroundColor: AppConfig.profileButtonColor,
+                        backgroundColor: ThemeConfig.profileButtonColor,
                         child: const Icon(Icons.account_circle_rounded),
                       ),
                       Text(AuthService.currentUser?.name??""),

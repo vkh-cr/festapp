@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class MapLocationPinHelper {
   static Widget? type2icon(MapPlaceModel placeType, List<IconModel> source) {
@@ -25,7 +25,7 @@ class MapLocationPinHelper {
   static Stack _locationPin(SvgPicture fill, {required double top, required double left, required double iconTop, required double iconLeft, required double iconWidth, required double iconHeight}) {
     return Stack(
       children: [
-        const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
+        Icon(Icons.location_pin, size: 58, color: ThemeConfig.mapPinColor),
         Positioned(
           top: top,
           left: left,

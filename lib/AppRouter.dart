@@ -45,6 +45,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
     AutoRoute(page: AdministrationRoute.page, path: "/:{$LINK}/${AdministrationPage.ROUTE}"),
+    AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
           AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
@@ -53,7 +54,6 @@ class AppRouter extends RootStackRouter {
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}"),
       AutoRoute(page: ProgramViewRoute.page, path: "${ProgramViewPage.ROUTE}"),
       AutoRoute(page: SongRoute.page, path: "${SongPage.ROUTE}"),
-      AutoRoute(page: MyScheduleRoute.page, path: "${MySchedulePage.ROUTE}"),
       AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", children: [
         AutoRoute(path: ':id', page: MapRoute.page,),
       ]),

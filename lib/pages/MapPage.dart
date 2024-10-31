@@ -211,7 +211,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(pageTitle),
-          leading: PopButton(color: Colors.white),
+          leading: PopButton(),
       ),
       body: Stack(
         children: [

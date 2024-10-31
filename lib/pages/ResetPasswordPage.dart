@@ -7,6 +7,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 
@@ -102,7 +103,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                   ButtonsHelper.bigButton(
                     onPressed: () async => _changePassword(context),
                     label: "Change Password".tr(),
-                    color: AppConfig.color1,
+                    color: ThemeConfig.color1,
                     textColor: Colors.white,
                   ),
                 ],

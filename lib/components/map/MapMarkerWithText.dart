@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapMarkerWithText extends Marker {
@@ -22,7 +22,7 @@ class MapMarkerWithText extends Marker {
     this.editAction,
     LatLng? oldPoint,
   }) : super(
-    child: icon ?? const Icon(Icons.location_pin, size: 36, color: AppConfig.mapPinColor),
+    child: icon ?? Icon(Icons.location_pin, size: 36, color: ThemeConfig.mapPinColor),
   );
 
   MapMarkerWithText cloneWithNewPoint(LatLng point) {
