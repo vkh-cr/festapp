@@ -19,10 +19,10 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
@@ -68,13 +68,13 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: _event == null
-              ? AppConfig.color1
-              : AppConfig.eventTypeToColor(_event!.type),
+              ? ThemeConfig.color1
+              : ThemeConfig.eventTypeToColor(_event!.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          leading: ScheduleBackButton(color: Colors.white),
+          leading: ScheduleBackButton(),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover(),
@@ -94,7 +94,9 @@ class _EventPageState extends State<EventPage> {
             ...ButtonsHelper.getAddToMyProgramButton(
                 _event?.canSaveEventToMyProgram(),
                 addToMySchedule,
-                removeFromMySchedule)]),
+                removeFromMySchedule,
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.surface)]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -241,7 +243,6 @@ class _EventPageState extends State<EventPage> {
                                   SizedBox.fromSize(size: const Size(4.0, 4.0)),
                                   Text(
                                     "${"Place".tr()}: ${_event?.place?.title ?? ""}",
-                                    style: normalTextStyle,
                                   )
                                 ],
                               ),
@@ -251,9 +252,9 @@ class _EventPageState extends State<EventPage> {
                         !AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                      child: Text(
                         "You need to have an account to sign in to the event.",
-                        style: TextStyle(color: AppConfig.attentionColor),
+                        style: TextStyle(color: ThemeConfig.attentionColor),
                       ).tr(),
                     )),
                 Visibility(

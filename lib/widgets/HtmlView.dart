@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html,
@@ -15,11 +16,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   @override
   FutureOr<bool> Function(String p1)? get onTapUrl {
     return (String url) {
-      if (url.startsWith("navigate:")) {
-        var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-        RouterService.navigateOccasion(context, navigateTo);
-        return true;
-      } else if (url.startsWith(AppConfig.webLink) || url.contains("localhost")) {
+      if (url.startsWith(AppConfig.webLink) || url.contains("localhost")) {
         var path = url.split('/#/').last;
         RouterService.navigate(context, path);
         return true;
@@ -48,7 +45,6 @@ class HtmlView extends StatefulWidget {
     Key? key,
     required this.html,
     this.fontSize = 18,
-    this.color = AppConfig.defaultHtmlViewColor,
     this.isSelectable = false,
   }) : super(key: key);
 
@@ -61,15 +57,9 @@ class _HtmlViewState extends State<HtmlView> {
 
   @override
   Widget build(BuildContext context) {
-    String widgetColor;
-    if (widget.color != null) {
-      final int r = widget.color!.red;
-      final int g = widget.color!.green;
-      final int b = widget.color!.blue;
-      widgetColor = 'rgb($r, $g, $b)';
-    } else {
-      widgetColor = "";
-    }
+    widget.color ??= ThemeConfig.defaultHtmlViewColor;
+    String widgetColor = colorToRgbString(widget.color);
+    String aColor = colorToRgbString(ThemeConfig.seedColor);
 
     Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
@@ -85,7 +75,7 @@ class _HtmlViewState extends State<HtmlView> {
         final tagName = element.localName;
         if (tagName == 'a') {
           return {
-            'color': widgetColor,
+            'color': aColor,
           };
         }
         return null;
@@ -99,5 +89,16 @@ class _HtmlViewState extends State<HtmlView> {
       child: htmlWidget,
     )
         : htmlWidget;
+  }
+
+  String colorToRgbString(Color? color) {
+    if (color != null) {
+      final int r = color.red;
+      final int g = color.green;
+      final int b = color.blue;
+      return 'rgb($r, $g, $b)';
+    } else {
+      return "";
+    }
   }
 }

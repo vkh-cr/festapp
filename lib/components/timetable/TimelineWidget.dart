@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/services/TimeHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';
 
 class TimelineWidget extends StatelessWidget {
@@ -34,7 +34,7 @@ class TimelineWidget extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(
                 i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
             child: Container(
-              color: AppConfig.timetableColor,
+              color: ThemeConfig.timetableTimeLineColor,
               height: timelineHeight,
               width: (i == hourCount || i == 0)
                   ? pixelsInHour / 2
@@ -48,7 +48,7 @@ class TimelineWidget extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
                   "$hour:00",
-                  style: const TextStyle(color: Colors.white),
+                  style: TextStyle(color: ThemeConfig.upperNavText(context)),
                 ),
               ),
             ),
@@ -65,7 +65,7 @@ class TimelineWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   decoration: BoxDecoration(
-                    color: AppConfig.timetableTimeSplitColor,
+                    color: ThemeConfig.timetableTimeSplitColor,
                     //border: Border.all(color: AppConfig.timetableTimeSplitColor, width: 2),
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: const [
@@ -78,7 +78,7 @@ class TimelineWidget extends StatelessWidget {
                   ),
                   child: Text(
                     timeFormat.format(now),
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

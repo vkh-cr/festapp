@@ -20,9 +20,9 @@ import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
@@ -55,9 +55,9 @@ class _UserPageState extends State<UserPage> {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back,
-                color: AppConfig.color1,
+                color: ThemeConfig.color1,
               ),
               onPressed: () {
                 RouterService.goBack(context);
@@ -78,9 +78,9 @@ class _UserPageState extends State<UserPage> {
                         name: name,
                       );
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.download,
-                      color: AppConfig.color1,
+                      color: ThemeConfig.color1,
                     ),
                   ),
                 ),
@@ -169,6 +169,7 @@ class _UserPageState extends State<UserPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: ButtonsHelper.buildQRCodeButton(
+                          context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
                               userData!.name!,
@@ -210,7 +211,7 @@ class _UserPageState extends State<UserPage> {
                                     const SizedBox(height: 10),
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: bigButtonColor,
+                                        color: ThemeConfig.qrButtonColor,
                                         // Match the background color
                                         borderRadius: BorderRadius.circular(
                                             12), // Optional: Rounded corners
@@ -218,14 +219,15 @@ class _UserPageState extends State<UserPage> {
                                       child: ExpansionTile(
                                         //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
                                         shape: const Border(),
-                                        title: Text(companion.name, style: const TextStyle(
-                                            fontWeight: FontWeight.bold),),
+                                        title: Text(companion.name, style: TextStyle(
+                                            fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),),
                                         subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
                                             style: TextStyle(
-                                                color: Colors.grey[800]!,
+                                                color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 13)),
                                         trailing:
                                             ButtonsHelper.buildQRCodeButton(
+                                              context: context,
                                           onPressed: () =>
                                               _showFullScreenDialog(
                                             context,
@@ -255,7 +257,7 @@ class _UserPageState extends State<UserPage> {
                                                   emptyContent: Center(child: Text(
                                                     "Companion's events will appear here.",
                                                       style: TextStyle(
-                                                          color: Colors.grey[600]!)
+                                                          color: ThemeConfig.grey600)
                                                   ).tr(),),)),
                                           SizedBox.fromSize(size: const Size.fromHeight(48)),
                                           Column(
@@ -275,10 +277,8 @@ class _UserPageState extends State<UserPage> {
                                                   await DbCompanions.delete(companion);
                                                   await loadData();
                                                 },
-                                                child: const Text(
-                                                  "Delete companion",
-                                                  style: TextStyle(
-                                                      color: Colors.black), // Set the text color to black
+                                                child: Text(
+                                                  "Delete companion", // Set the text color to black
                                                 ).tr(),
                                               ),
                                             ],
@@ -352,10 +352,10 @@ class _UserPageState extends State<UserPage> {
                 ButtonsHelper.bigButton(
                     onPressed: () async => _logout(),
                     label: "Sign out".tr(),
-                    color: AppConfig.color1,
+                    color: ThemeConfig.color1,
                     textColor: Colors.white),
                 const SizedBox(
-                  height: 16,
+                  height: 24,
                 ),
                 Container(
                     alignment: Alignment.topCenter,
@@ -385,11 +385,11 @@ class _UserPageState extends State<UserPage> {
                       },
                       child: Text(
                         "Change password".tr(),
-                        style: normalTextStyle,
+                        style: TextStyle(fontSize: normalClickableFontSize),
                       ).tr(),
                     )),
                 const SizedBox(
-                  height: 8,
+                  height: 16,
                 ),
                 Container(
                     alignment: Alignment.topCenter,
@@ -401,7 +401,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr()),
                         child: Text(
                           "Delete account".tr(),
-                          style: normalTextStyle,
+                          style: TextStyle(fontSize: normalClickableFontSize),
                         ).tr()))
               ],
             ),
@@ -434,7 +434,6 @@ class _UserPageState extends State<UserPage> {
             hintText: placeholder,
             hintStyle: const TextStyle(
               fontSize: 17,
-              color: Colors.black,
             )),
       ),
     );

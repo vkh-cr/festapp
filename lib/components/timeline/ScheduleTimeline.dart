@@ -1,8 +1,8 @@
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:timelines/timelines.dart';
-import 'package:fstapp/appConfig.dart';
 
 
 class ScheduleTimeline extends StatefulWidget {
@@ -62,8 +62,8 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       physics: const NeverScrollableScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
-        indicatorTheme: IndicatorTheme.of(context).copyWith(color: AppConfig.timelineColor),
-        connectorTheme: ConnectorTheme.of(context).copyWith(color: AppConfig.timelineColor, thickness: 2),
+        indicatorTheme: IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor),
+        connectorTheme: ConnectorTheme.of(context).copyWith(color: ThemeConfig.timelineColor, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -74,7 +74,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               event.data["leftText"],
-              style: timeLineSmallTextStyle.copyWith(color: AppConfig.timelineTextColor),
+              style: timeLineSmallTextStyle.copyWith(color: ThemeConfig.timelineTextColor),
             ),
           );
         },
@@ -83,7 +83,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           return TextButton(
             onPressed: () => widget.onEventPressed!(event.id),
             style: TextButton.styleFrom(
-              foregroundColor: AppConfig.timelineTextColor,
+              foregroundColor: ThemeConfig.timelineTextColor,
               alignment: Alignment.centerLeft,
             ),
             child: Text(
@@ -95,19 +95,19 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         indicatorBuilder: (_, index) {
           final event = events[index];
           if(event.timeBlockType == TimeBlockType.signedIn) {
-            return const OutlinedDotIndicator(
-              color: AppConfig.timelineColor,
+            return OutlinedDotIndicator(
+              color: ThemeConfig.timelineColor,
               borderWidth: 6,
             );
           } else if(event.timeBlockType == TimeBlockType.canSignIn) {
-            return const OutlinedDotIndicator(
-              color: AppConfig.timelineColor,
+            return OutlinedDotIndicator(
+              color: ThemeConfig.timelineColor,
               borderWidth: 2,
             );
           } else {
-            return const Padding(
+            return Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-              child: DotIndicator(color: AppConfig.timelineColor, size: 8),
+              child: DotIndicator(color: ThemeConfig.timelineColor, size: 8),
             );
           }
         },

@@ -14,8 +14,8 @@ import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/TimeTravelWidget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
@@ -115,7 +115,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Offset _offset = Offset.zero;
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     TimeHelper.toggleTimeTravel = () {
@@ -123,6 +122,7 @@ class _MyAppState extends State<MyApp> {
         widget.isTimeTravelVisible = !widget.isTimeTravelVisible;
       });
     };
+
     return MaterialApp.router(
       routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
       debugShowCheckedModeBanner: false,
@@ -151,26 +151,9 @@ class _MyAppState extends State<MyApp> {
       supportedLocales: context.supportedLocales,
       locale: context.locale,
       title: HomePage.HOME_PAGE,
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-          fontFamily: "Futura",
-          useMaterial3: false,
-          scaffoldBackgroundColor: AppConfig.backgroundColor,
-          secondaryHeaderColor: const Color(0xFFBA5D3F),
-          bottomNavigationBarTheme: BottomNavigationBarThemeData(
-            selectedItemColor: AppConfig.color1,
-            unselectedItemColor: Colors.black26,
-          ),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: primarySwatch)
-              .copyWith(surface: AppConfig.backgroundColor)),
+      theme: ThemeConfig.lightTheme,
+      darkTheme: ThemeConfig.darkTheme,
+      themeMode: ThemeConfig.isDarkMode ? ThemeMode.dark : ThemeMode.light,
     ).animate().fadeIn(
       duration: 300.ms,
     );

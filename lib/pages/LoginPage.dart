@@ -4,9 +4,9 @@ import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
-import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         }
                       },
-                      color: AppConfig.color1,
+                      color: ThemeConfig.color1,
                       textColor: Colors.white,
                       isEnabled: !_isLoading,
                     ),

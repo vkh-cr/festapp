@@ -4,6 +4,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
@@ -62,7 +63,7 @@ class DataGridHelper
         height: 20,
         child: SvgPicture.string(
           icon.data!,
-          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(ThemeConfig.blackColor, BlendMode.srcIn),
         ),
       );
 

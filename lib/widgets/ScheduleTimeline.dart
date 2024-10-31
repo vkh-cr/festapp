@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:timelines/timelines.dart';
 
 
@@ -165,9 +166,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: AppConfig.timelineColor),
+            IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: AppConfig.timelineColor, thickness: 2),
+            .copyWith(color: ThemeConfig.timelineColor, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -194,10 +195,10 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: AppConfig.timelineColor, borderWidth: event.dotType == DotType.closed ? 6 : 2)
-              : const Padding(
+                  color: ThemeConfig.timelineColor, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+              : Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: AppConfig.timelineColor, size: 8));
+                  child: DotIndicator(color: ThemeConfig.timelineColor, size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

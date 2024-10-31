@@ -13,6 +13,7 @@ import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/VibrateService.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 enum ScanState { signedIn, notSignedIn, nothing }
@@ -180,9 +181,9 @@ class _CheckPageState extends State<CheckPage> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: AppConfig.color1,
+                          color: ThemeConfig.color1,
                         ),
                         onPressed: () {
                           RouterService.goBack(context);
@@ -191,10 +192,10 @@ class _CheckPageState extends State<CheckPage> {
                       Expanded(
                         child: Text(
                           _event?.toString() ?? "",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppConfig.color1,
+                            color: ThemeConfig.color1,
                           ),
                           textAlign: TextAlign.center,
                         ),
