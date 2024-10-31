@@ -11,14 +11,14 @@ class ThemeConfig {
     useMaterial3: false,
     primarySwatch: ThemeConfig.seedColor.getMaterialColorFromColor(),
     colorScheme: ColorScheme.fromSwatch(
-        //accentColor: seed2,
         primarySwatch: ThemeConfig.seedColor.getMaterialColorFromColor(),
         ).copyWith(
       surface: surfaceColor,
       onSurface: blackColor,
     ),
     scaffoldBackgroundColor: backgroundColor,
-    //colorSchemeSeed: seed4
+    appBarTheme: AppBarTheme(color: appBarColor),
+    tabBarTheme: TabBarTheme(indicatorColor: seedColor)
   );
 
   // Light theme configuration
@@ -34,7 +34,9 @@ class ThemeConfig {
     primaryColor: baseTheme.primaryColor,
     colorScheme: baseTheme.colorScheme.copyWith(
       brightness: Brightness.dark,
-    )
+    ),
+    appBarTheme: baseTheme.appBarTheme,
+    tabBarTheme: baseTheme.tabBarTheme
   );
 
   static ThemeData get currentTheme => isDarkMode ? darkTheme : lightTheme;
@@ -78,6 +80,7 @@ class ThemeConfig {
   static Color get infoPageColor => backgroundColor;
   static Color get profileButtonColor => isDarkMode ? grey600 : color4;
 
+  static Color get appBarColor => isDarkMode ? bottomNavBackgroundColor : color1;
   static Color get bottomNavBackgroundColor => color1;
   static Color get bottomNavSelectedItemColor => color3;
   static Color get bottomNavUnselectedItemColor => Colors.grey;
@@ -85,7 +88,7 @@ class ThemeConfig {
   static Color  upperNavText(BuildContext context) => isDarkMode ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
 
 
-  static Color get timetableTimeLineColor => color4;
+  static Color get timetableTimeLineColor => appBarColor;
   static Color get timetableSelectedColor => color2;
   static Color get timetableTimeSplitColor => Colors.red;
   static Color get timetableBackground1 => whiteColor;
@@ -155,11 +158,13 @@ extension ColorExtensions on Color {
   Color withOpacityBlack(double factor) {
     assert(factor >= 0 && factor <= 1, 'Factor must be between 0 and 1');
 
-    factor = factor * 1.4;
-    // Blend the color with black by scaling down the RGB values
-    final int r = (red * (factor)).round();
-    final int g = (green * (factor)).round();
-    final int b = (blue * (factor)).round();
+    // Reverse the factor so that 1 keeps the color unchanged and 0 moves it to black
+    final adjustedFactor = (factor * 1.4).clamp(0.0, 1.0);
+
+    // Blend each component towards black using the adjusted factor
+    final int r = (red * adjustedFactor).round();
+    final int g = (green * adjustedFactor).round();
+    final int b = (blue * adjustedFactor).round();
 
     return Color.fromARGB(alpha, r, g, b);
   }
