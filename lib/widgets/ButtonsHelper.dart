@@ -39,6 +39,7 @@ class ButtonsHelper {
   }
 
   static Widget bigButton({
+    required BuildContext context,
     required String label,
     VoidCallback? onPressed,
     Color? color,
@@ -47,12 +48,12 @@ class ButtonsHelper {
     double height = 50.0,
     double width = 250.0,
   }) {
-    color ??= ThemeConfig.bigButtonColor;
+    color ??= ThemeConfig.bigButtonColor(context);
     return Container(
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color: isEnabled ? color : ThemeConfig.grey380,
+        color: isEnabled ? color : ThemeConfig.grey380(context),
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextButton(
@@ -100,7 +101,7 @@ class ButtonsHelper {
           ).tr(),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.all(12.0),
-            backgroundColor: buttonColor ?? ThemeConfig.qrButtonColor, // Set the background color
+            backgroundColor: buttonColor ?? ThemeConfig.qrButtonColor(context), // Set the background color
             minimumSize: const Size.fromHeight(60),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular

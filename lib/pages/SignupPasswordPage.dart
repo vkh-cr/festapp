@@ -41,7 +41,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       try {
         token = regExpMatch.namedGroup("token")!;
       } on Exception catch (e) {
-        ToastHelper.Show(e.toString());
+        ToastHelper.Show(context, e.toString());
       }
     }
   }
@@ -98,7 +98,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                         height: 50,
                         width: 250,
                         decoration: BoxDecoration(
-                            color: ThemeConfig.color1,
+                            color: ThemeConfig.seed1,
                             borderRadius: BorderRadius.circular(20)),
                         child: TextButton(
                           onPressed: () async {
@@ -107,15 +107,15 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                               await AuthService.changePassword(token!, _passwordController.text)
                                   .then((value) async {
                                 if(value["code"] == 403 || value["code"] == 404) {
-                                  ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
+                                  ToastHelper.Show(context, "Token is not valid.".tr(), severity: ToastSeverity.NotOk);
                                 }
                                 else if(value["code"] == 200) {
                                   await AuthService.login(value["email"], _passwordController.text);
-                                  ToastHelper.Show("Password has been changed.".tr());
+                                  ToastHelper.Show(context, "Password has been changed.".tr());
                                   RouterService.goBackOrInitial(context);
                                 }
                               }).onError((error, stackTrace) {
-                                ToastHelper.Show(error.toString());
+                                ToastHelper.Show(context, error.toString());
                               });
                             }
                           },

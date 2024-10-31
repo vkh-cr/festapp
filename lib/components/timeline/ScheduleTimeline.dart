@@ -40,7 +40,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
             child: Text(
               group.title,
-              style: timeLineSplitTextStyle,
+              style: timeLineSplitTextStyle(context),
             ),
           ),
         ),
@@ -62,8 +62,8 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       physics: const NeverScrollableScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
-        indicatorTheme: IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor),
-        connectorTheme: ConnectorTheme.of(context).copyWith(color: ThemeConfig.timelineColor, thickness: 2),
+        indicatorTheme: IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor(context)),
+        connectorTheme: ConnectorTheme.of(context).copyWith(color: ThemeConfig.timelineColor(context), thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -74,7 +74,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               event.data["leftText"],
-              style: timeLineSmallTextStyle.copyWith(color: ThemeConfig.timelineTextColor),
+              style: timeLineSmallTextStyle.copyWith(color: ThemeConfig.timelineTextColor(context)),
             ),
           );
         },
@@ -83,7 +83,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           return TextButton(
             onPressed: () => widget.onEventPressed!(event.id),
             style: TextButton.styleFrom(
-              foregroundColor: ThemeConfig.timelineTextColor,
+              foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
             ),
             child: Text(
@@ -96,18 +96,18 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           if(event.timeBlockType == TimeBlockType.signedIn) {
             return OutlinedDotIndicator(
-              color: ThemeConfig.timelineColor,
+              color: ThemeConfig.timelineColor(context),
               borderWidth: 6,
             );
           } else if(event.timeBlockType == TimeBlockType.canSignIn) {
             return OutlinedDotIndicator(
-              color: ThemeConfig.timelineColor,
+              color: ThemeConfig.timelineColor(context),
               borderWidth: 2,
             );
           } else {
             return Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-              child: DotIndicator(color: ThemeConfig.timelineColor, size: 8),
+              child: DotIndicator(color: ThemeConfig.timelineColor(context), size: 8),
             );
           }
         },

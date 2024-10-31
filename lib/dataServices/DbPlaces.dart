@@ -86,7 +86,6 @@ class DbPlaces {
         "latLng": {"lat": lat, "lng": lng}
       }
     }).eq(Tb.places.id, placeId);
-    ToastHelper.Show("Place has been changed.".tr());
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/NewsModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -52,8 +53,6 @@ class DbNews {
         .from(Tb.news.table)
         .delete()
         .eq(Tb.news.id, message.id);
-
-    ToastHelper.Show("Message has been removed.".tr());
   }
 
   static Future<void> updateNewsMessage(NewsModel message) async {
@@ -61,10 +60,9 @@ class DbNews {
         .from(Tb.news.table)
         .update({Tb.news.message:message.message})
         .eq(Tb.news.id, message.id);
-    ToastHelper.Show("Message has been changed.".tr());
   }
 
-  static insertNewsMessage(String? heading, String headingDefault, String message, bool addToNews, bool withNotification, List<String>? to) async {
+  static insertNewsMessage(BuildContext context, String? heading, String headingDefault, String message, bool addToNews, bool withNotification, List<String>? to) async {
     if (addToNews) {
       var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
       await _supabase.from(Tb.news.table).insert(
@@ -98,12 +96,12 @@ class DbNews {
           }
       );
 
-      ToastHelper.Show("Message has been sent.".tr());
+      ToastHelper.Show(context, "Message has been sent.".tr());
       return;
     }
 
     if (addToNews) {
-      ToastHelper.Show("Message has been created.".tr());
+      ToastHelper.Show(context, "Message has been created.".tr());
     }
   }
 

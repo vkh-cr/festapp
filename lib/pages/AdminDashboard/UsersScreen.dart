@@ -100,10 +100,10 @@ class _UsersScreenState extends State<UsersScreen> {
     try {
       for (var u in users) {
         await UserManagementHelper.unsafeChangeUserPassword(context, u);
-        ToastHelper.Show("Password has been changed.".tr());
+        ToastHelper.Show(context, "Password has been changed.".tr());
       }
     } on Exception catch (e) {
-      ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
       return;
     }
   }

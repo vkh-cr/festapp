@@ -34,7 +34,7 @@ class TimelineWidget extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(
                 i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
             child: Container(
-              color: ThemeConfig.timetableTimeLineColor,
+              color: ThemeConfig.timetableTimeLineColor(context),
               height: timelineHeight,
               width: (i == hourCount || i == 0)
                   ? pixelsInHour / 2
@@ -65,7 +65,7 @@ class TimelineWidget extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                   decoration: BoxDecoration(
-                    color: ThemeConfig.timetableTimeSplitColor,
+                    color: ThemeConfig.timetableTimeSplitColor(context),
                     //border: Border.all(color: AppConfig.timetableTimeSplitColor, width: 2),
                     borderRadius: BorderRadius.circular(5.0),
                     boxShadow: const [

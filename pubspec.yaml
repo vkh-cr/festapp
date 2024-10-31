@@ -78,6 +78,7 @@ dependencies:
   flutter_map_pmtiles: ^1.0.4
   flutter_map_animations: ^0.7.1
   auto_route: ^9.2.2
+  adaptive_theme: ^3.6.0
 
 dev_dependencies:
   auto_route_generator: ^9.0.0

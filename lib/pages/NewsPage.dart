@@ -7,6 +7,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -37,7 +38,7 @@ class _NewsPageState extends State<NewsPage> {
         var heading = data["heading"];
         String headingDefault = data["heading_default"]!;
 
-        await DbNews.insertNewsMessage(heading, headingDefault, message, addToNews, withNotification, to);
+        await DbNews.insertNewsMessage(context, heading, headingDefault, message, addToNews, withNotification, to);
 
         if (addToNews) {
           await loadNewsMessages();
@@ -65,7 +66,7 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeConfig.newsPageColor,
+      backgroundColor: ThemeConfig.newsPageColor(context),
       appBar: AppBar(
         title: const Text("News").tr(),
         leading: PopButton(),
@@ -143,12 +144,14 @@ class _NewsPageState extends State<NewsPage> {
                       onSelected: (choice) async {
                         if (choice == ContextMenuChoice.delete) {
                           await DbNews.deleteNewsMessage(message);
+                          ToastHelper.Show(context, "Message has been removed.".tr());
                         } else {
                           await RouterService.navigatePageInfo(context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: message.message})).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DbNews.updateNewsMessage(message);
+                              ToastHelper.Show(context, "Message has been changed.".tr());
                             }
                           });
                         }

@@ -43,7 +43,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       try {
         token = regExpMatch.namedGroup("token")!;
       } on Exception catch (e) {
-        ToastHelper.Show(e.toString());
+        ToastHelper.Show(context, e.toString());
       }
     }
   }
@@ -54,14 +54,14 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       await AuthService.changePassword(token!, _passwordController.text)
           .then((value) async {
         if (value["code"] == 403 || value["code"] == 404) {
-          ToastHelper.Show("Token is not valid.".tr(), severity: ToastSeverity.NotOk);
+          ToastHelper.Show(context, "Token is not valid.".tr(), severity: ToastSeverity.NotOk);
         } else if (value["code"] == 200) {
           await AuthService.login(value["email"], _passwordController.text);
-          ToastHelper.Show("Password has been changed.".tr());
+          ToastHelper.Show(context, "Password has been changed.".tr());
           RouterService.goBackOrInitial(context);
         }
       }).onError((error, stackTrace) {
-        ToastHelper.Show(error.toString());
+        ToastHelper.Show(context, error.toString());
       });
     }
   }
@@ -101,9 +101,10 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                     height: 16,
                   ),
                   ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () async => _changePassword(context),
                     label: "Change Password".tr(),
-                    color: ThemeConfig.color1,
+                    color: ThemeConfig.seed1,
                     textColor: Colors.white,
                   ),
                 ],

@@ -113,8 +113,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: ThemeConfig.color1,
-                                      foregroundColor: ThemeConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                   ),
                                 ),
@@ -134,8 +134,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: ThemeConfig.color1,
-                                      foregroundColor: ThemeConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                     child: const Icon(Icons.remove,
                                         color: Colors.white),
@@ -151,8 +151,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: ThemeConfig.color1,
-                                      foregroundColor: ThemeConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                     child: Icon(Icons.adaptive.arrow_back,
                                         color: Colors.white),

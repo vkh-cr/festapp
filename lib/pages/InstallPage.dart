@@ -142,9 +142,10 @@ class _InstallPageState extends State<InstallPage> {
           child: Column(
             children: [
               ButtonsHelper.bigButton(
+                context: context,
                 label: isApple ? "Download App".tr() : "Install App".tr(),
                 onPressed: isApple ? () => InstallPage.jsInterop.openLinkInNewTab(link) : _canInstallPWA ? handleInstallButtonPress : null,
-                color: isApple || _canInstallPWA ? ThemeConfig.color1 : Colors.grey,
+                color: isApple || _canInstallPWA ? ThemeConfig.seed1 : Colors.grey,
                 textColor: Colors.white,
               ),
               if (_isAppInstalled)
@@ -152,7 +153,7 @@ class _InstallPageState extends State<InstallPage> {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     "The app is already installed.",
-                    style: TextStyle(fontSize: 16, color: ThemeConfig.color1),
+                    style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
                     textAlign: TextAlign.center,
                   ).tr(),
                 ),

@@ -62,7 +62,7 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
               left: BorderSide(width: 0.25, color: Colors.grey),
               right: BorderSide(width: 0.25, color: Colors.grey),
             ),
-            color: i % 2 == 0 ? ThemeConfig.timetableBackground1 : ThemeConfig.timetableBackground2,
+            color: i % 2 == 0 ? ThemeConfig.timetableBackground1(context) : ThemeConfig.timetableBackground2(context),
             // boxShadow: i % 2 == 0 ? [] : [
             //   BoxShadow(
             //     color: Colors.black26,

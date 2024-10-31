@@ -97,6 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 16,
                     ),
                     ButtonsHelper.bigButton(
+                      context: context,
                       label: "Sign in".tr(),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
@@ -113,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         }
                       },
-                      color: ThemeConfig.color1,
+                      color: ThemeConfig.seed1,
                       textColor: Colors.white,
                       isEnabled: !_isLoading,
                     ),
@@ -146,10 +147,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showToast(value) {
-    ToastHelper.Show("Successful sign in!".tr());
+    ToastHelper.Show(context, "Successful sign in!".tr());
   }
 
   void _onError(err) {
-    ToastHelper.Show("Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
+    ToastHelper.Show(context, "Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
   }
 }

@@ -124,7 +124,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
-    final logoAsset = ThemeConfig.isDarkMode
+    final logoAsset = ThemeConfig.isDarkMode(context)
         ? 'assets/icons/fstapplogo.dark.svg' // Dark mode logo
         : 'assets/icons/fstapplogo.svg'; // Light mode logo
     return SafeArea(
@@ -143,7 +143,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                 GestureDetector(
                   onDoubleTap: () async {
                     var packageInfo = await PackageInfo.fromPlatform();
-                    ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                    ToastHelper.Show(context, "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     if(RightsService.isEditor()) {
                       setState(() {
                         TimeHelper.toggleTimeTravel?.call();
@@ -164,7 +164,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _loginPressed,
-                        backgroundColor: ThemeConfig.profileButtonColor,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
                         child: const Icon(Icons.login),
                       ),
                       Text("Sign in".tr()),
@@ -178,7 +178,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _profileButtonPressed,
-                        backgroundColor: ThemeConfig.profileButtonColor,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
                         child: const Icon(Icons.account_circle_rounded),
                       ),
                       Text(AuthService.currentUser?.name??""),

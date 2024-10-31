@@ -19,6 +19,7 @@ import 'package:fstapp/components/map/MapDescriptionPopup.dart';
 import 'package:fstapp/components/map/MapLocationPinHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
@@ -181,11 +182,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     var mappedMarkers = places.map((place) {
       var mapPlace = MapPlaceModel.fromPlaceModel(place);
       return MapMarkerWithText(
+        context: context,
         place: mapPlace,
         point: mapPlace.latLng,
         width: 60,
         height: 60,
-        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(mapPlace, _icons) : null,
+        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(context, mapPlace, _icons) : null,
         alignment: Alignment.topCenter,
         editAction: runEditPositionMode,
       );
@@ -297,7 +299,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   onMapTap(LatLng pos) {
     if (selectedMarker != null) {
       _selectedMarkers.remove(selectedMarker);
-      selectedMarker = selectedMarker!.cloneWithNewPoint(pos);
+      selectedMarker = selectedMarker!.cloneWithNewPoint(context, pos);
       _selectedMarkers.add(selectedMarker!);
       setState(() {});
     } else {
@@ -315,6 +317,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
     await DbPlaces.saveLocation(selectedMarker!.place.id!,
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
+    ToastHelper.Show(context, "Place has been changed.".tr());
 
     var markerToRemove =
         _markers.firstWhere((m) => m.place.id == selectedMarker!.place.id);

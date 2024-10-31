@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/AppRouter.dart';
@@ -123,39 +124,44 @@ class _MyAppState extends State<MyApp> {
       });
     };
 
-    return MaterialApp.router(
-      routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
-      debugShowCheckedModeBanner: false,
-      builder: (context, child) {
-        return Stack(
-          children: [
-            child!,
-            Positioned(
-              left: _offset.dx,
-              top: _offset.dy,
-              child: GestureDetector(
-                onPanUpdate: (d) => setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
-                child: Visibility(
-                  visible: widget.isTimeTravelVisible,
-                  child: TimeTravelWidget(),
+    var baseTheme = ThemeConfig.baseTheme();
+    return AdaptiveTheme(
+      light: ThemeConfig.baseTheme(),
+      dark: ThemeConfig.darkTheme(baseTheme),
+      initial: AdaptiveThemeMode.system,
+      builder: (theme, darkTheme) => MaterialApp.router(
+        routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
+        debugShowCheckedModeBanner: false,
+        builder: (context, child) {
+          return Stack(
+            children: [
+              child!,
+              Positioned(
+                left: _offset.dx,
+                top: _offset.dy,
+                child: GestureDetector(
+                  onPanUpdate: (d) => setState(() => _offset += Offset(d.delta.dx, d.delta.dy)),
+                  child: Visibility(
+                    visible: widget.isTimeTravelVisible,
+                    child: TimeTravelWidget(),
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
-      localizationsDelegates: [
-        ...context.localizationDelegates,
-        FormBuilderLocalizations.delegate,
-      ],
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      title: HomePage.HOME_PAGE,
-      theme: ThemeConfig.lightTheme,
-      darkTheme: ThemeConfig.darkTheme,
-      themeMode: ThemeConfig.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-    ).animate().fadeIn(
-      duration: 300.ms,
+            ],
+          );
+        },
+        localizationsDelegates: [
+          ...context.localizationDelegates,
+          FormBuilderLocalizations.delegate,
+        ],
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        title: HomePage.HOME_PAGE,
+        theme: theme,
+        darkTheme: darkTheme,
+      ).animate().fadeIn(
+        duration: 300.ms,
+      ),
     );
   }
 }
