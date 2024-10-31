@@ -95,8 +95,8 @@ class _EventPageState extends State<EventPage> {
                 _event?.canSaveEventToMyProgram(),
                 addToMySchedule,
                 removeFromMySchedule,
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.surface)]),
+                ThemeConfig.upperNavText(context),
+                ThemeConfig.upperNavText(context))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(

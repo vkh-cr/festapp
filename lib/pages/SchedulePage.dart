@@ -36,8 +36,8 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver {
-  List<TimeBlockItem> _dots = [];
-  List<EventModel> _events = [];
+  final List<TimeBlockItem> _dots = [];
+  final List<EventModel> _events = [];
 
   @override
   void initState() {
@@ -124,6 +124,9 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
 
   @override
   Widget build(BuildContext context) {
+    final logoAsset = ThemeConfig.isDarkMode
+        ? 'assets/icons/fstapplogo.dark.svg' // Dark mode logo
+        : 'assets/icons/fstapplogo.svg'; // Light mode logo
     return SafeArea(
       top: true,
       bottom: false,
@@ -150,7 +153,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                   child: SvgPicture.asset(
                     height: 112,
                     semanticsLabel: 'Festapp logo',
-                    'assets/icons/fstapplogo.svg',
+                    logoAsset,
                   ),
                 ),
                 const Spacer(),
