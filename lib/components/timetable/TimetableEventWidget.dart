@@ -53,8 +53,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           height: widget.itemHeight,
           decoration: BoxDecoration(
             color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                ? ThemeConfig.eventTypeToColor(widget.item.eventType).withOpacityUniversal(context, 1)
-                : ThemeConfig.eventTypeToColor(widget.item.eventType).withOpacityUniversal(context, 0.3),
+                ? ThemeConfig.eventTypeToColor(context, widget.item.eventType).withOpacityUniversal(context, 1)
+                : ThemeConfig.eventTypeToColor(context, widget.item.eventType).withOpacityUniversal(context, 0.3),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Stack(
@@ -72,7 +72,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                     await widget.removeFromMyProgram!(widget.item);
                     setState(() {});
                   }
-                }, ThemeConfig.whiteColor, ThemeConfig.darkColor),
+                }, ThemeConfig.whiteColor(context), ThemeConfig.darkColor(context)),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
@@ -82,8 +82,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
                             ? FontWeight.bold
                             : FontWeight.normal,
                         color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                            ? ThemeConfig.whiteColor
-                            : ThemeConfig.blackColor),
+                            ? ThemeConfig.whiteColor(context)
+                            : ThemeConfig.blackColor(context)),
                     overflow: TextOverflow.fade),
               ),
             ],

@@ -444,7 +444,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     title: "Icon".tr(),
                     field: Tb.places.icon,
                     type: PlutoColumnType.select(mapIcons, builder: (icon) {
-                      return DataGridHelper.iconToRow(icon, svgIcons);
+                      return DataGridHelper.iconToRow(context, icon, svgIcons);
                     }),
                     renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, svgIcons),
                   ),
@@ -834,7 +834,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       await AuthService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
       u.data![Tb.occasion_users.data_isInvited] = true;
       await DbUsers.updateOccasionUser(u);
-      ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
+      ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
     await dataGrid.reloadData();
   }
@@ -850,10 +850,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     try {
       for(var u in users) {
           await UserManagementHelper.unsafeChangeUserPassword(context, u);
-          ToastHelper.Show("Password has been changed.".tr());
+          ToastHelper.Show(context, "Password has been changed.".tr());
       }
     } on Exception catch (e) {
-      ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
       return;
     }
   }
@@ -874,7 +874,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       value.setChecked(false);
     }
 
-    ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
+    ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
   }
 
   Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
@@ -889,7 +889,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     DialogHelper.chooseUser(context, (person) async
     {
       await DbUsers.addUserToOccasion(person.id, RightsService.currentOccasion!);
-      ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
+      ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item":person.toString()}));
     }, nonAdded, "Add".tr());
 
     await dataGrid.reloadData();

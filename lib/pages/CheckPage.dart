@@ -183,7 +183,7 @@ class _CheckPageState extends State<CheckPage> {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          color: ThemeConfig.color1,
+                          color: ThemeConfig.seed1,
                         ),
                         onPressed: () {
                           RouterService.goBack(context);
@@ -195,7 +195,7 @@ class _CheckPageState extends State<CheckPage> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: ThemeConfig.color1,
+                            color: ThemeConfig.seed1,
                           ),
                           textAlign: TextAlign.center,
                         ),

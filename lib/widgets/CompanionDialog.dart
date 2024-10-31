@@ -61,7 +61,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
-    await DbCompanions.signOut(widget.eventId, companion);
+    await DbCompanions.signOut(context, widget.eventId, companion);
     widget.companions = await DbCompanions.getAllCompanions();
     setState(() {});
     await widget.refreshData?.call();

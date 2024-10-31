@@ -23,13 +23,13 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   @override
   _AdministrationHeaderState createState() => _AdministrationHeaderState(fromPlutoJson, loadData, dataGrid, headerChildren: headerChildren, actionsExtended: saveExtended);
 
-  static PlutoGridConfiguration defaultPlutoGridConfiguration(String langCode) {
+  static PlutoGridConfiguration defaultPlutoGridConfiguration(BuildContext context, String langCode) {
     return PlutoGridConfiguration(
       scrollbar: const PlutoGridScrollbarConfig(
         scrollbarThickness: 16.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
-      style: ThemeConfig.isDarkMode ? PlutoGridStyleConfig.dark(
+      style: ThemeConfig.isDarkMode(context) ? PlutoGridStyleConfig.dark(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white70
       ) : PlutoGridStyleConfig(
@@ -134,10 +134,10 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
       }
       catch(e)
       {
-        ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("${"Deleted".tr()}: ${element.toBasicString()}");
+      ToastHelper.Show(context, "${"Deleted".tr()}: ${element.toBasicString()}");
     }
 
     var updatedSet = Set<T>.from(
@@ -156,10 +156,10 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
       }
       catch(e)
       {
-        ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+        ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
         return;
       }
-      ToastHelper.Show("${"Saved".tr()}: ${element.toBasicString()}");
+      ToastHelper.Show(context, "${"Saved".tr()}: ${element.toBasicString()}");
     }
     await loadData();
   }

@@ -51,10 +51,10 @@ class DataGridHelper
 
   static Widget mapIconRenderer(rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
-    return iconToRow(value, icons);
+    return iconToRow(rendererContext, value, icons);
   }
 
-  static Widget iconToRow(int? id, List<IconModel> icons) {
+  static Widget iconToRow(BuildContext context, int? id, List<IconModel> icons) {
     var icon = icons.firstWhereOrNull((t)=>t.id == id);
 
     if (icon != null) {
@@ -63,7 +63,7 @@ class DataGridHelper
         height: 20,
         child: SvgPicture.string(
           icon.data!,
-          colorFilter: ColorFilter.mode(ThemeConfig.blackColor, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(ThemeConfig.blackColor(context), BlendMode.srcIn),
         ),
       );
 

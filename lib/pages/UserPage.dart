@@ -57,7 +57,7 @@ class _UserPageState extends State<UserPage> {
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: ThemeConfig.color1,
+                color: ThemeConfig.seed1,
               ),
               onPressed: () {
                 RouterService.goBack(context);
@@ -80,7 +80,7 @@ class _UserPageState extends State<UserPage> {
                     },
                     icon: Icon(
                       Icons.download,
-                      color: ThemeConfig.color1,
+                      color: ThemeConfig.seed1,
                     ),
                   ),
                 ),
@@ -211,7 +211,7 @@ class _UserPageState extends State<UserPage> {
                                     const SizedBox(height: 10),
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: ThemeConfig.qrButtonColor,
+                                        color: ThemeConfig.qrButtonColor(context),
                                         // Match the background color
                                         borderRadius: BorderRadius.circular(
                                             12), // Optional: Rounded corners
@@ -257,7 +257,7 @@ class _UserPageState extends State<UserPage> {
                                                   emptyContent: Center(child: Text(
                                                     "Companion's events will appear here.",
                                                       style: TextStyle(
-                                                          color: ThemeConfig.grey600)
+                                                          color: ThemeConfig.grey600(context))
                                                   ).tr(),),)),
                                           SizedBox.fromSize(size: const Size.fromHeight(48)),
                                           Column(
@@ -332,6 +332,7 @@ class _UserPageState extends State<UserPage> {
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () async => _redirectToAdminPage(),
                     label: "Event management".tr(),
                   ),
@@ -342,6 +343,7 @@ class _UserPageState extends State<UserPage> {
                 Visibility(
                   visible: RightsService.isAdmin(),
                   child: ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () => RouterService.navigate(context, AdminDashboardPage.ROUTE),
                     label: "Workspace".tr(),
                   ),
@@ -350,9 +352,10 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () async => _logout(),
                     label: "Sign out".tr(),
-                    color: ThemeConfig.color1,
+                    color: ThemeConfig.seed1,
                     textColor: Colors.white),
                 const SizedBox(
                   height: 24,
@@ -372,6 +375,7 @@ class _UserPageState extends State<UserPage> {
                                   userData!.email!)
                               .then((value) {
                             ToastHelper.Show(
+                                context,
                                 "Password reset email has been sent.".tr());
                             DialogHelper.showInformationDialogAsync(
                                 context,
@@ -442,7 +446,7 @@ class _UserPageState extends State<UserPage> {
   Future<void> _logout() async {
     var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
     await AuthService.logout();
-    ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+    ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
     RouterService.popOrHome(context);
   }
 

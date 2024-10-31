@@ -5,20 +5,20 @@ import 'package:simple_shadow/simple_shadow.dart';
 
 TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
-TextStyle timeLineSplitTextStyle = TextStyle(
-    color: ThemeConfig.timelineSplitLabelColor, fontWeight: FontWeight.bold, fontSize: 15);
+TextStyle timeLineSplitTextStyle(BuildContext context) => TextStyle(
+    color: ThemeConfig.timelineSplitLabelColor(context), fontWeight: FontWeight.bold, fontSize: 15);
 double normalClickableFontSize = 18;
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;
 
 
-ButtonStyle mainPageButtonStyle = OutlinedButton.styleFrom(
+ButtonStyle mainPageButtonStyle(BuildContext context) => OutlinedButton.styleFrom(
     padding: const EdgeInsets.all(8),
     minimumSize: const Size(70, 50),
 
     maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
-    backgroundColor: ThemeConfig.color2,
+    backgroundColor: ThemeConfig.seed2,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
@@ -37,12 +37,12 @@ class MainPageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    backgroundColor ??= ThemeConfig.color2;
+    backgroundColor ??= ThemeConfig.seed2;
     return Container(
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle.copyWith(
+        style: mainPageButtonStyle(context).copyWith(
           backgroundColor: WidgetStatePropertyAll(backgroundColor),
         ),
         child: child,
@@ -64,12 +64,12 @@ class CircularButton extends MainPageButton {
 
   @override
   Widget build(BuildContext context) {
-    backgroundColor ??= ThemeConfig.color2;
+    backgroundColor ??= ThemeConfig.seed2;
     return Container(
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle.copyWith(
+        style: mainPageButtonStyle(context).copyWith(
           backgroundColor: WidgetStateProperty.all(backgroundColor),
           shape: WidgetStateProperty.all(const CircleBorder()),
           minimumSize: WidgetStateProperty.all(size),

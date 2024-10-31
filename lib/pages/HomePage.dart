@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    StylesHelper.setMetaThemeColor(ThemeConfig.color1);
+    StylesHelper.setMetaThemeColor(ThemeConfig.seed1);
   }
 
   @override
@@ -81,9 +81,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: ThemeConfig.bottomNavBackgroundColor,
-            selectedItemColor: ThemeConfig.bottomNavSelectedItemColor,
-            unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor,
+            backgroundColor: ThemeConfig.bottomNavBackgroundColor(context),
+            selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(context),
+            unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
             currentIndex: tabsRouter.activeIndex,
             type: BottomNavigationBarType.fixed,
             onTap: (int index) {

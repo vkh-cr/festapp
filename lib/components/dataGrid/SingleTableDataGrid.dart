@@ -111,7 +111,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
                   headerChildren: headerChildren,
                   saveExtended: actionsExtended,
                   dataGrid: this),
-          configuration: AdministrationHeader.defaultPlutoGridConfiguration(context.locale.languageCode),
+          configuration: AdministrationHeader.defaultPlutoGridConfiguration(context, context.locale.languageCode),
         ),
       ),
     );

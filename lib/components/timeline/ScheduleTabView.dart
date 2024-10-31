@@ -48,8 +48,8 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
           appBar: TabBar(
             isScrollable: datedEvents.length > 4 ? true : false,
             unselectedLabelColor: Colors.grey,
-            labelColor: ThemeConfig.timelineTabLabelColor,
-            indicatorColor: ThemeConfig.timelineTabIndicatorColor,
+            labelColor: ThemeConfig.timelineTabLabelColor(context),
+            indicatorColor: ThemeConfig.timelineTabIndicatorColor(context),
             indicatorWeight: 3.0,
             indicatorSize: TabBarIndicatorSize.label,
             indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),

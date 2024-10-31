@@ -49,7 +49,7 @@ class _InfoPageState extends State<InfoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ThemeConfig.infoPageColor,
+      backgroundColor: ThemeConfig.infoPageColor(context),
       appBar: AppBar(
         title: Text(title),
         leading: PopButton(),
@@ -69,7 +69,7 @@ class _InfoPageState extends State<InfoPage> {
                   : _informationList!.map<ExpansionPanel>((InformationModel item) {
                 int index = _informationList!.indexOf(item);
                 return ExpansionPanel(
-                  backgroundColor: ThemeConfig.backgroundColor,
+                  backgroundColor: ThemeConfig.backgroundColor(context),
                   headerBuilder: (BuildContext context, bool isExpanded) {
                     return ListTile(
                       title: Text(item.title ?? ""),
@@ -92,7 +92,7 @@ class _InfoPageState extends State<InfoPage> {
                                 item.description = result as String;
                               });
                               await DbInformation.updateInformation(item);
-                              ToastHelper.Show("Content has been changed.".tr());
+                              ToastHelper.Show(context, "Content has been changed.".tr());
                             }
                           },
                           child: const Text("Edit content").tr(),

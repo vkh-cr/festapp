@@ -11,6 +11,7 @@ class MapMarkerWithText extends Marker {
   Widget? icon;
 
   MapMarkerWithText({
+    required BuildContext context,
     required super.point,
     required this.place,
     super.key,
@@ -22,11 +23,12 @@ class MapMarkerWithText extends Marker {
     this.editAction,
     LatLng? oldPoint,
   }) : super(
-    child: icon ?? Icon(Icons.location_pin, size: 36, color: ThemeConfig.mapPinColor),
+    child: icon ?? Icon(Icons.location_pin, size: 36, color: ThemeConfig.mapPinColor(context)),
   );
 
-  MapMarkerWithText cloneWithNewPoint(LatLng point) {
+  MapMarkerWithText cloneWithNewPoint(BuildContext context, LatLng point) {
     return MapMarkerWithText(
+      context: context,
       oldPoint: oldPoint,
       place: place,
       point: point,

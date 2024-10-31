@@ -1,3 +1,4 @@
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -29,6 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _isPlatformSupported = true;
   bool _notificationError = false;
   LanguageModel? _currentLanguage;
+  AdaptiveThemeMode? _themeMode;
 
   @override
   void didChangeDependencies() {
@@ -41,8 +43,9 @@ class _SettingsPageState extends State<SettingsPage> {
     Locale currentLocale = context.locale;
     LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
     bool isAppInstalled = SynchroService.isPwaInstalledOrNative();
-
-    setState(() {
+    var themeMode = await AdaptiveTheme.getThemeMode();
+    setState(()  {
+      _themeMode = themeMode;
       _notificationsEnabled = isEnabled;
       _currentLanguage = currentLanguage;
       _isAppInstalled = isAppInstalled;
@@ -62,6 +65,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   bool get _canInstallPWA => !_isAppInstalled && _isPlatformSupported && _isPromptEnabled;
+
+  void _setThemeMode(AdaptiveThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+      AdaptiveTheme.of(context).setThemeMode(mode);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +149,49 @@ class _SettingsPageState extends State<SettingsPage> {
                       ).tr(),
                     ),],
                 const SizedBox(height: 24),
+                const Text("Theme Settings", style: TextStyle(fontSize: 20)).tr(),
+                const SizedBox(height: 16),
+                ToggleButtons(
+                  isSelected: [
+                    _themeMode == AdaptiveThemeMode.dark,
+                    _themeMode == AdaptiveThemeMode.system,
+                    _themeMode == AdaptiveThemeMode.light,
+                  ],
+                  onPressed: (int index) {
+                    if (index == 0) {
+                      _setThemeMode(AdaptiveThemeMode.dark);
+                    } else if (index == 1) {
+                      _setThemeMode(AdaptiveThemeMode.system);
+                    } else if (index == 2) {
+                      _setThemeMode(AdaptiveThemeMode.light);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(8.0),
+                  children: const [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text("Dark"),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text("Auto"),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text("Light"),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
                 if (kIsWeb) // Only show if running on web
                   Center(
                     child: Column(
                       children: [
                         ButtonsHelper.bigButton(
+                          context: context,
                           label: "Install App".tr(),
                           onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA ? ThemeConfig.color1 : Colors.grey,
+                          color: _canInstallPWA ? ThemeConfig.seed1 : Colors.grey,
                           textColor: Colors.white,
                         ),
                         if (!_isPlatformSupported)
@@ -163,7 +208,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               "The app is already installed.",
-                              style: TextStyle(fontSize: 16, color: ThemeConfig.color1),
+                              style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),

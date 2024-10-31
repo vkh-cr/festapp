@@ -68,8 +68,8 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: _event == null
-              ? ThemeConfig.color1
-              : ThemeConfig.eventTypeToColor(_event!.type),
+              ? ThemeConfig.seed1
+              : ThemeConfig.eventTypeToColor(context, _event!.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
             style: const TextStyle(fontWeight: FontWeight.bold),
@@ -204,7 +204,7 @@ class _EventPageState extends State<EventPage> {
                                                         .updateEvent(_event!);
                                                   }
                                                   await loadData(_event!.id!);
-                                                  ToastHelper.Show(
+                                                  ToastHelper.Show(context,
                                                       "Content has been changed."
                                                           .tr());
                                                 }
@@ -254,7 +254,7 @@ class _EventPageState extends State<EventPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         "You need to have an account to sign in to the event.",
-                        style: TextStyle(color: ThemeConfig.attentionColor),
+                        style: TextStyle(color: ThemeConfig.attentionColor(context)),
                       ).tr(),
                     )),
                 Visibility(
@@ -293,7 +293,7 @@ class _EventPageState extends State<EventPage> {
                                 text: _participants
                                     .map((e) => e.toFullNameString())
                                     .join("\n")));
-                            ToastHelper.Show(
+                            ToastHelper.Show(context,
                                 "Participants have been copied.".tr());
                           },
                           icon: const Icon(Icons.copy)),
@@ -377,7 +377,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> addToMySchedule() async {
-    if (!await DbEvents.addToMySchedule(_event!.id!)) {
+    if (!await DbEvents.addToMySchedule(context, _event!.id!)) {
       return;
     }
     setState(() {
@@ -386,7 +386,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> removeFromMySchedule() async {
-    await DbEvents.removeFromMySchedule(_event!.id!);
+    await DbEvents.removeFromMySchedule(context, _event!.id!);
     setState(() {
       _event!.isEventInMySchedule = false;
     });
@@ -496,7 +496,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signOut() async {
-    await DbEvents.signOutFromEvent(_event!.id!);
+    await DbEvents.signOutFromEvent(context, _event!.id!);
     await loadData(_event!.id!);
   }
 
@@ -537,7 +537,7 @@ class _EventPageState extends State<EventPage> {
                   onPressed: () async {
                     RouterService.goBack(context);
                     await DbEvents.signOutFromEvent(
-                        _event!.id!, participant);
+                        context, _event!.id!, participant);
                     await loadData(_event!.id!);
                   },
                   child: const Text("Sign out someone").tr(),

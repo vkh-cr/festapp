@@ -112,10 +112,8 @@ class RouterService {
         checkedObject.isAvailable()) {
       canContinue = true;
     } else if (checkedObject.isAccessDenied()) {
-      ToastHelper.Show("You cannot access this occasion.");
       canContinue = false;
     } else if (checkedObject.isNotFound()) {
-      ToastHelper.Show("The occasion has not been found.");
       canContinue = false;
     }
 
