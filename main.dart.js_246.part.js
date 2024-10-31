@@ -15,6 +15,6 @@ A=c[0]
 B=c[107]
 C=a.updateHolder(c[37],C)
 D=c[204]
-var z=a.updateTypes([]);(function constants(){D.a1l=new A.bV("Storno",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+var z=a.updateTypes([]);(function constants(){D.a1k=new A.bV("Storno",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_246",e:"endPart",h:b})})($__dart_deferred_initializers__,"XbrZS1yoXU/eEAzGbzkmUb6KZH0=");
+a.eventLog.push({p:"main.dart.js_246",e:"endPart",h:b})})($__dart_deferred_initializers__,"UgBnhGzl9BaiCOgvUyHTNu1sKNo=");
