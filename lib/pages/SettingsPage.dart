@@ -191,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           context: context,
                           label: "Install App".tr(),
                           onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA ? ThemeConfig.seed1 : Colors.grey,
+                          color: _canInstallPWA ? ThemeConfig.blackColor(context) : Colors.grey,
                           textColor: Colors.white,
                         ),
                         if (!_isPlatformSupported)
@@ -208,7 +208,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               "The app is already installed.",
-                              style: TextStyle(fontSize: 16, color: ThemeConfig.seed1),
+                              style: TextStyle(fontSize: 16, color: ThemeConfig.blackColor(context)),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),
