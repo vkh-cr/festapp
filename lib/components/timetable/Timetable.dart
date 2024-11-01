@@ -8,6 +8,7 @@ import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timetable/TimelineWidget.dart';
 import 'package:fstapp/components/timetable/TimetableItemsWidget.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class TimetableController {
   void Function()? autoSetPosition;
@@ -347,13 +348,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       container = Container(
         width: getTimetableWidth(),
         height: getTimetableHeight(),
-        color: Colors.black.withOpacity(0.2),
+        color: ThemeConfig.blackColor(context).withOpacity(0.2),
       );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
       container = Container(
         width: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
         height: getTimetableHeight(),
-        color: Colors.black.withOpacity(AppConfig.timetableTimeSplitOpacity),
+        color: ThemeConfig.blackColor(context).withOpacity(ThemeConfig.timetableTimeSplitOpacity),
       );
     } else {
       container = const SizedBox.shrink();
@@ -372,9 +373,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
             child: Container(
               width: 2,
               height: getTimetableHeight(),
-              decoration: const BoxDecoration(
-                color: AppConfig.timetableTimeSplitColor,
-                boxShadow: [
+              decoration: BoxDecoration(
+                color: ThemeConfig.timetableTimeSplitColor(context),
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10,
@@ -389,7 +390,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimeBlockItem item) async {
-    if(!await DbEvents.addToMySchedule(item.id)) {
+    if(!await DbEvents.addToMySchedule(context, item.id)) {
       return;
     }
     setState(() {
@@ -398,7 +399,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> removeFromMyProgram(TimeBlockItem item) async {
-    await DbEvents.removeFromMySchedule(item.id);
+    await DbEvents.removeFromMySchedule(context, item.id);
     setState(() {
       item.timeBlockType = TimeBlockType.canSave;
     });

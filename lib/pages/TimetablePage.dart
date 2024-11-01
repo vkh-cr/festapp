@@ -5,7 +5,6 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
@@ -14,6 +13,7 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/components/timetable/Timetable.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 
 @RoutePage()
@@ -147,7 +147,7 @@ class _ProgramViewPageState extends State<ProgramViewPage>
     return Scaffold(
         appBar: AppBar(
           title: Text("Schedule".tr()),
-          leading: PopButton(color: Colors.white),
+          leading: PopButton(),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
             child: Builder(builder: (context) {
@@ -181,13 +181,13 @@ class _ProgramViewPageState extends State<ProgramViewPage>
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
+                       Icon(
                         Icons.schedule,
-                        color: Colors.white,
+                        color: ThemeConfig.upperNavText(context),
                       ),
                       Text("My schedule".tr(),
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 9)),
+                          style: TextStyle(
+                              color:  ThemeConfig.upperNavText(context), fontSize: 9)),
                     ],
                   ),
                 ),

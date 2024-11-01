@@ -2,9 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/components/map/MapIconService.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
@@ -49,38 +49,35 @@ class DataGridHelper
         },
     );}
 
-  static Widget mapIconRenderer(rendererContext, void Function(Function() set) setState, List<IconModel> icons) {
-    String? value = rendererContext.cell.value;
+  static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
+    int? value = rendererContext.cell.value;
+    return iconToRow(context, value, icons);
+  }
 
-      var iconLink = MapIconHelper.getIconAddress(value);
-      if(iconLink != null)
-      {
-        var svgIcon = SizedBox(
-          width: 20,
-          height: 20,
-          child: SvgPicture.asset(
-            iconLink,
-            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-          ),
-        );
-        return Row(children: [svgIcon, const SizedBox(width: 12,),Text(value!)],);
-      }
+  static Widget iconToRow(BuildContext context, int? id, List<IconModel> icons) {
+    var icon = icons.firstWhereOrNull((t)=>t.id == id);
 
-      var iconData = icons.firstWhereOrNull((i)=>i.link == value)?.data;
-      if(iconData!=null){
-        var svgIcon = SizedBox(
-          width: 20,
-          height: 20,
-          child: SvgPicture.string(
-            iconData,
-            colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-          ),
-        );
-        return Row(children: [svgIcon, const SizedBox(width: 12,),Text(value!)],);
-      }
+    if (icon != null) {
+      var svgIcon = SizedBox(
+        width: 20,
+        height: 20,
+        child: SvgPicture.string(
+          icon.data!,
+          colorFilter: ColorFilter.mode(ThemeConfig.blackColor(context), BlendMode.srcIn),
+        ),
+      );
 
-      return const Text(PlaceModel.WithouValue);
+      return Row(
+        children: [
+          svgIcon,
+          const SizedBox(width: 12),
+          Text(icon.link!),
+        ],
+      );
     }
+
+    return const Text(PlaceModel.WithouValue);
+  }
 
   static Widget idRenderer(rendererContext) {
     var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();

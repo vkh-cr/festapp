@@ -1,39 +1,31 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/map/MapPlaceModel.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
-import 'package:fstapp/components/map/MapIconService.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class MapLocationPinHelper {
-  static Widget? type2icon(String? placeType, List<IconModel> source) {
+  static Widget? type2icon(BuildContext context, MapPlaceModel placeType, List<IconModel> source) {
     SvgPicture? fill;
-    var iconLink = MapIconHelper.getIconAddress(placeType);
 
-    if (iconLink != null) {
-      fill = SvgPicture.asset(
-        iconLink,
+    var iconData = source.firstWhereOrNull((i) => i.id == placeType.icon)?.data;
+    iconData ??= source.firstWhereOrNull((i) => i.link == placeType.type)?.data;
+    if (iconData != null) {
+      fill = SvgPicture.string(
+        iconData,
         colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
       );
-      return _locationPin(fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 19, iconWidth: 19, iconHeight: 19);
-    } else {
-      var iconData = source.firstWhereOrNull((i) => i.link == placeType)?.data;
-      if (iconData != null) {
-        fill = SvgPicture.string(
-          iconData,
-          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
-        );
-        return _locationPin(fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 18, iconWidth: 21, iconHeight: 21);
-      }
+      return _locationPin(context, fill, top: 7.5, left: 14.5, iconTop: 12, iconLeft: 19, iconWidth: 19, iconHeight: 19);
     }
 
     return null;
   }
 
-  static Stack _locationPin(SvgPicture fill, {required double top, required double left, required double iconTop, required double iconLeft, required double iconWidth, required double iconHeight}) {
+  static Stack _locationPin(BuildContext context, SvgPicture fill, {required double top, required double left, required double iconTop, required double iconLeft, required double iconWidth, required double iconHeight}) {
     return Stack(
       children: [
-        const Icon(Icons.location_pin, size: 58, color: AppConfig.mapPinColor),
+        Icon(Icons.location_pin, size: 58, color: ThemeConfig.mapPinColor(context)),
         Positioned(
           top: top,
           left: left,

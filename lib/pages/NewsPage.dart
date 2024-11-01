@@ -7,8 +7,9 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,7 @@ class _NewsPageState extends State<NewsPage> {
         var heading = data["heading"];
         String headingDefault = data["heading_default"]!;
 
-        await DbNews.insertNewsMessage(heading, headingDefault, message, addToNews, withNotification, to);
+        await DbNews.insertNewsMessage(context, heading, headingDefault, message, addToNews, withNotification, to);
 
         if (addToNews) {
           await loadNewsMessages();
@@ -65,10 +66,10 @@ class _NewsPageState extends State<NewsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppConfig.newsPageColor,
+      backgroundColor: ThemeConfig.newsPageColor(context),
       appBar: AppBar(
         title: const Text("News").tr(),
-        leading: PopButton(color: Colors.white),
+        leading: PopButton(),
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -95,14 +96,14 @@ class _NewsPageState extends State<NewsPage> {
                       alignment: Alignment.topRight,
                       child: Text(
                         DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt!),
-                        style: message.isRead ? readTextStyle : unReadTextStyle,
+                        style: message.isRead ? readTextStyle() : unReadTextStyle(),
                       ),
                     ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       message.createdBy ?? "",
-                      style: message.isRead ? readTextStyle : unReadTextStyle,
+                      style: message.isRead ? readTextStyle() : unReadTextStyle(),
                     ),
                   ),
                   Padding(
@@ -110,7 +111,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: AppConfig.color1.withOpacity(0.10),
+                        color: Theme.of(context).colorScheme.surface,
                       ),
                       child: Column(
                         children: [
@@ -125,9 +126,9 @@ class _NewsPageState extends State<NewsPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                  const Icon(Icons.remove_red_eye, size: 16, color: Colors.black54),
+                                   Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
                                   const SizedBox(width: 6),
-                                  Text(message.views.toString(), style: readTextStyle),
+                                  Text(message.views.toString(), style: TextStyle(color: Theme.of(context).disabledColor, fontWeight: FontWeight.bold)),
                                   const SizedBox(width: 10),
                                 ],
                               ),
@@ -143,12 +144,14 @@ class _NewsPageState extends State<NewsPage> {
                       onSelected: (choice) async {
                         if (choice == ContextMenuChoice.delete) {
                           await DbNews.deleteNewsMessage(message);
+                          ToastHelper.Show(context, "Message has been removed.".tr());
                         } else {
                           await RouterService.navigatePageInfo(context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: message.message})).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;
                               await DbNews.updateNewsMessage(message);
+                              ToastHelper.Show(context, "Message has been changed.".tr());
                             }
                           });
                         }
@@ -183,8 +186,8 @@ class _NewsPageState extends State<NewsPage> {
     );
   }
 
-  TextStyle unReadTextStyle = const TextStyle(fontWeight: FontWeight.bold);
-  TextStyle readTextStyle = const TextStyle(fontWeight: FontWeight.bold, color: Colors.black54);
+  TextStyle unReadTextStyle() => TextStyle(fontWeight: FontWeight.bold);
+  TextStyle readTextStyle() => TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).hintColor);
 }
 
 enum ContextMenuChoice { delete, edit }

@@ -274,6 +274,7 @@ class IconsTb{
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get organization => "organization";
   String get link => "link";
   String get data => "data";
 }

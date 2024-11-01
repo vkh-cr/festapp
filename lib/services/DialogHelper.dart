@@ -178,7 +178,7 @@ class DialogHelper{
     if(selectedLocale!=null)
     {
       context.setLocale(selectedLocale!.locale);
-      ToastHelper.Show("Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
+      ToastHelper.Show(context, "Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
     }
     return selectedLocale;
   }

@@ -20,9 +20,9 @@ import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:image_downloader_web/image_downloader_web.dart';
@@ -55,9 +55,9 @@ class _UserPageState extends State<UserPage> {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back,
-                color: AppConfig.color1,
+                color: ThemeConfig.blackColor(context),
               ),
               onPressed: () {
                 RouterService.goBack(context);
@@ -78,9 +78,9 @@ class _UserPageState extends State<UserPage> {
                         name: name,
                       );
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.download,
-                      color: AppConfig.color1,
+                      color: ThemeConfig.blackColor(context),
                     ),
                   ),
                 ),
@@ -102,6 +102,7 @@ class _UserPageState extends State<UserPage> {
                     Text(
                       "[$eventName]",
                       style: const TextStyle(
+                          color: Colors.black,
                           fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
@@ -114,6 +115,7 @@ class _UserPageState extends State<UserPage> {
                     Text(
                       "[$name]",
                       style: const TextStyle(
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -169,6 +171,7 @@ class _UserPageState extends State<UserPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: ButtonsHelper.buildQRCodeButton(
+                          context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
                               userData!.name!,
@@ -192,9 +195,9 @@ class _UserPageState extends State<UserPage> {
                             itemBuilder: (context, index) {
                               if (index == 0) {
                                 return ListTile(
-                                  title: const Text(
+                                  title: Text(
                                     "Companions",
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: ThemeConfig.blackColor(context), fontWeight: FontWeight.bold),
                                   ).tr(),
                                 );
                               }
@@ -210,7 +213,7 @@ class _UserPageState extends State<UserPage> {
                                     const SizedBox(height: 10),
                                     Container(
                                       decoration: BoxDecoration(
-                                        color: bigButtonColor,
+                                        color: ThemeConfig.qrButtonColor(context),
                                         // Match the background color
                                         borderRadius: BorderRadius.circular(
                                             12), // Optional: Rounded corners
@@ -218,14 +221,15 @@ class _UserPageState extends State<UserPage> {
                                       child: ExpansionTile(
                                         //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
                                         shape: const Border(),
-                                        title: Text(companion.name, style: const TextStyle(
-                                            fontWeight: FontWeight.bold),),
+                                        title: Text(companion.name, style: TextStyle(
+                                            fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),),
                                         subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
                                             style: TextStyle(
-                                                color: Colors.grey[800]!,
+                                                color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 13)),
                                         trailing:
                                             ButtonsHelper.buildQRCodeButton(
+                                              context: context,
                                           onPressed: () =>
                                               _showFullScreenDialog(
                                             context,
@@ -255,7 +259,7 @@ class _UserPageState extends State<UserPage> {
                                                   emptyContent: Center(child: Text(
                                                     "Companion's events will appear here.",
                                                       style: TextStyle(
-                                                          color: Colors.grey[600]!)
+                                                          color: ThemeConfig.grey600(context))
                                                   ).tr(),),)),
                                           SizedBox.fromSize(size: const Size.fromHeight(48)),
                                           Column(
@@ -275,10 +279,8 @@ class _UserPageState extends State<UserPage> {
                                                   await DbCompanions.delete(companion);
                                                   await loadData();
                                                 },
-                                                child: const Text(
-                                                  "Delete companion",
-                                                  style: TextStyle(
-                                                      color: Colors.black), // Set the text color to black
+                                                child: Text(
+                                                  "Delete companion", // Set the text color to black
                                                 ).tr(),
                                               ),
                                             ],
@@ -311,6 +313,7 @@ class _UserPageState extends State<UserPage> {
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () async => _redirectToAdminPage(),
                     label: "Event management".tr(),
                   ),
@@ -321,6 +324,7 @@ class _UserPageState extends State<UserPage> {
                 Visibility(
                   visible: RightsService.isAdmin(),
                   child: ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () => RouterService.navigate(context, AdminDashboardPage.ROUTE),
                     label: "Workspace".tr(),
                   ),
@@ -329,12 +333,13 @@ class _UserPageState extends State<UserPage> {
                   height: 16,
                 ),
                 ButtonsHelper.bigButton(
+                    context: context,
                     onPressed: () async => _logout(),
                     label: "Sign out".tr(),
-                    color: AppConfig.color1,
+                    color: ThemeConfig.seed1,
                     textColor: Colors.white),
                 const SizedBox(
-                  height: 16,
+                  height: 24,
                 ),
                 Container(
                     alignment: Alignment.topCenter,
@@ -351,6 +356,7 @@ class _UserPageState extends State<UserPage> {
                                   userData!.email!)
                               .then((value) {
                             ToastHelper.Show(
+                                context,
                                 "Password reset email has been sent.".tr());
                             DialogHelper.showInformationDialogAsync(
                                 context,
@@ -364,7 +370,7 @@ class _UserPageState extends State<UserPage> {
                       },
                       child: Text(
                         "Change password".tr(),
-                        style: normalTextStyle,
+                        style: TextStyle(fontSize: normalClickableFontSize),
                       ).tr(),
                     )),
                 const SizedBox(
@@ -380,7 +386,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr()),
                         child: Text(
                           "Delete account".tr(),
-                          style: normalTextStyle,
+                          style: TextStyle(fontSize: normalClickableFontSize),
                         ).tr()))
               ],
             ),
@@ -413,7 +419,6 @@ class _UserPageState extends State<UserPage> {
             hintText: placeholder,
             hintStyle: const TextStyle(
               fontSize: 17,
-              color: Colors.black,
             )),
       ),
     );
@@ -422,7 +427,7 @@ class _UserPageState extends State<UserPage> {
   Future<void> _logout() async {
     var trPrefix = (await DbUsers.getCurrentUserInfo()).getGenderPrefix();
     await AuthService.logout();
-    ToastHelper.Show("${trPrefix}You have been signed out.".tr());
+    ToastHelper.Show(context, "${trPrefix}You have been signed out.".tr());
     RouterService.popOrHome(context);
   }
 

@@ -24,7 +24,6 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/MapPage.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/components/map/MapIconService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/UserManagementHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -47,7 +46,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   OccasionModel? occasionModel;
   List<String> places = [];
   List<PlutoColumn> columns = [];
-  List<String> mapIcons = [];
+  List<int?> mapIcons = [];
   List<IconModel> svgIcons = [];
   bool isAdmin = false;
   late TabController _tabController;
@@ -68,10 +67,9 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
   Future<void> loadData() async {
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
     await loadPlaces();
-    mapIcons = MapIconHelper.type2Icon.keys.toList();
-    mapIcons.add(PlaceModel.WithouValue);
     svgIcons = await DbPlaces.getAllIcons();
-    mapIcons.addAll(svgIcons.map((i)=>i.link!));
+    mapIcons.addAll(svgIcons.map((s)=>s.id));
+    mapIcons.add(null);
     setState(() {});
   }
 
@@ -430,9 +428,11 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                   ),
                   PlutoColumn(
                     title: "Icon".tr(),
-                    field: Tb.places.type,
-                    type: PlutoColumnType.select(mapIcons),
-                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, setState, svgIcons),
+                    field: Tb.places.icon,
+                    type: PlutoColumnType.select(mapIcons, builder: (icon) {
+                      return DataGridHelper.iconToRow(context, icon, svgIcons);
+                    }),
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(context, rendererContext, svgIcons),
                   ),
                   PlutoColumn(
                       width: 150,
@@ -750,7 +750,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       await AuthService.resetPasswordForEmail(u.data![Tb.occasion_users.data_email]);
       u.data![Tb.occasion_users.data_isInvited] = true;
       await DbUsers.updateOccasionUser(u);
-      ToastHelper.Show("Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
+      ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user":u.data![Tb.occasion_users.data_email]}));
     }
     await dataGrid.reloadData();
   }
@@ -766,10 +766,10 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     try {
       for(var u in users) {
           await UserManagementHelper.unsafeChangeUserPassword(context, u);
-          ToastHelper.Show("Password has been changed.".tr());
+          ToastHelper.Show(context, "Password has been changed.".tr());
       }
     } on Exception catch (e) {
-      ToastHelper.Show(e.toString(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
       return;
     }
   }
@@ -790,7 +790,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
       value.setChecked(false);
     }
 
-    ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
+    ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item":chosenGroup.title}));
   }
 
   Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
@@ -805,7 +805,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
     DialogHelper.chooseUser(context, (person) async
     {
       await DbUsers.addUserToOccasion(person.id, RightsService.currentOccasion!);
-      ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item":person.toString()}));
+      ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item":person.toString()}));
     }, nonAdded, "Add".tr());
 
     await dataGrid.reloadData();

@@ -1,8 +1,7 @@
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -182,7 +181,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               padding: EdgeInsets.fromLTRB(
                   i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
               child: Container(
-                color: AppConfig.color1,
+                color: ThemeConfig.color1,
                 height: timelineHeight,
                 width: (i == hourCount! || i == 0)
                     ? pixelsInHour / 2
@@ -196,7 +195,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     "$hour:00",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: ThemeConfig.whiteColor),
                   ),
                 ),
               ),
@@ -295,8 +294,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                    ? AppConfig.eventTypeToColor(item.eventType).withOpacity(1)
-                    : AppConfig.eventTypeToColor(item.eventType).withOpacity(0.3),
+                    ? ThemeConfig.eventTypeToColor(item.eventType).withOpacity(1)
+                    : ThemeConfig.eventTypeToColor(item.eventType).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Stack(
@@ -309,15 +308,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                       await addToMyProgram(item);
                     }, () async {
                       await removeFromMyProgram(item);
-                    }, Colors.white),
+                    }, ThemeConfig.whiteColor, ThemeConfig.blackColor),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
                     child: Text(item.text,
                         style: TextStyle(
                             color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                                ? Colors.white
-                                : Colors.black),
+                                ? ThemeConfig.whiteColor
+                                : ThemeConfig.blackColor),
                         overflow: TextOverflow.fade),
                   ),
                 ],
