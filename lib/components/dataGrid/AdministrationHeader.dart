@@ -31,7 +31,9 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
       style: ThemeConfig.isDarkMode(context) ? PlutoGridStyleConfig.dark(
         rowHeight: 36,
-        cellColorInReadOnlyState: Colors.white70
+        cellColorInReadOnlyState: Colors.white24,
+        cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
+        columnTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
       ) : PlutoGridStyleConfig(
           rowHeight: 36,
           cellColorInReadOnlyState: Colors.white70
