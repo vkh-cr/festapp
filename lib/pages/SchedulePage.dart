@@ -133,7 +133,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -162,7 +162,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                       CircularButton(
                         onPressed: _loginPressed,
                         backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: const Icon(Icons.login),
+                        child: Icon(Icons.login, color: ThemeConfig.profileButtonTextColor(context)),
                       ),
                       Text("Sign in".tr()),
                     ],
@@ -176,7 +176,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                       CircularButton(
                         onPressed: _profileButtonPressed,
                         backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: const Icon(Icons.account_circle_rounded),
+                        child: Icon(Icons.account_circle_rounded, color: ThemeConfig.profileButtonTextColor(context),),
                       ),
                       Text(AuthService.currentUser?.name??""),
                     ],
