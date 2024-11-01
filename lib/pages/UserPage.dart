@@ -57,7 +57,7 @@ class _UserPageState extends State<UserPage> {
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: ThemeConfig.seed1,
+                color: ThemeConfig.blackColor(context),
               ),
               onPressed: () {
                 RouterService.goBack(context);
@@ -80,7 +80,7 @@ class _UserPageState extends State<UserPage> {
                     },
                     icon: Icon(
                       Icons.download,
-                      color: ThemeConfig.seed1,
+                      color: ThemeConfig.blackColor(context),
                     ),
                   ),
                 ),
@@ -102,6 +102,7 @@ class _UserPageState extends State<UserPage> {
                     Text(
                       "[$eventName]",
                       style: const TextStyle(
+                          color: Colors.black,
                           fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 20),
@@ -114,6 +115,7 @@ class _UserPageState extends State<UserPage> {
                     Text(
                       "[$name]",
                       style: const TextStyle(
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -193,9 +195,9 @@ class _UserPageState extends State<UserPage> {
                             itemBuilder: (context, index) {
                               if (index == 0) {
                                 return ListTile(
-                                  title: const Text(
+                                  title: Text(
                                     "Companions",
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: TextStyle(color: ThemeConfig.blackColor(context), fontWeight: FontWeight.bold),
                                   ).tr(),
                                 );
                               }
