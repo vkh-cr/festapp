@@ -393,7 +393,7 @@ class _UserPageState extends State<UserPage> {
                       ).tr(),
                     )),
                 const SizedBox(
-                  height: 16,
+                  height: 8,
                 ),
                 Container(
                     alignment: Alignment.topCenter,
