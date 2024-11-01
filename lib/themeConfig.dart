@@ -9,16 +9,16 @@ class ThemeConfig {
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
-      primarySwatch: ThemeConfig.seed4.getMaterialColorFromColor(),
+      primarySwatch: ThemeConfig.seed3.getMaterialColorFromColor(),
       colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: ThemeConfig.seed4.getMaterialColorFromColor(),
+        primarySwatch: ThemeConfig.seed3.getMaterialColorFromColor(),
       ).copyWith(
-        surface: Colors.grey[200]!,
+        surface: seed2.changeColorSaturation(0.2).changeColorLightness(0.92),
         onSurface: Colors.black,
       ),
-      scaffoldBackgroundColor: Colors.white,
-      appBarTheme: AppBarTheme(color: seed1),
-      tabBarTheme: TabBarTheme(indicatorColor: seed4)
+      scaffoldBackgroundColor: lllBackground,
+      appBarTheme: AppBarTheme(color: appBarColor()),
+      tabBarTheme: TabBarTheme(indicatorColor: seed3)
   );
 
   // Dark theme configuration
@@ -28,61 +28,68 @@ class ThemeConfig {
       scaffoldBackgroundColor: dddBackground,
       textTheme: ThemeData.dark().textTheme.apply(fontFamily: fontFamily),
       primaryTextTheme: ThemeData.dark().primaryTextTheme.apply(fontFamily: fontFamily),
-      primaryColor: seed3,
+      primaryColor: seed2,
       colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: ThemeConfig.seed3.getMaterialColorFromColor(),
+        primarySwatch: ThemeConfig.seed2.getMaterialColorFromColor(),
       ).copyWith(
         brightness: Brightness.dark,
         surface: Colors.grey[800]!,
         onSurface: dddText,
       ),
-      appBarTheme: AppBarTheme(color: seed1),
-      tabBarTheme: TabBarTheme(indicatorColor: seed3)
+      appBarTheme: AppBarTheme(color: appBarColor()),
+      tabBarTheme: TabBarTheme(indicatorColor: seed2)
   );
 
   // Dynamic color methods with BuildContext for theme-based color adaptation
-  static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
+  static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
   static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF4465A6);
-  static Color seed3 = const Color(0xFF80BDF2);
+  static Color seed2 = const Color(0xFF80BDF2);
+  static Color seed3 = const Color(0xFF4465A6);
   static Color seed4 = const Color(0xFF253759);
-  static Color seedColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   static const int primaryColor = 0xFF0D0D0D;
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
-  static Color dddBackground = const Color(0xFF1e1f22);
-  static Color dddBackgroundDarker = const Color(0xFF191a1e);
+  static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
+  static Color lllBackground = seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
+  static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
 
-  static Color dddText = const Color(0xFFbcbec4);
+  static Color dddBackgroundDarker = const Color(0xFF191a1e);
 
   static Color darkColor(BuildContext context) => isDarkMode(context) ? dddText : seed1;
   static Color blackColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.black;
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
 
-  static Color timelineAll(BuildContext context) => darkColor(context);
+  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
   static Color timelineColor(BuildContext context) => timelineAll(context);
   static Color timelineTextColor(BuildContext context) => blackColor(context);
 
-  static Color mapPinColor(BuildContext context) => seed1;
+  static Color mapPinColor(BuildContext context) => appBarColor();
   static Color newsPageColor(BuildContext context) => backgroundColor(context);
   static Color infoPageColor(BuildContext context) => backgroundColor(context);
-  static Color profileButtonColor(BuildContext context) => isDarkMode(context) ? grey600(context) : seed4;
+  static Color profileButtonColor(BuildContext context) => appBarColor();
+  static Color profileButtonTextColor(BuildContext context) => isDarkMode(context) ? darkColor(context) : Colors.grey;
 
-  static Color appBarColor(BuildContext context) => isDarkMode(context) ? bottomNavBackgroundColor(context) : seed1;
-  static Color bottomNavBackgroundColor(BuildContext context) => seed1;
-  static Color bottomNavSelectedItemColor(BuildContext context) => seed3;
+  static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
+  static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
+  static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
 
   static Color upperNavText(BuildContext context) => isDarkMode(context) ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
 
-  static Color timetableTimeLineColor(BuildContext context) => appBarColor(context);
-  static Color timetableSelectedColor(BuildContext context) => seed2;
+  static Color timetableTimeLineColor(BuildContext context) => appBarColor();
+  static Color timetableSelectedColor(BuildContext context, Color color) => isDarkMode(context) ?
+      color.changeColorSaturation(0.7).changeColorLightness(0.8) :
+      color.changeColorSaturation(0.6).changeColorLightness(0.6)
+  ;
+  static Color timetableUnselectedColor(BuildContext context, Color color) => isDarkMode(context) ?
+      color.changeColorSaturation(0.1).changeColorLightness(0.3) :
+      color.changeColorSaturation(0.2).changeColorLightness(0.6);
   static Color timetableTimeSplitColor(BuildContext context) => Colors.red;
   static Color timetableBackground1(BuildContext context) => whiteColor(context);
   static Color timetableBackground2(BuildContext context) => whiteColorDarker(context);
@@ -98,6 +105,8 @@ class ThemeConfig {
   static Color grey150(BuildContext context) => isDarkMode(context) ? Colors.grey[850]! : Colors.grey[200]!;
 
   static Color defaultHtmlViewColor(BuildContext context) => blackColor(context);
+  static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed3;
+
 
   // Function for eventTypeColor
   static Color eventTypeToColor(BuildContext context, String? type) {
@@ -109,7 +118,7 @@ class ThemeConfig {
       case "other":
         return seed4;
     }
-    return seed2;
+    return appBarColor();
   }
 
   static Color getShade(Color color, {bool darker = false, double value = .1}) {
@@ -171,4 +180,8 @@ extension ColorExtensions on Color {
   Color withOpacityUniversal(BuildContext context, double factor) {
     return ThemeConfig.isDarkMode(context) ? withOpacityBlack(factor) : withOpacityWhite(factor);
   }
+
+  Color changeColorSaturation(double newSaturationValue) => HSLColor.fromColor(this).withSaturation(newSaturationValue).toColor();
+  Color changeColorLightness(double newLightnessValue) => HSLColor.fromColor(this).withLightness(newLightnessValue).toColor();
+
 }

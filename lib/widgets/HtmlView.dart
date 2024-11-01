@@ -59,7 +59,7 @@ class _HtmlViewState extends State<HtmlView> {
   Widget build(BuildContext context) {
     widget.color ??= ThemeConfig.defaultHtmlViewColor(context);
     String widgetColor = colorToRgbString(widget.color);
-    String aColor = colorToRgbString(ThemeConfig.seedColor(context));
+    String aColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
     Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
