@@ -149,7 +149,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ).tr(),
                     ),],
                 const SizedBox(height: 24),
-                const Text("Theme Settings", style: TextStyle(fontSize: 20)).tr(),
+                const Text("Appearance", style: TextStyle(fontSize: 20)).tr(),
                 const SizedBox(height: 16),
                 ToggleButtons(
                   isSelected: [
@@ -167,18 +167,18 @@ class _SettingsPageState extends State<SettingsPage> {
                     }
                   },
                   borderRadius: BorderRadius.circular(8.0),
-                  children: const [
+                  children:  [
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text("Dark"),
+                      child: const Text("Dark").tr(),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text("Auto"),
+                      child: Text("Auto").tr(),
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text("Light"),
+                      child: Text("Light").tr(),
                     ),
                   ],
                 ),
