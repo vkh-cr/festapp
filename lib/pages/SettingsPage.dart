@@ -191,7 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           context: context,
                           label: "Install App".tr(),
                           onPressed: _canInstallPWA ? handleInstallButtonPress : null,
-                          color: _canInstallPWA ? ThemeConfig.blackColor(context) : Colors.grey,
+                          color: _canInstallPWA ? null : Colors.grey,
                           textColor: Colors.white,
                         ),
                         if (!_isPlatformSupported)
