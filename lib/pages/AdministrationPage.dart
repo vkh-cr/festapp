@@ -446,7 +446,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     type: PlutoColumnType.select(mapIcons, builder: (icon) {
                       return DataGridHelper.iconToRow(context, icon, svgIcons);
                     }),
-                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(rendererContext, svgIcons),
+                    renderer: (rendererContext) => DataGridHelper.mapIconRenderer(context, rendererContext, svgIcons),
                   ),
                   PlutoColumn(
                       width: 150,

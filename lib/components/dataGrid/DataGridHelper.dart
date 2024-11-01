@@ -49,9 +49,9 @@ class DataGridHelper
         },
     );}
 
-  static Widget mapIconRenderer(rendererContext, List<IconModel> icons) {
+  static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
-    return iconToRow(rendererContext, value, icons);
+    return iconToRow(context, value, icons);
   }
 
   static Widget iconToRow(BuildContext context, int? id, List<IconModel> icons) {
