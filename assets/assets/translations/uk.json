@@ -237,5 +237,10 @@
   "Large Images Detected": "Виявлено великі зображення",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Деякі зображення великі і можуть уповільнити роботу програми. Натисніть OK, щоб перетворити їх на оптимальний розмір.",
   "Workspace": "Workspace",
+  "Home": "Дім",
+  "Appearance": "Зовнішній вигляд",
+  "Light": "Світлий",
+  "Dark": "Темний",
+  "Auto": "Автоматично",
   "_": "_"
 }
