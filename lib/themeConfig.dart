@@ -33,7 +33,7 @@ class ThemeConfig {
         primarySwatch: ThemeConfig.seed2.getMaterialColorFromColor(),
       ).copyWith(
         brightness: Brightness.dark,
-        surface: Colors.grey[800]!,
+        surface: seed2.changeColorSaturation(0.06).changeColorLightness(0.20),
         onSurface: dddText,
       ),
       appBarTheme: AppBarTheme(color: appBarColor()),
