@@ -16,7 +16,7 @@ class ThemeConfig {
         surface: Colors.grey[200]!,
         onSurface: Colors.black,
       ),
-      scaffoldBackgroundColor: Colors.white,
+      scaffoldBackgroundColor: seedBackground,
       appBarTheme: AppBarTheme(color: seed1),
       tabBarTheme: TabBarTheme(indicatorColor: seed4)
   );
@@ -41,12 +41,13 @@ class ThemeConfig {
   );
 
   // Dynamic color methods with BuildContext for theme-based color adaptation
-  static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
+  static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : seedBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF4465A6);
-  static Color seed3 = const Color(0xFF80BDF2);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seedBackground = const Color(0xFFE3E2D3);
+  static Color seed1 = const Color(0xFF2c366f);
+  static Color seed2 = const Color(0xFF5f689b);
+  static Color seed3 = const Color(0xFFc4caec);
+  static Color seed4 = const Color(0xFF233182);
   static Color seedColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   static const int primaryColor = 0xFF0D0D0D;
