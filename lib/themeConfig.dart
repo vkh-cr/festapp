@@ -5,7 +5,7 @@ class ThemeConfig {
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura";
+  static final fontFamily = "Cerebri";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -43,10 +43,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF4465A6);
-  static Color seed3 = const Color(0xFF80BDF2);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seed1 = const Color(0xFFFFA33C);
+  static Color seed2 = const Color(0xFFB15EFF);
+  static Color seed3 = const Color(0xFF3D30A2);
+  static Color seed4 = const Color(0xFFFFFB73);
   static Color seedColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   static const int primaryColor = 0xFF0D0D0D;

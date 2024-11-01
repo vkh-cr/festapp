@@ -3,10 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 
-TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
+TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15, fontWeight: FontWeight.w900);
 TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
 TextStyle timeLineSplitTextStyle(BuildContext context) => TextStyle(
-    color: ThemeConfig.timelineSplitLabelColor(context), fontWeight: FontWeight.bold, fontSize: 15);
+    color: ThemeConfig.timelineSplitLabelColor(context), fontWeight: FontWeight.w900, fontSize: 15);
 double normalClickableFontSize = 18;
 TextStyle normalTextStyle = const TextStyle(fontSize: 18);
 double appMaxWidth = 820;

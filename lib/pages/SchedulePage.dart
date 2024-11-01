@@ -149,7 +149,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                   },
                   child: Image.asset(
                     'assets/icons/fstapplogo.png',
-                    width: 200,
+                    width: 180,
                     semanticLabel: 'BISCUP',
                   ),
                 ),
