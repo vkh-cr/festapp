@@ -20,6 +20,7 @@ import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
@@ -35,8 +36,8 @@ class SchedulePage extends StatefulWidget {
 }
 
 class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver {
-  List<TimeBlockItem> _dots = [];
-  List<EventModel> _events = [];
+  final List<TimeBlockItem> _dots = [];
+  final List<EventModel> _events = [];
 
   @override
   void initState() {
@@ -139,7 +140,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                 GestureDetector(
                   onDoubleTap: () async {
                     var packageInfo = await PackageInfo.fromPlatform();
-                    ToastHelper.Show("${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                    ToastHelper.Show(context, "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
                     if(RightsService.isEditor()) {
                       setState(() {
                         TimeHelper.toggleTimeTravel?.call();
@@ -160,7 +161,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _loginPressed,
-                        backgroundColor: AppConfig.button1Color,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
                         child: const Icon(Icons.login),
                       ),
                       Text("Sign in".tr()),
@@ -174,7 +175,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     children: <Widget>[
                       CircularButton(
                         onPressed: _profileButtonPressed,
-                        backgroundColor: AppConfig.profileButtonColor,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
                         child: const Icon(Icons.account_circle_rounded),
                       ),
                       Text(AuthService.currentUser?.name??""),

@@ -19,10 +19,10 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
@@ -68,13 +68,13 @@ class _EventPageState extends State<EventPage> {
     return Scaffold(
       appBar: AppBar(
           backgroundColor: _event == null
-              ? AppConfig.color1
-              : AppConfig.eventTypeToColor(_event!.type),
+              ? ThemeConfig.seed1
+              : ThemeConfig.eventTypeToColor(context, _event!.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          leading: ScheduleBackButton(color: Colors.white),
+          leading: ScheduleBackButton(),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover(),
@@ -94,7 +94,9 @@ class _EventPageState extends State<EventPage> {
             ...ButtonsHelper.getAddToMyProgramButton(
                 _event?.canSaveEventToMyProgram(),
                 addToMySchedule,
-                removeFromMySchedule)]),
+                removeFromMySchedule,
+                ThemeConfig.upperNavText(context),
+                ThemeConfig.upperNavText(context))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -202,7 +204,7 @@ class _EventPageState extends State<EventPage> {
                                                         .updateEvent(_event!);
                                                   }
                                                   await loadData(_event!.id!);
-                                                  ToastHelper.Show(
+                                                  ToastHelper.Show(context,
                                                       "Content has been changed."
                                                           .tr());
                                                 }
@@ -241,7 +243,6 @@ class _EventPageState extends State<EventPage> {
                                   SizedBox.fromSize(size: const Size(4.0, 4.0)),
                                   Text(
                                     "${"Place".tr()}: ${_event?.place?.title ?? ""}",
-                                    style: normalTextStyle,
                                   )
                                 ],
                               ),
@@ -251,9 +252,9 @@ class _EventPageState extends State<EventPage> {
                         !AuthService.isLoggedIn(),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: const Text(
+                      child: Text(
                         "You need to have an account to sign in to the event.",
-                        style: TextStyle(color: AppConfig.attentionColor),
+                        style: TextStyle(color: ThemeConfig.attentionColor(context)),
                       ).tr(),
                     )),
                 Visibility(
@@ -292,7 +293,7 @@ class _EventPageState extends State<EventPage> {
                                 text: _participants
                                     .map((e) => e.toFullNameString())
                                     .join("\n")));
-                            ToastHelper.Show(
+                            ToastHelper.Show(context,
                                 "Participants have been copied.".tr());
                           },
                           icon: const Icon(Icons.copy)),
@@ -376,7 +377,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> addToMySchedule() async {
-    if (!await DbEvents.addToMySchedule(_event!.id!)) {
+    if (!await DbEvents.addToMySchedule(context, _event!.id!)) {
       return;
     }
     setState(() {
@@ -385,7 +386,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> removeFromMySchedule() async {
-    await DbEvents.removeFromMySchedule(_event!.id!);
+    await DbEvents.removeFromMySchedule(context, _event!.id!);
     setState(() {
       _event!.isEventInMySchedule = false;
     });
@@ -495,7 +496,7 @@ class _EventPageState extends State<EventPage> {
   }
 
   Future<void> signOut() async {
-    await DbEvents.signOutFromEvent(_event!.id!);
+    await DbEvents.signOutFromEvent(context, _event!.id!);
     await loadData(_event!.id!);
   }
 
@@ -536,7 +537,7 @@ class _EventPageState extends State<EventPage> {
                   onPressed: () async {
                     RouterService.goBack(context);
                     await DbEvents.signOutFromEvent(
-                        _event!.id!, participant);
+                        context, _event!.id!, participant);
                     await loadData(_event!.id!);
                   },
                   child: const Text("Sign out someone").tr(),

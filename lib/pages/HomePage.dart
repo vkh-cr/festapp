@@ -11,6 +11,7 @@ import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -39,7 +40,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    StylesHelper.setMetaThemeColor(AppConfig.color1);
+    StylesHelper.setMetaThemeColor(ThemeConfig.seed1);
   }
 
   @override
@@ -79,9 +80,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
           bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: AppConfig.bottomNavBackgroundColor,
-            selectedItemColor: AppConfig.bottomNavSelectedItemColor,
-            unselectedItemColor: AppConfig.bottomNavUnselectedItemColor,
+            backgroundColor: ThemeConfig.bottomNavBackgroundColor(context),
+            selectedItemColor: ThemeConfig.bottomNavSelectedItemColor(context),
+            unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
             currentIndex: tabsRouter.activeIndex,
             type: BottomNavigationBarType.fixed,
             onTap: (int index) {

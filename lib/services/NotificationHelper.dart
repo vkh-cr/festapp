@@ -81,15 +81,15 @@ class NotificationHelper {
         await StorageHelper.set(notificationAllowedAsked, false.toString());
 
         if (!dialogResult) {
-          ToastHelper.Show("Notifications have been disabled.".tr());
+          ToastHelper.Show(context, "Notifications have been disabled.".tr());
           return;
         }
         var requestResult = await requestNotificationPermission();
         await StorageHelper.set(notificationAllowedAsked, requestResult.toString());
         if (requestResult) {
-          ToastHelper.Show("Notifications have been allowed.".tr());
+          ToastHelper.Show(context, "Notifications have been allowed.".tr());
         } else {
-          ToastHelper.Show("Notifications have been disabled.".tr());
+          ToastHelper.Show(context, "Notifications have been disabled.".tr());
         }
       }
     }

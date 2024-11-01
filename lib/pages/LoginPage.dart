@@ -4,9 +4,9 @@ import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
-import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -97,6 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 16,
                     ),
                     ButtonsHelper.bigButton(
+                      context: context,
                       label: "Sign in".tr(),
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
@@ -113,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                           });
                         }
                       },
-                      color: AppConfig.color1,
+                      color: ThemeConfig.seed1,
                       textColor: Colors.white,
                       isEnabled: !_isLoading,
                     ),
@@ -146,10 +147,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _showToast(value) {
-    ToastHelper.Show("Successful sign in!".tr());
+    ToastHelper.Show(context, "Successful sign in!".tr());
   }
 
   void _onError(err) {
-    ToastHelper.Show("Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
+    ToastHelper.Show(context, "Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
   }
 }

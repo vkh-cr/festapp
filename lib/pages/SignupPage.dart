@@ -8,6 +8,7 @@ import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import '../styles/Styles.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -89,6 +90,7 @@ class _SignupPageState extends State<SignupPage> {
                         height: 16,
                       ),
                       ButtonsHelper.bigButton(
+                        context: context,
                         onPressed: _isLoading ? null : () async {
                           TextInput.finishAutofillContext();
                           if (_formKey.currentState?.saveAndValidate() ?? false) {
@@ -99,17 +101,18 @@ class _SignupPageState extends State<SignupPage> {
                             fieldsData = data;
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {
-                              ToastHelper.Show("Registration is almost complete!".tr());
+                              ToastHelper.Show(context, "Registration is almost complete!".tr());
                               setState(() {
                                 _isRegistrationSuccess = true;
                               });
                             } else if (resp["code"] == 409) {
                               ToastHelper.Show(
+                                  context,
                                   "Registration failed: Email {email} is already in use.".tr(namedArgs: {"email": resp["email"]}),
                                   severity: ToastSeverity.NotOk
                               );
                             } else {
-                              ToastHelper.Show("Registration has failed.".tr(), severity: ToastSeverity.NotOk);
+                              ToastHelper.Show(context, "Registration has failed.".tr(), severity: ToastSeverity.NotOk);
                             }
                             setState(() {
                               _isLoading = false;
@@ -117,7 +120,7 @@ class _SignupPageState extends State<SignupPage> {
                           }
                         },
                         label: "Sign up".tr(),
-                        color: AppConfig.color1,
+                        color: ThemeConfig.seed1,
                         textColor: Colors.white,
                         isEnabled: !_isLoading,
                         height: 50.0,

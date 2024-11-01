@@ -13,6 +13,7 @@ import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/VibrateService.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 enum ScanState { signedIn, notSignedIn, nothing }
@@ -126,6 +127,7 @@ class _CheckPageState extends State<CheckPage> {
               Text(
                 _scannedUser!.toFullNameString(),
                 style: const TextStyle(
+                  color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -135,8 +137,8 @@ class _CheckPageState extends State<CheckPage> {
             ],
           ),
           if (_scannedUser!.companionParent == null) ...[
-            Text(_scannedUser!.email!),
-            Text(UserInfoModel.sexToLocale(_scannedUser!.sex)),
+            Text(_scannedUser!.email!, style: TextStyle(color: Colors.black),),
+            Text(UserInfoModel.sexToLocale(_scannedUser!.sex,), style: TextStyle(color: Colors.black)),
             if (_scannedUser!.companions != null) ...[
               const SizedBox(height: 16),
               Text("${'Signed in companions'.tr()}:"),
@@ -169,7 +171,7 @@ class _CheckPageState extends State<CheckPage> {
     const minChildSize = 0.25;
     const maxChildSize = 0.88;
     return Scaffold(
-      backgroundColor: _scannedUser == null ? Colors.grey[200] : getResultColor(_scanState),
+      backgroundColor: _scannedUser == null ? ThemeConfig.grey200(context) : getResultColor(_scanState),
       body: SafeArea(
         child: Stack(
           children: [
@@ -180,9 +182,9 @@ class _CheckPageState extends State<CheckPage> {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back,
-                          color: AppConfig.color1,
+                          color: ThemeConfig.seed1,
                         ),
                         onPressed: () {
                           RouterService.goBack(context);
@@ -191,10 +193,10 @@ class _CheckPageState extends State<CheckPage> {
                       Expanded(
                         child: Text(
                           _event?.toString() ?? "",
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: AppConfig.color1,
+                            color: ThemeConfig.seed1,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -249,8 +251,8 @@ class _CheckPageState extends State<CheckPage> {
                             curve: Curves.easeInOut);
                     },
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: ThemeConfig.whiteColor(context),
                         borderRadius:
                             BorderRadius.vertical(top: Radius.circular(16)),
                       ),
@@ -265,7 +267,7 @@ class _CheckPageState extends State<CheckPage> {
                               width: 60,
                               margin: const EdgeInsets.symmetric(vertical: 10),
                               decoration: BoxDecoration(
-                                color: Colors.grey[300],
+                                color: ThemeConfig.grey380(context),
                                 borderRadius: BorderRadius.circular(3),
                               ),
                             ),
@@ -294,7 +296,7 @@ class _CheckPageState extends State<CheckPage> {
                                             horizontal: 10, vertical: 5),
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            color: Colors.grey[200],
+                                            color: ThemeConfig.grey200(context),
                                             borderRadius:
                                                 BorderRadius.circular(12),
                                           ),

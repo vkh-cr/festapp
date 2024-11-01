@@ -61,7 +61,7 @@ class UserManagementHelper{
       if(really) {
         toBeCreated.forEach((u) async {
           await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
-          ToastHelper.Show("Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
+          ToastHelper.Show(context, "Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
@@ -77,7 +77,7 @@ class UserManagementHelper{
       if(really) {
         toBeUpdated.forEach((u) async {
           await DbUsers.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
-          ToastHelper.Show("Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
+          ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
         });
       }
     }
@@ -104,7 +104,7 @@ class UserManagementHelper{
       if(reallyDelete) {
         toBeDeleted.forEach((existing) async {
           await DbUsers.deleteUser(existing.user!, existing.occasion!);
-          ToastHelper.Show("Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
+          ToastHelper.Show(context, "Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
         });
       }
     }

@@ -28,42 +28,6 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
-  static const primaryColor = 0xFFFFA33C;
-  static const backgroundColor = Color(0xFF1e1e1e);
-  static const color1 = Color(primaryColor);
-  static const color2 = Color(0xFFB15EFF);
-  static const color3 = Color(0xFF3D30A2);
-  static const color4 = Color(0xFFFFFB73);
-  static const attentionColor = Color(0xFF8B0000);
-
-  static const timelineSplitLabelColor = color1;
-  static const timelineTabLabelColor = color1;
-  static const timelineTabIndicatorColor = color1;
-  static const timelineColor = color1;
-  static const timelineTextColor = color1;
-  static const mapPinColor = color1;
-  static const newsPageColor = backgroundColor;
-  static const infoPageColor = backgroundColor;
-
-  static const profileButtonColor = color1;
-
-  static const bottomNavBackgroundColor = Colors.black;
-  static const bottomNavSelectedItemColor = color1;
-  static const bottomNavUnselectedItemColor = Colors.grey;
-
-  static const timetableColor = color1;
-  static const timetableSelectedColor = color2;
-  static const timetableTimeSplitColor = Colors.red;
-  static const timetableBackground1 = Colors.white60;
-  static const timetableBackground2 = Colors.white;
-  static const double timetableTimeSplitOpacity = 0.15;
-
-  static const button1Color = color1;
-  static const button2Color = color3;
-  static const button3Color = color2;
-  static const button4Color = color4;
-
-  static const defaultHtmlViewColor = Colors.white;
 
   static const bool isSplitByPlace = false;
 
@@ -74,16 +38,6 @@ class AppConfig {
       return isNotificationsSupported && isWebNotificationsSupported;
     }
     return isNotificationsSupported;
-  }
-
-  static Color eventTypeToColor(String? type)
-  {
-    switch (type){
-      case "music": return color2;
-      case "talk": return color3;
-      case "other": return color4;
-    }
-    return color1;
   }
 
   static List<LanguageModel> availableLanguages = [

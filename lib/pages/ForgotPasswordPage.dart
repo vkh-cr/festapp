@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         height: 16,
                       ),
                       ButtonsHelper.bigButton(
+                        context: context,
                         onPressed: _isSent == true ? null : () async {
                           if (_formKey.currentState!.validate()) {
                             TextInput.finishAutofillContext();
@@ -70,15 +71,15 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             });
                             await AuthService.resetPasswordForEmail(_emailController.text)
                                 .then((value) {
-                              ToastHelper.Show("Password reset email has been sent.".tr());
+                              ToastHelper.Show(context, "Password reset email has been sent.".tr());
                             })
                                 .onError((error, stackTrace) {
-                              ToastHelper.Show(error.toString());
+                              ToastHelper.Show(context, error.toString());
                             });
                           }
                         },
                         label: "Send Reset Email".tr(),
-                        color: AppConfig.color1,
+                        color: ThemeConfig.seed1,
                         textColor: Colors.white,
                         isEnabled: !_isSent,
                         height: 50.0,

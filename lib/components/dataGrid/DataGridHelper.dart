@@ -4,6 +4,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
@@ -48,12 +49,12 @@ class DataGridHelper
         },
     );}
 
-  static Widget mapIconRenderer(rendererContext, List<IconModel> icons) {
+  static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
-    return iconToRow(value, icons);
+    return iconToRow(context, value, icons);
   }
 
-  static Widget iconToRow(int? id, List<IconModel> icons) {
+  static Widget iconToRow(BuildContext context, int? id, List<IconModel> icons) {
     var icon = icons.firstWhereOrNull((t)=>t.id == id);
 
     if (icon != null) {
@@ -62,7 +63,7 @@ class DataGridHelper
         height: 20,
         child: SvgPicture.string(
           icon.data!,
-          colorFilter: const ColorFilter.mode(Colors.black, BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(ThemeConfig.blackColor(context), BlendMode.srcIn),
         ),
       );
 
@@ -70,17 +71,17 @@ class DataGridHelper
         children: [
           svgIcon,
           const SizedBox(width: 12),
-          Text(icon.link!, style: TextStyle(color: Colors.black)),
+          Text(icon.link!),
         ],
       );
     }
 
-    return const Text(PlaceModel.WithouValue, style: TextStyle(color: Colors.black));
+    return const Text(PlaceModel.WithouValue);
   }
 
   static Widget idRenderer(rendererContext) {
     var value = rendererContext.cell.value == -1 ? "" : rendererContext.cell.value.toString();
-    return Text(value, style: TextStyle(color: Colors.black));
+    return Text(value);
   }
 
   static PlutoGridLocaleText getPlutoLocaleFromLangCode(String langCode)

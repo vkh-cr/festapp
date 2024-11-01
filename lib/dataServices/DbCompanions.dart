@@ -24,9 +24,9 @@ class DbCompanions {
         UserInfoModel(name: companion.name, id: companion.id));
   }
 
-  static Future<void> signOut(int eventId, CompanionModel companion) async {
+  static Future<void> signOut(BuildContext context, int eventId, CompanionModel companion) async {
     await DbEvents.signOutFromEvent(
-        eventId, UserInfoModel(name: companion.name, id: companion.id));
+        context, eventId, UserInfoModel(name: companion.name, id: companion.id));
   }
 
   static Future<void> create(String name) async {
