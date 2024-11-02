@@ -79,7 +79,7 @@ class ThemeConfig {
 
   static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
-  static Color bottomNavSelectedItemColor(BuildContext context) => seed1;
+  static Color bottomNavSelectedItemColor(BuildContext context) => seed1.changeColorSaturation(0.7);
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
 
   static Color upperNavText(BuildContext context) => isDarkMode(context) ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
