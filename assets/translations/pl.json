@@ -241,5 +241,8 @@
   "Light": "Jasny",
   "Dark": "Ciemny",
   "Auto": "Automatycznie",
+  "New Version Available": "Dostępna nowa wersja",
+  "Update the app to the latest version to access all features.": "Zaktualizuj aplikację do najnowszej wersji, aby uzyskać dostęp do wszystkich funkcji.",
+  "Update": "Aktualizuj",
   "_": "_"
 }
