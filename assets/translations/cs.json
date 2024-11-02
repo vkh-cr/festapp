@@ -237,5 +237,10 @@
   "Large Images Detected": "Zjištěny velké obrázky",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Některé obrázky jsou velké a mohou zpomalit aplikaci. Stiskněte OK pro jejich převod na optimální velikost.",
   "Workspace": "Workspace",
+  "Home": "Domů",
+  "Appearance": "Vzhled",
+  "Light": "Světlý",
+  "Dark": "Tmavý",
+  "Auto": "Automaticky",
   "_": "_"
 }
