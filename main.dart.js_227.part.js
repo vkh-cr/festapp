@@ -20,6 +20,6 @@ B.alt.prototype={}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
 x(B.alt,A.jy)})()
 A.bG(b.typeUniverse,JSON.parse('{"alt":{"jy":["A6"]}}'))
-var y={g:A.x("f"),b:A.x("@")};(function constants(){D.G7=new A.aX(58172,"MaterialIcons",null,!1)})()};
+var y={g:A.y("f"),b:A.y("@")};(function constants(){D.G7=new A.aX(58172,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_227",e:"endPart",h:b})})($__dart_deferred_initializers__,"BnK8ddAmAilz+kpzEmgk6Oo976k=");
+a.eventLog.push({p:"main.dart.js_227",e:"endPart",h:b})})($__dart_deferred_initializers__,"8+cY0lRGhaJHZkr/M9SmJLjXvgk=");

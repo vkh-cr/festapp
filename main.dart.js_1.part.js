@@ -19,7 +19,7 @@ aP9(d,e){var x=0,w=A.l(y.b),v,u
 var $async$aP9=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.e1().nj("set_user_password_token",A.I(["token",d,"password",e],y.w,u),u),$async$aP9)
+return A.c($.dZ().nj("set_user_password_token",A.I(["token",d,"password",e],y.w,u),u),$async$aP9)
 case 3:v=g
 x=1
 break
@@ -55,7 +55,7 @@ var $async$bf=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:v.cX()
 s=A.uZ()
 u=A.bs("token=(?<token>[^&]+)",!0,!1,!1).q3(s.k(0))
-if(u!=null)try{r=u.but("token")
+if(u!=null)try{r=u.bur("token")
 r.toString
 v.f=r}catch(p){r=A.ac(p)
 if(y.g.b(r)){t=r
@@ -83,7 +83,7 @@ B.bO8.prototype={
 $0(){var x=0,w=A.l(y.v),v=this,u,t,s,r
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:r=v.a
-x=r.d.ga0().rQ()?2:3
+x=r.d.ga0().rP()?2:3
 break
 case 2:E.au2(!0)
 u=r.f
@@ -123,12 +123,12 @@ w(A.cL,[B.bO6,B.bO8])
 w(A.c0,[B.bO7,B.bO4])
 x(B.bO5,A.dT)})()
 A.bG(b.typeUniverse,JSON.parse('{"B8":{"H":[],"e":[]},"aGj":{"K":["B8"]}}'))
-var y={g:A.x("aU"),u:A.x("p<e>"),o:A.x("aM<r3>"),F:A.x("aH"),E:A.x("A"),w:A.x("f"),b:A.x("@"),v:A.x("~")};(function constants(){var x=a.makeConstList
-D.axe=A.a(x(["password"]),A.x("p<f>"))
+var y={g:A.y("aU"),u:A.y("p<e>"),o:A.y("aM<r3>"),F:A.y("aH"),E:A.y("A"),w:A.y("f"),b:A.y("@"),v:A.y("~")};(function constants(){var x=a.makeConstList
+D.axe=A.a(x(["password"]),A.y("p<f>"))
 D.aTT=new A.aW(null,64,null,null)
 D.aXG=new A.X(!0,null,null,null,null,null,20,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aVG=new A.X(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b_l=new A.bU("Change Password",null,D.aVG,null,null,null,null,null,null,null,null,null,null,null)
 D.b_w=new A.bU("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"6rMESu6iTBArVIvHnj5ac8kJsKM=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"vUypbi3m2ShOgM2JniIigMA/00Y=");
