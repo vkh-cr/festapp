@@ -9,16 +9,16 @@ class ThemeConfig {
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
-      primarySwatch: ThemeConfig.seed3.getMaterialColorFromColor(),
+      primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: ThemeConfig.seed3.getMaterialColorFromColor(),
+        primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       ).copyWith(
         surface: seed2.changeColorSaturation(0.2).changeColorLightness(0.92),
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
       appBarTheme: AppBarTheme(color: appBarColor()),
-      tabBarTheme: TabBarTheme(indicatorColor: seed3)
+      tabBarTheme: TabBarTheme(indicatorColor: lllPrimary)
   );
 
   // Dark theme configuration
@@ -28,16 +28,16 @@ class ThemeConfig {
       scaffoldBackgroundColor: dddBackground,
       textTheme: ThemeData.dark().textTheme.apply(fontFamily: fontFamily),
       primaryTextTheme: ThemeData.dark().primaryTextTheme.apply(fontFamily: fontFamily),
-      primaryColor: seed2,
+      primaryColor: dddPrimary,
       colorScheme: ColorScheme.fromSwatch(
-        primarySwatch: ThemeConfig.seed2.getMaterialColorFromColor(),
+        primarySwatch: ThemeConfig.dddPrimary.getMaterialColorFromColor(),
       ).copyWith(
         brightness: Brightness.dark,
-        surface: seed2.changeColorSaturation(0.06).changeColorLightness(0.20),
+        surface: dddPrimary.changeColorSaturation(0.06).changeColorLightness(0.20),
         onSurface: dddText,
       ),
       appBarTheme: AppBarTheme(color: appBarColor()),
-      tabBarTheme: TabBarTheme(indicatorColor: seed2)
+      tabBarTheme: TabBarTheme(indicatorColor: dddPrimary)
   );
 
   // Dynamic color methods with BuildContext for theme-based color adaptation
@@ -48,8 +48,10 @@ class ThemeConfig {
   static Color seed3 = const Color(0xFF4465A6);
   static Color seed4 = const Color(0xFF253759);
 
-  static const int primaryColor = 0xFF0D0D0D;
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
+
+  static Color dddPrimary = seed2;
+  static Color lllPrimary = seed3;
 
   static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
   static Color lllBackground = seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
