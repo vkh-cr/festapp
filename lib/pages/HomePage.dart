@@ -6,9 +6,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -57,6 +59,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> loadData() async {
+    await AppConfigService.versionCheck(context);
     if (AuthService.isLoggedIn()) {
       DbUsers.getCurrentUserInfo().then((value) => setState(() => userName = value.name!));
       DbNews.countNewMessages().then((value) => setState(() => _messageCount = value));
