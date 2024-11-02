@@ -40,22 +40,6 @@ class _UsersTabState extends State<UsersTab> {
     INVITED
   ];
 
-  // Column identifier constants
-  static const String ID = "id";
-  static const String EMAIL = "email";
-  static const String NAME = "name";
-  static const String SURNAME = "surname";
-  static const String SEX = "sex";
-  static const String ACCOMMODATION = "accommodation";
-  static const String PHONE = "phone";
-  static const String BIRTHDAY = "birthday";
-  static const String ROLE = "role";
-  static const String ADMINISTRATOR = "administrator";
-  static const String EDITOR = "editor";
-  static const String APPROVER = "approver";
-  static const String APPROVED = "approved";
-  static const String INVITED = "invited";
-
   List<UserInfoModel> _allUsers = [];
 
   @override
@@ -88,6 +72,22 @@ class _UsersTabState extends State<UsersTab> {
       columns: _generateColumns(),
     ).DataGrid();
   }
+
+  // Column identifier constants
+  static const String ID = "id";
+  static const String EMAIL = "email";
+  static const String NAME = "name";
+  static const String SURNAME = "surname";
+  static const String SEX = "sex";
+  static const String ACCOMMODATION = "accommodation";
+  static const String PHONE = "phone";
+  static const String BIRTHDAY = "birthday";
+  static const String ROLE = "role";
+  static const String ADMINISTRATOR = "administrator";
+  static const String EDITOR = "editor";
+  static const String APPROVER = "approver";
+  static const String APPROVED = "approved";
+  static const String INVITED = "invited";
 
   // Map of column builders based on the identifier
   Map<String, PlutoColumn> get columnBuilders => {
