@@ -242,5 +242,8 @@
   "Light": "Light",
   "Dark": "Dark",
   "Auto": "Auto",
+  "New Version Available": "New Version Available",
+  "Update the app to the latest version to access all features.": "Update the app to the latest version to access all features.",
+  "Update": "Update",
   "_":"_"
 }

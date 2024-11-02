@@ -43,9 +43,9 @@ Both technologies were chosen to speed up development, and they have effectively
 
 - [Absolventský Velehrad](https://av23.cz)
 - [Člověk a Víra](https://ff23.cz)
-- [BISCUP](https://biscup23.app)
-- [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app/#/csa2024)
-- [Festival Slunovrat](https://app.festivalslunovrat.cz/#/2024)
+- [BISCUP](https://biscup.netlify.app)
+- [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app)
+- [Festival Slunovrat](https://app.festivalslunovrat.cz)
 
 Links to phone install are usually saved in info section.
 

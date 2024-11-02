@@ -64,7 +64,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
   Future<void> loadData() async {
     await loadOfflineData();
 
-    await DbEvents.updateEvents(_events).whenComplete(() async {
+      await DbEvents.updateEvents(_events).whenComplete(() async {
       if(AppConfig.isSplitByPlace) {
         await loadPlacesForEvents(_events, DbPlaces.getPlacesIn);
       }
