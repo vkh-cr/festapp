@@ -8,6 +8,7 @@ DECLARE
     occasion_user occasion_users%rowtype;
     is_admin_bool BOOLEAN;
     occasion_link text;
+    version_recommended text;
 BEGIN
     -- If no link is provided, get the default occasion from the organization
     IF link_txt = '' THEN
@@ -49,6 +50,11 @@ BEGIN
         END IF;
     END IF;
 
+     -- Retrieve version_recommended from organization's data
+    SELECT data->>'VERSION_RECOMMENDED' INTO version_recommended
+    FROM organizations
+    WHERE id = org_id;
+
     -- Get the is_open status for the occasion
     SELECT is_open INTO is_open_bool
     FROM occasions
@@ -66,17 +72,18 @@ BEGIN
     -- If the occasion is not open, enforce access restrictions
     IF is_open_bool = FALSE THEN
         IF auth.uid() IS NULL THEN
-            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link);
+            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
         END IF;
         IF occasion_user IS NULL AND NOT is_admin_bool THEN
-            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link);
+            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
         END IF;
         RETURN json_build_object(
             'code', 200,
             'is_admin', is_admin_bool,
             'occasion_user', COALESCE(row_to_json(occasion_user)::jsonb, NULL),
+            'link', occasion_link,
             'occasion', occasionId,
-            'link', occasion_link
+            'version_recommended', version_recommended
         );
     END IF;
 
@@ -98,7 +105,8 @@ BEGIN
             'code', 200,
             'is_admin', is_admin_bool,
             'link', occasion_link,
-            'occasion', occasionId
+            'occasion', occasionId,
+            'version_recommended', version_recommended
         );
     END IF;
 
@@ -108,7 +116,8 @@ BEGIN
         'is_admin', is_admin_bool,
         'occasion_user', row_to_json(occasion_user)::jsonb,
         'link', occasion_link,
-        'occasion', occasionId
+        'occasion', occasionId,
+        'version_recommended', version_recommended
     );
 END;
 $$;
