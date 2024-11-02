@@ -13,7 +13,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
-import 'package:fstapp/pages/AdministrationPage.dart';
+import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MapPage.dart';
@@ -453,7 +453,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    RouterService.navigateOccasion(context, AdministrationPage.ROUTE);
+    RouterService.navigateOccasion(context, AdminPage.ROUTE);
   }
 
   Future<void> loadData() async {

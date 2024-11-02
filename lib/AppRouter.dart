@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
-import 'package:fstapp/pages/AdministrationPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
@@ -23,6 +22,7 @@ import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 
 import 'AppRouter.gr.dart';
+import 'pages/AdministrationOccasion/AdminPage.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
@@ -44,7 +44,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
-    AutoRoute(page: AdministrationRoute.page, path: "/:{$LINK}/${AdministrationPage.ROUTE}"),
+    AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
           AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
