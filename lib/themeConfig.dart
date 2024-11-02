@@ -13,7 +13,7 @@ class ThemeConfig {
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       ).copyWith(
-        surface: seed2.changeColorSaturation(0.2).changeColorLightness(0.92),
+        surface: seed1.changeColorSaturation(0.15).changeColorLightness(0.92),
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
@@ -43,10 +43,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF80BDF2);
-  static Color seed3 = const Color(0xFF4465A6);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seed1 = const Color(0xFF2c366f);
+  static Color seed2 = const Color(0xFF5f689b);
+  static Color seed3 = const Color(0xFFc4caec);
+  static Color seed4 = const Color(0xFF233182);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
@@ -54,7 +54,7 @@ class ThemeConfig {
   static Color lllPrimary = seed4;
 
   static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
-  static Color lllBackground = seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
+  static Color lllBackground = const Color(0xFFE3E2D3);
   static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
@@ -64,7 +64,7 @@ class ThemeConfig {
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
 
-  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
+  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.4) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
@@ -79,7 +79,7 @@ class ThemeConfig {
 
   static Color appBarColor() => seed1;
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
-  static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
+  static Color bottomNavSelectedItemColor(BuildContext context) => isDarkMode(context) ? seed3 : backgroundColor(context);
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
 
   static Color upperNavText(BuildContext context) => isDarkMode(context) ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
@@ -107,7 +107,7 @@ class ThemeConfig {
   static Color grey150(BuildContext context) => isDarkMode(context) ? Colors.grey[850]! : Colors.grey[200]!;
 
   static Color defaultHtmlViewColor(BuildContext context) => blackColor(context);
-  static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed3;
+  static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed3 : seed1;
 
 
   // Function for eventTypeColor
