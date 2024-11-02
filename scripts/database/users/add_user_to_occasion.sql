@@ -7,7 +7,24 @@ DECLARE
     occasion_open BOOLEAN;
     user_data JSONB;
     user_exists BOOLEAN;
+    user_org BIGINT;
+    occasion_org BIGINT;
 BEGIN
+    -- Get the organization ID of the occasion
+    SELECT organization INTO occasion_org
+    FROM occasions
+    WHERE id = oc;
+
+    -- Get the organization ID of the user
+    SELECT organization INTO user_org
+    FROM user_info
+    WHERE id = usr;
+
+    -- Check if the user and occasion belong to the same organization
+    IF user_org IS DISTINCT FROM occasion_org THEN
+        RETURN jsonb_build_object('code', 403, 'message', 'User does not belong to the same organization as the occasion');
+    END IF;
+
     -- Check if the occasion is open
     SELECT is_open INTO occasion_open
     FROM occasions
