@@ -39,6 +39,8 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
   final List<TimeBlockItem> _dots = [];
   final List<EventModel> _events = [];
 
+  String? userName;
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +97,12 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
       _dots.clear();
       _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
       setState(() {});
+    }
+    if (AuthService.isLoggedIn()) {
+      var userInfo = await OfflineDataService.getUserInfo();
+      setState(() {
+        userName = userInfo?.name??"";
+      });
     }
   }
 
@@ -181,7 +189,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                         backgroundColor: ThemeConfig.profileButtonColor(context),
                         child: Icon(Icons.account_circle_rounded, color: ThemeConfig.profileButtonTextColor(context),),
                       ),
-                      Text(AuthService.currentUser?.name??""),
+                      Text(AuthService.currentUser?.name??userName??""),
                     ],
                   ),
                 ),
