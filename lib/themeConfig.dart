@@ -87,7 +87,7 @@ class ThemeConfig {
   static Color timetableTimeLineColor(BuildContext context) => appBarColor();
   static Color timetableSelectedColor(BuildContext context, Color color) => isDarkMode(context) ?
       color.changeColorSaturation(0.7).changeColorLightness(0.8) :
-      color.changeColorSaturation(0.6).changeColorLightness(0.6)
+      color.changeColorSaturation(0.5).changeColorLightness(0.6)
   ;
   static Color timetableUnselectedColor(BuildContext context, Color color) => isDarkMode(context) ?
       color.changeColorSaturation(0.1).changeColorLightness(0.3) :

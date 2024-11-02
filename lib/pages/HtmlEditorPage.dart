@@ -166,13 +166,13 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
                   onPressed: _isSaving ? null : cancelPressed,
                 ),
                 ButtonsHelper.bottomBarButton(
-                  text: "Process and Save".tr(),
+                  text: "Save".tr(),
                   onPressed: _isSaving ? null : savePressed,
                 ),
-                ButtonsHelper.bottomBarButton(
-                  text: "Save".tr(),
-                  onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
-                ),
+                // ButtonsHelper.bottomBarButton(
+                //   text: "Save".tr(),
+                //   onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
+                // ),
               ],
               ),
             ),
@@ -185,8 +185,8 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
 
   Future<void> savePressed() async {
     String? htmlTextEdited = await controller.getText();
-    var htmlText = HtmlHelper.removeBackgroundColor(htmlTextEdited);
-    htmlText = HtmlHelper.detectAndReplaceLinks(htmlTextEdited);
+    var htmlText = HtmlHelper.removeColor(htmlTextEdited);
+    htmlText = HtmlHelper.detectAndReplaceLinks(htmlText);
 
     setState(() {
       _isSaving = true;
