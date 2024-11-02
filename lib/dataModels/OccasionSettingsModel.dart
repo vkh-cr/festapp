@@ -31,6 +31,7 @@ class OccasionSettingsModel {
   {
     Tb.occasions.data_defaultMapLocation: defaultMapLocation,
     Tb.occasions.data_defaultMapZoom: defaultMapZoom,
+    Tb.occasions.data_is_enabled_entry_code: isEnabledEntryCode,
   };
 
   static const dynamic DefaultPosition =  {

@@ -11,7 +11,8 @@ class RouterService {
   static const LINK_PATH = "/:$LINK";
   static String currentOccasionLink = "";
 
-  static String getCurrentLink() => "/$currentOccasionLink/";
+  //todo temporary fix
+  static String getCurrentLink() => currentOccasionLink.isNotEmpty ? "/$currentOccasionLink/" : "/offlineOccasion/"; //to avoid offline errors
 
   static Future<T?> navigatePageInfo<T extends Object?>(BuildContext context, PageRouteInfo route){
     return context.router.push(route);
