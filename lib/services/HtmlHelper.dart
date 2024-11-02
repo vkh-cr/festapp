@@ -84,8 +84,8 @@ class HtmlHelper {
     return document.outerHtml;
   }
 
-  static String removeBackgroundColor(String htmlText) {
-    RegExp regExp = RegExp(r'background-color\s*:\s*[^;]+;?\s*', caseSensitive: false);
+  static String removeColor(String htmlText) {
+    RegExp regExp = RegExp(r'(background-color|color)\s*:\s*[^;]+;?\s*', caseSensitive: false);
     String cleanedHtmlString = htmlText.replaceAll(regExp, '');
     return cleanedHtmlString;
   }

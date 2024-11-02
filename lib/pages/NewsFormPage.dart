@@ -55,7 +55,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
 
   Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
     var htmlContent = await _controller.getText();
-    htmlContent = HtmlHelper.removeBackgroundColor(htmlContent);
+    htmlContent = HtmlHelper.removeColor(htmlContent);
     if (process == true) {
       htmlContent = HtmlHelper.detectAndReplaceLinks(htmlContent);
     }
@@ -76,7 +76,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
   }
 
   Future<void> _processAndSendPressed() async {
-    _sendPressed(process: true);
+    _sendPressed(isTest: true, process: true);
   }
 
   @override
@@ -142,10 +142,10 @@ class _NewsFormPageState extends State<NewsFormPage> {
                   ),
                   ButtonsHelper.bottomBarButton(
                     onPressed: _processAndSendPressed,
-                    text: "Process and Send".tr(),
+                    text: "Test",
                   ),
                   ButtonsHelper.bottomBarButton(
-                    onPressed: () => _sendPressed(),
+                    onPressed: () => _sendPressed(process: true),
                     text: "Send".tr(),
                   ),
                 ],
