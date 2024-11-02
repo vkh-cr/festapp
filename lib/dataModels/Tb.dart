@@ -67,6 +67,9 @@ class OccasionUsersTb{
   String get data_phone => "phone";
   String get data_accommodation => "accommodation";
   String get data_isInvited => "is_invited";
+  String get data_text1 => "text1";
+  String get data_text2 => "text2";
+  String get data_text3 => "text3";
 }
 class NewsTb{
   const NewsTb();

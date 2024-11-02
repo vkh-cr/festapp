@@ -29,6 +29,9 @@ class _UsersTabState extends State<UsersTab> {
     NAME,
     SURNAME,
     SEX,
+    TEXT1,
+    TEXT2,
+    TEXT3,
     ACCOMMODATION,
     PHONE,
     BIRTHDAY,
@@ -83,6 +86,9 @@ class _UsersTabState extends State<UsersTab> {
   static const String PHONE = "phone";
   static const String BIRTHDAY = "birthday";
   static const String ROLE = "role";
+  static const String TEXT1 = "text1";
+  static const String TEXT2 = "text2";
+  static const String TEXT3 = "text3";
   static const String ADMINISTRATOR = "administrator";
   static const String EDITOR = "editor";
   static const String APPROVER = "approver";
@@ -156,6 +162,27 @@ class _UsersTabState extends State<UsersTab> {
       field: Tb.user_info.role,
       type: PlutoColumnType.text(),
       width: 100,
+    ),
+    TEXT1: PlutoColumn(
+      title: "Type".tr(),
+      enableEditingMode: RightsService.canUpdateUsers(),
+      field: Tb.occasion_users.data_text1,
+      type: PlutoColumnType.text(),
+      width: 100,
+    ),
+    TEXT2: PlutoColumn(
+      title: "Type".tr(),
+      enableEditingMode: RightsService.canUpdateUsers(),
+      field: Tb.occasion_users.data_text2,
+      type: PlutoColumnType.text(),
+      width: 100,
+    ),
+    TEXT3: PlutoColumn(
+      title: "Note".tr(),
+      enableEditingMode: RightsService.canUpdateUsers(),
+      field: Tb.occasion_users.data_text3,
+      type: PlutoColumnType.text(),
+      width: 200,
     ),
     ADMINISTRATOR: _statusColumn("Administrator".tr(), Tb.occasion_users.is_manager),
     EDITOR: _statusColumn("Editor".tr(), Tb.occasion_users.is_editor),
