@@ -756,7 +756,7 @@ class _AdministrationPageState extends State<AdministrationPage> with SingleTick
                     width: 100,
                   ),
                   PlutoColumn(
-                    title: "Manager".tr(),
+                    title: "Administrator".tr(),
                     field: Tb.occasion_users.is_manager,
                     type: PlutoColumnType.select([]),
                     applyFormatterInEditing: true,
