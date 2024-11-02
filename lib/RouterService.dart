@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/AppRouter.gr.dart';
+import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/services/ToastHelper.dart';
 
 class RouterService {
   static const LINK = "link";
@@ -108,6 +108,7 @@ class RouterService {
     RightsService.currentOccasion = checkedObject.occasionId;
     RightsService.currentLink = checkedObject.link;
     RightsService.isAdminField = checkedObject.isAdmin;
+    AppConfigService.versionRecommended = checkedObject.versionRecommended;
 
     if (checkedObject.link != RouterService.currentOccasionLink &&
         checkedObject.isAvailable()) {

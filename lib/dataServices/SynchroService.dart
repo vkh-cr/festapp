@@ -16,7 +16,7 @@ class SynchroService {
   static final _supabase = Supabase.instance.client;
   static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.DefaultSettings;
 
-  static Future<OccasionSettingsModel> loadOrInitGlobalSettings() async {
+  static Future<OccasionSettingsModel> loadOrInitOccasionSettings() async {
     OccasionSettingsModel toReturn;
     if(RightsService.currentOccasion == null) {
       toReturn =  OccasionSettingsModel.DefaultSettings;

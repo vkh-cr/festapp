@@ -30,7 +30,7 @@ class RightsService{
       }
 
       RouterService.currentOccasionLink = currentLink!;
-      var globalSettings = await SynchroService.loadOrInitGlobalSettings();
+      var globalSettings = await SynchroService.loadOrInitOccasionSettings();
       await OfflineDataService.saveGlobalSettings(globalSettings);
 
       SynchroService.refreshOfflineData();
