@@ -13,7 +13,7 @@ BEGIN
     -- If no link is provided, get the default occasion from the organization
     IF link_txt = '' THEN
         -- Get the default occasion ID from the organization's data
-        SELECT data->>'default_occasion' INTO occasionId
+        SELECT data->>'DEFAULT_OCCASION' INTO occasionId
         FROM organizations
         WHERE id = org_id;
 
