@@ -6,6 +6,7 @@ import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -170,6 +171,26 @@ class DbUsers {
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
     var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
+  }
+
+  static Future<List<OccasionUserModel>> getOccasionUsersServiceTab() async {
+    var allFood = await DbOccasions.getAllServices("food");
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    for(var ou in data){
+      for(var f in allFood) {
+        if(ou[Tb.occasion_users.services] == null){
+          ou[Tb.occasion_users.services] = {DbOccasions.serviceTypeFood:{}};
+        }
+        if(ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood] == null){
+          ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood] = {};
+        }
+        if(ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood][f.code] == null) {
+          ou[Tb.occasion_users.services][DbOccasions.serviceTypeFood][f.code] =
+              DbOccasions.serviceNone;
+        }
+      }
+    }
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
   }
 

@@ -13,7 +13,8 @@ import 'package:flutter/foundation.dart' as _i25;
 import 'package:flutter/material.dart' as _i24;
 import 'package:fstapp/dataModels/PlaceModel.dart' as _i26;
 import 'package:fstapp/pages/AdminDashboardPage.dart' deferred as _i1;
-import 'package:fstapp/pages/AdministrationPage.dart' deferred as _i2;
+import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart'
+    deferred as _i2;
 import 'package:fstapp/pages/CheckPage.dart' deferred as _i3;
 import 'package:fstapp/pages/EventPage.dart' deferred as _i4;
 import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i5;
@@ -58,22 +59,22 @@ class AdminDashboardRoute extends _i23.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i2.AdministrationPage]
-class AdministrationRoute extends _i23.PageRouteInfo<void> {
-  const AdministrationRoute({List<_i23.PageRouteInfo>? children})
+/// [_i2.AdminPage]
+class AdminRoute extends _i23.PageRouteInfo<void> {
+  const AdminRoute({List<_i23.PageRouteInfo>? children})
       : super(
-          AdministrationRoute.name,
+          AdminRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'AdministrationRoute';
+  static const String name = 'AdminRoute';
 
   static _i23.PageInfo page = _i23.PageInfo(
     name,
     builder: (data) {
       return _i23.DeferredWidget(
         _i2.loadLibrary,
-        () => _i2.AdministrationPage(),
+        () => _i2.AdminPage(),
       );
     },
   );
