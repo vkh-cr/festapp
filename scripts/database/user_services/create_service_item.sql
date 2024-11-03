@@ -21,7 +21,7 @@ BEGIN
   SELECT jsonb_agg(item)
   INTO existing_codes
   FROM public.occasions,
-       jsonb_array_elements(occasions.services->type) AS item
+       jsonb_array_elements(COALESCE(occasions.services->type, '[]'::jsonb)) AS item
   WHERE occasions.id = oc
     AND (item->>'code') = code;
 
@@ -43,7 +43,7 @@ BEGIN
   -- Update the occasion to add the new item to the specified type array in services
   UPDATE public.occasions
   SET services = jsonb_set(
-    services,
+    COALESCE(services, '{}'::jsonb),                    -- Ensure services is an empty JSON if NULL
     ARRAY[type],
     COALESCE(services->type, '[]'::jsonb) || new_service_item,
     true

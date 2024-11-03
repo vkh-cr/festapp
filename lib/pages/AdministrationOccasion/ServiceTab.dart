@@ -42,7 +42,7 @@ class _ServiceTabState extends State<ServiceTab> {
   }
 
   Future<void> loadData() async {
-    var af = await DbOccasions.getAllServices("food");
+    var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
     setState(() {
       allFood = af;
     });
@@ -72,7 +72,7 @@ class _ServiceTabState extends State<ServiceTab> {
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
-          type: "accommodation",
+          type: DbOccasions.serviceTypeAccommodation,
           title: "Accommodation".tr(),
           description: "To create accommodation, fill in the title, unique code, and the reference of the place.".tr(),
           referenceString: "Place".tr(),
@@ -86,7 +86,7 @@ class _ServiceTabState extends State<ServiceTab> {
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
-          type: "food",
+          type: DbOccasions.serviceTypeFood,
           title: "Food".tr(),
           description: "To create food, fill in the title, unique code, and the reference of the event.".tr(),
           referenceString: "Event".tr(),
