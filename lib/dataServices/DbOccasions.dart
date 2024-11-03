@@ -12,6 +12,7 @@ class DbOccasions {
   static const String serviceTypeAccommodation = "accommodation";
 
   static Future<List<ServiceItemModel>> getAllServices(String type) async {
+    var oc = RightsService.currentOccasion;
     var data = await _supabase.rpc("get_all_service_items", params: {
       'oc': RightsService.currentOccasion,
       'type': type,
