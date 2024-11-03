@@ -1,4 +1,5 @@
 import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
@@ -21,8 +22,9 @@ class OccasionUserModel extends IPlutoRowModel {
   bool? isApproved = false;
 
   Map<String, dynamic>? data;
+  Map<String, dynamic>? services;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-     this.isEditor, this.isManager, this.isApprover, this.isApproved});
+     this.isEditor, this.isManager, this.isApprover, this.isApproved, this.services});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -34,7 +36,8 @@ class OccasionUserModel extends IPlutoRowModel {
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
         role: json[Tb.occasion_users.role],
-        data: json[Tb.occasion_users.data]
+        data: json[Tb.occasion_users.data],
+        services: json[Tb.occasion_users.services]
     );
   }
 
@@ -48,6 +51,7 @@ class OccasionUserModel extends IPlutoRowModel {
     Tb.occasion_users.is_manager: isManager??false,
     Tb.occasion_users.role: role,
     Tb.occasion_users.data: data,
+    Tb.occasion_users.services: services,
   };
 
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json) {
@@ -82,7 +86,14 @@ class OccasionUserModel extends IPlutoRowModel {
 
   @override
   PlutoRow toPlutoRow() {
-    return PlutoRow(cells: {
+    Map<String, PlutoCell> foodServices = {};
+    for(var f in services?[DbOccasions.serviceTypeFood]?.entries??[]){
+      foodServices[DbOccasions.serviceTypeFood+f.key] = PlutoCell(value: f.value);
+    }
+    Map<String, PlutoCell> json = {};
+    json.addAll(foodServices);
+
+    json.addAll({
       Tb.occasion_users.user: PlutoCell(value: user),
       Tb.occasion_users.is_editor: PlutoCell(value: isEditor.toString()),
       Tb.occasion_users.is_manager: PlutoCell(value: isManager.toString()),
@@ -100,7 +111,10 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_text1: PlutoCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
       Tb.occasion_users.data_text2: PlutoCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
       Tb.occasion_users.data_text3: PlutoCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
+      Tb.occasion_users.data_text4: PlutoCell(value: data?[Tb.occasion_users.data_text4] ?? ""),
     });
+
+    return PlutoRow(cells: json);
   }
 
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
@@ -114,6 +128,18 @@ class OccasionUserModel extends IPlutoRowModel {
     else{
       bd = jsonTime;
     }
+
+    Map<String, dynamic> services = {};
+    for(var f in json.entries){
+      if(f.key.startsWith(DbOccasions.serviceTypeFood)) {
+        var code = f.key.substring(DbOccasions.serviceTypeFood.length);
+        if(services[DbOccasions.serviceTypeFood] == null){
+          services[DbOccasions.serviceTypeFood] = {};
+        }
+        services[DbOccasions.serviceTypeFood][code] = f.value;
+      }
+    }
+
     return OccasionUserModel(
       occasion: RightsService.currentOccasion,
       user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
@@ -122,6 +148,7 @@ class OccasionUserModel extends IPlutoRowModel {
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
       role: int.tryParse(json[Tb.occasion_users.role]),
+      services: services,
       data: {
         Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_name]?.trim(),
         Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_surname]?.trim(),
@@ -135,6 +162,7 @@ class OccasionUserModel extends IPlutoRowModel {
         Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text1]?.trim(),
         Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text2]?.trim(),
         Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text3]?.trim(),
+        Tb.occasion_users.data_text4: json[Tb.occasion_users.data_text4]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text4]?.trim(),
       },
     );
   }

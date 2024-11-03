@@ -245,5 +245,17 @@
   "New Version Available": "Dostupná nová verzia",
   "Update the app to the latest version to access all features.": "Aktualizujte aplikáciu na najnovšiu verziu pre prístup ku všetkým funkciám.",
   "Update": "Aktualizovať",
+  "Service": "Pobyt",
+  "Note": "Poznámka",
+  "Diet": "Diéta",
+  "Accommodation settings": "Nastavenie ubytovania",
+  "Food settings": "Nastavenie jedla",
+  "Really delete service?": "Naozaj zmazať službu?",
+  "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.": "Najmenej jeden používateľ má túto službu. Môžete ho nájsť v tabuľke. Naozaj ju chcete zmazať? Zmazanie sa nedá vrátiť.",
+  "Create": "Vytvoriť",
+  "Code": "Kód",
+  "To create accommodation, fill in the title, unique code, and the reference of the place.": "Na vytvorenie ubytovania vyplňte názov, jedinečný kód a referenciu na miesto.",
+  "Food": "Jedlo",
+  "To create food, fill in the title, unique code, and the reference of the event.": "Na vytvorenie jedla vyplňte názov, jedinečný kód a referenciu na program.",
   "_": "_"
 }

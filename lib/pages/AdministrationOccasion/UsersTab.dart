@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -10,10 +9,10 @@ import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/pages/AdministrationOccasion/ColumnHelper.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/UserManagementHelper.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({Key? key}) : super(key: key);
@@ -24,20 +23,20 @@ class UsersTab extends StatefulWidget {
 
 class _UsersTabState extends State<UsersTab> {
   static const List<String> columnIdentifiers = [
-    ID,
-    EMAIL,
-    NAME,
-    SURNAME,
-    SEX,
-    ACCOMMODATION,
-    PHONE,
-    BIRTHDAY,
-    ROLE,
-    ADMINISTRATOR,
-    EDITOR,
-    APPROVER,
-    APPROVED,
-    INVITED
+    ColumnHelper.ID,
+    ColumnHelper.EMAIL,
+    ColumnHelper.NAME,
+    ColumnHelper.SURNAME,
+    ColumnHelper.SEX,
+    ColumnHelper.ACCOMMODATION,
+    ColumnHelper.PHONE,
+    ColumnHelper.BIRTHDAY,
+    ColumnHelper.ROLE,
+    ColumnHelper.ADMINISTRATOR,
+    ColumnHelper.EDITOR,
+    ColumnHelper.APPROVER,
+    ColumnHelper.APPROVED,
+    ColumnHelper.INVITED
   ];
 
   List<UserInfoModel> _allUsers = [];
@@ -69,140 +68,10 @@ class _UsersTabState extends State<UsersTab> {
         DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
         DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
       ],
-      columns: _generateColumns(),
+      columns: ColumnHelper.generateColumns(columnIdentifiers),
     ).DataGrid();
   }
 
-  // Column identifier constants
-  static const String ID = "id";
-  static const String EMAIL = "email";
-  static const String NAME = "name";
-  static const String SURNAME = "surname";
-  static const String SEX = "sex";
-  static const String ACCOMMODATION = "accommodation";
-  static const String PHONE = "phone";
-  static const String BIRTHDAY = "birthday";
-  static const String ROLE = "role";
-  static const String TEXT1 = "text1";
-  static const String TEXT2 = "text2";
-  static const String TEXT3 = "text3";
-  static const String ADMINISTRATOR = "administrator";
-  static const String EDITOR = "editor";
-  static const String APPROVER = "approver";
-  static const String APPROVED = "approved";
-  static const String INVITED = "invited";
-
-  // Map of column builders based on the identifier
-  Map<String, PlutoColumn> get columnBuilders => {
-    ID: PlutoColumn(
-      hide: true,
-      title: "Id".tr(),
-      field: Tb.occasion_users.user,
-      type: PlutoColumnType.text(),
-      readOnly: true,
-      width: 50,
-    ),
-    EMAIL: PlutoColumn(
-      title: "E-mail".tr(),
-      field: Tb.occasion_users.data_email,
-      type: PlutoColumnType.text(),
-      checkReadOnly: (row, cell) => row.cells[Tb.occasion_users.user]?.value != null,
-      width: 200,
-    ),
-    NAME: PlutoColumn(
-      title: "Name".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.user_info_public.name,
-      type: PlutoColumnType.text(),
-      width: 200,
-    ),
-    SURNAME: PlutoColumn(
-      title: "Surname".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.user_info_public.surname,
-      type: PlutoColumnType.text(),
-      width: 200,
-    ),
-    SEX: PlutoColumn(
-      title: "Sex".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.user_info_public.sex,
-      type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
-      formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
-      applyFormatterInEditing: true,
-      width: 100,
-    ),
-    ACCOMMODATION: PlutoColumn(
-      title: "Accommodation".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_accommodation,
-      type: PlutoColumnType.text(),
-      width: 150,
-    ),
-    PHONE: PlutoColumn(
-      title: "Phone".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_phone,
-      type: PlutoColumnType.text(),
-      width: 200,
-    ),
-    BIRTHDAY: PlutoColumn(
-      title: "Birthday".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_birthDate,
-      type: PlutoColumnType.date(defaultValue: DateTime.now()),
-      width: 140,
-    ),
-    ROLE: PlutoColumn(
-      title: "Role".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.user_info.role,
-      type: PlutoColumnType.text(),
-      width: 100,
-    ),
-    TEXT1: PlutoColumn(
-      title: "Type".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_text1,
-      type: PlutoColumnType.text(),
-      width: 100,
-    ),
-    TEXT2: PlutoColumn(
-      title: "Type".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_text2,
-      type: PlutoColumnType.text(),
-      width: 100,
-    ),
-    TEXT3: PlutoColumn(
-      title: "Note".tr(),
-      enableEditingMode: RightsService.canUpdateUsers(),
-      field: Tb.occasion_users.data_text3,
-      type: PlutoColumnType.text(),
-      width: 200,
-    ),
-    ADMINISTRATOR: _statusColumn("Administrator".tr(), Tb.occasion_users.is_manager),
-    EDITOR: _statusColumn("Editor".tr(), Tb.occasion_users.is_editor),
-    APPROVER: _statusColumn("Approver".tr(), Tb.occasion_users.is_approver),
-    APPROVED: _statusColumn("Approved".tr(), Tb.occasion_users.is_approved),
-    INVITED: _statusColumn("Invited".tr(), Tb.occasion_users.data_isInvited),
-  };
-
-  List<PlutoColumn> _generateColumns() {
-    return columnIdentifiers.map((identifier) => columnBuilders[identifier]!).toList();
-  }
-
-  PlutoColumn _statusColumn(String title, String field) {
-    return PlutoColumn(
-      title: title,
-      field: field,
-      type: PlutoColumnType.select([]),
-      applyFormatterInEditing: true,
-      enableEditingMode: false,
-      width: 100,
-      renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
-    );
-  }
 
   // Actions (import, invite, change password, add to group, add existing)
   Future<void> _import(SingleTableDataGrid dataGrid) async {

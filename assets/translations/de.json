@@ -245,5 +245,17 @@
   "New Version Available": "Neue Version verfügbar",
   "Update the app to the latest version to access all features.": "Aktualisieren Sie die App auf die neueste Version, um auf alle Funktionen zuzugreifen.",
   "Update": "Aktualisieren",
+  "Service": "Aufenthalt",
+  "Note": "Notiz",
+  "Diet": "Diät",
+  "Accommodation settings": "Unterkunftseinstellungen",
+  "Food settings": "Lebensmitteleinstellungen",
+  "Really delete service?": "Dienst wirklich löschen?",
+  "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.": "Mindestens ein Benutzer hat diesen Dienst. Sie finden ihn in der Tabelle. Sind Sie sicher, dass Sie ihn löschen möchten? Das Löschen kann nicht rückgängig gemacht werden.",
+  "Create": "Erstellen",
+  "Code": "Code",
+  "To create accommodation, fill in the title, unique code, and the reference of the place.": "Um eine Unterkunft zu erstellen, füllen Sie den Titel, den eindeutigen Code und die Referenz des Ortes aus.",
+  "Food": "Essen",
+  "To create food, fill in the title, unique code, and the reference of the event.": "Um Essen zu erstellen, füllen Sie den Titel, den eindeutigen Code und die Referenz des Programms aus.",
   "_": "_"
 }

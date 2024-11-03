@@ -245,5 +245,17 @@
   "New Version Available": "Доступна нова версія",
   "Update the app to the latest version to access all features.": "Оновіть додаток до останньої версії, щоб отримати доступ до всіх функцій.",
   "Update": "Оновити",
+  "Service": "Pobyt",
+  "Note": "Примітка",
+  "Diet": "Дієта",
+  "Accommodation settings": "Налаштування проживання",
+  "Food settings": "Налаштування їжі",
+  "Really delete service?": "Справді видалити послугу?",
+  "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.": "Принаймні один користувач має цю послугу. Ви можете знайти його в таблиці. Ви впевнені, що хочете видалити це? Видалення не можна скасувати.",
+  "Create": "Створити",
+  "Code": "Код",
+  "To create accommodation, fill in the title, unique code, and the reference of the place.": "Щоб створити проживання, заповніть назву, унікальний код та посилання на місце.",
+  "Food": "Їжа",
+  "To create food, fill in the title, unique code, and the reference of the event.": "Щоб створити їжу, заповніть назву, унікальний код та посилання на програму.",
   "_": "_"
 }

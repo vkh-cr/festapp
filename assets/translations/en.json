@@ -245,5 +245,17 @@
   "New Version Available": "New Version Available",
   "Update the app to the latest version to access all features.": "Update the app to the latest version to access all features.",
   "Update": "Update",
+  "Service": "Service",
+  "Note": "Note",
+  "Diet": "Diet",
+  "Accommodation settings": "Accommodation settings",
+  "Food settings": "Food settings",
+  "Really delete service?": "Really delete service?",
+  "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.": "At least one user has this service. You can find them in the grid. Are you sure you want to delete it? Deletion cannot be undone.",
+  "Create": "Create",
+  "Code": "Code",
+  "To create accommodation, fill in the title, unique code, and the reference of the place.": "To create accommodation, fill in the title, unique code, and the reference of the place.",
+  "Food": "Food",
+  "To create food, fill in the title, unique code, and the reference of the event.": "To create food, fill in the title, unique code, and the reference of the event.",
   "_":"_"
 }

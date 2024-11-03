@@ -46,6 +46,7 @@ class OccasionsTb{
   String get data_events_registration_start => "events_registration_start";
   String get data_is_enabled_entry_code => "is_enabled_entry_code";
   String get data_max_companions => "max_companions";
+  String get services => "services";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -70,6 +71,9 @@ class OccasionUsersTb{
   String get data_text1 => "text1";
   String get data_text2 => "text2";
   String get data_text3 => "text3";
+  String get data_text4 => "text4";
+  String get services => "services";
+  String get services_accommodation => "accommodation";
 }
 class NewsTb{
   const NewsTb();
