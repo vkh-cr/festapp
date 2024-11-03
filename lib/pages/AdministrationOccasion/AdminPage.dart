@@ -12,6 +12,7 @@ import 'package:fstapp/pages/AdministrationOccasion/EventsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ExclusivityTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
+import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
 
@@ -36,7 +37,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: 6);
+    _tabController = TabController(vsync: this, length: 7);
     loadData();
   }
 
@@ -116,6 +117,12 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                         Padding(padding: const EdgeInsets.all(12), child: const Text("Users").tr())
                       ]
                   ),
+                  Row(
+                      children: [
+                        const Icon(Icons.food_bank),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Service").tr())
+                      ]
+                  ),
                 ],
               ),
             ),
@@ -131,6 +138,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             ExclusivityTab(),
             UserGroupsTab(),
             UsersTab(),
+            ServiceTab(),
           ],
         ),
       ),
