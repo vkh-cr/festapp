@@ -4,7 +4,9 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
@@ -48,6 +50,22 @@ class DataGridHelper
         rendererContext.cell.value = value.toString();
         },
     );}
+
+  static Widget threeStateCheckBoxRenderer(
+      rendererContext, String idString, [bool Function()? isEnabled]) {
+    // Get the current state (default to "none" if the value is null or invalid)
+    String currentState = rendererContext.cell.value ?? DbOccasions.serviceNone;
+
+    return CustomThreeStateCheckbox(
+      currentState: currentState,
+      onStateChanged: (String newState) {
+        var cell = rendererContext.row.cells[idString]!;
+        rendererContext.stateManager.changeCellValue(cell, newState, force: true);
+        rendererContext.cell.value = newState;
+      },
+      isEnabled: isEnabled == null || isEnabled(),
+    );
+  }
 
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
