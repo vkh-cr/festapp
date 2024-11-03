@@ -16,8 +16,8 @@ _.d=g
 _.e=h
 _.f=i
 _.r=j},
-ctW(d,e){return new B.zk(d,e)},
-zk:function zk(d,e){this.c=d
+ctW(d,e){return new B.zj(d,e)},
+zj:function zj(d,e){this.c=d
 this.a=e},
 a55:function a55(d,e,f,g){var _=this
 _.d=d
@@ -75,7 +75,7 @@ bFg:function bFg(d){this.a=d},
 bFh:function bFh(d,e,f){this.a=d
 this.b=e
 this.c=f},
-Dp:function Dp(d,e,f,g,h){var _=this
+Do:function Do(d,e,f,g,h){var _=this
 _.c=d
 _.d=e
 _.e=f
@@ -115,7 +115,7 @@ return A.k($async$aVk,w)},
 aVl(d,e,f){var x=0,w=A.l(y.H)
 var $async$aVl=A.h(function(g,h){if(g===1)return A.i(h,w)
 while(true)switch(x){case 0:x=2
-return A.c(A.Ko(d,e,A.bvR(null,null,null,null,null,null,null,f.a,f.b,null,null,null,null,null,null,null)),$async$aVl)
+return A.c(A.Kn(d,e,A.bvR(null,null,null,null,null,null,null,f.a,f.b,null,null,null,null,null,null,null)),$async$aVl)
 case 2:return A.j(null,w)}})
 return A.k($async$aVl,w)},
 aVi(d){var x=0,w=A.l(y.H),v,u,t,s
@@ -253,7 +253,7 @@ A_=c[150]
 R=c[126]
 B.adA.prototype={}
 B.asD.prototype={}
-B.zk.prototype={
+B.zj.prototype={
 M(){var x=y.Y
 return new B.a55(A.a([],y.Z),A.a([],x),A.a([],x),A.a([],y.F))}}
 B.a55.prototype={
@@ -282,13 +282,13 @@ w===$&&A.b()
 x=A.kg("EEEE, MMM d, HH:mm",w.gfb(0)).eF(x.cy)+" - "+A.agu(i).eF(x.db)}x=A.aR(Y.fz,A.as(x==null?"":x,i,i,i,i,i,i,i,L.eT,i,i,i,i),C.h,i,i,i,i,i,i,i,i,i,i)
 w=j.e
 w=w==null?i:w.e
-u=Al.xj(i,D.aTK)
+u=Al.xi(i,D.aTK)
 t=A.a0("Place",i)
 r=j.e
 if(r==null)r=i
 else{r=r.e
 r=r==null?i:r.c}if(r==null)r=""
-w=A.fo(A.aR(Y.fz,A.e7(!1,Z.zU(A.bN(A.a([D.aiT,u,A.as(t+": "+r,i,i,i,i,i,i,i,i,i,i,i,i)],v),C.n,C.o,C.q),i),i,i,C.N,i,i,i,i,new B.bF_(j,d),i,i),C.h,i,i,i,i,i,i,C.aM,i,i,i),w!=null)
+w=A.fo(A.aR(Y.fz,A.e7(!1,Z.zT(A.bN(A.a([D.aiT,u,A.as(t+": "+r,i,i,i,i,i,i,i,i,i,i,i,i)],v),C.n,C.o,C.q),i),i,i,C.N,i,i,i,i,new B.bF_(j,d),i,i),C.h,i,i,i,i,i,i,C.aM,i,i,i),w!=null)
 u=j.e
 u=u!=null&&u.a!=null&&$.dU().gd6().d==null
 u=A.fo(new A.am(C.aM,E.bA(A.as("You need to have an account to sign in to the event.",i,i,i,i,i,i,i,A.bR(i,i,D.ab9,i,i,i,i,i,i,i,i,i,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),i,i,i,i),i),i),u)
@@ -301,7 +301,7 @@ else p=!1
 o=q?i:r.at
 p=A.fo(new A.am(An.ce,new A1.r6(o==null?"":o,18,!0,i),i),p)
 r=q?i:r.r.length!==0
-r=A.fo(new A.am(Ae.Fl,K.eR(new A8.Bk(j.gaU9(),A6.c38(j.d,d),0.3,i,i),i,C.t,i,i,C.F),i),r===!0)
+r=A.fo(new A.am(Ae.Fl,K.eR(new A8.Bj(j.gaU9(),A6.c38(j.d,d),0.3,i,i),i,C.t,i,i,C.F),i),r===!0)
 if(A.hP()){q=j.e
 q=(q==null?i:q.a)!=null}else q=!1
 o=A.bN(A.a([H.dz(i,i,i,i,i,D.aiK,i,i,new B.bF0(j,d),i,i,i,i,i),A.as(A.a0(h,i)+":",i,i,i,i,i,i,i,i,i,i,i,i)],v),C.n,C.o,C.q)
@@ -363,7 +363,7 @@ t=v.e
 u=t.b
 u.toString
 x=4
-return A.c(A.Aq(C.c.k(u),t,"events"),$async$kl)
+return A.c(A.Ap(C.c.k(u),t,"events"),$async$kl)
 case 4:x=A.hP()?5:6
 break
 case 5:x=7
@@ -375,7 +375,7 @@ btz(d){var x=0,w=A.l(y.H),v=this,u,t,s,r,q,p,o,n
 var $async$yg=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:r=y.l
 x=2
-return A.c(U.mw("events",A.zj(),r),$async$yg)
+return A.c(U.mw("events",A.zi(),r),$async$yg)
 case 2:q=f
 p=A.fH(q,new B.bF7(d))
 x=p!=null?3:4
@@ -393,7 +393,7 @@ p.e=r.d
 v.f=r}x=6
 break
 case 7:x=9
-return A.c(A.oD(C.c.k(d),A.zj(),"events",r),$async$yg)
+return A.c(A.oD(C.c.k(d),A.zi(),"events",r),$async$yg)
 case 9:t=f
 p.at=t==null?null:t.at
 r=p.e
@@ -424,7 +424,7 @@ W6(d){return this.btA(d)},
 btA(d){var x=0,w=A.l(y.H),v=this
 var $async$W6=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=2
-return A.c(A.Km(d),$async$W6)
+return A.c(A.Kl(d),$async$W6)
 case 2:v.r=f
 v.K(new B.bFc())
 return A.j(null,w)}})
@@ -494,7 +494,7 @@ t.toString
 u=v.e.b
 u.toString
 x=2
-return A.c(A.Ko(t,u,null),$async$uB)
+return A.c(A.Kn(t,u,null),$async$uB)
 case 2:u=v.e.b
 u.toString
 x=3
@@ -504,7 +504,7 @@ return A.k($async$uB,w)},
 Pk(){var x=0,w=A.l(y.H),v=this,u
 var $async$Pk=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(A.za(),$async$Pk)
+return A.c(A.z9(),$async$Pk)
 case 2:v.x=e
 u=v.c
 u.toString
@@ -514,7 +514,7 @@ return A.k($async$Pk,w)},
 aFI(d){var x=null,w=this.c
 w.toString
 return N.kv(x,x,!0,x,new B.bFi(this,d),w,x,!0,!0,y.N)}}
-B.Dp.prototype={
+B.Do.prototype={
 M(){return new B.a4b(new I.ff(M.br,$.ak()))}}
 B.a4b.prototype={
 Iv(){var x=0,w=A.l(y.H),v=this,u,t
@@ -529,7 +529,7 @@ u=v.a
 u.toString
 t=u
 x=5
-return A.c(A.za(),$async$Iv)
+return A.c(A.z9(),$async$Iv)
 case 5:t.e=e
 v.K(new B.bBn())
 case 3:return A.j(null,w)}})
@@ -548,7 +548,7 @@ case 4:t=u.a
 t.toString
 s=t
 x=5
-return A.c(A.za(),$async$zF)
+return A.c(A.z9(),$async$zF)
 case 5:s.e=f
 u.K(new B.bBo())
 t=u.a.f.$0()
@@ -567,7 +567,7 @@ case 2:u=v.a
 u.toString
 t=u
 x=3
-return A.c(A.za(),$async$E8)
+return A.c(A.z9(),$async$E8)
 case 3:t.e=f
 v.K(new B.bBp())
 u=v.a.f.$0()
@@ -586,7 +586,7 @@ case 2:u=v.a
 u.toString
 t=u
 x=3
-return A.c(A.za(),$async$E9)
+return A.c(A.z9(),$async$E9)
 case 3:t.e=f
 v.K(new B.bBq())
 u=v.a.f.$0()
@@ -601,20 +601,20 @@ x=E.bA(D.b_L,A.H(["max_companions",C.c.k(r)],x,x))
 r=J.aY(u.a.e)
 w=u.a.d
 v=y.p
-w=K.eR(new A.dG(D.a5C,A.bL(A.a([x,O.el,A.fo(A.bL(A.a([I.jY(!0,C.bj,!1,t,!0,C.z,t,I.lf(),u.d,t,t,t,t,t,2,I.hf(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.a0("Companion Name",t),t,t,t,t,t,t,t,t,t,t,t,t,t),C.t,!0,t,!0,t,!1,t,Aj.bt,t,A.a([new I.wz(30,t)],y.V),t,t,t,t,t,1,t,t,!1,"\u2022",t,t,t,t,t,!1,t,!1,t,!0,t,M.bL,t,t,C.bm,C.bg,t,t,t,t,t,t,t,C.aj,t,M.bQ,t,t,t,t),O.el,A.fi(!1,E.bA(D.b_B,t),t,t,C.N,t,t,t,t,u.gaR9(),t,t)],v),C.n,C.o,C.q,t,C.B),r<w),O.el,new A.aX(380,150,R.mt(!0,t,new B.bBu(u),J.aY(u.a.e),t,t,P.fl,!1,C.F,!1),t)],v),C.n,C.o,C.ai,t,C.B),t),t,C.t,t,t,C.F)
+w=K.eR(new A.dG(D.a5C,A.bL(A.a([x,O.el,A.fo(A.bL(A.a([I.jY(!0,C.bj,!1,t,!0,C.z,t,I.lf(),u.d,t,t,t,t,t,2,I.hf(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.a0("Companion Name",t),t,t,t,t,t,t,t,t,t,t,t,t,t),C.t,!0,t,!0,t,!1,t,Aj.bt,t,A.a([new I.M5(30,t)],y.V),t,t,t,t,t,1,t,t,!1,"\u2022",t,t,t,t,t,!1,t,!1,t,!0,t,M.bL,t,t,C.bm,C.bg,t,t,t,t,t,t,t,C.aj,t,M.bQ,t,t,t,t),O.el,A.fi(!1,E.bA(D.b_B,t),t,t,C.N,t,t,t,t,u.gaR9(),t,t)],v),C.n,C.o,C.q,t,C.B),r<w),O.el,new A.aX(380,150,R.mt(!0,t,new B.bBu(u),J.aY(u.a.e),t,t,P.fl,!1,C.F,!1),t)],v),C.n,C.o,C.ai,t,C.B),t),t,C.t,t,t,C.F)
 return N.oc(A.a([A.e7(!1,E.bA(Ab.BE,t),t,t,C.N,t,t,t,t,new B.bBv(d),t,t)],v),t,w,t,t,s)}}
 B.asB.prototype={
 C(d){var x=null
 if(F.fT(d,!1).f.gBJ().gafS()>0)return H.dz(x,x,x,x,x,T.cb(A4.hV,A.N(d).Y.f,x,24),x,x,new B.bmB(d),x,x,x,x,x)
 return A3.bps(x)}}
-var z=a.updateTypes(["R<~>()","@(q)","H0(Q,aa)","Dp(Q)","hZ(Q)"])
+var z=a.updateTypes(["R<~>()","@(q)","H_(Q,aa)","Do(Q)","hZ(Q)"])
 B.bEZ.prototype={
 $0(){var x=0,w=A.l(y.H),v=this,u,t
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:t=v.a.e.b
 t.toString
 u=A.H(["id",t],y.N,y.z)
-F.fT(v.b,!1).f.ko(new B.adA("CheckRoute",new A.yV(t,null),u,C.bp,null,"",null),y.X)
+F.fT(v.b,!1).f.ko(new B.adA("CheckRoute",new A.yU(t,null),u,C.bp,null,"",null),y.X)
 return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
@@ -637,7 +637,7 @@ u=A.fo(new A.am(C.aM,A.fi(!1,E.bA(D.b_g,s),s,s,C.N,s,s,s,s,new B.bEU(r,d),s,s),s
 if(!A.hP())if(Af.c_P()){t=r.e
 t=t!=null&&t.ch}else t=!1
 else t=!0
-return K.eR(new A.dG(new A.aa(e.b,1/0,0,1/0),Z.zU(A.bN(A.a([x,w,v,u,A.fo(A.fi(!1,E.bA(Ah.a1w,s),s,s,C.N,s,s,s,s,new B.bEV(r,d),s,s),t)],y.p),C.n,C.ee,C.q),s),s),s,C.t,s,s,C.a2)},
+return K.eR(new A.dG(new A.aa(e.b,1/0,0,1/0),Z.zT(A.bN(A.a([x,w,v,u,A.fo(A.fi(!1,E.bA(Ah.a1w,s),s,s,C.N,s,s,s,s,new B.bEV(r,d),s,s),t)],y.p),C.n,C.ee,C.q),s),s),s,C.t,s,s,C.a2)},
 $S:z+2}
 B.bER.prototype={
 $0(){return this.a.aFD()},
@@ -653,7 +653,7 @@ $0(){var x=0,w=A.l(y.H),v=this,u,t
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=v.a
 x=2
-return A.c(V.zc(),$async$$0)
+return A.c(V.zb(),$async$$0)
 case 2:t=e
 u.w=t
 J.hn(t,new B.bEP(u))
@@ -697,7 +697,7 @@ t=u.f
 x=t!=null?4:6
 break
 case 4:t.r=d
-t=A.DF(t)
+t=A.DE(t)
 x=7
 return A.c(t,$async$$1)
 case 7:x=5
@@ -731,7 +731,7 @@ B.bF0.prototype={
 $0(){var x=0,w=A.l(y.H),v=this
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(X.z2(new X.pk(J.cm(v.a.r,new B.bEX(),y.N).bV(0,"\n"))),$async$$0)
+return A.c(X.z1(new X.pk(J.cm(v.a.r,new B.bEX(),y.N).bV(0,"\n"))),$async$$0)
 case 2:A.cU(v.b,A.a0("Participants have been copied.",null),C.ax)
 return A.j(null,w)}})
 return A.k($async$$0,w)},
@@ -797,7 +797,7 @@ $1(d){var x,w=this.a,v=w.e.b
 v.toString
 x=$.tv().d
 x.toString
-return new B.Dp(v,x,w.x,new B.bFe(w),null)},
+return new B.Do(v,x,w.x,new B.bFe(w),null)},
 $S:z+3}
 B.bFe.prototype={
 $0(){var x=0,w=A.l(y.H),v=this,u,t
@@ -828,7 +828,7 @@ u=v.a
 t=u.e.b
 t.toString
 x=2
-return A.c(A.Ko(s,t,v.c),$async$$0)
+return A.c(A.Kn(s,t,v.c),$async$$0)
 case 2:t=u.e.b
 t.toString
 x=3
@@ -887,13 +887,13 @@ x(v,"gbz7","Xx",0)
 w(v,"gaU9","aUa",1)
 x(B.a4b.prototype,"gaR9","Iv",0)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(A.jy,[B.adA,B.asD])
-x(A.F,[B.zk,B.Dp])
+x(A.F,[B.zj,B.Do])
 x(A.K,[B.a55,B.a4b])
 x(A.cL,[B.bEZ,B.bER,B.bES,B.bET,B.bEU,B.bEV,B.bEM,B.bF_,B.bF0,B.bEW,B.bEL,B.bFd,B.bFb,B.bFc,B.bF4,B.bF6,B.bFe,B.bFg,B.bFh,B.bBn,B.bBo,B.bBp,B.bBq,B.bBr,B.bBs,B.bBt,B.bBv,B.bmB])
 x(A.dQ,[B.bF2,B.bF1,B.bF3,B.bBu])
 x(A.c1,[B.bEP,B.bEN,B.bEQ,B.bEO,B.bEY,B.bEX,B.bF7,B.bF8,B.bF9,B.bFa,B.bF5,B.bEK,B.bFf,B.bFi])
 w(B.asB,A.a6)})()
-A.bF(b.typeUniverse,JSON.parse('{"adA":{"jy":["yV"]},"asD":{"jy":["~"]},"zk":{"F":[],"e":[]},"a55":{"K":["zk"]},"Dp":{"F":[],"e":[]},"a4b":{"K":["Dp"]},"asB":{"a6":[],"e":[]}}'))
+A.bF(b.typeUniverse,JSON.parse('{"adA":{"jy":["yU"]},"asD":{"jy":["~"]},"zj":{"F":[],"e":[]},"a55":{"K":["zj"]},"Do":{"F":[],"e":[]},"a4b":{"K":["Do"]},"asB":{"a6":[],"e":[]}}'))
 var y=(function rtii(){var x=A.y
 return{l:x("d_"),_:x("R<@>"),x:x("R<~>"),F:x("p<lk>"),V:x("p<oY>"),Z:x("p<dB>"),Y:x("p<ea>"),p:x("p<e>"),P:x("aE"),e:x("et"),O:x("ct<v>"),N:x("f"),U:x("ea"),g:x("qm"),y:x("v"),z:x("@"),S:x("q"),X:x("A?"),H:x("~")}})();(function constants(){D.a5C=new A.aa(0,480,0,1/0)
 D.ab9=new A.D(4287299584)
@@ -920,4 +920,4 @@ D.b_J=new A.bQ("Do you want to sign out participant {participant} from {event}?"
 D.b_L=new A.bQ("If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b_M=new A.bQ("Sign out",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"hlnbLrv7qThqGBmgDd5sf+LrJ0o=");
+a.eventLog.push({p:"main.dart.js_245",e:"endPart",h:b})})($__dart_deferred_initializers__,"pk8xfE9ERGrb/USQTNNviaLJgSc=");

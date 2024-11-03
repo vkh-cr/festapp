@@ -15,7 +15,7 @@ return A.c(s.bT("events").hq(0,"id,updated_at,title,start_time,end_time,max_part
 case 3:r=n.pw(f)
 q=y.u
 x=4
-return A.c(A.oD(D.c.k(d),A.zj(),"events",q),$async$pp)
+return A.c(A.oD(D.c.k(d),A.zi(),"events",q),$async$pp)
 case 4:p=f
 o=p==null
 if(o)u=null
@@ -101,7 +101,7 @@ aoP(d){var x=0,w=A.l(y.e),v,u
 var $async$aoP=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:u=J
 x=3
-return A.c(A.Fj(),$async$aoP)
+return A.c(A.Fi(),$async$aoP)
 case 3:v=u.n1(f,d)
 x=1
 break
@@ -128,4 +128,4 @@ $S:49};(function inheritance(){var x=a.inheritMany
 x(A.c1,[B.aUJ,B.aUK,B.aVt])})()
 var y={f:A.y("by"),u:A.y("d_"),r:A.y("p<q>"),w:A.y("f"),e:A.y("v"),b:A.y("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_199",e:"endPart",h:b})})($__dart_deferred_initializers__,"//5wIObnf6+ccHWaiUQbNXBes34=");
+a.eventLog.push({p:"main.dart.js_199",e:"endPart",h:b})})($__dart_deferred_initializers__,"mU+d5W0/xyjBQnwPVg2Q03orY3Q=");

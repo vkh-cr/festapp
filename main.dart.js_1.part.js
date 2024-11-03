@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_1",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-czc(){return new B.Bd(null)},
-Bd:function Bd(d){this.a=d},
+czc(){return new B.Bc(null)},
+Bc:function Bc(d){this.a=d},
 aGX:function aGX(d,e){var _=this
 _.d=d
 _.e=e
@@ -46,7 +46,7 @@ T=c[211]
 U=c[169]
 I=c[143]
 K=c[80]
-B.Bd.prototype={
+B.Bc.prototype={
 M(){return new B.aGX(new A.aM(null,y.o),new F.ff(H.br,$.ak()))}}
 B.aGX.prototype={
 m(){this.an()},
@@ -70,7 +70,7 @@ x=A.as(A.a0("Welcome in {name}!",A.H(["name","Fstapp"],x,x)),t,t,t,t,t,t,t,D.aXP
 w=A.as(A.a0("Create a new password to continue.",t),t,t,t,t,t,t,t,S.eT,t,t,t,t)
 v=R.a2_(D.axn,!1,this.e,F.hf(t,U.m3,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.a0("New Password",t),t,t,t,t,t,t,t,t,t,t,t,t,t),t,H.Bx,t,!0,t,t,t,!1,new B.bOi())
 u=A.fa(20)
-return M.i7(s,t,new A.cY(C.G,t,t,new A.dG(new A.aa(0,820,0,1/0),P.eR(Q.VC(t,t,new E.yI(A.bL(A.a([x,G.d_,w,D.aU1,new A.am(T.xF,v,t),G.d_,A.aR(t,A.e7(!1,I.bA(D.b_x,t),t,t,C.N,t,t,t,t,new B.bOj(this,d),t,t),C.h,t,t,new A.c0(C.cc,t,t,u,t,t,t,C.Z),t,50,t,t,t,t,250)],y.u),C.n,C.o,C.q,t,C.B),t),this.d,t,t),t,C.t,t,t,C.F),t),t),t,t,t,t)}}
+return M.i7(s,t,new A.cY(C.G,t,t,new A.dG(new A.aa(0,820,0,1/0),P.eR(Q.VC(t,t,new E.yH(A.bL(A.a([x,G.d_,w,D.aU1,new A.am(T.xF,v,t),G.d_,A.aR(t,A.e7(!1,I.bA(D.b_x,t),t,t,C.N,t,t,t,t,new B.bOj(this,d),t,t),C.h,t,t,new A.c0(C.cc,t,t,u,t,t,t,C.Z),t,50,t,t,t,t,250)],y.u),C.n,C.o,C.q,t,C.B),t),this.d,t,t),t,C.t,t,t,C.F),t),t),t,t,t,t)}}
 var z=a.updateTypes([])
 B.bOh.prototype={
 $0(){return K.asp(this.a)},
@@ -107,7 +107,7 @@ break
 case 4:x=J.n(u.i(d,"code"),200)?5:6
 break
 case 5:x=7
-return A.c(L.J2(u.i(d,"email"),v.a.e.a.a),$async$$1)
+return A.c(L.J1(u.i(d,"email"),v.a.e.a.a),$async$$1)
 case 7:u=v.b
 A.cU(u,A.a0("Password has been changed.",null),C.ax)
 K.asp(u)
@@ -117,12 +117,12 @@ $S:69}
 B.bOg.prototype={
 $2(d,e){A.cU(this.a,J.aD(d),C.ax)},
 $S:318};(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.Bd,A.F)
+x(B.Bc,A.F)
 x(B.aGX,A.K)
 w(A.cL,[B.bOh,B.bOj])
 w(A.c1,[B.bOi,B.bOf])
 x(B.bOg,A.dQ)})()
-A.bF(b.typeUniverse,JSON.parse('{"Bd":{"F":[],"e":[]},"aGX":{"K":["Bd"]}}'))
+A.bF(b.typeUniverse,JSON.parse('{"Bc":{"F":[],"e":[]},"aGX":{"K":["Bc"]}}'))
 var y={g:A.y("aU"),u:A.y("p<e>"),o:A.y("aM<r3>"),F:A.y("aE"),E:A.y("A"),w:A.y("f"),b:A.y("@"),v:A.y("~")};(function constants(){var x=a.makeConstList
 D.axn=A.a(x(["password"]),A.y("p<f>"))
 D.aU1=new A.aX(null,64,null,null)
@@ -131,4 +131,4 @@ D.aVP=new A.X(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b_x=new A.bQ("Change Password",null,D.aVP,null,null,null,null,null,null,null,null,null,null,null)
 D.b_I=new A.bQ("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"wj8poPDJWYKCy1wLC7jwXy/xt40=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"MLJMH/PIJCFBjMCqFiRYC4Q3iH0=");

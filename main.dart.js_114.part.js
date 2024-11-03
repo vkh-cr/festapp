@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_114",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,E,B={
-cvV(){return new B.zR(null)},
-zR:function zR(d){this.a=d},
+cvV(){return new B.zQ(null)},
+zQ:function zQ(d){this.a=d},
 a5S:function a5S(d){var _=this
 _.f=_.e=_.d=!1
 _.r=""
@@ -41,7 +41,7 @@ W=c[101]
 G=c[143]
 X=c[222]
 Y=c[80]
-B.zR.prototype={
+B.zQ.prototype={
 M(){return new B.a5S(new U.ff(I.br,$.ak()))}}
 B.a5S.prototype={
 bk(){var x=this
@@ -70,7 +70,7 @@ else x=!u.d&&!u.f&&u.e?u.ga78():t
 w=!i
 if(w)v=!u.d&&!u.f&&u.e
 else v=!0
-p=A.a([W.De(v?C.cc:C.fi,d,50,!0,p,x,C.l,250)],s)
+p=A.a([W.Dd(v?C.cc:C.fi,d,50,!0,p,x,C.l,250)],s)
 if(u.d)p.push(new A.am(E.ll,G.bA(A.as("The app is already installed.",t,t,t,t,t,t,t,A.bR(t,t,C.cc,t,t,t,t,t,t,t,t,16,t,t,t,t,t,!0,t,t,t,t,t,t,t,t),C.cm,t,t,t),t),t))
 if(w&&u.f)p.push(new A.am(E.ll,A.bL(A.a([G.bA(D.aZY,t),X.B5,A.bN(A.a([A.eE(S.a2_(t,!1,u.w,I.ajr,t,t,t,!1,t,t,t,!0,t),1,t),Q.dz(t,t,t,t,t,F.cb(O.G6,t,t,t),t,t,new B.bIL(u,d),t,t,t,t,t)],s),C.n,C.o,C.q)],s),C.n,C.o,C.q,t,C.B),t))
 q.push(new A.am(C.dt,A.bL(p,C.n,C.o,C.q,t,C.B),t))
@@ -104,21 +104,21 @@ return null},
 $S:0}
 B.bIL.prototype={
 $0(){var x,w=null
-H.z2(new H.pk(this.a.w.a.a))
+H.z1(new H.pk(this.a.w.a.a))
 x=this.b.am(y.a)
 x.toString
 x.f.abY(K.c2I(w,w,w,w,w,C.z,w,A.as("Copied to clipboard",w,w,w,w,w,w,w,w,w,w,w,w),w,L.Fe,w,w,w,w,w,w,w,w,w))},
 $S:0};(function installTearOffs(){var x=a._instance_0u
 x(B.a5S.prototype,"ga78","vx",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.zR,A.F)
+x(B.zQ,A.F)
 x(B.a5S,A.K)
 w(A.cL,[B.bIN,B.bIP,B.bIO,B.bIM,B.bIK,B.bIL])})()
-A.bF(b.typeUniverse,JSON.parse('{"zR":{"F":[],"e":[]},"a5S":{"K":["zR"]}}'))
-var y={e:A.y("p<e>"),a:A.y("Cz"),f:A.y("~")};(function constants(){D.ahc=new A.aV(57477,"MaterialIcons",null,!1)
+A.bF(b.typeUniverse,JSON.parse('{"zQ":{"F":[],"e":[]},"a5S":{"K":["zQ"]}}'))
+var y={e:A.y("p<e>"),a:A.y("Cy"),f:A.y("~")};(function constants(){D.ahc=new A.aV(57477,"MaterialIcons",null,!1)
 D.ahq=new A.aV(57795,"MaterialIcons",null,!1)
 D.aiu=new A.aV(984254,"MaterialIcons",null,!1)
 D.aZY=new A.bQ("Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",null,E.BB,null,C.cm,null,null,null,null,null,null,null,null,null)
 D.b_O=new A.bQ("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"cRN","c5N",()=>new A.LX())})()};
+x($,"cRN","c5N",()=>new A.LW())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_114",e:"endPart",h:b})})($__dart_deferred_initializers__,"5QOIYQIKhmkdYlddN5VfBmnL9E4=");
+a.eventLog.push({p:"main.dart.js_114",e:"endPart",h:b})})($__dart_deferred_initializers__,"yOEEMPHsXUrAWfCtoyDmtLzcei4=");
