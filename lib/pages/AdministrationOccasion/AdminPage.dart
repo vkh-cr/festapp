@@ -113,14 +113,14 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                   ),
                   Row(
                       children: [
-                        const Icon(Icons.people),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Users").tr())
+                        const Icon(Icons.food_bank),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Service").tr())
                       ]
                   ),
                   Row(
                       children: [
-                        const Icon(Icons.food_bank),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Service").tr())
+                        const Icon(Icons.people),
+                        Padding(padding: const EdgeInsets.all(12), child: const Text("Users").tr())
                       ]
                   ),
                 ],
@@ -137,8 +137,8 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
             PlacesTab(svgIcons: svgIcons, mapIcons: mapIcons, loadPlaces: loadPlaces,),
             ExclusivityTab(),
             UserGroupsTab(),
-            UsersTab(),
             ServiceTab(),
+            UsersTab(),
           ],
         ),
       ),
