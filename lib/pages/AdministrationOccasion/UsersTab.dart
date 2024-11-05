@@ -60,7 +60,7 @@ class _UsersTabState extends State<UsersTab> {
       OccasionUserModel.fromPlutoJson,
       DataGridFirstColumn.deleteAndCheck,
       Tb.occasion_users.user,
-      actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsService.canUpdateUsers),
+      actionsExtended: DataGridActionsController(areAllActionsEnabled: RightsService.canUpdateUsers),
       headerChildren: [
         DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
         DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),

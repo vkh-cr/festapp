@@ -58,7 +58,9 @@ class _ServiceTabState extends State<ServiceTab> {
       OccasionUserModel.fromPlutoJson,
       DataGridFirstColumn.none,
       Tb.occasion_users.user,
-      actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsService.canUpdateUsers),
+      actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+          isAddActionPossible: () => false),
       headerChildren: [
         DataGridAction(name: "Accommodation settings".tr(), action: (SingleTableDataGrid p0, [_]) => _accommodationDefinition(p0)),
         DataGridAction(name: "Food settings".tr(), action: (SingleTableDataGrid p0, [_]) => _foodDefinition(p0)),
