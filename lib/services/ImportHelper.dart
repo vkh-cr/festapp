@@ -1,13 +1,25 @@
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:csv/csv.dart';
 import 'package:cross_file/cross_file.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
+
+static Map<String, String> get migrateColumns =>
+{
+  Tb.user_info.id:"Id",
+  Tb.user_info.email_readonly:"E-mail",
+  Tb.user_info.name:"Jméno",
+  Tb.user_info.surname:"Příjmení",
+  Tb.user_info.sex:"Pohlaví",
+  Tb.occasion_users.data_accommodation:"Varianta ubytování",
+  Tb.occasion_users.data_phone:"Telefon",
+  Tb.occasion_users.role:"Role",
+};
+
 static int getIndex(String s, List<String> row)
 {
-  return row.indexOf(UserInfoModel.migrateColumns[s]!);
+  return row.indexOf(migrateColumns[s]!);
 }
 
 static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
@@ -18,7 +30,7 @@ static Future<List<Map<String, dynamic>>> getUsersFromFile(XFile file) async {
 
   var firstRow = fields[0].map((e) => e.toString()).toList();
   Map<String, int> userColumnIndex = {};
-  for(var keyValue in UserInfoModel.migrateColumns.entries) {
+  for(var keyValue in migrateColumns.entries) {
     var index = firstRow.indexOf(keyValue.value);
     if(index == -1) {
       continue;
