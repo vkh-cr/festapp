@@ -1,9 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'dart:html' as html;
+import 'package:url_launcher/url_launcher.dart';
 
 class AppConfigService {
   static String? versionRecommended;
@@ -11,7 +13,7 @@ class AppConfigService {
   static bool isVersionChecking = false;
 
   static Future<void> versionCheck(BuildContext context) async {
-    if (!kIsWeb || alreadyChecked || isVersionChecking) return;
+    if (alreadyChecked || isVersionChecking) return;
 
     isVersionChecking = true;
 
@@ -24,11 +26,11 @@ class AppConfigService {
             context,
             "New Version Available".tr(),
             "Update the app to the latest version to access all features.".tr(),
-          confirmButtonMessage: "Update".tr()
+            confirmButtonMessage: "Update".tr()
         );
 
         if (updateConfirmed) {
-          html.window.location.reload();
+          _redirectToUpdate();
         } else {
           alreadyChecked = true;
         }
@@ -53,5 +55,21 @@ class AppConfigService {
       }
     }
     return false;
+  }
+
+  static void _redirectToUpdate() {
+    if (PlatformHelper.isWeb) {
+      _launchURL(AppConfig.webLink);
+    } else if (PlatformHelper.isAndroid) {
+      _launchURL(AppConfig.playStoreLaunchLink);
+    } else if (PlatformHelper.isIOS) {
+      _launchURL(AppConfig.appStoreLink);
+    }
+  }
+
+  static Future<void> _launchURL(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    }
   }
 }

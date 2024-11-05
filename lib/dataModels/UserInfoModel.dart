@@ -146,8 +146,15 @@ class UserInfoModel {
   bool isSignedIn = false;
 
 
-  static String sexToLocale(String? sx) => sx == "male" ? "Male".tr() : "Female".tr();
+  static String sexToLocale(String? sx) {
+    if (sx == "female") {
+      return "Female".tr();
+    } else if (sx == "male") {
+      return "Male".tr();
+    }
 
+    return "Not specified".tr();
+  }
   bool importedEquals(Map<String, dynamic> u) {
     return 
         u[emailReadonlyColumn].toString().trim().toLowerCase() == email

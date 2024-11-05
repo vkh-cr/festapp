@@ -5,6 +5,18 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 class FormHelper {
+  // Field Type Constants
+  static const String fieldTypeName = "name";
+  static const String fieldTypeSurname = "surname";
+  static const String fieldTypeCity = "city";
+  static const String fieldTypeEmail = "email";
+  static const String fieldTypeSex = "sex";
+  static const String fieldTypeBirthYear = "birth_year";
+
+  // Field Attribute Constants
+  static const String IS_REQUIRED = "is_required";
+
+  // Labels and messages
   static String nameLabel() => "Name".tr();
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
@@ -15,114 +27,123 @@ class FormHelper {
   static String maleLabel() => "Male".tr();
   static String femaleLabel() => "Female".tr();
 
+  // Public method to generate form fields from configuration
   static List<Widget> getFormFields(dynamic fields) {
-    List<Widget> toReturn = [];
-    for (var field in fields["fields"]) {
-      toReturn.add(getFormField(field));
-    }
-    return toReturn;
+    return fields.map<Widget>((field) => createFormField(field)).toList();
   }
 
+  // Retrieve form data by iterating over defined fields
   static Map<String, dynamic> getDataFromForm(GlobalKey<FormBuilderState> key, dynamic fields) {
     Map<String, dynamic> toReturn = {};
     for (var k in fields) {
-      toReturn[k["type"]] = getValueFromTypeField(key, k["type"]);
+      toReturn[k["type"]] = getFieldData(key, k["type"]);
     }
     return toReturn;
   }
 
-  static dynamic getValueFromTypeField(GlobalKey<FormBuilderState> formKey, String type) {
-    switch (type) {
-      case "name":
-        return formKey.currentState?.fields["name"]!.value.trim();
-      case "surname":
-        return formKey.currentState?.fields["surname"]!.value.trim();
-      case "city":
-        return formKey.currentState?.fields["city"]!.value.trim();
-      case "email":
-        return formKey.currentState?.fields["email"]!.value.trim();
-      case "sex":
-        var option = formKey.currentState?.fields["sex"]!.value as FormOptionModel;
-        return option.code;
-      case "birthYear":
-        return int.parse(formKey.currentState?.fields["birthYear"]!.value);
+  // Determine the correct data from the form based on type
+  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType) {
+    var fieldValue = formKey.currentState?.fields[fieldType]?.value;
+    if (fieldType == fieldTypeSex) {
+      if(fieldValue == null){
+        return null;
+      }
+      return (fieldValue as FormOptionModel).code;
+    } else if (fieldType == fieldTypeBirthYear) {
+      return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
     }
+    return fieldValue?.trim();
   }
 
-  static Widget getFormField(dynamic field) {
-    Widget toReturn = const SizedBox.shrink();
+  // Create individual form field widget based on configuration
+  static Widget createFormField(Map<String, dynamic> field) {
+    final bool isRequiredField = field[IS_REQUIRED] ?? false;
     switch (field["type"]) {
-      case "name":
-        return getSimpleTextField("name", nameLabel(), true, [AutofillHints.givenName]);
-      case "surname":
-        return getSimpleTextField("surname", surnameLabel(), true, [AutofillHints.familyName]);
-      case "city":
-        return getSimpleTextField("city", cityLabel(), false, [AutofillHints.addressCity]);
-      case "email":
-        return getEmailField();
-      case "sex":
-        return getSexField("sex", sexLabel());
-      case "birthYear":
-        return getBirthYear("birthYear", birthYearLabel());
+      case fieldTypeName:
+        return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
+      case fieldTypeSurname:
+        return buildTextField(fieldTypeSurname, surnameLabel(), isRequiredField, [AutofillHints.familyName]);
+      case fieldTypeCity:
+        return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
+      case fieldTypeEmail:
+        return buildEmailField(isRequiredField);
+      case fieldTypeSex:
+        return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
+      case fieldTypeBirthYear:
+        return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
+      default:
+        return const SizedBox.shrink();
     }
-    return toReturn;
   }
 
-  static FormBuilderTextField getSimpleTextField(String name, String title, [bool required = true, Iterable<String>? autofillHints]) {
+  // Build a simple text field with optional validation
+  static FormBuilderTextField buildTextField(String name, String label, bool isRequired, [List<String>? autofillHints]) {
     return FormBuilderTextField(
+      name: name,
       autofillHints: autofillHints,
-      name: name,
-      decoration: InputDecoration(labelText: title),
-      validator: required == true ? FormBuilderValidators.required() : null,
+      decoration: InputDecoration(labelText: label),
+      validator: isRequired ? FormBuilderValidators.required() : null,
     );
   }
 
-  static FormBuilderRadioGroup getSexField(String name, String title, [bool required = true]) {
-    var sexOptions = [
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[0], maleLabel())),
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[1], femaleLabel()))
-    ];
-    return FormBuilderRadioGroup(
-      name: name,
-      decoration: InputDecoration(labelText: title),
-      validator: required == true ? FormBuilderValidators.required() : null,
-      options: sexOptions,
-    );
-  }
-
-  static FormBuilderTextField getEmailField() {
+  // Build an email field with validation for format and required status
+  static FormBuilderTextField buildEmailField(bool isRequired) {
     return FormBuilderTextField(
-      autofillHints: const [AutofillHints.email],
-      name: "email",
+      name: fieldTypeEmail,
+      autofillHints: [AutofillHints.email],
       decoration: InputDecoration(labelText: emailLabel()),
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
+        if (isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: emailInvalidMessage()),
       ]),
     );
   }
 
-  static FormBuilderTextField getBirthYear(String name, String title, [bool required = true, Iterable<String>? autofillHints]) {
-    return FormBuilderTextField(
-      autofillHints: autofillHints,
+  // Build a radio group for selecting sex
+  static FormBuilderRadioGroup buildRadioField(String name, String label, bool isRequired) {
+    var options = [
+      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[0], maleLabel())),
+      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[1], femaleLabel()))
+    ];
+    return FormBuilderRadioGroup(
       name: name,
-      decoration: InputDecoration(labelText: title),
+      decoration: InputDecoration(labelText: label),
+      validator: isRequired ? FormBuilderValidators.required() : null,
+      options: options,
+    );
+  }
+
+  static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
+    return FormBuilderTextField(
+      name: name,
+      decoration: InputDecoration(labelText: label),
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-        FormBuilderValidators.numeric(),
-        FormBuilderValidators.min(1900),
-        FormBuilderValidators.max(DateTime.now().year - 12),
+        if (isRequired) FormBuilderValidators.required(),
+        // Allow empty for optional field; validate only if non-empty
+            (value) {
+          if (value == null || value.isEmpty) {
+            return null;
+          }
+          if (int.tryParse(value) == null) {
+            return NumericValidator().translatedErrorText; // uses default numeric error message
+          }
+          final numericValue = int.parse(value);
+          if (numericValue < 1900 || numericValue > DateTime.now().year - 12) {
+            return RangeValidator(DateTime.now().year - 12, 1900).translatedErrorText;
+          }
+          return null;
+        },
       ]),
+      keyboardType: TextInputType.number,
     );
   }
 }
 
 class FormOptionModel {
   FormOptionModel(this.code, this.name);
-  String name;
-  String code;
+  final String name;
+  final String code;
+
   @override
-  String toString() {
-    return name;
-  }
+  String toString() => name;
 }

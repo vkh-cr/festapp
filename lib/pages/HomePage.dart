@@ -4,12 +4,17 @@ import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/AppRouter.gr.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
@@ -28,7 +33,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  String userName = "";
+  String? userName;
   int _messageCount = 0;
   int currentPageIndex = 0;
 
@@ -59,6 +64,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> loadData() async {
+    await loadOfflineData();
     await AppConfigService.versionCheck(context);
     if (AuthService.isLoggedIn()) {
       DbUsers.getCurrentUserInfo().then((value) => setState(() => userName = value.name!));
@@ -68,6 +74,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await NotificationHelper.checkForNotificationPermission(context);
   }
 
+  Future<void> loadOfflineData() async {
+    if (AuthService.isLoggedIn()) {
+      var userInfo = await OfflineDataService.getUserInfo();
+      setState(() {
+        userName = userInfo?.name;
+      });
+    }
+  }
+
   String messageCountString() => _messageCount < 100 ? _messageCount.toString() : "99+";
 
   @override
@@ -75,10 +90,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     return AutoTabsRouter(
       routes: [
         ScheduleNavigationRoute(),
-        ProgramViewRoute(),
         NewsRoute(),
         MapRoute(),
         InfoRoute(),
+        UserRoute(),
       ],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
@@ -90,20 +105,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             currentIndex: tabsRouter.activeIndex,
             type: BottomNavigationBarType.fixed,
             onTap: (int index) {
-              setState(() {
-                tabsRouter.setActiveIndex(index);
-              });
+              if(!AuthService.isLoggedIn() && index == 4){
+                RouterService.navigate(context, LoginPage.ROUTE);
+              } else{
+                setState(() {
+                  tabsRouter.setActiveIndex(index);
+                });
+              }
             },
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),
                 activeIcon: Icon(Icons.home),
                 label: "Home".tr(),
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.calendar_month_outlined),
-                activeIcon: Icon(Icons.calendar_month),
-                label: "Schedule".tr(),
               ),
               BottomNavigationBarItem(
                 icon: badges.Badge(
@@ -133,6 +147,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 icon: Icon(Icons.info_outlined),
                 activeIcon: Icon(Icons.info),
                 label: "Info".tr(),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.account_circle_outlined),
+                activeIcon: Icon(Icons.account_circle),
+                label: AuthService.currentUser?.name??userName??"Sign in".tr(),
               ),
             ],
           ),

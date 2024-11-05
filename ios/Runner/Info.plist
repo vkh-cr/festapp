@@ -38,11 +38,11 @@
 	<key>NSCameraUsageDescription</key>
     <string>This app needs camera access to scan QR codes.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app requires access to your location to display your current position on the map.</string>
+	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app requires access to your location to display your current position on the map.</string>
+	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app requires access to your location to display your current position on the map.</string>
+	<string>Your location is used to provide a customized map experience, showing relevant information and navigation based on your position.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app does not require access to the microphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
