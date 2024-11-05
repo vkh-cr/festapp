@@ -27,7 +27,7 @@ class PlacesTab extends StatelessWidget {
       PlaceModel.fromPlutoJson,
       DataGridFirstColumn.deleteAndDuplicate,
       Tb.places.id,
-      actionsExtended: DataGridExtendedActions(saveAction:
+      actionsExtended: DataGridActionsController(saveAction:
       DataGridAction(
           action: (datagrid, [action]) async {
             await action!();
