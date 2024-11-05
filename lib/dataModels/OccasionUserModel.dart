@@ -63,8 +63,17 @@ class OccasionUserModel extends IPlutoRowModel {
           Tb.occasion_users.data_email: json[Tb.user_info.email_readonly],
           Tb.occasion_users.data_name: json[Tb.user_info.name],
           Tb.occasion_users.data_surname: json[Tb.user_info.surname],
-          Tb.occasion_users.data_sex: json[Tb.user_info.sex],
-        }
+          Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
+          Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
+          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
+          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
+          Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3],
+          Tb.occasion_users.data_text4: json[Tb.occasion_users.data_text4],
+          Tb.occasion_users.data_birthDate: json[Tb.occasion_users.data_birthDate],
+          Tb.occasion_users.data_note: json[Tb.occasion_users.data_note],
+          Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet],
+        },
+        services: json[Tb.occasion_users.services_food]
     );
   }
 
@@ -108,6 +117,8 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_accommodation: PlutoCell(value: data?[Tb.occasion_users.data_accommodation] ?? ""),
       Tb.occasion_users.data_birthDate: PlutoCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate]??"")??DateTime.fromMicrosecondsSinceEpoch(0)),
       Tb.occasion_users.data_isInvited: PlutoCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      Tb.occasion_users.data_note: PlutoCell(value: data?[Tb.occasion_users.data_note] ?? ""),
+      Tb.occasion_users.data_diet: PlutoCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
       Tb.occasion_users.data_text1: PlutoCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
       Tb.occasion_users.data_text2: PlutoCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
       Tb.occasion_users.data_text3: PlutoCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
@@ -159,6 +170,8 @@ class OccasionUserModel extends IPlutoRowModel {
         Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim().isEmpty??true ? null : json[Tb.occasion_users.data_accommodation]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
         Tb.occasion_users.data_isInvited: json[Tb.occasion_users.data_isInvited] == "true" ? true : false,
+        Tb.occasion_users.data_note: json[Tb.occasion_users.data_note]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_note]?.trim(),
+        Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_diet]?.trim(),
         Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text1]?.trim(),
         Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text2]?.trim(),
         Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3]?.trim().isEmpty ? "" : json[Tb.occasion_users.data_text3]?.trim(),
