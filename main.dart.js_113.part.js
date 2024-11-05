@@ -62,8 +62,8 @@ else A.V("This platform or browser does not support the PWA install prompt")}cat
 return A.c(v.oV(),$async$vw)
 case 2:return A.j(null,w)}})
 return A.k($async$vw,w)},
-C(d){var x=this,w=null,v=F.bA(D.b_Q,w)
-return G.i7(N.kA(w,!0,w,w,w,w,w,R.qH(new B.bIN(d)),w,v),w,new A.cY(C.b_,w,w,new A.am(T.f6,new A.dG(new A.aa(0,820,0,1/0),A.bM(A.a([x.ar5(d,A.a0("Install for Apple",w),D.ait,"https://apps.apple.com/us/app/festapp/id6474078383",x.r==="ios",!0),x.ar4(d,A.a0("Install for Android",w),D.ahc,"",x.r==="android"),x.ar4(d,A.a0("Install for PC/Mac",w),D.ahq,"",x.r==="web")],y.e),C.b0,C.p,C.q,w,C.B),w),w),w),w,w,w,w)},
+C(d){var x=this,w=null,v=F.bA(D.b_P,w)
+return G.i7(N.kA(w,!0,w,w,w,w,w,R.qH(new B.bIN(d)),w,v),w,new A.cY(C.b_,w,w,new A.am(T.f6,new A.dG(new A.aa(0,820,0,1/0),A.bM(A.a([x.ar5(d,A.a0("Install for Apple",w),D.ais,"https://apps.apple.com/us/app/festapp/id6474078383",x.r==="ios",!0),x.ar4(d,A.a0("Install for Android",w),D.ahb,"",x.r==="android"),x.ar4(d,A.a0("Install for PC/Mac",w),D.ahp,"",x.r==="web")],y.e),C.b0,C.p,C.q,w,C.B),w),w),w),w,w,w,w)},
 ar5(d,e,f,g,h,i){var x,w,v,u=this,t=null,s=y.e,r=A.bN(A.a([G.cd(f,t,t,t),O.kj,A.as(e,t,t,t,t,t,t,t,C.iz,t,t,t,t)],s),C.n,C.p,C.q),q=A.a([],s),p=i?A.a0("Download App",t):A.a0("Install App",t)
 if(i)x=new B.bIL(g)
 else x=!u.d&&!u.f&&u.e?u.ga77():t
@@ -72,7 +72,7 @@ if(w)v=!u.d&&!u.f&&u.e
 else v=!0
 p=A.a([W.Dd(v?C.cs:C.hk,d,50,!0,p,x,C.l,250)],s)
 if(u.d)p.push(new A.am(E.ll,F.bA(A.as("The app is already installed.",t,t,t,t,t,t,t,A.bR(t,t,C.cs,t,t,t,t,t,t,t,t,16,t,t,t,t,t,!0,t,t,t,t,t,t,t,t),C.cl,t,t,t),t),t))
-if(w&&u.f)p.push(new A.am(E.ll,A.bM(A.a([F.bA(D.b__,t),X.B5,A.bN(A.a([A.eE(S.a1X(t,!1,u.w,I.ajp,t,t,t,!1,t,t,t,!0,t),1,t),Q.dA(t,t,t,t,t,G.cd(P.G7,t,t,t),t,t,new B.bIM(u,d),t,t,t,t,t)],s),C.n,C.p,C.q)],s),C.n,C.p,C.q,t,C.B),t))
+if(w&&u.f)p.push(new A.am(E.ll,A.bM(A.a([F.bA(D.aZZ,t),X.B5,A.bN(A.a([A.eE(S.a1X(t,!1,u.w,I.ajo,t,t,t,!1,t,t,t,!0,t),1,t),Q.dA(t,t,t,t,t,G.cd(P.G7,t,t,t),t,t,new B.bIM(u,d),t,t,t,t,t)],s),C.n,C.p,C.q)],s),C.n,C.p,C.q,t,C.B),t))
 q.push(new A.am(C.dt,A.bM(p,C.n,C.p,C.q,t,C.B),t))
 q.push(V.d_)
 return M.b0f(q,t,h,t,t,r,t)},
@@ -114,11 +114,11 @@ x(B.zQ,A.F)
 x(B.a5Q,A.K)
 w(A.cL,[B.bIO,B.bIQ,B.bIP,B.bIN,B.bIL,B.bIM])})()
 A.bF(b.typeUniverse,JSON.parse('{"zQ":{"F":[],"e":[]},"a5Q":{"K":["zQ"]}}'))
-var y={e:A.y("p<e>"),a:A.y("Cy"),f:A.y("~")};(function constants(){D.ahc=new A.aV(57477,"MaterialIcons",null,!1)
-D.ahq=new A.aV(57795,"MaterialIcons",null,!1)
-D.ait=new A.aV(984254,"MaterialIcons",null,!1)
-D.b__=new A.bQ("Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",null,E.BC,null,C.cl,null,null,null,null,null,null,null,null,null)
-D.b_Q=new A.bQ("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
+var y={e:A.y("p<e>"),a:A.y("Cy"),f:A.y("~")};(function constants(){D.ahb=new A.aV(57477,"MaterialIcons",null,!1)
+D.ahp=new A.aV(57795,"MaterialIcons",null,!1)
+D.ais=new A.aV(984254,"MaterialIcons",null,!1)
+D.aZZ=new A.bQ("Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",null,E.BC,null,C.cl,null,null,null,null,null,null,null,null,null)
+D.b_P=new A.bQ("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"cRO","c5P",()=>new A.LV())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"i+L6P6kqrJNs1n8hCx2T1mDWsZ8=");
+a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"uSvA7lSDE4q/OBkQmfPDVpL2XbE=");

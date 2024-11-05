@@ -6,11 +6,11 @@ this.b=e},bxb:function bxb(){},aQX:function aQX(){},
 cKv(d){switch(d.a){case 0:return D.Ae
 case 2:return D.ZQ
 case 1:return D.ZP
-case 3:return C.aPN
+case 3:return C.aPM
 case 4:return D.ZR}},
 bZf(d,e,f){var x=0,w=A.l(y.a),v,u
 var $async$bZf=A.h(function(g,h){if(g===1)return A.i(h,w)
-while(true)switch(x){case 0:if(e===C.ak1||e===C.ak2)u=!(d.gi4()==="https"||d.gi4()==="http")
+while(true)switch(x){case 0:if(e===C.ak0||e===C.ak1)u=!(d.gi4()==="https"||d.gi4()==="http")
 else u=!1
 if(u)throw A.d(A.es(d,"url","To use an in-app web view, you must provide an http(s) URL."))
 v=$.c69().Mq(d.k(0),new A.all(B.cKv(e),new A.akv(!0,!0,D.eL),f))
@@ -37,12 +37,12 @@ var z=a.updateTypes([]);(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.M2,A.dV)
 w(A.A,[B.bxb,B.aQX])})()
 var y={a:A.y("v")};(function constants(){C.vY=new A.iD(1,1)
-C.b6X=new B.aQX()
-C.b7b=new B.bxb()
-C.ak0=new B.M2(0,"platformDefault")
-C.ak1=new B.M2(1,"inAppWebView")
-C.ak2=new B.M2(2,"inAppBrowserView")
-C.ak3=new B.M2(3,"externalApplication")
-C.aPN=new A.Gc(3,"externalApplication")})()};
+C.b6W=new B.aQX()
+C.b7a=new B.bxb()
+C.ak_=new B.M2(0,"platformDefault")
+C.ak0=new B.M2(1,"inAppWebView")
+C.ak1=new B.M2(2,"inAppBrowserView")
+C.ak2=new B.M2(3,"externalApplication")
+C.aPM=new A.Gc(3,"externalApplication")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_127",e:"endPart",h:b})})($__dart_deferred_initializers__,"TCg0IfbokXNDMqvhOK1gfKzDqpE=");
+a.eventLog.push({p:"main.dart.js_127",e:"endPart",h:b})})($__dart_deferred_initializers__,"2mWO0V+j64EDkjUJS1CPB5Dewa8=");
