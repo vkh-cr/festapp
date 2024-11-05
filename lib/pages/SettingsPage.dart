@@ -8,6 +8,7 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -42,7 +43,7 @@ class _SettingsPageState extends State<SettingsPage> {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
     LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
-    bool isAppInstalled = SynchroService.isPwaInstalledOrNative();
+    bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     var themeMode = await AdaptiveTheme.getThemeMode();
     setState(()  {
       _themeMode = themeMode;

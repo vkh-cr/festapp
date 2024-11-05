@@ -40,19 +40,19 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
-    AutoRoute(page: UserRoute.page, path: "/:{$LINK}/${UserPage.ROUTE}"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
     AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
+    AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
-          AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
+      AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
+      AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}"),
-      AutoRoute(page: ProgramViewRoute.page, path: "${ProgramViewPage.ROUTE}"),
       AutoRoute(page: SongRoute.page, path: "${SongPage.ROUTE}"),
       AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", children: [
         AutoRoute(path: ':id', page: MapRoute.page,),

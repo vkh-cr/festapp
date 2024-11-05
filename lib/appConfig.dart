@@ -21,6 +21,7 @@ class AppConfig {
   static const String webLink = "https://biscup.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/biscup/id6472435824";
   static const String playStoreLink = "";
+  static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
   static bool isProLicense = true;
 

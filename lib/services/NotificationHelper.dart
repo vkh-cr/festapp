@@ -7,6 +7,7 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:fstapp/services/StorageHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/js/js_interop.dart';
@@ -66,7 +67,7 @@ class NotificationHelper {
   }
 
   static Future<void> checkForNotificationPermission(BuildContext context, [bool forceAsk = false]) async {
-    if (!SynchroService.isPwaInstalledOrNative() && !forceAsk) {
+    if (!PlatformHelper.isPwaInstalledOrNative() && !forceAsk) {
       return;
     }
     var allowed = getNotificationPermission();
