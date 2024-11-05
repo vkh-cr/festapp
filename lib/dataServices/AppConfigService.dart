@@ -69,7 +69,7 @@ class AppConfigService {
 
   static Future<void> _launchURL(String url) async {
     if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication, webOnlyWindowName: "_self");
     }
   }
 }
