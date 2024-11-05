@@ -11,12 +11,12 @@ class PlatformHelper {
 
     if (isWebBasic) {
       platform = 'web';
+    } else if (isPwa) {
+      platform = 'pwa';
     } else if (Platform.isIOS) {
       platform = 'ios';
     } else if (Platform.isAndroid) {
       platform = 'droid';
-    } else if (isPwa) {
-      platform = 'pwa';
     } else {
       platform = 'unknown';
     }
