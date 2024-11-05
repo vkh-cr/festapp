@@ -80,6 +80,9 @@ static Map<String, String> get migrateColumns =>
           var dateTime = format.parse(trimmedString);
           userJsonObject[entry.key] = dateTime;
           continue;
+        } else if(entry.key == Tb.occasion_users.services_food) {
+          userJsonObject[entry.key] = createFoodJson(trimmedString);
+          continue;
         }
         userJsonObject[entry.key] = trimmedString;
         continue;
@@ -102,4 +105,16 @@ static Map<String, String> get migrateColumns =>
     }
     return userList;
   }
+
+static Map<String, dynamic> createFoodJson(String data) {
+  List<String> items = data.split(',').map((item) => item.trim()).toList();
+
+  Map<String, String> foodMap = {
+    for (var item in items) item: 'paid',
+  };
+
+  return {
+    'food': foodMap,
+  };
+}
 }

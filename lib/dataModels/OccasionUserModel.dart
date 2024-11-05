@@ -63,8 +63,17 @@ class OccasionUserModel extends IPlutoRowModel {
           Tb.occasion_users.data_email: json[Tb.user_info.email_readonly],
           Tb.occasion_users.data_name: json[Tb.user_info.name],
           Tb.occasion_users.data_surname: json[Tb.user_info.surname],
-          Tb.occasion_users.data_sex: json[Tb.user_info.sex],
-        }
+          Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
+          Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
+          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
+          Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
+          Tb.occasion_users.data_text3: json[Tb.occasion_users.data_text3],
+          Tb.occasion_users.data_text4: json[Tb.occasion_users.data_text4],
+          Tb.occasion_users.data_birthDate: json[Tb.occasion_users.data_birthDate],
+          Tb.occasion_users.data_note: json[Tb.occasion_users.data_note],
+          Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet],
+        },
+        services: json[Tb.occasion_users.services_food]
     );
   }
 
