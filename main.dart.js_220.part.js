@@ -70,7 +70,7 @@ l=J
 x=7
 return A.c(u.cp("occasion",r).rE(0,"start_time",!0).rE(0,"max_participants",!1),$async$DB)
 case 7:o.F(n,m.bl(l.cm(f,new B.aVu(),q),!0,p))
-x=E.c_Q()?8:9
+x=E.c_R()?8:9
 break
 case 8:u=s.bT("events").hp(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cp("is_group_event",!0).cp("is_hidden",!1)
 s=$.e_
@@ -178,7 +178,7 @@ B.aVN.prototype={
 $1(d){return d.b==this.a.b},
 $S:35}
 B.aVO.prototype={
-$1(d){return!J.c_v(this.a,new B.aVM(d))},
+$1(d){return!J.c_w(this.a,new B.aVM(d))},
 $S:35}
 B.aVM.prototype={
 $1(d){return this.a.b==d.b},
@@ -198,4 +198,4 @@ x(A.c1,[B.aVD,B.aVE,B.aVF,B.aVJ,B.aVu,B.aVv,B.aVw,B.aVN,B.aVO,B.aVM])
 w(B.aVP,A.dR)})()
 var y={u:A.y("d_"),F:A.y("p<d_>"),c:A.y("x<d_>"),p:A.y("e4"),b:A.y("@"),v:A.y("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_220",e:"endPart",h:b})})($__dart_deferred_initializers__,"1TV8KvHA7wHrw930easFZ7Cf3y8=");
+a.eventLog.push({p:"main.dart.js_220",e:"endPart",h:b})})($__dart_deferred_initializers__,"IcMehdfvxP+FDFSwn0RQhInVyFA=");
