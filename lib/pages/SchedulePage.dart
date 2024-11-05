@@ -142,7 +142,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -157,7 +157,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                     }
                   },
                   child: SvgPicture.asset(
-                    height: 112,
+                    width: 200,
                     semanticsLabel: 'Festapp logo',
                     logoAsset,
                   ),
