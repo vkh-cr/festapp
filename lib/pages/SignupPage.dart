@@ -30,12 +30,12 @@ class _SignupPageState extends State<SignupPage> {
   final dynamic fields =
   {"fields":
   [
-    {"type":"name"},
-    {"type":"surname"},
-    {"type":"sex"},
-    {"type":"email"},
-    {"type":"city"},
-    {"type":"birthYear"},
+    {"type":FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeSex},
+    {"type":FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeBirthYear},
   ]};
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -85,7 +85,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getFormFields(fields),
+                    ...FormHelper.getFormFields(fields["fields"]),
                       const SizedBox(
                         height: 16,
                       ),
