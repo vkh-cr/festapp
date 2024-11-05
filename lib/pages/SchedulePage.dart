@@ -139,7 +139,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
