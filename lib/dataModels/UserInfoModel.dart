@@ -50,19 +50,6 @@ class UserInfoModel {
 
   static const sexes = ["male", "female"];
 
-  static const migrateColumns =
-  {
-    //idColumn:"Id",
-    emailReadonlyColumn:"E-mailová adresa",
-    nameColumn:"Jméno:",
-    surnameColumn:"Příjmení:",
-    sexColumn:"Jsi:",
-    accommodationColumn:"Ubytování",
-    phoneColumn:"Mobilní telefon:",
-    roleColumn:"Typ účastníka:",
-    birthDateColumn:"Datum narození:",
-  };
-
   UserInfoModel({
      this.id,
      this.email,
