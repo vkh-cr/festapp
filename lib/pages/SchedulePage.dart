@@ -120,8 +120,8 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
     }
   }
 
-  void _schedulePressed() {
-    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+  void _mySchedulePressed() {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE).then((value) => loadData());
   }
 
   void _eventPressed(int id) {
@@ -164,9 +164,9 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     CircularButton(
-                      onPressed: _schedulePressed,
+                      onPressed: _mySchedulePressed,
                       backgroundColor: ThemeConfig.profileButtonColor(context),
-                      child: Icon(Icons.calendar_month, color: ThemeConfig.profileButtonTextColor(context)),
+                      child: Icon(Icons.favorite, color: ThemeConfig.profileButtonTextColor(context)),
                     ),
                     Text("My schedule".tr()),
                   ]
