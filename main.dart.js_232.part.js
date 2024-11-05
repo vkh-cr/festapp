@@ -1,16 +1,21 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_232",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C,D={
-bu8(d){var x,w=d.cy,v=d.db,u=C.a2g(d),t=d.b
-t.toString
-x=y.c
-return new B.dB(w,v,u,A.H(["leftText",d.a6n(),"rightText",d.k(0)],x,x),t,null,null)}}
-A=c[0]
-B=c[100]
-C=c[90]
-D=a.updateHolder(c[37],D)
-var z=a.updateTypes([])
-var y={c:A.y("f")}};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,A={
+c3c(d){var y,x,w=d.b
+w.toString
+y=d.c
+if(y==null)y="---"
+x=d.f
+return new A.xw(w,y,x==null?0:x)},
+xw:function xw(d,e,f){this.a=d
+this.b=e
+this.c=f}}
+B=c[0]
+A=a.updateHolder(c[68],A)
+A.xw.prototype={
+gdV(d){return this.b}}
+var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
+y(A.xw,B.A)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_232",e:"endPart",h:b})})($__dart_deferred_initializers__,"oPRk7DBXIsineT9MYwJ7Brji7PM=");
+a.eventLog.push({p:"main.dart.js_232",e:"endPart",h:b})})($__dart_deferred_initializers__,"cUJQrqwGg102mkXatP56FWp7RqQ=");

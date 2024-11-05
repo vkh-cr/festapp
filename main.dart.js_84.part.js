@@ -2,63 +2,84 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_84",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-cyT(d,e,f,g,h,i,j,k,l,m){var x=null,w=A.a([],y.o),v=$.ah,u=A.oO(C.cP),t=A.a([],y.g),s=$.ak(),r=$.ah,q=m.h("a9<0?>"),p=m.h("aI<0?>")
-return new B.B3(h,f,g,e,k,j,d,x,l,w,A.aN(y.l),new A.aM(x,m.h("aM<mV<0>>")),new A.aM(x,y.j),new A.rs(),x,0,new A.aI(new A.a9(v,m.h("a9<0?>")),m.h("aI<0?>")),u,t,C.hq,new A.bW(x,s,y.p),new A.aI(new A.a9(r,q),p),new A.aI(new A.a9(r,q),p),m.h("B3<0>"))},
-B3:function B3(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,a0,a1,a2){var _=this
-_.bj=d
-_.cP=e
-_.dA=f
-_.dT=g
-_.h_=h
-_.h0=i
-_.jq=j
-_.go=k
-_.id=l
-_.k1=!1
-_.k3=_.k2=null
-_.k4=m
-_.ok=n
-_.p1=o
-_.p2=p
-_.p3=q
-_.p4=$
-_.R8=null
-_.RG=$
-_.jR$=r
-_.oO$=s
-_.Q=t
-_.as=null
-_.at=!1
-_.ay=_.ax=null
-_.ch=u
-_.CW=!0
-_.cy=_.cx=null
-_.f=v
-_.a=null
-_.b=w
-_.c=x
-_.d=a0
-_.e=a1
-_.$ti=a2}},E,D
+ct7(d){var x=d.am(y.o)
+x.toString
+switch(x.w.a){case 0:x=D.aLs
+break
+case 1:x=C.f
+break
+default:x=null}return x},
+c93(d){var x=d.cx,w=A.Z(x)
+return new A.e7(new A.aq(x,new B.aYm(),w.h("aq<1>")),new B.aYn(),w.h("e7<1,Y>"))},
+ct6(d,e){var x,w,v,u,t=C.b.gO(d),s=B.c92(e,t)
+for(x=d.length,w=0;w<d.length;d.length===x||(0,A.M)(d),++w){v=d[w]
+u=B.c92(e,v)
+if(u<s){s=u
+t=v}}return t},
+c92(d,e){var x,w,v=d.a,u=e.a
+if(v<u){x=d.b
+w=e.b
+if(x<w)return d.a8(0,new A.m(u,w)).gfT()
+else{w=e.d
+if(x>w)return d.a8(0,new A.m(u,w)).gfT()
+else return u-v}}else{u=e.c
+if(v>u){x=d.b
+w=e.b
+if(x<w)return d.a8(0,new A.m(u,w)).gfT()
+else{w=e.d
+if(x>w)return d.a8(0,new A.m(u,w)).gfT()
+else return v-u}}else{v=d.b
+u=e.b
+if(v<u)return u-v
+else{u=e.d
+if(v>u)return v-u
+else return 0}}}},
+c94(d,e){var x,w,v,u,t,s,r,q,p,o,n,m=y.j,l=A.a([d],m)
+for(x=e.gW(e);x.q();l=v){w=x.gJ(x)
+v=A.a([],m)
+for(u=l.length,t=w.a,s=w.b,r=w.d,w=w.c,q=0;q<l.length;l.length===u||(0,A.M)(l),++q){p=l[q]
+o=p.b
+if(o>=s&&p.d<=r){n=p.a
+if(n<t)v.push(new A.Y(n,o,n+(t-n),o+(p.d-o)))
+n=p.c
+if(n>w)v.push(new A.Y(w,o,w+(n-w),o+(p.d-o)))}else{n=p.a
+if(n>=t&&p.c<=w){if(o<s)v.push(new A.Y(n,o,n+(p.c-n),o+(s-o)))
+o=p.d
+if(o>r)v.push(new A.Y(n,r,n+(p.c-n),r+(o-r)))}else v.push(p)}}}return l},
+ct5(d,e){var x=d.a,w=!1
+if(x>=0)if(x<=e.a){w=d.b
+w=w>=0&&w<=e.b}if(w)return d
+else return new A.m(Math.min(Math.max(0,x),e.a),Math.min(Math.max(0,d.b),e.b))},
+KB:function KB(d,e,f){this.c=d
+this.d=e
+this.a=f},
+aYm:function aYm(){},
+aYn:function aYn(){},
+AW:function AW(){}},D
 A=c[0]
 C=c[2]
-B=a.updateHolder(c[116],B)
-E=c[283]
-D=c[128]
-B.B3.prototype={
-gtu(){return this.cP},
-gv9(){return this.dA},
-gr9(){return this.dT},
-gw_(d){return this.h_},
-xm(d,e,f){var x=null,w=this.bj.$3(d,e,f)
-return new A.bT(A.c5(x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x),!1,!0,!1,!1,new D.KB(this.jq,w,x),x)},
-xn(d,e,f,g){var x=this.h0
-if(x==null)return new A.fj(e,!1,g,null)
-return x.$4(d,e,f,g)}}
-var z=a.updateTypes([]);(function aliases(){var x=B.B3.prototype
-x.aIa=x.xn})();(function inheritance(){var x=a.inherit
-x(B.B3,D.AW)})()
-A.bF(b.typeUniverse,JSON.parse('{"B3":{"f4":["1"],"hS":["1"],"ew":["1"],"f4.T":"1"}}'))
-var y={g:A.y("p<lz>"),o:A.y("p<R<v>()>"),j:A.y("aM<K<F>>"),l:A.y("N0<A?>"),p:A.y("bW<f?>")};(function constants(){E.b7e=new A.D(2147483648)})()};
+B=a.updateHolder(c[128],B)
+D=c[283]
+B.KB.prototype={
+C(d){var x=A.bw(d,null,y.h).w,w=x.a,v=w.a,u=w.b,t=B.ct7(d),s=B.ct5(t,w),r=B.ct6(B.c94(new A.Y(0,0,0+v,0+u),B.c93(x)),s)
+return new A.am(new A.ar(r.a,r.b,v-r.c,u-r.d),A.Mo(this.d,x.bz0(r)),null)}}
+B.AW.prototype={
+gvM(){return!1},
+gyi(){return!0}}
+var z=a.updateTypes([])
+B.aYm.prototype={
+$1(d){var x=d.gEw(d).giI().z6(0,0)
+if(!x)d.gacf(d)
+return x},
+$S:278}
+B.aYn.prototype={
+$1(d){return d.gEw(d)},
+$S:861};(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.KB,A.a6)
+w(A.c1,[B.aYm,B.aYn])
+x(B.AW,A.f4)})()
+A.bF(b.typeUniverse,JSON.parse('{"KB":{"a6":[],"e":[]},"AW":{"f4":["1"],"hS":["1"],"ex":["1"]}}'))
+A.lV(b.typeUniverse,JSON.parse('{"AW":1}'))
+var y={o:A.y("fs"),j:A.y("p<Y>"),h:A.y("hg")};(function constants(){D.aLs=new A.m(17976931348623157e292,0)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_84",e:"endPart",h:b})})($__dart_deferred_initializers__,"lI6pIm9Vi65+mG9uDCWgF7PndY8=");
+a.eventLog.push({p:"main.dart.js_84",e:"endPart",h:b})})($__dart_deferred_initializers__,"olgA1FZTp59DIhaz7BrfwOzBBLk=");
