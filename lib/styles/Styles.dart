@@ -13,9 +13,7 @@ double appMaxWidth = 820;
 
 
 ButtonStyle mainPageButtonStyle(BuildContext context) => OutlinedButton.styleFrom(
-    padding: const EdgeInsets.all(8),
     minimumSize: const Size(70, 50),
-
     maximumSize: const Size(80, 60),
     tapTargetSize: MaterialTapTargetSize.padded,
     backgroundColor: ThemeConfig.seed2,
