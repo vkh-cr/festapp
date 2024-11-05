@@ -138,7 +138,7 @@ class ColumnHelper {
       PlutoColumn(
         title: "Note".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text3,
+        field: Tb.occasion_users.data_note,
         type: PlutoColumnType.text(),
         width: 200,
       ),
@@ -147,7 +147,7 @@ class ColumnHelper {
       PlutoColumn(
         title: "Diet".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text4,
+        field: Tb.occasion_users.data_diet,
         type: PlutoColumnType.text(),
         width: 200,
       ),
