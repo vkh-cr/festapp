@@ -16,6 +16,8 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/MySchedulePage.dart';
+import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -118,12 +120,8 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
     }
   }
 
-  void _loginPressed() {
-    RouterService.navigate(context, LoginPage.ROUTE).then((value) => loadData());
-  }
-
-  void _profileButtonPressed() {
-    RouterService.navigateOccasion(context, UserPage.ROUTE).then((value) => loadData());
+  void _schedulePressed() {
+    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
   }
 
   void _eventPressed(int id) {
@@ -165,35 +163,18 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
                   ),
                 ),
                 const Spacer(),
-                Visibility(
-                  visible: !AuthService.isLoggedIn(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      CircularButton(
-                        onPressed: _loginPressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.login, color: ThemeConfig.profileButtonTextColor(context)),
-                      ),
-                      Text("Sign in".tr()),
-                    ],
-                  ),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    CircularButton(
+                      onPressed: _schedulePressed,
+                      backgroundColor: ThemeConfig.profileButtonColor(context),
+                      child: Icon(Icons.calendar_month, color: ThemeConfig.profileButtonTextColor(context)),
+                    ),
+                    Text("My schedule".tr()),
+                  ]
                 ),
-                Visibility(
-                  visible: AuthService.isLoggedIn(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      CircularButton(
-                        onPressed: _profileButtonPressed,
-                        backgroundColor: ThemeConfig.profileButtonColor(context),
-                        child: Icon(Icons.account_circle_rounded, color: ThemeConfig.profileButtonTextColor(context),),
-                      ),
-                      Text(AuthService.currentUser?.name??userName??""),
-                    ],
-                  ),
-                ),
-              ],
+              ]
             ),
           ),
           Expanded(
