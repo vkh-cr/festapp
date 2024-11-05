@@ -4,16 +4,22 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
-  static Map<String, String> get migrateColumns => {
-        Tb.user_info.id: "Id",
-        Tb.user_info.email_readonly: "E-mail",
-        Tb.user_info.name: "Jméno",
-        Tb.user_info.surname: "Příjmení",
-        Tb.user_info.sex: "Pohlaví",
-        Tb.occasion_users.data_accommodation: "Varianta ubytování",
-        Tb.occasion_users.data_phone: "Telefon",
-        Tb.occasion_users.role: "Role",
-      };
+
+static Map<String, String> get migrateColumns =>
+{
+  Tb.user_info.email_readonly:"E-mailová adresa",
+  Tb.user_info.name:"Jméno:",
+  Tb.user_info.surname:"Příjmení:",
+  Tb.user_info.sex:"Jsi:",
+  Tb.occasion_users.data_accommodation:"Ubytování",
+  Tb.occasion_users.data_phone:"Mobilní telefon:",
+  Tb.occasion_users.data_text1:"Typ účastníka:",
+  Tb.occasion_users.data_text2:"Přípravný tým:",
+  Tb.occasion_users.data_birthDate:"Datum narození:",
+  Tb.occasion_users.data_note:"Poznámka:",
+  Tb.occasion_users.data_diet:"Stravovací omezení:",
+  Tb.occasion_users.services_food:"Stravování:",
+};
 
   static int getIndex(String s, List<String> row) {
     return row.indexOf(migrateColumns[s]!);
