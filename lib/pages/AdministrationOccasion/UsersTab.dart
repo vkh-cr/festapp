@@ -40,6 +40,7 @@ class _UsersTabState extends State<UsersTab> {
   ];
 
   List<UserInfoModel> _allUsers = [];
+  Key refreshKey = UniqueKey(); // Initialize the refresh key
 
   @override
   void initState() {
@@ -49,34 +50,38 @@ class _UsersTabState extends State<UsersTab> {
 
   Future<void> loadUsers() async {
     _allUsers = await DbUsers.getAllUsersBasics();
-    setState(() {});
+    setState(() {
+      refreshKey = UniqueKey(); // Update the key to force a full rebuild
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleTableDataGrid<OccasionUserModel>(
-      context,
-      DbUsers.getOccasionUsers,
-      OccasionUserModel.fromPlutoJson,
-      DataGridFirstColumn.deleteAndCheck,
-      Tb.occasion_users.user,
-      actionsExtended: DataGridActionsController(areAllActionsEnabled: RightsService.canUpdateUsers),
-      headerChildren: [
-        DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
-        DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
-        DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
-        DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
-        DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
-      ],
-      columns: ColumnHelper.generateColumns(columnIdentifiers),
-    ).DataGrid();
+    return KeyedSubtree(
+      key: refreshKey,
+      child: SingleTableDataGrid<OccasionUserModel>(
+        context,
+        DbUsers.getOccasionUsers,
+        OccasionUserModel.fromPlutoJson,
+        DataGridFirstColumn.deleteAndCheck,
+        Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(areAllActionsEnabled: RightsService.canUpdateUsers),
+        headerChildren: [
+          DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
+          DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
+          DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
+          DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
+          DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
+        ],
+        columns: ColumnHelper.generateColumns(columnIdentifiers),
+      ).DataGrid(),
+    );
   }
-
 
   // Actions (import, invite, change password, add to group, add existing)
   Future<void> _import(SingleTableDataGrid dataGrid) async {
     await UserManagementHelper.import(context);
-    await dataGrid.reloadData();
+    await loadUsers(); // Reload users and force rebuild
   }
 
   Future<void> _invite(SingleTableDataGrid dataGrid) async {
@@ -107,12 +112,11 @@ class _UsersTabState extends State<UsersTab> {
     var nonAdded = _allUsers.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
     DialogHelper.chooseUser(context,  (chosenUser) async {
       if (chosenUser != null) {
-          await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
-          ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+        await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
+        ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+        await loadUsers(); // Reload users and force rebuild
       }
     }, nonAdded, "Add".tr());
-
-    await dataGrid.reloadData();
   }
 
   List<OccasionUserModel> _getCheckedUsers(SingleTableDataGrid dataGrid) {
@@ -132,7 +136,7 @@ class _UsersTabState extends State<UsersTab> {
         await DbUsers.updateOccasionUser(user);
         ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}));
       }
-      await dataGrid.reloadData();
+      await loadUsers(); // Reload users and force rebuild
     }
   }
 }
