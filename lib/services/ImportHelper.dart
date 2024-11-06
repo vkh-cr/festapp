@@ -1,6 +1,7 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:csv/csv.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
@@ -8,7 +9,7 @@ class ImportHelper {
         Tb.user_info.email_readonly: "E-mailová adresa",
         Tb.user_info.name: "Jméno:",
         Tb.user_info.surname: "Příjmení:",
-        Tb.occasion_users.data_accommodation: "Ubytování",
+        Tb.occasion_users.services_accommodation: "Ubytování",
         Tb.occasion_users.data_phone: "Mobilní telefon:",
         Tb.occasion_users.data_text1: "Typ účastníka:",
         Tb.occasion_users.data_text2: "Přípravný tým:",
@@ -68,11 +69,11 @@ class ImportHelper {
           }
           trimmedString =
               trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
-        } else if (entry.key == Tb.user_info.birth_date) {
+        } else if (entry.key == Tb.occasion_users.data_birthDate) {
           if (trimmedString.isEmpty) {
             continue;
           }
-          final format = DateFormat("d/M/y");
+          final format = DateFormat("d.M.y");
           var dateTime = format.parse(trimmedString);
           userJsonObject[entry.key] = dateTime;
           continue;
@@ -110,12 +111,12 @@ class ImportHelper {
   static Map<String, dynamic> createServicesJson(String data) {
     List<String> items = data.split(',').map((item) => item.trim()).toList();
 
-    Map<String, String> foodMap = {
-      for (var item in items) item: 'paid',
+    Map<String, String> servicesMap = {
+      for (var item in items) item: DbOccasions.servicePaid,
     };
 
     return {
-      'food': foodMap,
+      DbOccasions.serviceTypeFood: servicesMap,
     };
   }
 

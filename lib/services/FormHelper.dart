@@ -26,6 +26,7 @@ class FormHelper {
   static String emailInvalidMessage() => "E-mail is not valid!".tr();
   static String maleLabel() => "Male".tr();
   static String femaleLabel() => "Female".tr();
+  static String notSpecifiedLabel() => "Not specified".tr();
 
   // Public method to generate form fields from configuration
   static List<Widget> getFormFields(dynamic fields) {
@@ -105,6 +106,9 @@ class FormHelper {
       FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[0], maleLabel())),
       FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[1], femaleLabel()))
     ];
+    if(!isRequired){
+      options.insert(0, FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel())));
+    }
     return FormBuilderRadioGroup(
       name: name,
       decoration: InputDecoration(labelText: label),
@@ -121,7 +125,7 @@ class FormHelper {
         if (isRequired) FormBuilderValidators.required(),
         // Allow empty for optional field; validate only if non-empty
             (value) {
-          if (value == null || value.isEmpty) {
+          if (value == null || value.isEmpty || value == "") {
             return null;
           }
           if (int.tryParse(value) == null) {
