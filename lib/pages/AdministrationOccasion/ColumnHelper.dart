@@ -80,15 +80,6 @@ class ColumnHelper {
         width: 100,
       ),
     ],
-    ACCOMMODATION: [
-      PlutoColumn(
-        title: "Accommodation".tr(),
-        enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_accommodation,
-        type: PlutoColumnType.text(),
-        width: 100,
-      ),
-    ],
     PHONE: [
       PlutoColumn(
         title: "Phone".tr(),
@@ -163,6 +154,17 @@ class ColumnHelper {
       }
 
       return columns;
+    },
+    ACCOMMODATION: (Map<String, dynamic> data) {
+      return [
+        PlutoColumn(
+        title: "Accommodation".tr(),
+        field: DbOccasions.serviceTypeAccommodation,
+        type: PlutoColumnType.select(data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList()),
+        applyFormatterInEditing: true,
+        enableEditingMode: true,
+        width: 100
+      )];
     },
     ADMINISTRATOR: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
