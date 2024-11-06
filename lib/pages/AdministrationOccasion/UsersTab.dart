@@ -39,7 +39,7 @@ class _UsersTabState extends State<UsersTab> {
     ColumnHelper.INVITED
   ];
 
-  List<UserInfoModel> _allUsers = [];
+  List<UserInfoModel>? _allUsers; // Initialize as null to indicate loading state
   Key refreshKey = UniqueKey(); // Initialize the refresh key
 
   @override
@@ -57,6 +57,10 @@ class _UsersTabState extends State<UsersTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (_allUsers == null) {
+      return Center(child: CircularProgressIndicator()); // Show loading indicator if users are not loaded yet
+    }
+
     return KeyedSubtree(
       key: refreshKey,
       child: SingleTableDataGrid<OccasionUserModel>(
@@ -65,7 +69,8 @@ class _UsersTabState extends State<UsersTab> {
         OccasionUserModel.fromPlutoJson,
         DataGridFirstColumn.deleteAndCheck,
         Tb.occasion_users.user,
-        actionsExtended: DataGridActionsController(areAllActionsEnabled: RightsService.canUpdateUsers),
+        actionsExtended: DataGridActionsController(
+            areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
           DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
           DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
@@ -108,9 +113,9 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
-    if (_allUsers.isEmpty) _allUsers = await DbUsers.getAllUsersBasics();
-    var nonAdded = _allUsers.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
-    DialogHelper.chooseUser(context,  (chosenUser) async {
+    if (_allUsers == null) return;
+    var nonAdded = _allUsers!.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
+    DialogHelper.chooseUser(context, (chosenUser) async {
       if (chosenUser != null) {
         await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
         ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
