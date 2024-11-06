@@ -7,7 +7,7 @@ var $async$agA=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:r=A.Z(d).h("S<1,q?>")
 q=J
 x=2
-return A.c($.fC().bT("events").hp(0,"id, event_users!inner(count)").cp("event_users.user",$.dP().gd6().c.a).Bt("id",A.I(new A.S(d,new B.aVG(),r),!0,r.h("ae.E"))),$async$agA)
+return A.c($.fC().bT("events").hp(0,"id, event_users!inner(count)").cp("event_users.user",$.dP().gd6().c.a).Bu("id",A.I(new A.S(d,new B.aVG(),r),!0,r.h("ae.E"))),$async$agA)
 case 2:r=q.kc(f,new B.aVH())
 v=r.$ti.h("e7<1,q>")
 u=A.fz(new A.e7(r,new B.aVI(),v),v.h("t.E"))
@@ -26,14 +26,14 @@ B=a.updateHolder(c[99],B)
 var z=a.updateTypes([])
 B.aVG.prototype={
 $1(d){return d.b},
-$S:141}
+$S:115}
 B.aVH.prototype={
-$1(d){return J.cp6(J.u(J.u(J.u(d,"event_users"),0),"count"),0)},
-$S:44}
+$1(d){return J.cpc(J.u(J.u(J.u(d,"event_users"),0),"count"),0)},
+$S:50}
 B.aVI.prototype={
 $1(d){return A.b2(J.u(d,"id"))},
-$S:149};(function inheritance(){var x=a.inheritMany
+$S:147};(function inheritance(){var x=a.inheritMany
 x(A.c1,[B.aVG,B.aVH,B.aVI])})()
 var y={b:A.y("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_184",e:"endPart",h:b})})($__dart_deferred_initializers__,"Ua1Om/TtQQyjaHu9WHMTQ4qBmR4=");
+a.eventLog.push({p:"main.dart.js_184",e:"endPart",h:b})})($__dart_deferred_initializers__,"64juQOqa52vHI6oSbAs3cS6yor8=");
