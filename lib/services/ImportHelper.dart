@@ -4,21 +4,19 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:intl/intl.dart';
 
 class ImportHelper {
-
-static Map<String, String> get migrateColumns =>
-{
-  Tb.user_info.email_readonly:"E-mailová adresa",
-  Tb.user_info.name:"Jméno:",
-  Tb.user_info.surname:"Příjmení:",
-  Tb.occasion_users.data_accommodation:"Ubytování",
-  Tb.occasion_users.data_phone:"Mobilní telefon:",
-  Tb.occasion_users.data_text1:"Typ účastníka:",
-  Tb.occasion_users.data_text2:"Přípravný tým:",
-  Tb.occasion_users.data_birthDate:"Datum narození:",
-  Tb.occasion_users.data_note:"Poznámka:",
-  Tb.occasion_users.data_diet:"Stravovací omezení:",
-  Tb.occasion_users.services_food:"Stravování:",
-};
+  static Map<String, String> get migrateColumns => {
+        Tb.user_info.email_readonly: "E-mailová adresa",
+        Tb.user_info.name: "Jméno:",
+        Tb.user_info.surname: "Příjmení:",
+        Tb.occasion_users.data_accommodation: "Ubytování",
+        Tb.occasion_users.data_phone: "Mobilní telefon:",
+        Tb.occasion_users.data_text1: "Typ účastníka:",
+        Tb.occasion_users.data_text2: "Přípravný tým:",
+        Tb.occasion_users.data_birthDate: "Datum narození:",
+        Tb.occasion_users.data_note: "Poznámka:",
+        Tb.occasion_users.data_diet: "Stravovací omezení:",
+        Tb.occasion_users.services_food: "Stravování:",
+      };
 
   static int getIndex(String s, List<String> row) {
     return row.indexOf(migrateColumns[s]!);
@@ -78,10 +76,16 @@ static Map<String, String> get migrateColumns =>
           var dateTime = format.parse(trimmedString);
           userJsonObject[entry.key] = dateTime;
           continue;
-        } else if(entry.key == Tb.occasion_users.services_food) {
-          userJsonObject[entry.key] = createFoodJson(trimmedString);
+        } else if (entry.key == Tb.occasion_users.services_food) {
+          var foodJson = createServicesJson(trimmedString);
+          userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], foodJson);
+          continue;
+        } else if (entry.key == Tb.occasion_users.services_accommodation) {
+          var accommodationJson = createServicesJson(trimmedString);
+          userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], accommodationJson);
           continue;
         }
+
         userJsonObject[entry.key] = trimmedString;
         continue;
       }
@@ -103,15 +107,32 @@ static Map<String, String> get migrateColumns =>
     return userList;
   }
 
-static Map<String, dynamic> createFoodJson(String data) {
-  List<String> items = data.split(',').map((item) => item.trim()).toList();
+  static Map<String, dynamic> createServicesJson(String data) {
+    List<String> items = data.split(',').map((item) => item.trim()).toList();
 
-  Map<String, String> foodMap = {
-    for (var item in items) item: 'paid',
-  };
+    Map<String, String> foodMap = {
+      for (var item in items) item: 'paid',
+    };
 
-  return {
-    'food': foodMap,
-  };
-}
+    return {
+      'food': foodMap,
+    };
+  }
+
+  static Map<String, dynamic> addJson(
+      Map<String, dynamic>? existingJson, Map<String, dynamic> newJson) {
+    existingJson ??= {};
+
+    // Merge new JSON into existing JSON
+    newJson.forEach((key, value) {
+      if (existingJson![key] is Map && value is Map) {
+        existingJson[key] = addJson(existingJson[key] as Map<String, dynamic>,
+            value as Map<String, dynamic>);
+      } else {
+        existingJson[key] = value;
+      }
+    });
+
+    return existingJson;
+  }
 }
