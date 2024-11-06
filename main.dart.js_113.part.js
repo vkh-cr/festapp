@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_113",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,E,B={
-cw9(){return new B.zS(null)},
-zS:function zS(d){this.a=d},
+cw9(){return new B.zR(null)},
+zR:function zR(d){this.a=d},
 a5R:function a5R(d){var _=this
 _.f=_.e=_.d=!1
 _.r=""
@@ -41,12 +41,12 @@ F=c[143]
 X=c[222]
 Y=c[79]
 G=c[153]
-B.zS.prototype={
+B.zR.prototype={
 N(){return new B.a5R(new U.ff(I.br,$.ak()))}}
 B.a5R.prototype={
 bk(){var x=this
 x.d_()
-x.r=$.c6_().aBX()
+x.r=$.c60().aBX()
 x.oW()
 x.K(new B.bIX())},
 oW(){var x=0,w=A.l(y.f),v=this,u
@@ -70,9 +70,9 @@ else x=!u.d&&!u.f&&u.e?u.ga7b():t
 w=!i
 if(w)v=!u.d&&!u.f&&u.e
 else v=!0
-p=A.a([W.Df(v?C.cs:C.hk,d,50,!0,p,x,C.l,250)],s)
+p=A.a([W.De(v?C.cs:C.hk,d,50,!0,p,x,C.l,250)],s)
 if(u.d)p.push(new A.am(E.ll,F.bA(A.as("The app is already installed.",t,t,t,t,t,t,t,A.bS(t,t,C.cs,t,t,t,t,t,t,t,t,16,t,t,t,t,t,!0,t,t,t,t,t,t,t,t),C.cl,t,t,t),t),t))
-if(w&&u.f)p.push(new A.am(E.ll,A.bN(A.a([F.bA(D.aZX,t),X.B5,A.bO(A.a([A.eE(S.a1Y(t,!1,u.w,I.ajh,t,t,t,!1,t,t,t,!0,t),1,t),Q.dA(t,t,t,t,t,G.ce(P.G5,t,t,t),t,t,new B.bIV(u,d),t,t,t,t,t)],s),C.n,C.p,C.q)],s),C.n,C.p,C.q,t,C.B),t))
+if(w&&u.f)p.push(new A.am(E.ll,A.bN(A.a([F.bA(D.aZX,t),X.B5,A.bO(A.a([A.eE(S.a1Y(t,!1,u.w,I.ajh,t,t,t,!1,t,t,t,!0,t),1,t),Q.dB(t,t,t,t,t,G.ce(P.G5,t,t,t),t,t,new B.bIV(u,d),t,t,t,t,t)],s),C.n,C.p,C.q)],s),C.n,C.p,C.q,t,C.B),t))
 q.push(new A.am(C.dt,A.bN(p,C.n,C.p,C.q,t,C.B),t))
 q.push(V.d_)
 return M.b0k(q,t,h,t,t,r,t)},
@@ -97,7 +97,7 @@ B.bIW.prototype={
 $0(){return Y.asq(this.a)},
 $S:0}
 B.bIU.prototype={
-$0(){$.c6_()
+$0(){$.c60()
 var x=window.open(this.a,"_blank")
 A.cfO(x)
 return null},
@@ -107,18 +107,18 @@ $0(){var x,w=null
 H.z4(new H.pk(this.a.w.a.a))
 x=this.b.am(y.a)
 x.toString
-x.f.ac0(K.c2V(w,w,w,w,w,C.z,w,A.as("Copied to clipboard",w,w,w,w,w,w,w,w,w,w,w,w),w,L.Fd,w,w,w,w,w,w,w,w,w))},
+x.f.ac0(K.c2W(w,w,w,w,w,C.z,w,A.as("Copied to clipboard",w,w,w,w,w,w,w,w,w,w,w,w),w,L.Fd,w,w,w,w,w,w,w,w,w))},
 $S:0};(function installTearOffs(){var x=a._instance_0u
 x(B.a5R.prototype,"ga7b","vy",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.zS,A.F)
+x(B.zR,A.F)
 x(B.a5R,A.K)
 w(A.cL,[B.bIX,B.bIZ,B.bIY,B.bIW,B.bIU,B.bIV])})()
-A.bF(b.typeUniverse,JSON.parse('{"zS":{"F":[],"e":[]},"a5R":{"K":["zS"]}}'))
-var y={e:A.y("p<e>"),a:A.y("CA"),f:A.y("~")};(function constants(){D.ah4=new A.aV(57477,"MaterialIcons",null,!1)
+A.bF(b.typeUniverse,JSON.parse('{"zR":{"F":[],"e":[]},"a5R":{"K":["zR"]}}'))
+var y={e:A.y("p<e>"),a:A.y("Cz"),f:A.y("~")};(function constants(){D.ah4=new A.aV(57477,"MaterialIcons",null,!1)
 D.ahi=new A.aV(57795,"MaterialIcons",null,!1)
 D.ail=new A.aV(984254,"MaterialIcons",null,!1)
 D.aZX=new A.bR("Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",null,E.BC,null,C.cl,null,null,null,null,null,null,null,null,null)
 D.b_N=new A.bR("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"cS2","c6_",()=>new A.LV())})()};
+x($,"cS2","c60",()=>new A.LV())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"9eA9Q/kDj7IvuiUquRssijZe9iA=");
+a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"OYZMKOHVTUTahP0qbLnP88uJIPM=");

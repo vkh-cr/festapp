@@ -5,7 +5,7 @@ $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C={
 buh(d){var x,w=d.cy,v=d.db,u=B.a2e(d),t=d.b
 t.toString
 x=y.c
-return new D.dC(w,v,u,A.H(["leftText",d.a6q(),"rightText",d.k(0)],x,x),t,null,null)}},D
+return new D.dD(w,v,u,A.H(["leftText",d.a6q(),"rightText",d.k(0)],x,x),t,null,null)}},D
 A=c[0]
 B=c[89]
 C=a.updateHolder(c[37],C)
@@ -13,4 +13,4 @@ D=c[100]
 var z=a.updateTypes([])
 var y={c:A.y("f")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_222",e:"endPart",h:b})})($__dart_deferred_initializers__,"gTjk/ClzxH2aLQl7Vx63DhGrqcs=");
+a.eventLog.push({p:"main.dart.js_222",e:"endPart",h:b})})($__dart_deferred_initializers__,"oHT8ZGBomoAuzzV3xxhIQ+iLwP0=");

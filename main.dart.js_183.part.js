@@ -15,7 +15,7 @@ return A.c(s.bT("events").hp(0,"id,updated_at,title,start_time,end_time,max_part
 case 3:r=n.pw(f)
 q=y.u
 x=4
-return A.c(A.ny(D.c.k(d),A.zk(),"events",q),$async$pp)
+return A.c(A.ny(D.c.k(d),A.zj(),"events",q),$async$pp)
 case 4:p=f
 o=p==null
 if(o)u=null
@@ -128,4 +128,4 @@ $S:47};(function inheritance(){var x=a.inheritMany
 x(A.c1,[B.aUN,B.aUO,B.aVx])})()
 var y={f:A.y("bx"),u:A.y("d_"),r:A.y("p<q>"),w:A.y("f"),e:A.y("v"),b:A.y("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_183",e:"endPart",h:b})})($__dart_deferred_initializers__,"jpW2sUCqsCAP410zLLxXuEeLIhw=");
+a.eventLog.push({p:"main.dart.js_183",e:"endPart",h:b})})($__dart_deferred_initializers__,"pV5YiWzHoSdSuQ8p6tGgqFdJjVY=");
