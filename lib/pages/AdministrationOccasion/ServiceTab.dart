@@ -35,6 +35,7 @@ class _ServiceTabState extends State<ServiceTab> {
 
   List<ServiceItemModel>? allFood;
   List<ServiceItemModel>? allAccommodation;
+  Key refreshKey = UniqueKey();
 
   @override
   void initState() {
@@ -49,32 +50,45 @@ class _ServiceTabState extends State<ServiceTab> {
     setState(() {
       allAccommodation = aa;
       allFood = af;
+      refreshKey = UniqueKey();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return allFood == null
-        ? Center(child: CircularProgressIndicator()) // Show a loading indicator while food data is loading
-        : SingleTableDataGrid<OccasionUserModel>(
-      context,
-      DbUsers.getOccasionUsersServiceTab,
-      OccasionUserModel.fromPlutoJson,
-      DataGridFirstColumn.none,
-      Tb.occasion_users.user,
-      actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
-          isAddActionPossible: () => false),
-      headerChildren: [
-        DataGridAction(name: "Accommodation settings".tr(), action: (SingleTableDataGrid p0, [_]) => _accommodationDefinition(p0)),
-        DataGridAction(name: "Food settings".tr(), action: (SingleTableDataGrid p0, [_]) => _foodDefinition(p0)),
-      ],
-      columns: ColumnHelper.generateColumns(columnIdentifiers, data: {ColumnHelper.FOOD: allFood, ColumnHelper.ACCOMMODATION: allAccommodation}),
-    ).DataGrid();
+    return KeyedSubtree(
+      key: refreshKey,
+      child: allFood == null
+          ? Center(child: CircularProgressIndicator())
+          : SingleTableDataGrid<OccasionUserModel>(
+        context,
+        DbUsers.getOccasionUsersServiceTab,
+        OccasionUserModel.fromPlutoJson,
+        DataGridFirstColumn.none,
+        Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(
+            areAllActionsEnabled: RightsService.canUpdateUsers,
+            isAddActionPossible: () => false),
+        headerChildren: [
+          DataGridAction(
+              name: "Accommodation settings".tr(),
+              action: (SingleTableDataGrid p0, [_]) =>
+                  _accommodationDefinition(p0)),
+          DataGridAction(
+              name: "Food settings".tr(),
+              action: (SingleTableDataGrid p0, [_]) =>
+                  _foodDefinition(p0)),
+        ],
+        columns: ColumnHelper.generateColumns(columnIdentifiers, data: {
+          ColumnHelper.FOOD: allFood,
+          ColumnHelper.ACCOMMODATION: allAccommodation
+        }),
+      ).DataGrid(),
+    );
   }
 
-  _accommodationDefinition(SingleTableDataGrid<IPlutoRowModel> p0) {
-    showDialog(
+  _accommodationDefinition(SingleTableDataGrid<IPlutoRowModel> p0) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
@@ -85,10 +99,13 @@ class _ServiceTabState extends State<ServiceTab> {
         );
       },
     );
+
+    // Reload data and trigger a full page rebuild
+    await loadData();
   }
 
-  _foodDefinition(SingleTableDataGrid<IPlutoRowModel> p0) {
-    showDialog(
+  _foodDefinition(SingleTableDataGrid<IPlutoRowModel> p0) async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return ServiceDialog(
@@ -99,5 +116,8 @@ class _ServiceTabState extends State<ServiceTab> {
         );
       },
     );
+
+    // Reload data and trigger a full page rebuild
+    await loadData();
   }
 }
