@@ -48,7 +48,7 @@ class UserInfoModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
 
-  static const sexes = ["male", "female"];
+  static const sexes = ["male", "female", ""];
 
   UserInfoModel({
      this.id,
