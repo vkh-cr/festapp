@@ -156,11 +156,13 @@ class ColumnHelper {
       return columns;
     },
     ACCOMMODATION: (Map<String, dynamic> data) {
+      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList();
+      select.add("");
       return [
         PlutoColumn(
         title: "Accommodation".tr(),
         field: DbOccasions.serviceTypeAccommodation,
-        type: PlutoColumnType.select(data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList()),
+        type: PlutoColumnType.select(select),
         applyFormatterInEditing: true,
         enableEditingMode: true,
         width: 100
