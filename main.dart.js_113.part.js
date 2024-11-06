@@ -46,7 +46,7 @@ N(){return new B.a5R(new U.ff(I.br,$.ak()))}}
 B.a5R.prototype={
 bk(){var x=this
 x.d_()
-x.r=$.c6_().aBV()
+x.r=$.c6_().aBX()
 x.oW()
 x.K(new B.bIX())},
 oW(){var x=0,w=A.l(y.f),v=this,u
@@ -63,10 +63,10 @@ return A.c(v.oW(),$async$vy)
 case 2:return A.j(null,w)}})
 return A.k($async$vy,w)},
 C(d){var x=this,w=null,v=F.bA(D.b_N,w)
-return G.i6(N.kA(w,!0,w,w,w,w,w,R.qH(new B.bIW(d)),w,v),w,new A.cY(C.b_,w,w,new A.am(T.f6,new A.dG(new A.aa(0,820,0,1/0),A.bN(A.a([x.ar7(d,A.a0("Install for Apple",w),D.ail,"https://apps.apple.com/us/app/festapp/id6474078383",x.r==="ios",!0),x.ar6(d,A.a0("Install for Android",w),D.ah4,"",x.r==="android"),x.ar6(d,A.a0("Install for PC/Mac",w),D.ahi,"",x.r==="web")],y.e),C.b0,C.p,C.q,w,C.B),w),w),w),w,w,w,w)},
-ar7(d,e,f,g,h,i){var x,w,v,u=this,t=null,s=y.e,r=A.bO(A.a([G.ce(f,t,t,t),O.kj,A.as(e,t,t,t,t,t,t,t,C.iz,t,t,t,t)],s),C.n,C.p,C.q),q=A.a([],s),p=i?A.a0("Download App",t):A.a0("Install App",t)
+return G.i6(N.kA(w,!0,w,w,w,w,w,R.qH(new B.bIW(d)),w,v),w,new A.cY(C.b_,w,w,new A.am(T.f6,new A.dG(new A.aa(0,820,0,1/0),A.bN(A.a([x.ar9(d,A.a0("Install for Apple",w),D.ail,"https://apps.apple.com/us/app/festapp/id6474078383",x.r==="ios",!0),x.ar8(d,A.a0("Install for Android",w),D.ah4,"",x.r==="android"),x.ar8(d,A.a0("Install for PC/Mac",w),D.ahi,"",x.r==="web")],y.e),C.b0,C.p,C.q,w,C.B),w),w),w),w,w,w,w)},
+ar9(d,e,f,g,h,i){var x,w,v,u=this,t=null,s=y.e,r=A.bO(A.a([G.ce(f,t,t,t),O.kj,A.as(e,t,t,t,t,t,t,t,C.iz,t,t,t,t)],s),C.n,C.p,C.q),q=A.a([],s),p=i?A.a0("Download App",t):A.a0("Install App",t)
 if(i)x=new B.bIU(g)
-else x=!u.d&&!u.f&&u.e?u.ga79():t
+else x=!u.d&&!u.f&&u.e?u.ga7b():t
 w=!i
 if(w)v=!u.d&&!u.f&&u.e
 else v=!0
@@ -76,7 +76,7 @@ if(w&&u.f)p.push(new A.am(E.ll,A.bN(A.a([F.bA(D.aZX,t),X.B5,A.bO(A.a([A.eE(S.a1Y
 q.push(new A.am(C.dt,A.bN(p,C.n,C.p,C.q,t,C.B),t))
 q.push(V.d_)
 return M.b0k(q,t,h,t,t,r,t)},
-ar6(d,e,f,g,h){return this.ar7(d,e,f,g,h,!1)}}
+ar8(d,e,f,g,h){return this.ar9(d,e,f,g,h,!1)}}
 var z=a.updateTypes(["R<~>()"])
 B.bIX.prototype={
 $0(){},
@@ -107,9 +107,9 @@ $0(){var x,w=null
 H.z4(new H.pk(this.a.w.a.a))
 x=this.b.am(y.a)
 x.toString
-x.f.abZ(K.c2V(w,w,w,w,w,C.z,w,A.as("Copied to clipboard",w,w,w,w,w,w,w,w,w,w,w,w),w,L.Fd,w,w,w,w,w,w,w,w,w))},
+x.f.ac0(K.c2V(w,w,w,w,w,C.z,w,A.as("Copied to clipboard",w,w,w,w,w,w,w,w,w,w,w,w),w,L.Fd,w,w,w,w,w,w,w,w,w))},
 $S:0};(function installTearOffs(){var x=a._instance_0u
-x(B.a5R.prototype,"ga79","vy",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.a5R.prototype,"ga7b","vy",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.zS,A.F)
 x(B.a5R,A.K)
 w(A.cL,[B.bIX,B.bIZ,B.bIY,B.bIW,B.bIU,B.bIV])})()
@@ -121,4 +121,4 @@ D.aZX=new A.bR("Installation failed. Please try opening this link in Chrome, Edg
 D.b_N=new A.bR("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"cS2","c6_",()=>new A.LV())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"ync2TOsueBOtsRn/cOE67ijj0RA=");
+a.eventLog.push({p:"main.dart.js_113",e:"endPart",h:b})})($__dart_deferred_initializers__,"9eA9Q/kDj7IvuiUquRssijZe9iA=");

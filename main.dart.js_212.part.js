@@ -16,7 +16,7 @@ C=c[2]
 A=a.updateHolder(c[76],A)
 A.ak0.prototype={}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(A.ak0,B.jx)})()
-B.bF(b.typeUniverse,JSON.parse('{"ak0":{"jx":["zA"]}}'))};
+y(A.ak0,B.jy)})()
+B.bF(b.typeUniverse,JSON.parse('{"ak0":{"jy":["zA"]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_212",e:"endPart",h:b})})($__dart_deferred_initializers__,"HC9Uj3R6qb+sPdRD0zNnBP5FAS8=");
+a.eventLog.push({p:"main.dart.js_212",e:"endPart",h:b})})($__dart_deferred_initializers__,"6PhJFxZX5me7geHuyctx6cVb8mc=");

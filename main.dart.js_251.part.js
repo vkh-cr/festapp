@@ -35,14 +35,14 @@ while(true)switch(x){case 0:p=$.yr()
 o=p.bT("news").hp(0,"id")
 n=d.a
 n.toString
-o=A.rC(o.zF(o.As("created_at","lt."+n.k(0))),o.$ti.c)
+o=A.rC(o.zE(o.Ar("created_at","lt."+n.k(0))),o.$ti.c)
 n=d.d
-v=o.As("id","neq."+n)
-o=A.rC(o.zF(v),o.$ti.c)
+v=o.Ar("id","neq."+n)
+o=A.rC(o.zE(v),o.$ti.c)
 u=$.e_
 u.toString
 x=2
-return A.c(o.cp("occasion",u).axd(0,"created_at").a7U(1).G5(),$async$DI)
+return A.c(o.cp("occasion",u).axf(0,"created_at").a7W(1).G5(),$async$DI)
 case 2:t=f
 x=t!=null?3:5
 break
@@ -53,7 +53,7 @@ r=A.a([],y.t)
 for(p=J.ah(s),o=J.a5(t),u=y.N,q=y.z;p.q();)r.push(A.H(["user",J.t(p.gJ(p),"user"),"news_id",o.i(t,"id")],u,q))
 p=$.yr()
 x=7
-return A.c(p.bT("user_news").O2(r).hP(0),$async$DI)
+return A.c(p.bT("user_news").O4(r).hP(0),$async$DI)
 case 7:x=4
 break
 case 5:x=8
@@ -126,9 +126,9 @@ Y=c[150]
 Z=c[126]
 B.N2.prototype={
 N(){return new B.N3(this.$ti.h("N3<1>"))},
-bsL(d){return this.c.$1(d)}}
+bsN(d){return this.c.$1(d)}}
 B.N3.prototype={
-aFv(){var x,w,v,u,t,s,r,q=this,p=null,o=q.c
+aFx(){var x,w,v,u,t,s,r,q=this,p=null,o=q.c
 o.toString
 x=E.aqM(o)
 o=q.c.gah()
@@ -157,8 +157,8 @@ v=q.a
 v.toString
 t=q.c
 t.toString
-r=v.bsL(t)
-if(J.jK(r)){q.a.toString
+r=v.bsN(t)
+if(J.jL(r)){q.a.toString
 o=q.c
 o.toString
 E.cka(C.h,x.a,p,o,x.d,p,r,x.c,p,s,p,x.e,x.b,x.f,!1,q.$ti.h("1?")).aP(0,new B.bij(q),y.H)}},
@@ -175,11 +175,11 @@ u=A.em(d,C.aB,y.y)
 u.toString
 u=u.gcc()
 t.a.toString
-return N.dA(v,s,s,!0,s,x,w,s,t.gaFu(),C.aO,s,s,s,u)}}
+return N.dA(v,s,s,!0,s,x,w,s,t.gaFw(),C.aO,s,s,s,u)}}
 B.Ap.prototype={
 N(){return new B.aEf(A.a([],y.o))}}
 B.aEf.prototype={
-bcL(d){Y.nF(d,"newsForm",y.X).aP(0,new B.bLS(this,d),y.P)},
+bcN(d){Y.nF(d,"newsForm",y.X).aP(0,new B.bLS(this,d),y.P)},
 G1(){var x=0,w=A.l(y.H),v=this,u
 var $async$G1=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=B
@@ -284,8 +284,8 @@ w.push(A.fI(new B.N2(new B.bLU(),new B.bLV(p,o,d),D.aiO,q,y.I),A.i5()))
 return A.bN(w,C.ct,C.p,C.q,q,C.B)},
 $S:826}
 B.bLV.prototype={
-$1(d){return this.aB3(d)},
-aB3(d){var x=0,w=A.l(y.H),v=this,u,t,s
+$1(d){return this.aB5(d)},
+aB5(d){var x=0,w=A.l(y.H),v=this,u,t,s
 var $async$$1=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:t=v.b
 s=v.c
@@ -322,9 +322,9 @@ $1(d){var x=y.B
 return A.a([E.c2y(F.bA(S.BE,null),!0,48,D.ad5,x),E.c2y(F.bA(D.b_d,null),!0,48,D.EE,x)],y.h)},
 $S:z+2}
 B.bLX.prototype={
-$0(){return this.a.bcL(this.b)},
+$0(){return this.a.bcN(this.b)},
 $S:0};(function installTearOffs(){var x=a._instance_0u,w=a._static_1
-x(B.N3.prototype,"gaFu","aFv",0)
+x(B.N3.prototype,"gaFw","aFx",0)
 w(B,"cxJ","cxK",3)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(A.F,[B.N2,B.Ap])
 x(A.K,[B.N3,B.aEf])
@@ -344,4 +344,4 @@ D.aTY=new A.aX(6,null,null,null)
 D.b_d=new A.bR("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b_P=new A.bR("News",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_251",e:"endPart",h:b})})($__dart_deferred_initializers__,"VN+jJBJPC+bjUmhOl9tEkQ4x5OY=");
+a.eventLog.push({p:"main.dart.js_251",e:"endPart",h:b})})($__dart_deferred_initializers__,"y43gbgtWMff5AE5lQ3jgWwoR5p8=");
