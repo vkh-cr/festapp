@@ -1,4 +1,4 @@
-import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:collection/collection.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -192,9 +192,22 @@ class OccasionUserModel extends IPlutoRowModel {
       && u[Tb.user_info.surname].toString().trim() == data?[Tb.occasion_users.data_surname]
       && u[Tb.user_info.accommodation]?.toString().trim() == data?[Tb.occasion_users.data_accommodation]
       && u[Tb.user_info.role] == role
-      && u[Tb.user_info.phone]?.toString().trim() == data?[Tb.occasion_users.data_phone]
+      && u[Tb.occasion_users.data_phone]?.toString().trim() == data?[Tb.occasion_users.data_phone]
+      && u[Tb.occasion_users.data_text1]?.toString().trim() == data?[Tb.occasion_users.data_text1]
+      && u[Tb.occasion_users.data_text2]?.toString().trim() == data?[Tb.occasion_users.data_text2]
+      && u[Tb.occasion_users.data_text3]?.toString().trim() == data?[Tb.occasion_users.data_text3]
+      && u[Tb.occasion_users.data_text4]?.toString().trim() == data?[Tb.occasion_users.data_text4]
+      && u[Tb.occasion_users.data_diet]?.toString().trim() == data?[Tb.occasion_users.data_diet]
+      && u[Tb.occasion_users.data_note]?.toString().trim() == data?[Tb.occasion_users.data_note]
+      && compareJson(u[Tb.occasion_users.services], data?[Tb.occasion_users.services])
       //todo fix
       //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
       && (u[Tb.user_info.sex].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == data?[Tb.occasion_users.data_sex];
+  }
+
+  static bool compareJson(Map<String, dynamic> json1, Map<String, dynamic> json2) {
+    // Use DeepCollectionEquality to perform a deep comparison
+    final deepEquality = const DeepCollectionEquality().equals;
+    return deepEquality(json1, json2);
   }
 }

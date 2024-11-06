@@ -10,7 +10,6 @@ static Map<String, String> get migrateColumns =>
   Tb.user_info.email_readonly:"E-mailová adresa",
   Tb.user_info.name:"Jméno:",
   Tb.user_info.surname:"Příjmení:",
-  Tb.user_info.sex:"Jsi:",
   Tb.occasion_users.data_accommodation:"Ubytování",
   Tb.occasion_users.data_phone:"Mobilní telefon:",
   Tb.occasion_users.data_text1:"Typ účastníka:",
@@ -43,7 +42,6 @@ static Map<String, String> get migrateColumns =>
 
     if (!userColumnIndex.keys.toSet().containsAll([
       Tb.user_info.email_readonly,
-      Tb.user_info.sex,
       Tb.user_info.name,
       Tb.user_info.surname,
     ])) {
@@ -89,7 +87,6 @@ static Map<String, String> get migrateColumns =>
       }
       if (!userJsonObject.keys.toSet().containsAll([
         Tb.user_info.email_readonly,
-        Tb.user_info.sex,
         Tb.user_info.name,
         Tb.user_info.surname,
       ])) {
