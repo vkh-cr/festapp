@@ -118,7 +118,7 @@ class ColumnHelper {
     ],
     TEXT1: [
       PlutoColumn(
-        title: "Role".tr(),
+        title: "Type".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text1,
         type: PlutoColumnType.text(),
@@ -127,7 +127,7 @@ class ColumnHelper {
     ],
     TEXT2: [
       PlutoColumn(
-        title: "Type".tr(),
+        title: "Přípravný tým",
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text2,
         type: PlutoColumnType.text(),
