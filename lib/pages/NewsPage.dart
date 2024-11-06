@@ -54,11 +54,13 @@ class _NewsPageState extends State<NewsPage> {
 
   @override
   Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
-    newsMessages = await OfflineDataService.getAllMessages();
+    try{
+      newsMessages = await OfflineDataService.getAllMessages();
+    } catch(e){};
     setState(() {});
     await loadNewsMessages();
     await OfflineDataService.saveAllMessages(newsMessages);
+    super.didChangeDependencies();
   }
 
   @override
