@@ -9,7 +9,7 @@ class ImportHelper {
         Tb.user_info.email_readonly: "E-mailová adresa",
         Tb.user_info.name: "Jméno:",
         Tb.user_info.surname: "Příjmení:",
-        Tb.occasion_users.services_accommodation: "Ubytování",
+        Tb.occasion_users.services_accommodation: "Ubytování:",
         Tb.occasion_users.data_phone: "Mobilní telefon:",
         Tb.occasion_users.data_text1: "Typ účastníka:",
         Tb.occasion_users.data_text2: "Přípravný tým:",
@@ -75,14 +75,14 @@ class ImportHelper {
           }
           final format = DateFormat("d.M.y");
           var dateTime = format.parse(trimmedString);
-          userJsonObject[entry.key] = dateTime;
+          userJsonObject[entry.key] = dateTime.toIso8601String();
           continue;
         } else if (entry.key == Tb.occasion_users.services_food) {
-          var foodJson = createServicesJson(trimmedString);
+          var foodJson = createServicesJson(trimmedString, DbOccasions.serviceTypeFood);
           userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], foodJson);
           continue;
         } else if (entry.key == Tb.occasion_users.services_accommodation) {
-          var accommodationJson = createServicesJson(trimmedString);
+          var accommodationJson = createServicesJson(trimmedString, DbOccasions.serviceTypeAccommodation);
           userJsonObject[Tb.occasion_users.services] = addJson(userJsonObject[Tb.occasion_users.services], accommodationJson);
           continue;
         }
@@ -108,16 +108,14 @@ class ImportHelper {
     return userList;
   }
 
-  static Map<String, dynamic> createServicesJson(String data) {
+  static Map<String, dynamic> createServicesJson(String data, String serviceType) {
     List<String> items = data.split(',').map((item) => item.trim()).toList();
 
     Map<String, String> servicesMap = {
       for (var item in items) item: DbOccasions.servicePaid,
     };
 
-    return {
-      DbOccasions.serviceTypeFood: servicesMap,
-    };
+    return { serviceType: servicesMap };
   }
 
   static Map<String, dynamic> addJson(

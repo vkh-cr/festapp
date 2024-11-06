@@ -89,13 +89,45 @@ class OccasionUserModel extends IPlutoRowModel {
   }
 
   Map<String, dynamic> toImportedUpdateJson() {
-    return convertDateTime({
+    return {
       Tb.occasion_users.occasion: occasion,
       Tb.occasion_users.user: user,
       Tb.occasion_users.role: role,
       Tb.occasion_users.data: data,
       Tb.occasion_users.services: services,
-    });
+    };
+  }
+
+  Map<String, PlutoCell> serviceToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
+    Map<String, PlutoCell> serviceCells = {};
+    for (var entry in services?[serviceType]?.entries ?? []) {
+      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+    }
+    return serviceCells;
+  }
+
+  Map<String, PlutoCell> servicesToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
+    PlutoCell cell = PlutoCell(value: "");
+    var emptyResult =  { serviceType : cell };
+
+    if(services?[serviceType] == null) {
+      return emptyResult;
+    }
+    var value = services?[serviceType]?.entries;
+    if(value.isEmpty){
+      return emptyResult;
+    }
+    var first = value.first.value;
+    cell = PlutoCell(value: first);
+    return { serviceType : cell };
+  }
+
+  Map<String, PlutoCell> servicesToPlutoRow(Map<String, dynamic>? services, String serviceType) {
+    Map<String, PlutoCell> serviceCells = {};
+    for (var entry in services?[serviceType]?.entries ?? []) {
+      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+    }
+    return serviceCells;
   }
 
 
@@ -109,12 +141,11 @@ class OccasionUserModel extends IPlutoRowModel {
 
   @override
   PlutoRow toPlutoRow() {
-    Map<String, PlutoCell> foodServices = {};
-    for(var f in services?[DbOccasions.serviceTypeFood]?.entries??[]){
-      foodServices[DbOccasions.serviceTypeFood+f.key] = PlutoCell(value: f.value);
-    }
     Map<String, PlutoCell> json = {};
+    Map<String, PlutoCell> foodServices = servicesToPlutoRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);
+
+    json.addAll(servicesToOneColumnPlutoRow(services, DbOccasions.serviceTypeAccommodation));
 
     json.addAll({
       Tb.occasion_users.user: PlutoCell(value: user),
@@ -142,6 +173,23 @@ class OccasionUserModel extends IPlutoRowModel {
     return PlutoRow(cells: json);
   }
 
+  static void mapOneToServices(Map<String, dynamic> services, String serviceType, String key, String value) {
+    if(services[serviceType] == null) {
+      services[serviceType] = {};
+    }
+    services[serviceType][key] = value;
+  }
+
+  static void mapJsonToServices(Map<String, dynamic> json, Map<String, dynamic> services, String serviceType) {
+    for (var entry in json.entries) {
+      if (entry.key.startsWith(serviceType)) {
+        var code = entry.key.substring(serviceType.length);
+        services[serviceType] ??= {};
+        services[serviceType][code] = entry.value;
+      }
+    }
+  }
+
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
     DateTime? bd;
     var jsonTime = json[Tb.occasion_users.data_birthDate];
@@ -155,15 +203,10 @@ class OccasionUserModel extends IPlutoRowModel {
     }
 
     Map<String, dynamic> services = {};
-    for(var f in json.entries){
-      if(f.key.startsWith(DbOccasions.serviceTypeFood)) {
-        var code = f.key.substring(DbOccasions.serviceTypeFood.length);
-        if(services[DbOccasions.serviceTypeFood] == null){
-          services[DbOccasions.serviceTypeFood] = {};
-        }
-        services[DbOccasions.serviceTypeFood][code] = f.value;
-      }
-    }
+    mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
+
+    var value = json[DbOccasions.serviceTypeAccommodation]?.isEmpty ?? true ? DbOccasions.serviceNone : DbOccasions.servicePaid;
+    mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[DbOccasions.serviceTypeAccommodation], value);
 
     return OccasionUserModel(
       occasion: RightsService.currentOccasion,
@@ -224,7 +267,7 @@ class OccasionUserModel extends IPlutoRowModel {
         && compareField(iu, Tb.occasion_users.data_text4, Tb.occasion_users.data_text4)
         && compareField(iu, Tb.occasion_users.data_diet, Tb.occasion_users.data_diet)
         && compareField(iu, Tb.occasion_users.data_note, Tb.occasion_users.data_note)
-        && compareServicesJson(iu[Tb.occasion_users.services], services)
+        && compareServicesJson(iu[Tb.occasion_users.services], services, [DbOccasions.serviceTypeFood, DbOccasions.serviceTypeAccommodation])
         && iu[Tb.occasion_users.data_birthDate] == data?[Tb.occasion_users.data_birthDate];
 
     // Uncomment and adjust for additional fields
@@ -240,36 +283,34 @@ class OccasionUserModel extends IPlutoRowModel {
     return deepEquality(json1, json2);
   }
 
-  static bool compareServicesJson(Map<String, dynamic>? json1, Map<String, dynamic>? json2) {
+  static bool compareServicesJson(Map<String, dynamic>? json1, Map<String, dynamic>? json2, List<String> serviceTypes) {
     if (json1 == null && json2 == null) return true;
     if (json1 == null || json2 == null) return false;
 
-    // Expect specific structure with a "serviceTypeFood" key
-    if (!(json1.containsKey(DbOccasions.serviceTypeFood) && json2.containsKey(DbOccasions.serviceTypeFood))) return false;
-
-    Map<String, dynamic> food1 = json1[DbOccasions.serviceTypeFood];
-    Map<String, dynamic> food2 = json2[DbOccasions.serviceTypeFood];
-
-    // Compare the contents of the "serviceTypeFood" maps
-    for (var key in food1.keys) {
-      var value1 = food1[key];
-      var value2 = food2[key];
-
-      // Check if value is "serviceNone" in one JSON and something else in the other
-      if ((value1 == DbOccasions.serviceNone && value2 != DbOccasions.serviceNone) || (value2 == DbOccasions.serviceNone && value1 != DbOccasions.serviceNone)) {
+    for (String serviceType in serviceTypes) {
+      // Check if both JSON objects contain the current service type key
+      if (!(json1.containsKey(serviceType) && json2.containsKey(serviceType)))
         return false;
+
+      Map<String, dynamic> service1 = json1[serviceType];
+      Map<String, dynamic> service2 = json2[serviceType];
+
+      // Compare the contents of each service type map
+      for (var key in service1.keys) {
+        var value1 = service1[key];
+        var value2 = service2[key];
+
+        // Check if value is "serviceNone" in one JSON and something else in the other
+        if ((value1 == DbOccasions.serviceNone && value2 != DbOccasions.serviceNone) ||
+            (value2 == DbOccasions.serviceNone && value1 != DbOccasions.serviceNone)) {
+          return false;
+        }
       }
 
-      // Regular value comparison
-      if (value1 != value2) {
-        return false;
-      }
-    }
-
-    // Ensure all keys in food2 are also in food1
-    for (var key in food2.keys) {
-      if (!food1.containsKey(key)) {
-        return false;
+      // Check for any extra keys in json2 that are not in json1
+      for (var key in service2.keys.where((k)=>k.isNotEmpty)) {
+        if (!service1.containsKey(key))
+          return false;
       }
     }
 
