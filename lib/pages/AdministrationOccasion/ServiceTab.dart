@@ -34,6 +34,7 @@ class _ServiceTabState extends State<ServiceTab> {
   ];
 
   List<ServiceItemModel>? allFood;
+  List<ServiceItemModel>? allAccommodation;
 
   @override
   void initState() {
@@ -43,7 +44,10 @@ class _ServiceTabState extends State<ServiceTab> {
 
   Future<void> loadData() async {
     var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
+    var aa = await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
+
     setState(() {
+      allAccommodation = aa;
       allFood = af;
     });
   }
@@ -65,7 +69,7 @@ class _ServiceTabState extends State<ServiceTab> {
         DataGridAction(name: "Accommodation settings".tr(), action: (SingleTableDataGrid p0, [_]) => _accommodationDefinition(p0)),
         DataGridAction(name: "Food settings".tr(), action: (SingleTableDataGrid p0, [_]) => _foodDefinition(p0)),
       ],
-      columns: ColumnHelper.generateColumns(columnIdentifiers, data: {ColumnHelper.FOOD: allFood}),
+      columns: ColumnHelper.generateColumns(columnIdentifiers, data: {ColumnHelper.FOOD: allFood, ColumnHelper.ACCOMMODATION: allAccommodation}),
     ).DataGrid();
   }
 
