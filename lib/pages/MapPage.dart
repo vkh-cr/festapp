@@ -236,7 +236,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               TileLayer(
                 tileProvider: CancellableNetworkTileProvider(),
                 maxZoom: 19,
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: AppConfig.mapLayer,
               ),
               CurrentLocationLayer(),
               PopupMarkerLayer(

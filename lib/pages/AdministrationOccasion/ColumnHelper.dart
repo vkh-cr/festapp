@@ -157,6 +157,7 @@ class ColumnHelper {
     },
     ACCOMMODATION: (Map<String, dynamic> data) {
       var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList();
+      select ??= [];
       select.add("");
       return [
         PlutoColumn(
