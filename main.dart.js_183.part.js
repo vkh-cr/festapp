@@ -8,7 +8,7 @@ aUN:function aUN(){},
 aUO:function aUO(){},
 pp(d){var x=0,w=A.l(y.u),v,u,t,s,r,q,p,o,n,m,l,k
 var $async$pp=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:s=$.fC()
+while(true)switch(x){case 0:s=$.fD()
 n=A
 x=3
 return A.c(s.bT("events").hp(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),event_groups!event_groups_event_parent_fkey(event_child)").cp("id",d).ly(0),$async$pp)
@@ -23,7 +23,7 @@ else{u=p.c
 u.toString
 t=r.c
 t.toString
-t=u.mG(t)
+t=u.mF(t)
 u=t}x=u!==!1?5:7
 break
 case 5:o=r.b
@@ -81,7 +81,7 @@ return A.k($async$pp,w)},
 aVE(d){var x=0,w=A.l(y.e),v
 var $async$aVE=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fC().bT("event_users").hP(0).cp("event",d).cp("user",$.dP().gd6().c.a).a5J(0),$async$aVE)
+return A.c($.fD().bT("event_users").hP(0).cp("event",d).cp("user",$.dP().gd6().c.a).a5J(0),$async$aVE)
 case 3:v=f.b>0
 x=1
 break
@@ -90,7 +90,7 @@ return A.k($async$aVE,w)},
 aVF(d){var x=0,w=A.l(y.e),v
 var $async$aVF=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fC().bT("event_users_saved").hP(0).cp("event",d).cp("user",$.dP().gd6().c.a).G5(),$async$aVF)
+return A.c($.fD().bT("event_users_saved").hP(0).cp("event",d).cp("user",$.dP().gd6().c.a).G5(),$async$aVF)
 case 3:v=f!=null
 x=1
 break
@@ -128,4 +128,4 @@ $S:47};(function inheritance(){var x=a.inheritMany
 x(A.c1,[B.aUN,B.aUO,B.aVx])})()
 var y={f:A.y("bx"),u:A.y("d_"),r:A.y("p<q>"),w:A.y("f"),e:A.y("v"),b:A.y("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_183",e:"endPart",h:b})})($__dart_deferred_initializers__,"mpj1OOMKpHeXCaxRPcmp5kWQTCM=");
+a.eventLog.push({p:"main.dart.js_183",e:"endPart",h:b})})($__dart_deferred_initializers__,"CEOH07E/75oTsmxDAtRaDWmehfo=");

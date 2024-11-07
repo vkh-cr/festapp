@@ -132,7 +132,7 @@ return A.k($async$aVm,w)},
 aVC(d){var x=0,w=A.l(y.S),v
 var $async$aVC=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fC().bT("event_users").hP(0).cp("event",d).a5J(0),$async$aVC)
+return A.c($.fD().bT("event_users").hP(0).cp("event",d).a5J(0),$async$aVC)
 case 3:v=f.b
 x=1
 break
@@ -146,7 +146,7 @@ if(l==null)l=$.dP().gd6().c.a
 u=y.N
 t=y.z
 x=3
-return A.c($.fC().l3("sign_user_to_event",A.H(["ev",e,"usr",l],u,t),t),$async$agF)
+return A.c($.fD().l3("sign_user_to_event",A.H(["ev",e,"usr",l],u,t),t),$async$agF)
 case 3:s=h
 t=J.a5(s)
 switch(t.i(s,"code")){case 200:if(m)A.cU(d,A.a0(($.m5.e==="female"?"F":"M")+"You have been signed in.",null),C.ax)
@@ -197,7 +197,7 @@ return A.k($async$agF,w)},
 csw(d){var x=A.o8(d,A.qv(),null)
 x.toString
 x=new A.ie(new A.mc(),x)
-x.n2("MMMMEEEEd")
+x.n1("MMMMEEEEd")
 return x}},D,Af,Ag,Ah,W,Ai,I,Aj,Ak,L,M,Al,Am,E,X,An,F,N,Y,Z,R
 J=c[1]
 A=c[0]
@@ -376,7 +376,7 @@ while(true)switch(x){case 0:r=y.l
 x=2
 return A.c(V.mv("events",A.zj(),r),$async$yh)
 case 2:q=f
-p=A.fG(q,new B.bFi(d))
+p=A.fy(q,new B.bFi(d))
 x=p!=null?3:4
 break
 case 3:x=p.ch&&$.dP().gd6().d!=null?5:7
@@ -402,7 +402,7 @@ case 10:o=p
 n=A
 x=13
 return A.c(V.mv("places",Ac.c2o(),y.e),$async$yh)
-case 13:o.e=n.fG(f,new B.bFj(p))
+case 13:o.e=n.fy(f,new B.bFj(p))
 x=11
 break
 case 12:p.e=null
@@ -919,4 +919,4 @@ D.b_I=new A.bR("Do you want to sign out participant {participant} from {event}?"
 D.b_K=new A.bR("If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b_L=new A.bR("Sign out",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_248",e:"endPart",h:b})})($__dart_deferred_initializers__,"w5zwZOU1+uN3zllbKCZrQ9j2cy4=");
+a.eventLog.push({p:"main.dart.js_248",e:"endPart",h:b})})($__dart_deferred_initializers__,"LcDknpwFsFtzlaIStjwvQwyXdm0=");

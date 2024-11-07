@@ -12,7 +12,7 @@ while(true)switch(x){case 0:v=$.dP()
 x=v.gd6().d!=null?2:3
 break
 case 2:x=4
-return A.c($.fC().bT("event_users_saved").jN(0).cp("event",e).cp("user",v.gd6().c.a),$async$TY)
+return A.c($.fD().bT("event_users_saved").jN(0).cp("event",e).cp("user",v.gd6().c.a),$async$TY)
 case 4:case 3:x=5
 return A.c(B.aoS(e),$async$TY)
 case 5:A.cU(d,A.a0("Removed from My schedule.",null),C.ax)
@@ -24,7 +24,7 @@ while(true)switch(x){case 0:u=$.dP()
 x=u.gd6().d!=null?3:4
 break
 case 3:x=5
-return A.c($.fC().bT("event_users_saved").jW(0,A.H(["event",e,"user",u.gd6().c.a],y.g,y.o)),$async$TW)
+return A.c($.fD().bT("event_users_saved").jW(0,A.H(["event",e,"user",u.gd6().c.a],y.g,y.o)),$async$TW)
 case 5:case 4:x=6
 return A.c(B.aoP(e),$async$TW)
 case 6:A.cU(d,A.a0("Added to My schedule.",null),C.ax)
@@ -90,4 +90,4 @@ x(A.cL,[B.aRp,B.aRq])})()
 var y={p:A.y("p<xJ>"),o:A.y("A"),g:A.y("f"),e:A.y("v"),f:A.y("~")};(function constants(){D.aa9=new A.D(4280629081)
 D.ah2=new A.aV(57424,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_235",e:"endPart",h:b})})($__dart_deferred_initializers__,"Zye/vQOWRIrK/f4JL8JLWe8RtOQ=");
+a.eventLog.push({p:"main.dart.js_235",e:"endPart",h:b})})($__dart_deferred_initializers__,"hti8v+cnGU6pyU6UNv9daswGoI8=");

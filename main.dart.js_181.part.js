@@ -628,7 +628,7 @@ x=4
 return A.c(A.Kl(d),$async$kk)
 case 4:s=f
 for(t=J.a5(s),r=y.Y,q=y.t,p=y.Z,o=y.F,n=0;n<t.gt(s);++n){m=t.i(s,n)
-if(m.ch!=null){l=A.fG(s,new B.bB7(m))
+if(m.ch!=null){l=A.fy(s,new B.bB7(m))
 if(l!=null){k=l.ay
 if(k==null)k=l.ay=A.a([],o)
 j=m.a
@@ -1042,4 +1042,4 @@ D.aVG=new A.X(!0,C.w,null,null,null,null,16,C.aJ,null,null,null,null,null,null,n
 D.aXN=new A.X(!0,null,null,null,null,null,14,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aZU=new A.bR("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_181",e:"endPart",h:b})})($__dart_deferred_initializers__,"k/vx5COkMe6d4FxGh4BEqgnddFk=");
+a.eventLog.push({p:"main.dart.js_181",e:"endPart",h:b})})($__dart_deferred_initializers__,"vO2g7i29OOHPs1fS9D2qB5SECw8=");
