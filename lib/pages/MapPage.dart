@@ -241,6 +241,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 urlTemplate: SynchroService.globalSettingsModel!.mapLayerLayerLink ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               ),
+              if(SynchroService.globalSettingsModel!.mapLayerLogo != null || SynchroService.globalSettingsModel!.mapLayerText != null)
               RichAttributionWidget(
                 showFlutterMapAttribution: false,
                 animationConfig: const ScaleRAWA(),
