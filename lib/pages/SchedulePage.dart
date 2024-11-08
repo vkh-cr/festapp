@@ -131,7 +131,7 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     final logoAsset = ThemeConfig.isDarkMode(context)
-        ? 'assets/icons/fstapplogo.svg' // Dark mode logo
+        ? 'assets/icons/fstapplogo.dark.svg' // Dark mode logo
         : 'assets/icons/fstapplogo.svg'; // Light mode logo
     return SafeArea(
       top: true,
