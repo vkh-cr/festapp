@@ -37,7 +37,6 @@ class PlacesTab extends StatelessWidget {
       )),
       columns: [
         PlutoColumn(
-          hide: true,
           title: "Id".tr(),
           field: Tb.places.id,
           type: PlutoColumnType.number(defaultValue: -1),
