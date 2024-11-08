@@ -34,7 +34,6 @@ class _UsersTabState extends State<UsersTab> {
     ColumnHelper.ADMINISTRATOR,
     ColumnHelper.EDITOR,
     ColumnHelper.APPROVER,
-    ColumnHelper.APPROVED,
     ColumnHelper.INVITED
   ];
 
