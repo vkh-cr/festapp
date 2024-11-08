@@ -85,7 +85,7 @@ BEGIN
 
     -- If the occasion is not open, enforce access restrictions
     IF is_open_bool = FALSE THEN
-        IF auth.uid() IS NULL OR occasion_user IS NULL THEN
+        IF auth.uid() IS NULL OR (occasion_user IS NULL AND NOT is_admin_bool) THEN
             RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
         END IF;
     END IF;
