@@ -24,7 +24,6 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Člověk a Víra">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
@@ -36,16 +35,167 @@
   <meta name="theme-color" content="#ffffff">
 
   <title>Člověk a Víra</title>
-  <link rel="manifest" href="manifest.json">
-
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
-    // The value below is injected by flutter build, do not touch.
-    var serviceWorkerVersion = null;
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+   async function initializeOneSignal(callback, errorCallback) {
+       if (!window.OneSignalInitialized) {
+           window.OneSignalInitialized = true;
+           OneSignalDeferred.push(async function(OneSignal) {
+               try {
+                 await OneSignal.init({
+                       appId: "0b9c568e-1231-4a5d-a82e-06622def39f4",
+                       safari_web_id: "web.onesignal.auto.34cabfa2-ddd9-46d0-b8b2-6fad793020e0",
+                       allowLocalhostAsSecureOrigin: true,
+                       persistNotification: false,
+                       welcomeNotification: {
+                         title: "Notifikace",
+                         message: "Děkujeme za povolení notifikací.",
+                       },
+                       serviceWorkerParam: { scope: "/push/" },
+                       serviceWorkerPath: "./push/OneSignalSDKWorker.js",
+                   });
+
+                   OneSignal.Notifications.addEventListener('foregroundWillDisplay', function(event) {
+                       console.log("Received notification: ", event.notification.title, event.notification.body);
+                       // Show SnackBar or do async work
+                   });
+               } catch (error) {
+                 console.log("OneSignal initialization failed:", error);
+               }
+
+               if (callback) callback(null);
+           });
+       }
+   }
+
+   async function requestNotificationPermission(callback, errorCallback) {
+       try {
+           await OneSignal.Notifications.requestPermission()
+           console.log("Notification permission request sent.");
+           if (callback) callback(getNotificationPermission());
+       } catch (error) {
+           console.error("Notification permission request failed:", error);
+           if (errorCallback) errorCallback(error);
+       }
+   }
+
+   async function logout(callback, errorCallback) {
+       OneSignalDeferred.push(async function(OneSignal) {
+           await OneSignal.logout();
+           console.log("User has been logged out from OneSignal.");
+       });
+       if (callback) callback(null);
+   }
+
+   async function login(externalId, callback, errorCallback) {
+       console.log("User is logging to OneSignal with Id:", externalId);
+       OneSignalDeferred.push(async function(OneSignal) {
+           await OneSignal.login(externalId);
+           console.log("User has been logged in to OneSignal successfully with externalId:", externalId);
+       });
+       if (callback) callback(null);
+   }
+
+   function getNotificationPermission() {
+    // Check if the Notification API is supported
+    if (!("Notification" in window)) {
+      console.error("This browser does not support desktop notifications.");
+      return false;
+    }
+
+    // Check if the site is served over HTTPS or is running on localhost
+    if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+      console.error("Notifications require a secure context (HTTPS).");
+      return false;
+    }
+
+    // Return the permission status
+    return OneSignal.Notifications.permission;
+  }
+
+   async function optIn(callback, errorCallback) {
+       try {
+           await OneSignal.User.PushSubscription.optIn();
+           console.log("User has opted in for notifications.");
+       } catch (error) {
+           console.error("Opt-in for notifications failed:", error);
+       }
+       if (callback) callback(null);
+   }
+
+   async function optOut(callback, errorCallback) {
+       try {
+           await OneSignal.User.PushSubscription.optOut();
+           console.log("User has opted out of notifications.");
+       } catch (error) {
+           console.error("Opt-out of notifications failed:", error);
+       }
+       if (callback) callback(null);
+   }
   </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+  <script>
+    function setMetaThemeColor(color) {
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", color);
+      }
+  </script>
 </head>
 <body>
+
+<script>
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    deferredPrompt = e;
+    e.preventDefault();
+    return false;
+  });
+
+  function promptInstall(){
+     deferredPrompt.prompt();
+  }
+
+  // Listen for app install event
+  window.addEventListener('appinstalled', () => {
+    deferredPrompt = null;
+    appInstalled();
+  });
+
+  // Track how PWA was launched (either from browser or as PWA)
+  function getLaunchMode() {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    if(deferredPrompt) hasPrompt();
+    if (document.referrer.startsWith('android-app://')) {
+      appLaunchedAsTWA();
+    } else if (navigator.standalone || isStandalone) {
+      appLaunchedAsPWA();
+    } else {
+      window.appLaunchedInBrowser();
+    }
+  }
+</script>
+
+<script>
+  window.addEventListener('load', function(ev) {
+      {{flutter_js}}
+      {{flutter_build_config}}
+
+      _flutter.loader.load({
+        serviceWorkerSettings: {
+          timeoutMillis: 8000,
+          serviceWorkerVersion: {{flutter_service_worker_version}},
+        },
+        onEntrypointLoaded: async function(engineInitializer) {
+          const appRunner = await engineInitializer.initializeEngine({
+            useColorEmoji: true
+          });
+          await appRunner.runApp();
+        }
+      });
+    });
+</script>
+
 <style>
   body {
     background-color: white;
@@ -72,36 +222,12 @@
 
 
 </style>
-<script>
-    function delay(time) {
-      return new Promise(resolve => setTimeout(resolve, time));
-    }
 
-    window.addEventListener('load', function(ev) {
-      var loaderContent = document.querySelector('#loader-content');
-
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(async function(appRunner) {
-            //await delay(5000);
-
-            loaderContent.style.opacity = "0";
-            //await delay(200);
-            appRunner.runApp();
-          });
-        }
-      });
-    });
-  </script>
-<div class="main-content" id="loader-content">
-  <div class="loader">
+  <div class="main-content" id="loader-content">
+      <div class="loader">
       <span>
-        <svg id="Vrstva_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
-     width="841.89px" height="595.28px" viewBox="0 0 841.89 595.28" enable-background="new 0 0 841.89 595.28" xml:space="preserve">
+        <svg version="1.1" id="Vrstva_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+             width="841.89px" height="595.28px" viewBox="0 0 841.89 595.28" enable-background="new 0 0 841.89 595.28" xml:space="preserve">
 <path fill="#D39C0A" d="M449.244,170.826h-23.856v111.448h23.856v-24.015l5.965-7.535l18.682,31.55h29.353l-31.395-45.68
 	l27.471-31.077H470.59l-15.539,23.072c-1.881,2.827-3.768,5.965-5.493,9.263h-0.313V170.826z M384.54,195.94l15.541-23.859h-15.695
 	l-7.853,13.656h-0.311l-8.004-13.656h-15.541l15.541,23.859H384.54z M362.25,235.184c0.629-6.28,4.711-15.543,14.755-15.543
@@ -143,7 +269,8 @@
 <polygon points="516.609,290.218 504.94,312.597 532.567,312.597 547.986,290.218 "/>
 </svg>
       </span>
+      </div>
+
   </div>
-</div>
 </body>
 </html>

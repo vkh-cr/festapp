@@ -1,70 +1,83 @@
-import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:go_router/go_router.dart';
-import 'package:quill_html_editor/quill_html_editor.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/widgets/HtmlEditorWidget.dart';
+import 'package:quill_html_editor/quill_html_editor.dart';
 
+@RoutePage()
 class HtmlEditorPage extends StatefulWidget {
-  static const ROUTE = "/htmlEditor";
-  String? content;
+  static const String parContent = "content";
+  static const String parLoad = "load";
+  static const ROUTE = "htmlEditor";
+  Map<String, dynamic>? content;
   HtmlEditorPage({this.content, super.key});
 
   @override
-  _HtmlEditorState createState() => _HtmlEditorState();
+  _HtmlEditorPageState createState() => _HtmlEditorPageState();
 }
 
-class _HtmlEditorState extends State<HtmlEditorPage> {
-  _HtmlEditorState();
-  late String _html;
+class _HtmlEditorPageState extends State<HtmlEditorPage> {
+  final String _html = "";
+  String? _originalHtml;
+  bool _isTextSet = false;
+  bool _isContentLoading = false;
+  bool _isSaving = false;
+  bool _showOverlay = false;
+  double? _progress;
 
-  ///[controller] create a QuillEditorController to access the editor methods
+  int processedCount = 0;
+  List<String> imagesToProcess = [];
+
   late QuillEditorController controller;
-
-  ///[customToolBarList] pass the custom toolbarList to show only selected styles in the editor
-
-  final customToolBarList = [
-    ToolBarStyle.bold,
-    ToolBarStyle.italic,
-    ToolBarStyle.underline,
-    ToolBarStyle.strike,
-    ToolBarStyle.align,
-    ToolBarStyle.clean,
-    ToolBarStyle.link,
-  ];
-
-  final _toolbarColor = Colors.grey.shade200;
-  final _backgroundColor = Colors.white70;
-  final _toolbarIconColor = Colors.black87;
-  final _editorTextStyle = const TextStyle(
-      fontSize: 16,
-      fontFamily: '"PT Sans", Calibri, Tahoma, sans-serif',
-  );
-  final _hintTextStyle = const TextStyle(
-      fontSize: 18, color: Colors.black12);
 
   @override
   void initState() {
-    _html = widget.content??"";
-    controller = QuillEditorController();
-    controller.onTextChanged((text) {
-      debugPrint('listening to $text');
-    });
-    controller.onEditorLoaded(() {
-      debugPrint('Editor Loaded :)');
-    });
-    Timer(const Duration(seconds: 2), () {
-      if(_html.isNotEmpty)
-        {
-          setHtmlText(_html);
-        }
-    });
     super.initState();
+    if (widget.content != null) {
+      _originalHtml = widget.content?[HtmlEditorPage.parContent];
+    }
+
+    controller = QuillEditorController();
+    var firstLoad = (t) async {
+      if (_isContentLoading) {
+        _isTextSet = true;
+      }
+      if (_isTextSet) {
+        return;
+      }
+      await setHtmlText(_originalHtml ?? _html);
+      _isTextSet = true;
+    };
+    controller.onTextChanged(firstLoad);
+    if (_originalHtml == null) {
+      _loadHtmlContent();
+    }
+  }
+
+  Future<void> _loadHtmlContent() async {
+    setState(() {
+      _isContentLoading = true;
+    });
+    try {
+      _originalHtml = await widget.content?[HtmlEditorPage.parLoad]();
+      if (_originalHtml != null) {
+        await setHtmlText(_originalHtml!);
+      }
+    } catch (e) {
+      // Handle error
+    }
+    setState(() {
+      _isContentLoading = false;
+    });
   }
 
   @override
   void dispose() {
-    /// please do not forget to dispose the controller
     controller.dispose();
     super.dispose();
   }
@@ -75,119 +88,164 @@ class _HtmlEditorState extends State<HtmlEditorPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         resizeToAvoidBottomInset: true,
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
+        body: Stack(
           children: [
-            SizedBox(
-              width: 50,
-              child: ToolBar.scroll(
-                toolBarColor: _toolbarColor,
-                padding: const EdgeInsets.all(8),
-                iconSize: 25,
-                iconColor: _toolbarIconColor,
-                activeIconColor: Colors.greenAccent.shade400,
-                controller: controller,
-                toolBarConfig: customToolBarList,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                direction: Axis.vertical,
-                customButtons: [],
+            if (!_isSaving && !_showOverlay)
+              Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: appMaxWidth),
+                  child: HtmlEditorWidget(
+                    initialContent: _html,
+                    controller: controller,
+                  ),
+                ),
               ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: QuillHtmlEditor(
-                hintText: null,
-                controller: controller,
-                isEnabled: true,
-                ensureVisible: false,
-                minHeight: 200,
-                textStyle: _editorTextStyle,
-                hintTextStyle: _hintTextStyle,
-                hintTextAlign: TextAlign.start,
-                padding: const EdgeInsets.only(left: 10, top: 10),
-                hintTextPadding: const EdgeInsets.only(left: 20),
-                backgroundColor: _backgroundColor,
-                loadingBuilder: (context) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 0.4,
-                      ));
-                },
-                onFocusChanged: (focus) {
-                  debugPrint('has focus $focus');
-                  setState(() {
-                  });
-                },
-                onTextChanged: (text) => debugPrint('widget text change $text'),
-                onEditorCreated: () {},
-                onEditorResized: (height) =>
-                    debugPrint('Editor resized $height'),
-                onSelectionChanged: (sel) =>
-                    debugPrint('index ${sel.index}, range ${sel.length}'),
+            if (_isContentLoading)
+              Container(
+                color: Colors.black54,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
               ),
-            ),
+            if (_showOverlay)
+              Container(
+                color: Colors.black54,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (_progress == null) ...[
+                          const Text('Processing content and detecting large images...', style: TextStyle(color: Colors.white, fontSize: 16)).tr(),
+                        ] else ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            color: Colors.white,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Reducing Images Size...', style: TextStyle(color: Colors.black, fontSize: 16)).tr(),
+                                const SizedBox(height: 20),
+                                LinearProgressIndicator(value: _progress),
+                                const SizedBox(height: 10),
+                                Text(
+                                  '$processedCount / ${imagesToProcess.length}',
+                                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
-        bottomNavigationBar: Visibility(
-          visible: true,
-          child: Container(
-            width: double.maxFinite,
-            color: _toolbarColor,
-            child: Wrap(
-              children: [
-                textButton(
-                    text: "Reset".tr(),
-                    onPressed: () {
-                      setHtmlText(_html);
-                    }),
-                textButton(
-                    text: "Storno".tr(),
-                    onPressed: () {
-                      cancelPressed();
-                    }),
-                textButton(
-                    text: "Save".tr(),
-                    onPressed: () {
-                      savePressed();
-                    }),
+        bottomNavigationBar: !_isSaving && !_showOverlay
+            ? Container(
+          width: double.maxFinite,
+          color: Colors.grey.shade200,
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: IntrinsicWidth(
+              child: Row(children: [
+                ButtonsHelper.bottomBarButton(
+                  text: "Reset".tr(),
+                  onPressed: _isSaving
+                      ? null
+                      : () async {
+                    await setHtmlText(_originalHtml ?? _html);
+                  },
+                ),
+                ButtonsHelper.bottomBarButton(
+                  text: "Storno".tr(),
+                  onPressed: _isSaving ? null : cancelPressed,
+                ),
+                ButtonsHelper.bottomBarButton(
+                  text: "Save".tr(),
+                  onPressed: _isSaving ? null : savePressed,
+                ),
+                // ButtonsHelper.bottomBarButton(
+                //   text: "Save".tr(),
+                //   onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
+                // ),
               ],
+              ),
             ),
           ),
-        ),
+        )
+            : null,
       ),
     );
   }
 
-  Widget textButton({required String text, required VoidCallback onPressed}) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: MaterialButton(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          color: _toolbarIconColor,
-          onPressed: onPressed,
-          child: Text(
-            text,
-            style: TextStyle(color: _toolbarColor),
-          )),
-    );
+  Future<void> savePressed() async {
+    String? htmlTextEdited = await controller.getText();
+    var htmlText = HtmlHelper.removeColor(htmlTextEdited);
+    htmlText = HtmlHelper.detectAndReplaceLinks(htmlText);
+
+    setState(() {
+      _isSaving = true;
+      _showOverlay = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    imagesToProcess = HtmlHelper.detectImagesToProcess(htmlText);
+    bool hasLargeImages = imagesToProcess.isNotEmpty;
+
+    if (hasLargeImages) {
+      bool compress = await showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Large Images Detected"),
+          content: const Text("Some images are large and may slow down the app. Press OK to convert them into optimal size."),
+          actions: [
+            TextButton(
+              child: const Text("Ok").tr(),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
+
+      if (compress) {
+        setState(() {
+          _progress = 0.0;
+        });
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        for (String imageSrc in imagesToProcess) {
+          htmlText = await HtmlHelper.compressImage(htmlText, imageSrc, () {
+            setState(() {
+              processedCount++;
+              _progress = processedCount / imagesToProcess.length;
+            });
+          });
+        }
+      }
+    }
+
+    setState(() {
+      _isSaving = false;
+    });
+    RouterService.goBack(context, htmlText);
   }
 
-  void savePressed() async {
+  Future<void> saveRawPressed() async {
     String? htmlText = await controller.getText();
-    context.pop(htmlText);
+    RouterService.goBack(context, htmlText);
   }
 
   void cancelPressed() async {
-    context.pop();
+    RouterService.goBack(context);
   }
 
-  ///[setHtmlText] to set the html text to editor
-  void setHtmlText(String text) async {
+  Future<void> setHtmlText(String text) async {
     await controller.setText(text);
   }
-
-
-  /// to clear the editor
-  void clearEditor() => controller.clear();
 }

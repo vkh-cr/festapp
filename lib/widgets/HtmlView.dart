@@ -1,60 +1,104 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import 'package:go_router/go_router.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
-  HtmlWithAppLinksWidget(this.context, super.html, {required ColumnMode renderMode, super.textStyle});
+  HtmlWithAppLinksWidget(this.context, super.html,
+      {required ColumnMode renderMode,
+        super.textStyle,
+        super.customStylesBuilder});
 
   final BuildContext context;
-@override
-  FutureOr<bool> Function(String p1)? get onTapUrl {
-  return (String url) {
-    if(url.startsWith("navigate:"))
-    {
-      var navigateTo = url.replaceFirst(RegExp("navigate:"), "");
-      context.push(navigateTo);
-      return true;
-    }
-    super.onTapUrl?.call(url);
-    return false;
-  };
 
-}
+  @override
+  FutureOr<bool> Function(String p1)? get onTapUrl {
+    return (String url) {
+      if (url.startsWith(AppConfig.webLink) || url.contains("localhost")) {
+        var path = url.split('/#/').last;
+        RouterService.navigate(context, path);
+        return true;
+      } else {
+        super.onTapUrl?.call(url);
+        return false;
+      }
+    };
+  }
+
+  @override
+  void Function(ImageMetadata p1)? get onTapImage {
+    return (ImageMetadata imgData) {
+      return;
+    };
+  }
 }
 
 class HtmlView extends StatefulWidget {
   final String html;
-  double? fontSize;
+  final double? fontSize;
+  final bool isSelectable;
+  Color? color;
 
-  HtmlView({super.key, required this.html, this.fontSize = 18 });
+  HtmlView({
+    Key? key,
+    required this.html,
+    this.fontSize = 18,
+    this.isSelectable = false,
+  }) : super(key: key);
 
   @override
   _HtmlViewState createState() => _HtmlViewState();
 }
 
 class _HtmlViewState extends State<HtmlView> {
-
   _HtmlViewState();
+
   @override
   Widget build(BuildContext context) {
-    var st = DefaultTextStyle.of(context).style;
-    return HtmlWithAppLinksWidget(
-      // the first parameter (`html`) is required
+    widget.color ??= ThemeConfig.defaultHtmlViewColor(context);
+    String widgetColor = colorToRgbString(widget.color);
+    String aColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
+
+    Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
       widget.html,
-      // select the render mode for HTML body
-      // by default, a simple `Column` is rendered
-      // consider using `ListView` or `SliverList` for better performance
       renderMode: RenderMode.column,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
-      fontFamily: "Futura",
-      color: Colors.black,
-      inherit: false,
+        fontFamily: "Futura",
+        color: widget.color,
+        inherit: false,
       ),
+      customStylesBuilder: (element) {
+        final tagName = element.localName;
+        if (tagName == 'a') {
+          return {
+            'color': aColor,
+          };
+        }
+        return null;
+      },
     );
+
+    return widget.isSelectable
+        ? SelectionArea(
+      focusNode: FocusNode(),
+      selectionControls: materialTextSelectionControls,
+      child: htmlWidget,
+    )
+        : htmlWidget;
+  }
+
+  String colorToRgbString(Color? color) {
+    if (color != null) {
+      final int r = color.red;
+      final int g = color.green;
+      final int b = color.blue;
+      return 'rgb($r, $g, $b)';
+    } else {
+      return "";
     }
   }
+}

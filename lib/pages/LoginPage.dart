@@ -1,16 +1,23 @@
-import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/services/ToastHelper.dart';
-import 'package:avapp/widgets/LanguageButton.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/SignupPage.dart';
+import 'package:fstapp/pages/SettingsPage.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/widgets/FormFields.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:avapp/appConfig.dart';
-import '../data/DataService.dart';
-import '../styles/Styles.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 
-
+@RoutePage()
 class LoginPage extends StatefulWidget {
-  static const ROUTE = "/login";
+  static const ROUTE = "login";
   const LoginPage({Key? key}) : super(key: key);
 
   @override
@@ -18,6 +25,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  bool _isLoading = false;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -31,14 +40,21 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> actions = [
+      IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
+      ),
+    ];
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Sign in").tr(),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
-        actions: [const LanguageButton()],
+        actions: actions,
       ),
       body: Align(
         alignment: Alignment.topCenter,
@@ -53,66 +69,64 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 200,
                     ),
+                    Container(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text("First time?".tr(), style: TextStyle(fontSize: 18)),
+                            const SizedBox(
+                              width: 16,
+                            ),
+                            TextButton(
+                                onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                                child: Text("Sign up", style: normalTextStyle).tr())
+                          ]
+                      ),
+                    ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        autofillHints: const [AutofillHints.email],
-                        keyboardType: TextInputType.emailAddress,
-                        controller: _emailController,
-                        decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            labelText: "E-mail".tr()),
-                        validator: (String? value) {
-                          if (value!.isEmpty || !value.contains('@')) {
-                            return "E-mail is not valid!".tr();
-                          }
-                        },
-                      ),
+                      child: FormFields.email(_emailController),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
                           left: 15.0, right: 15.0, top: 15, bottom: 0),
-                      //padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: TextFormField(
-                        controller: _passwordController,
-                        autofillHints: const [AutofillHints.password],
-                        keyboardType: TextInputType.text,
-                        obscureText: true,
-                        decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: "Password".tr()),
-                        validator: (String? value) {
-                          if (value!.isEmpty) {
-                            return "Fill the password!".tr();
-                          }
-                        },
-                      ),
+                      child: PasswordField(label: "Password".tr(), controller:  _passwordController, passwordType: AutofillHints.password),
                     ),
                     const SizedBox(
                       height: 16,
                     ),
+                    ButtonsHelper.bigButton(
+                      context: context,
+                      label: "Sign in".tr(),
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          TextInput.finishAutofillContext();
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          await AuthService.login(AppConfig.getUserPrefix(_emailController.text), _passwordController.text)
+                              .then(_showToast)
+                              .then(_refreshSignedInStatus)
+                              .catchError(_onError);
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
+                      color: ThemeConfig.seed1,
+                      textColor: Colors.white,
+                      isEnabled: !_isLoading,
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
                     Container(
-                      height: 50,
-                      width: 250,
-                      decoration: BoxDecoration(
-                          color: AppConfig.color1,
-                          borderRadius: BorderRadius.circular(20)),
-                      child: TextButton(
-                        onPressed: () async {
-                          if (_formKey.currentState!.validate()) {
-                            TextInput.finishAutofillContext();
-                            await DataService.login(
-                                    _emailController.text, _passwordController.text)
-                                .then(_showToast)
-                                .then(_refreshSignedInStatus)
-                                .catchError(_onError);
-                          }
-                        },
-                        child: const Text(
-                          "Sign in",
-                          style: TextStyle(color: Colors.white, fontSize: 25),
-                        ).tr(),
-                      ),
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
+                            child: Text("Forgot your password?", style: normalTextStyle).tr())
                     ),
                   ],
                 ),
@@ -125,18 +139,18 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _refreshSignedInStatus(value) async {
-    var loggedIn = await DataService.tryAuthUser();
-    if(loggedIn)
-    {
-      NavigationHelper.goBackOrHome(context);
+    var loggedIn = await AuthService.tryAuthUser();
+    if (loggedIn) {
+      RouterService.updateOccasionFromLink(RouterService.currentOccasionLink);
+      RouterService.popOrHome(context);
     }
   }
 
   void _showToast(value) {
-    ToastHelper.Show("Successful sign in!".tr());
+    ToastHelper.Show(context, "Successful sign in!".tr());
   }
 
   void _onError(err) {
-    ToastHelper.Show("Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
+    ToastHelper.Show(context, "Invalid credentials!".tr(), severity: ToastSeverity.NotOk);
   }
 }

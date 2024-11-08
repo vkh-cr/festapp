@@ -6,18 +6,18 @@
     "configurations": [
 
         {
-            "name": "avapp",
+            "name": "festapp",
             "request": "launch",
             "type": "dart",
         },
         {
-            "name": "avapp (profile mode)",
+            "name": "festapp (profile mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile"
         },
         {
-            "name": "avapp (release mode)",
+            "name": "festapp (release mode)",
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"

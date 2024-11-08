@@ -1,45 +1,98 @@
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-import * as OneSignal from 'https://esm.sh/@onesignal/node-onesignal@1.0.0-beta7'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
-const _OnesignalAppId_ = Deno.env.get('ONESIGNAL_APP_ID')!
-const _OnesignalUserAuthKey_ = Deno.env.get('USER_AUTH_KEY')!
-const _OnesignalRestApiKey_ = Deno.env.get('ONESIGNAL_REST_API_KEY')!
-const configuration = OneSignal.createConfiguration({
-  userKey: _OnesignalUserAuthKey_,
-  appKey: _OnesignalRestApiKey_,
-})
+const _supabase = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
 
-const onesignal = new OneSignal.DefaultApi(configuration)
+Deno.serve(async (req) => {
+  const { record } = await req.json();
+  const organizationId = record.organization; // assuming `organization` is passed in `record`
+  const url = 'https://onesignal.com/api/v1/notifications';
 
-serve(async (req) => {
-  try {
-    const { record } = await req.json()
+  // Fetch organization data to get ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, and DEFAULT_URL
+  const orgData = await _supabase
+    .from("organizations")
+    .select("data")
+    .eq("id", organizationId)
+    .single();
 
-    // Build OneSignal notification object
-    const notification = new OneSignal.Notification()
-    notification.app_id = _OnesignalAppId_
-    notification.included_segments = ["All"]
-    notification.contents = {
-      en: record.content,
-    }
+  if (orgData.error || !orgData.data) {
+    console.error("Organization data not found.");
+    return new Response(JSON.stringify({ error: "Organization data not found" }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 404,
+    });
+  }
 
-    notification.headings = {
-          en: record.heading,
-        }
+  const orgConfig = orgData.data.data;
+  const onesignalAppId = orgConfig.ONESIGNAL_APP_ID;
+  const onesignalRestApiKey = orgConfig.ONESIGNAL_REST_API_KEY;
+  const defaultUrl = orgConfig.DEFAULT_URL;
 
-    const onesignalApiRes = await onesignal.createNotification(notification)
-
+  // Check if any required config values are missing
+  if (!onesignalAppId || !onesignalRestApiKey || !defaultUrl) {
+    console.error("Required organization configuration is missing.");
     return new Response(
-      JSON.stringify({ onesignalResponse: onesignalApiRes }),
+      JSON.stringify({ error: "Missing required organization configuration" }),
       {
         headers: { 'Content-Type': 'application/json' },
+        status: 400,
       }
-    )
-  } catch (err) {
-    console.error('Failed to create OneSignal notification', err)
-    return new Response('Server error.', {
-      headers: { 'Content-Type': 'application/json' },
-      status: 400,
-    })
+    );
   }
-})
+
+  // Fetch the link for the current occasion
+  const currentLink = await _supabase
+    .from("occasions")
+    .select("link")
+    .eq("id", record.occasion)
+    .single();
+
+  if (currentLink.error || !currentLink.data) {
+    console.error("Occasion link not found.");
+    return new Response(JSON.stringify({ error: "Occasion link not found" }), {
+      headers: { 'Content-Type': 'application/json' },
+      status: 404,
+    });
+  }
+
+  // Construct payload for OneSignal notification
+  let payload: Record<string, any> = {};
+
+  if (record.to) {
+    payload = {
+      app_id: onesignalAppId,
+      web_url: `${defaultUrl}/#/${currentLink.data.link}/news`,
+      include_aliases: { "external_id": record.to },
+      target_channel: "push",
+      headings: { en: record.heading },
+      contents: { en: record.content },
+    };
+  } else {
+    payload = {
+      app_id: onesignalAppId,
+      included_segments: ["All"],
+      headings: { en: record.heading },
+      contents: { en: record.content },
+    };
+  }
+
+  // Send notification to OneSignal
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${onesignalRestApiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error('Error sending notification:', errorData);
+  } else {
+    const data = await response.json();
+    console.log('Notification sent successfully:', data);
+  }
+});
