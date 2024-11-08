@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_map_animations/flutter_map_animations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/components/map/MapPlaceModel.dart';
@@ -23,6 +24,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class MapPage extends StatefulWidget {
@@ -236,8 +238,31 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               TileLayer(
                 tileProvider: CancellableNetworkTileProvider(),
                 maxZoom: 19,
-                urlTemplate: AppConfig.mapLayer,
+                urlTemplate: SynchroService.globalSettingsModel!.mapLayerLayerLink ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              ),
+              RichAttributionWidget(
+                showFlutterMapAttribution: false,
+                animationConfig: const ScaleRAWA(),
+                attributions: [
+                  if (SynchroService.globalSettingsModel!.mapLayerLogo != null)
+                    LogoSourceAttribution(
+                      SvgPicture.network(
+                        SynchroService.globalSettingsModel!.mapLayerLogo!,
+                        height: 28,
+                      ),
+                      onTap: SynchroService.globalSettingsModel!.mapLayerLogoLink != null
+                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerLogoLink!))
+                          : null,
+                    ),
+                  if (SynchroService.globalSettingsModel!.mapLayerText != null)
+                    TextSourceAttribution(
+                      SynchroService.globalSettingsModel!.mapLayerText!,
+                      onTap: SynchroService.globalSettingsModel!.mapLayerTextLink != null
+                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerTextLink!))
+                          : null,
+                    ),
+                ],
               ),
               CurrentLocationLayer(),
               PopupMarkerLayer(
