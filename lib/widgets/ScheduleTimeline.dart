@@ -1,12 +1,12 @@
-import 'package:avapp/styles/Styles.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:timelines/timelines.dart';
-import 'package:avapp/appConfig.dart';
 
-import '../models/EventModel.dart';
 
 enum DotType {
   dot, open, closed
@@ -36,11 +36,11 @@ class TimeLineItem{
       {
         return DotType.closed;
       }
-      else if(model.currentParticipants != null && model.maxParticipants != null && model.isFull())
+      else if(model.maxParticipantsNumber() > 0 && model.isFull())
       {
         return DotType.dot;
       }
-      else if (EventModel.canSignIn(model))
+      else if (model.maxParticipantsNumber() > 0 && !model.isFull())
       {
         return DotType.open;
       }
@@ -104,14 +104,14 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
 
       if (children.isEmpty)
       {
-        children.add(Center(
+        return Center(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.fromLTRB(24,88,24,24),
             child: const Text(
-                "There will appear your events.",
-                style: TextStyle(fontSize: 20),).tr(),
+              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
+              style: TextStyle(fontSize: 20),).tr(),
           ),
-        ));
+        );
       }
       return SingleChildScrollView(
           child: Column(
@@ -166,9 +166,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: AppConfig.color1),
+            IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: AppConfig.color1, thickness: 2),
+            .copyWith(color: ThemeConfig.timelineColor, thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -177,7 +177,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(event.leftText, style: timeLineSmallTextStyle,),
+            child: Text(event.leftText, style: const TextStyle(fontSize: 15),),
           );
         },
         contentsBuilder: (_, index) {
@@ -195,10 +195,10 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: AppConfig.color1, borderWidth: event.dotType == DotType.closed ? 6 : 2)
-              : const Padding(
+                  color: ThemeConfig.timelineColor, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+              : Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: AppConfig.color1, size: 8));
+                  child: DotIndicator(color: ThemeConfig.timelineColor, size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

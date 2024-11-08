@@ -1,14 +1,14 @@
-import 'package:avapp/appConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:fstapp/themeConfig.dart';
 
 enum ToastSeverity{
   Ok, NotOk
 }
 class ToastHelper {
-  static void Show(String value, {ToastSeverity severity = ToastSeverity.Ok}) {
+  static void Show(BuildContext context, String value, {ToastSeverity severity = ToastSeverity.Ok}) {
 
-    Color color = AppConfig.color1;
+    Color color = ThemeConfig.seed1;
     var hexCode = '#${color.value.toRadixString(16).substring(2, 8)}';
     String webColor = hexCode;
     if(severity!=ToastSeverity.Ok)

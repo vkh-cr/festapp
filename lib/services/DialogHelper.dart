@@ -1,15 +1,15 @@
-import 'package:avapp/models/LanguageModel.dart';
-import 'package:avapp/models/UserGroupInfoModel.dart';
-import 'package:avapp/services/ToastHelper.dart';
+import 'package:fstapp/dataModels/LanguageModel.dart';
+import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:avapp/appConfig.dart';
+import 'package:fstapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
 
-import '../models/UserInfoModel.dart';
 import '../widgets/DropFile.dart';
 
 class DialogHelper{
@@ -35,7 +35,7 @@ class DialogHelper{
           ],
           builder: (person) => ListTile(
             title: Text(person.name!),
-            subtitle: Text(person.surname!),
+            subtitle: Text(person.surname??""),
             trailing: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -78,39 +78,39 @@ class DialogHelper{
   static Future<bool> showConfirmationDialogAsync(
       BuildContext context,
       String titleMessage,
-      String textMessage,
-  {
-    String confirmButtonMessage = "Ok",
-    String cancelButtonMessage = "Storno"
-  }
-      ) async {
+      String textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
     bool result = false;
     await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(titleMessage),
-            content: SingleChildScrollView(child: Text(textMessage)),
-            actions: [
-              ElevatedButton(
-                child: Text(cancelButtonMessage),
-                onPressed: () {
-                  result = false;
-                  Navigator.of(context).pop();
-                },
-              ),
-              ElevatedButton(
-                child: Text(confirmButtonMessage),
-                onPressed: () {
-                  result = true;
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        });
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: SingleChildScrollView(child: Text(textMessage)),
+          actions: [
+            TextButton(
+              child: Text(cancelButtonMessage),
+              onPressed: () {
+                result = false;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
     return result;
   }
+
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
       BuildContext context,
@@ -148,7 +148,7 @@ class DialogHelper{
   static Future<LanguageModel?> chooseLanguage(
       BuildContext context,
       ) async {
-    var locales = AppConfig.AvailableLanguages;
+    var locales = AppConfig.availableLanguages;
     LanguageModel? selectedLocale;
     await SelectDialog.showModal<LanguageModel>(
       context,
@@ -178,7 +178,7 @@ class DialogHelper{
     if(selectedLocale!=null)
     {
       context.setLocale(selectedLocale!.locale);
-      ToastHelper.Show("Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
+      ToastHelper.Show(context, "Language was set to {language}.".tr(namedArgs: {"language":selectedLocale!.name}));
     }
     return selectedLocale;
   }
@@ -264,5 +264,43 @@ class DialogHelper{
       },
     );
     return filePath;
+  }
+
+
+  static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Notifications").tr(),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text("Notifications will inform you about schedule changes and other selected news.").tr(),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Disable").tr(),
+              onPressed: () {
+                result = false;
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text("Enable").tr(),
+              onPressed: () async {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
   }
 }

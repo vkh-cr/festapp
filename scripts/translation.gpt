@@ -2,16 +2,17 @@ Translate the following English sentence into the languages listed below. For ea
 
 Format the result as key:value pairs. An example of the format is shown below:
 
-"English text": "Translation into cs language",
-"English text": "Translation into sk language",
-"English text": "Translation into pl language",
+"English text1": "Translation into cs language1",
+"English text2": "Translation into cs language2",
+"English text3": "Translation into cs language3",
 
 
 English sentence for translation:
-"Schedule":"Schedule",
-  "My schedule":"My schedule",
-  "Added to My schedule.":"Added to My schedule.",
-  "Removed from My schedule.":"Removed from My schedule.",
+"Manager": "Manager",
+  "Approver": "Approver",
+  "Approved": "Approved",
+  "Password has been changed.": "Password has been changed.",
+  "Roles": "Roles",
 
 Languages: cs, sk, pl, de, uk
 

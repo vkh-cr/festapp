@@ -1,19 +1,22 @@
-import 'package:avapp/appConfig.dart';
-import 'package:avapp/data/DataExtensions.dart';
-import 'package:avapp/data/DataService.dart';
-import 'package:avapp/data/OfflineDataHelper.dart';
-import 'package:avapp/models/InformationModel.dart';
-import 'package:avapp/services/NavigationHelper.dart';
-import 'package:avapp/styles/Styles.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/DataExtensions.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
+import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/themeConfig.dart';
 
 import '../widgets/HtmlView.dart';
 
+@RoutePage()
 class SongPage extends StatefulWidget {
   final String? type = "song";
 
-  static const ROUTE = "/songs";
+  static const ROUTE = "songs";
 
   SongPage({super.key});
 
@@ -45,7 +48,7 @@ class _SongPageState extends State<SongPage> {
       appBar: AppBar(
         title: Text(title),
         leading: BackButton(
-          onPressed: () => NavigationHelper.goBackOrHome(context),
+          onPressed: () => RouterService.popOrHome(context),
         ),
       ),
       body: Align(
@@ -110,8 +113,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                   ),
                                 ),
@@ -131,8 +134,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                     child: const Icon(Icons.remove,
                                         color: Colors.white),
@@ -148,8 +151,8 @@ class _SongPageState extends State<SongPage> {
                                     style: ElevatedButton.styleFrom(
                                       shape: CircleBorder(),
                                       padding: EdgeInsets.all(12),
-                                      backgroundColor: AppConfig.color1,
-                                      foregroundColor: AppConfig.color2,
+                                      backgroundColor: ThemeConfig.seed1,
+                                      foregroundColor: ThemeConfig.seed2,
                                     ),
                                     child: Icon(Icons.adaptive.arrow_back,
                                         color: Colors.white),
@@ -163,7 +166,7 @@ class _SongPageState extends State<SongPage> {
                   child: Container(
                       padding: const EdgeInsets.all(12),
                       alignment: Alignment.centerLeft,
-                      child: Text(_informationList![index].title, textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
+                      child: Text(_informationList![index].title??"-", textAlign: TextAlign.left, style: TextStyle(fontSize: 18),)),
                 );
               }),
         ),
@@ -172,10 +175,10 @@ class _SongPageState extends State<SongPage> {
   }
 
   Future<void> loadData() async {
-    _informationList = OfflineDataHelper.getAllInfo().filterByType(widget.type);
-    var allInfo = await DataService.getAllActiveInformation();
+    _informationList = (await OfflineDataService.getAllInfo()).filterByType(widget.type);
+    var allInfo = await DbInformation.getAllActiveInformation();
     _informationList = allInfo.filterByType(widget.type);
-    OfflineDataHelper.saveAllInfo(allInfo);
+    OfflineDataService.saveAllInfo(allInfo);
     setState(() {});
   }
 }
