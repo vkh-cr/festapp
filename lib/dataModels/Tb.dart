@@ -27,7 +27,7 @@ class Tb {
   static OrganizationsTb organizations = const OrganizationsTb();
   static OrganizationUsersTb organization_users = const OrganizationUsersTb();
 }
-class OccasionsTb{
+class OccasionsTb {
   const OccasionsTb();
   String get table => "occasions";
   String get id => "id";
@@ -46,6 +46,15 @@ class OccasionsTb{
   String get data_events_registration_start => "events_registration_start";
   String get data_is_enabled_entry_code => "is_enabled_entry_code";
   String get data_max_companions => "max_companions";
+
+  // Map layer keys as nested object
+  String get data_map_layer => "map_layer";
+  String get data_map_layer_layer_link => "layer_link";
+  String get data_map_layer_logo => "logo";
+  String get data_map_layer_text => "text";
+  String get data_map_layer_logo_link => "logo_link";
+  String get data_map_layer_text_link => "text_link";
+
   String get services => "services";
 }
 class OccasionUsersTb{
