@@ -43,10 +43,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF80BDF2);
-  static Color seed3 = const Color(0xFF4465A6);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seed1 = const Color(0xFF122640);
+  static Color seed2 = const Color(0xFFBF8641);
+  static Color seed3 = const Color(0xFF1B3659);
+  static Color seed4 = const Color(0xFF593E25);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
@@ -64,7 +64,7 @@ class ThemeConfig {
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
 
-  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
+  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.4) : seed1.changeColorSaturation(0.4).changeColorLightness(0.3);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
