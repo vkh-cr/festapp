@@ -25,7 +25,6 @@ BEGIN
 
     -- If no link is provided, get the default occasion from the organization
     IF link_txt IS NULL OR link_txt = '' THEN
-        -- Get the default occasion ID from the organization's data
         SELECT data->>'DEFAULT_OCCASION' INTO occasionId
         FROM organizations
         WHERE id = org_id;
@@ -86,20 +85,9 @@ BEGIN
 
     -- If the occasion is not open, enforce access restrictions
     IF is_open_bool = FALSE THEN
-        IF auth.uid() IS NULL THEN
+        IF auth.uid() IS NULL OR occasion_user IS NULL THEN
             RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
         END IF;
-        IF occasion_user IS NULL AND NOT is_admin_bool THEN
-            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
-        END IF;
-        RETURN json_build_object(
-            'code', 200,
-            'is_admin', is_admin_bool,
-            'occasion_user', COALESCE(row_to_json(occasion_user)::jsonb, NULL),
-            'link', occasion_link,
-            'occasion', occasionId,
-            'version_recommended', version_recommended
-        );
     END IF;
 
     -- If the occasion user record is not found, the user is authenticated, and the occasion is open
@@ -114,22 +102,11 @@ BEGIN
           AND "user" = auth.uid();
     END IF;
 
-    -- If the occasion user record is still not found and the user is not an admin, return basic occasion data
-    IF occasion_user IS NULL THEN
-        RETURN json_build_object(
-            'code', 200,
-            'is_admin', is_admin_bool,
-            'link', occasion_link,
-            'occasion', occasionId,
-            'version_recommended', version_recommended
-        );
-    END IF;
-
-    -- Return full occasion data including the user and admin status
+    -- Return final response with all data and status code 200 at the end
     RETURN json_build_object(
         'code', 200,
         'is_admin', is_admin_bool,
-        'occasion_user', row_to_json(occasion_user)::jsonb,
+        'occasion_user', COALESCE(row_to_json(occasion_user)::jsonb, NULL),
         'link', occasion_link,
         'occasion', occasionId,
         'version_recommended', version_recommended
