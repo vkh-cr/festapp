@@ -253,7 +253,7 @@ class _UserPageState extends State<UserPage> {
                                                   onEventPressed: (eventId) async {
                                                     await RouterService.navigateOccasion(
                                                         context,
-                                                        "${EventPage.ROUTE}/$eventId");
+                                                        "${EventPage.ROUTE}/$eventId").then((value) => loadData());
                                                     await loadData();
                                                   },
                                                   nodePosition: 0.3,
@@ -467,7 +467,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    RouterService.navigateOccasion(context, AdminPage.ROUTE);
+    RouterService.navigateOccasion(context, AdminPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> loadData() async {
