@@ -7,6 +7,7 @@ import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -65,7 +66,8 @@ class AuthService {
   }
 
   static Future<UserInfoModel> getFullUserInfo() async {
-    var user = await DbUsers.getCurrentUserInfo();
+    var user = UserInfoModel();
+    user.occasionUser = await DbUsers.getOccasionUser(AuthService.currentUserId());
     if(RightsService.currentUserOccasion?.role != null) {
       user.roleString = await getRoleInfo(RightsService.currentUserOccasion!.role!);
     }
@@ -76,7 +78,10 @@ class AuthService {
     if(SynchroService.globalSettingsModel!.isEnabledEntryCode??false) {
       user.companions = await DbCompanions.getAllCompanions();
     }
-
+    var place = SynchroService.globalSettingsModel!.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
+    if(place!=null){
+      user.accommodationPlace = PlaceModel(id: place.reference, title: place.title, description: "", type: "");
+    }
     return user;
   }
 

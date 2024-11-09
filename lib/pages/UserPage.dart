@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
@@ -174,9 +175,9 @@ class _UserPageState extends State<UserPage> {
                           context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
-                              userData!.name!,
+                              userData?.occasionUser!.data![Tb.occasion_users.data_name],
                               AppConfig.appName,
-                              userData!.id!),
+                              userData?.occasionUser!.user!??""),
                           label: "Show my code".tr(),
                         ),
                       ),
@@ -203,7 +204,7 @@ class _UserPageState extends State<UserPage> {
                               }
 
                               final companion =
-                                  userData!.companions![index - 1];
+                                  userData?.companions![index - 1];
 
                               return Padding(
                                 padding:
@@ -221,7 +222,7 @@ class _UserPageState extends State<UserPage> {
                                       child: ExpansionTile(
                                         //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
                                         shape: const Border(),
-                                        title: Text(companion.name, style: TextStyle(
+                                        title: Text(companion!.name, style: TextStyle(
                                             fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),),
                                         subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
                                             style: TextStyle(
@@ -302,10 +303,10 @@ class _UserPageState extends State<UserPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                buildTextField("Name".tr(), userData?.name ?? ""),
-                buildTextField("Surname".tr(), userData?.surname ?? ""),
-                buildTextField("E-mail".tr(), userData?.email ?? ""),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
+                buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
+                buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
+                buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
+                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 buildTextField("Role".tr(), userData?.roleString ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -318,8 +319,8 @@ class _UserPageState extends State<UserPage> {
                         child: TextButton(
                             onPressed: userData?.accommodationPlace == null
                                 ? null
-                                : () => RouterService.navigate(context,
-                                    "${MapPage.ROUTE}/${userData!.accommodationPlace!.id!}"),
+                                : () => RouterService.navigateOccasion(context,
+                                    "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}"),
                             child: Text(
                                 userData?.accommodationPlace?.title ??
                                     "Without accommodation".tr(),
@@ -374,7 +375,7 @@ class _UserPageState extends State<UserPage> {
                             confirmButtonMessage: "Proceed".tr());
                         if (answer) {
                           await AuthService.resetPasswordForEmail(
-                                  userData!.email!)
+                              userData!.occasionUser!.data![Tb.occasion_users.data_email])
                               .then((value) {
                             ToastHelper.Show(
                                 context,
@@ -384,7 +385,7 @@ class _UserPageState extends State<UserPage> {
                                 "Change Password Instructions".tr(),
                                 "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
                                     .tr(namedArgs: {
-                                  "email": userData!.email!
+                                  "email": userData!.occasionUser!.data![Tb.occasion_users.data_email]
                                 }));
                           });
                         }
