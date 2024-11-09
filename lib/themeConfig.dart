@@ -33,7 +33,7 @@ class ThemeConfig {
         primarySwatch: ThemeConfig.dddPrimary.getMaterialColorFromColor(),
       ).copyWith(
         brightness: Brightness.dark,
-        surface: dddPrimary.changeColorSaturation(0.06).changeColorLightness(0.20),
+        surface: seed3.changeColorSaturation(0.06).changeColorLightness(0.20),
         onSurface: dddText,
       ),
       appBarTheme: AppBarTheme(color: appBarColor()),
@@ -50,7 +50,7 @@ class ThemeConfig {
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
-  static Color dddPrimary = seed3;
+  static Color dddPrimary = seed1;
   static Color lllPrimary = seed3;
 
   static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
