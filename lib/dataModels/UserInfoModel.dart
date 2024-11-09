@@ -14,7 +14,6 @@ class UserInfoModel {
   String? sex;
   String? role;
   String? phone;
-  String? accommodation;
   DateTime? birthDate;
   bool? isAdmin = false;
   bool? isEditor = false;
@@ -61,7 +60,6 @@ class UserInfoModel {
      this.isAdmin,
      this.isEditor,
      this.phone,
-     this.accommodation,
      this.accommodationPlace,
      this.userGroup,
      this.occasionUser,
@@ -78,12 +76,6 @@ class UserInfoModel {
       email: json[emailReadonlyColumn]??json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
-      //todo remove
-      phone: json[phoneColumn],
-      //todo remove
-      role: json[roleColumn],
-      //todo remove
-      accommodation: json[accommodationColumn],
       accommodationPlace: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
       userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
       occasionUser: json[occasionUserColumn]!=null?OccasionUserModel.fromJson(json[occasionUserColumn]):null,
@@ -142,18 +134,6 @@ class UserInfoModel {
     }
 
     return "Not specified".tr();
-  }
-  bool importedEquals(Map<String, dynamic> u) {
-    return 
-        u[emailReadonlyColumn].toString().trim().toLowerCase() == email
-        && u[nameColumn].toString().trim() == name
-        && u[surnameColumn].toString().trim() == surname
-        && u[accommodationColumn].toString().trim() == accommodation
-        && u[roleColumn].toString().trim() == role
-        && u[phoneColumn].toString().trim() == phone
-        //todo fix
-        //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
-        && (u[sexColumn].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == sex;
   }
 
   @override
