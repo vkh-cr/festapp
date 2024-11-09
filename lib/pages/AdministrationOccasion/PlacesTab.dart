@@ -16,9 +16,8 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 class PlacesTab extends StatelessWidget {
   final List<IconModel> svgIcons;
   final List<int?> mapIcons;
-  final Future<void> Function() loadPlaces;
 
-  const PlacesTab({Key? key, required this.svgIcons, required this.mapIcons, required this.loadPlaces}) : super(key: key);
+  const PlacesTab({Key? key, required this.svgIcons, required this.mapIcons}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +27,6 @@ class PlacesTab extends StatelessWidget {
       PlaceModel.fromPlutoJson,
       DataGridFirstColumn.deleteAndDuplicate,
       Tb.places.id,
-      actionsExtended: DataGridActionsController(saveAction:
-      DataGridAction(
-          action: (datagrid, [action]) async {
-            await action!();
-            await loadPlaces();
-          }
-      )),
       columns: [
         PlutoColumn(
           title: "Id".tr(),

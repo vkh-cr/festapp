@@ -44,7 +44,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   Future<void> loadData() async {
     // Load data for all tabs
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
-    await loadPlaces();
     var svgs = await DbPlaces.getAllIcons();
     svgIcons.clear();
     svgIcons.addAll(svgs);
@@ -53,14 +52,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     mapIcons.add(null);
 
     setState(() {});
-  }
-
-  Future<void> loadPlaces() async {
-    var placesRaws = await DbPlaces.getMapPlaces();
-    var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
-    placesStrings.add(PlaceModel.WithouValue);
-    places.clear();
-    places.addAll(placesStrings);
   }
 
   @override
@@ -133,8 +124,8 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
           physics: const NeverScrollableScrollPhysics(),
           children: [
             InformationTab(),
-            EventsTab(occasionModel: occasionModel, places: places),
-            PlacesTab(svgIcons: svgIcons, mapIcons: mapIcons, loadPlaces: loadPlaces,),
+            EventsTab(occasionModel: occasionModel),
+            PlacesTab(svgIcons: svgIcons, mapIcons: mapIcons),
             ExclusivityTab(),
             UserGroupsTab(),
             ServiceTab(),
