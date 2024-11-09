@@ -19,7 +19,7 @@ BEGIN
     SELECT 1
     FROM public.occasion_users
     WHERE occasion_users.occasion = oc
-      AND occasion_users.services->type @> jsonb_build_array(jsonb_build_object('code', code))
+      AND (occasion_users.services->type->>code IS NOT NULL AND occasion_users.services->type->>code <> 'none')
   ) INTO in_use;
 
   -- If the code is in use and force is not true, return an error response
@@ -36,12 +36,21 @@ BEGIN
     SET services = jsonb_set(
       services,
       ARRAY[type],
-      (SELECT jsonb_agg(item)
-       FROM jsonb_array_elements(services->type) AS item
-       WHERE item->>'code' IS DISTINCT FROM code)
+      (services->type) - code
     )
     WHERE occasion_users.occasion = oc
-      AND occasion_users.services->type @> jsonb_build_array(jsonb_build_object('code', code));
+      AND (occasion_users.services->type->>code IS NOT NULL AND occasion_users.services->type->>code <> 'none');
+  END IF;
+
+  IF NOT force AND NOT in_use THEN
+    UPDATE public.occasion_users
+    SET services = jsonb_set(
+      services,
+      ARRAY[type],
+      (services->type) - code
+    )
+    WHERE occasion_users.occasion = oc
+      AND (occasion_users.services->type->>code IS NULL OR occasion_users.services->type->>code = 'none');
   END IF;
 
   -- Remove the item from the occasions.services->type array

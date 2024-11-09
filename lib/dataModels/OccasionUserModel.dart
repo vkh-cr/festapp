@@ -173,7 +173,10 @@ class OccasionUserModel extends IPlutoRowModel {
     return PlutoRow(cells: json);
   }
 
-  static void mapOneToServices(Map<String, dynamic> services, String serviceType, String key, String value) {
+  static void mapOneToServices(Map<String, dynamic> services, String serviceType, String? key, String value) {
+    if(key == null) {
+      return;
+    }
     if(services[serviceType] == null) {
       services[serviceType] = {};
     }
@@ -215,7 +218,7 @@ class OccasionUserModel extends IPlutoRowModel {
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-      role: int.tryParse(json[Tb.occasion_users.role]),
+      role: int.tryParse(json[Tb.occasion_users.role]??""),
       services: services,
       data: {
         Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim(),
