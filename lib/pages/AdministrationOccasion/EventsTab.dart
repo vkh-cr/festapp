@@ -6,16 +6,40 @@ import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class EventsTab extends StatelessWidget {
+class EventsTab extends StatefulWidget {
   final OccasionModel? occasionModel;
-  final List<String> places;
 
-  const EventsTab({Key? key, required this.occasionModel, required this.places}) : super(key: key);
+  const EventsTab({Key? key, required this.occasionModel}) : super(key: key);
+
+  @override
+  _EventsTabState createState() => _EventsTabState();
+}
+
+class _EventsTabState extends State<EventsTab> {
+  List<String> places = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadPlaces();
+  }
+
+  Future<void> loadPlaces() async {
+    var placesRaws = await DbPlaces.getMapPlaces();
+    var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
+    placesStrings.add(PlaceModel.WithouValue);
+    setState(() {
+      places.clear();
+      places.addAll(placesStrings);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +83,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "Start date".tr(),
             field: EventModel.startDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: widget.occasionModel?.startTime),
             width: 140,
           ),
           PlutoColumn(
@@ -71,7 +95,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "End date".tr(),
             field: EventModel.endDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: widget.occasionModel?.startTime),
             width: 140,
           ),
           PlutoColumn(
@@ -107,7 +131,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "Place".tr(),
             field: EventModel.placeColumn,
-            type: PlutoColumnType.select([]),
+            type: PlutoColumnType.select(places),
             applyFormatterInEditing: true,
             formatter: DataGridHelper.GetValueFromFormatted,
           ),
