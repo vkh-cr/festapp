@@ -314,6 +314,7 @@ class _UserPageState extends State<UserPage> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text("Accommodation").tr(),
+                      SizedBox.fromSize(size: const Size(4.0, 4.0)),
                       Container(
                         alignment: Alignment.topLeft,
                         child: TextButton(
@@ -321,10 +322,22 @@ class _UserPageState extends State<UserPage> {
                                 ? null
                                 : () => RouterService.navigateOccasion(context,
                                     "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}"),
-                            child: Text(
+                            child: userData?.accommodationPlace == null ?
+                            Text(
                                 userData?.accommodationPlace?.title ??
                                     "Without accommodation".tr(),
-                                style: const TextStyle(fontSize: 17))),
+                                style: const TextStyle(fontSize: 20)) :
+                            IntrinsicWidth(
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.place),
+                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
+                                  Text(userData!.accommodationPlace!.title!, style: const TextStyle(fontSize: 20)),
+                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
+                                ],
+                              ),
+                            )
+                        ),
                       )
                     ],
                   ),
