@@ -164,7 +164,6 @@
   "Welcome in {name}!": "Ласкаво просимо до {name}!",
   "Invite": "Запросити",
   "Invited": "Запрошено",
-  "Users will get invitation via e-mail.": "Користувачі отримають запрошення по електронній пошті.",
   "Invite users who have already been invited?": "Запросити користувачів, які вже були запрошені?",
   "Invited: {user}.": "Запрошено: {user}.",
   "Token is not valid.": "Токен недійсний.",
@@ -258,5 +257,8 @@
   "Food": "Їжа",
   "To create food, fill in the title, unique code, and the reference of the event.": "Щоб створити їжу, заповніть назву, унікальний код та посилання на програму.",
   "Not specified": "Не вказано",
+  "Users will get a sign in code via e-mail.": "Користувачі отримають код для входу на електронну пошту.",
+  "Users ({count}) invited successfully.": "Користувачі ({count}) успішно запрошені.",
+  "Progress": "Прогрес",
   "_": "_"
 }
