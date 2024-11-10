@@ -133,13 +133,46 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
-    var confirm = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "${"Users will get invitation via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}");
+    var confirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Invite".tr(),
+        "${"Users will get a sign in code invitation via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
+    );
+
     if (confirm) {
+      ValueNotifier<int> invitedCount = ValueNotifier(0);
+
+      // Show the progress dialog and update the count via the notifier
+      DialogHelper.showProgressDialogAsync(
+        context,
+        "Invite".tr(),
+        users.length,
+        invitedCount,
+      );
+
       for (var user in users) {
         await AuthService.sendSignInCode(user);
-        ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}));
+        invitedCount.value++;
+
+        // Show toast notification after each invitation
+        ToastHelper.Show(
+          context,
+          "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
+        );
       }
+
+      // Close the dialog after all users are invited
+      Navigator.of(context).pop();
+
       await loadUsers(); // Reload users and force rebuild
+
+      // Display final information dialog
+      await DialogHelper.showInformationDialogAsync(
+        context,
+        "Invite".tr(),
+        "Users {count} invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
+      );
+
     }
   }
 }

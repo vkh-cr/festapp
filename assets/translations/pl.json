@@ -164,7 +164,6 @@
   "Welcome in {name}!": "Witaj w {name}!",
   "Invite": "Zaproś",
   "Invited": "Zaproszony",
-  "Users will get invitation via e-mail.": "Użytkownicy otrzymają zaproszenie drogą e-mailową.",
   "Invite users who have already been invited?": "Zaprosić użytkowników, którzy już zostali zaproszeni?",
   "Invited: {user}.": "Zaproszony: {user}.",
   "Token is not valid.": "Token nie jest ważny.",
@@ -257,5 +256,8 @@
   "Food": "Jedzenie",
   "To create food, fill in the title, unique code, and the reference of the event.": "Aby utworzyć jedzenie, wypełnij tytuł, unikalny kod i odniesienie do programu.",
   "Not specified": "Nieokreślony",
+  "Users will get a sign in code via e-mail.": "Użytkownicy otrzymają kod logowania za pomocą e-maila.",
+  "Users ({count}) invited successfully.": "Użytkownicy ({count}) zostali pomyślnie zaproszeni.",
+  "Progress": "Postęp",
   "_": "_"
 }
