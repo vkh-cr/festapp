@@ -1,10 +1,7 @@
-import { SMTPClient } from "https://deno.land/x/denomailer/mod.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
-const _SMTP_HOSTNAME = Deno.env.get('SMTP_HOSTNAME')!;
-const _SMTP_USER_NAME = Deno.env.get('SMTP_USER_NAME')!;
-const _SMTP_USER_PASSWORD = Deno.env.get('SMTP_USER_PASSWORD')!;
-const _DEFAULT_EMAIL = Deno.env.get('DEFAULT_EMAIL')!;
+const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
 const _supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
@@ -22,10 +19,9 @@ Deno.serve(async (req) => {
   }
 
   const reqData = await req.json();
-  const userEmail = reqData.email.trim();;
+  const userEmail = reqData.email.trim();
   const organizationId = reqData.organization;
 
-  // Retrieve organization-specific settings for APP_NAME and DEFAULT_URL
   const orgData = await _supabase
     .from("organizations")
     .select("data")
@@ -44,8 +40,7 @@ Deno.serve(async (req) => {
   const appName = orgConfig.APP_NAME;
   const defaultUrl = orgConfig.DEFAULT_URL;
 
-  // Check if any required config values are missing
-  if (!appName || !defaultUrl || !_SMTP_HOSTNAME || !_SMTP_USER_NAME || !_SMTP_USER_PASSWORD) {
+  if (!appName || !defaultUrl) {
     console.error("Required configuration is missing.");
     return new Response(
       JSON.stringify({ error: "Missing required configuration" }),
@@ -56,24 +51,22 @@ Deno.serve(async (req) => {
     );
   }
 
-    // Check if the email already exists in user_info
-    const userData = await _supabase
-      .from("user_info")
-      .select()
-      .eq("email_readonly", userEmail)
-      .eq("organization", organizationId) // Add organization ID condition
-      .maybeSingle();
+  const userData = await _supabase
+    .from("user_info")
+    .select()
+    .eq("email_readonly", userEmail)
+    .eq("organization", organizationId)
+    .maybeSingle();
 
-    if (userData.data != null) {
-      return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
-    }
+  if (userData.data != null) {
+    return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    });
+  }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Create user using the stored procedure
   const { data } = await _supabase.rpc("create_user_in_organization_with_data", {
     org: organizationId,
     email: userEmail,
@@ -81,40 +74,24 @@ Deno.serve(async (req) => {
     data: reqData,
   });
 
-  const userId = data;
-  console.log(userId);
-
-  // Fetch email template
   const template = await _supabase
     .from("email_templates")
     .select()
     .eq("id", "SIGN_IN_CODE")
     .single();
 
-  let html = template.data.html;
-  html = html.replaceAll(`{{code}}`, code);
-  html = html.replaceAll(`{{email}}`, userEmail);
+  const subs = {
+    code: code,
+    email: userEmail,
+  };
 
-  const client = new SMTPClient({
-    connection: {
-      hostname: _SMTP_HOSTNAME,
-      port: 465,
-      tls: true,
-      auth: {
-        username: _SMTP_USER_NAME,
-        password: _SMTP_USER_PASSWORD,
-      },
-    },
-  });
-
-  await client.send({
-    from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
+  await sendEmailWithSubs({
     to: userEmail,
     subject: template.data.subject,
-    html: html,
+    content: template.data.html,
+    subs,
+    from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
-
-  await client.close();
 
   await _supabase
     .from("log_emails")

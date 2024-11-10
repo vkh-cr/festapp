@@ -303,4 +303,34 @@ class DialogHelper{
     );
     return result;
   }
+
+  static Future<void> showProgressDialogAsync(
+      BuildContext context,
+      String title,
+      int total,
+      ValueNotifier<int> progressNotifier,
+      ) async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ValueListenableBuilder<int>(
+          valueListenable: progressNotifier,
+          builder: (context, progress, _) {
+            return AlertDialog(
+              title: Text(title),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("${"Progress".tr()}: $progress/$total"),
+                  SizedBox(height: 20),
+                  LinearProgressIndicator(value: total > 0 ? progress / total : 0),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 }

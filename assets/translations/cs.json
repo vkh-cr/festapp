@@ -164,7 +164,6 @@
   "Welcome in {name}!": "Vítejte v aplikaci {name}!",
   "Invite": "Pozvat",
   "Invited": "Pozván",
-  "Users will get invitation via e-mail.": "Uživatelé obdrží pozvánku e-mailem.",
   "Invite users who have already been invited?": "Pozvat i uživatele, kteří již byli pozváni?",
   "Invited: {user}.": "Pozván: {user}.",
   "Token is not valid.": "Token není platný.",
@@ -258,5 +257,8 @@
   "Food": "Jídlo",
   "To create food, fill in the title, unique code, and the reference of the event.": "Pro vytvoření jídla vyplňte název, jedinečný kód a referenci na program.",
   "Not specified": "Nespecifikováno",
+  "Users will get a sign in code via e-mail.": "Uživatelé obdrží přihlašovací kód e-mailem.",
+  "Users ({count}) invited successfully.": "Uživatelé ({count}) byli úspěšně pozváni.",
+  "Progress": "Postup",
   "_": "_"
 }
