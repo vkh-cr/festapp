@@ -55,7 +55,7 @@ var $async$bk=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:v.d_()
 s=A.v2()
 u=A.bs("token=(?<token>[^&]+)",!0,!1,!1).q2(s.k(0))
-if(u!=null)try{r=u.buT("token")
+if(u!=null)try{r=u.buU("token")
 r.toString
 v.f=r}catch(p){r=A.ac(p)
 if(y.g.b(r)){t=r
@@ -131,4 +131,4 @@ D.aVO=new A.X(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b_w=new A.bS("Change Password",null,D.aVO,null,null,null,null,null,null,null,null,null,null,null)
 D.b_H=new A.bS("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"sA/Mh/7GSNnvKEVmOnkLpKW1u9k=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"9/Xk3ExX5vFjhqyj/K38IbT4rDc=");
