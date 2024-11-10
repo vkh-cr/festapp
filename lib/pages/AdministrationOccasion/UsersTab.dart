@@ -170,7 +170,7 @@ class _UsersTabState extends State<UsersTab> {
       await DialogHelper.showInformationDialogAsync(
         context,
         "Invite".tr(),
-        "Users {count} invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
+        "Users ({count}) invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
       );
 
     }
