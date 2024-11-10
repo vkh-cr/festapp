@@ -41,7 +41,6 @@ class ImportService {
                 Tb.occasion_users.data_name: userInfo.name,
                 Tb.occasion_users.data_surname: userInfo.surname,
                 Tb.occasion_users.data_phone: userInfo.phone,
-                Tb.occasion_users.data_accommodation: userInfo.accommodation,
                 Tb.occasion_users.data_birthDate: userInfo.birthDate?.toIso8601String(),
                 Tb.occasion_users.data_isInvited: true,
               }

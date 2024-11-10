@@ -164,7 +164,6 @@
   "Welcome in {name}!": "Welcome in {name}!",
   "Invite": "Invite",
   "Invited": "Invited",
-  "Users will get invitation via e-mail.": "Users will get invitation via e-mail.",
   "Invite users who have already been invited?": "Invite users who have already been invited?",
   "Invited: {user}.": "Invited: {user}.",
   "Token is not valid.": "Token is not valid.",
@@ -258,5 +257,8 @@
   "Food": "Food",
   "To create food, fill in the title, unique code, and the reference of the event.": "To create food, fill in the title, unique code, and the reference of the event.",
   "Not specified": "Not specified",
+  "Users will get a sign in code via e-mail.": "Users will get a sign in code via e-mail.",
+  "Users ({count}) invited successfully.": "Users ({count}) invited successfully.",
+  "Progress": "Progress",
   "_":"_"
 }
