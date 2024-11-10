@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -69,7 +68,7 @@ class _SignupPageState extends State<SignupPage> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          style: const TextStyle(fontSize: 18, color: Colors.black),
+                          style: TextStyle(fontSize: 18, color: ThemeConfig.blackColor(context)),
                           text: "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.".tr(namedArgs: {"email": fieldsData?["email"]}),
                         ),
                         const WidgetSpan(
