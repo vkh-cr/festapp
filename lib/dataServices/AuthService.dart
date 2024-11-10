@@ -40,7 +40,11 @@ class AuthService {
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
-    return await _supabase.functions.invoke("email", body: {"email": email, "organization": AppConfig.organization});
+    return await _supabase.functions.invoke("send-reset-password-link", body: {"email": email, "organization": AppConfig.organization});
+  }
+
+  static Future<dynamic> sendSignInCode(OccasionUserModel ou) async {
+    return await _supabase.functions.invoke("send-sign-in-code", body: {"oc": ou.occasion, "usr": ou.user,});
   }
 
   static UserInfoModel? currentUser;

@@ -136,9 +136,7 @@ class _UsersTabState extends State<UsersTab> {
     var confirm = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "${"Users will get invitation via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}");
     if (confirm) {
       for (var user in users) {
-        await AuthService.resetPasswordForEmail(user.data![Tb.occasion_users.data_email]);
-        user.data![Tb.occasion_users.data_isInvited] = true;
-        await DbUsers.updateOccasionUser(user);
+        await AuthService.sendSignInCode(user);
         ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}));
       }
       await loadUsers(); // Reload users and force rebuild
