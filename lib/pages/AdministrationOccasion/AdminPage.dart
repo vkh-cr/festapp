@@ -64,7 +64,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
                       Icon(tab.icon),
                       Padding(
                         padding: const EdgeInsets.all(12),
-                        child: Text(tab.label).tr(),
+                        child: Text(tab.label),
                       ),
                     ],
                   );
@@ -105,15 +105,17 @@ class AdminTabDefinition {
   static const String groups = "Groups";
   static const String service = "Service";
   static const String users = "Users";
+  static const String game = "Game";
 
   // Available tabs defined in a dictionary
-  static final Map<String, AdminTabDefinition> availableTabs = {
-    info: AdminTabDefinition(label: info, icon: Icons.info, widget: InformationTab()),
-    events: AdminTabDefinition(label: events, icon: Icons.calendar_month, widget: EventsTab()),
-    places: AdminTabDefinition(label: places, icon: Icons.pin_drop, widget: PlacesTab()),
-    exclusivity: AdminTabDefinition(label: exclusivity, icon: Icons.punch_clock_rounded, widget: ExclusivityTab()),
-    groups: AdminTabDefinition(label: groups, icon: Icons.groups, widget: UserGroupsTab()),
-    service: AdminTabDefinition(label: service, icon: Icons.food_bank, widget: ServiceTab()),
-    users: AdminTabDefinition(label: users, icon: Icons.people, widget: UsersTab()),
+  static Map<String, AdminTabDefinition> get availableTabs => {
+    info: AdminTabDefinition(label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
+    events: AdminTabDefinition(label: "Events".tr(), icon: Icons.calendar_month, widget: EventsTab()),
+    places: AdminTabDefinition(label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
+    exclusivity: AdminTabDefinition(label: "Exclusivity".tr(), icon: Icons.punch_clock_rounded, widget: ExclusivityTab()),
+    groups: AdminTabDefinition(label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
+    service: AdminTabDefinition(label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
+    users: AdminTabDefinition(label: "Users".tr(), icon: Icons.people, widget: UsersTab()),
+    game: AdminTabDefinition(label: "Game".tr(), icon: Icons.gamepad, widget: InformationTab()),
   };
 }
