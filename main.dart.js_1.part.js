@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_1",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-cA6(){return new B.Bf(null)},
+cA8(){return new B.Bf(null)},
 Bf:function Bf(d){this.a=d},
 aH8:function aH8(d,e){var _=this
 _.d=d
@@ -78,7 +78,7 @@ $S:0}
 B.bOO.prototype={
 $1(d){if(d.length===0)return A.a0("Fill the password!",null)
 return null},
-$S:96}
+$S:97}
 B.bOP.prototype={
 $0(){var x=0,w=A.l(y.v),v=this,u,t,s,r
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
@@ -131,4 +131,4 @@ D.aVO=new A.X(!0,C.l,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b_w=new A.bS("Change Password",null,D.aVO,null,null,null,null,null,null,null,null,null,null,null)
 D.b_H=new A.bS("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"9/Xk3ExX5vFjhqyj/K38IbT4rDc=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"O3c0XPKNqGAE+cVssKwkiiVHpPo=");
