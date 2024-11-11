@@ -257,7 +257,7 @@
   "Food": "Essen",
   "To create food, fill in the title, unique code, and the reference of the event.": "Um Essen zu erstellen, füllen Sie den Titel, den eindeutigen Code und die Referenz des Programms aus.",
   "Not specified": "Nicht angegeben",
-  "Users will get a sign in code via e-mail.": "Benutzer erhalten einen Anmeldecode per E-Mail.",
+  "Users will get a sign-in code via e-mail.": "Benutzer erhalten einen Anmeldecode per E-Mail.",
   "Users ({count}) invited successfully.": "Benutzer ({count}) wurden erfolgreich eingeladen.",
   "Progress": "Fortschritt",
   "_": "_"

@@ -257,7 +257,7 @@
   "Food": "Jedlo",
   "To create food, fill in the title, unique code, and the reference of the event.": "Na vytvorenie jedla vyplňte názov, jedinečný kód a referenciu na program.",
   "Not specified": "Neurčené",
-  "Users will get a sign in code via e-mail.": "Používatelia dostanú prihlasovací kód e-mailom.",
+  "Users will get a sign-in code via e-mail.": "Používatelia dostanú prihlasovací kód e-mailom.",
   "Users ({count}) invited successfully.": "Používatelia ({count}) boli úspešne pozvaní.",
   "Progress": "Postup",
   "_": "_"

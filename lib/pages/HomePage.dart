@@ -104,9 +104,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             unselectedItemColor: ThemeConfig.bottomNavUnselectedItemColor(context),
             currentIndex: tabsRouter.activeIndex,
             type: BottomNavigationBarType.fixed,
-            onTap: (int index) {
+            onTap: (int index) async {
               if(!AuthService.isLoggedIn() && index == 4){
-                RouterService.navigate(context, LoginPage.ROUTE);
+                await RouterService.navigate(context, LoginPage.ROUTE);
+                await loadData();
               } else{
                 setState(() {
                   tabsRouter.setActiveIndex(index);

@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
-const _supabase = createClient(
+const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   const userEmail = reqData.email.trim();
   const organizationId = reqData.organization;
 
-  const orgData = await _supabase
+  const orgData = await supabaseAdmin
     .from("organizations")
     .select("data")
     .eq("id", organizationId)
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     );
   }
 
-  const userData = await _supabase
+  const userData = await supabaseAdmin
     .from("user_info")
     .select()
     .eq("email_readonly", userEmail)
@@ -67,14 +67,14 @@ Deno.serve(async (req) => {
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  const { data } = await _supabase.rpc("create_user_in_organization_with_data", {
+  const { data } = await supabaseAdmin.rpc("create_user_in_organization_with_data", {
     org: organizationId,
     email: userEmail,
     password: code,
     data: reqData,
   });
 
-  const template = await _supabase
+  const template = await supabaseAdmin
     .from("email_templates")
     .select()
     .eq("id", "SIGN_IN_CODE")
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
     from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
-  await _supabase
+  await supabaseAdmin
     .from("log_emails")
     .insert({
       "from": _DEFAULT_EMAIL,

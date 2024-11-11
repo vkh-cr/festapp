@@ -8,6 +8,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
+
 Deno.serve(async (req) => {
   try {
     if (req.method === 'OPTIONS') {
@@ -100,6 +105,15 @@ Deno.serve(async (req) => {
       content: template.data.html,
       subs,
       from: `Festapp <${_DEFAULT_EMAIL}>`,
+    });
+
+  await supabaseAdmin
+    .from("log_emails")
+    .insert({
+      "from": _DEFAULT_EMAIL,
+      "to": occasionUser.data.data.email,
+      "template": template.data.id,
+      "organization": organizationId
     });
 
     occasionUser.data.data.is_invited = true;
