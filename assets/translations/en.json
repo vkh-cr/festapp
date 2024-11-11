@@ -257,8 +257,9 @@
   "Food": "Food",
   "To create food, fill in the title, unique code, and the reference of the event.": "To create food, fill in the title, unique code, and the reference of the event.",
   "Not specified": "Not specified",
-  "Users will get a sign in code via e-mail.": "Users will get a sign in code via e-mail.",
+  "Users will get a sign-in code via e-mail.": "Users will get a sign-in code via e-mail.",
   "Users ({count}) invited successfully.": "Users ({count}) invited successfully.",
   "Progress": "Progress",
+  "Some users have already been invited. Do you want to invite them again and send a new sign-in code?": "Some users have already been invited. Do you want to invite them again and send a new sign-in code?",
   "_":"_"
 }
