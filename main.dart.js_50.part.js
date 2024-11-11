@@ -7,7 +7,7 @@ var $async$acL=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:u=$.dF().Q
 u===$&&A.b()
 x=3
-return A.c(u.rt("send-reset-password-link",A.H(["email",d,"organization",1],y.g,y.o)),$async$acL)
+return A.c(u.rs("send-reset-password-link",A.H(["email",d,"organization",1],y.g,y.o)),$async$acL)
 case 3:v=f
 x=1
 break
@@ -18,4 +18,4 @@ B=a.updateHolder(c[42],B)
 var z=a.updateTypes([])
 var y={o:A.y("A"),g:A.y("f"),b:A.y("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_50",e:"endPart",h:b})})($__dart_deferred_initializers__,"dcj6lVWRbmBSxKffK/+O+hQdd2I=");
+a.eventLog.push({p:"main.dart.js_50",e:"endPart",h:b})})($__dart_deferred_initializers__,"/mqwvYFzVYmHbXtAHd1UCf6sztk=");
