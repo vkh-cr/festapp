@@ -7,6 +7,7 @@ class Tb {
   static UserNewsViewsTb user_news_views = const UserNewsViewsTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
+  static HiddenInfo hidden_info = const HiddenInfo();
   static EventsTb events = const EventsTb();
   static EventUserTb event_users = const EventUserTb();
   static EventUsersSavedTb event_users_saved = const EventUsersSavedTb();
@@ -54,6 +55,11 @@ class OccasionsTb {
   String get data_map_layer_text => "text";
   String get data_map_layer_logo_link => "logo_link";
   String get data_map_layer_text_link => "text_link";
+
+  // Game settings keys
+  String get data_game => "game";
+  String get data_game_start => "start";
+  String get data_game_end => "end";
 
   String get services => "services";
 }
@@ -162,6 +168,17 @@ class InformationTb{
   String get type => "type";
   String get description => "description";
   String get order => "order";
+  String get data => "data";
+  String get data_correct => "correct";
+  String get data_correct_reference => "correct_reference";
+}
+class HiddenInfo{
+  const HiddenInfo();
+  String get table => "hidden_info";
+  String get id => "id";
+  String get data => "data";
+  String get data_correct => "correct";
+
 }
 class EventsTb{
   const EventsTb();
@@ -238,6 +255,8 @@ class UserGroupInfoTb{
   String get leader => "leader";
   String get place => "place";
   String get description => "description";
+  String get type => "type";
+  String get data => "data";
 }
 class UserGroupsTb{
   const UserGroupsTb();

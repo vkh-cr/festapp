@@ -15,7 +15,7 @@ class DbGroups {
     return List<UserGroupInfoModel>.from(data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
 
-  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo() async {
+  static Future<List<UserGroupInfoModel>> getAllUserGroupInfo([String? type]) async {
     var data = await _supabase
         .from(Tb.user_group_info.table)
         .select(
@@ -24,8 +24,11 @@ class DbGroups {
             "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}),"
             "${Tb.places.table}(*),"
             "${Tb.user_group_info.description},"
+            "${Tb.user_group_info.type},"
+            "${Tb.user_group_info.data},"
             "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
-    .eq(Tb.user_group_info.occasion, RightsService.currentOccasion!);
+    .eq(Tb.user_group_info.occasion, RightsService.currentOccasion!)
+    .filter(Tb.user_group_info.type, type == null ? "is" : "eq", type);
     return List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
   }
@@ -60,6 +63,10 @@ class DbGroups {
       Tb.user_group_info.leader: model.leader?.id,
     };
 
+    if(model.type != null)
+    {
+      upsertObj.addAll({Tb.user_group_info.type: model.type});
+    }
     if(model.description != null)
     {
       upsertObj.addAll({Tb.user_group_info.description: model.description});

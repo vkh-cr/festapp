@@ -11,6 +11,12 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
 {
+  static T? getValueOrNull<T>(dynamic value, {T? emptyValue}) {
+    if (value == emptyValue || value == "") return null;
+    if (value is String) return value.trim() as T;
+    return value as T?;
+  }
+
   static String GetValueFromFormatted(dynamic value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)

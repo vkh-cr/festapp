@@ -1,20 +1,23 @@
 // ignore_for_file: unused_import
 
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbInformation {
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<InformationModel>> getAllInformationForDataGrid() async {
+  static Future<List<InformationModel>> getAllInformationForDataGrid([String? informationType]) async {
     var data = await _supabase.from(Tb.information.table).select(
         "${Tb.information.id},"
         "${Tb.information.occasion},"
@@ -23,8 +26,11 @@ class DbInformation {
         "${Tb.information.is_hidden},"
         "${Tb.information.title},"
         "${Tb.information.order},"
-        "${Tb.information.type}")
-    .eq(Tb.information.occasion, RightsService.currentOccasion!);
+        "${Tb.information.type},"
+        "${Tb.information.data}")
+    .eq(Tb.information.occasion, RightsService.currentOccasion!)
+    .filter(Tb.information.type, "eq", informationType??"");
+
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
     infoList.sortBy((element) => element.title??"".toLowerCase());
@@ -41,8 +47,9 @@ class DbInformation {
             "${Tb.information.order},"
             "${Tb.information.type},"
             "${Tb.information.title},"
-            "${Tb.information.id}"
-    )
+            "${Tb.information.id},"
+            "${Tb.information.data}"
+        )
         .eq(Tb.information.is_hidden, false)
         .eq(Tb.information.occasion, RightsService.currentOccasion!);
 
@@ -76,11 +83,25 @@ class DbInformation {
   }
 
   static Future<void> updateInformation(InformationModel info) async {
+    if(info.type == InformationModel.gameType){
+      var upsertObj = {
+        Tb.hidden_info.data: {Tb.hidden_info.data_correct: info.data?[Tb.information.data_correct]},
+      };
+      if(info.data?[Tb.information.data_correct_reference] != null){
+        upsertObj.addAll({Tb.hidden_info.id: info.data?[Tb.information.data_correct_reference]});
+      }
+
+      var ref = await _supabase.from(Tb.hidden_info.table).upsert(upsertObj).select(Tb.hidden_info.id).single();
+      info.data?[Tb.information.data_correct_reference] = ref[Tb.hidden_info.id];
+      //todo add safety
+      //info.data?.remove(Tb.information.data_correct);
+    }
     var upsertObj = {
       Tb.information.title: info.title,
       Tb.information.type: info.type,
       Tb.information.is_hidden: info.isHidden,
-      Tb.information.order: info.order
+      Tb.information.order: info.order,
+      Tb.information.data: info.data
     };
     if(info.description!=null) {
       upsertObj.addAll({Tb.information.description: info.description});
@@ -132,4 +153,47 @@ class DbInformation {
       }
     }
   }
+
+  static Future<bool> makeGameGuess(BuildContext context, int checkPointId, String guess) async {
+    var result = await _supabase.rpc("game_guess", params: {
+      "check_point_id": checkPointId,
+      "guess": guess,
+    });
+
+    switch (result["code"]) {
+      case 200:  // Correct answer
+        ToastHelper.Show(context, "Correct!".tr());
+        return true;
+
+      case 4031:  // User not in occasion
+        ToastHelper.Show(context, "You are not part of this occasion.".tr(), severity: ToastSeverity.NotOk);
+        break;
+
+      case 4032:  // User not part of a game group
+        ToastHelper.Show(context, "You are not part of a game group.".tr(), severity: ToastSeverity.NotOk);
+        break;
+
+      case 4033:  // Guessing outside allowed time window
+        ToastHelper.Show(context, "Guessing is only allowed within the game time window.", severity: ToastSeverity.NotOk);
+        break;
+
+      case 4041:  // Correct reference not found
+        ToastHelper.Show(context, "Correct answer for this check point was not set.".tr(), severity: ToastSeverity.NotOk);
+        break;
+
+      case 4042:  // Hidden info not found
+        ToastHelper.Show(context, "Correct answer was not set.".tr(), severity: ToastSeverity.NotOk);
+        break;
+
+      case 4001:  // Incorrect guess
+        ToastHelper.Show(context, "Incorrect, try again!".tr(), severity: ToastSeverity.NotOk);
+        break;
+
+      default:
+        ToastHelper.Show(context, "An unexpected error occurred.".tr(), severity: ToastSeverity.NotOk);
+        break;
+    }
+    return false;
+  }
+
 }

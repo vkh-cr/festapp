@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/EventsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ExclusivityTab.dart';
+import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
@@ -29,6 +30,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.places,
     AdminTabDefinition.exclusivity,
     AdminTabDefinition.groups,
+    AdminTabDefinition.game,
     AdminTabDefinition.service,
     AdminTabDefinition.users
   ];
@@ -116,6 +118,6 @@ class AdminTabDefinition {
     groups: AdminTabDefinition(label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
     service: AdminTabDefinition(label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
     users: AdminTabDefinition(label: "Users".tr(), icon: Icons.people, widget: UsersTab()),
-    game: AdminTabDefinition(label: "Game".tr(), icon: Icons.gamepad, widget: InformationTab()),
+    game: AdminTabDefinition(label: "Game".tr(), icon: Icons.gamepad, widget: GameTab()),
   };
 }

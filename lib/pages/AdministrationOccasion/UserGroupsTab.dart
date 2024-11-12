@@ -63,16 +63,16 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           ),
           PlutoColumn(
               title: "Moderator".tr(),
-              field: UserGroupInfoModel.leaderUserColumn,
+              field: Tb.user_group_info.leader,
               type: PlutoColumnType.text(),
               enableEditingMode: false,
               width: 200,
               renderer: (rendererContext) {
                 String? userName;
-                var currentValue = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value;
+                var currentValue = rendererContext.row.cells[Tb.user_group_info.leader]?.value;
                 if(currentValue!=null && currentValue.toString().isNotEmpty)
                 {
-                  var user = (rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value as UserInfoModel);
+                  var user = (rendererContext.row.cells[Tb.user_group_info.leader]?.value as UserInfoModel);
                   userName = user.toString();
                 }
                 return Row(
@@ -86,8 +86,8 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                             }
                             DialogHelper.chooseUser(context, (person) =>
                                 setState(() {
-                                  rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]?.value = person;
-                                  var cell = rendererContext.row.cells[UserGroupInfoModel.leaderUserColumn]!;
+                                  rendererContext.row.cells[Tb.user_group_info.leader]?.value = person;
+                                  var cell = rendererContext.row.cells[Tb.user_group_info.leader]!;
                                   rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                                   RouterService.goBack(context);
                                 }), _allUsers, "Set".tr());
@@ -193,6 +193,10 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     child: Row(children: [const Icon(Icons.location_pin), Padding(padding: const EdgeInsets.all(6), child: const Text("Location").tr()) ])
                 );
               }),
+          PlutoColumn(
+              title: "Type".tr(),
+              field: Tb.user_group_info.type,
+              type: PlutoColumnType.text()),
         ]).DataGrid();
   }
 }

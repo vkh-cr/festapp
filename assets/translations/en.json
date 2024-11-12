@@ -261,5 +261,13 @@
   "Users ({count}) invited successfully.": "Users ({count}) invited successfully.",
   "Progress": "Progress",
   "Some users have already been invited. Do you want to invite them again and send a new sign-in code?": "Some users have already been invited. Do you want to invite them again and send a new sign-in code?",
+  "Game": "Game",
+  "Correct answer": "Correct answer",
+  "Guess!": "Guess!",
+  "Incorrect, try again!": "Incorrect, try again!",
+  "Correct!": "Correct!",
+  "Check point {title}": "Check point {title}",
+  "Take a guess": "Take a guess",
+  "Check points": "Check points",
   "_":"_"
 }
