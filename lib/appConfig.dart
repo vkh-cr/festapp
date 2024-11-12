@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/LanguageModel.dart';
 class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
   static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String appName = 'Fstapp';
+  static const String appName = 'Vstupenka.online';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
@@ -14,12 +14,12 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
-  static const String oneSignalAppId = '73f77f22-961a-4ded-9647-e33a7ac14f90';
+  static const String oneSignalAppId = '';
 
-  static const int organization = 1;
+  static const int organization = 3;
 
-  static const String webLink = "https://live.festapp.net";
-  static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
+  static const String webLink = "";
+  static const String appStoreLink = "";
   static const String playStoreLink = "";
   static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
