@@ -34,13 +34,14 @@ class OccasionSettingsModel {
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
-    Map<String, dynamic> servicesPart = json[Tb.occasions.services];
+    Map<String, dynamic>? servicesPart = json[Tb.occasions.services];
 
     OccasionSettingsModel toReturn;
     var dataPart = json[Tb.occasions.data];
     if(dataPart == null) {
       toReturn = OccasionSettingsModel.DefaultSettings;
       toReturn.services = servicesPart;
+      return toReturn;
     }
 
     var mapLayer = dataPart[Tb.occasions.data_map_layer] ?? {}; // Handle map_layer as nested object
