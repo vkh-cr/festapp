@@ -81,7 +81,15 @@ class ButtonsHelper {
     );
   }
 
-  static Widget buildQRCodeButton({required BuildContext context, required VoidCallback onPressed, required String label, Color? buttonColor}) {
+  static Widget buildReferenceButton({
+    required BuildContext context,
+    required VoidCallback onPressed,
+    required String label,
+    IconData? icon, // Optional icon parameter
+    Color? buttonColor,
+    Color? iconColor,
+    Color? textColor,
+  }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -91,24 +99,27 @@ class ButtonsHelper {
         child: TextButton.icon(
           onPressed: onPressed,
           iconAlignment: IconAlignment.end,
-          icon: const Icon(Icons.qr_code),
+          icon: Icon(
+            icon ?? Icons.qr_code, // Default to QR code icon if none provided
+            color: iconColor ?? ThemeConfig.blackColor(context), // Set icon color
+          ),
           label: Text(
             label,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
+              color: textColor ?? ThemeConfig.blackColor(context), // Set label color
             ),
           ).tr(),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.all(12.0),
-            backgroundColor: buttonColor ?? ThemeConfig.qrButtonColor(context), // Set the background color
+            backgroundColor: buttonColor ?? ThemeConfig.qrButtonColor(context), // Set button color
             minimumSize: const Size.fromHeight(60),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // Ensure the border radius is circular
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
         ),
       ),
     );
-  }
-}
+  }}

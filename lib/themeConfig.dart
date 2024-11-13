@@ -1,4 +1,3 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class ThemeConfig {
@@ -108,7 +107,7 @@ class ThemeConfig {
 
   static Color defaultHtmlViewColor(BuildContext context) => blackColor(context);
   static Color htmlLinkColor(BuildContext context) => isDarkMode(context) ? seed2 : seed3;
-
+  static Color correctGuessColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   // Function for eventTypeColor
   static Color eventTypeToColor(BuildContext context, String? type) {

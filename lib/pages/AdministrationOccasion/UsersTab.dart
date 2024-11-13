@@ -89,12 +89,6 @@ class _UsersTabState extends State<UsersTab> {
     await loadUsers(); // Reload users and force rebuild
   }
 
-  Future<void> _invite(SingleTableDataGrid dataGrid) async {
-    var users = _getCheckedUsers(dataGrid);
-    if (users.isEmpty) return;
-    await _processInvites(users, dataGrid);
-  }
-
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
     var users = _getCheckedUsers(dataGrid);
     if (users.isEmpty) return;
@@ -132,16 +126,70 @@ class _UsersTabState extends State<UsersTab> {
     );
   }
 
-  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
-    var confirm = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "${"Users will get invitation via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}");
-    if (confirm) {
-      for (var user in users) {
-        await AuthService.resetPasswordForEmail(user.data![Tb.occasion_users.data_email]);
-        user.data![Tb.occasion_users.data_isInvited] = true;
-        await DbUsers.updateOccasionUser(user);
-        ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}));
+  Future<void> _invite(SingleTableDataGrid dataGrid) async {
+    var users = _getCheckedUsers(dataGrid);
+    if (users.isEmpty) return;
+
+    // Separate already invited users
+    var alreadyInvitedUsers = users.where((user) => user.data![Tb.occasion_users.data_isInvited] == true).toList();
+    var newUsers = users.where((user) => user.data![Tb.occasion_users.data_isInvited] != true).toList();
+
+    if (alreadyInvitedUsers.isNotEmpty) {
+      // Ask the user if they want to reinvite already invited users
+      var reinviteConfirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Invite".tr(),
+        "Some users have already been invited. Do you want to invite them again and send a new sign-in code?".tr(),
+      );
+
+      // If the user chooses not to reinvite, exclude already invited users
+      if (!reinviteConfirm) {
+        await _processInvites(newUsers, dataGrid);
+        return;
       }
-      await loadUsers(); // Reload users and force rebuild
+    }
+
+    // Proceed with inviting both new and previously invited users (if reinvite confirmed)
+    await _processInvites(users, dataGrid);
+  }
+
+  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
+    var confirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Invite".tr(),
+        "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
+    );
+
+    if (confirm) {
+      ValueNotifier<int> invitedCount = ValueNotifier(0);
+
+      // Show progress dialog
+      DialogHelper.showProgressDialogAsync(
+        context,
+        "Invite".tr(),
+        users.length,
+        invitedCount,
+      );
+
+      for (var user in users) {
+        await AuthService.sendSignInCode(user);
+        invitedCount.value++;
+
+        ToastHelper.Show(
+          context,
+          "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
+        );
+      }
+
+      Navigator.of(context).pop(); // Close the dialog
+
+      await loadUsers(); // Reload users
+
+      await DialogHelper.showInformationDialogAsync(
+        context,
+        "Invite".tr(),
+        "Users ({count}) invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
+      );
     }
   }
 }

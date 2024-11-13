@@ -23,6 +23,7 @@ import 'package:fstapp/pages/UserPage.dart';
 
 import 'AppRouter.gr.dart';
 import 'pages/AdministrationOccasion/AdminPage.dart';
+import 'pages/GamePage.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
@@ -46,6 +47,8 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
     AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
+    AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
+
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
@@ -54,7 +57,7 @@ class AppRouter extends RootStackRouter {
                   ]),
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}"),
       AutoRoute(page: SongRoute.page, path: "${SongPage.ROUTE}"),
-      AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", children: [
+      AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", maintainState: false, children: [
         AutoRoute(path: ':id', page: MapRoute.page,),
       ]),
       AutoRoute(page: InfoRoute.page, path: "${InfoPage.ROUTE}", children: [

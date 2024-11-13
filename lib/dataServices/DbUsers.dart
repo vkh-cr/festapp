@@ -169,6 +169,11 @@ class DbUsers {
     return data;
   }
 
+  static Future<OccasionUserModel> getOccasionUser(String id) async {
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.user, id).limit(1).single();
+    return OccasionUserModel.fromJson(data);
+  }
+
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
     var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);

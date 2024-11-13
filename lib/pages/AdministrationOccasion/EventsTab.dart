@@ -6,16 +6,48 @@ import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
+import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class EventsTab extends StatelessWidget {
-  final OccasionModel? occasionModel;
-  final List<String> places;
+class EventsTab extends StatefulWidget {
+  const EventsTab({Key? key}) : super(key: key);
 
-  const EventsTab({Key? key, required this.occasionModel, required this.places}) : super(key: key);
+  @override
+  _EventsTabState createState() => _EventsTabState();
+}
+
+class _EventsTabState extends State<EventsTab> {
+  OccasionModel? occasionModel; // Occasions are now loaded directly within EventsTab
+  List<String> places = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadOccasion(); // Load occasion details
+    loadPlaces();   // Load places for the dropdown list
+  }
+
+  Future<void> loadOccasion() async {
+    // Fetch the occasion based on the current occasion ID
+    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
+    setState(() {}); // Update the UI once occasion data is loaded
+  }
+
+  Future<void> loadPlaces() async {
+    var placesRaws = await DbPlaces.getMapPlaces();
+    var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
+    placesStrings.add(PlaceModel.WithouValue);
+    setState(() {
+      places.clear();
+      places.addAll(placesStrings);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +91,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "Start date".tr(),
             field: EventModel.startDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use loaded occasion data
             width: 140,
           ),
           PlutoColumn(
@@ -71,7 +103,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "End date".tr(),
             field: EventModel.endDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use loaded occasion data
             width: 140,
           ),
           PlutoColumn(
@@ -107,7 +139,7 @@ class EventsTab extends StatelessWidget {
           PlutoColumn(
             title: "Place".tr(),
             field: EventModel.placeColumn,
-            type: PlutoColumnType.select([]),
+            type: PlutoColumnType.select(places),
             applyFormatterInEditing: true,
             formatter: DataGridHelper.GetValueFromFormatted,
           ),
@@ -124,14 +156,12 @@ class EventsTab extends StatelessWidget {
                     onPressed: () async {
                       String? textToEdit;
                       String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
-                      if(oldText!=null)
-                      {
+                      if(oldText!=null) {
                         textToEdit = oldText;
                       }
                       Future<String?> Function() load = () async {
                         var eventId = rendererContext.row.cells[Tb.events.id]!.value;
-                        if(eventId!=null)
-                        {
+                        if(eventId != null) {
                           var fullEvent = await DbEvents.getEvent(eventId);
                           return fullEvent.description;
                         }
@@ -139,18 +169,17 @@ class EventsTab extends StatelessWidget {
                       };
                       Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
                       RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
-                        if(value != null)
-                        {
+                        if(value != null) {
                           var newText = value as String;
-                          if(newText!=textToEdit)
-                          {
+                          if(newText != textToEdit) {
                             rendererContext.row.cells[Tb.events.description]?.value = newText;
                             var cell = rendererContext.row.cells[Tb.events.description]!;
                             rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                           }
                         }
-                      });},
-                    child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
+                      });
+                    },
+                    child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr())])
                 );
               }),
           PlutoColumn(

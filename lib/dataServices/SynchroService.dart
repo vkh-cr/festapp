@@ -10,7 +10,6 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/PlatformHelper.dart';
-import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
@@ -25,15 +24,11 @@ class SynchroService {
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
-          .select(Tb.occasions.data)
+          .select("${Tb.occasions.data}, ${Tb.occasions.services}", )
           .eq(Tb.occasions.id, RightsService.currentOccasion!)
           .single();
 
-      if(data[Tb.occasions.data] == null) {
-        toReturn = OccasionSettingsModel.DefaultSettings;
-      } else {
-        toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
-      }
+      toReturn = OccasionSettingsModel.fromJson(data);
     }
 
     globalSettingsModel = toReturn;
