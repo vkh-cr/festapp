@@ -176,6 +176,7 @@ class InformationTb{
 class InformationHidden{
   const InformationHidden();
   String get table => "information_hidden";
+  String get occasion => "occasion";
   String get id => "id";
   String get data => "data";
   String get data_correct => "correct";
