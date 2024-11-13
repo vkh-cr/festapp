@@ -85,16 +85,22 @@ class DbInformation {
 
   static Future<void> updateInformation(InformationModel info) async {
     if(info.type == InformationModel.gameType){
+
+
       Map<String, dynamic> upsertObj = {
         Tb.information_hidden.data: info.informationHidden?.data,
+        Tb.information_hidden.occasion: RightsService.currentOccasion!
       };
+      Map<String, dynamic> ref;
       if(info.informationHidden?.id != null){
         upsertObj.addAll({
-          Tb.information_hidden.id: info.informationHidden?.id
+          Tb.information_hidden.id: info.informationHidden?.id,
         });
+        ref = await _supabase.from(Tb.information_hidden.table).update(upsertObj).eq(Tb.information_hidden.id, info.informationHidden!.id!).select(Tb.information_hidden.id).single();
+      } else {
+        ref = await _supabase.from(Tb.information_hidden.table).insert(upsertObj).select(Tb.information_hidden.id).single();
       }
 
-      var ref = await _supabase.from(Tb.information_hidden.table).upsert(upsertObj).select(Tb.information_hidden.id).single();
       info.informationHidden = InformationHiddenModel(id: ref[Tb.information_hidden.id]);
     }
     var upsertObj = {
