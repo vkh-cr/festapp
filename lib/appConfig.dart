@@ -16,7 +16,7 @@ class AppConfig {
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
   static const bool isUsersImportSupported = true;
-  static const String oneSignalAppId = '0b9c568e-1231-4a5d-a82e-06622def39f4';
+  static const String oneSignalAppId = '009d3437-d794-459f-9e3d-4bd70b740f7d';
 
   static const int organization = 1;
 
