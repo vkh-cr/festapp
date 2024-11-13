@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
@@ -415,12 +414,12 @@ class _EventPageState extends State<EventPage> {
     if (event != null) {
       if (event.isGroupEvent && AuthService.isLoggedIn()) {
         var userInfo = await OfflineDataService.getUserInfo();
-        if (userInfo?.userGroup != null) {
-          event.title = userInfo!.userGroup!.title;
+        if (userInfo?.eventUserGroup != null) {
+          event.title = userInfo!.eventUserGroup!.title;
           event.isMyGroupEvent = true;
-          event.description = userInfo.userGroup!.description;
-          event.place = userInfo.userGroup!.place;
-          _groupInfoModel = userInfo.userGroup;
+          event.description = userInfo.eventUserGroup!.description;
+          event.place = userInfo.eventUserGroup!.place;
+          _groupInfoModel = userInfo.eventUserGroup;
         }
       } else {
         var descr = await OfflineDataService.getEventDescription(id.toString());
