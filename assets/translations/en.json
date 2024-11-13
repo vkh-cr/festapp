@@ -269,5 +269,13 @@
   "Check point {title}": "Check point {title}",
   "Take a guess": "Take a guess",
   "Check points": "Check points",
+  "Sign in to participate in the game.": "Sign in to participate in the game.",
+  "For playing the game, you must be assigned to a game group": "For playing the game, you must be assigned to a game group",
+  "Game has not started yet": "Game has not started yet",
+  "Game has ended": "Game has ended",
+  "Time left: {time}": "Time left: {time}",
+  "Start time must be earlier than end time.": "Start time must be earlier than end time.",
+  "You are offline. Please check your internet connection.": "You are offline. Please check your internet connection.",
+  "More": "More",
   "_":"_"
 }

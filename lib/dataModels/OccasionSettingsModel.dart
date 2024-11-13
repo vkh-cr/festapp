@@ -17,6 +17,10 @@ class OccasionSettingsModel {
   String? mapLayerLogoLink;
   String? mapLayerTextLink;
 
+  // Game fields
+  DateTime? gameStartTime;
+  DateTime? gameEndTime;
+
   static const String globalSettingsOffline = "globalSettingsOffline";
 
   OccasionSettingsModel({
@@ -30,12 +34,13 @@ class OccasionSettingsModel {
     this.mapLayerText,
     this.mapLayerLogoLink,
     this.mapLayerTextLink,
-    this.services
+    this.services,
+    this.gameStartTime,
+    this.gameEndTime,
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
     Map<String, dynamic>? servicesPart = json[Tb.occasions.services];
-
     OccasionSettingsModel toReturn;
     var dataPart = json[Tb.occasions.data];
     if(dataPart == null) {
@@ -44,7 +49,8 @@ class OccasionSettingsModel {
       return toReturn;
     }
 
-    var mapLayer = dataPart[Tb.occasions.data_map_layer] ?? {}; // Handle map_layer as nested object
+    var mapLayer = dataPart[Tb.occasions.data_map_layer] ?? {};
+    var gameSettings = dataPart[Tb.occasions.data_game] ?? {};
 
 
     return OccasionSettingsModel(
@@ -60,27 +66,36 @@ class OccasionSettingsModel {
       mapLayerText: mapLayer[Tb.occasions.data_map_layer_text],
       mapLayerLogoLink: mapLayer[Tb.occasions.data_map_layer_logo_link],
       mapLayerTextLink: mapLayer[Tb.occasions.data_map_layer_text_link],
-      services: servicesPart
+      gameStartTime: gameSettings[Tb.occasions.data_game_start] != null
+          ? DateTime.parse(gameSettings[Tb.occasions.data_game_start])
+          : null,
+      gameEndTime: gameSettings[Tb.occasions.data_game_end] != null
+          ? DateTime.parse(gameSettings[Tb.occasions.data_game_end])
+          : null,
+      services: servicesPart,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    Tb.occasions.services:services,
-    Tb.occasions.data:{
-    Tb.occasions.data_defaultMapLocation: defaultMapLocation,
-    Tb.occasions.data_defaultMapZoom: defaultMapZoom,
-    Tb.occasions.data_is_enabled_entry_code: isEnabledEntryCode,
-    Tb.occasions.data_max_companions: maxCompanions,
-    Tb.occasions.data_events_registration_start: eventsRegistrationTime?.toIso8601String(),
-
-    // Nested map_layer object
-    Tb.occasions.data_map_layer: {
-      Tb.occasions.data_map_layer_logo: mapLayerLogo,
-      Tb.occasions.data_map_layer_text: mapLayerText,
-      Tb.occasions.data_map_layer_logo_link: mapLayerLogoLink,
-      Tb.occasions.data_map_layer_text_link: mapLayerTextLink,
+    Tb.occasions.services: services,
+    Tb.occasions.data: {
+      Tb.occasions.data_defaultMapLocation: defaultMapLocation,
+      Tb.occasions.data_defaultMapZoom: defaultMapZoom,
+      Tb.occasions.data_is_enabled_entry_code: isEnabledEntryCode,
+      Tb.occasions.data_max_companions: maxCompanions,
+      Tb.occasions.data_events_registration_start: eventsRegistrationTime?.toIso8601String(),
+      Tb.occasions.data_map_layer: {
+        Tb.occasions.data_map_layer_logo: mapLayerLogo,
+        Tb.occasions.data_map_layer_text: mapLayerText,
+        Tb.occasions.data_map_layer_logo_link: mapLayerLogoLink,
+        Tb.occasions.data_map_layer_text_link: mapLayerTextLink,
+      },
+      Tb.occasions.data_game: {
+        Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
+        Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
+      }
     }
-  }};
+  };
 
   static dynamic get DefaultPosition => {
     "lat": 49.1038023,
@@ -106,7 +121,7 @@ class OccasionSettingsModel {
     // Retrieve the list of services for the specified service type
     var servs = services?[serviceType] ?? [];
 
-    var serviceRecords = userServices?[serviceType] as Map;
+    var serviceRecords = userServices?[serviceType] as Map? ?? {};
     var userCode = serviceRecords.keys.firstWhereOrNull((key) => key.isNotEmpty);
     if(userCode == null) {
       return null;

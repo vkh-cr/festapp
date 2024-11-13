@@ -8,6 +8,7 @@ class InformationModel extends IPlutoRowModel {
   static const String gameType = "game";
 
   int? id;
+  InformationHiddenModel? informationHidden;
   DateTime? updatedAt;
   String? title;
   String? description;
@@ -32,6 +33,10 @@ class InformationModel extends IPlutoRowModel {
       order: json[Tb.information.order]??0,
       updatedAt: json[Tb.occasions.updated_at]!=null ? DateTime.parse(json[Tb.occasions.updated_at]):null,
       data: json[Tb.information.data],
+      informationHidden: json[Tb.information_hidden.table] != null ?
+        InformationHiddenModel(
+          id: json[Tb.information_hidden.table][Tb.information_hidden.id],
+          data: json[Tb.information_hidden.table][Tb.information_hidden.data]) : null
     );
   }
 
@@ -44,6 +49,7 @@ class InformationModel extends IPlutoRowModel {
     Tb.information.is_hidden: isHidden,
     Tb.information.order: order,
     Tb.information.updated_at: updatedAt?.toIso8601String(),
+    Tb.information.information_hidden: informationHidden,
     Tb.information.data: data
   };
 
@@ -66,9 +72,11 @@ class InformationModel extends IPlutoRowModel {
       type: InformationModel.gameType,
       isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
       order: json[Tb.information.order],
-      data: {
-        Tb.information.data_correct: json[Tb.information.data_correct],
-      });
+      informationHidden: json[Tb.information.data_correct] != null ?
+        InformationHiddenModel(
+            data: {Tb.information.data_correct : json[Tb.information.data_correct]},
+            id: json[Tb.information.data_correct_reference]) : null
+    );
   }
 
   @override
@@ -80,8 +88,8 @@ class InformationModel extends IPlutoRowModel {
       Tb.information.type: PlutoCell(value: type ?? ""),
       Tb.information.is_hidden: PlutoCell(value: isHidden.toString()),
       Tb.information.order: PlutoCell(value: order),
-      Tb.information.data_correct: PlutoCell(value: data?[Tb.information.data_correct] ?? ""),
-      Tb.information.data_correct_reference: PlutoCell(value: data?[Tb.information.data_correct_reference]),
+      Tb.information.data_correct: PlutoCell(value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
+      Tb.information.data_correct_reference: PlutoCell(value: informationHidden?.id),
     });
   }
 
@@ -106,5 +114,13 @@ class InformationModel extends IPlutoRowModel {
     this.type,
     this.isHidden,
     this.order,
+    this.informationHidden,
     this.data});
+}
+
+class InformationHiddenModel{
+  int? id;
+  Map<String, dynamic>? data;
+
+  InformationHiddenModel({this.id, this.data});
 }

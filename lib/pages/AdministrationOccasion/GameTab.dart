@@ -44,7 +44,7 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
                     Icon(Icons.gamepad),
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Text("Check Points".tr()),
+                      child: Text("Check points".tr()),
                     ),
                   ],
                 ),
@@ -53,7 +53,7 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
                     Icon(Icons.groups),
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Text("User Groups".tr()),
+                      child: Text("Groups".tr()),
                     ),
                   ],
                 ),

@@ -7,7 +7,7 @@ class Tb {
   static UserNewsViewsTb user_news_views = const UserNewsViewsTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
-  static HiddenInfo hidden_info = const HiddenInfo();
+  static InformationHidden information_hidden = const InformationHidden();
   static EventsTb events = const EventsTb();
   static EventUserTb event_users = const EventUserTb();
   static EventUsersSavedTb event_users_saved = const EventUsersSavedTb();
@@ -168,13 +168,14 @@ class InformationTb{
   String get type => "type";
   String get description => "description";
   String get order => "order";
+  String get information_hidden => "information_hidden";
   String get data => "data";
   String get data_correct => "correct";
   String get data_correct_reference => "correct_reference";
 }
-class HiddenInfo{
-  const HiddenInfo();
-  String get table => "hidden_info";
+class InformationHidden{
+  const InformationHidden();
+  String get table => "information_hidden";
   String get id => "id";
   String get data => "data";
   String get data_correct => "correct";
@@ -263,6 +264,7 @@ class UserGroupsTb{
   String get table => "user_groups";
   String get user => "user";
   String get group => "group";
+  String get is_admin => "is_admin";
 }
 //todo delete
 class NotificationRecordsTb{

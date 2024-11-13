@@ -27,7 +27,8 @@ class DbInformation {
         "${Tb.information.title},"
         "${Tb.information.order},"
         "${Tb.information.type},"
-        "${Tb.information.data}")
+        "${Tb.information.data},"
+        "${Tb.information_hidden.table}(*)")
     .eq(Tb.information.occasion, RightsService.currentOccasion!)
     .filter(Tb.information.type, "eq", informationType??"");
 
@@ -84,24 +85,25 @@ class DbInformation {
 
   static Future<void> updateInformation(InformationModel info) async {
     if(info.type == InformationModel.gameType){
-      var upsertObj = {
-        Tb.hidden_info.data: {Tb.hidden_info.data_correct: info.data?[Tb.information.data_correct]},
+      Map<String, dynamic> upsertObj = {
+        Tb.information_hidden.data: info.informationHidden?.data,
       };
-      if(info.data?[Tb.information.data_correct_reference] != null){
-        upsertObj.addAll({Tb.hidden_info.id: info.data?[Tb.information.data_correct_reference]});
+      if(info.informationHidden?.id != null){
+        upsertObj.addAll({
+          Tb.information_hidden.id: info.informationHidden?.id
+        });
       }
 
-      var ref = await _supabase.from(Tb.hidden_info.table).upsert(upsertObj).select(Tb.hidden_info.id).single();
-      info.data?[Tb.information.data_correct_reference] = ref[Tb.hidden_info.id];
-      //todo add safety
-      //info.data?.remove(Tb.information.data_correct);
+      var ref = await _supabase.from(Tb.information_hidden.table).upsert(upsertObj).select(Tb.information_hidden.id).single();
+      info.informationHidden = InformationHiddenModel(id: ref[Tb.information_hidden.id]);
     }
     var upsertObj = {
       Tb.information.title: info.title,
       Tb.information.type: info.type,
       Tb.information.is_hidden: info.isHidden,
       Tb.information.order: info.order,
-      Tb.information.data: info.data
+      Tb.information.data: info.data,
+      Tb.information.information_hidden: info.informationHidden?.id
     };
     if(info.description!=null) {
       upsertObj.addAll({Tb.information.description: info.description});

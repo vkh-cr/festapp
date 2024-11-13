@@ -8,6 +8,11 @@ import 'PlaceModel.dart';
 import 'UserInfoModel.dart';
 
 class UserGroupInfoModel extends IPlutoRowModel {
+  Map<int, String> checkpointTitlesDict = {};
+
+  static const String progressColumn = "progress";
+  static const String participantsColumn = "participants";
+
   int? id;
   String title;
   UserInfoModel? leader;
@@ -35,7 +40,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
   factory UserGroupInfoModel.fromJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
       id: json[Tb.user_group_info.id],
-      leaderId: json[Tb.user_group_info.leader],
+      leaderId: json[Tb.user_group_info.leader] is String ? json[Tb.user_group_info.leader] : null,
       title: json[Tb.user_group_info.title],
       type: json[Tb.user_group_info.type],
       data: json[Tb.user_group_info.data],
@@ -46,11 +51,9 @@ class UserGroupInfoModel extends IPlutoRowModel {
               ? PlaceModel.fromJson(json[PlaceModel.placeObjectColumn])
               : null,
       description: json[Tb.user_group_info.description],
-      leader: json[Tb.user_info.table] != null
-          ? UserInfoModel.fromJson(json[Tb.user_info.table])
-          : json[Tb.user_info_public.table] != null
+      leader: json[Tb.user_info_public.table] != null
               ? UserInfoModel.fromJson(json[Tb.user_info_public.table])
-              : json[Tb.user_group_info.leader] != null
+              : json[Tb.user_group_info.leader] != null && json[Tb.user_group_info.leader] is Map
                   ? UserInfoModel.fromJson(json[Tb.user_group_info.leader])
                   : null,
       participants: json.containsKey(Tb.user_groups.table)
@@ -63,9 +66,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
               : {},
     );
   }
-
-  static const String participantsColumn = "participants";
-
+  
   static UserGroupInfoModel fromPlutoJson(Map<String, dynamic> json) {
     return UserGroupInfoModel(
         id: json[Tb.user_group_info.id] == -1 ? null : json[Tb.user_group_info.id],
@@ -92,6 +93,15 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
   @override
   PlutoRow toPlutoRow() {
+    var checkpoints = (data?["game"] ?? [])
+        .where((item) => checkpointTitlesDict.containsKey(item["check_point"])) // Filter out non-existent checkpoints
+        .map((item) => checkpointTitlesDict[item["check_point"]])
+        .toList();
+
+    checkpoints.sort();
+
+    var progressText = "${checkpoints.length} [${checkpoints.join(",")}]";
+
     return PlutoRow(cells: {
       Tb.user_group_info.id: PlutoCell(value: id),
       Tb.user_group_info.title: PlutoCell(value: title),
@@ -100,6 +110,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
       Tb.user_group_info.place: PlutoCell(value: place),
       Tb.user_group_info.type: PlutoCell(value: type ?? ""),
       participantsColumn: PlutoCell(value: participants),
+      progressColumn: PlutoCell(value: progressText),
     });
   }
 

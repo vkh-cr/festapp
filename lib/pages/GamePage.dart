@@ -1,9 +1,11 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/GameSettingsModel.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
+import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -23,40 +25,77 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  static const refreshInterval = Duration(seconds: 5);
+
   List<InformationModel> _gameList = [];
   Set<int> _correctGuesses = {};
-  String title = "Game".tr();
+  String _groupTitle = "Game".tr();
   GameSettingsModel? _gameSettings;
   Timer? _countdownTimer;
+  Timer? _correctGuessesTimer;
   Duration? _remainingTime;
+  bool _isUserInGameGroup = false;
+  bool _isOffline = false; // Track offline status
+
+  late StreamSubscription _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
     loadGameData();
+    _correctGuessesTimer = Timer.periodic(refreshInterval, (timer) {
+      loadCorrectGuesses();
+    });
+
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((result) {
+      setState(() {
+        _isOffline = result.contains(ConnectivityResult.none);
+      });
+    });
   }
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _correctGuessesTimer?.cancel();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
   Future<void> loadGameData() async {
-    // Load game settings and information
     _gameSettings = await DbOccasions.loadGameSettings();
-    var allInfo = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
+    var userGroups = await DbGroups.getUserGroups();
 
+    _isUserInGameGroup = userGroups.any((g) => g.type == InformationModel.gameType);
+
+    if (_isUserInGameGroup) {
+      var userGroup = userGroups.firstWhere((g) => g.type == InformationModel.gameType);
+      setState(() {
+        _groupTitle = userGroup.title ?? "Game".tr();
+      });
+    }
+
+    var allInfo = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
     setState(() {
       _gameList = allInfo.toList();
     });
 
-    // Check if the game is ongoing and start countdown if necessary
+    await loadCorrectGuesses();
+
     if (_gameSettings != null && DateTime.now().isBefore(_gameSettings!.end!)) {
       if (DateTime.now().isAfter(_gameSettings!.start!)) {
         startCountdown(_gameSettings!.end!);
       }
     }
+  }
+
+  Future<void> loadCorrectGuesses() async {
+    if (!_isUserInGameGroup) return;
+
+    var correctGuesses = await DbGroups.getCorrectlyGuessedCheckpoints();
+    setState(() {
+      _correctGuesses = correctGuesses.toSet();
+    });
   }
 
   void startCountdown(DateTime endTime) {
@@ -67,7 +106,6 @@ class _GamePageState extends State<GamePage> {
         if (_remainingTime!.isNegative) {
           _countdownTimer?.cancel();
           _remainingTime = null;
-          // Close any open dialogs if the game has ended
           Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
         }
       });
@@ -82,14 +120,13 @@ class _GamePageState extends State<GamePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(_groupTitle),
         leading: BackButton(
           onPressed: () => RouterService.popOrHome(context),
         ),
       ),
       body: Stack(
         children: [
-          // Game content
           Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -97,8 +134,8 @@ class _GamePageState extends State<GamePage> {
               child: GridView.builder(
                 padding: const EdgeInsets.all(8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4, // Smaller rectangles with 4 items per row
-                  childAspectRatio: 0.75, // Adjusted for a smaller appearance
+                  crossAxisCount: 4,
+                  childAspectRatio: 0.75,
                   crossAxisSpacing: 8,
                   mainAxisSpacing: 8,
                 ),
@@ -108,8 +145,9 @@ class _GamePageState extends State<GamePage> {
                     onTap: () => _showGuessDialog(context, index),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: _correctGuesses.contains(index)
-                            ? ThemeConfig.correctGuessColor(context) : Colors.grey,
+                        color: _correctGuesses.contains(_gameList[index].id)
+                            ? ThemeConfig.correctGuessColor(context)
+                            : Colors.grey,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
@@ -129,31 +167,35 @@ class _GamePageState extends State<GamePage> {
             ),
           ),
 
-          // Overlay for "Game not started yet"
-          if (hasNotStarted)
-            _buildOverlay("Game has not started yet"),
+          if (!_isUserInGameGroup)
+            _buildOverlay("For playing the game, you must be assigned to a game group".tr()),
 
-          // Countdown overlay
-          if (!hasNotStarted && !hasEnded && _remainingTime != null)
+          if (_isUserInGameGroup && hasNotStarted)
+            _buildOverlay("Game has not started yet".tr()),
+
+          if (_isUserInGameGroup && !hasNotStarted && !hasEnded && _remainingTime != null)
             Positioned(
               top: 16,
               right: 16,
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black54,
+                  color: Colors.black87,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  "Time left: ${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}",
+                  "Time left: {time}".tr(namedArgs: {"time":"${_remainingTime!.inHours}:${(_remainingTime!.inMinutes % 60).toString().padLeft(2, '0')}:${(_remainingTime!.inSeconds % 60).toString().padLeft(2, '0')}"}),
                   style: const TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),
 
-          // Overlay for "Game has ended"
-          if (hasEnded)
-            _buildOverlay("Game has ended"),
+          if (_isUserInGameGroup && hasEnded)
+            _buildOverlay("Game has ended".tr()),
+
+          // Overlay for offline status
+          if (_isOffline)
+            _buildOverlay("You are offline. Please check your internet connection.".tr()),
         ],
       ),
     );
@@ -163,12 +205,18 @@ class _GamePageState extends State<GamePage> {
     return Container(
       color: Colors.black54,
       alignment: Alignment.center,
-      child: Text(
-        message.tr(),
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );
@@ -200,7 +248,7 @@ class _GamePageState extends State<GamePage> {
                 var isCorrect = await DbInformation.makeGameGuess(context, _gameList[index].id!, userGuess ?? "");
                 if (isCorrect) {
                   setState(() {
-                    _correctGuesses.add(index);
+                    _correctGuesses.add(_gameList[index].id!);
                   });
                   Navigator.pop(dialogContext);
                 }
