@@ -2,8 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
-
-const supabaseAdmin = createClient(
+const _supabase = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
@@ -19,13 +18,13 @@ Deno.serve(async (req) => {
   }
 
   const reqData = await req.json();
-  const userEmail = reqData.email.trim();
-  const organizationId = reqData.organization;
+  const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
+  const organization = reqData.organization;
 
-  const orgData = await supabaseAdmin
+  const orgData = await _supabase
     .from("organizations")
     .select("data")
-    .eq("id", organizationId)
+    .eq("id", organization)
     .single();
 
   if (orgData.error || !orgData.data) {
@@ -37,52 +36,56 @@ Deno.serve(async (req) => {
   }
 
   const orgConfig = orgData.data.data;
-  const appName = orgConfig.APP_NAME;
-  const defaultUrl = orgConfig.DEFAULT_URL;
+  const appName = orgConfig.APP_NAME || "DefaultAppName";
+  const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
 
-  if (!appName || !defaultUrl) {
-    console.error("Required configuration is missing.");
-    return new Response(
-      JSON.stringify({ error: "Missing required configuration" }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      }
-    );
-  }
-
-  const userData = await supabaseAdmin
+  const userData = await _supabase
     .from("user_info")
     .select()
-    .eq("email_readonly", userEmail)
-    .eq("organization", organizationId)
+    .eq("organization", organization)
+    .ilike("email_readonly", userEmail)
     .maybeSingle();
 
-  if (userData.data != null) {
-    return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
+  if (userData.data == null) {
+    return new Response(JSON.stringify({ "email": userEmail }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const userId = userData.data.id;
+  const token = crypto.randomUUID();
 
-  const { data } = await supabaseAdmin.rpc("create_user_in_organization_with_data", {
-    org: organizationId,
-    email: userEmail,
-    password: code,
-    data: reqData,
-  });
+  await _supabase
+    .from("user_reset_token")
+    .delete()
+    .eq("user", userId);
 
-  const template = await supabaseAdmin
+  await _supabase
+    .from("user_reset_token")
+    .insert({
+      "user": userId,
+      "token": token,
+    });
+
+  const template = await _supabase
     .from("email_templates")
     .select()
-    .eq("id", "SIGN_IN_CODE")
+    .eq("id", "RESET_PASSWORD")
+    .eq("organization", organization)
     .single();
 
+  if (template.error || !template.data) {
+    console.error("Template not found for the specified organization.");
+    return new Response(JSON.stringify({ error: "Template not found" }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 404,
+    });
+  }
+
+  const resetPasswordLink = `${defaultUrl}/#/resetPassword?token=${token}`;
   const subs = {
-    code: code,
-    email: userEmail,
+    resetPasswordLink: resetPasswordLink,
   };
 
   await sendEmailWithSubs({
@@ -93,15 +96,16 @@ Deno.serve(async (req) => {
     from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
-  await supabaseAdmin
+  await _supabase
     .from("log_emails")
     .insert({
       "from": _DEFAULT_EMAIL,
       "to": userEmail,
       "template": template.data.id,
+      "organization": organization
     });
 
-  return new Response(JSON.stringify({ "email": userEmail, "code": 200 }), {
+  return new Response(JSON.stringify({ "email": userEmail }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     status: 200,
   });

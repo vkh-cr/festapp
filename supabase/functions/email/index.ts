@@ -1,12 +1,8 @@
-import { SMTPClient } from "https://deno.land/x/denomailer/mod.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
-const _SMTP_HOSTNAME = Deno.env.get('SMTP_HOSTNAME')!;
-const _SMTP_USER_NAME = Deno.env.get('SMTP_USER_NAME')!;
-const _SMTP_USER_PASSWORD = Deno.env.get('SMTP_USER_PASSWORD')!;
-const _DEFAULT_EMAIL = Deno.env.get('DEFAULT_EMAIL')!;
-
-const _supabase = createClient(
+const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
+const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
@@ -22,13 +18,10 @@ Deno.serve(async (req) => {
   }
 
   const reqData = await req.json();
-  console.log(reqData);
-
-  const userEmail = reqData.email != null ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
+  const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
   const organization = reqData.organization;
 
-  // Fetch organization data to get appName and defaultUrl
-  const orgData = await _supabase
+  const orgData = await supabaseAdmin
     .from("organizations")
     .select("data")
     .eq("id", organization)
@@ -46,8 +39,7 @@ Deno.serve(async (req) => {
   const appName = orgConfig.APP_NAME || "DefaultAppName";
   const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
 
-  // Search for user by email and organization in user_info
-  const userData = await _supabase
+  const userData = await supabaseAdmin
     .from("user_info")
     .select()
     .eq("organization", organization)
@@ -64,20 +56,19 @@ Deno.serve(async (req) => {
   const userId = userData.data.id;
   const token = crypto.randomUUID();
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .delete()
     .eq("user", userId);
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .insert({
       "user": userId,
       "token": token,
     });
 
-  // Fetch email template for the organization
-  const template = await _supabase
+  const template = await supabaseAdmin
     .from("email_templates")
     .select()
     .eq("id", "RESET_PASSWORD")
@@ -92,30 +83,20 @@ Deno.serve(async (req) => {
     });
   }
 
-  let html = template.data.html;
-  html = html.replaceAll(`{{.ResetPasswordLink}}`, `${defaultUrl}/#/resetPassword?token=${token}`);
-  const client = new SMTPClient({
-    connection: {
-      hostname: _SMTP_HOSTNAME,
-      port: 465,
-      tls: true,
-      auth: {
-        username: _SMTP_USER_NAME,
-        password: _SMTP_USER_PASSWORD,
-      },
-    },
-  });
+  const resetPasswordLink = `${defaultUrl}/#/resetPassword?token=${token}`;
+  const subs = {
+    resetPasswordLink: resetPasswordLink,
+  };
 
-  await client.send({
-    from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
+  await sendEmailWithSubs({
     to: userEmail,
     subject: template.data.subject,
-    html: html,
+    content: template.data.html,
+    subs,
+    from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
-  await client.close();
-
-  await _supabase
+  await supabaseAdmin
     .from("log_emails")
     .insert({
       "from": _DEFAULT_EMAIL,

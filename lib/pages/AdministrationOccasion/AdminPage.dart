@@ -2,14 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/IconModel.dart';
-import 'package:fstapp/dataModels/OccasionModel.dart';
-import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/dataServices/DbPlaces.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/EventsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ExclusivityTab.dart';
+import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
@@ -28,43 +23,28 @@ class AdminPage extends StatefulWidget {
 class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // Shared Data
-  OccasionModel? occasionModel;
-  List<String> places = [];
-  List<int?> mapIcons = [];
-  List<IconModel> svgIcons = [];
+  // List of active tabs by name
+  final List<String> activeTabNames = [
+    AdminTabDefinition.info,
+    AdminTabDefinition.events,
+    AdminTabDefinition.places,
+    AdminTabDefinition.exclusivity,
+    AdminTabDefinition.groups,
+    AdminTabDefinition.game,
+    AdminTabDefinition.service,
+    AdminTabDefinition.users
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: 7);
-    loadData();
-  }
-
-  Future<void> loadData() async {
-    // Load data for all tabs
-    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
-    await loadPlaces();
-    var svgs = await DbPlaces.getAllIcons();
-    svgIcons.clear();
-    svgIcons.addAll(svgs);
-    mapIcons.clear();
-    mapIcons.addAll(svgIcons.map((icon) => icon.id).toList());
-    mapIcons.add(null);
-
-    setState(() {});
-  }
-
-  Future<void> loadPlaces() async {
-    var placesRaws = await DbPlaces.getMapPlaces();
-    var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
-    placesStrings.add(PlaceModel.WithouValue);
-    places.clear();
-    places.addAll(placesStrings);
+    _tabController = TabController(vsync: this, length: activeTabNames.length);
   }
 
   @override
   Widget build(BuildContext context) {
+    final activeTabs = activeTabNames.map((name) => AdminTabDefinition.availableTabs[name]!).toList();
+
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
@@ -80,50 +60,17 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
-                tabs: [
-                  Row(
-                      children: [
-                        const Icon(Icons.info),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Info").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.calendar_month),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Events").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.pin_drop),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Places").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.punch_clock_rounded),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Exclusivity").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.groups),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Groups").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.food_bank),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Service").tr())
-                      ]
-                  ),
-                  Row(
-                      children: [
-                        const Icon(Icons.people),
-                        Padding(padding: const EdgeInsets.all(12), child: const Text("Users").tr())
-                      ]
-                  ),
-                ],
+                tabs: activeTabs.map((tab) {
+                  return Row(
+                    children: [
+                      Icon(tab.icon),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(tab.label),
+                      ),
+                    ],
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -131,15 +78,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
-          children: [
-            InformationTab(),
-            EventsTab(occasionModel: occasionModel, places: places),
-            PlacesTab(svgIcons: svgIcons, mapIcons: mapIcons, loadPlaces: loadPlaces,),
-            ExclusivityTab(),
-            UserGroupsTab(),
-            ServiceTab(),
-            UsersTab(),
-          ],
+          children: activeTabs.map((tab) => tab.widget).toList(),
         ),
       ),
     );
@@ -150,4 +89,35 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     _tabController.dispose();
     super.dispose();
   }
+}
+
+// Definition for each tab
+class AdminTabDefinition {
+  final String label;
+  final IconData icon;
+  final Widget widget;
+
+  AdminTabDefinition({required this.label, required this.icon, required this.widget});
+
+  // Tab labels as static const strings
+  static const String info = "Info";
+  static const String events = "Events";
+  static const String places = "Places";
+  static const String exclusivity = "Exclusivity";
+  static const String groups = "Groups";
+  static const String service = "Service";
+  static const String users = "Users";
+  static const String game = "Game";
+
+  // Available tabs defined in a dictionary
+  static Map<String, AdminTabDefinition> get availableTabs => {
+    info: AdminTabDefinition(label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
+    events: AdminTabDefinition(label: "Events".tr(), icon: Icons.calendar_month, widget: EventsTab()),
+    places: AdminTabDefinition(label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
+    exclusivity: AdminTabDefinition(label: "Exclusivity".tr(), icon: Icons.punch_clock_rounded, widget: ExclusivityTab()),
+    groups: AdminTabDefinition(label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
+    service: AdminTabDefinition(label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
+    users: AdminTabDefinition(label: "Users".tr(), icon: Icons.people, widget: UsersTab()),
+    game: AdminTabDefinition(label: "Game".tr(), icon: Icons.gamepad, widget: GameTab()),
+  };
 }
