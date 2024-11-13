@@ -17,7 +17,7 @@ var z=a.updateTypes([])
 B.b4m.prototype={
 $1(d){if(d.length===0||!C.e.p(d,"@"))return A.U("E-mail is not valid!",null)},
 $S:91};(function inheritance(){var y=a.inherit
-y(B.b4m,A.bQ)})();(function constants(){var y=a.makeConstList
+y(B.b4m,A.bR)})();(function constants(){var y=a.makeConstList
 D.awZ=A.a(y(["email"]),A.y("q<f>"))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_43",e:"endPart",h:b})})($__dart_deferred_initializers__,"NX3C2rHBuJgnpGdBl2inw/ToDOs=");
+a.eventLog.push({p:"main.dart.js_43",e:"endPart",h:b})})($__dart_deferred_initializers__,"m43QXtjau1AYqmOPPRvoIFjB668=");

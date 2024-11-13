@@ -13,7 +13,7 @@ var $async$aca=B.h(function(g,h){if(g===1)return B.i(h,w)
 while(true)switch(x){case 0:if(e===C.alk||e===C.all)u=!(d.giv()==="https"||d.giv()==="http")
 else u=!1
 if(u)throw B.e(B.eA(d,"url","To use an in-app web view, you must provide an http(s) URL."))
-v=$.can().Nh(d.k(0),new B.amv(A.cP6(e),new B.alF(!0,!0,D.f2),f))
+v=$.can().Ng(d.k(0),new B.amw(A.cP6(e),new B.alG(!0,!0,D.f2),f))
 x=1
 break
 case 1:return B.j(v,w)}})
@@ -36,6 +36,6 @@ C.yL=new A.Mv(0,"platformDefault")
 C.alk=new A.Mv(1,"inAppWebView")
 C.all=new A.Mv(2,"inAppBrowserView")
 C.alm=new A.Mv(3,"externalApplication")
-C.aR5=new B.GD(3,"externalApplication")})()};
+C.aR5=new B.GE(3,"externalApplication")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_152",e:"endPart",h:b})})($__dart_deferred_initializers__,"EDUFVXARCoUt5PH/k8SlxsxuJmg=");
+a.eventLog.push({p:"main.dart.js_152",e:"endPart",h:b})})($__dart_deferred_initializers__,"V4FiCZoF1yBtsKQIXsSbIpP56vU=");
