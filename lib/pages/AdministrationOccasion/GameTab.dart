@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameCheckPointsContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameSettingsContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameUserGroupsContent.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class GameTab extends StatefulWidget {
   const GameTab({Key? key}) : super(key: key);
@@ -33,39 +34,16 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
       child: Column(
         children: [
           Container(
+            color: ThemeConfig.backgroundColor(context),
             height: 40,
             alignment: Alignment.centerLeft,
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                Row(
-                  children: [
-                    Icon(Icons.gamepad),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text("Check points".tr()),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.groups),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text("Groups".tr()),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.settings),
-                    Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: Text("Settings".tr()),
-                    ),
-                  ],
-                ),
+                buildTab(Icons.gamepad, "Check points".tr()),
+                buildTab(Icons.groups, "Groups".tr()),
+                buildTab(Icons.settings, "Settings".tr()),
               ],
             ),
           ),
@@ -82,6 +60,21 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
+    );
+  }
+
+  Widget buildTab(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: ThemeConfig.blackColor(context)),
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            text,
+            style: TextStyle(color: ThemeConfig.blackColor(context)),
+          ),
+        ),
+      ],
     );
   }
 }
