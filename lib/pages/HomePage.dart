@@ -4,18 +4,16 @@ import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/LoginPage.dart';
-import 'package:fstapp/pages/UserPage.dart';
-import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -78,7 +76,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (AuthService.isLoggedIn()) {
       var userInfo = await OfflineDataService.getUserInfo();
       setState(() {
-        userName = userInfo?.name;
+        userName = userInfo?.occasionUser?.data?[Tb.occasion_users.data_name];
       });
     }
   }
@@ -145,9 +143,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 label: "Map".tr(),
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.info_outlined),
+                icon: Icon(Icons.info_outline),
                 activeIcon: Icon(Icons.info),
-                label: "Info".tr(),
+                label: "More".tr(),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.account_circle_outlined),

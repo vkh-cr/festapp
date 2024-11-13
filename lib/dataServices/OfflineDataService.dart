@@ -61,10 +61,10 @@ class OfflineDataService {
 
   static Future<void> updateEventsWithGroupName(Iterable<EventModel> events) async {
     var me = await getUserInfo();
-    if (me?.userGroup != null) {
+    if (me?.eventUserGroup != null) {
       for (var e in events) {
         if (e.isGroupEvent) {
-          e.title = me!.userGroup!.title;
+          e.title = me!.eventUserGroup!.title;
           e.isMyGroupEvent = true;
         }
       }

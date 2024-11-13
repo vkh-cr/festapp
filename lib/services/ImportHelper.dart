@@ -6,9 +6,9 @@ import 'package:intl/intl.dart';
 
 class ImportHelper {
   static Map<String, String> get migrateColumns => {
-        Tb.user_info.email_readonly: "E-mailová adresa",
-        Tb.user_info.name: "Jméno:",
-        Tb.user_info.surname: "Příjmení:",
+        Tb.occasion_users.data_email: "E-mailová adresa",
+        Tb.occasion_users.data_name: "Jméno:",
+        Tb.occasion_users.data_surname: "Příjmení:",
         Tb.occasion_users.services_accommodation: "Ubytování:",
         Tb.occasion_users.data_phone: "Mobilní telefon:",
         Tb.occasion_users.data_text1: "Typ účastníka:",
@@ -40,9 +40,9 @@ class ImportHelper {
     }
 
     if (!userColumnIndex.keys.toSet().containsAll([
-      Tb.user_info.email_readonly,
-      Tb.user_info.name,
-      Tb.user_info.surname,
+      Tb.occasion_users.data_email,
+      Tb.occasion_users.data_name,
+      Tb.occasion_users.data_surname,
     ])) {
       throw Exception("Table doesn't contain required columns.");
     }
@@ -51,7 +51,7 @@ class ImportHelper {
       Map<String, dynamic> userJsonObject = {};
       for (var entry in userColumnIndex.entries) {
         var trimmedString = fields[r][entry.value].toString().trim();
-        if (entry.key == Tb.user_info.email_readonly) {
+        if (entry.key == Tb.occasion_users.data_email) {
           if (trimmedString.isEmpty) {
             break;
           }
@@ -63,7 +63,7 @@ class ImportHelper {
           var role = trimmedString.toLowerCase().startsWith("p") ? 1 : 2;
           userJsonObject[entry.key] = role;
           continue;
-        } else if (entry.key == Tb.user_info.sex) {
+        } else if (entry.key == Tb.occasion_users.data_sex) {
           if (trimmedString.isEmpty) {
             break;
           }
@@ -91,15 +91,15 @@ class ImportHelper {
         continue;
       }
       if (!userJsonObject.keys.toSet().containsAll([
-        Tb.user_info.email_readonly,
-        Tb.user_info.name,
-        Tb.user_info.surname,
+        Tb.occasion_users.data_email,
+        Tb.occasion_users.data_name,
+        Tb.occasion_users.data_surname,
       ])) {
         continue;
       }
       if (userList.any((element) =>
-          element[Tb.user_info.email_readonly] ==
-          userJsonObject[Tb.user_info.email_readonly])) {
+          element[Tb.occasion_users.data_email] ==
+          userJsonObject[Tb.occasion_users.data_email])) {
         //omit with duplicate email
         continue;
       }

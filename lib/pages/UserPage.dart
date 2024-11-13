@@ -171,13 +171,14 @@ class _UserPageState extends State<UserPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ButtonsHelper.buildQRCodeButton(
+                        child: ButtonsHelper.buildReferenceButton(
                           context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
                               userData?.occasionUser!.data![Tb.occasion_users.data_name],
                               AppConfig.appName,
                               userData?.occasionUser!.user!??""),
+                          icon: Icons.qr_code,
                           label: "Show my code".tr(),
                         ),
                       ),
@@ -229,7 +230,7 @@ class _UserPageState extends State<UserPage> {
                                                 color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 13)),
                                         trailing:
-                                            ButtonsHelper.buildQRCodeButton(
+                                            ButtonsHelper.buildReferenceButton(
                                               context: context,
                                           onPressed: () =>
                                               _showFullScreenDialog(
@@ -238,6 +239,7 @@ class _UserPageState extends State<UserPage> {
                                             AppConfig.appName,
                                             companion.id,
                                           ),
+                                          icon: Icons.qr_code,
                                           label: "Show Code".tr(),
                                         ),
                                         expandedCrossAxisAlignment:

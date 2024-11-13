@@ -10,25 +10,33 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class EventsTab extends StatefulWidget {
-  final OccasionModel? occasionModel;
-
-  const EventsTab({Key? key, required this.occasionModel}) : super(key: key);
+  const EventsTab({Key? key}) : super(key: key);
 
   @override
   _EventsTabState createState() => _EventsTabState();
 }
 
 class _EventsTabState extends State<EventsTab> {
+  OccasionModel? occasionModel; // Occasions are now loaded directly within EventsTab
   List<String> places = [];
 
   @override
   void initState() {
     super.initState();
-    loadPlaces();
+    loadOccasion(); // Load occasion details
+    loadPlaces();   // Load places for the dropdown list
+  }
+
+  Future<void> loadOccasion() async {
+    // Fetch the occasion based on the current occasion ID
+    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasion!);
+    setState(() {}); // Update the UI once occasion data is loaded
   }
 
   Future<void> loadPlaces() async {
@@ -83,7 +91,7 @@ class _EventsTabState extends State<EventsTab> {
           PlutoColumn(
             title: "Start date".tr(),
             field: EventModel.startDateColumn,
-            type: PlutoColumnType.date(defaultValue: widget.occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use loaded occasion data
             width: 140,
           ),
           PlutoColumn(
@@ -95,7 +103,7 @@ class _EventsTabState extends State<EventsTab> {
           PlutoColumn(
             title: "End date".tr(),
             field: EventModel.endDateColumn,
-            type: PlutoColumnType.date(defaultValue: widget.occasionModel?.startTime),
+            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use loaded occasion data
             width: 140,
           ),
           PlutoColumn(
@@ -148,14 +156,12 @@ class _EventsTabState extends State<EventsTab> {
                     onPressed: () async {
                       String? textToEdit;
                       String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
-                      if(oldText!=null)
-                      {
+                      if(oldText!=null) {
                         textToEdit = oldText;
                       }
                       Future<String?> Function() load = () async {
                         var eventId = rendererContext.row.cells[Tb.events.id]!.value;
-                        if(eventId!=null)
-                        {
+                        if(eventId != null) {
                           var fullEvent = await DbEvents.getEvent(eventId);
                           return fullEvent.description;
                         }
@@ -163,18 +169,17 @@ class _EventsTabState extends State<EventsTab> {
                       };
                       Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
                       RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
-                        if(value != null)
-                        {
+                        if(value != null) {
                           var newText = value as String;
-                          if(newText!=textToEdit)
-                          {
+                          if(newText != textToEdit) {
                             rendererContext.row.cells[Tb.events.description]?.value = newText;
                             var cell = rendererContext.row.cells[Tb.events.description]!;
                             rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
                           }
                         }
-                      });},
-                    child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr()) ])
+                      });
+                    },
+                    child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr())])
                 );
               }),
           PlutoColumn(

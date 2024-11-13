@@ -54,15 +54,15 @@ class OccasionUserModel extends IPlutoRowModel {
     Tb.occasion_users.services: services,
   };
 
-  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json) {
+  factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
         occasion: RightsService.currentOccasion!,
         user: json[Tb.occasion_users.user],
         role: json[Tb.occasion_users.role],
         data: {
-          Tb.occasion_users.data_email: json[Tb.user_info.email_readonly],
-          Tb.occasion_users.data_name: json[Tb.user_info.name],
-          Tb.occasion_users.data_surname: json[Tb.user_info.surname],
+          Tb.occasion_users.data_email: json[Tb.occasion_users.data_email],
+          Tb.occasion_users.data_name: json[Tb.occasion_users.data_name],
+          Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname],
           Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
           Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
           Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
@@ -72,6 +72,7 @@ class OccasionUserModel extends IPlutoRowModel {
           Tb.occasion_users.data_birthDate: json[Tb.occasion_users.data_birthDate],
           Tb.occasion_users.data_note: json[Tb.occasion_users.data_note],
           Tb.occasion_users.data_diet: json[Tb.occasion_users.data_diet],
+          Tb.occasion_users.data_isInvited: original?.data?[Tb.occasion_users.data_isInvited],
         },
         services: json[Tb.occasion_users.services]
     );
@@ -254,14 +255,16 @@ class OccasionUserModel extends IPlutoRowModel {
   }
 
   bool compareField(Map<String, dynamic> u, dynamic dataField, dynamic uField) {
+    if(!compareStrings(u[uField], data?[dataField])){
+      var x= 1;
+    }
     return compareStrings(u[uField], data?[dataField]);
   }
 
   bool importedEquals(Map<String, dynamic> iu) {
-    return compareField(iu, Tb.occasion_users.data_email, Tb.user_info.email_readonly)
-        && compareField(iu, Tb.occasion_users.data_name, Tb.user_info.name)
-        && compareField(iu, Tb.occasion_users.data_surname, Tb.user_info.surname)
-        && compareField(iu, Tb.occasion_users.data_accommodation, Tb.user_info.accommodation)
+    return compareField(iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email)
+        && compareField(iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name)
+        && compareField(iu, Tb.occasion_users.data_surname, Tb.occasion_users.data_surname)
         && iu[Tb.user_info.role] == role
         && compareField(iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone)
         && compareField(iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1)

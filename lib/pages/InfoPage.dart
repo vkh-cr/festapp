@@ -2,17 +2,19 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/pages/GamePage.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import '../services/ToastHelper.dart';
 import '../services/js/js_interop.dart';
@@ -60,53 +62,83 @@ class _InfoPageState extends State<InfoPage> {
           constraints: BoxConstraints(maxWidth: appMaxWidth),
           child: SingleChildScrollView(
             controller: _scrollController,
-            child: ExpansionPanelList(
-              expansionCallback: (panelIndex, isExpanded) async {
-                await handleExpansion(panelIndex, isExpanded);
-              },
-              children: _informationList == null
-                  ? []
-                  : _informationList!.map<ExpansionPanel>((InformationModel item) {
-                int index = _informationList!.indexOf(item);
-                return ExpansionPanel(
-                  backgroundColor: ThemeConfig.backgroundColor(context),
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return ListTile(
-                      title: Text(item.title ?? ""),
-                    );
-                  },
-                  body: _isItemLoading[index] ?? false
-                      ? const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                      : Column(
-                    children: [
-                      if (RightsService.isEditor())
-                        ElevatedButton(
-                          onPressed: () async {
-                            var result = await RouterService.navigatePageInfo(
-                                context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
-                            if (result != null) {
-                              setState(() {
-                                item.description = result as String;
-                              });
-                              await DbInformation.updateInformation(item);
-                              ToastHelper.Show(context, "Content has been changed.".tr());
-                            }
-                          },
-                          child: const Text("Edit content").tr(),
-                        ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? "", isSelectable: true),
-                      )
-                    ],
+            child: Column(
+              children: [
+                Container(
+                  width: double.infinity, // Expand container to full width
+                  padding: const EdgeInsets.all(24), // Slightly larger padding
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey[300]!),
+                    ),
                   ),
-                  isExpanded: item.isExpanded,
-                  canTapOnHeader: true,
-                );
-              }).toList(),
+                  child: Align(
+                    alignment: Alignment.center, // Center the button within the container
+                    child: ButtonsHelper.buildReferenceButton(
+                      context: context,
+                      onPressed: () {
+                        if(!AuthService.isLoggedIn()) {
+                          ToastHelper.Show(context, "Sign in to participate in the game.".tr());
+                          return;
+                        }
+                        // Define the action for the Game button
+                        RouterService.navigateOccasion(context, GamePage.ROUTE); // Replace with your game route
+                      },
+                      icon: Icons.gamepad,
+                      label: "Game",
+                    ),
+                  ),
+                ),
+                // Information list
+                ExpansionPanelList(
+                  expansionCallback: (panelIndex, isExpanded) async {
+                    await handleExpansion(panelIndex, isExpanded);
+                  },
+                  children: _informationList == null
+                      ? []
+                      : _informationList!.map<ExpansionPanel>((InformationModel item) {
+                    int index = _informationList!.indexOf(item);
+                    return ExpansionPanel(
+                      backgroundColor: ThemeConfig.backgroundColor(context),
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return ListTile(
+                          title: Text(item.title ?? ""),
+                        );
+                      },
+                      body: _isItemLoading[index] ?? false
+                          ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                          : Column(
+                        children: [
+                          if (RightsService.isEditor())
+                            ElevatedButton(
+                              onPressed: () async {
+                                var result = await RouterService.navigatePageInfo(
+                                    context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
+                                if (result != null) {
+                                  setState(() {
+                                    item.description = result as String;
+                                  });
+                                  await DbInformation.updateInformation(item);
+                                  ToastHelper.Show(context, "Content has been changed.".tr());
+                                }
+                              },
+                              child: const Text("Edit content").tr(),
+                            ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.all(12),
+                            child: HtmlView(html: item.description ?? "", isSelectable: true),
+                          ),
+                        ],
+                      ),
+                      isExpanded: item.isExpanded,
+                      canTapOnHeader: true,
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
         ),
