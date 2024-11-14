@@ -22,8 +22,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'styles/Styles.dart';
-
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
   await initializeEverything();
