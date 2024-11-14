@@ -175,7 +175,7 @@
   "City": "Stadt",
   "Birth year": "Geburtsjahr",
   "Sign up": "Anmelden",
-  "I'm": "Ich bin",
+  "I am": "Ich bin",
   "First time?": "Zum ersten Mal?",
   "Add existing": "Bestehendes hinzufügen",
   "Registration is almost complete!": "Die Registrierung ist fast abgeschlossen!",
@@ -277,5 +277,8 @@
   "Start time must be earlier than end time.": "Der Startzeitpunkt muss früher als der Endzeitpunkt sein.",
   "You are offline. Please check your internet connection.": "Du bist offline. Bitte überprüfe deine Internetverbindung.",
   "More": "Mehr",
+  "Songbook": "Liederbuch",
+  "Smaller": "Kleiner",
+  "Larger": "Größer",
   "_": "_"
 }
