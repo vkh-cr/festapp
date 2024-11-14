@@ -21,7 +21,7 @@ class FormHelper {
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
   static String emailLabel() => "E-mail".tr();
-  static String sexLabel() => "I'm".tr();
+  static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String emailInvalidMessage() => "E-mail is not valid!".tr();
   static String maleLabel() => "Male".tr();

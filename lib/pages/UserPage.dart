@@ -308,7 +308,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
                 buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
                 buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                //buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                //buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 buildTextField("Typ účastníka", userData?.occasionUser?.data![Tb.occasion_users.data_text1] ?? ""),
                 buildTextField("Přípravný tým", userData?.occasionUser?.data![Tb.occasion_users.data_text2] ?? ""),
                 Padding(
