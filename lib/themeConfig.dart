@@ -61,6 +61,8 @@ class ThemeConfig {
   static Color darkColor(BuildContext context) => isDarkMode(context) ? dddText : seed1;
   static Color blackColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.black;
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
+  static Color whiteTextColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.white;
+
   static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
 
   static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);

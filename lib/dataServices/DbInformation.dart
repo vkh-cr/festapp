@@ -153,6 +153,13 @@ class DbInformation {
     }
   }
 
+  static Future<void> fillDescriptionFromOffline(InformationModel info) async {
+    var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
+    if (infoDesc != null) {
+      info.description = infoDesc.description ?? "";
+    }
+  }
+
   static Future<void> _checkForUpdates(List<InformationModel> infosToCheck, List<int> needsUpdate) async {
     for (var infoMeta in infosToCheck) {
       var oe = await OfflineDataService.getInfoDescription(infoMeta.id.toString());

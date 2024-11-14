@@ -277,5 +277,8 @@
   "Start time must be earlier than end time.": "Čas začiatku musí byť skorší ako čas konca.",
   "You are offline. Please check your internet connection.": "Si offline. Skontroluj svoje internetové pripojenie.",
   "More": "Viac",
+  "Songbook": "Spevník",
+  "Smaller": "Menší",
+  "Larger": "Väčší",
   "_": "_"
 }
