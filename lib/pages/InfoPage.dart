@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/AppRouter.gr.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
@@ -64,6 +65,7 @@ class _InfoPageState extends State<InfoPage> {
             controller: _scrollController,
             child: Column(
               children: [
+                if(AppConfig.isGameSupported)
                 Container(
                   width: double.infinity, // Expand container to full width
                   padding: const EdgeInsets.all(24), // Slightly larger padding
