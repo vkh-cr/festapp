@@ -16,7 +16,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   @override
   FutureOr<bool> Function(String p1)? get onTapUrl {
     return (String url) {
-      if (url.startsWith(AppConfig.webLink) || url.contains("localhost")) {
+      if (AppConfig.compatibleUrls().any((u) => u.startsWith(AppConfig.webLink)) || url.contains("localhost")) {
         var path = url.split('/#/').last;
         RouterService.navigate(context, path);
         return true;

@@ -28,9 +28,9 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
         supportedLocales:
-        AppConfig.availableLanguages.map((e) => e.locale).toList(),
+        AppConfig.availableLanguages().map((e) => e.locale).toList(),
         path: "assets/translations",
-        fallbackLocale: AppConfig.availableLanguages.map((e) => e.locale).first,
+        fallbackLocale: AppConfig.availableLanguages().map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
         child: MyApp()),
