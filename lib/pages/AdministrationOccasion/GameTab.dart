@@ -35,7 +35,6 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
         children: [
           Container(
             color: ThemeConfig.backgroundColor(context),
-            height: 40,
             alignment: Alignment.centerLeft,
             child: TabBar(
               controller: _tabController,
@@ -68,7 +67,7 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
       children: [
         Icon(icon, color: ThemeConfig.blackColor(context)),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           child: Text(
             text,
             style: TextStyle(color: ThemeConfig.blackColor(context)),

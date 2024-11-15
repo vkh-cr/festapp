@@ -308,7 +308,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
                 buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
                 buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 buildTextField("Role".tr(), userData?.roleString ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),

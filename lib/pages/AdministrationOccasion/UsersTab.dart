@@ -172,6 +172,8 @@ class _UsersTabState extends State<UsersTab> {
       );
 
       for (var user in users) {
+        // slow down to avoid rate limit SES has 14 email / sec
+        await Future.delayed(Duration(milliseconds: 100));
         await AuthService.sendSignInCode(user);
         invitedCount.value++;
 

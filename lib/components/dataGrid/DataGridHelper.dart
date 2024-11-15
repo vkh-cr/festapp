@@ -1,16 +1,62 @@
 import 'package:collection/collection.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/AppRouter.gr.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
+import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class DataGridHelper
 {
+  static Widget buildHtmlEditorButton({
+    required BuildContext context,
+    required String field,
+    required PlutoColumnRendererContext rendererContext,
+    required Future<String?> Function() loadContent,
+  }) {
+    String? textToEdit;
+    String? oldText = rendererContext.row.cells[field]?.value;
+    if (oldText != null) {
+      textToEdit = oldText;
+    }
+
+    return ElevatedButton(
+      onPressed: () async {
+        Map<String, dynamic> param = {
+          HtmlEditorPage.parContent: textToEdit,
+          HtmlEditorPage.parLoad: loadContent,
+        };
+
+        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
+          if (value != null) {
+            var newText = value as String;
+            if (newText != textToEdit) {
+              rendererContext.row.cells[field]?.value = newText;
+              var cell = rendererContext.row.cells[field]!;
+              rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
+            }
+          }
+        });
+      },
+      child: Row(
+        children: [
+          const Icon(Icons.edit),
+          Padding(
+            padding: const EdgeInsets.all(6),
+            child: Text("Edit".tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
   static T? getValueOrNull<T>(dynamic value, {T? emptyValue}) {
     if (value == emptyValue || value == "") return null;
     if (value is String) return value.trim() as T;
