@@ -1,25 +1,78 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_228",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-c5P(d){var x=null,w=A.G(["id",null],y.g,y.b)
-return new B.an8("MapRoute",new A.Au(x,d,x),w,C.bv,x,"",x)},
-an8:function an8(d,e,f,g,h,i,j){var _=this
-_.a=d
-_.b=e
-_.c=f
-_.d=g
-_.e=h
-_.f=i
-_.r=j}},D
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={Wo:function Wo(d,e){this.a=d
+this.b=e},
+zx(d){return B.cx9(d)},
+cx9(d){var x=0,w=A.l(y.l),v,u,t,s,r,q
+var $async$zx=A.h(function(e,f){if(e===1)return A.i(f,w)
+while(true)switch(x){case 0:t=$.vN().bY("information").hd(0,"id,occasion,created_at,updated_at,is_hidden,title,order,type,data,information_hidden(*)")
+s=$.dJ
+s.toString
+s=t.cE("occasion",s)
+t=y.c
+r=A
+q=J
+x=3
+return A.c(s.avH(0,"type","eq",d==null?"":d),$async$zx)
+case 3:u=r.bi(q.cg(f,new B.aY_(),y.b),!0,t)
+A.cfT(u,new B.aY0(),t,y.g)
+C.b.f8(u,new B.aY1())
+v=u
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$zx,w)},
+aY_:function aY_(){},
+aY0:function aY0(){},
+aY1:function aY1(){},
+ai1(){var x=0,w=A.l(y.i),v,u,t,s,r,q
+var $async$ai1=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:r=$.S8().bY("occasions").hd(0,"data")
+q=$.dJ
+q.toString
+x=3
+return A.c(r.cE("id",q).Nv(),$async$ai1)
+case 3:u=e
+if(u!=null){t=J.t(u,"data")
+if(t!=null&&J.t(t,"game")!=null){r=J.t(t,"game")
+q=J.a3(r)
+s=q.i(r,"start")!=null?A.jc(q.i(r,"start")):null
+v=new B.Wo(s,q.i(r,"end")!=null?A.jc(q.i(r,"end")):null)
+x=1
+break}}v=null
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$ai1,w)}}
+J=c[1]
 A=c[0]
 C=c[2]
-B=a.updateHolder(c[29],B)
-D=c[190]
-B.an8.prototype={}
-var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.an8,A.jJ)})()
-A.bD(b.typeUniverse,JSON.parse('{"an8":{"jJ":["Au"]}}'))
-var y={g:A.y("f"),b:A.y("@")};(function constants(){D.H_=new A.aW(58172,"MaterialIcons",null,!1)})()};
+B=a.updateHolder(c[28],B)
+B.Wo.prototype={
+dh(){var x,w=this.a
+w=w==null?null:w.jv()
+x=this.b
+return A.G(["start",w,"end",x==null?null:x.jv()],y.g,y.b)}}
+var z=a.updateTypes(["R<x<f8>>([f?])"])
+B.aY_.prototype={
+$1(d){return A.alS(d)},
+$S:100}
+B.aY0.prototype={
+$1(d){var x=d.d
+return x==null?"".toLowerCase():x},
+$S:267}
+B.aY1.prototype={
+$2(d,e){var x,w=d.w
+if(w==null)w=0
+x=e.w
+return C.c.c9(w,x==null?0:x)},
+$S:266};(function installTearOffs(){var x=a.installStaticTearOff
+x(B,"cx8",0,function(){return[null]},["$1","$0"],["zx",function(){return B.zx(null)}],0,0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.Wo,A.z)
+w(A.bO,[B.aY_,B.aY0])
+x(B.aY1,A.dN)})()
+var y={c:A.y("f8"),l:A.y("x<f8>"),g:A.y("f"),b:A.y("@"),i:A.y("Wo?")};(function lazyInitializers(){var x=a.lazyFinal
+x($,"cVX","S8",()=>$.km().gu1(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_228",e:"endPart",h:b})})($__dart_deferred_initializers__,"ItvNPI+UAugGFy07lN7O/7js9A4=");
+a.eventLog.push({p:"main.dart.js_228",e:"endPart",h:b})})($__dart_deferred_initializers__,"iDy7kLGfkdL3br4gJdFJQZJOJqc=");
