@@ -24,7 +24,7 @@ class _SongDialogState extends State<SongDialog> {
   static const double fontSizeStep = 2;
   static const double maxFontSize = 50;
   static const double minFontSize = 8;
-  double buttonVisibleOpacity() => ThemeConfig.isDarkMode(context) ? 1 : 0.84;
+  double buttonVisibleOpacity(BuildContext context) => ThemeConfig.isDarkMode(context) ? 1 : 0.9;
   static const double buttonHiddenOpacity = 0.2;
   static const double scrollThreshold = 50.0;
 
@@ -47,7 +47,7 @@ class _SongDialogState extends State<SongDialog> {
   void _updateButtonOpacity() {
     setState(() {
       _buttonOpacity = _scrollController.position.pixels <= scrollThreshold
-          ? buttonVisibleOpacity()
+          ? buttonVisibleOpacity(context)
           : buttonHiddenOpacity;
     });
   }
@@ -107,7 +107,7 @@ class _SongDialogState extends State<SongDialog> {
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                              backgroundColor: ThemeConfig.seed1.withOpacity(buttonVisibleOpacity()),
+                              backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,
                             ),
@@ -129,7 +129,7 @@ class _SongDialogState extends State<SongDialog> {
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                              backgroundColor: ThemeConfig.seed1.withOpacity(buttonVisibleOpacity()),
+                              backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,
                             ),
@@ -156,7 +156,7 @@ class _SongDialogState extends State<SongDialog> {
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           padding: const EdgeInsets.all(16),
-                          backgroundColor: ThemeConfig.seed1.withOpacity(buttonVisibleOpacity()),
+                          backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                           shadowColor: Colors.transparent,
                           elevation: 0,
                         ),
