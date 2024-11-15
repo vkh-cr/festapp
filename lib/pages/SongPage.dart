@@ -11,17 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
-class SongPage extends StatefulWidget {
+class SongbookPage extends StatefulWidget {
   final String? type = "song";
-  static const ROUTE = "songs";
+  static const ROUTE = "songbook";
 
-  SongPage({super.key});
+  SongbookPage({super.key});
 
   @override
-  _SongPageState createState() => _SongPageState();
+  _SongbookPageState createState() => _SongbookPageState();
 }
 
-class _SongPageState extends State<SongPage> {
+class _SongbookPageState extends State<SongbookPage> {
   List<InformationModel>? _informationList;
   static bool? isDarkMode; // Independent theme state for the page
   static bool isDarkModeDefault = false; // Independent theme state for the page
@@ -62,8 +62,8 @@ class _SongPageState extends State<SongPage> {
                       isDarkMode = value;
                     });
                   },
-                  activeColor: Colors.grey,
-                  inactiveThumbColor: Colors.grey,
+                  activeColor: Colors.grey[600],
+                  inactiveThumbColor: Colors.grey[400],
                   inactiveTrackColor: Colors.grey[300],
                   activeTrackColor: Colors.grey[600],
                 ),

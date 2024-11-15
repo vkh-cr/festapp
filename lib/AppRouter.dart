@@ -48,7 +48,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
     AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
     AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
-    AutoRoute(page: SongRoute.page, path: "/:{$LINK}/${SongPage.ROUTE}"),
+    AutoRoute(page: SongRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
 
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),

@@ -670,7 +670,7 @@ class SignupRoute extends _i24.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i22.SongPage]
+/// [_i22.SongbookPage]
 class SongRoute extends _i24.PageRouteInfo<SongRouteArgs> {
   SongRoute({
     _i25.Key? key,
@@ -690,7 +690,7 @@ class SongRoute extends _i24.PageRouteInfo<SongRouteArgs> {
           data.argsAs<SongRouteArgs>(orElse: () => const SongRouteArgs());
       return _i24.DeferredWidget(
         _i22.loadLibrary,
-        () => _i22.SongPage(key: args.key),
+        () => _i22.SongbookPage(key: args.key),
       );
     },
   );
