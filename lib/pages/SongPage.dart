@@ -23,7 +23,8 @@ class SongPage extends StatefulWidget {
 
 class _SongPageState extends State<SongPage> {
   List<InformationModel>? _informationList;
-  static bool isDarkMode = false; // Static variable to persist within app lifecycle
+  static bool? isDarkMode; // Independent theme state for the page
+  static bool isDarkModeDefault = false; // Independent theme state for the page
 
   // Define light and dark themes for this page
   final ThemeData lightTheme = ThemeConfig.baseTheme();
@@ -37,8 +38,9 @@ class _SongPageState extends State<SongPage> {
 
   @override
   Widget build(BuildContext context) {
+    isDarkMode = isDarkMode ?? ThemeConfig.isDarkMode(context);
     return Theme(
-      data: isDarkMode ? darkTheme : lightTheme,
+      data: isDarkMode ?? isDarkModeDefault ? darkTheme : lightTheme,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -54,7 +56,7 @@ class _SongPageState extends State<SongPage> {
               children: [
                 Icon(Icons.wb_sunny, color: Colors.grey),
                 Switch(
-                  value: isDarkMode,
+                  value: isDarkMode ?? isDarkModeDefault,
                   onChanged: (value) {
                     setState(() {
                       isDarkMode = value;
@@ -81,7 +83,7 @@ class _SongPageState extends State<SongPage> {
                   // Add extra space above the first item
                   return Column(
                     children: [
-                      SizedBox(height: 16),  // Extra space below the AppBar
+                      SizedBox(height: 16), // Extra space below the AppBar
                       buildListItem(index),
                     ],
                   );
@@ -104,7 +106,7 @@ class _SongPageState extends State<SongPage> {
           builder: (context) => SongDialog(
             title: _informationList![index].title ?? "",
             description: _informationList![index].description ?? "",
-            isDarkMode: isDarkMode,  // Pass theme setting to dialog
+            isDarkMode: isDarkMode ?? isDarkModeDefault, // Pass theme setting to dialog
           ),
         );
       },

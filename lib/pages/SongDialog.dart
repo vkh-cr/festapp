@@ -30,6 +30,7 @@ class _SongDialogState extends State<SongDialog> {
 
   final ScrollController _scrollController = ScrollController();
   double _buttonOpacity = 1;
+  BuildContext? themedContext;
 
   @override
   void initState() {
@@ -47,7 +48,7 @@ class _SongDialogState extends State<SongDialog> {
   void _updateButtonOpacity() {
     setState(() {
       _buttonOpacity = _scrollController.position.pixels <= scrollThreshold
-          ? buttonVisibleOpacity(context)
+          ? buttonVisibleOpacity(themedContext??context)
           : buttonHiddenOpacity;
     });
   }
@@ -62,6 +63,7 @@ class _SongDialogState extends State<SongDialog> {
       data: themeData,
       child: Builder(
         builder: (BuildContext context) {
+          themedContext = context;
           return Dialog(
             insetPadding: EdgeInsets.zero, // Remove default padding
             child: Container(
@@ -106,7 +108,7 @@ class _SongDialogState extends State<SongDialog> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,
@@ -128,7 +130,7 @@ class _SongDialogState extends State<SongDialog> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,
