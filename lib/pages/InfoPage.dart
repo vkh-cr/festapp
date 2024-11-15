@@ -173,8 +173,8 @@ class _InfoPageState extends State<InfoPage> {
     await loadDataOffline();
     if (widget.id != null) {
       var focused = allInfo.firstWhereOrNull((b) => b.id == widget.id);
-      if (focused != null) {
-        var index = allInfo.indexOf(focused);
+      if (focused != null && _informationList != null) {
+        var index = _informationList!.indexWhere((i)=>i.id == focused.id);
         await handleExpansion(index, true);
         _scrollToExpandedItem(index);
       }

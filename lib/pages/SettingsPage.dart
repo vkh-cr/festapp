@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> loadSettings() async {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
-    LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
+    LanguageModel? currentLanguage = AppConfig.availableLanguages().firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
     bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     var themeMode = await AdaptiveTheme.getThemeMode();
     setState(()  {
@@ -92,7 +92,7 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (AppConfig.availableLanguages.length > 1) ...[
+                if (AppConfig.availableLanguages().length > 1) ...[
                   const Text("Language Settings", style: TextStyle(fontSize: 20)).tr(),
                   const SizedBox(height: 16),
                   Row(
