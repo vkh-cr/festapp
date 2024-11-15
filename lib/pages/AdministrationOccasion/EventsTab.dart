@@ -144,44 +144,26 @@ class _EventsTabState extends State<EventsTab> {
             formatter: DataGridHelper.GetValueFromFormatted,
           ),
           PlutoColumn(
-              width: 150,
-              title: "Content".tr(),
-              enableFilterMenuItem: false,
-              enableContextMenu: false,
-              enableSorting: false,
-              field: Tb.events.description,
-              type: PlutoColumnType.text(defaultValue: ""),
-              renderer: (rendererContext) {
-                return ElevatedButton(
-                    onPressed: () async {
-                      String? textToEdit;
-                      String? oldText = rendererContext.row.cells[Tb.events.description]?.value;
-                      if(oldText!=null) {
-                        textToEdit = oldText;
-                      }
-                      Future<String?> Function() load = () async {
-                        var eventId = rendererContext.row.cells[Tb.events.id]!.value;
-                        if(eventId != null) {
-                          var fullEvent = await DbEvents.getEvent(eventId);
-                          return fullEvent.description;
-                        }
-                        return null;
-                      };
-                      Map<String, dynamic> param = {HtmlEditorPage.parContent: textToEdit, HtmlEditorPage.parLoad: load};
-                      RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
-                        if(value != null) {
-                          var newText = value as String;
-                          if(newText != textToEdit) {
-                            rendererContext.row.cells[Tb.events.description]?.value = newText;
-                            var cell = rendererContext.row.cells[Tb.events.description]!;
-                            rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                          }
-                        }
-                      });
-                    },
-                    child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr())])
-                );
-              }),
+            width: 150,
+            title: "Content".tr(),
+            field: Tb.events.description,
+            type: PlutoColumnType.text(),
+            renderer: (rendererContext) {
+              return DataGridHelper.buildHtmlEditorButton(
+                context: context,
+                field: Tb.events.description,
+                rendererContext: rendererContext,
+                loadContent: () async {
+                  var eventId = rendererContext.row.cells[Tb.events.id]!.value;
+                  if (eventId != null) {
+                    var fullEvent = await DbEvents.getEvent(eventId);
+                    return fullEvent.description;
+                  }
+                  return null;
+                },
+              );
+            },
+          ),
           PlutoColumn(
               title: "Show inside event".tr(),
               field: EventModel.parentEventColumn,

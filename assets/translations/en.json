@@ -277,5 +277,8 @@
   "Start time must be earlier than end time.": "Start time must be earlier than end time.",
   "You are offline. Please check your internet connection.": "You are offline. Please check your internet connection.",
   "More": "More",
+  "Songbook": "Songbook",
+  "Smaller": "Smaller",
+  "Larger": "Larger",
   "_":"_"
 }

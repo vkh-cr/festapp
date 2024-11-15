@@ -6,6 +6,7 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class InformationModel extends IPlutoRowModel {
   static const String gameType = "game";
+  static const String songType = "song";
 
   int? id;
   InformationHiddenModel? informationHidden;
@@ -76,6 +77,17 @@ class InformationModel extends IPlutoRowModel {
         InformationHiddenModel(
             data: {Tb.information.data_correct : json[Tb.information.data_correct]},
             id: json[Tb.information.data_correct_reference]) : null
+    );
+  }
+
+  static InformationModel fromPlutoJsonSong(Map<String, dynamic> json) {
+    return InformationModel(
+      id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
+      title: json[Tb.information.title],
+      description: json[Tb.information.description],
+      type: songType,
+      isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
+      order: json[Tb.information.order],
     );
   }
 
