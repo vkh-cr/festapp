@@ -276,5 +276,8 @@
   "Start time must be earlier than end time.": "Czas rozpoczęcia musi być wcześniejszy niż czas zakończenia.",
   "You are offline. Please check your internet connection.": "Jesteś offline. Sprawdź swoje połączenie z internetem.",
   "More": "Więcej",
+  "Songbook": "Śpiewnik",
+  "Smaller": "Mniejszy",
+  "Larger": "Większy",
   "_": "_"
 }

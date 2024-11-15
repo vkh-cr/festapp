@@ -277,5 +277,8 @@
   "Start time must be earlier than end time.": "Час початку повинен бути раніше часу закінчення.",
   "You are offline. Please check your internet connection.": "Ви офлайн. Будь ласка, перевірте своє інтернет-з'єднання.",
   "More": "Більше",
+  "Songbook": "Пісенник",
+  "Smaller": "Менше",
+  "Larger": "Більше",
   "_": "_"
 }

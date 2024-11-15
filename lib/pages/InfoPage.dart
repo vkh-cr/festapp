@@ -11,6 +11,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/GamePage.dart';
+import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -65,32 +66,48 @@ class _InfoPageState extends State<InfoPage> {
             controller: _scrollController,
             child: Column(
               children: [
-                if(AppConfig.isGameSupported)
-                Container(
-                  width: double.infinity, // Expand container to full width
-                  padding: const EdgeInsets.all(24), // Slightly larger padding
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Colors.grey[300]!),
+                if(AppConfig.isGameSupported || AppConfig.isSongBookSupported)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[300]!),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Game button
+                          if (AppConfig.isGameSupported)
+                            ButtonsHelper.buildReferenceButton(
+                              context: context,
+                              onPressed: () {
+                                if (!AuthService.isLoggedIn()) {
+                                  ToastHelper.Show(context, "Sign in to participate in the game.".tr());
+                                  return;
+                                }
+                                RouterService.navigateOccasion(context, GamePage.ROUTE);
+                              },
+                              icon: Icons.gamepad,
+                              label: "Game",
+                            ),
+                          const SizedBox(width: 16), // Add spacing between buttons
+                          if (AppConfig.isSongBookSupported)
+                            ButtonsHelper.buildReferenceButton(
+                              context: context,
+                              onPressed: () {
+                                RouterService.navigateOccasion(context, SongPage.ROUTE); // Replace with your songbook route
+                              },
+                              icon: Icons.library_music,
+                              label: "Songbook",
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: Align(
-                    alignment: Alignment.center, // Center the button within the container
-                    child: ButtonsHelper.buildReferenceButton(
-                      context: context,
-                      onPressed: () {
-                        if(!AuthService.isLoggedIn()) {
-                          ToastHelper.Show(context, "Sign in to participate in the game.".tr());
-                          return;
-                        }
-                        // Define the action for the Game button
-                        RouterService.navigateOccasion(context, GamePage.ROUTE); // Replace with your game route
-                      },
-                      icon: Icons.gamepad,
-                      label: "Game",
-                    ),
-                  ),
-                ),
                 // Information list
                 ExpansionPanelList(
                   expansionCallback: (panelIndex, isExpanded) async {
@@ -194,26 +211,17 @@ class _InfoPageState extends State<InfoPage> {
     });
 
     var info = _informationList![index];
-    await fillDescriptionFromOffline(info);
+    await DbInformation.fillDescriptionFromOffline(info);
     setState(() {
       if (info.description != null) {
         _isItemLoading[index] = false;
       }
     });
     await DbInformation.updateInfoDescription([info.id!]);
-    await fillDescriptionFromOffline(info);
+    await DbInformation.fillDescriptionFromOffline(info);
     setState(() {
       _isItemLoading[index] = false;
     });
-  }
-
-  Future<void> fillDescriptionFromOffline(InformationModel info) async {
-    var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
-    if (infoDesc != null) {
-      setState(() {
-        info.description = infoDesc.description ?? "";
-      });
-    }
   }
 
   Future<void> loadDataOffline() async {
