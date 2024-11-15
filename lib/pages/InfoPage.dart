@@ -99,7 +99,7 @@ class _InfoPageState extends State<InfoPage> {
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
-                                RouterService.navigateOccasion(context, SongPage.ROUTE); // Replace with your songbook route
+                                RouterService.navigateOccasion(context, SongbookPage.ROUTE); // Replace with your songbook route
                               },
                               icon: Icons.library_music,
                               label: "Songbook",
