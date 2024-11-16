@@ -123,7 +123,7 @@ class _EventEditPageState extends State<EventEditPage> {
           ..maxParticipants = maxParticipants == 0 ? null : maxParticipants
           ..splitForMenWomen = splitForMenWomen!
           ..isGroupEvent = isGroupEvent!
-          ..place = places!.firstWhereOrNull((p)=>p.id! == placeId!)
+          ..place = places!.firstWhereOrNull((p)=>p.id == placeId)
           ..type = type
           ..description = content
           ..parentEventIds = showInsideEvent != null && showInsideEvent!.isNotEmpty
