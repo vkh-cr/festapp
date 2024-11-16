@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -55,7 +56,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       children.add(
         Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 48.0),
+            padding: const EdgeInsets.symmetric(vertical: 38.0),
             child: TextButton.icon(
               onPressed: () {
                 widget.onAddNewEvent?.call(context, widget.eventGroups);
@@ -64,7 +65,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
                 Icons.add_circle_outline,
                 size: 24,
               ),
-              label: const Text("Add new event"),
+              label: const Text("Add New Event").tr(),
               style: TextButton.styleFrom(
                 foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
