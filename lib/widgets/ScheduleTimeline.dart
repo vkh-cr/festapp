@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -108,7 +107,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24,88,24,24),
             child: const Text(
-              AppConfig.isOwnProgramSupported ? "Create your own schedule with ⊕ button." : "There will appear your events.",
+              "There will appear your events.",
               style: TextStyle(fontSize: 20),).tr(),
           ),
         );

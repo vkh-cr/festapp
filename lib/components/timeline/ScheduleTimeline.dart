@@ -1,15 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:timelines/timelines.dart';
-
 
 class ScheduleTimeline extends StatefulWidget {
   final Function(int)? onEventPressed;
   final List<TimeBlockGroup> eventGroups;
   final double? nodePosition;
   final Widget? emptyContent;
+  final Function(BuildContext, List<TimeBlockGroup>)? onAddNewEvent;
+  final bool Function()? showAddNewEventButton;
 
   const ScheduleTimeline({
     super.key,
@@ -17,6 +18,8 @@ class ScheduleTimeline extends StatefulWidget {
     this.onEventPressed,
     this.nodePosition = 0.24,
     this.emptyContent,
+    this.onAddNewEvent,
+    this.showAddNewEventButton,
   });
 
   @override
@@ -48,6 +51,30 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       children.add(createTimeline(timeLineItems));
     }
 
+    if (widget.showAddNewEventButton?.call() ?? false) {
+      children.add(
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 48.0),
+            child: TextButton.icon(
+              onPressed: () {
+                widget.onAddNewEvent?.call(context, widget.eventGroups);
+              },
+              icon: const Icon(
+                Icons.add_circle_outline,
+                size: 24,
+              ),
+              label: const Text("Add new event"),
+              style: TextButton.styleFrom(
+                foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,8 +89,13 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       physics: const NeverScrollableScrollPhysics(),
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
-        indicatorTheme: IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor(context)),
-        connectorTheme: ConnectorTheme.of(context).copyWith(color: ThemeConfig.timelineColor(context), thickness: 2),
+        indicatorTheme: IndicatorTheme.of(context).copyWith(
+          color: ThemeConfig.timelineColor(context),
+        ),
+        connectorTheme: ConnectorTheme.of(context).copyWith(
+          color: ThemeConfig.timelineColor(context),
+          thickness: 2,
+        ),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -74,14 +106,16 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.all(8.0),
             child: Text(
               event.data["leftText"],
-              style: StylesConfig.timeLineSmallTextStyle.copyWith(color: ThemeConfig.timelineTextColor(context)),
+              style: StylesConfig.timeLineSmallTextStyle.copyWith(
+                color: ThemeConfig.timelineTextColor(context),
+              ),
             ),
           );
         },
         contentsBuilder: (_, index) {
           final event = events[index];
           return TextButton(
-            onPressed: () => widget.onEventPressed!(event.id),
+            onPressed: () => widget.onEventPressed?.call(event.id),
             style: TextButton.styleFrom(
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
@@ -94,12 +128,12 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
-          if(event.timeBlockType == TimeBlockType.signedIn) {
+          if (event.timeBlockType == TimeBlockType.signedIn) {
             return OutlinedDotIndicator(
               color: ThemeConfig.timelineColor(context),
               borderWidth: 6,
             );
-          } else if(event.timeBlockType == TimeBlockType.canSignIn) {
+          } else if (event.timeBlockType == TimeBlockType.canSignIn) {
             return OutlinedDotIndicator(
               color: ThemeConfig.timelineColor(context),
               borderWidth: 2,
@@ -107,7 +141,10 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           } else {
             return Padding(
               padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-              child: DotIndicator(color: ThemeConfig.timelineColor(context), size: 8),
+              child: DotIndicator(
+                color: ThemeConfig.timelineColor(context),
+                size: 8,
+              ),
             );
           }
         },

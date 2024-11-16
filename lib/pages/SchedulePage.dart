@@ -18,12 +18,11 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
-import 'package:fstapp/pages/UserPage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/AddNewEventDialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
@@ -183,6 +182,8 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
               key: _dots.isEmpty ? UniqueKey() : null,
               events: _dots,
               onEventPressed: _eventPressed,
+              showAddNewEventButton: () => true || RightsService.isEditor(),
+              onAddNewEvent: (context, p) => AddNewEventDialog.showAddEventDialog(context, p).then((_)=>loadData()),
             ),
           ),
         ],

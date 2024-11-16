@@ -75,7 +75,7 @@ class TimeBlockHelper {
 
   static List<TimeBlockGroup> splitTimeBlocks(Iterable<TimeBlockItem> events) {
     List<TimeBlockGroup> eventGroups;
-    if (events.any((a)=> a.timeBlockPlace != null)) {
+    if (AppConfig.isSplitByPlace) {
       eventGroups = TimeBlockHelper.splitTimeBlockByPlace(events.where((e)=>e.timeBlockPlace!=null));
     } else {
       eventGroups = TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
@@ -91,7 +91,7 @@ class TimeBlockHelper {
     var fromD = events.first.startTime.subtract(const Duration(days: 1));
     var fromDate = DateTime(fromD.year, fromD.month, fromD.day);
     var tested = fromDate.add(Duration(hours: splitHour));
-    
+
     while(!tested.isAfter(events.last.startTime)) {
       var testedPlusDay = tested.add(const Duration(days: 1));
       var eventsFocused = events.where((e)=>e.startTime.isAfter(tested) && (e.startTime.isAtSameMomentAs(testedPlusDay) || e.startTime.isBefore(testedPlusDay))).toList();
@@ -198,7 +198,7 @@ class TimeBlockItem {
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       id: model.id!,
       data: {"leftText": model.startTimeString(), "rightText": model.toString()},
-      timeBlockPlace: model.place != null && model.place!.id != null && AppConfig.isSplitByPlace ? TimeBlockPlace.fromPlaceModel(model.place!) : null,
+      timeBlockPlace: model.place != null && model.place!.id != null ? TimeBlockPlace.fromPlaceModel(model.place!) : null,
     );
   }
 

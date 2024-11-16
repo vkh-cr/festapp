@@ -93,7 +93,7 @@ class _EventEditPageState extends State<EventEditPage> {
     if (confirmation) {
       await DbEvents.deleteEvent(originalEvent!);
       ToastHelper.Show(context, "${"Deleted".tr()}: ${originalEvent!.title!}");
-      Navigator.of(context).pop();
+      RouterService.popTwo(context);
     }
   }
 

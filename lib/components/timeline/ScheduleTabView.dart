@@ -4,41 +4,51 @@ import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-
 import 'ScheduleTimeline.dart';
 
 class ScheduleTabView extends StatefulWidget {
-  Function(int)? onEventPressed;
+  final Function(int)? onEventPressed;
+  final List<TimeBlockItem> events;
+  final Function(BuildContext, List<TimeBlockGroup>)? onAddNewEvent;
+  final bool Function()? showAddNewEventButton;
 
-  List<TimeBlockItem> events = [];
-
- ScheduleTabView({super.key, required this.events, this.onEventPressed});
+  ScheduleTabView({
+    super.key,
+    required this.events,
+    this.onAddNewEvent,
+    this.showAddNewEventButton,
+    this.onEventPressed,
+  });
 
   @override
-  _ScheduleTabViewState createState() => _ScheduleTabViewState(events, onEventPressed);
+  _ScheduleTabViewState createState() => _ScheduleTabViewState();
 }
 
 class _ScheduleTabViewState extends State<ScheduleTabView> {
-
   List<TimeBlockGroup> datedEvents = [];
-  final List<TimeBlockItem> events;
-  Function(int)? onEventPressed;
-
-_ScheduleTabViewState(this.events, this.onEventPressed);
-
 
   @override
   Widget build(BuildContext context) {
-
     List<Widget> programLineChildren = [];
 
-    datedEvents = TimeBlockHelper.splitTimeBlocksByDate(events, context, AppConfig.daySplitHour);
-    for (var eventsByDay in datedEvents)
-    {
+    // Group events by date
+    datedEvents = TimeBlockHelper.splitTimeBlocksByDate(
+      widget.events,
+      context,
+      AppConfig.daySplitHour,
+    );
+
+    for (var eventsByDay in datedEvents) {
       var eventGroups = TimeBlockHelper.splitTimeBlocks(eventsByDay.events);
-      var timeline = ScheduleTimeline(eventGroups: eventGroups, onEventPressed: onEventPressed,);
+      var timeline = ScheduleTimeline(
+        eventGroups: eventGroups,
+        onEventPressed: widget.onEventPressed,
+        showAddNewEventButton: widget.showAddNewEventButton,
+        onAddNewEvent: widget.onAddNewEvent,
+      );
       programLineChildren.add(SingleChildScrollView(child: timeline));
     }
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 400),
       child: DefaultTabController(
@@ -46,7 +56,7 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
         length: datedEvents.length,
         child: Scaffold(
           appBar: TabBar(
-            isScrollable: datedEvents.length > 4 ? true : false,
+            isScrollable: datedEvents.length > 4,
             unselectedLabelColor: Colors.grey,
             labelColor: ThemeConfig.timelineTabLabelColor(context),
             indicatorColor: ThemeConfig.timelineTabIndicatorColor(context),
@@ -54,8 +64,14 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
             indicatorSize: TabBarIndicatorSize.label,
             indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
             tabs: [
-                for(var e in datedEvents)
-                  Tab(child: Text(e.dateTime!.weekdayToString(context), style: StylesConfig.timeLineTabNameTextStyle, maxLines: 1))
+              for (var e in datedEvents)
+                Tab(
+                  child: Text(
+                    e.dateTime!.weekdayToString(context),
+                    style: StylesConfig.timeLineTabNameTextStyle,
+                    maxLines: 1,
+                  ),
+                )
             ],
           ),
           body: TabBarView(
@@ -66,5 +82,7 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
     );
   }
 
-  getInitialIndex() => TimeHelper.getIndexFromDays(datedEvents.map((e)=>e.dateTime!.weekday));
+  int getInitialIndex() => TimeHelper.getIndexFromDays(
+    datedEvents.map((e) => e.dateTime!.weekday),
+  );
 }
