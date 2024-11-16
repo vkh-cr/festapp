@@ -112,7 +112,7 @@ class AdminTabDefinition {
   // Available tabs defined in a dictionary
   static Map<String, AdminTabDefinition> get availableTabs => {
     info: AdminTabDefinition(label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
-    events: AdminTabDefinition(label: "Events".tr(), icon: Icons.calendar_month, widget: EventsTab()),
+    events: AdminTabDefinition(label: "Schedule".tr(), icon: Icons.calendar_month, widget: EventsTab()),
     places: AdminTabDefinition(label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
     exclusivity: AdminTabDefinition(label: "Exclusivity".tr(), icon: Icons.punch_clock_rounded, widget: ExclusivityTab()),
     groups: AdminTabDefinition(label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),

@@ -18,7 +18,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -174,42 +174,41 @@ class _EventPageState extends State<EventPage> {
                                               const Text("Sign in other").tr()),
                                     ),
                                   ),
-                                  Visibility(
-                                      visible: RightsService.isEditor() ||
-                                          (AuthService.isGroupLeader() &&
-                                              _event != null &&
-                                              _event!.isGroupEvent),
-                                      child: ElevatedButton(
-                                          onPressed: () =>
-                                              RouterService.navigatePageInfo(
-                                                      context,
-                                                      HtmlEditorRoute(content: {HtmlEditorPage.parContent:
-                                                      _event!.description}))
-                                                  .then((value) async {
-                                                if (value != null) {
-                                                  var changed = value as String;
-                                                  if (_groupInfoModel != null) {
-                                                    _groupInfoModel!
-                                                        .description = changed;
-                                                    await DbGroups
-                                                        .updateUserGroupInfo(
-                                                            _groupInfoModel!);
-                                                  } else {
-                                                    setState(() {
-                                                      _event!.description =
-                                                          changed;
-                                                    });
-                                                    await DbEvents
-                                                        .updateEvent(_event!);
-                                                  }
-                                                  await loadData(_event!.id!);
-                                                  ToastHelper.Show(context,
-                                                      "Content has been changed."
-                                                          .tr());
-                                                }
-                                              }),
-                                          child:
-                                              const Text("Edit content").tr()))
+                                  if (AuthService.isGroupLeader() &&
+                                      _event != null &&
+                                      _event!.isGroupEvent)
+                                    ElevatedButton(
+                                        onPressed: () =>
+                                        RouterService.navigatePageInfo(
+                                                context,
+                                                HtmlEditorRoute(content: {HtmlEditorPage.parContent:
+                                                _event!.description}))
+                                            .then((value) async {
+                                          if (value != null) {
+                                            var changed = value as String;
+                                            if (_groupInfoModel != null) {
+                                              _groupInfoModel!
+                                                  .description = changed;
+                                              await DbGroups
+                                                  .updateUserGroupInfo(
+                                                      _groupInfoModel!);
+                                            }
+                                            await loadData(_event!.id!);
+                                            ToastHelper.Show(context,
+                                                "Content has been changed."
+                                                    .tr());
+                                          }
+                                        }),
+                                        child:
+                                        const Text("Edit content").tr()),
+                                  if(RightsService.isEditor())
+                                  ElevatedButton(
+                                      onPressed: () => RouterService.navigateOccasion(
+                                          context,
+                                          "${EventEditPage.ROUTE}/${_event!.id}")
+                                          .then((value) => loadData(_event!.id!)),
+                                      child:
+                                          const Text("Edit").tr())
                                 ]),
                           ),
                         ),
