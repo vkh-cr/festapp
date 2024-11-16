@@ -12,7 +12,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/GamePage.dart';
 import 'package:fstapp/pages/SongPage.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -61,7 +61,7 @@ class _InfoPageState extends State<InfoPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             controller: _scrollController,
             child: Column(

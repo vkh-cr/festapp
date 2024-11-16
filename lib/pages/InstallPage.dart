@@ -6,7 +6,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/services.dart';
 import '../services/js/js_interop.dart';
@@ -74,7 +74,7 @@ class _InstallPageState extends State<InstallPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

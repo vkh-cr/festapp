@@ -280,5 +280,9 @@
   "Songbook": "Liederbuch",
   "Smaller": "Kleiner",
   "Larger": "Größer",
+  "Maximum of participants": "Maximale Teilnehmerzahl",
+  "Are you sure you want to delete this event?": "Sind Sie sicher, dass Sie dieses Ereignis löschen möchten?",
+  "Advanced Settings": "Erweiterte Einstellungen",
+  "Add New Event": "Neue Veranstaltung hinzufügen",
   "_": "_"
 }
