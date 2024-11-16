@@ -322,7 +322,7 @@ class _EventEditPageState extends State<EventEditPage> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<PlaceModel?>(
-                        value: places?.firstWhere((p) => p.id == placeId),
+                        value: places?.firstWhereOrNull((p) => p.id == placeId),
                         items: [
                           DropdownMenuItem<PlaceModel?>(
                             value: null,
