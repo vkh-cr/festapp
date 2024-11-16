@@ -42,11 +42,15 @@ class AppConfig {
     return isNotificationsSupported;
   }
 
-  static List<LanguageModel> availableLanguages = [
+  static List<LanguageModel> availableLanguages() => [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
 
   static String getUserPrefix(String email){
       return "$organization+$email";
   }
+
+  static List<String> compatibleUrls() => [
+    AppConfig.webLink
+  ];
 }

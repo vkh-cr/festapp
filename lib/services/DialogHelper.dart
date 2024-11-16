@@ -148,7 +148,7 @@ class DialogHelper{
   static Future<LanguageModel?> chooseLanguage(
       BuildContext context,
       ) async {
-    var locales = AppConfig.availableLanguages;
+    var locales = AppConfig.availableLanguages();
     LanguageModel? selectedLocale;
     await SelectDialog.showModal<LanguageModel>(
       context,

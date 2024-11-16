@@ -71,6 +71,7 @@ class ThemeConfig {
   static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
   static Color timelineColor(BuildContext context) => timelineAll(context);
   static Color timelineTextColor(BuildContext context) => blackColor(context);
+  static Color timelineAddNewEventColor(BuildContext context) => timelineAll(context);
 
   static Color mapPinColor(BuildContext context) => appBarColor();
   static Color newsPageColor(BuildContext context) => backgroundColor(context);
