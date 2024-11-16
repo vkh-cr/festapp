@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_281",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,C,I,K,L,M,N,G,O,P,Q,R,S,T,U,V,A={
-cHd(d,e){return d.od(y.B)},
+cHc(d,e){return d.od(y.B)},
 a2Y:function a2Y(d,e,f,g){var _=this
 _.f=d
 _.r=e
@@ -31,7 +31,7 @@ buQ:function buQ(d){this.a=d},
 buS:function buS(d){this.a=d},
 buP:function buP(d){this.a=d},
 buO:function buO(d){this.a=d},
-cK3(d,e,f){return new B.fB(f,!1,e,null)},
+cK2(d,e,f){return new B.fB(f,!1,e,null)},
 aei:function aei(){},
 JO:function JO(){},
 aSr:function aSr(d,e){this.a=d
@@ -255,7 +255,7 @@ _.d=g
 _.e=h
 _.f=i
 _.r=j},
-cBx(){return new A.A4(null)},
+cBw(){return new A.A4(null)},
 A4:function A4(d){this.a=d},
 aEA:function aEA(){var _=this
 _.d=null
@@ -276,8 +276,8 @@ this.c=f},
 bLj:function bLj(d,e){this.a=d
 this.b=e},
 aNp:function aNp(){},
-b_g(d){return A.cz6(d)},
-cz6(d){var x=0,w=B.l(y.y),v,u
+b_g(d){return A.cz5(d)},
+cz5(d){var x=0,w=B.l(y.y),v,u
 var $async$b_g=B.h(function(e,f){if(e===1)return B.i(f,w)
 while(true)switch(x){case 0:u={}
 u.a=!1
@@ -297,7 +297,7 @@ cdD(d){var x
 d.af(y.C)
 x=B.J(d)
 return x.to},
-czC(d,e,f,g,h){switch(h.a){case 2:return new A.axl(g,d,e,f,null)
+czB(d,e,f,g,h){switch(h.a){case 2:return new A.axl(g,d,e,f,null)
 case 3:return new A.amj(g,d,e,f,null)
 case 1:case 0:break}return null},
 adL(d){var x=0,w=B.l(y.H),v,u,t
@@ -311,7 +311,7 @@ return B.c(B.Ni(),$async$adL)
 case 5:u=f.c
 t=$.c5J
 t.toString
-x=A.cwm(u,t)?6:7
+x=A.cwl(u,t)?6:7
 break
 case 6:x=8
 return B.c(Q.l1(d,B.P("New Version Available",null),B.P("Update the app to the latest version to access all features.",null),B.P("Update",null)),$async$adL)
@@ -320,7 +320,7 @@ else $.cdg=!0
 case 7:case 4:$.c5I=!1
 case 1:return B.j(v,w)}})
 return B.k($async$adL,w)},
-cwm(d,e){var x,w,v,u=d.split("."),t=e.split(".")
+cwl(d,e){var x,w,v,u=d.split("."),t=e.split(".")
 for(x=0;x<t.length;++x){w=B.dM(u[x],null)
 v=B.dM(t[x],null)
 if(w<v)return!0
@@ -357,7 +357,7 @@ var $async$FX=B.h(function(e,f){if(e===1)return B.i(f,w)
 while(true)switch(x){case 0:s=$.r4().b.e
 if(!s){x=1
 break}$.vU()
-x=!$.Du().mh("getNotificationPermission",[])?3:4
+x=!$.Du().mg("getNotificationPermission",[])?3:4
 break
 case 3:x=7
 return B.c(B.C9("NotificationAllowed",null),$async$FX)
@@ -447,9 +447,9 @@ ana(d,e){var x,w,v,u,t,s,r,q,p
 for(u=d.length,t=this.c,s=y.z,r=0;r<d.length;d.length===u||(0,B.O)(d),++r){x=d[r]
 w=this.a1i(x,this.ay)
 try{q=w
-t.push(B.cwU(q.a.y.Ls(q),q,s))}catch(p){u=B.af(p)
+t.push(B.cwT(q.a.y.Ls(q),q,s))}catch(p){u=B.af(p)
 if(u instanceof B.YZ){v=u
-if(e)throw B.e(B.is("Can not automatically navigate to "+J.cvu(x)+" because it has required parameters. Routes must be added manually to AutoTabsRouter\n"+J.aH(v)))
+if(e)throw B.e(B.is("Can not automatically navigate to "+J.cvt(x)+" because it has required parameters. Routes must be added manually to AutoTabsRouter\n"+J.aH(v)))
 else throw p}else throw p}}},
 anP(d){var x=this.b5K(d)
 x.toString
@@ -536,7 +536,7 @@ w.d=null}w.am()},
 aQu(){return this.gaQt().$0()}}
 A.a4Q.prototype={
 M(){return new A.a4R(new B.aO(null,y.A),null,null)},
-bDg(d,e,f){return A.cQf().$3(d,e,f)}}
+bDg(d,e,f){return A.cQe().$3(d,e,f)}}
 A.a4R.prototype={
 X(){var x,w,v=this,u=null
 v.ap()
@@ -1147,9 +1147,9 @@ X(){this.ap()
 $.ar.eb$.push(this)
 this.cY()},
 b6(){this.d1()
-$.cs7().mh("setMetaThemeColor",["#"+C.e.fw(C.c.kO(855309,16),6,"0").toUpperCase()])},
+$.cs7().mg("setMetaThemeColor",["#"+C.e.fw(C.c.kO(855309,16),6,"0").toUpperCase()])},
 ug(d){if(d===C.dV)this.cY()},
-m(){$.ar.lV(this)
+m(){$.ar.lU(this)
 this.am()},
 cY(){var x=0,w=B.l(y.H),v=this,u
 var $async$cY=B.h(function(d,e){if(d===1)return B.i(e,w)
@@ -1275,7 +1275,7 @@ A.aSH.prototype={
 $2(d,e){var x,w=this,v=null,u=w.a,t=u.aYg()
 u=u.a
 if(w.b){u.toString
-u=B.hQ(new B.ai(G.es,u.r,v),v,!1,v,A.czC(v,v,C.t,C.eA,D.a5l),C.R)}else{x=new B.bT(C.eA,v,w.d,v,v,v,v,C.dv)
+u=B.hQ(new B.ai(G.es,u.r,v),v,!1,v,A.czB(v,v,C.t,C.eA,D.a5l),C.R)}else{x=new B.bT(C.eA,v,w.d,v,v,v,v,C.dv)
 x=B.hr(C.L,!0,v,K.SF(new B.ai(G.es,u.r,v),C.a1,x,C.C,v,v,v,v,v),C.h,v,2,v,v,w.c,v,v,C.fD)
 u=x}return E.ZD(u,t)},
 $S:z+1}
@@ -1286,7 +1286,7 @@ A.bCP.prototype={
 $0(){this.a.a.d.$1(this.b)},
 $S:0}
 A.c9w.prototype={
-$1(d){return new B.T(d,this.a.a.gaW7(),B.a_(d).h("T<1,D>")).lP(0,0,new A.bEf())},
+$1(d){return new B.T(d,this.a.a.gaW7(),B.a_(d).h("T<1,D>")).lO(0,0,new A.bEf())},
 $S:720}
 A.bEf.prototype={
 $2(d,e){return d+e},
@@ -1316,7 +1316,7 @@ else{x=x.x
 x=x==null?null:J.t(x,"name")}}this.a.d=x},
 $S:0}
 A.bLl.prototype={
-$2(d,e){var x,w,v,u,t,s,r,q,p,o=null,n=A.cHd(d,!1).f,m=B.cs(C.b1)
+$2(d,e){var x,w,v,u,t,s,r,q,p,o=null,n=A.cHc(d,!1).f,m=B.cs(C.b1)
 m=B.cs(new B.c9(m.a,m.b,0.4,m.d).dc())
 m=new B.c9(m.a,m.b,m.c,0.1).dc()
 x=n.ch
@@ -1383,7 +1383,7 @@ x=A.a4T.prototype
 x.aLn=x.m
 x=A.abg.prototype
 x.aMS=x.m})();(function installTearOffs(){var x=a.installStaticTearOff,w=a._instance_1u,v=a._instance_0u
-x(A,"cQf",3,null,["$3"],["cK3"],5,0)
+x(A,"cQe",3,null,["$3"],["cK2"],5,0)
 w(A.a4R.prototype,"gbys","byt",0)
 var u
 v(u=A.a5_.prototype,"gaQD","aQE",2)
@@ -1413,10 +1413,10 @@ w(A.aNu,A.aJl)
 x(A.a4T,B.ef)
 x(A.abg,B.ef)
 w(A.aNp,B.ey)})()
-B.bz(b.typeUniverse,JSON.parse('{"a2Y":{"bc":[],"b9":[],"d":[]},"awf":{"jl":[],"al":[]},"a4Q":{"E":[],"d":[]},"a6T":{"E":[],"d":[]},"a6U":{"K":["a6T"]},"aei":{"E":[],"d":[]},"JO":{"K":["1"]},"a4R":{"K":["a4Q"]},"Tf":{"E":[],"d":[]},"aet":{"K":["Tf"]},"aes":{"a5":[],"d":[]},"amj":{"al":[]},"axl":{"al":[]},"ajq":{"hA":[]},"Tl":{"E":[],"d":[]},"aBh":{"a5":[],"d":[]},"aLA":{"a5":[],"d":[]},"aLB":{"a5":[],"d":[]},"aFr":{"a5":[],"d":[]},"a5_":{"K":["Tl"]},"aB7":{"a5":[],"d":[]},"aI0":{"al":[]},"amf":{"jK":["Al"]},"aqb":{"jK":["~"]},"aul":{"jK":["~"]},"axB":{"jK":["~"]},"A4":{"E":[],"d":[]},"aEA":{"K":["A4"],"ey":[]},"cx2":{"bc":[],"b9":[],"d":[]}}'))
+B.bz(b.typeUniverse,JSON.parse('{"a2Y":{"bc":[],"b9":[],"d":[]},"awf":{"jl":[],"al":[]},"a4Q":{"E":[],"d":[]},"a6T":{"E":[],"d":[]},"a6U":{"K":["a6T"]},"aei":{"E":[],"d":[]},"JO":{"K":["1"]},"a4R":{"K":["a4Q"]},"Tf":{"E":[],"d":[]},"aet":{"K":["Tf"]},"aes":{"a5":[],"d":[]},"amj":{"al":[]},"axl":{"al":[]},"ajq":{"hA":[]},"Tl":{"E":[],"d":[]},"aBh":{"a5":[],"d":[]},"aLA":{"a5":[],"d":[]},"aLB":{"a5":[],"d":[]},"aFr":{"a5":[],"d":[]},"a5_":{"K":["Tl"]},"aB7":{"a5":[],"d":[]},"aI0":{"al":[]},"amf":{"jK":["Al"]},"aqb":{"jK":["~"]},"aul":{"jK":["~"]},"axB":{"jK":["~"]},"A4":{"E":[],"d":[]},"aEA":{"K":["A4"],"ey":[]},"cx1":{"bc":[],"b9":[],"d":[]}}'))
 B.kM(b.typeUniverse,JSON.parse('{"JO":1,"aJl":1}'))
 var y=(function rtii(){var x=B.x
-return{e:x("oD"),Y:x("hm<@>"),x:x("z7"),C:x("cx2"),L:x("oI"),I:x("fl"),D:x("p<oD>"),M:x("p<hm<@>>"),E:x("p<aeK>"),_:x("p<oI>"),b:x("p<jK<@>>"),G:x("p<jl>"),p:x("p<d>"),A:x("aO<a6U>"),v:x("aC"),w:x("ft"),u:x("xC"),N:x("f"),T:x("cl<v>"),q:x("cl<~>"),B:x("a2Y"),J:x("aw<m>"),t:x("aw<D>"),U:x("e6"),a:x("cK<r>"),l:x("d"),P:x("dg"),R:x("d0v"),y:x("v"),z:x("@"),S:x("r"),h:x("dU?"),X:x("z?"),H:x("~")}})();(function constants(){D.b8K=new A.aSE(0,"slide")
+return{e:x("oD"),Y:x("hm<@>"),x:x("z7"),C:x("cx1"),L:x("oI"),I:x("fl"),D:x("p<oD>"),M:x("p<hm<@>>"),E:x("p<aeK>"),_:x("p<oI>"),b:x("p<jK<@>>"),G:x("p<jl>"),p:x("p<d>"),A:x("aO<a6U>"),v:x("aC"),w:x("ft"),u:x("xC"),N:x("f"),T:x("cl<v>"),q:x("cl<~>"),B:x("a2Y"),J:x("aw<m>"),t:x("aw<D>"),U:x("e6"),a:x("cK<r>"),l:x("d"),P:x("dg"),R:x("d0u"),y:x("v"),z:x("@"),S:x("r"),h:x("dU?"),X:x("z?"),H:x("~")}})();(function constants(){D.b8K=new A.aSE(0,"slide")
 D.a5l=new A.aSF(0,"circle")
 D.DR=new A.Tm(0,"spread")
 D.a6J=new A.Tm(1,"centered")
@@ -1439,7 +1439,7 @@ D.ajQ=new B.aS(62005,"MaterialIcons",null,!1)
 D.b0K=new B.c4("Notifications will inform you about schedule changes and other selected news.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cdg=!1
 $.c5I=!1
 $.c7N=!1})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"d0u","cce",()=>B.md(1,1.5,B.x("D")))
-x($,"d_D","cs7",()=>new B.MA())})()};
+x($,"d0t","cce",()=>B.md(1,1.5,B.x("D")))
+x($,"d_C","cs7",()=>new B.MA())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_281",e:"endPart",h:b})})($__dart_deferred_initializers__,"pMLasaj0eU+ZAcGDASXWbdaSMiU=");
+a.eventLog.push({p:"main.dart.js_281",e:"endPart",h:b})})($__dart_deferred_initializers__,"RD+B8ajfXB1cvLq2C7DKRaGYpaE=");

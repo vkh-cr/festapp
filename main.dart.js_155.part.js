@@ -3,7 +3,7 @@ a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_155",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var B,D,A={MI:function MI(d,e){this.a=d
 this.b=e},bAb:function bAb(){},aTo:function aTo(){},
-cQV(d){switch(d.a){case 0:return D.AO
+cQU(d){switch(d.a){case 0:return D.AO
 case 2:return D.a_W
 case 1:return D.a_V
 case 3:return C.aRf
@@ -13,7 +13,7 @@ var $async$acB=B.h(function(g,h){if(g===1)return B.i(h,w)
 while(true)switch(x){case 0:if(e===C.alt||e===C.alu)u=!(d.giw()==="https"||d.giw()==="http")
 else u=!1
 if(u)throw B.e(B.eB(d,"url","To use an in-app web view, you must provide an http(s) URL."))
-v=$.cc8().Nl(d.k(0),new B.an0(A.cQV(e),new B.ama(!0,!0,D.f8),f))
+v=$.cc8().Nl(d.k(0),new B.an0(A.cQU(e),new B.ama(!0,!0,D.f8),f))
 x=1
 break
 case 1:return B.j(v,w)}})
@@ -38,4 +38,4 @@ C.alu=new A.MI(2,"inAppBrowserView")
 C.alv=new A.MI(3,"externalApplication")
 C.aRf=new B.GU(3,"externalApplication")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_155",e:"endPart",h:b})})($__dart_deferred_initializers__,"sCJCFTniR14vdgYUuM62nfE20b8=");
+a.eventLog.push({p:"main.dart.js_155",e:"endPart",h:b})})($__dart_deferred_initializers__,"R7HiXoPXJX6CC3QGyu8ollpXPUI=");

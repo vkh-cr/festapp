@@ -26,7 +26,7 @@ _.w=l
 _.x=m},ajg:function ajg(d,e,f){this.d=d
 this.w=e
 this.a=f},
-czP(d,e,f){var w=null
+czO(d,e,f){var w=null
 return new B.aDO(f,w,w,w,w,C.h,w,!1,w,!0,new B.aDP(e,d,w,C.H,w),w)},
 aDO:function aDO(d,e,f,g,h,i,j,k,l,m,n,o){var _=this
 _.c=d
@@ -129,7 +129,7 @@ c_4:function c_4(){},
 c_5:function c_5(){},
 c_6:function c_6(){},
 c_7:function c_7(){},
-cw7(){return new B.yW(null)},
+cw6(){return new B.yW(null)},
 yW:function yW(d){this.a=d},
 a4F:function a4F(d){var _=this
 _.d=null
@@ -150,8 +150,8 @@ bVj:function bVj(d,e){this.a=d
 this.b=e},
 bVk:function bVk(d){this.a=d},
 bVl:function bVl(d){this.a=d},
-b2p(d,e,f,g){return B.cA2(d,e,f,g)},
-cA2(d,e,f,g){var w=0,v=A.l(x.H),u,t,s,r,q,p,o,n,m,l,k,j
+b2p(d,e,f,g){return B.cA1(d,e,f,g)},
+cA1(d,e,f,g){var w=0,v=A.l(x.H),u,t,s,r,q,p,o,n,m,l,k,j
 var $async$b2p=A.h(function(h,i){if(h===1)return A.i(i,v)
 while(true)switch(w){case 0:k={}
 j=A.P("myfestival",null)
@@ -163,18 +163,18 @@ k.d=s
 k.e=!1
 k.f=null
 r=$.aj()
-q=new F.eE(new A.dP(j,C.bL,C.aT),r)
-p=new F.eE(new A.dP(u,C.bL,C.aT),r)
+q=new F.eF(new A.dP(j,C.bL,C.aT),r)
+p=new F.eF(new A.dP(u,C.bL,C.aT),r)
 o=A.wm(null).e8(t)
 n=A.wm(null).e8(s)
 m=new A.bY("      <p>"+A.P("This event will be available at",null)+y.c+u+'">https://live.festapp.net/#/'+u+"</a></p>\n    ",r,x.q)
 l=new B.b2G(k,p,f)
 q.a9(0,new B.b2E(k,q,p,m,l))
 w=2
-return A.c(A7.iR(null,null,!0,null,new B.b2F(k,q,p,l,m,new F.eE(new A.dP(o,C.bL,C.aT),r),new F.eE(new A.dP(n,C.bL,C.aT),r),e,g),d,null,!0,!0,x.z),$async$b2p)
+return A.c(A7.iR(null,null,!0,null,new B.b2F(k,q,p,l,m,new F.eF(new A.dP(o,C.bL,C.aT),r),new F.eF(new A.dP(n,C.bL,C.aT),r),e,g),d,null,!0,!0,x.z),$async$b2p)
 case 2:return A.j(null,v)}})
 return A.k($async$b2p,v)},
-cA1(d,e){var w,v=null
+cA0(d,e){var w,v=null
 if(d.length===0)return A.P("Link is required",v)
 w=A.by("^[a-zA-Z0-9-_]+$",!0,!1,!1)
 if(!w.b.test(d))return A.P("Invalid characters",v)
@@ -390,7 +390,7 @@ return A.k($async$K6,v)},
 aPV(){var w=this,v=w.c
 v.toString
 B.b2p(v,w.a.c,w.d,w.gb5m())},
-A(d){var w=null,v=x.p,u=A.bs(A.a([A.ae("Events",w,w,w,w,w,w,w,A.bG(w,w,w,w,w,w,w,w,w,w,w,24,w,w,C.aJ,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),B.czP(K.c2(A1.yt,w,w,w),I.bE(A.ae("Add New Event",w,w,w,w,w,w,w,w,w,w,w,w,w),w),this.gaPU())],v),C.k,C.dk,C.n,w),t=x.w
+A(d){var w=null,v=x.p,u=A.bs(A.a([A.ae("Events",w,w,w,w,w,w,w,A.bG(w,w,w,w,w,w,w,w,w,w,w,24,w,w,C.aJ,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),B.czO(K.c2(A1.yt,w,w,w),I.bE(A.ae("Add New Event",w,w,w,w,w,w,w,w,w,w,w,w,w),w),this.gaPU())],v),C.k,C.dk,C.n,w),t=x.w
 if(A.at(d,w,t).w.a.a>=1100)t=3
 else t=A.at(d,w,t).w.a.a<1100&&A.at(d,w,t).w.a.a>=720?2:1
 return K.hI(w,w,new A.ai(C.aE,A.bk(A.a([u,new A.aM(w,16,w,w),A.cP(W.WK(w,C.v,new A_.HF(t,10,10,2),new B.bQx(this),J.b_(this.d),w,w,w,C.K,!0),1,w)],v),C.k,C.l,C.n,w,C.y),w),w,w,w,w)}}
@@ -612,7 +612,7 @@ B.bVl.prototype={
 $0(){this.a.a.ayO(new B.a3S(null),"Users")},
 $S:0}
 B.b2G.prototype={
-$0(){this.a.f=B.cA1(this.b.a.a,this.c)},
+$0(){this.a.f=B.cA0(this.b.a.a,this.c)},
 $S:0}
 B.b2E.prototype={
 $0(){var w,v=this,u=v.a
@@ -686,7 +686,7 @@ s=t.d
 w=2
 return A.c(O.Jr(u.b,t.c,s,P.ep,A.cS(2101,1,1,0,0,0,0,0)),$async$$0)
 case 2:r=e
-if(r!=null&&r.lR(t.c)){s=u.c
+if(r!=null&&r.lQ(t.c)){s=u.c
 s.$1(new B.b2s(t,r,u.d,u.e,u.f,u.r,u.w,s))}return A.j(null,v)}})
 return A.k($async$$0,v)},
 $S:2}
@@ -761,4 +761,4 @@ E.aiH=new A.aS(57442,"MaterialIcons",null,!1)
 E.b_g=new A.X(!0,C.o,null,null,null,null,null,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 E.b13=new A.c4("Open",null,E.b_g,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_132",e:"endPart",h:b})})($__dart_deferred_initializers__,"z098J+2s6k8ze/8JtNHKDI/y/zI=");
+a.eventLog.push({p:"main.dart.js_132",e:"endPart",h:b})})($__dart_deferred_initializers__,"h6KZqO1nDuUECM1y9gnLDmm5oz8=");
