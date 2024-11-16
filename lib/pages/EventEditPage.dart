@@ -454,7 +454,7 @@ class _EventEditPageState extends State<EventEditPage> {
           ),
           bottomNavigationBar: Container(
             color: ThemeConfig.appBarColor(),
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
