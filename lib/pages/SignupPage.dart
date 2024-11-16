@@ -7,9 +7,10 @@ import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import '../styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 @RoutePage()
@@ -56,7 +57,7 @@ class _SignupPageState extends State<SignupPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),

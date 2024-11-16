@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
+import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
@@ -48,8 +49,10 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
     AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
     AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
-    AutoRoute(page: SongRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
-
+    AutoRoute(page: SongbookRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
+    AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
+      AutoRoute(path: ':id', page: EventEditRoute.page,),
+    ]),
     AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [

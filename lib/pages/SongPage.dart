@@ -5,9 +5,9 @@ import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/pages/SongDialog.dart';
-import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
@@ -75,7 +75,7 @@ class _SongbookPageState extends State<SongbookPage> {
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: ListView.builder(
               itemCount: _informationList?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {

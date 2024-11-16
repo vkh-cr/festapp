@@ -7,7 +7,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
@@ -93,7 +93,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
               children: [
                 Padding(
