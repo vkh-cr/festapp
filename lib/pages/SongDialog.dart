@@ -26,7 +26,7 @@ class _SongDialogState extends State<SongDialog> {
   static const double minFontSize = 8;
   double buttonVisibleOpacity(BuildContext context) => ThemeConfig.isDarkMode(context) ? 1 : 0.9;
   static const double buttonHiddenOpacity = 0.2;
-  static const double scrollThreshold = 50.0;
+  static const double scrollThreshold = 10.0;
 
   final ScrollController _scrollController = ScrollController();
   double _buttonOpacity = 1;
@@ -78,7 +78,7 @@ class _SongDialogState extends State<SongDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 32),
+                        SizedBox(height: widget.title.length < 20 ? 32 : 54),
                         Container(
                           padding: const EdgeInsets.all(12),
                           alignment: Alignment.topCenter,

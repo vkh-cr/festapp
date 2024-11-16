@@ -22,7 +22,7 @@ class EventModel extends IPlutoRowModel {
 
   final int? id;
   DateTime? updatedAt;
-  bool isHidden;
+  bool isHidden = false;
   PlaceModel? place;
   String? type;
   List<EventModel> childEvents = [];
@@ -57,9 +57,9 @@ class EventModel extends IPlutoRowModel {
   EventModel({
     required this.startTime,
     required this.endTime,
-    required this.id,
-    required this.isHidden,
+    this.id,
     this.updatedAt,
+    required this.isHidden,
     this.title,
     this.description,
     this.maxParticipants,

@@ -8,7 +8,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/NewsFormPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -74,7 +74,7 @@ class _NewsPageState extends State<NewsPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: ListView.builder(
             itemCount: newsMessages.length,
             itemBuilder: (BuildContext context, int index) {

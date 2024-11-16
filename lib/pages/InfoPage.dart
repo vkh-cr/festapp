@@ -12,7 +12,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/GamePage.dart';
 import 'package:fstapp/pages/SongPage.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -61,7 +61,7 @@ class _InfoPageState extends State<InfoPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             controller: _scrollController,
             child: Column(
@@ -99,7 +99,7 @@ class _InfoPageState extends State<InfoPage> {
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
-                                RouterService.navigateOccasion(context, SongPage.ROUTE); // Replace with your songbook route
+                                RouterService.navigateOccasion(context, SongbookPage.ROUTE); // Replace with your songbook route
                               },
                               icon: Icons.library_music,
                               label: "Songbook",
@@ -173,8 +173,8 @@ class _InfoPageState extends State<InfoPage> {
     await loadDataOffline();
     if (widget.id != null) {
       var focused = allInfo.firstWhereOrNull((b) => b.id == widget.id);
-      if (focused != null) {
-        var index = allInfo.indexOf(focused);
+      if (focused != null && _informationList != null) {
+        var index = _informationList!.indexWhere((i)=>i.id == focused.id);
         await handleExpansion(index, true);
         _scrollToExpandedItem(index);
       }

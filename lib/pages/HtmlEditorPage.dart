@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/HtmlEditorWidget.dart';
 import 'package:quill_html_editor/quill_html_editor.dart';
@@ -94,7 +94,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
               Align(
                 alignment: Alignment.topCenter,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: appMaxWidth),
+                  constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
                   child: HtmlEditorWidget(
                     initialContent: _html,
                     controller: controller,
