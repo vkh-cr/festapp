@@ -483,7 +483,7 @@ p=p.z.c
 p.toString
 p=Am.wX(A.bs(A.a([K.Hk,o,A.ae(p,l,l,l,l,l,l,l,Q.kP,l,l,l,l,l),G.n2(l,K.vq)],k),D.k,D.l,D.n,l),l)}n=A.bk(A.a([r,q,A.aL(Ag.ei,A.dL(!1,p,l,l,D.H,l,l,l,l,n,l,l),D.h,l,l,l,l,l,l,l,l,l,l)],k),D.cc,D.l,D.n,l,D.y)
 r=!0
-if(!A.id()){q=$.a1b
+if(!A.i0()){q=$.a1b
 q=q==null?l:q.f
 if(q!==!0){r=$.mZ
 r=r===!0}}r=A.h1(P.DN(l,d,50,!0,A.P("Event management",l),new C.bZY(m),D.u,250),r)
@@ -1368,4 +1368,4 @@ B.b1e=new A.c4("Accommodation",null,null,null,null,null,null,null,null,null,null
 x($,"d2U","aPH",()=>C.cNr())
 x($,"d1W","aPC",()=>C.cNq())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"tdcIl5WxK5znDM1MiKzLFDDVufk=");
+a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"BJp+ayFh2BDTUZydrzpIEwwVAZw=");

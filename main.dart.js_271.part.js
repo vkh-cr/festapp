@@ -219,7 +219,7 @@ if(r.z&&x)v.push(r.QH(A.P("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.eT(8)
 t=r.y.a
 s=y.w
-v.push(A.ic(q,A.aL(q,A.ae(A.P("Time left: {time}",A.G(["time",""+C.c.aY(t,36e8)+":"+C.e.fw(C.c.k(C.c.al(C.c.aY(t,6e7),60)),2,"0")+":"+C.e.fw(C.c.k(C.c.al(C.c.aY(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,M.a2r,q,q,q,q,q),C.h,q,q,new A.bT(C.aH,q,q,u,q,q,q,C.W),q,q,q,C.aI,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.QH(A.P("Game has ended",q)))
+v.push(A.id(q,A.aL(q,A.ae(A.P("Time left: {time}",A.G(["time",""+C.c.aY(t,36e8)+":"+C.e.fw(C.c.k(C.c.al(C.c.aY(t,6e7),60)),2,"0")+":"+C.e.fw(C.c.k(C.c.al(C.c.aY(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,M.a2r,q,q,q,q,q),C.h,q,q,new A.bT(C.aH,q,q,u,q,q,q,C.W),q,q,q,C.aI,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.QH(A.P("Game has ended",q)))
 if(r.Q)v.push(r.QH(A.P("You are offline. Please check your internet connection.",q)))
 return U.hI(o,q,A.dx(C.ah,v,C.B,C.af,q),q,q,q,q)},
 QH(d){var x=null
@@ -343,4 +343,4 @@ D.b_f=new A.X(!0,C.o,null,null,null,null,16,C.aJ,null,null,null,null,null,null,n
 D.b_e=new A.X(!0,C.o,null,null,null,null,24,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b0R=new A.c4("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.ceg=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_271",e:"endPart",h:b})})($__dart_deferred_initializers__,"+eALfcrLy2i0aK/FESd3Vpi6+SA=");
+a.eventLog.push({p:"main.dart.js_271",e:"endPart",h:b})})($__dart_deferred_initializers__,"fQK+P5BJF/VsDCud49U8bPPUxfQ=");
