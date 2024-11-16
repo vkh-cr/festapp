@@ -101,7 +101,6 @@ class AdminTabDefinition {
   static const String info = "Info";
   static const String events = "Events";
   static const String places = "Places";
-  static const String exclusivity = "Exclusivity";
   static const String groups = "Groups";
   static const String service = "Service";
   static const String users = "Users";
