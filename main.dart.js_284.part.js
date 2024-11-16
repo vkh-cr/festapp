@@ -471,7 +471,7 @@ t=A.P("Role",l)
 r=m.d
 r=r==null?l:r.ax
 t=m.Lr(t,r==null?"":r)
-r=E.bE(B.b1e,l)
+r=E.bE(B.b1d,l)
 q=G.n2(l,K.vq)
 p=m.d
 o=p==null
@@ -488,7 +488,7 @@ q=q==null?l:q.f
 if(q!==!0){r=$.mZ
 r=r===!0}}r=A.h1(P.DN(l,d,50,!0,A.P("Event management",l),new C.bZY(m),D.u,250),r)
 q=$.mZ
-return F.hI(i,l,new A.cT(D.aS,l,l,new A.dB(new A.a7(0,820,0,1/0),A6.eN(A.bk(A.a([B.a1L,x,B.a1L,w,v,u,s,t,new A.ai(A_.er,n,l),N.bE,r,N.bE,A.h1(P.DN(l,d,50,!0,A.P("Workspace",l),new C.bZZ(d),D.u,250),q===!0),N.bE,P.DN(D.dy,d,50,!0,A.P("Sign out",l),new C.c__(m),D.o,250),A0.vt,A.aL(D.aS,A.dL(!1,E.bE(A.ae(A.P("Change password",l),l,l,l,l,l,l,l,A.bG(l,l,l,l,l,l,l,l,l,l,l,18,l,l,l,l,l,!0,l,l,l,l,l,l,l,l),l,l,l,l,l),l),l,l,D.H,l,l,l,l,new C.c_0(m,d),l,l),D.h,l,l,l,l,l,l,l,l,l,l),Ak.BF,A.aL(D.aS,A.dL(!1,E.bE(A.ae(A.P("Delete account",l),l,l,l,l,l,l,l,A.bG(l,l,l,l,l,l,l,l,l,l,l,18,l,l,l,l,l,!0,l,l,l,l,l,l,l,l),l,l,l,l,l),l),l,l,D.H,l,l,l,l,new C.c_1(d),l,l),D.h,l,l,l,l,l,l,l,l,l,l)],k),D.k,D.l,D.n,l,D.y),l,D.v,l,l,l,D.K),l),l),l,l,l,l)},
+return F.hI(i,l,new A.cT(D.aS,l,l,new A.dB(new A.a7(0,820,0,1/0),A6.eN(A.bk(A.a([B.a1L,x,B.a1L,w,v,u,s,t,new A.ai(A_.er,n,l),N.bE,r,N.bE,A.h1(P.DN(l,d,50,!0,A.P("Workspace",l),new C.bZZ(d),D.u,250),q===!0),N.bE,P.DN(D.dx,d,50,!0,A.P("Sign out",l),new C.c__(m),D.o,250),A0.vt,A.aL(D.aS,A.dL(!1,E.bE(A.ae(A.P("Change password",l),l,l,l,l,l,l,l,A.bG(l,l,l,l,l,l,l,l,l,l,l,18,l,l,l,l,l,!0,l,l,l,l,l,l,l,l),l,l,l,l,l),l),l,l,D.H,l,l,l,l,new C.c_0(m,d),l,l),D.h,l,l,l,l,l,l,l,l,l,l),Ak.BF,A.aL(D.aS,A.dL(!1,E.bE(A.ae(A.P("Delete account",l),l,l,l,l,l,l,l,A.bG(l,l,l,l,l,l,l,l,l,l,l,18,l,l,l,l,l,!0,l,l,l,l,l,l,l,l),l,l,l,l,l),l),l,l,D.H,l,l,l,l,new C.c_1(d),l,l),D.h,l,l,l,l,l,l,l,l,l,l)],k),D.k,D.l,D.n,l,D.y),l,D.v,l,l,l,D.K),l),l),l,l,l,l)},
 b6(){this.d1()
 if($.dQ().gdu().d==null){var x=this.c
 x.toString
@@ -924,7 +924,7 @@ s=W.aTO(d,X.He,A.P("Show Code",n),new C.bZQ(x,d,v))
 q=G.n2(n,B.aVu)
 p=Ad.c98(v.e,d)
 o=y.p
-return new A.ai(A5.dA,A.bk(A.a([A2.kJ,A.aL(n,A1.ajH(A.a([q,new A.dB(B.a71,Ae.c8z(A.d4(E.bE(A.ae("Companion's events will appear here.",n,n,n,n,n,n,n,A.bG(n,n,A.J(d).ax.a===D.z?D.i2:D.fV,n,n,n,n,n,n,n,n,n,n,n,n,n,n,!0,n,n,n,n,n,n,n,n),n,n,n,n,n),n),n,n),p,0.3,n,new C.bZR(x,d),n),n),G.n2(n,B.aVv),A.bk(A.a([A.dL(!1,E.bE(A.ae("Delete companion",n,n,n,n,n,n,n,n,n,n,n,n,n),n),n,n,D.H,n,n,n,n,new C.bZS(x,d,v),n,n)],o),D.k,D.bR,D.n,n,D.y)],o),D.k,!1,V.nq,r,t,s),D.h,n,n,new A.bT(w,n,n,u,n,n,n,D.W),n,n,n,n,n,n,n)],o),D.k,D.l,D.n,n,D.y),n)},
+return new A.ai(A5.dz,A.bk(A.a([A2.kJ,A.aL(n,A1.ajH(A.a([q,new A.dB(B.a71,Ae.c8z(A.d4(E.bE(A.ae("Companion's events will appear here.",n,n,n,n,n,n,n,A.bG(n,n,A.J(d).ax.a===D.z?D.i2:D.fV,n,n,n,n,n,n,n,n,n,n,n,n,n,n,!0,n,n,n,n,n,n,n,n),n,n,n,n,n),n),n,n),p,0.3,n,new C.bZR(x,d),n),n),G.n2(n,B.aVv),A.bk(A.a([A.dL(!1,E.bE(A.ae("Delete companion",n,n,n,n,n,n,n,n,n,n,n,n,n),n),n,n,D.H,n,n,n,n,new C.bZS(x,d,v),n,n)],o),D.k,D.bR,D.n,n,D.y)],o),D.k,!1,V.nq,r,t,s),D.h,n,n,new A.bT(w,n,n,u,n,n,n,D.W),n,n,n,n,n,n,n)],o),D.k,D.l,D.n,n,D.y),n)},
 $S:71}
 C.bZQ.prototype={
 $0(){var x=this.c
@@ -1364,8 +1364,8 @@ B.a1L=new A.aM(null,15,null,null)
 B.a2q=new A.X(!0,D.u,null,null,null,null,18,D.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.aZb=new A.X(!0,null,null,null,null,null,17,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 B.b0x=new A.c4("Profile",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-B.b1e=new A.c4("Accommodation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
+B.b1d=new A.c4("Accommodation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"d2U","aPH",()=>C.cNr())
 x($,"d1W","aPC",()=>C.cNq())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"BJp+ayFh2BDTUZydrzpIEwwVAZw=");
+a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"M87P7J9OX+3cZp16/qUhesgGGcQ=");

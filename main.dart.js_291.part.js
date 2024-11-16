@@ -266,7 +266,7 @@ var x=this.a.c
 x.toString
 this.kn(x)},
 A(d){var x,w,v,u,t,s,r,q,p,o,n,m,l,k,j=this,i=null,h="Participants",g=j.e
-g=g==null?C.dy:G.c92(d,g.f)
+g=g==null?C.dx:G.c92(d,g.f)
 x=j.e
 x=A.ae(x==null?A.P("Event",i):x.k(0),i,i,i,i,i,i,i,C.iU,i,i,i,i,i)
 w=j.Iv()&&A7.cjn()
@@ -292,12 +292,12 @@ r=j.e
 if(r==null)r=i
 else{r=r.e
 r=r==null?i:r.c}if(r==null)r=""
-w=A.h1(A.aL(Y.fS,A.dL(!1,A0.wX(A.bs(A.a([X.Hk,u,A.ae(t+": "+r,i,i,i,i,i,i,i,i,i,i,i,i,i)],v),C.k,C.l,C.n,i),i),i,i,C.H,i,i,i,i,new B.bIR(j,d),i,i),C.h,i,i,i,i,i,i,C.aI,i,i,i),w!=null)
+w=A.h1(A.aL(Y.fS,A.dL(!1,A0.wX(A.bs(A.a([X.Hk,u,A.ae(t+": "+r,i,i,i,i,i,i,i,i,i,i,i,i,i)],v),C.k,C.l,C.n,i),i),i,i,C.H,i,i,i,i,new B.bIR(j,d),i,i),C.h,i,i,i,i,i,i,C.aE,i,i,i),w!=null)
 u=j.e
 u=u!=null&&u.a!=null&&$.dQ().gdu().d==null
-u=A.h1(new A.ai(C.aI,E.bE(A.ae("You need to have an account to sign in to the event.",i,i,i,i,i,i,i,A.bG(i,i,D.acq,i,i,i,i,i,i,i,i,i,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),i,i,i,i,i),i),i),u)
+u=A.h1(new A.ai(C.aE,E.bE(A.ae("You need to have an account to sign in to the event.",i,i,i,i,i,i,i,A.bG(i,i,D.acq,i,i,i,i,i,i,i,i,i,i,i,i,i,i,!0,i,i,i,i,i,i,i,i),i,i,i,i,i),i),i),u)
 t=B.cfM(j.e)&&$.dQ().gdu().d!=null
-t=A.h1(new A.ai(C.aI,E.bE(D.b19,i),i),t)
+t=A.h1(new A.ai(C.aE,E.bE(D.b18,i),i),t)
 r=j.e
 q=r==null
 if(!q)p=r.at!=null
@@ -309,7 +309,7 @@ r=A.h1(new A.ai(Aj.Gb,K.eN(Ae.c8z(i,Ad.c98(j.d,d),0.3,i,j.gaW9(),i),i,C.v,i,i,i,
 if(A.i0()){q=j.e
 q=(q==null?i:q.a)!=null}else q=!1
 o=A.bs(A.a([H.da(i,i,i,i,i,D.akc,i,i,new B.bIS(j,d),i,i,i,i,i),A.ae(A.P(h,i)+":",i,i,i,i,i,i,i,i,i,i,i,i,i)],v),C.k,C.l,C.n,i)
-q=A.h1(S.ajH(A.a([R.mN(!0,i,new B.bIT(j),J.b_(j.r),i,C.aI,P.ec,!1,C.K,!0)],v),i,!1,i,i,o,i),q)
+q=A.h1(S.ajH(A.a([R.mN(!0,i,new B.bIT(j),J.b_(j.r),i,C.aE,P.ec,!1,C.K,!0)],v),i,!1,i,i,o,i),q)
 o=j.f
 n=o==null
 m=n?i:o.c
@@ -326,7 +326,7 @@ l=j.f
 if(l==null)l=i
 else{l=l.z
 l=l.gt(l)}if(l==null)l=0
-return F.hI(g,i,new A.cT(C.aS,i,i,new A.dB(new A.a7(0,820,0,1/0),K.eN(A.bk(A.a([new A.ai(C.aI,new A.hX(new B.bIU(j),i),i),new A.ai(C.aI,x,i),w,u,t,p,r,q,A.h1(S.ajH(A.a([A.bk(A.a([D.aPn,o,new A.ai(D.Ge,k,i),R.mN(!0,i,new B.bIV(j),l,i,C.aI,P.ec,!1,C.K,!0)],v),C.aA,C.l,C.n,i,C.y)],v),i,!1,i,i,m,i),!n)],v),C.k,C.l,C.n,i,C.y),i,C.v,i,i,i,C.K),i),i),i,i,i,i)},
+return F.hI(g,i,new A.cT(C.aS,i,i,new A.dB(new A.a7(0,820,0,1/0),K.eN(A.bk(A.a([new A.ai(C.aE,new A.hX(new B.bIU(j),i),i),new A.ai(C.aE,x,i),w,u,t,p,r,q,A.h1(S.ajH(A.a([A.bk(A.a([D.aPn,o,new A.ai(D.Ge,k,i),R.mN(!0,i,new B.bIV(j),l,i,C.aE,P.ec,!1,C.K,!0)],v),C.aA,C.l,C.n,i,C.y)],v),i,!1,i,i,m,i),!n)],v),C.k,C.l,C.n,i,C.y),i,C.v,i,i,i,C.K),i),i),i,i,i,i)},
 UG(){var x=0,w=A.l(y.H),v,u=this,t,s
 var $async$UG=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:s=u.c
@@ -598,14 +598,14 @@ x=4
 return A.c(y.x.b(u)?u:A.cw(u,y.H),$async$ET)
 case 4:return A.j(null,w)}})
 return A.k($async$ET,w)},
-A(d){var x,w,v,u=this,t=null,s=E.bE(D.b1c,t),r=$.jX().f
+A(d){var x,w,v,u=this,t=null,s=E.bE(D.b1b,t),r=$.jX().f
 r.toString
 x=y.N
-x=E.bE(D.b1b,A.G(["max_companions",C.c.k(r)],x,x))
+x=E.bE(D.b1a,A.G(["max_companions",C.c.k(r)],x,x))
 r=J.b_(u.a.e)
 w=u.a.d
 v=y.p
-w=K.eN(new A.dB(D.a7_,A.bk(A.a([x,Q.eF,A.h1(A.bk(A.a([I.jR(!0,C.bl,!1,t,!0,C.B,t,I.kO(),u.d,t,t,t,t,t,2,I.es(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.P("Companion Name",t),t,t,t,t,t,t,t,t,t,t,t,t,t),C.v,!0,t,!0,t,!1,t,Ag.bt,t,A.a([new I.Ft(30,t)],y.V),t,t,t,t,t,1,t,t,!1,"\u2022",t,t,t,t,t,!1,t,!1,t,!0,t,M.bP,t,t,C.bp,C.bh,t,t,t,t,t,t,t,C.Y,t,M.bU,t,t,t,t),Q.eF,A.eV(!1,E.bE(D.b0U,t),t,t,C.H,t,t,t,t,u.gaTb(),t,t)],v),C.k,C.l,C.n,t,C.y),r<w),Q.eF,new A.aM(380,150,R.mN(!0,t,new B.bEv(u),J.b_(u.a.e),t,t,P.ec,!1,C.K,!1),t)],v),C.k,C.l,C.ac,t,C.y),t),t,C.v,t,t,t,C.K)
+w=K.eN(new A.dB(D.a7_,A.bk(A.a([x,Q.eF,A.h1(A.bk(A.a([I.jR(!0,C.bl,!1,t,!0,C.B,t,I.kO(),u.d,t,t,t,t,t,2,I.es(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.P("Companion Name",t),t,t,t,t,t,t,t,t,t,t,t,t,t),C.v,!0,t,!0,t,!1,t,Ag.bt,t,A.a([new I.Ft(30,t)],y.V),t,t,t,t,t,1,t,t,!1,"\u2022",t,t,t,t,t,!1,t,!1,t,!0,t,M.bP,t,t,C.bp,C.bh,t,t,t,t,t,t,t,C.Y,t,M.bU,t,t,t,t),Q.eF,A.eV(!1,E.bE(D.b0T,t),t,t,C.H,t,t,t,t,u.gaTb(),t,t)],v),C.k,C.l,C.n,t,C.y),r<w),Q.eF,new A.aM(380,150,R.mN(!0,t,new B.bEv(u),J.b_(u.a.e),t,t,P.ec,!1,C.K,!1),t)],v),C.k,C.l,C.ac,t,C.y),t),t,C.v,t,t,t,C.K)
 return A_.lK(A.a([A.dL(!1,E.bE(A9.Cf,t),t,t,C.H,t,t,t,t,new B.bEw(d),t,t)],v),t,w,t,t,s)}}
 B.auk.prototype={
 A(d){var x=null
@@ -631,13 +631,13 @@ x=A.h1(A.eV(!1,E.bE(Ao.a2C,t),t,t,C.H,t,t,t,t,new B.bIH(s),t,t),x)
 if(s.Iv()){w=s.e
 w=w==null?t:w.ax
 w=w===!0}else w=!1
-w=A.h1(A.eV(!1,E.bE(D.b0X,t),t,t,C.H,t,t,t,t,new B.bII(s),t,t),w)
+w=A.h1(A.eV(!1,E.bE(D.b0W,t),t,t,C.H,t,t,t,t,new B.bII(s),t,t),w)
 if(s.Iv()){v=$.jX()
 v=v==null?t:v.f
 v=(v==null?0:v)>0}else v=!1
-v=A.h1(new A.ai(A8.Gm,A.eV(!1,E.bE(D.b1_,t),t,t,C.H,t,t,t,t,new B.bIJ(s),t,t),t),v)
+v=A.h1(new A.ai(A8.Gm,A.eV(!1,E.bE(D.b0Z,t),t,t,C.H,t,t,t,t,new B.bIJ(s),t,t),t),v)
 u=s.Iv()&&A.i0()
-u=A.a([x,w,v,A.h1(new A.ai(C.aI,A.eV(!1,E.bE(D.b1p,t),t,t,C.H,t,t,t,t,new B.bIK(s,d),t,t),t),u)],y.p)
+u=A.a([x,w,v,A.h1(new A.ai(C.aE,A.eV(!1,E.bE(D.b1p,t),t,t,C.H,t,t,t,t,new B.bIK(s,d),t,t),t),u)],y.p)
 if(Ak.c5M()){x=s.e
 x=x!=null&&x.ch}else x=!1
 if(x)u.push(A.eV(!1,E.bE(Am.a2D,t),t,t,C.H,t,t,t,t,new B.bIL(s,d),t,t))
@@ -745,7 +745,7 @@ $1(d){return d.or()},
 $S:892}
 B.bIT.prototype={
 $2(d,e){var x=null,w=this.a
-return new A.ai(C.aI,A.bs(A.a([H.da(x,x,x,x,x,D.akp,x,x,new B.bIN(w,e),x,x,x,x,x),A.ae(A.o(J.t(w.r,e)),x,x,x,x,x,x,x,x,x,x,x,x,x)],y.p),C.k,C.l,C.n,x),x)},
+return new A.ai(C.aE,A.bs(A.a([H.da(x,x,x,x,x,D.akp,x,x,new B.bIN(w,e),x,x,x,x,x),A.ae(A.o(J.t(w.r,e)),x,x,x,x,x,x,x,x,x,x,x,x,x)],y.p),C.k,C.l,C.n,x),x)},
 $S:96}
 B.bIN.prototype={
 $0(){var x=this.a
@@ -815,7 +815,7 @@ case 2:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
 B.bJ9.prototype={
-$1(d){var x=null,w=E.bE(D.b10,x),v=this.b,u=this.a,t=y.N
+$1(d){var x=null,w=E.bE(D.b1_,x),v=this.b,u=this.a,t=y.N
 t=E.bE(D.b0G,A.G(["participant",v.or(),"event",u.e.k(0)],t,t))
 return A_.lK(A.a([A.dL(!1,E.bE(Al.a2A,x),x,x,C.H,x,x,x,x,new B.bJ7(d),x,x),A.dL(!1,E.bE(D.a2B,x),x,x,C.H,x,x,x,x,new B.bJ8(u,d,v),x,x)],y.p),x,t,x,x,w)},
 $S:z+4}
@@ -857,10 +857,10 @@ $2(d,e){var x=null,w=this.a,v=J.t(w.a.e,e),u=A.a([],y.p)
 if(v.a92(w.a.c))u.push(Aq.Hj)
 u.push(D.aVA)
 u.push(A.cP(A.ae(v.b,x,x,x,x,x,x,x,x,x,x,x,x,x),1,x))
-if(!v.a92(w.a.c))u.push(A.eV(!1,E.bE(D.b1k,x),x,x,C.H,x,x,x,x,new B.bEs(w,v),x,x))
+if(!v.a92(w.a.c))u.push(A.eV(!1,E.bE(D.b1j,x),x,x,C.H,x,x,x,x,new B.bEs(w,v),x,x))
 if(v.a92(w.a.c))u.push(A.eV(!1,E.bE(D.a2B,x),x,x,C.H,x,x,x,x,new B.bEt(w,v),x,x))
 u.push(H.da(x,x,x,x,x,Ac.yI,x,x,new B.bEu(w,v),x,x,x,x,x))
-return new A.ai(C.aI,A.bs(u,C.k,C.l,C.n,x),x)},
+return new A.ai(C.aE,A.bs(u,C.k,C.l,C.n,x),x)},
 $S:96}
 B.bEs.prototype={
 $0(){return this.a.ES(this.b)},
@@ -907,18 +907,18 @@ D.ak7=new A.eq(D.ajg,null,null,null,null)
 D.akc=new A.eq(A2.H2,null,null,null,null)
 D.aji=new A.aS(58648,"MaterialIcons",null,!1)
 D.akp=new A.eq(D.aji,null,null,null,null)
-D.aPn=new A.ai(C.aI,null,null)
+D.aPn=new A.ai(C.aE,null,null)
 D.aVA=new A.aM(4,null,null,null)
 D.b0G=new A.c4("Do you want to sign out participant {participant} from {event}?",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.a2B=new A.c4("Sign out someone",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0U=new A.c4("Create Companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0X=new A.c4("Sign out",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b1_=new A.c4("Sign in companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b10=new A.c4("Sign out participant",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b19=new A.c4("This event is fully booked.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b1b=new A.c4("If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b1c=new A.c4("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b1k=new A.c4("Sign in someone",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b0T=new A.c4("Create Companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b0W=new A.c4("Sign out",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b0Z=new A.c4("Sign in companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1_=new A.c4("Sign out participant",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b18=new A.c4("This event is fully booked.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1a=new A.c4("If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1b=new A.c4("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1j=new A.c4("Sign in someone",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b1p=new A.c4("Sign in other",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"fopxesH83FyxyVtz7RrcBzY5jAw=");
+a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"08F21Vxjji/JvRiTbaQBe3GC45I=");

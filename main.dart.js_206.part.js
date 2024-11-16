@@ -192,12 +192,12 @@ var $async$a3J=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:v.Ky(!0,!0)
 return A.j(null,w)}})
 return A.k($async$a3J,w)},
-A(d){var x,w,v,u=this,t=null,s=L.bE(D.b0O,t)
+A(d){var x,w,v,u=this,t=null,s=L.bE(D.b0N,t)
 s=M.k_(t,!0,t,t,!0,t,t,O.pJ(new B.bQg(d)),t,s)
 x=A.P("Heading",t)
 w=u.w
 v=y.u
-x=H.cg4(A.bk(A.a([H.b5j(t,I.es(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,F.yk,t,t,t,t,t,t,t,t,t,t,t,w==null?t:w.c,t,t,t,t,t,t,t,t,x,t,t,t,t,t,t,t,t,t,t,t,t,t),u.r,t,"heading",t),B.cAY(!0,"with_notification",L.bE(D.b1g,t))],v),C.k,C.l,C.n,t,C.y),u.d)
+x=H.cg4(A.bk(A.a([H.b5j(t,I.es(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,F.yk,t,t,t,t,t,t,t,t,t,t,t,w==null?t:w.c,t,t,t,t,t,t,t,t,x,t,t,t,t,t,t,t,t,t,t,t,t,t),u.r,t,"heading",t),B.cAY(!0,"with_notification",L.bE(D.b1f,t))],v),C.k,C.l,C.n,t,C.y),u.d)
 w=u.e
 w===$&&A.b()
 return A.m9(!0,W.hI(s,t,new A.cT(C.aS,t,t,new A.dB(new A.a7(0,820,0,1/0),A.bk(A.a([new A.ai(N.lM,x,t),E.cgm(w,"")],v),C.k,C.l,C.n,t,C.y),t),t),A.aL(t,P.eN(U.wX(A.bs(A.a([E.Tv(u.gbga(),A.P("Storno",t)),E.Tv(u.gbbo(),"Test"),E.Tv(new B.bQh(u),A.P("Send",t))],v),C.k,C.l,C.n,t),t),t,C.v,t,t,t,C.a5),C.h,C.js,t,t,t,t,t,t,t,t,17976931348623157e292),t,t,t),!0,C.Z,!0,!0)}}
@@ -238,8 +238,8 @@ w(A.cq,[B.bQi,B.bQg,B.bQh])})()
 A.bz(b.typeUniverse,JSON.parse('{"TE":{"a5":[],"d":[]},"LO":{"mF":["v"],"hU":["v"],"hq":["v"],"E":[],"d":[],"hq.T":"v","hU.T":"v","mF.T":"v"},"a6w":{"je":["LO","v"],"fD":["hU<v>","v"],"fE":["v"],"K":["hq<v>"],"fD.F":"hU<v>","je.F":"LO"},"AW":{"E":[],"d":[]},"a7Q":{"K":["AW"]}}'))
 var y=(function rtii(){var x=A.x
 return{x:x("p<f>"),u:x("p<d>"),F:x("aO<EU>"),b:x("ej<z?>"),w:x("f"),k:x("dg"),A:x("a6w"),m:x("@"),v:x("~"),z:x("~()")}})();(function constants(){D.akO=new I.An(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,F.cS,F.cS,null,F.cS,F.cS,F.cS,!0,null,null,null)
-D.b0O=new A.c4("Create news",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b1g=new A.c4("Send with notification",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b0N=new A.c4("Create news",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1f=new A.c4("Send with notification",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b9C=new B.bEe(0,"material")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"8uG9MQqDdioUSAhg5fUzHreM6B0=");
+a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"qCJ3gysVpH9xMonzA6dRn3pmG3Y=");

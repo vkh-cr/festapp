@@ -645,7 +645,7 @@ case 1:return A.j(v,w)}})
 return A.k($async$kn,w)},
 aWD(){this.I(new B.bDQ(this,B.ceU(this.x.a.a.toLowerCase())))},
 blU(){var x,w,v,u,t=this,s=null,r=t.r
-if(r==null)return A.d4(new A.ai(D.agF,A1.bE(D.b0P,s),s),s,s)
+if(r==null)return A.d4(new A.ai(D.agF,A1.bE(D.b0O,s),s),s,s)
 x=t.w
 if(x===D.a0A)w=M.os
 else{if(x!==D.a0B)return C.a8
@@ -659,12 +659,12 @@ if(t.r.ay!=null){x=A.a([A_.bE,A.ae(A.P("Signed in companions",s)+":",s,s,s,s,s,s
 u=t.r.ay
 u.toString
 C.b.H(x,J.cd(u,new B.bDR(),y.l))
-C.b.H(v,x)}C.b.H(r,v)}return new A.ai(L.db,A.bk(r,C.aA,C.l,C.n,s,C.y),s)},
-A(d){var x,w=this,v=null,u=w.r==null?B.ckH(d):w.aDV(w.w),t=O.da(v,v,v,v,v,G.c2(P.id,C.dy,v,v),v,v,new B.bDV(d),v,v,v,v,v),s=w.d
+C.b.H(v,x)}C.b.H(r,v)}return new A.ai(L.dA,A.bk(r,C.aA,C.l,C.n,s,C.y),s)},
+A(d){var x,w=this,v=null,u=w.r==null?B.ckH(d):w.aDV(w.w),t=O.da(v,v,v,v,v,G.c2(P.id,C.dx,v,v),v,v,new B.bDV(d),v,v,v,v,v),s=w.d
 s=s==null?v:s.k(0)
 if(s==null)s=""
 x=y.p
-return G.hI(v,u,A.m9(!0,A.dx(C.ah,A.a([A.bk(A.a([new A.ai(L.db,A.bs(A.a([t,A.cP(A.ae(s,v,v,v,v,v,v,v,A.bG(v,v,C.dy,v,v,v,v,v,v,v,v,20,v,v,C.aJ,v,v,!0,v,v,v,v,v,v,v,v),C.bT,v,v,v,v),1,v)],x),C.k,C.l,C.n,v),v),w.blU(),A.cP(new B.Z0(w.z,new B.bDW(w),N.a76,v),1,v)],x),C.k,C.l,C.n,v,C.y),A.a1z(A.v5(d).au0(A.cY([C.bC,C.c6],y.z)),new B.Vq(0.25,0.25,0.88,w.y,new B.bDX(w),v))],x),C.B,C.af,v),!0,C.Z,!0,!0),v,v,v,v)},
+return G.hI(v,u,A.m9(!0,A.dx(C.ah,A.a([A.bk(A.a([new A.ai(L.dA,A.bs(A.a([t,A.cP(A.ae(s,v,v,v,v,v,v,v,A.bG(v,v,C.dx,v,v,v,v,v,v,v,v,20,v,v,C.aJ,v,v,!0,v,v,v,v,v,v,v,v),C.bT,v,v,v,v),1,v)],x),C.k,C.l,C.n,v),v),w.blU(),A.cP(new B.Z0(w.z,new B.bDW(w),N.a76,v),1,v)],x),C.k,C.l,C.n,v,C.y),A.a1z(A.v5(d).au0(A.cY([C.bC,C.c6],y.z)),new B.Vq(0.25,0.25,0.88,w.y,new B.bDX(w),v))],x),C.B,C.af,v),!0,C.Z,!0,!0),v,v,v,v)},
 Qa(d){return this.aH1(d)},
 aH1(d){var x=0,w=A.l(y.H),v,u=this,t
 var $async$Qa=A.h(function(e,f){if(e===1)return A.i(f,w)
@@ -915,7 +915,7 @@ return A.k($async$$1,w)},
 $S:879}
 B.bDX.prototype={
 $2(d,e){var x=null,w=this.a,v=A.J(d).ax.a===C.z?$.np():C.o,u=V.cdC(C.G,new A.aT(16,16)),t=A.aL(C.F,A.aL(x,x,C.h,x,x,new A.bT(C.li,x,x,A.eT(3),x,x,x,C.W),x,6,W.y7,x,x,x,60),C.h,x,x,x,x,40,x,x,x,x,1/0),s=F.jR(!0,C.bl,!1,x,!0,C.B,x,F.kO(),w.x,x,x,x,x,x,2,F.es(x,Z.mt,x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,A.P("Search Attendees",x),x,C.akf,x,x,x,x,x,x,x,x,x,x,x),C.v,!0,x,!0,x,!1,x,X.bt,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,!1,x,!0,x,H.bP,x,x,C.bp,C.bh,x,x,x,x,x,x,x,C.Y,x,H.bU,x,x,x,x),r=w.f
-return A.dk(x,A.aL(x,A.bk(A.a([t,new A.ai(C.aI,s,x),A.cP(r!=null?A3.mN(!0,e,new B.bDS(w),J.b_(r),x,x,x,!1,C.K,!1):C.fU,1,x)],y.p),C.k,C.l,C.n,x,C.y),C.h,x,x,new A.bT(v,x,x,u,x,x,x,C.W),x,x,x,x,x,x,x),C.v,!1,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,new B.bDT(w),x,new B.bDU(w,d),!1,C.ad)},
+return A.dk(x,A.aL(x,A.bk(A.a([t,new A.ai(C.aE,s,x),A.cP(r!=null?A3.mN(!0,e,new B.bDS(w),J.b_(r),x,x,x,!1,C.K,!1):C.fU,1,x)],y.p),C.k,C.l,C.n,x,C.y),C.h,x,x,new A.bT(v,x,x,u,x,x,x,C.W),x,x,x,x,x,x,x),C.v,!1,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,new B.bDT(w),x,new B.bDU(w,d),!1,C.ad)},
 $S:880}
 B.bDU.prototype={
 $1(d){var x=this.a.y,w=x.a.as.x.a,v=d.c
@@ -1041,6 +1041,6 @@ D.a0B=new B.a1q(1,"notSignedIn")
 D.a0C=new B.a1q(2,"nothing")
 D.aXk=new A.X(!0,C.u,null,null,null,null,16,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aZq=new A.X(!0,null,null,null,null,null,14,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0P=new A.c4("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+D.b0O=new A.c4("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_195",e:"endPart",h:b})})($__dart_deferred_initializers__,"4O7cwX91QNBpxisJa8qK6Taw+Ko=");
+a.eventLog.push({p:"main.dart.js_195",e:"endPart",h:b})})($__dart_deferred_initializers__,"Tgk+2JU4DXZtVaMY2g0j0zzDLH4=");

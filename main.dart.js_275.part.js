@@ -1,7 +1,7 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_275",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,L,U,V,W,M,N,X,Y,Z,A_,O,A0,A1,A2,P,Q,A3,E,B={
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,L,T,U,V,M,N,W,X,Y,Z,O,A_,A0,A1,P,Q,A2,E,B={
 c8Q(d,e,f){return new B.aw7(f,d,e,null)},
 bWO:function bWO(d,e){this.a=d
 this.b=e},
@@ -114,33 +114,33 @@ bIk:function bIk(d){this.a=d},
 bI3:function bI3(d,e){this.a=d
 this.b=e},
 bIl:function bIl(d){this.a=d},
-bIm:function bIm(d){this.a=d}},F,R,A4,S,D,G,I,K,A5,H,A6,T
+bIm:function bIm(d){this.a=d}},F,R,A3,A4,D,G,I,K,A5,H,A6,S
 J=c[1]
 A=c[0]
 C=c[2]
 L=c[66]
-U=c[81]
-V=c[154]
-W=c[100]
+T=c[81]
+U=c[154]
+V=c[100]
 M=c[75]
 N=c[180]
-X=c[104]
-Y=c[166]
-Z=c[97]
-A_=c[80]
+W=c[104]
+X=c[166]
+Y=c[97]
+Z=c[80]
 O=c[82]
-A0=c[64]
-A1=c[129]
-A2=c[91]
+A_=c[64]
+A0=c[129]
+A1=c[91]
 P=c[62]
 Q=c[186]
-A3=c[196]
+A2=c[196]
 E=c[128]
 B=a.updateHolder(c[6],B)
 F=c[209]
 R=c[40]
-A4=c[39]
-S=c[177]
+A3=c[39]
+A4=c[177]
 D=c[152]
 G=c[203]
 I=c[179]
@@ -148,12 +148,12 @@ K=c[210]
 A5=c[65]
 H=c[161]
 A6=c[138]
-T=c[167]
+S=c[167]
 B.bWO.prototype={
 G(){return"_SwitchListTileType."+this.b}}
 B.aw7.prototype={
 A(d){var x,w,v,u,t,s,r,q=this,p=null
-switch(0){case 0:x=new A0.ED(!0,L.c8P(p,p,p,!1,C.v,p,p,p,C.uL,p,p,q.d,p,p,p,p,p,p,p,p,q.c),p)
+switch(0){case 0:x=new A_.ED(!0,L.c8P(p,p,p,!1,C.v,p,p,p,C.uL,p,p,q.d,p,p,p,p,p,p,p,p,q.c),p)
 break}$label0$1:{w=new A.ah(p,x)
 break $label0$1}v=w.a
 u=w.b
@@ -243,7 +243,7 @@ t=v.a.c
 x=t!=null?2:3
 break
 case 2:x=4
-return A.c(A_.oJ(t),$async$Nr)
+return A.c(Z.oJ(t),$async$Nr)
 case 4:v.f=e
 case 3:x=5
 return A.c(A.Ek(),$async$Nr)
@@ -272,7 +272,7 @@ var $async$Mb=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:s=v.c
 s.toString
 x=4
-return A.c(Z.l1(s,A.P("Confirm removal",null),A.P("Are you sure you want to delete this event?",null),"Ok"),$async$Mb)
+return A.c(Y.l1(s,A.P("Confirm removal",null),A.P("Are you sure you want to delete this event?",null),"Ok"),$async$Mb)
 case 4:x=e?2:3
 break
 case 2:s=v.f
@@ -376,8 +376,8 @@ $1(d){return A.dM(C.e.dX(d),null)},
 $S:63}
 B.bIv.prototype={
 $2(d,a0){var x,w,v,u,t,s,r,q,p,o,n,m,l,k=null,j=a0?Q.dR:Q.c1,i=a0?N.fp:N.ep,h=H.bE(A.ae("Edit",k,k,k,k,k,k,k,k,k,k,k,k,k),k),g=y.p,f=A.a([],g),e=this.a
-if(e.a.c!=null)f.push(Y.da(k,k,k,k,k,A3.yI,k,k,e.gbpW(),k,k,k,k,A.P("Delete",k)))
-h=V.k_(f,!0,k,k,k,k,k,k,k,h)
+if(e.a.c!=null)f.push(X.da(k,k,k,k,k,A2.yI,k,k,e.gbpW(),k,k,k,k,A.P("Delete",k)))
+h=U.k_(f,!0,k,k,k,k,k,k,k,h)
 if(e.f==null)f=C.fU
 else{f=H.bE(A.ae("Hide",k,k,k,k,k,k,k,k,k,k,k,k,k),k)
 x=e.w
@@ -430,7 +430,7 @@ s=A.ae(A.P("Content",k),k,k,k,k,k,k,k,A.J(d).p2.at,k,k,k,k,k)
 r=A.d4(A.eV(!1,A.ae(A.P("Edit content",k),k,k,k,k,k,k,k,k,k,k,k,k,k),k,k,C.H,k,k,k,k,new B.bIh(e,d),k,k),k,k)
 q=e.z
 if(q==null)q=""
-q=A.pN(new A.dB(new A.a7(0,1/0,0,400),new B.av0(new B.bIi(),C.wM,new W.q3(q,18,!0,k),k),k),C.B,k)
+q=A.pN(new A.dB(new A.a7(0,1/0,0,400),new B.av0(new B.bIi(),C.wM,new V.q3(q,18,!0,k),k),k),C.B,k)
 p=A.P("Advanced Settings",k)
 o=A.J(d).p2.w
 p=A.ae(p,k,k,k,k,k,k,k,o==null?k:o.bnR(C.aJ),k,k,k,k,k)
@@ -443,12 +443,12 @@ n=B.c8Q(new B.bIk(e),n,m===!0)
 m=e.y
 m=E.lv(k,!1,k,D.es(k,k,k,k,k,k,k,k,!0,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,A.P("Type",k),k,k,k,k,k,k,k,k,k,k,k,k,k),!1,k,m,k,k,1,k,!1,k,k,k,new B.bIl(e),k,!1,k,k,C.Y,k,k)
 l=e.Q
-p=new A.cT(C.aS,k,k,new A.dB(new A.a7(0,820,0,1/0),new A.ai(S.db,A1.A0(k,k,X.bbl(A.a([f,x,w,v,G.bE,u,G.bE,t,G.bE,s,r,G.bE,q,G.bE,U.ajH(A.a([o,n,m,E.lv(k,!1,k,D.es(k,k,k,k,k,k,k,k,!0,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,A.P("Show inside event",k),k,k,k,k,k,k,k,k,k,k,k,k,k),!1,k,l,k,k,1,k,!1,k,k,k,new B.bIm(e),k,!1,k,k,C.Y,k,k)],g),k,!1,k,k,p,k)],g),k,k,!1),e.e,k,k),k),k),k)
+p=new A.cT(C.aS,k,k,new A.dB(new A.a7(0,820,0,1/0),new A.ai(A4.dA,A0.A0(k,k,W.bbl(A.a([f,x,w,v,G.bE,u,G.bE,t,G.bE,s,r,G.bE,q,G.bE,T.ajH(A.a([o,n,m,E.lv(k,!1,k,D.es(k,k,k,k,k,k,k,k,!0,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,k,A.P("Show inside event",k),k,k,k,k,k,k,k,k,k,k,k,k,k),!1,k,l,k,k,1,k,!1,k,k,k,new B.bIm(e),k,!1,k,k,C.Y,k,k)],g),k,!1,k,k,p,k)],g),k,k,!1),e.e,k,k),k),k),k)
 f=p}x=A.cs(C.b1)
 x=A.cs(new A.c9(x.a,x.b,0.4,x.d).dc())
 x=new A.c9(x.a,x.b,x.c,0.1).dc()
 w=A.na(k,k,k,k,k,k,k,k,k,C.o,k,k,k,k,k,k,k,k,k)
-return T.hI(h,k,f,A.aL(k,A.bs(A.a([A.dL(!1,H.bE(A.ae("Storno",k,k,k,k,k,k,k,k,k,k,k,k,k),k),k,k,C.H,k,k,k,k,e.gbme(),k,w),K.iQ,A.eV(!1,A.ae(A.P("Save",k),k,k,k,k,k,k,k,k,k,k,k,k,k),k,k,C.H,k,k,k,k,e.gaEa(),k,k)],g),C.k,C.eb,C.n,k),C.h,x,k,k,k,k,k,S.db,k,k,k),k,k,k)},
+return S.hI(h,k,f,A.aL(k,A.bs(A.a([A.dL(!1,H.bE(A.ae("Storno",k,k,k,k,k,k,k,k,k,k,k,k,k),k),k,k,C.H,k,k,k,k,e.gbme(),k,w),K.iQ,A.eV(!1,A.ae(A.P("Save",k),k,k,k,k,k,k,k,k,k,k,k,k,k),k,k,C.H,k,k,k,k,e.gaEa(),k,k)],g),C.k,C.eb,C.n,k),C.h,x,k,k,k,k,k,C.aE,k,k,k),k,k,k)},
 $S:853}
 B.bIc.prototype={
 $1(d){var x=this.a
@@ -588,8 +588,8 @@ B.bIh.prototype={
 $0(){var x=0,w=A.l(y.H),v=this,u,t
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=v.a
-t=A2.WZ(A.G(["content",u.z],y.N,y.z))
-T.h0(v.b,!1).f.l5(t,y.X).aL(0,new B.bI5(u),y.a)
+t=A1.WZ(A.G(["content",u.z],y.N,y.z))
+S.h0(v.b,!1).f.l5(t,y.X).aL(0,new B.bI5(u),y.a)
 return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
@@ -634,7 +634,7 @@ x(w,"gbme","bmf",1)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.bWO,A.dW)
 x(B.aw7,A.a5)
 w(A.cq,[B.buG,B.bIx,B.bIb,B.bIe,B.bIa,B.bIn,B.bI9,B.bIo,B.bI8,B.bIq,B.bI7,B.bI6,B.bIh,B.bI2,B.bI4,B.bI3])
-x(B.ana,A4.alg)
+x(B.ana,A3.alg)
 x(B.a21,A.d5)
 x(B.atw,A.lj)
 x(B.av0,A.b5)
@@ -649,4 +649,4 @@ F.asf=A.a(x([0.9,1]),A.x("p<D>"))
 F.vA=A.ba("d9")
 F.b9F=new B.bWO(0,"material")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"svVqCAW9ssoCBcBLnSC0cBSz69g=");
+a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"l8fiUJvB29uT7ZHql4PeKQ6AVSg=");

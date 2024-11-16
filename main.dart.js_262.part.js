@@ -195,7 +195,7 @@ _.ax=p
 _.ay=q
 _.ch=r
 _.CW=s
-_.a=t}},D,N,O,P,G
+_.a=t}},D,N,O,P,Q,G
 J=c[1]
 B=c[0]
 C=c[2]
@@ -209,8 +209,9 @@ M=c[282]
 A=a.updateHolder(c[83],A)
 D=c[260]
 N=c[163]
-O=c[149]
-P=c[148]
+O=c[161]
+P=c[149]
+Q=c[148]
 G=c[151]
 A.bL9.prototype={}
 A.Oq.prototype={
@@ -228,10 +229,11 @@ r=B.cs(new B.c9(r.a,r.b,0.4,r.d).dc())
 r=new B.c9(r.a,r.b,r.c,0.4).dc()}x.push(new B.y5(new B.ai(D.ah2,new B.c4(s,p,new B.X(!0,r,p,p,p,p,15,C.aJ,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p,p),p,p,p,p,p,p,p,p,p,p,p,p),p),s.length!==0,!1,!1,!1,!1,!1,p))
 x.push(q.bpg(t))}o=q.a.w
 o=o==null?p:o.$0()
-if(o==null?!1:o){if(B.J(d).ax.a===C.z){o=B.cs(C.cA)
-o=new B.c9(o.a,o.b,0.6,o.d).dc()}else{o=B.cs(C.b1)
-o=B.cs(new B.c9(o.a,o.b,0.4,o.d).dc())
-o=new B.c9(o.a,o.b,o.c,0.4).dc()}x.push(B.d4(new B.ai(D.agH,H.bvx(D.akh,C.H,D.b0N,new A.bUg(q,d),B.na(p,p,p,p,p,p,p,p,p,o,p,p,D.ah_,p,p,p,p,p,p)),p),p,p))}return I.eN(B.bk(x,C.aA,C.l,C.n,p,C.y),p,C.v,p,p,p,C.K)},
+if(o==null?!1:o){o=O.bE(D.b1k,p)
+if(B.J(d).ax.a===C.z){w=B.cs(C.cA)
+w=new B.c9(w.a,w.b,0.6,w.d).dc()}else{w=B.cs(C.b1)
+w=B.cs(new B.c9(w.a,w.b,0.4,w.d).dc())
+w=new B.c9(w.a,w.b,w.c,0.4).dc()}x.push(B.d4(new B.ai(D.agG,H.bvx(D.akh,C.H,o,new A.bUg(q,d),B.na(p,p,p,p,p,p,p,p,p,w,p,p,D.ah_,p,p,p,p,p,p)),p),p,p))}return I.eN(B.bk(x,C.aA,C.l,C.n,p,C.y),p,C.v,p,p,p,C.K)},
 bpg(d){var x,w,v,u,t,s=this,r=null,q=s.c
 q.toString
 q=A.nf(q)
@@ -330,7 +332,7 @@ if(s)x=15
 else x=u
 if(s)s=15
 else s=u
-return B.d4(B.aL(v,w.y,C.h,v,v,new B.bT(t,v,w.x,v,v,v,v,C.dw),v,s,v,v,v,v,x),v,v)}}
+return B.d4(B.aL(v,w.y,C.h,v,v,new B.bT(t,v,w.x,v,v,v,v,C.dv),v,s,v,v,v,v,x),v,v)}}
 A.aqJ.prototype={
 A(d){var x=this
 return A.cfu(N.pL(x.d,C.D,x.y),null,C.A,x.e,x.c)}}
@@ -390,7 +392,7 @@ v=q===C.K?C.eJ:C.aS
 u=s.r
 x.push(B.cP(new B.cT(v,r,r,u==null?E.bsn(r):u,r),w,r))}switch(q.a){case 1:t=new B.XK(B.bs(x,C.k,C.bR,C.n,r),r)
 break
-case 0:t=O.wX(B.bk(x,C.k,C.bR,C.n,r,C.y),r)
+case 0:t=P.wX(B.bk(x,C.k,C.bR,C.n,r,C.y),r)
 break
 default:throw B.e(B.eB(q,q.k(0)+" is invalid.",r))}t=new B.cT(C.F,r,r,t,r)
 return A.nf(d).a!==q?new A.I5(A.nf(d).LJ(q),t,r):t}}
@@ -403,7 +405,7 @@ G(){return"ConnectorType."+this.b}}
 A.ax3.prototype={
 Ln(d,e){return this.a.$2(d,e)}}
 A.ax0.prototype={
-a66(d){var x=P.cjZ(this.RG)
+a66(d){var x=Q.cjZ(this.RG)
 return new A.I5(this.rx,x,null)}}
 var z=a.updateTypes(["OV(N,r,KH)","d(N,r)"])
 A.bUg.prototype={
@@ -413,7 +415,7 @@ $S:0}
 A.bUl.prototype={
 $2(d,e){var x=null,w=J.t(this.b[e].d,"leftText"),v=this.a.c
 v.toString
-return new B.ai(C.aI,B.ae(w,x,x,x,x,x,x,x,D.Cd.cQ(B.J(v).ax.a===C.z?$.fU():C.u),x,x,x,x,x),x)},
+return new B.ai(C.aE,B.ae(w,x,x,x,x,x,x,x,D.Cd.cQ(B.J(v).ax.a===C.z?$.fU():C.u),x,x,x,x,x),x)},
 $S:96}
 A.bUj.prototype={
 $2(d,e){var x,w=null,v=this.b[e],u=this.a,t=u.c
@@ -515,14 +517,14 @@ D.Fm=new A.afP(1,"after")
 D.Fq=new A.KH(0,"start")
 D.Fr=new A.KH(1,"end")
 D.aey=new A.aWu(0,"basic")
-D.agH=new B.as(0,48,0,48)
+D.agG=new B.as(0,38,0,38)
 D.ah_=new B.as(20,12,20,12)
 D.ah2=new B.as(36,18,0,12)
 D.akh=new B.eq(M.H0,24,null,null,null)
 D.aVT=new A.OV(null,null,null,null,null)
 D.Cd=new B.X(!0,null,null,null,null,null,15,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0N=new B.c4("Add new event",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b1k=new B.c4("Add New Event",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b9A=new A.bxb(2,"basic")})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"d_U","cse",()=>A.cI4())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"Yt24BRwIL5es4eZ2EMLlX5M7L2s=");
+a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"tHdrZ5b/dS9Gpyl+TvF/Xjsqz64=");
