@@ -2,11 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/EventsTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ExclusivityTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
+import 'package:fstapp/pages/AdministrationOccasion/ScheduleTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
@@ -28,7 +27,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.info,
     AdminTabDefinition.events,
     AdminTabDefinition.places,
-    AdminTabDefinition.exclusivity,
     AdminTabDefinition.groups,
     AdminTabDefinition.game,
     AdminTabDefinition.service,
@@ -112,9 +110,8 @@ class AdminTabDefinition {
   // Available tabs defined in a dictionary
   static Map<String, AdminTabDefinition> get availableTabs => {
     info: AdminTabDefinition(label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
-    events: AdminTabDefinition(label: "Schedule".tr(), icon: Icons.calendar_month, widget: EventsTab()),
+    events: AdminTabDefinition(label: "Schedule".tr(), icon: Icons.calendar_month, widget: ScheduleTab()),
     places: AdminTabDefinition(label: "Places".tr(), icon: Icons.pin_drop, widget: PlacesTab()),
-    exclusivity: AdminTabDefinition(label: "Exclusivity".tr(), icon: Icons.punch_clock_rounded, widget: ExclusivityTab()),
     groups: AdminTabDefinition(label: "Groups".tr(), icon: Icons.groups, widget: UserGroupsTab()),
     service: AdminTabDefinition(label: "Service".tr(), icon: Icons.food_bank, widget: ServiceTab()),
     users: AdminTabDefinition(label: "Users".tr(), icon: Icons.people, widget: UsersTab()),
