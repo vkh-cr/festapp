@@ -56,7 +56,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       children.add(
         Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 38.0),
+            padding: const EdgeInsets.symmetric(vertical: 28.0),
             child: TextButton.icon(
               onPressed: () {
                 widget.onAddNewEvent?.call(context, widget.eventGroups);

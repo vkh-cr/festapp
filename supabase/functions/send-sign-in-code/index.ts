@@ -78,6 +78,16 @@ Deno.serve(async (req) => {
 
     const organizationId = occasionData.organization;
 
+    const orgData = await supabaseAdmin
+        .from("organizations")
+        .select("data")
+        .eq("id", organizationId)
+        .single();
+
+    const orgConfig = orgData.data.data;
+    const appName = orgConfig.APP_NAME || "DefaultAppName";
+    const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
+
     // Fetch email template based on the organization
     const template = await supabase
       .from("email_templates")
@@ -104,7 +114,7 @@ Deno.serve(async (req) => {
       subject: template.data.subject,
       content: template.data.html,
       subs,
-      from: `Festapp <${_DEFAULT_EMAIL}>`,
+      from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
     });
 
   await supabaseAdmin
