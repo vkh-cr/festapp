@@ -5,7 +5,7 @@ import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,
@@ -80,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                                 onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                                child: Text("Sign up", style: normalTextStyle).tr())
+                                child: Text("Sign up", style: StylesConfig.normalTextStyle).tr())
                           ]
                       ),
                     ),
@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                         alignment: Alignment.topRight,
                         child: TextButton(
                             onPressed: () => RouterService.navigate(context, ForgotPasswordPage.ROUTE),
-                            child: Text("Forgot your password?", style: normalTextStyle).tr())
+                            child: Text("Forgot your password?", style: StylesConfig.normalTextStyle).tr())
                     ),
                   ],
                 ),

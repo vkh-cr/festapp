@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:timelines/timelines.dart';
 
@@ -97,7 +97,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
               child: Text(
                 group.key,
-                style: timeLineSplitTextStyle,
+                style: StylesConfig.timeLineSplitTextStyle(context),
               ),));
         children.add(createTimeline(group.value));
       }
@@ -134,7 +134,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
               "Afternoon".tr(),
-              style: timeLineSplitTextStyle,
+              style: StylesConfig.timeLineSplitTextStyle(context),
             ),
           )
         : const SizedBox.shrink(),
@@ -144,7 +144,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.fromLTRB(48, 18, 0, 12),
             child: Text(
               "Evening".tr(),
-              style: timeLineSplitTextStyle,
+              style: StylesConfig.timeLineSplitTextStyle(context),
             ),
           )
         : const SizedBox.shrink(),
@@ -166,9 +166,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       theme: TimelineTheme.of(context).copyWith(
         nodePosition: widget.nodePosition,
         indicatorTheme:
-            IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor),
+            IndicatorTheme.of(context).copyWith(color: ThemeConfig.timelineColor(context)),
         connectorTheme: ConnectorTheme.of(context)
-            .copyWith(color: ThemeConfig.timelineColor, thickness: 2),
+            .copyWith(color: ThemeConfig.timelineColor(context), thickness: 2),
       ),
       builder: TimelineTileBuilder.connected(
         itemCount: events.length,
@@ -189,16 +189,16 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
                 foregroundColor: Colors.black,
                 alignment: Alignment.centerLeft
               ),
-              child: Text(event.rightText, style: timeLineSmallTextStyle,));
+              child: Text(event.rightText, style: StylesConfig.timeLineSmallTextStyle,));
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
           return event.dotType != DotType.dot
               ? OutlinedDotIndicator(
-                  color: ThemeConfig.timelineColor, borderWidth: event.dotType == DotType.closed ? 6 : 2)
+                  color: ThemeConfig.timelineColor(context), borderWidth: event.dotType == DotType.closed ? 6 : 2)
               : Padding(
                   padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
-                  child: DotIndicator(color: ThemeConfig.timelineColor, size: 8));
+                  child: DotIndicator(color: ThemeConfig.timelineColor(context), size: 8));
         },
         connectorBuilder: (_, index, __) {
           return const SolidLineConnector();

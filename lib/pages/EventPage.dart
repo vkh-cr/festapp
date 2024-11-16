@@ -28,7 +28,7 @@ import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
 
 import '../services/ToastHelper.dart';
-import '../styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import '../widgets/HtmlView.dart';
 import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
@@ -100,7 +100,7 @@ class _EventPageState extends State<EventPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -222,7 +222,7 @@ class _EventPageState extends State<EventPage> {
                   child: Container(
                     alignment: Alignment.topRight,
                     child: Text(_event?.durationString(context) ?? "",
-                        style: normalTextStyle),
+                        style: StylesConfig.normalTextStyle),
                   ),
                 ),
                 Visibility(
@@ -340,13 +340,13 @@ class _EventPageState extends State<EventPage> {
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
                                     "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
-                                    style: normalTextStyle)),
+                                    style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 16),
                               child: Text("${"Participants".tr()}:",
-                                  style: normalTextStyle)),
+                                  style: StylesConfig.normalTextStyle)),
                           ListView.builder(
                               shrinkWrap: true,
                               padding: const EdgeInsets.all(8),
@@ -359,7 +359,7 @@ class _EventPageState extends State<EventPage> {
                                       horizontal: 16.0, vertical: 4.0),
                                   child: Text(
                                       "${_groupInfoModel?.participants!.toList()[index].name}",
-                                      style: normalTextStyle),
+                                      style: StylesConfig.normalTextStyle),
                                 );
                               })
                         ],

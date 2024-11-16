@@ -13,7 +13,7 @@ import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
@@ -169,7 +169,7 @@ class _EventEditPageState extends State<EventEditPage> {
               : Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: appMaxWidth),
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Form(

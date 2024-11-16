@@ -1,23 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:simple_shadow/simple_shadow.dart';
-
-TextStyle timeLineTabNameTextStyle = const TextStyle(fontSize: 15);
-TextStyle timeLineSmallTextStyle = const TextStyle(fontSize: 15);
-TextStyle timeLineSplitTextStyle(BuildContext context) => TextStyle(
-    color: ThemeConfig.timelineSplitLabelColor(context), fontWeight: FontWeight.bold, fontSize: 15);
-double normalClickableFontSize = 18;
-TextStyle normalTextStyle = const TextStyle(fontSize: 18);
-double appMaxWidth = 820;
-
-
-ButtonStyle mainPageButtonStyle(BuildContext context) => OutlinedButton.styleFrom(
-    minimumSize: const Size(70, 50),
-    maximumSize: const Size(80, 60),
-    tapTargetSize: MaterialTapTargetSize.padded,
-    backgroundColor: ThemeConfig.seed2,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)));
 
 class MainPageButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -40,7 +25,7 @@ class MainPageButton extends StatelessWidget {
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle(context).copyWith(
+        style: StylesConfig.mainPageButtonStyle(context).copyWith(
           backgroundColor: WidgetStatePropertyAll(backgroundColor),
         ),
         child: child,
@@ -67,7 +52,7 @@ class CircularButton extends MainPageButton {
       margin: margin,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: mainPageButtonStyle(context).copyWith(
+        style: StylesConfig.mainPageButtonStyle(context).copyWith(
           backgroundColor: WidgetStateProperty.all(backgroundColor),
           shape: WidgetStateProperty.all(const CircleBorder()),
           minimumSize: WidgetStateProperty.all(size),

@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/GameSettingsModel.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart' show ThemeConfig;
@@ -130,7 +130,7 @@ class _GamePageState extends State<GamePage> {
           Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: appMaxWidth),
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
               child: GridView.builder(
                 padding: const EdgeInsets.all(8),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

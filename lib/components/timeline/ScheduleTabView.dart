@@ -1,6 +1,6 @@
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -55,7 +55,7 @@ _ScheduleTabViewState(this.events, this.onEventPressed);
             indicatorPadding: const EdgeInsets.symmetric(vertical: 12.0),
             tabs: [
                 for(var e in datedEvents)
-                  Tab(child: Text(e.dateTime!.weekdayToString(context), style: timeLineTabNameTextStyle, maxLines: 1))
+                  Tab(child: Text(e.dateTime!.weekdayToString(context), style: StylesConfig.timeLineTabNameTextStyle, maxLines: 1))
             ],
           ),
           body: TabBarView(

@@ -22,7 +22,8 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
@@ -156,7 +157,7 @@ class _UserPageState extends State<UserPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -407,7 +408,7 @@ class _UserPageState extends State<UserPage> {
                       },
                       child: Text(
                         "Change password".tr(),
-                        style: TextStyle(fontSize: normalClickableFontSize),
+                        style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                       ).tr(),
                     )),
                 const SizedBox(
@@ -423,7 +424,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr()),
                         child: Text(
                           "Delete account".tr(),
-                          style: TextStyle(fontSize: normalClickableFontSize),
+                          style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                         ).tr()))
               ],
             ),
