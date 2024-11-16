@@ -5,25 +5,26 @@ import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/pages/SongDialog.dart';
-import 'package:fstapp/styles/Styles.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
-class SongPage extends StatefulWidget {
+class SongbookPage extends StatefulWidget {
   final String? type = "song";
-  static const ROUTE = "songs";
+  static const ROUTE = "songbook";
 
-  SongPage({super.key});
+  SongbookPage({super.key});
 
   @override
-  _SongPageState createState() => _SongPageState();
+  _SongbookPageState createState() => _SongbookPageState();
 }
 
-class _SongPageState extends State<SongPage> {
+class _SongbookPageState extends State<SongbookPage> {
   List<InformationModel>? _informationList;
-  static bool isDarkMode = false; // Static variable to persist within app lifecycle
+  static bool? isDarkMode; // Independent theme state for the page
+  static bool isDarkModeDefault = false; // Independent theme state for the page
 
   // Define light and dark themes for this page
   final ThemeData lightTheme = ThemeConfig.baseTheme();
@@ -37,8 +38,9 @@ class _SongPageState extends State<SongPage> {
 
   @override
   Widget build(BuildContext context) {
+    isDarkMode = isDarkMode ?? ThemeConfig.isDarkMode(context);
     return Theme(
-      data: isDarkMode ? darkTheme : lightTheme,
+      data: isDarkMode ?? isDarkModeDefault ? darkTheme : lightTheme,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -54,14 +56,14 @@ class _SongPageState extends State<SongPage> {
               children: [
                 Icon(Icons.wb_sunny, color: Colors.grey),
                 Switch(
-                  value: isDarkMode,
+                  value: isDarkMode ?? isDarkModeDefault,
                   onChanged: (value) {
                     setState(() {
                       isDarkMode = value;
                     });
                   },
-                  activeColor: Colors.grey,
-                  inactiveThumbColor: Colors.grey,
+                  activeColor: Colors.grey[600],
+                  inactiveThumbColor: Colors.grey[400],
                   inactiveTrackColor: Colors.grey[300],
                   activeTrackColor: Colors.grey[600],
                 ),
@@ -73,7 +75,7 @@ class _SongPageState extends State<SongPage> {
         body: Align(
           alignment: Alignment.topCenter,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: ListView.builder(
               itemCount: _informationList?.length ?? 0,
               itemBuilder: (BuildContext context, int index) {
@@ -81,7 +83,7 @@ class _SongPageState extends State<SongPage> {
                   // Add extra space above the first item
                   return Column(
                     children: [
-                      SizedBox(height: 16),  // Extra space below the AppBar
+                      SizedBox(height: 16), // Extra space below the AppBar
                       buildListItem(index),
                     ],
                   );
@@ -104,7 +106,7 @@ class _SongPageState extends State<SongPage> {
           builder: (context) => SongDialog(
             title: _informationList![index].title ?? "",
             description: _informationList![index].description ?? "",
-            isDarkMode: isDarkMode,  // Pass theme setting to dialog
+            isDarkMode: isDarkMode ?? isDarkModeDefault, // Pass theme setting to dialog
           ),
         );
       },

@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/FormFields.dart';
@@ -47,7 +47,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
         body: Align(
           alignment: Alignment.center,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: SingleChildScrollView(
               child: Form(
                 key: _formKey,

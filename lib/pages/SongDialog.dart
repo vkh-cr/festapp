@@ -26,10 +26,11 @@ class _SongDialogState extends State<SongDialog> {
   static const double minFontSize = 8;
   double buttonVisibleOpacity(BuildContext context) => ThemeConfig.isDarkMode(context) ? 1 : 0.9;
   static const double buttonHiddenOpacity = 0.2;
-  static const double scrollThreshold = 50.0;
+  static const double scrollThreshold = 10.0;
 
   final ScrollController _scrollController = ScrollController();
   double _buttonOpacity = 1;
+  BuildContext? themedContext;
 
   @override
   void initState() {
@@ -47,7 +48,7 @@ class _SongDialogState extends State<SongDialog> {
   void _updateButtonOpacity() {
     setState(() {
       _buttonOpacity = _scrollController.position.pixels <= scrollThreshold
-          ? buttonVisibleOpacity(context)
+          ? buttonVisibleOpacity(themedContext??context)
           : buttonHiddenOpacity;
     });
   }
@@ -62,6 +63,7 @@ class _SongDialogState extends State<SongDialog> {
       data: themeData,
       child: Builder(
         builder: (BuildContext context) {
+          themedContext = context;
           return Dialog(
             insetPadding: EdgeInsets.zero, // Remove default padding
             child: Container(
@@ -76,7 +78,7 @@ class _SongDialogState extends State<SongDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 32),
+                        SizedBox(height: widget.title.length < 20 ? 32 : 54),
                         Container(
                           padding: const EdgeInsets.all(12),
                           alignment: Alignment.topCenter,
@@ -106,7 +108,7 @@ class _SongDialogState extends State<SongDialog> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,
@@ -128,7 +130,7 @@ class _SongDialogState extends State<SongDialog> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               backgroundColor: ThemeConfig.songButtonColor(context).withOpacity(buttonVisibleOpacity(context)),
                               shadowColor: Colors.transparent,
                               elevation: 0,

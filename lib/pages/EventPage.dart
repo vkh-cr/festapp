@@ -18,6 +18,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
@@ -27,7 +28,7 @@ import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
 
 import '../services/ToastHelper.dart';
-import '../styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import '../widgets/HtmlView.dart';
 import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
@@ -99,7 +100,7 @@ class _EventPageState extends State<EventPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -174,42 +175,41 @@ class _EventPageState extends State<EventPage> {
                                               const Text("Sign in other").tr()),
                                     ),
                                   ),
-                                  Visibility(
-                                      visible: RightsService.isEditor() ||
-                                          (AuthService.isGroupLeader() &&
-                                              _event != null &&
-                                              _event!.isGroupEvent),
-                                      child: ElevatedButton(
-                                          onPressed: () =>
-                                              RouterService.navigatePageInfo(
-                                                      context,
-                                                      HtmlEditorRoute(content: {HtmlEditorPage.parContent:
-                                                      _event!.description}))
-                                                  .then((value) async {
-                                                if (value != null) {
-                                                  var changed = value as String;
-                                                  if (_groupInfoModel != null) {
-                                                    _groupInfoModel!
-                                                        .description = changed;
-                                                    await DbGroups
-                                                        .updateUserGroupInfo(
-                                                            _groupInfoModel!);
-                                                  } else {
-                                                    setState(() {
-                                                      _event!.description =
-                                                          changed;
-                                                    });
-                                                    await DbEvents
-                                                        .updateEvent(_event!);
-                                                  }
-                                                  await loadData(_event!.id!);
-                                                  ToastHelper.Show(context,
-                                                      "Content has been changed."
-                                                          .tr());
-                                                }
-                                              }),
-                                          child:
-                                              const Text("Edit content").tr()))
+                                  if (AuthService.isGroupLeader() &&
+                                      _event != null &&
+                                      _event!.isGroupEvent)
+                                    ElevatedButton(
+                                        onPressed: () =>
+                                        RouterService.navigatePageInfo(
+                                                context,
+                                                HtmlEditorRoute(content: {HtmlEditorPage.parContent:
+                                                _event!.description}))
+                                            .then((value) async {
+                                          if (value != null) {
+                                            var changed = value as String;
+                                            if (_groupInfoModel != null) {
+                                              _groupInfoModel!
+                                                  .description = changed;
+                                              await DbGroups
+                                                  .updateUserGroupInfo(
+                                                      _groupInfoModel!);
+                                            }
+                                            await loadData(_event!.id!);
+                                            ToastHelper.Show(context,
+                                                "Content has been changed."
+                                                    .tr());
+                                          }
+                                        }),
+                                        child:
+                                        const Text("Edit content").tr()),
+                                  if(RightsService.isEditor())
+                                  ElevatedButton(
+                                      onPressed: () => RouterService.navigateOccasion(
+                                          context,
+                                          "${EventEditPage.ROUTE}/${_event!.id}")
+                                          .then((value) => loadData(_event!.id!)),
+                                      child:
+                                          const Text("Edit").tr())
                                 ]),
                           ),
                         ),
@@ -222,7 +222,7 @@ class _EventPageState extends State<EventPage> {
                   child: Container(
                     alignment: Alignment.topRight,
                     child: Text(_event?.durationString(context) ?? "",
-                        style: normalTextStyle),
+                        style: StylesConfig.normalTextStyle),
                   ),
                 ),
                 Visibility(
@@ -340,13 +340,13 @@ class _EventPageState extends State<EventPage> {
                                     vertical: 8.0, horizontal: 16),
                                 child: Text(
                                     "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
-                                    style: normalTextStyle)),
+                                    style: StylesConfig.normalTextStyle)),
                           ),
                           Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 8.0, horizontal: 16),
                               child: Text("${"Participants".tr()}:",
-                                  style: normalTextStyle)),
+                                  style: StylesConfig.normalTextStyle)),
                           ListView.builder(
                               shrinkWrap: true,
                               padding: const EdgeInsets.all(8),
@@ -359,7 +359,7 @@ class _EventPageState extends State<EventPage> {
                                       horizontal: 16.0, vertical: 4.0),
                                   child: Text(
                                       "${_groupInfoModel?.participants!.toList()[index].name}",
-                                      style: normalTextStyle),
+                                      style: StylesConfig.normalTextStyle),
                                 );
                               })
                         ],

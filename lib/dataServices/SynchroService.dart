@@ -24,7 +24,7 @@ class SynchroService {
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
-          .select("${Tb.occasions.data}, ${Tb.occasions.services}", )
+          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
           .eq(Tb.occasions.id, RightsService.currentOccasion!)
           .single();
 
