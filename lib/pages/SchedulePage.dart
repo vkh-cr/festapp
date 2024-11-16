@@ -15,8 +15,6 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/LoginPage.dart';
-import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -37,7 +35,8 @@ class SchedulePage extends StatefulWidget {
   _SchedulePageState createState() => _SchedulePageState();
 }
 
-class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver {
+class _SchedulePageState extends State<SchedulePage>
+    with WidgetsBindingObserver {
   final List<TimeBlockItem> _dots = [];
   final List<EventModel> _events = [];
 
@@ -66,12 +65,14 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
   Future<void> loadData() async {
     await loadOfflineData();
 
-      await DbEvents.updateEvents(_events).whenComplete(() async {
-      if(AppConfig.isSplitByPlace) {
+    await DbEvents.updateEvents(_events).whenComplete(() async {
+      if (AppConfig.isSplitByPlace) {
         await loadPlacesForEvents(_events, DbPlaces.getPlacesIn);
       }
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
+      _dots.addAll(_events
+          .filterRootEvents()
+          .map((e) => TimeBlockItem.fromEventModel(e)));
     });
     await loadEventParticipants();
     await OfflineDataService.saveAllEvents(_events);
@@ -92,24 +93,33 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
     if (_events.isEmpty) {
       var offlineEvents = await OfflineDataService.getAllEvents();
       await OfflineDataService.updateEventsWithGroupName(offlineEvents);
-      if(AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(offlineEvents, (ids) async => (await OfflineDataService.getAllPlaces()));
+      if (AppConfig.isSplitByPlace) {
+        await loadPlacesForEvents(offlineEvents,
+            (ids) async => (await OfflineDataService.getAllPlaces()));
       }
       _events.addAll(offlineEvents);
       _dots.clear();
-      _dots.addAll(_events.filterRootEvents().map((e) => TimeBlockItem.fromEventModel(e)));
+      _dots.addAll(_events
+          .filterRootEvents()
+          .map((e) => TimeBlockItem.fromEventModel(e)));
       setState(() {});
     }
     if (AuthService.isLoggedIn()) {
       var userInfo = await OfflineDataService.getUserInfo();
       setState(() {
-        userName = userInfo?.name??"";
+        userName = userInfo?.name ?? "";
       });
     }
   }
 
-  Future<void> loadPlacesForEvents(List<EventModel> events, Future<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
-    var placeIds = events.map((e) => e.place?.id).where((id) => id != null).cast<int>().toSet().toList();
+  Future<void> loadPlacesForEvents(List<EventModel> events,
+      Future<List<PlaceModel>> Function(List<int>) fetchPlaces) async {
+    var placeIds = events
+        .map((e) => e.place?.id)
+        .where((id) => id != null)
+        .cast<int>()
+        .toSet()
+        .toList();
     var places = await fetchPlaces(placeIds);
     var placesById = {for (var place in places) place.id: place};
 
@@ -121,11 +131,13 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
   }
 
   void _schedulePressed() {
-    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE).then((value) => loadData());
+    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE)
+        .then((value) => loadData());
   }
 
   void _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id").then((_) => loadData());
+    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+        .then((_) => loadData());
   }
 
   @override
@@ -144,38 +156,36 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                GestureDetector(
-                  onDoubleTap: () async {
-                    var packageInfo = await PackageInfo.fromPlatform();
-                    ToastHelper.Show(context, "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                    if(RightsService.isEditor()) {
-                      setState(() {
-                        TimeHelper.toggleTimeTravel?.call();
-                      });
-                    }
-                  },
-                  child: SvgPicture.asset(
-                    width: 200,
-                    semanticsLabel: 'Festapp logo',
-                    logoAsset,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  GestureDetector(
+                    onDoubleTap: () async {
+                      var packageInfo = await PackageInfo.fromPlatform();
+                      ToastHelper.Show(context,
+                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                      if (RightsService.isEditor()) {
+                        setState(() {
+                          TimeHelper.toggleTimeTravel?.call();
+                        });
+                      }
+                    },
+                    child: SvgPicture.asset(
+                      width: 200,
+                      semanticsLabel: 'Festapp logo',
+                      logoAsset,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
+                  const Spacer(),
+                  Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
                       onPressed: _schedulePressed,
                       backgroundColor: ThemeConfig.profileButtonColor(context),
-                      child: Icon(Icons.calendar_month, color: ThemeConfig.profileButtonTextColor(context)),
+                      child: Icon(Icons.calendar_month,
+                          color: ThemeConfig.profileButtonTextColor(context)),
                     ),
                     Text("My schedule".tr()),
-                  ]
-                ),
-              ]
-            ),
+                  ]),
+                ]),
           ),
           Expanded(
             child: ScheduleTabView(
@@ -183,7 +193,9 @@ class _SchedulePageState extends State<SchedulePage> with WidgetsBindingObserver
               events: _dots,
               onEventPressed: _eventPressed,
               showAddNewEventButton: () => true || RightsService.isEditor(),
-              onAddNewEvent: (context, p) => AddNewEventDialog.showAddEventDialog(context, p).then((_)=>loadData()),
+              onAddNewEvent: (context, p) =>
+                  AddNewEventDialog.showAddEventDialog(context, p)
+                      .then((_) => loadData()),
             ),
           ),
         ],

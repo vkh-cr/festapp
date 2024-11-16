@@ -12,11 +12,13 @@ class TimeBlockHelper {
     } else if (model.isEventInMySchedule == true) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent) {
-      if(model.isMyGroupEvent) {
+      if (model.isMyGroupEvent) {
         return TimeBlockType.signedIn;
       }
       return TimeBlockType.noAction;
-    } else if (model.currentParticipants != null && model.maxParticipants != null && model.isFull()) {
+    } else if (model.currentParticipants != null &&
+        model.maxParticipants != null &&
+        model.isFull()) {
       return TimeBlockType.isFull;
     } else if (EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.canSignIn;
@@ -24,7 +26,8 @@ class TimeBlockHelper {
     return TimeBlockType.canSave;
   }
 
-  static List<TimeBlockGroup> splitTimeBlockByPlace(Iterable<TimeBlockItem> events) {
+  static List<TimeBlockGroup> splitTimeBlockByPlace(
+      Iterable<TimeBlockItem> events) {
     // Group events by AlternativeSplit.id, handling null case
     Map<int?, List<TimeBlockItem>> groupedByAlternativeSplit = {};
     for (var event in events) {
@@ -36,7 +39,8 @@ class TimeBlockHelper {
     }
 
     // Convert to a list of EventGroup and order by AlternativeSplit.order, handling null case
-    List<TimeBlockGroup> eventGroups = groupedByAlternativeSplit.entries.map((entry) {
+    List<TimeBlockGroup> eventGroups =
+        groupedByAlternativeSplit.entries.map((entry) {
       var alternativeSplit = entry.value.first.timeBlockPlace;
       String title = alternativeSplit!.title;
       return TimeBlockGroup(
@@ -47,19 +51,23 @@ class TimeBlockHelper {
 
     // Sort the event groups by AlternativeSplit.order, with nulls (max order) at the end
     eventGroups.sort((a, b) {
-      int orderA = a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
-      int orderB = b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+      int orderA =
+          a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+      int orderB =
+          b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
       return orderA.compareTo(orderB);
     });
 
     return eventGroups;
   }
 
-  static List<TimeBlockGroup> splitTimeBlocksByDay(Iterable<TimeBlockItem> events, BuildContext context) {
+  static List<TimeBlockGroup> splitTimeBlocksByDay(
+      Iterable<TimeBlockItem> events, BuildContext context) {
     Map<String, List<TimeBlockItem>> groupedByDay = {};
 
     for (var event in events) {
-      String day = DateFormat("EEEE d. MMMM ", context.locale.languageCode).format(event.startTime);
+      String day = DateFormat("EEEE d. MMMM ", context.locale.languageCode)
+          .format(event.startTime);
       day = day[0].toUpperCase() + day.substring(1);
 
       if (!groupedByDay.containsKey(day)) {
@@ -76,47 +84,67 @@ class TimeBlockHelper {
   static List<TimeBlockGroup> splitTimeBlocks(Iterable<TimeBlockItem> events) {
     List<TimeBlockGroup> eventGroups;
     if (AppConfig.isSplitByPlace) {
-      eventGroups = TimeBlockHelper.splitTimeBlockByPlace(events.where((e)=>e.timeBlockPlace!=null));
+      eventGroups = TimeBlockHelper.splitTimeBlockByPlace(
+          events.where((e) => e.timeBlockPlace != null));
     } else {
       eventGroups = TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
     }
     return eventGroups;
   }
 
-  static List<TimeBlockGroup> splitTimeBlocksByDate(Iterable<TimeBlockItem> events, BuildContext context, int splitHour) {
+  static List<TimeBlockGroup> splitTimeBlocksByDate(
+      Iterable<TimeBlockItem> events, BuildContext context, int splitHour) {
     List<TimeBlockGroup> toReturn = [];
-    if(events.isEmpty){
+    if (events.isEmpty) {
       return toReturn;
     }
     var fromD = events.first.startTime.subtract(const Duration(days: 1));
     var fromDate = DateTime(fromD.year, fromD.month, fromD.day);
     var tested = fromDate.add(Duration(hours: splitHour));
 
-    while(!tested.isAfter(events.last.startTime)) {
+    while (!tested.isAfter(events.last.startTime)) {
       var testedPlusDay = tested.add(const Duration(days: 1));
-      var eventsFocused = events.where((e)=>e.startTime.isAfter(tested) && (e.startTime.isAtSameMomentAs(testedPlusDay) || e.startTime.isBefore(testedPlusDay))).toList();
-      if(eventsFocused.isNotEmpty) {
-        toReturn.add(TimeBlockGroup(title: eventsFocused.first.startTime.weekdayToString(context), events: eventsFocused, dateTime: tested));
+      var eventsFocused = events
+          .where((e) =>
+              e.startTime.isAfter(tested) &&
+              (e.startTime.isAtSameMomentAs(testedPlusDay) ||
+                  e.startTime.isBefore(testedPlusDay)))
+          .toList();
+      if (eventsFocused.isNotEmpty) {
+        toReturn.add(TimeBlockGroup(
+            title: eventsFocused.first.startTime.weekdayToString(context),
+            events: eventsFocused,
+            dateTime: tested));
       }
       tested = testedPlusDay;
     }
     return toReturn;
   }
 
-  static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(Iterable<TimeBlockItem> events) {
-    List<TimeBlockItem> morningEvents = events.where((e) => e.startTime.hour <= 12).toList();
-    List<TimeBlockItem> afternoonEvents = events.where((e) => e.startTime.hour > 12 && e.startTime.hour < 18).toList();
-    List<TimeBlockItem> eveningEvents = events.where((e) => e.startTime.hour >= 18).toList();
+  static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(
+      Iterable<TimeBlockItem> events) {
+    List<TimeBlockItem> morningEvents =
+        events.where((e) => e.startTime.hour <= 12).toList();
+    List<TimeBlockItem> afternoonEvents = events
+        .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
+        .toList();
+    List<TimeBlockItem> eveningEvents =
+        events.where((e) => e.startTime.hour >= 18).toList();
 
-    bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents].where((group) => group.isNotEmpty).length > 1;
+    bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents]
+            .where((group) => group.isNotEmpty)
+            .length >
+        1;
 
     TimeBlockGroup createGroup(String title, List<TimeBlockItem> events) {
-      return TimeBlockGroup(title: hasMultipleGroups ? title.tr() : "", events: events);
+      return TimeBlockGroup(
+          title: hasMultipleGroups ? title.tr() : "", events: events);
     }
 
     return [
       createGroup("", morningEvents),
-      if (afternoonEvents.isNotEmpty) createGroup("Afternoon".tr(), afternoonEvents),
+      if (afternoonEvents.isNotEmpty)
+        createGroup("Afternoon".tr(), afternoonEvents),
       if (eveningEvents.isNotEmpty) createGroup("Evening".tr(), eveningEvents),
     ];
   }
@@ -138,8 +166,9 @@ class TimeBlockPlace {
 
   TimeBlockPlace({required this.id, required this.title, required this.order});
 
-  factory TimeBlockPlace.fromPlaceModel(PlaceModel place){
-    return TimeBlockPlace(id: place.id!, title: place.title ?? "---", order: place.order ?? 0);
+  factory TimeBlockPlace.fromPlaceModel(PlaceModel place) {
+    return TimeBlockPlace(
+        id: place.id!, title: place.title ?? "---", order: place.order ?? 0);
   }
 }
 
@@ -169,15 +198,14 @@ class TimeBlockItem {
   TimeBlockPlace? timeBlockPlace;
   String? eventType;
 
-  TimeBlockItem({
-    required this.timeBlockType,
-    required this.startTime,
-    required this.endTime,
-    required this.id,
-    this.data,
-    this.timeBlockPlace,
-    this.eventType
-  });
+  TimeBlockItem(
+      {required this.timeBlockType,
+      required this.startTime,
+      required this.endTime,
+      required this.id,
+      this.data,
+      this.timeBlockPlace,
+      this.eventType});
 
   factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
     return TimeBlockItem(
@@ -187,7 +215,9 @@ class TimeBlockItem {
       id: model.id!,
       data: model.toString(),
       eventType: model.type,
-      timeBlockPlace: model.place != null ? TimeBlockPlace.fromPlaceModel(model.place!) : null,
+      timeBlockPlace: model.place != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
     );
   }
 
@@ -197,8 +227,13 @@ class TimeBlockItem {
       endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       id: model.id!,
-      data: {"leftText": model.startTimeString(), "rightText": model.toString()},
-      timeBlockPlace: model.place != null && model.place!.id != null ? TimeBlockPlace.fromPlaceModel(model.place!) : null,
+      data: {
+        "leftText": model.startTimeString(),
+        "rightText": model.toString()
+      },
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
     );
   }
 
@@ -208,7 +243,10 @@ class TimeBlockItem {
       endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       id: model.id!,
-      data: {"leftText": model.durationTimeString(), "rightText": model.toString()},
+      data: {
+        "leftText": model.durationTimeString(),
+        "rightText": model.toString()
+      },
       timeBlockPlace: null,
     );
   }
@@ -219,7 +257,10 @@ class TimeBlockItem {
       endTime: model.endTime,
       timeBlockType: TimeBlockType.signedIn,
       id: model.id!,
-      data: {"leftText": model.durationTimeString(), "rightText": model.toString()},
+      data: {
+        "leftText": model.durationTimeString(),
+        "rightText": model.toString()
+      },
     );
   }
 }
