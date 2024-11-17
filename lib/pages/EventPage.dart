@@ -23,6 +23,7 @@ import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/AddNewEventDialog.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
@@ -272,15 +273,19 @@ class _EventPageState extends State<EventPage> {
                     child: HtmlView(html: _event?.description ?? "", isSelectable: true,),
                   ),
                 ),
-                Visibility(
-                    visible: _event?.childEvents.isNotEmpty == true,
-                    child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: SingleChildScrollView(
-                            child: ScheduleTimeline(
-                                eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
-                                onEventPressed: _eventPressed,
-                                nodePosition: 0.3)))),
+                if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
+                Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: SingleChildScrollView(
+                        child: ScheduleTimeline(
+                            eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
+                            onEventPressed: _eventPressed,
+                            showAddNewEventButton: RightsService.isEditor,
+                            onAddNewEvent: (context, p, parent) =>
+                                AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
+                                    .then((_) => loadData(_event!.id!)),
+                            parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
+                            nodePosition: 0.3))),
                 Visibility(
                   visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,

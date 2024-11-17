@@ -6,6 +6,7 @@ import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
@@ -14,6 +15,7 @@ class AddNewEventDialog {
   static Future<void> showAddEventDialog(
       BuildContext context,
       List<TimeBlockGroup> timelineItems,
+      [TimeBlockItem? parentEvent]
       ) async {
     final _formKey = GlobalKey<FormState>();
     String? eventTitle;
@@ -30,8 +32,8 @@ class AddNewEventDialog {
         .sorted((a, b) => a.startTime.compareTo(b.startTime))
         .lastOrNull;
 
-    final defaultStartTime = lastEvent?.endTime ?? DateTime.now();
-    final defaultEndTime = defaultStartTime.add(Duration(hours: 1));
+    final defaultStartTime = parentEvent?.startTime ?? lastEvent?.endTime ?? SynchroService.globalSettingsModel!.eventStartTime!;
+    final defaultEndTime = parentEvent?.endTime ?? defaultStartTime.add(Duration(hours: 1));
     final defaultPlaceId = lastEvent?.timeBlockPlace?.id;
 
     // Initialize defaults
@@ -160,6 +162,7 @@ class AddNewEventDialog {
                         splitForMenWomen: false,
                         isSignedIn: false,
                         isGroupEvent: false,
+                        parentEventIds: parentEvent != null ? [parentEvent.id] : null
                       );
                       await DbEvents.updateEvent(newEvent);
                       Navigator.of(context).pop();

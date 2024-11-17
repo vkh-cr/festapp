@@ -251,7 +251,11 @@ class DbEvents {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<EventModel> getEvent(int eventId) async {
+  static Future<EventModel> getEvent(int eventId, [bool withParent = false]) async {
+    // with parents or children
+    var withParentSelect = withParent ?
+    "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent})" :
+    "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})";
     var data = await _supabase
         .from(Tb.events.table)
         .select(
@@ -266,7 +270,8 @@ class DbEvents {
             "${Tb.events.is_hidden},"
             "${Tb.events.type},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
+            + withParentSelect
+        )
         .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
@@ -581,21 +586,24 @@ class DbEvents {
       upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasion!});
       eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
     }
-    return EventModel.fromJson(eventData);
+    var updatedEvent = EventModel.fromJson(eventData);
+
+    if(event.parentEventIds?.isNotEmpty ?? false) {
+      await removeEventFromEventGroups(updatedEvent);
+      var insert = [];
+      for(var eParent in event.parentEventIds!)
+      {
+        insert.add({Tb.event_groups.event_child:updatedEvent.id, Tb.event_groups.event_parent:eParent});
+      }
+      await _supabase
+          .from(Tb.event_groups.table)
+          .insert(insert);
+    }
+    return updatedEvent;
   }
 
   static updateEventFromDataGrid(EventModel event) async {
     var updatedEvent = await updateEvent(event);
-    await removeEventFromEventGroups(updatedEvent);
-
-    var insert = [];
-    for(var eParent in event.parentEventIds!)
-    {
-      insert.add({Tb.event_groups.event_child:updatedEvent.id, Tb.event_groups.event_parent:eParent});
-    }
-    await _supabase
-        .from(Tb.event_groups.table)
-        .insert(insert);
 
     var insertRoles = [];
     for(var eParent in event.eventRolesIds!)
