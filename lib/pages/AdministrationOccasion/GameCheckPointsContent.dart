@@ -29,20 +29,13 @@ class GameCheckPointsContent extends StatelessWidget {
           renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
         ),
         PlutoColumn(
-          title: "Hide".tr(),
-          field: Tb.information.is_hidden,
-          type: PlutoColumnType.select([]),
-          applyFormatterInEditing: true,
-          enableEditingMode: false,
-          width: 100,
-          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
-        ),
-        PlutoColumn(
           title: "Title".tr(),
+          enableAutoEditing: true,
           field: Tb.information.title,
           type: PlutoColumnType.text(),
         ),
         PlutoColumn(
+          enableAutoEditing: true,
           title: "Correct answer".tr(),
           field: Tb.information.data_correct,
           type: PlutoColumnType.text(),
