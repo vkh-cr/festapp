@@ -17,7 +17,7 @@ class InformationModel extends IPlutoRowModel {
   bool? isHidden;
   int? order;
   Map<String, dynamic>? data;
-  int getOrder()  => order??0;
+  int getOrder()  => order ?? 0;
 
   bool isExpanded = false;
 

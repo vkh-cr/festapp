@@ -20,23 +20,59 @@ class DbInformation {
   static Future<List<InformationModel>> getAllInformationForDataGrid([String? informationType]) async {
     var data = await _supabase.from(Tb.information.table).select(
         "${Tb.information.id},"
-        "${Tb.information.occasion},"
-        "${Tb.information.created_at},"
-        "${Tb.information.updated_at},"
-        "${Tb.information.is_hidden},"
-        "${Tb.information.title},"
-        "${Tb.information.order},"
-        "${Tb.information.type},"
-        "${Tb.information.data},"
-        "${Tb.information_hidden.table}(*)")
-    .eq(Tb.information.occasion, RightsService.currentOccasion!)
-    .filter(Tb.information.type, "eq", informationType??"");
+            "${Tb.information.occasion},"
+            "${Tb.information.created_at},"
+            "${Tb.information.updated_at},"
+            "${Tb.information.is_hidden},"
+            "${Tb.information.title},"
+            "${Tb.information.order},"
+            "${Tb.information.type},"
+            "${Tb.information.data},"
+            "${Tb.information_hidden.table}(*)")
+        .eq(Tb.information.occasion, RightsService.currentOccasion!)
+        .filter(Tb.information.type, "eq", informationType ?? "");
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
-    infoList.sortBy((element) => element.title??"".toLowerCase());
-    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
+
+    infoList.sort((a, b) {
+      // Sort by order first
+      final orderComparison = a.getOrder().compareTo(b.getOrder());
+      if (orderComparison != 0) {
+        return orderComparison;
+      }
+      // If order is the same, sort naturally by title
+      return _naturalCompare(
+          a.title?.toLowerCase() ?? "", b.title?.toLowerCase() ?? "");
+    });
+
     return infoList;
+  }
+
+  static int _naturalCompare(String a, String b) {
+    final regex = RegExp(r'\d+|\D+');
+    final aMatches = regex.allMatches(a).map((m) => m.group(0)!).toList();
+    final bMatches = regex.allMatches(b).map((m) => m.group(0)!).toList();
+
+    for (var i = 0; i < aMatches.length && i < bMatches.length; i++) {
+      final aPart = aMatches[i];
+      final bPart = bMatches[i];
+
+      // Compare numbers as numbers
+      if (RegExp(r'^\d+$').hasMatch(aPart) && RegExp(r'^\d+$').hasMatch(bPart)) {
+        final aNum = int.parse(aPart);
+        final bNum = int.parse(bPart);
+        final numCompare = aNum.compareTo(bNum);
+        if (numCompare != 0) return numCompare;
+      } else {
+        // Compare non-numeric parts lexicographically
+        final strCompare = aPart.compareTo(bPart);
+        if (strCompare != 0) return strCompare;
+      }
+    }
+
+    // If all parts are equal so far, compare lengths
+    return aMatches.length.compareTo(bMatches.length);
   }
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
