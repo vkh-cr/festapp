@@ -1,25 +1,10 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_239",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-c7A(d){var x=null,w=A.G(["id",null],y.g,y.b)
-return new B.anE("MapRoute",new A.AJ(x,d,x),w,C.bw,x,"",x)},
-anE:function anE(d,e,f,g,h,i,j){var _=this
-_.a=d
-_.b=e
-_.c=f
-_.d=g
-_.e=h
-_.f=i
-_.r=j}},D
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
 A=c[0]
-C=c[2]
-B=a.updateHolder(c[30],B)
-D=c[188]
-B.anE.prototype={}
-var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.anE,A.jK)})()
-A.bz(b.typeUniverse,JSON.parse('{"anE":{"jK":["AJ"]}}'))
-var y={g:A.x("f"),b:A.x("@")};(function constants(){D.yz=new A.aS(58172,"MaterialIcons",null,!1)})()};
+B=c[188]
+var z=a.updateTypes([]);(function constants(){B.yy=new A.aS(58064,"MaterialIcons",null,!1)
+B.H8=new A.aS(58232,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_239",e:"endPart",h:b})})($__dart_deferred_initializers__,"4z5KQQgBQGz06/N7cU57Mhh1LxU=");
+a.eventLog.push({p:"main.dart.js_239",e:"endPart",h:b})})($__dart_deferred_initializers__,"w9VS9ADmB6PGy0g4x/bR1ivsybI=");
