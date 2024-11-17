@@ -51,8 +51,8 @@ dependencies:
   badges: ^3.1.1
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
-  geolocator: ^13.0.1
-  flutter_widget_from_html: ^0.15.2
+  geolocator: ^13.0.2
+  flutter_widget_from_html: ^0.15.3
   quill_html_editor: ^2.2.8
   pluto_grid_plus: ^8.4.3
   url_strategy: ^0.3.0

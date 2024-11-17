@@ -4,7 +4,8 @@ CREATE OR REPLACE FUNCTION game_update_settings(
   new_end_time TIMESTAMPTZ
 )
 RETURNS JSONB
-LANGUAGE plpgsql
+LANGUAGE plpgsql VOLATILE
+SECURITY DEFINER
 AS $$
 DECLARE
   existing_data JSONB;
