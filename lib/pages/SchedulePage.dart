@@ -192,8 +192,8 @@ class _SchedulePageState extends State<SchedulePage>
               key: _dots.isEmpty ? UniqueKey() : null,
               events: _dots,
               onEventPressed: _eventPressed,
-              showAddNewEventButton: () => RightsService.isEditor(),
-              onAddNewEvent: (context, p) =>
+              showAddNewEventButton: RightsService.isEditor,
+              onAddNewEvent: (context, p, _) =>
                   AddNewEventDialog.showAddEventDialog(context, p)
                       .then((_) => loadData()),
             ),
