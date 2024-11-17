@@ -69,7 +69,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           type: PlutoColumnType.select([]),
           applyFormatterInEditing: true,
           enableEditingMode: false,
-          width: 100,
+          width: 60,
           renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
         ),
         PlutoColumn(
@@ -77,37 +77,37 @@ class _ScheduleContentState extends State<ScheduleContent> {
           field: Tb.event_users.table,
           readOnly: true,
           type: PlutoColumnType.number(negative: false, defaultValue: 0),
-          width: 100,
+          width: 80,
         ),
         PlutoColumn(
           title: "Title".tr(),
           field: EventModel.titleColumn,
           type: PlutoColumnType.text(),
-          width: 300,
+          width: 250,
         ),
         PlutoColumn(
           title: "Start date".tr(),
           field: EventModel.startDateColumn,
           type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use occasion data
-          width: 140,
+          width: 110,
         ),
         PlutoColumn(
           title: "Start".tr(),
           field: EventModel.startTimeColumn,
           type: PlutoColumnType.time(),
-          width: 100,
+          width: 80,
         ),
         PlutoColumn(
           title: "End date".tr(),
           field: EventModel.endDateColumn,
           type: PlutoColumnType.date(defaultValue: occasionModel?.startTime), // Use occasion data
-          width: 140,
+          width: 110,
         ),
         PlutoColumn(
           title: "End".tr(),
           field: EventModel.endTimeColumn,
           type: PlutoColumnType.time(),
-          width: 100,
+          width: 80,
         ),
         PlutoColumn(
           title: "Max".tr(),
@@ -116,29 +116,12 @@ class _ScheduleContentState extends State<ScheduleContent> {
           width: 70,
         ),
         PlutoColumn(
-          title: "M/F 50/50".tr(),
-          field: EventModel.splitForMenWomenColumn,
-          type: PlutoColumnType.text(),
-          applyFormatterInEditing: true,
-          enableEditingMode: false,
-          width: 100,
-          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
-        ),
-        PlutoColumn(
-          title: "Group".tr(),
-          field: EventModel.isGroupEventColumn,
-          type: PlutoColumnType.text(),
-          applyFormatterInEditing: true,
-          enableEditingMode: false,
-          width: 100,
-          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
-        ),
-        PlutoColumn(
           title: "Place".tr(),
           field: EventModel.placeColumn,
           type: PlutoColumnType.select(places), // Dynamic places
           applyFormatterInEditing: true,
           formatter: DataGridHelper.GetValueFromFormatted,
+          width: 140,
         ),
         PlutoColumn(
           width: 150,
@@ -160,6 +143,24 @@ class _ScheduleContentState extends State<ScheduleContent> {
               },
             );
           },
+        ),
+        PlutoColumn(
+          title: "M/F 50/50".tr(),
+          field: EventModel.splitForMenWomenColumn,
+          type: PlutoColumnType.text(),
+          applyFormatterInEditing: true,
+          enableEditingMode: false,
+          width: 100,
+          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
+        ),
+        PlutoColumn(
+          title: "Group".tr(),
+          field: EventModel.isGroupEventColumn,
+          type: PlutoColumnType.text(),
+          applyFormatterInEditing: true,
+          enableEditingMode: false,
+          width: 100,
+          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
         ),
         PlutoColumn(
           title: "Show inside event".tr(),
