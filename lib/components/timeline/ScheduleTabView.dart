@@ -9,7 +9,7 @@ import 'ScheduleTimeline.dart';
 class ScheduleTabView extends StatefulWidget {
   final Function(int)? onEventPressed;
   final List<TimeBlockItem> events;
-  final Function(BuildContext, List<TimeBlockGroup>)? onAddNewEvent;
+  final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
 
   ScheduleTabView({
