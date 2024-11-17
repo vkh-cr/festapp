@@ -1,25 +1,16 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_253",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,A={Cp:function Cp(d,e){this.a=d
-this.b=e},dc:function dc(d,e,f,g,h,i,j){var _=this
-_.a=d
-_.b=e
-_.c=f
-_.d=g
-_.e=h
-_.f=i
-_.r=j}},C
-B=c[0]
-A=a.updateHolder(c[102],A)
-C=c[274]
-A.Cp.prototype={
-G(){return"TimeBlockType."+this.b}}
-A.dc.prototype={
-gcd(d){return this.e}}
-var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(A.Cp,B.dW)
-y(A.dc,B.z)})();(function constants(){C.iV=new A.Cp(3,"signedIn")
-C.a2K=new A.Cp(5,"canSignIn")})()};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C={
+a3r(d){var x,w=d.cy,v=d.db,u=B.a3q(d),t=d.b
+t.toString
+x=y.c
+return new D.dc(w,v,u,A.G(["leftText",d.a7K(),"rightText",d.k(0)],x,x),t,null,null)}},D
+A=c[0]
+B=c[94]
+C=a.updateHolder(c[41],C)
+D=c[102]
+var z=a.updateTypes([])
+var y={c:A.x("f")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_253",e:"endPart",h:b})})($__dart_deferred_initializers__,"Qfh1adz+VjKmP4UcaqL8lIBoyCE=");
+a.eventLog.push({p:"main.dart.js_253",e:"endPart",h:b})})($__dart_deferred_initializers__,"Y6/ndGuloDZQygITQ71Lc27tpgk=");
