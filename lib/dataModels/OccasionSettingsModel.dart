@@ -117,16 +117,6 @@ class OccasionSettingsModel {
     defaultMapZoom: 17,
   );
 
-  ServiceItemModel? getReferenceToService2(String serviceType, String? code) {
-    return (services?[serviceType] as List<dynamic>?)
-        ?.cast<Map<String, dynamic>>()
-        .map(ServiceItemModel.fromJson)
-        .cast<ServiceItemModel?>()
-        .firstWhereOrNull(
-          (service) => service?.code == code
-    );
-  }
-
   ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
     // Retrieve the list of services for the specified service type
     var servs = services?[serviceType] ?? [];

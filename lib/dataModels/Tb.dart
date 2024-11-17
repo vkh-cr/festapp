@@ -17,10 +17,7 @@ class Tb {
   static PlacesTb places = const PlacesTb();
   static UserGroupsTb user_groups = const UserGroupsTb();
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
-  static NotificationRecordsTb notification_records = const NotificationRecordsTb();
   static LogNotificationsTb log_notifications = const LogNotificationsTb();
-  static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
-  static GlobalSettingsTb global_settings = const GlobalSettingsTb();
   static EventRolesTb event_roles = const EventRolesTb();
   static RoleInfoTb role_info = const RoleInfoTb();
   static UserCompanionsTb user_companions = const UserCompanionsTb();
@@ -81,7 +78,6 @@ class OccasionUsersTb{
   String get data_sex => "sex";
   String get data_birthDate => "birthDate";
   String get data_phone => "phone";
-  String get data_accommodation => "accommodation";
   String get data_isInvited => "is_invited";
   String get data_note => "note";
   String get data_diet => "diet";
@@ -123,7 +119,6 @@ class UserInfoTb{
   String get name => "name";
   String get surname => "surname";
   String get sex => "sex";
-  String get accommodation => "accommodation";
   String get phone => "phone";
   String get role => "role";
   String get birth_date => "birth_date";
@@ -267,16 +262,6 @@ class UserGroupsTb{
   String get group => "group";
   String get is_admin => "is_admin";
 }
-//todo delete
-class NotificationRecordsTb{
-  const NotificationRecordsTb();
-  String get table => "notification_records";
-  String get id => "id";
-  String get created_at => "created_at";
-  String get user_id => "user_id";
-  String get heading => "heading";
-  String get content => "content";
-}
 class LogNotificationsTb{
   const LogNotificationsTb();
   String get table => "log_notifications";
@@ -288,20 +273,6 @@ class LogNotificationsTb{
   String get heading => "heading";
   String get content => "content";
   String get to => "to";
-}
-//todo migrate and delete
-class AccommodationPlacesTb{
-  const AccommodationPlacesTb();
-  String get table => "accommodation_places";
-  String get place => "place";
-  String get accommodation_type => "accommodation_type";
-}
-//todo delete
-class GlobalSettingsTb{
-  const GlobalSettingsTb();
-  String get table => "global_settings";
-  String get id => "id";
-  String get json => "json";
 }
 class UserCompanionsTb{
   const UserCompanionsTb();
