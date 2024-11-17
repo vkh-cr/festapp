@@ -61,7 +61,7 @@ class _EventEditPageState extends State<EventEditPage> {
     maxDate = SynchroService.globalSettingsModel!.eventEndTime!.add(Duration(days: eventDayRangeTolerance));
 
     if (widget.id != null) {
-      originalEvent = await DbEvents.getEvent(widget.id!);
+      originalEvent = await DbEvents.getEvent(widget.id!, true);
     }
 
     places = await DbPlaces.getAllPlaces();
@@ -91,7 +91,7 @@ class _EventEditPageState extends State<EventEditPage> {
       "Are you sure you want to delete this event?".tr(),
     );
     if (confirmation) {
-      await DbEvents.deleteEvent(originalEvent!);
+      await originalEvent!.deleteMethod();
       ToastHelper.Show(context, "${"Deleted".tr()}: ${originalEvent!.title!}");
       RouterService.popTwo(context);
     }
@@ -123,7 +123,7 @@ class _EventEditPageState extends State<EventEditPage> {
           ..maxParticipants = maxParticipants == 0 ? null : maxParticipants
           ..splitForMenWomen = splitForMenWomen!
           ..isGroupEvent = isGroupEvent!
-          ..place = places!.firstWhereOrNull((p)=>p.id! == placeId!)
+          ..place = places!.firstWhereOrNull((p)=>p.id == placeId)
           ..type = type
           ..description = content
           ..parentEventIds = showInsideEvent != null && showInsideEvent!.isNotEmpty

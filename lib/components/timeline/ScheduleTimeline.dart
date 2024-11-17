@@ -10,8 +10,9 @@ class ScheduleTimeline extends StatefulWidget {
   final List<TimeBlockGroup> eventGroups;
   final double? nodePosition;
   final Widget? emptyContent;
-  final Function(BuildContext, List<TimeBlockGroup>)? onAddNewEvent;
+  final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
+  final TimeBlockItem? parentEvent;
 
   const ScheduleTimeline({
     super.key,
@@ -21,6 +22,7 @@ class ScheduleTimeline extends StatefulWidget {
     this.emptyContent,
     this.onAddNewEvent,
     this.showAddNewEventButton,
+    this.parentEvent
   });
 
   @override
@@ -30,8 +32,8 @@ class ScheduleTimeline extends StatefulWidget {
 class _ScheduleTimelineState extends State<ScheduleTimeline> {
   @override
   Widget build(BuildContext context) {
-    if (widget.eventGroups.isEmpty) {
-      return widget.emptyContent ?? const SizedBox.shrink();
+    if (widget.eventGroups.isEmpty && widget.emptyContent != null) {
+      return widget.emptyContent!;
     }
 
     List<Widget> children = [];
@@ -59,7 +61,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             padding: const EdgeInsets.symmetric(vertical: 28.0),
             child: TextButton.icon(
               onPressed: () {
-                widget.onAddNewEvent?.call(context, widget.eventGroups);
+                widget.onAddNewEvent?.call(context, widget.eventGroups, widget.parentEvent);
               },
               icon: const Icon(
                 Icons.add_circle_outline,

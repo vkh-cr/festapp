@@ -23,12 +23,13 @@ class SongbookPage extends StatefulWidget {
 
 class _SongbookPageState extends State<SongbookPage> {
   List<InformationModel>? _informationList;
-  static bool? isDarkMode; // Independent theme state for the page
-  static bool isDarkModeDefault = false; // Independent theme state for the page
+  static bool? isDarkMode;
+  static bool isDarkModeDefault = false;
 
-  // Define light and dark themes for this page
   final ThemeData lightTheme = ThemeConfig.baseTheme();
   final ThemeData darkTheme = ThemeConfig.darkTheme(ThemeConfig.baseTheme());
+
+  bool _isDialogOpen = false;
 
   @override
   void didChangeDependencies() {
@@ -39,57 +40,76 @@ class _SongbookPageState extends State<SongbookPage> {
   @override
   Widget build(BuildContext context) {
     isDarkMode = isDarkMode ?? ThemeConfig.isDarkMode(context);
-    return Theme(
-      data: isDarkMode ?? isDarkModeDefault ? darkTheme : lightTheme,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Songbook".tr(),
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-          ),
-          leading: BackButton(
-            onPressed: () => RouterService.popOrHome(context),
-          ),
-          actions: [
-            // Sun and Moon icons with the switch in grayscale
-            Row(
-              children: [
-                Icon(Icons.wb_sunny, color: Colors.grey),
-                Switch(
-                  value: isDarkMode ?? isDarkModeDefault,
-                  onChanged: (value) {
-                    setState(() {
-                      isDarkMode = value;
-                    });
-                  },
-                  activeColor: Colors.grey[600],
-                  inactiveThumbColor: Colors.grey[400],
-                  inactiveTrackColor: Colors.grey[300],
-                  activeTrackColor: Colors.grey[600],
-                ),
-                Icon(Icons.nightlight_round, color: Colors.grey),
-              ],
+    return PopScope(
+      onPopInvokedWithResult: (result, x) {
+        if (_isDialogOpen) {
+          Navigator.of(context).pop(); // Close the dialog
+          setState(() {
+            _isDialogOpen = false;
+          });
+          result = false;
+        }
+        result = true; // Allow page pop
+      },
+      child: Theme(
+        data: isDarkMode ?? isDarkModeDefault ? darkTheme : lightTheme,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "Songbook".tr(),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
-          ],
-        ),
-        body: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: ListView.builder(
-              itemCount: _informationList?.length ?? 0,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0) {
-                  // Add extra space above the first item
-                  return Column(
-                    children: [
-                      SizedBox(height: 16), // Extra space below the AppBar
-                      buildListItem(index),
-                    ],
-                  );
+            leading: BackButton(
+              onPressed: () {
+                if (_isDialogOpen) {
+                  Navigator.of(context).pop(); // Close the dialog
+                  setState(() {
+                    _isDialogOpen = false;
+                  });
+                } else {
+                  RouterService.popOrHome(context); // Pop the page
                 }
-                return buildListItem(index);
               },
+            ),
+            actions: [
+              Row(
+                children: [
+                  Icon(Icons.wb_sunny, color: Colors.grey),
+                  Switch(
+                    value: isDarkMode ?? isDarkModeDefault,
+                    onChanged: (value) {
+                      setState(() {
+                        isDarkMode = value;
+                      });
+                    },
+                    activeColor: Colors.grey[600],
+                    inactiveThumbColor: Colors.grey[400],
+                    inactiveTrackColor: Colors.grey[300],
+                    activeTrackColor: Colors.grey[600],
+                  ),
+                  Icon(Icons.nightlight_round, color: Colors.grey),
+                ],
+              ),
+            ],
+          ),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+              child: ListView.builder(
+                itemCount: _informationList?.length ?? 0,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index == 0) {
+                    return Column(
+                      children: [
+                        SizedBox(height: 16),
+                        buildListItem(index),
+                      ],
+                    );
+                  }
+                  return buildListItem(index);
+                },
+              ),
             ),
           ),
         ),
@@ -101,14 +121,21 @@ class _SongbookPageState extends State<SongbookPage> {
     return TextButton(
       onPressed: () async {
         await loadItemDescription(index);
+        setState(() {
+          _isDialogOpen = true;
+        });
         showDialog(
           context: context,
           builder: (context) => SongDialog(
             title: _informationList![index].title ?? "",
             description: _informationList![index].description ?? "",
-            isDarkMode: isDarkMode ?? isDarkModeDefault, // Pass theme setting to dialog
+            isDarkMode: isDarkMode ?? isDarkModeDefault,
           ),
-        );
+        ).then((_) {
+          setState(() {
+            _isDialogOpen = false;
+          });
+        });
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
