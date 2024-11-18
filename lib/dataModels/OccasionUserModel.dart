@@ -118,7 +118,7 @@ class OccasionUserModel extends IPlutoRowModel {
     if(value.isEmpty){
       return emptyResult;
     }
-    var first = value.first.value;
+    var first = value.first.key;
     cell = PlutoCell(value: first);
     return { serviceType : cell };
   }
@@ -160,7 +160,6 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_surname: PlutoCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
       Tb.occasion_users.data_sex: PlutoCell(value: data?[Tb.occasion_users.data_sex]),
       Tb.occasion_users.data_phone: PlutoCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
-      Tb.occasion_users.data_accommodation: PlutoCell(value: data?[Tb.occasion_users.data_accommodation] ?? ""),
       Tb.occasion_users.data_birthDate: PlutoCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate]??"")??DateTime.fromMicrosecondsSinceEpoch(0)),
       Tb.occasion_users.data_isInvited: PlutoCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
       Tb.occasion_users.data_note: PlutoCell(value: data?[Tb.occasion_users.data_note] ?? ""),
@@ -228,7 +227,6 @@ class OccasionUserModel extends IPlutoRowModel {
 
         Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim(),
         Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim(),
-        Tb.occasion_users.data_accommodation: json[Tb.occasion_users.data_accommodation]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
         Tb.occasion_users.data_isInvited: json[Tb.occasion_users.data_isInvited] == "true" ? true : false,
         Tb.occasion_users.data_note: json[Tb.occasion_users.data_note]?.trim(),

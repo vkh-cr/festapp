@@ -33,7 +33,6 @@ class UserInfoModel {
   static const String nameColumn = "name";
   static const String surnameColumn = "surname";
   static const String sexColumn = "sex";
-  static const String accommodationColumn = "accommodation";
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
   static const String birthDateColumn = "birth_date";
