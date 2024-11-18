@@ -19,18 +19,16 @@ import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 
 @RoutePage()
-class HomePage extends StatefulWidget {
+class OccasionHomePage extends StatefulWidget {
   static const HOME_PAGE = AppConfig.appName;
 
-  const HomePage({super.key});
-
-  final String title = AppConfig.appName;
+  const OccasionHomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<OccasionHomePage> createState() => _OccasionHomePageState();
 }
 
-class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBindingObserver {
   String? userName;
   int _messageCount = 0;
   int currentPageIndex = 0;
