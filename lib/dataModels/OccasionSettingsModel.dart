@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fstapp/dataModels/FeatureModel.dart';
 import 'package:fstapp/dataModels/ServiceItemModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 
@@ -23,6 +24,9 @@ class OccasionSettingsModel {
   DateTime? gameStartTime;
   DateTime? gameEndTime;
 
+  // Features
+  List<FeatureModel>? features;
+
   static const String globalSettingsOffline = "globalSettingsOffline";
 
   OccasionSettingsModel({
@@ -41,6 +45,7 @@ class OccasionSettingsModel {
     this.services,
     this.gameStartTime,
     this.gameEndTime,
+    this.features,
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
@@ -56,6 +61,7 @@ class OccasionSettingsModel {
 
     var mapLayer = dataPart[Tb.occasions.data_map_layer] as Map<String, dynamic>? ?? {};
     var gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? {};
+    var featuresJson = dataPart[Tb.occasions.data_features] as List<dynamic>? ?? [];
 
     return OccasionSettingsModel(
       eventStartTime: json[Tb.occasions.start_time] != null
@@ -83,6 +89,7 @@ class OccasionSettingsModel {
           ? DateTime.tryParse(gameSettings[Tb.occasions.data_game_end])
           : null,
       services: servicesPart,
+      features: featuresJson.map((feature) => FeatureModel.fromJson(feature)).toList(),
     );
   }
 
@@ -103,19 +110,23 @@ class OccasionSettingsModel {
       Tb.occasions.data_game: {
         Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
         Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
-      }
+      },
+      Tb.occasions.data_features: features
     }
   };
 
-  static dynamic get DefaultPosition => {
-    "lat": 49.1038023,
-    "lng": 17.3947819
-  };
+  static dynamic get DefaultPosition => {"lat": 49.1038023, "lng": 17.3947819};
 
   static OccasionSettingsModel DefaultSettings = OccasionSettingsModel(
     defaultMapLocation: DefaultPosition,
     defaultMapZoom: 17,
   );
+
+  FeatureModel? getFeatureByCode(String code) =>
+      features?.firstWhereOrNull((feature) => feature.code == code);
+
+  bool isFeatureEnabled(String code) =>
+      features?.firstWhereOrNull((feature) => feature.code == code)?.isEnabled == true;
 
   ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
     // Retrieve the list of services for the specified service type
