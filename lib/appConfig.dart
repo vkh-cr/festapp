@@ -21,8 +21,8 @@ class AppConfig {
 
   static const String webLink = "https://clovekavira.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/%C4%8Dlov%C4%9Bk-a-v%C3%ADra/id6471667352";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
+  static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.cav";
+  static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.cav";
   static const String desktopAppLink = "";
   static bool isProLicense = true;
 
