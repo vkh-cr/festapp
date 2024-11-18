@@ -13,8 +13,6 @@ class AppConfig {
   static const bool isOwnProgramSupported = false;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const bool isGameSupported = true;
-  static const bool isSongBookSupported = true;
   static const String oneSignalAppId = '8ba73a49-1190-4b5a-a7e2-4edc344c4c5e';
 
   static const int organization = 2;
