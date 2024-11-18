@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/FeatureModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
@@ -10,6 +10,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/GamePage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -66,7 +67,8 @@ class _InfoPageState extends State<InfoPage> {
             controller: _scrollController,
             child: Column(
               children: [
-                if(AppConfig.isGameSupported || AppConfig.isSongBookSupported)
+                if(SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME) ||
+                    SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -81,7 +83,7 @@ class _InfoPageState extends State<InfoPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Game button
-                          if (AppConfig.isGameSupported)
+                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
@@ -95,7 +97,7 @@ class _InfoPageState extends State<InfoPage> {
                               label: "Game",
                             ),
                           const SizedBox(width: 16), // Add spacing between buttons
-                          if (AppConfig.isSongBookSupported)
+                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
