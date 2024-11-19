@@ -131,7 +131,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _schedulePressed() {
-    RouterService.navigateOccasion(context, ProgramViewPage.ROUTE)
+    RouterService.navigateOccasion(context, TimetablePage.ROUTE)
         .then((value) => loadData());
   }
 

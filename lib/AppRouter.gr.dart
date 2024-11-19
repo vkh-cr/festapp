@@ -29,13 +29,13 @@ import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i13;
 import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i14;
 import 'package:fstapp/pages/NewsPage.dart' deferred as _i15;
 import 'package:fstapp/pages/OccasionHomePage.dart' deferred as _i16;
-import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i19;
-import 'package:fstapp/pages/SchedulePage.dart' deferred as _i20;
-import 'package:fstapp/pages/SettingsPage.dart' deferred as _i21;
-import 'package:fstapp/pages/SignupPage.dart' deferred as _i22;
-import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i18;
-import 'package:fstapp/pages/SongPage.dart' deferred as _i23;
-import 'package:fstapp/pages/TimetablePage.dart' deferred as _i17;
+import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i18;
+import 'package:fstapp/pages/SchedulePage.dart' deferred as _i19;
+import 'package:fstapp/pages/SettingsPage.dart' deferred as _i20;
+import 'package:fstapp/pages/SignupPage.dart' deferred as _i21;
+import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i17;
+import 'package:fstapp/pages/SongPage.dart' deferred as _i22;
+import 'package:fstapp/pages/TimetablePage.dart' deferred as _i23;
 import 'package:fstapp/pages/UserPage.dart' deferred as _i24;
 
 /// generated route for
@@ -591,29 +591,7 @@ class OccasionHomeRoute extends _i25.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i17.ProgramViewPage]
-class ProgramViewRoute extends _i25.PageRouteInfo<void> {
-  const ProgramViewRoute({List<_i25.PageRouteInfo>? children})
-      : super(
-          ProgramViewRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'ProgramViewRoute';
-
-  static _i25.PageInfo page = _i25.PageInfo(
-    name,
-    builder: (data) {
-      return _i25.DeferredWidget(
-        _i17.loadLibrary,
-        () => _i17.ProgramViewPage(),
-      );
-    },
-  );
-}
-
-/// generated route for
-/// [_i18.ResetPasswordPage]
+/// [_i17.ResetPasswordPage]
 class ResetPasswordRoute extends _i25.PageRouteInfo<void> {
   const ResetPasswordRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -627,15 +605,15 @@ class ResetPasswordRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i18.loadLibrary,
-        () => _i18.ResetPasswordPage(),
+        _i17.loadLibrary,
+        () => _i17.ResetPasswordPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i19.ScheduleNavigationPage]
+/// [_i18.ScheduleNavigationPage]
 class ScheduleNavigationRoute extends _i25.PageRouteInfo<void> {
   const ScheduleNavigationRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -649,15 +627,15 @@ class ScheduleNavigationRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i19.loadLibrary,
-        () => _i19.ScheduleNavigationPage(),
+        _i18.loadLibrary,
+        () => _i18.ScheduleNavigationPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i20.SchedulePage]
+/// [_i19.SchedulePage]
 class ScheduleRoute extends _i25.PageRouteInfo<void> {
   const ScheduleRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -671,15 +649,15 @@ class ScheduleRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i20.loadLibrary,
-        () => _i20.SchedulePage(),
+        _i19.loadLibrary,
+        () => _i19.SchedulePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i21.SettingsPage]
+/// [_i20.SettingsPage]
 class SettingsRoute extends _i25.PageRouteInfo<void> {
   const SettingsRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -693,15 +671,15 @@ class SettingsRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i21.loadLibrary,
-        () => _i21.SettingsPage(),
+        _i20.loadLibrary,
+        () => _i20.SettingsPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i22.SignupPage]
+/// [_i21.SignupPage]
 class SignupRoute extends _i25.PageRouteInfo<void> {
   const SignupRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -715,15 +693,15 @@ class SignupRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i22.loadLibrary,
-        () => _i22.SignupPage(),
+        _i21.loadLibrary,
+        () => _i21.SignupPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i23.SongbookPage]
+/// [_i22.SongbookPage]
 class SongbookRoute extends _i25.PageRouteInfo<SongbookRouteArgs> {
   SongbookRoute({
     _i26.Key? key,
@@ -742,8 +720,8 @@ class SongbookRoute extends _i25.PageRouteInfo<SongbookRouteArgs> {
       final args = data.argsAs<SongbookRouteArgs>(
           orElse: () => const SongbookRouteArgs());
       return _i25.DeferredWidget(
-        _i23.loadLibrary,
-        () => _i23.SongbookPage(key: args.key),
+        _i22.loadLibrary,
+        () => _i22.SongbookPage(key: args.key),
       );
     },
   );
@@ -758,6 +736,28 @@ class SongbookRouteArgs {
   String toString() {
     return 'SongbookRouteArgs{key: $key}';
   }
+}
+
+/// generated route for
+/// [_i23.TimetablePage]
+class TimetableRoute extends _i25.PageRouteInfo<void> {
+  const TimetableRoute({List<_i25.PageRouteInfo>? children})
+      : super(
+          TimetableRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'TimetableRoute';
+
+  static _i25.PageInfo page = _i25.PageInfo(
+    name,
+    builder: (data) {
+      return _i25.DeferredWidget(
+        _i23.loadLibrary,
+        () => _i23.TimetablePage(),
+      );
+    },
+  );
 }
 
 /// generated route for
