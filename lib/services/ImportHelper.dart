@@ -6,17 +6,11 @@ import 'package:intl/intl.dart';
 
 class ImportHelper {
   static Map<String, String> get migrateColumns => {
-        Tb.occasion_users.data_email: "E-mailová adresa",
-        Tb.occasion_users.data_name: "Jméno:",
-        Tb.occasion_users.data_surname: "Příjmení:",
-        Tb.occasion_users.services_accommodation: "Ubytování:",
-        Tb.occasion_users.data_phone: "Mobilní telefon:",
-        Tb.occasion_users.data_text1: "Typ účastníka:",
-        Tb.occasion_users.data_text2: "Přípravný tým:",
-        Tb.occasion_users.data_birthDate: "Datum narození:",
-        Tb.occasion_users.data_note: "Poznámka:",
-        Tb.occasion_users.data_diet: "Stravovací omezení:",
-        Tb.occasion_users.services_food: "Stravování:",
+        Tb.occasion_users.data_email: "Email",
+        Tb.occasion_users.data_name: "Jméno",
+        Tb.occasion_users.data_surname: "Příjmení",
+        Tb.occasion_users.data_text1: "Pohlaví",
+        Tb.occasion_users.data_sex: "Sex",
       };
 
   static int getIndex(String s, List<String> row) {
