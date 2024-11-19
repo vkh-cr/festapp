@@ -13,7 +13,7 @@ var $async$acK=B.h(function(g,h){if(g===1)return B.i(h,w)
 while(true)switch(x){case 0:if(e===C.alv||e===C.alw)u=!(d.giw()==="https"||d.giw()==="http")
 else u=!1
 if(u)throw B.e(B.eC(d,"url","To use an in-app web view, you must provide an http(s) URL."))
-v=$.cct().Nm(d.k(0),new B.an5(A.cRk(e),new B.amf(!0,!0,D.f8),f))
+v=$.ccu().Nm(d.k(0),new B.an5(A.cRk(e),new B.amf(!0,!0,D.f8),f))
 x=1
 break
 case 1:return B.j(v,w)}})
@@ -29,13 +29,13 @@ A.aTv.prototype={}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(A.ML,B.dW)
 w(B.z,[A.bAj,A.aTv])})()
-var y={a:B.x("v")};(function constants(){C.hV=new B.iU(1,1)
-C.b8T=new A.aTv()
-C.b97=new A.bAj()
+var y={a:B.x("v")};(function constants(){C.hU=new B.iU(1,1)
+C.b8U=new A.aTv()
+C.b98=new A.bAj()
 C.yQ=new A.ML(0,"platformDefault")
 C.alv=new A.ML(1,"inAppWebView")
 C.alw=new A.ML(2,"inAppBrowserView")
 C.alx=new A.ML(3,"externalApplication")
 C.aRh=new B.GW(3,"externalApplication")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_156",e:"endPart",h:b})})($__dart_deferred_initializers__,"ESfa6OCuwEO2DhR8WiW+vmHzr0Y=");
+a.eventLog.push({p:"main.dart.js_156",e:"endPart",h:b})})($__dart_deferred_initializers__,"Y+AttOxiA9+JdnObkC5J5oTfhJE=");

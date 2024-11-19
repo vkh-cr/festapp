@@ -21,7 +21,7 @@ bNk:function bNk(d,e){this.a=d
 this.b=e},
 bNi:function bNi(d){this.a=d},
 bNj:function bNj(d,e){this.a=d
-this.b=e}},D,F,O,P,Q,R,S,T,U,V,W,I,X,Y,K,Z,A_,A0,E,A1,H
+this.b=e}},D,F,O,P,Q,R,S,T,U,V,W,I,X,Y,K,Z,A_,E,A0,H
 A=c[0]
 B=c[2]
 L=c[117]
@@ -45,17 +45,16 @@ X=c[155]
 Y=c[206]
 K=c[182]
 Z=c[102]
-A_=c[213]
-A0=c[239]
+A_=c[239]
 E=c[164]
-A1=c[84]
+A0=c[84]
 H=c[170]
 C.Aq.prototype={
 M(){return new C.a7e(new X.eF(K.bg,$.aj()),A.a([new F.EG(),new F.EG(),new F.EG()],y.h))}}
 C.a7e.prototype={
 b5(){var x=this
 x.d_()
-x.r=$.cc8().aDG()
+x.r=$.cc9().aDG()
 x.pt()
 x.G(new C.bNm())},
 pt(){var x=0,w=A.l(y.f),v=this,u
@@ -72,14 +71,14 @@ return A.c(v.pt(),$async$wa)
 case 2:return A.j(null,w)}})
 return A.k($async$wa,w)},
 b_7(d){this.G(new C.bNh(this,d))},
-A(d){var x,w,v,u=null,t=E.bA(D.b18,u)
+A(d){var x,w,v,u=null,t=E.bA(D.b19,u)
 t=S.k1(u,!0,u,u,u,u,u,V.pI(new C.bNl(d)),u,t)
 x=A.eP(12)
-x=A.aL(u,u,B.h,u,u,new A.bR(u,L.cf3(B.F,N.DY,new O.DG("assets/icons/fstappicon.png",u,u),u,M.et),u,x,u,u,u,B.W),u,64,u,u,u,u,64)
+x=A.aL(u,u,B.h,u,u,new A.bR(u,L.cf4(B.F,N.DY,new O.DG("assets/icons/fstappicon.png",u,u),u,M.et),u,x,u,u,u,B.W),u,64,u,u,u,u,64)
 w=y.g
 w=A.P("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.G(["title","Festapp"],w,w))
 v=y.e
-return H.hJ(t,u,new A.cV(B.aS,u,u,new A.ah(D.ah3,new A.dD(new A.a7(0,820,0,1/0),A.bk(A.a([A.d0(A.bq(A.a([x,A_.hM,A.cL(E.bA(A.ae(w,u,u,u,u,u,u,u,A.bH(u,u,A.J(d).ax.a===B.z?$.fy():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.k,B.bJ,B.n,u),u,u),D.aVH,this.blZ(d,A.P("Install for Apple",u),D.ak2,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bm_(d,A.P("Install for Android",u),D.aiK,"",1,A.P("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.blY(d,A.P("Install for PC/Mac",u),D.aiY,"",2)],v),B.k,B.l,B.n,u,B.y),u),u),u),u,u,u,u)},
+return H.hJ(t,u,new A.cV(B.aS,u,u,new A.ah(D.ah3,new A.dD(new A.a7(0,820,0,1/0),A.bk(A.a([A.d0(A.bq(A.a([x,D.aVC,A.cL(E.bA(A.ae(w,u,u,u,u,u,u,u,A.bH(u,u,A.J(d).ax.a===B.z?$.fy():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.k,B.bJ,B.n,u),u,u),D.aVI,this.blZ(d,A.P("Install for Apple",u),D.ak2,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bm_(d,A.P("Install for Android",u),D.aiK,"",1,A.P("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.blY(d,A.P("Install for PC/Mac",u),D.aiY,"",2)],v),B.k,B.l,B.n,u,B.y),u),u),u),u,u,u,u)},
 a6d(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
 if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
 else o=n
@@ -96,7 +95,7 @@ if(t)s=!r.d&&!r.f&&r.e
 else s=!0
 v=A.a([Z.DQ(s?B.dx:B.eA,d,50,!0,v,u,B.o,250)],n)
 if(r.d)v.push(new A.ah(G.lK,E.bA(A.ae("The app is already installed.",q,q,q,q,q,q,q,A.bH(q,q,B.dx,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.bT,q,q,q,q),q),q))
-if(t&&r.f)v.push(new A.ah(G.lK,A.bk(A.a([E.bA(D.b0U,q),A0.BF,A.bq(A.a([A.cL(W.lu(q,!1,r.w,K.HB,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.Y,q,q),1,q),T.mT,P.awv(H.cc(U.H2,q,q,q),B.G,E.bA(A.ae("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.bNj(r,d),q)],n),B.k,B.l,B.n,q)],n),B.k,B.l,B.n,q,B.y),q))
+if(t&&r.f)v.push(new A.ah(G.lK,A.bk(A.a([E.bA(D.b0V,q),A_.BF,A.bq(A.a([A.cL(W.lu(q,!1,r.w,K.HB,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.Y,q,q),1,q),T.mT,P.awv(H.cc(U.H2,q,q,q),B.G,E.bA(A.ae("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.bNj(r,d),q)],n),B.k,B.l,B.n,q)],n),B.k,B.l,B.n,q,B.y),q))
 w.push(new A.ah(B.cV,A.bk(v,B.k,B.l,B.n,q,B.y),q))
 w.push(Y.bE)
 return F.ajM(w,p,q,o,new C.bNk(r,h),q,q,x,q)},
@@ -126,13 +125,13 @@ if(!u.ay)u.a4K()}else{u=x[v].a
 if(u.ay)u.a4K()}},
 $S:0}
 C.bNl.prototype={
-$0(){return A1.auf(this.a)},
+$0(){return A0.auf(this.a)},
 $S:0}
 C.bNk.prototype={
 $1(d){if(d)this.a.b_7(this.b)},
 $S:25}
 C.bNi.prototype={
-$0(){$.cc8()
+$0(){$.cc9()
 var x=window.open(this.a,"_blank")
 A.cm_(x)
 return null},
@@ -151,9 +150,10 @@ var y={h:A.x("p<EG>"),e:A.x("p<d>"),g:A.x("f"),f:A.x("~")};(function constants()
 D.aiK=new A.aS(57477,"MaterialIcons",null,!1)
 D.aiY=new A.aS(57795,"MaterialIcons",null,!1)
 D.ak2=new A.aS(984254,"MaterialIcons",null,!1)
-D.aVH=new A.aM(null,48,null,null)
-D.b0U=new A.c3("Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",null,G.Cb,null,B.bT,null,null,null,null,null,null,null,null,null,null)
-D.b18=new A.c3("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"cYJ","cc8",()=>new A.MD())})()};
+D.aVC=new A.aM(22,null,null,null)
+D.aVI=new A.aM(null,48,null,null)
+D.b0V=new A.c3("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,G.Cb,null,B.bT,null,null,null,null,null,null,null,null,null,null)
+D.b19=new A.c3("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
+x($,"cYJ","cc9",()=>new A.MD())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_119",e:"endPart",h:b})})($__dart_deferred_initializers__,"L+/pc+7H7DTXppIqovVb7xxrW7Y=");
+a.eventLog.push({p:"main.dart.js_119",e:"endPart",h:b})})($__dart_deferred_initializers__,"BYBDM7TQvr5qw2cJ+iFkhJrXIjE=");
