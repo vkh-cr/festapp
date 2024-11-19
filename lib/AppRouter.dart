@@ -59,7 +59,6 @@ class AppRouter extends RootStackRouter {
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
-      AutoRoute(page: MyScheduleRoute.page, path: "${MySchedulePage.ROUTE}"),
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}"),
       AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", maintainState: false, children: [
         AutoRoute(path: ':id', page: MapRoute.page,),
