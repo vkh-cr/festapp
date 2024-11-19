@@ -51,9 +51,12 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: ThemeConfig.appBarColor(),
       systemNavigationBarColor: ThemeConfig.appBarColor(),
     ));
+    StylesHelper.setBodyBackgroundColor(ThemeConfig.appBarColor());
     StylesHelper.setMetaThemeColor(ThemeConfig.seed1);
   }
 
