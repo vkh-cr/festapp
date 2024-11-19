@@ -15,6 +15,7 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -131,7 +132,7 @@ class _SchedulePageState extends State<SchedulePage>
   }
 
   void _schedulePressed() {
-    RouterService.navigateOccasion(context, TimetablePage.ROUTE)
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
         .then((value) => loadData());
   }
 
