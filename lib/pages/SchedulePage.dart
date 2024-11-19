@@ -143,6 +143,9 @@ class _SchedulePageState extends State<SchedulePage>
 
   @override
   Widget build(BuildContext context) {
+    final logoAsset = ThemeConfig.isDarkMode(context)
+        ? 'assets/icons/fstapplogo.dark.svg' // Dark mode logo
+        : 'assets/icons/fstapplogo.svg'; // Light mode logo
     return SafeArea(
       top: true,
       bottom: false,
@@ -152,29 +155,30 @@ class _SchedulePageState extends State<SchedulePage>
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  GestureDetector(
-                    onDoubleTap: () async {
-                      var packageInfo = await PackageInfo.fromPlatform();
-                      ToastHelper.Show(context,
-                          "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
-                      if (RightsService.isEditor()) {
-                        setState(() {
-                          TimeHelper.toggleTimeTravel?.call();
-                        });
-                      }
-                    },
-                    child: SvgPicture.asset(
-                      height: 72,
-                      semanticsLabel: 'CSA logo',
-                      'assets/icons/LOGO CSA APP.svg',
-                    ),
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                GestureDetector(
+                  onDoubleTap: () async {
+                    var packageInfo = await PackageInfo.fromPlatform();
+                    ToastHelper.Show(context,
+                        "${packageInfo.appName} ${packageInfo.version}+${packageInfo.buildNumber}");
+                    if (RightsService.isEditor()) {
+                      setState(() {
+                        TimeHelper.toggleTimeTravel?.call();
+                      });
+                    }
+                  },
+                  child: SvgPicture.asset(
+                    width: 120,
+                    semanticsLabel: 'Festapp logo',
+                    logoAsset,
                   ),
-                  const Spacer(),
-                  Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                ),
+                const Spacer(),
+                Column(
+                  mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
                       onPressed: _schedulePressed,
                       backgroundColor: ThemeConfig.profileButtonColor(context),
