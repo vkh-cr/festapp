@@ -12,7 +12,7 @@ class ThemeConfig {
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       ).copyWith(
-        surface: seed1.changeColorSaturation(0.15).changeColorLightness(0.92),
+        surface: seed1.changeColorSaturation(0.12).changeColorLightness(0.86),
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
