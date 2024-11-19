@@ -13,9 +13,9 @@ _.y=e
 _.dx=f
 _.fx=g
 _.a=h},
-cgL(d){var w=B.bx("(background-color|color)\\s*:\\s*[^;]+;?\\s*",!1,!1,!1)
+cgM(d){var w=B.bx("(background-color|color)\\s*:\\s*[^;]+;?\\s*",!1,!1,!1)
 return B.dJ(d,w,"")},
-cgK(d){var w,v,u,t,s,r,q,p,o,n=B.bx("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",!0,!1,!1),m=B.bx("\\b((http|https)://|www\\.)[^\\s/$.?#].\\S*",!1,!1,!1),l=B.bx("\\b(\\+?[0-9]{1,4}[-.\\s]+)?(\\(?\\d{2,3}\\)?[-.\\s]+)?\\d{3}[-.\\s]+\\d{3}[-.\\s]+\\d{3,4}\\b",!0,!1,!1),k=A4.c4P(d),j=new A.b7S(),i=k.grO(0)
+cgL(d){var w,v,u,t,s,r,q,p,o,n=B.bx("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",!0,!1,!1),m=B.bx("\\b((http|https)://|www\\.)[^\\s/$.?#].\\S*",!1,!1,!1),l=B.bx("\\b(\\+?[0-9]{1,4}[-.\\s]+)?(\\(?\\d{2,3}\\)?[-.\\s]+)?\\d{3}[-.\\s]+\\d{3}[-.\\s]+\\d{3,4}\\b",!0,!1,!1),k=A4.c4P(d),j=new A.b7S(),i=k.grO(0)
 i.toString
 i=E.aPn(i,"*")
 w=i.length
@@ -65,7 +65,7 @@ b7V:function b7V(d,e){this.a=d
 this.b=e},
 b7P:function b7P(d,e){this.a=d
 this.b=e},
-cgJ(d,e){return new A.X6(e,d,null)},
+cgK(d,e){return new A.X6(e,d,null)},
 X6:function X6(d,e,f){this.c=d
 this.d=e
 this.a=f},
@@ -89,11 +89,11 @@ bLQ:function bLQ(){},
 a00:function a00(d,e,f){this.c=d
 this.e=e
 this.a=f},
-cjZ(d){var w=new A.BY(null,null),v=J.a3(d)
+ck_(d){var w=new A.BY(null,null),v=J.a3(d)
 w.a=v.i(d,"index")
 w.b=v.i(d,"length")
 return w},
-cnV(d){return B.e9(B.XT(d,new A.c1R(),x.S),0,null)},
+cnW(d){return B.e9(B.XT(d,new A.c1R(),x.S),0,null)},
 a0q:function a0q(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u){var _=this
 _.d=d
 _.e=e
@@ -148,7 +148,7 @@ blT:function blT(d){this.a=d},
 BY:function BY(d,e){this.a=d
 this.b=e},
 c1R:function c1R(){},
-cIJ(d,e,f,g,h,i,j){return new A.Ia(j,g,h,i,f,e,d,null)},
+cIK(d,e,f,g,h,i,j){return new A.Ia(j,g,h,i,f,e,d,null)},
 a3H:function a3H(d,e,f,g,h,i,j,k,l,m,n){var _=this
 _.c=d
 _.d=e
@@ -405,18 +405,18 @@ c7u(d,e,f,g){var w,v,u,t=D.e.dX(d).toLowerCase()
 if(!(D.e.bl(t,B.bx("<!DOCTYPE html>",!1,!1,!1))&&D.e.p(t,B.bx("<html",!1,!1,!1))&&D.e.p(t,B.bx("</html>",!1,!1,!1))))t='    <!DOCTYPE html>\n    <html lang="en">\n    <head>\n        <meta charset="UTF-8">\n        <meta name="viewport" content="width=device-width, initial-scale=1.0">\n        <title>IFrame '+g+"</title>\n    </head>\n    <body>\n    "+d+"\n    </body>\n    </html>\n    "
 else t=d
 w=x.N
-t=A.cgN(t,B.cY(["parent.connect_js_to_flutter"+g+" && parent.connect_js_to_flutter"+g+"(window)"],w),C.ahA)
+t=A.cgO(t,B.cY(["parent.connect_js_to_flutter"+g+" && parent.connect_js_to_flutter"+g+"(window)"],w),C.ahA)
 if(f.gdH(f)){v=B.aK(w)
 for(w=f.gX(f);w.q();){u=w.gK(0)
 u.gbvX()
-v.u(0,u.gbvX())}t=A.cgN(t,v,C.ahy)}return t},
-cgN(d,e,f){return A.cgM(f,d,"\n<script>\n"+e.fJ(0,new A.b82())+"\n</script>\n")},
-cgO(d,e,f){var w=B.bx("<"+d+"([^>]*)>",!1,!1,!1)
+v.u(0,u.gbvX())}t=A.cgO(t,v,C.ahy)}return t},
+cgO(d,e,f){return A.cgN(f,d,"\n<script>\n"+e.fJ(0,new A.b82())+"\n</script>\n")},
+cgP(d,e,f){var w=B.bx("<"+d+"([^>]*)>",!1,!1,!1)
 B.O3(0,0,e.length,"startIndex")
-return B.cVG(e,w,new A.b83(d,f),0)},
-cgM(d,e,f){var w
-switch(d.a){case 2:return A.cgO("head",e,f)
-case 0:return A.cgO("body",e,f)
+return B.cVH(e,w,new A.b83(d,f),0)},
+cgN(d,e,f){var w
+switch(d.a){case 2:return A.cgP("head",e,f)
+case 0:return A.cgP("body",e,f)
 case 3:w=D.e.dG(e,"</head>")
 return D.e.a2(e,0,w)+f+"\n"+D.e.cN(e,w)
 case 1:w=D.e.dG(e,"</body>")
@@ -480,24 +480,24 @@ _.c=f
 _.d=g},
 c0m:function c0m(d,e){this.a=d
 this.b=e},
-cfW(d,e,f,g,h,i,j,k,l,m,n){var w=null
+cfX(d,e,f,g,h,i,j,k,l,m,n){var w=null
 return new F.zO(i,m,w,w,j,w,k,8,l,g,w,w,24,!0,!1,48,f,w,!1,e,w,w,w,d,w,w,!1,!1,w,n.h("zO<0>"))},
 TB(d,e){var w=null,v=B.eP(8)
 return new B.ah(D.aE,new A.N2(d,D.aI,B.ae(e,w,w,w,w,w,w,w,B.bH(w,w,D.jt,w,w,w,w,w,w,w,w,w,w,w,w,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),new B.ew(v,D.u),w),w)},
-cky(d){var w=D.Vl.i(0,(d==null?D.U:d).a)
+ckz(d){var w=D.Vl.i(0,(d==null?D.U:d).a)
 w.toString
 return B.dJ(w,"w","")},
-cHg(d){var w=B.ds(d,0,null)
-if(D.e.p(w.gqG(w).toLowerCase(),"youtube"))return A.cHf(d)
-else if(D.e.p(w.gqG(w).toLowerCase(),"vimeo"))return A.cHe(d)
+cHh(d){var w=B.ds(d,0,null)
+if(D.e.p(w.gqG(w).toLowerCase(),"youtube"))return A.cHg(d)
+else if(D.e.p(w.gqG(w).toLowerCase(),"vimeo"))return A.cHf(d)
 else return d},
-cHf(d){var w,v,u,t
+cHg(d){var w,v,u,t
 if(!D.e.p(d,"http")&&d.length===11)return d
 D.e.dX(d)
 for(w=[B.bx("^https:\\/\\/(?:www\\.|m\\.)?youtube\\.com\\/watch\\?v=([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bx("^https:\\/\\/(?:music\\.)?youtube\\.com\\/watch\\?v=([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bx("^https:\\/\\/(?:www\\.|m\\.)?youtube\\.com\\/shorts\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bx("^https:\\/\\/(?:www\\.|m\\.)?youtube(?:-nocookie)?\\.com\\/embed\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bx("^https:\\/\\/youtu\\.be\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1)],v=null,u=0;u<5;++u){t=w[u].qA(d)
 if(t!=null&&t.b.length-1>=1)v=t.b[1]}if(v==null)return null
 return"https://www.youtube.com/embed/"+v},
-cHe(d){var w=B.bx("(?:http|https)?:?\\/?\\/?(?:www\\.)?(?:player\\.)?vimeo\\.com\\/(?:channels\\/(?:\\w+\\/)?|groups\\/(?:[^\\/]*)\\/videos\\/|video\\/|)(\\d+)(?:|\\/\\?)",!1,!1,!1).qA(d),v=w==null?null:w.b[1]
+cHf(d){var w=B.bx("(?:http|https)?:?\\/?\\/?(?:www\\.)?(?:player\\.)?vimeo\\.com\\/(?:channels\\/(?:\\w+\\/)?|groups\\/(?:[^\\/]*)\\/videos\\/|video\\/|)(\\d+)(?:|\\/\\?)",!1,!1,!1).qA(d),v=w==null?null:w.b[1]
 if(v==null)return null
 return"https://player.vimeo.com/video/"+v}},C,A4,F,G,W,A5,A6,A7,A8,A9,O,Aa,Ab,P,X,Y,I,Ac,Z
 J=c[1]
@@ -554,7 +554,7 @@ w=B.V(31,w.gj(w)>>>16&255,w.gj(w)>>>8&255,w.gj(w)&255)}v=p.z
 if(v==null){v=p.ZX(s)
 v=B.V(10,v.gj(v)>>>16&255,v.gj(v)>>>8&255,v.gj(v)&255)}u=p.aDL(s)
 t=new B.a7(p.a,1/0,p.b,1/0).aun(r,r)
-return B.cjo(D.L,!1,s.dx,D.h,t,0,2,!0,o,w,4,r,q.cy,8,v,4,q.f,r,r,r,s.c,u,s.fx,q.k2,n,q.Q)}}
+return B.cjp(D.L,!1,s.dx,D.h,t,0,2,!0,o,w,4,r,q.cy,8,v,4,q.f,r,r,r,s.c,u,s.fx,q.k2,n,q.Q)}}
 A.X6.prototype={
 M(){return new A.aEO(B.a([C.b2p,C.b2r,C.b2x,C.b2w,C.a2Y,C.a31,C.a2Z],x.f),D.jt)}}
 A.aEO.prototype={
@@ -577,7 +577,7 @@ return B.c(u.a.d.It(d),$async$rf)
 case 2:return B.j(null,v)}})
 return B.k($async$rf,v)}}
 A.a00.prototype={
-A(d){return $.cs9().asY(this.c,!1,this.a)}}
+A(d){return $.csa().asY(this.c,!1,this.a)}}
 A.a0q.prototype={
 M(){return new A.a0r()}}
 A.a0r.prototype={
@@ -601,7 +601,7 @@ v.eH()
 this.am()},
 A(d){var w=this.y
 w===$&&B.b()
-return A1.cgy(new A.bm9(this),w,x.z)},
+return A1.cgz(new A.bm9(this),w,x.z)},
 aR4(d,e){var w,v,u,t,s,r,q=this
 q.e=q.ajl(e)
 w=D.c.k(B.dg(q.a.r.b))
@@ -803,7 +803,7 @@ k=A.a3C(b1.a.y)
 j=b1.a.ch
 i=j.x
 if(i==null)i=D.ym
-j=A.cky(j.w)
+j=A.ckz(j.w)
 h=b1.z
 g=b1.a.ax
 f=g.x
@@ -814,7 +814,7 @@ e=b1.a.ax.b
 e=A.a3C(e==null?D.t:e)
 d=A.a3C(b1.a.y)
 a0=b1.a.ax
-a0=A.cky(a0.w)
+a0=A.ckz(a0.w)
 a1=b1.a.ay.a
 a1=B.o(a1)
 a2=b1.a.ay.c
@@ -836,8 +836,8 @@ b0=""+b1.a.d
 return'   <!DOCTYPE html>\n        <html>\n        <head>\n        <link href="https://fonts.googleapis.com/css?family='+c0+':400,400i,700,700i" rel="stylesheet">\n        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">    \n        \n       <!-- Include the Quill library --> \n        <script>\n        '+w+"\n        </script>\n        <style>\n        /*!\n       * Quill Editor v2.0.0-dev.3\n       * https://quilljs.com/\n       * Copyright (c) 2014, Jason Chen\n       * Copyright (c) 2013, salesforce.com\n       */.ql-container{box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;font-size:13px;height:100%;margin:0;position:relative}.ql-container.ql-disabled .ql-tooltip{visibility:hidden}.ql-container:not(.ql-disabled) li[data-list=checked]>.ql-ui,.ql-container:not(.ql-disabled) li[data-list=unchecked]>.ql-ui{cursor:pointer}.ql-clipboard{left:-100000px;height:1px;overflow-y:hidden;position:absolute;top:50%}.ql-clipboard p{margin:0;padding:0}.ql-editor{box-sizing:border-box;counter-reset:list-0;line-height:1.42;height:100%;outline:0;overflow-y:auto;padding:12px 15px;tab-size:4;-moz-tab-size:4;text-align:left;white-space:pre-wrap;word-wrap:break-word}.ql-editor>*{cursor:text}.ql-editor blockquote,.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6,.ql-editor ol,.ql-editor p,.ql-editor pre{margin:0;padding:0}.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6,.ql-editor p{counter-reset:list-0 list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor table{border-collapse:collapse}.ql-editor td{border:1px solid #000;padding:2px 5px}.ql-editor ol{padding-left:1.5em}.ql-editor li{list-style-type:none;padding-left:1.5em;position:relative}.ql-editor li>.ql-ui:before{display:inline-block;margin-left:-1.5em;margin-right:.3em;text-align:right;white-space:nowrap;width:1.2em}.ql-editor li[data-list=checked]>.ql-ui,.ql-editor li[data-list=unchecked]>.ql-ui{color:#777}.ql-editor li[data-list=bullet]>.ql-ui:before{content:'\\2022'}.ql-editor li[data-list=checked]>.ql-ui:before{content:'\\2611'}.ql-editor li[data-list=unchecked]>.ql-ui:before{content:'\\2610'}.ql-editor li[data-list=ordered]{counter-reset:list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;counter-increment:list-0}.ql-editor li[data-list=ordered]>.ql-ui:before{content:counter(list-0,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-1{counter-increment:list-1}.ql-editor li[data-list=ordered].ql-indent-1>.ql-ui:before{content:counter(list-1,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-1{counter-reset:list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-2{counter-increment:list-2}.ql-editor li[data-list=ordered].ql-indent-2>.ql-ui:before{content:counter(list-2,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-2{counter-reset:list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-3{counter-increment:list-3}.ql-editor li[data-list=ordered].ql-indent-3>.ql-ui:before{content:counter(list-3,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-3{counter-reset:list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-4{counter-increment:list-4}.ql-editor li[data-list=ordered].ql-indent-4>.ql-ui:before{content:counter(list-4,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-4{counter-reset:list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-5{counter-increment:list-5}.ql-editor li[data-list=ordered].ql-indent-5>.ql-ui:before{content:counter(list-5,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-5{counter-reset:list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-6{counter-increment:list-6}.ql-editor li[data-list=ordered].ql-indent-6>.ql-ui:before{content:counter(list-6,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-6{counter-reset:list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-7{counter-increment:list-7}.ql-editor li[data-list=ordered].ql-indent-7>.ql-ui:before{content:counter(list-7,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-7{counter-reset:list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-8{counter-increment:list-8}.ql-editor li[data-list=ordered].ql-indent-8>.ql-ui:before{content:counter(list-8,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-8{counter-reset:list-9}.ql-editor li[data-list=ordered].ql-indent-9{counter-increment:list-9}.ql-editor li[data-list=ordered].ql-indent-9>.ql-ui:before{content:counter(list-9,decimal) '. '}.ql-editor .ql-indent-1:not(.ql-direction-rtl){padding-left:3em}.ql-editor li.ql-indent-1:not(.ql-direction-rtl){padding-left:4.5em}.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right{padding-right:3em}.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right{padding-right:4.5em}.ql-editor .ql-indent-2:not(.ql-direction-rtl){padding-left:6em}.ql-editor li.ql-indent-2:not(.ql-direction-rtl){padding-left:7.5em}.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right{padding-right:6em}.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right{padding-right:7.5em}.ql-editor .ql-indent-3:not(.ql-direction-rtl){padding-left:9em}.ql-editor li.ql-indent-3:not(.ql-direction-rtl){padding-left:10.5em}.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right{padding-right:9em}.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right{padding-right:10.5em}.ql-editor .ql-indent-4:not(.ql-direction-rtl){padding-left:12em}.ql-editor li.ql-indent-4:not(.ql-direction-rtl){padding-left:13.5em}.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right{padding-right:12em}.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right{padding-right:13.5em}.ql-editor .ql-indent-5:not(.ql-direction-rtl){padding-left:15em}.ql-editor li.ql-indent-5:not(.ql-direction-rtl){padding-left:16.5em}.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right{padding-right:15em}.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right{padding-right:16.5em}.ql-editor .ql-indent-6:not(.ql-direction-rtl){padding-left:18em}.ql-editor li.ql-indent-6:not(.ql-direction-rtl){padding-left:19.5em}.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right{padding-right:18em}.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right{padding-right:19.5em}.ql-editor .ql-indent-7:not(.ql-direction-rtl){padding-left:21em}.ql-editor li.ql-indent-7:not(.ql-direction-rtl){padding-left:22.5em}.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right{padding-right:21em}.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right{padding-right:22.5em}.ql-editor .ql-indent-8:not(.ql-direction-rtl){padding-left:24em}.ql-editor li.ql-indent-8:not(.ql-direction-rtl){padding-left:25.5em}.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right{padding-right:24em}.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right{padding-right:25.5em}.ql-editor .ql-indent-9:not(.ql-direction-rtl){padding-left:27em}.ql-editor li.ql-indent-9:not(.ql-direction-rtl){padding-left:28.5em}.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right{padding-right:27em}.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right{padding-right:28.5em}.ql-editor li.ql-direction-rtl{padding-right:1.5em}.ql-editor li.ql-direction-rtl>.ql-ui:before{margin-left:.3em;margin-right:-1.5em;text-align:left}.ql-editor table{table-layout:fixed;width:100%}.ql-editor table td{outline:0}.ql-editor .ql-code-block-container{font-family:monospace}.ql-editor .ql-video{display:block;max-width:100%}.ql-editor .ql-video.ql-align-center{margin:0 auto}.ql-editor .ql-video.ql-align-right{margin:0 0 0 auto}.ql-editor .ql-bg-black{background-color:#000}.ql-editor .ql-bg-red{background-color:#e60000}.ql-editor .ql-bg-orange{background-color:#f90}.ql-editor .ql-bg-yellow{background-color:#ff0}.ql-editor .ql-bg-green{background-color:#008a00}.ql-editor .ql-bg-blue{background-color:#06c}.ql-editor .ql-bg-purple{background-color:#93f}.ql-editor .ql-color-white{color:#fff}.ql-editor .ql-color-red{color:#e60000}.ql-editor .ql-color-orange{color:#f90}.ql-editor .ql-color-yellow{color:#ff0}.ql-editor .ql-color-green{color:#008a00}.ql-editor .ql-color-blue{color:#06c}.ql-editor .ql-color-purple{color:#93f}.ql-editor .ql-font-serif{font-family:Georgia,Times New Roman,serif}.ql-editor .ql-font-monospace{font-family:Monaco,Courier New,monospace}.ql-editor .ql-size-small{font-size:.75em}.ql-editor .ql-size-large{font-size:1.5em}.ql-editor .ql-size-huge{font-size:2.5em}.ql-editor .ql-direction-rtl{direction:rtl;text-align:inherit}.ql-editor .ql-align-center{text-align:center}.ql-editor .ql-align-justify{text-align:justify}.ql-editor .ql-align-right{text-align:right}.ql-editor .ql-ui{position:absolute}.ql-editor.ql-blank::before{color:rgba(0,0,0,.6);content:attr(data-placeholder);font-style:italic;left:15px;pointer-events:none;position:absolute;right:15px}.ql-snow .ql-toolbar:after,.ql-snow.ql-toolbar:after{clear:both;content:'';display:table}.ql-snow .ql-toolbar button,.ql-snow.ql-toolbar button{background:0 0;border:none;cursor:pointer;display:inline-block;float:left;height:24px;padding:3px 5px;width:28px}.ql-snow .ql-toolbar button svg,.ql-snow.ql-toolbar button svg{float:left;height:100%}.ql-snow .ql-toolbar button:active:hover,.ql-snow.ql-toolbar button:active:hover{outline:0}.ql-snow .ql-toolbar input.ql-image[type=file],.ql-snow.ql-toolbar input.ql-image[type=file]{display:none}.ql-snow .ql-toolbar .ql-picker-item.ql-selected,.ql-snow .ql-toolbar .ql-picker-item:hover,.ql-snow .ql-toolbar .ql-picker-label.ql-active,.ql-snow .ql-toolbar .ql-picker-label:hover,.ql-snow .ql-toolbar button.ql-active,.ql-snow .ql-toolbar button:focus,.ql-snow .ql-toolbar button:hover,.ql-snow.ql-toolbar .ql-picker-item.ql-selected,.ql-snow.ql-toolbar .ql-picker-item:hover,.ql-snow.ql-toolbar .ql-picker-label.ql-active,.ql-snow.ql-toolbar .ql-picker-label:hover,.ql-snow.ql-toolbar button.ql-active,.ql-snow.ql-toolbar button:focus,.ql-snow.ql-toolbar button:hover{color:#06c}.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,.ql-snow .ql-toolbar button.ql-active .ql-fill,.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,.ql-snow .ql-toolbar button:focus .ql-fill,.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,.ql-snow .ql-toolbar button:hover .ql-fill,.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar button.ql-active .ql-fill,.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:focus .ql-fill,.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:hover .ql-fill,.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill{fill:#06c}.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,.ql-snow .ql-toolbar button.ql-active .ql-stroke,.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,.ql-snow .ql-toolbar button:focus .ql-stroke,.ql-snow .ql-toolbar button:focus .ql-stroke-miter,.ql-snow .ql-toolbar button:hover .ql-stroke,.ql-snow .ql-toolbar button:hover .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,.ql-snow.ql-toolbar button.ql-active .ql-stroke,.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,.ql-snow.ql-toolbar button:focus .ql-stroke,.ql-snow.ql-toolbar button:focus .ql-stroke-miter,.ql-snow.ql-toolbar button:hover .ql-stroke,.ql-snow.ql-toolbar button:hover .ql-stroke-miter{stroke:#06c}@media (pointer:coarse){.ql-snow .ql-toolbar button:hover:not(.ql-active),.ql-snow.ql-toolbar button:hover:not(.ql-active){color:#444}.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill{fill:#444}.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter{stroke:#444}}.ql-snow{box-sizing:border-box}.ql-snow *{box-sizing:border-box}.ql-snow .ql-hidden{display:none}.ql-snow .ql-out-bottom,.ql-snow .ql-out-top{visibility:hidden}.ql-snow .ql-tooltip{position:absolute;transform:translateY(10px)}.ql-snow .ql-tooltip a{cursor:pointer;text-decoration:none}.ql-snow .ql-tooltip.ql-flip{transform:translateY(-10px)}.ql-snow .ql-formats{display:inline-block;vertical-align:middle}.ql-snow .ql-formats:after{clear:both;content:'';display:table}.ql-snow .ql-stroke{fill:none;stroke:#444;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.ql-snow .ql-stroke-miter{fill:none;stroke:#444;stroke-miterlimit:10;stroke-width:2}.ql-snow .ql-fill,.ql-snow .ql-stroke.ql-fill{fill:#444}.ql-snow .ql-empty{fill:none}.ql-snow .ql-even{fill-rule:evenodd}.ql-snow .ql-stroke.ql-thin,.ql-snow .ql-thin{stroke-width:1}.ql-snow .ql-transparent{opacity:.4}.ql-snow .ql-direction svg:last-child{display:none}.ql-snow .ql-direction.ql-active svg:last-child{display:inline}.ql-snow .ql-direction.ql-active svg:first-child{display:none}.ql-snow .ql-editor h1{font-size:2em}.ql-snow .ql-editor h2{font-size:1.5em}.ql-snow .ql-editor h3{font-size:1.17em}.ql-snow .ql-editor h4{font-size:1em}.ql-snow .ql-editor h5{font-size:.83em}.ql-snow .ql-editor h6{font-size:.67em}.ql-snow .ql-editor a{text-decoration:underline}.ql-snow .ql-editor blockquote{border-left:4px solid #ccc;margin-bottom:5px;margin-top:5px;padding-left:16px}.ql-snow .ql-editor .ql-code-block-container,.ql-snow .ql-editor code{background-color:#f0f0f0;border-radius:3px}.ql-snow .ql-editor .ql-code-block-container{margin-bottom:5px;margin-top:5px;padding:5px 10px}.ql-snow .ql-editor code{font-size:85%;padding:2px 4px}.ql-snow .ql-editor .ql-code-block-container{background-color:#23241f;color:#f8f8f2;overflow:visible}.ql-snow .ql-editor img{max-width:100%}.ql-snow .ql-picker{color:#444;display:inline-block;float:left;font-size:14px;font-weight:500;height:24px;position:relative;vertical-align:middle}.ql-snow .ql-picker-label{cursor:pointer;display:inline-block;height:100%;padding-left:8px;padding-right:2px;position:relative;width:100%}.ql-snow .ql-picker-label::before{display:inline-block;line-height:22px}.ql-snow .ql-picker-options{background-color:#fff;display:none;min-width:100%;padding:4px 8px;position:absolute;white-space:nowrap}.ql-snow .ql-picker-options .ql-picker-item{cursor:pointer;display:block;padding-bottom:5px;padding-top:5px}.ql-snow .ql-picker.ql-expanded .ql-picker-label{color:#ccc;z-index:2}.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill{fill:#ccc}.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke{stroke:#ccc}.ql-snow .ql-picker.ql-expanded .ql-picker-options{display:block;margin-top:-1px;top:100%;z-index:1}.ql-snow .ql-color-picker,.ql-snow .ql-icon-picker{width:28px}.ql-snow .ql-color-picker .ql-picker-label,.ql-snow .ql-icon-picker .ql-picker-label{padding:2px 4px}.ql-snow .ql-color-picker .ql-picker-label svg,.ql-snow .ql-icon-picker .ql-picker-label svg{right:4px}.ql-snow .ql-icon-picker .ql-picker-options{padding:4px 0}.ql-snow .ql-icon-picker .ql-picker-item{height:24px;width:24px;padding:2px 4px}.ql-snow .ql-color-picker .ql-picker-options{padding:3px 5px;width:152px}.ql-snow .ql-color-picker .ql-picker-item{border:1px solid transparent;float:left;height:16px;margin:2px;padding:0;width:16px}.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg{position:absolute;margin-top:-9px;right:0;top:50%;width:18px}.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before{content:attr(data-label)}.ql-snow .ql-picker.ql-header{width:98px}.ql-snow .ql-picker.ql-header .ql-picker-item::before,.ql-snow .ql-picker.ql-header .ql-picker-label::before{content:'Normal'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before{content:'Heading 1'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before{content:'Heading 2'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before{content:'Heading 3'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before{content:'Heading 4'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before{content:'Heading 5'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before{content:'Heading 6'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before{font-size:2em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before{font-size:1.5em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before{font-size:1.17em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before{font-size:1em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before{font-size:.83em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before{font-size:.67em}.ql-snow .ql-picker.ql-font{width:108px}.ql-snow .ql-picker.ql-font .ql-picker-item::before,.ql-snow .ql-picker.ql-font .ql-picker-label::before{content:'Sans Serif'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before{content:'Serif'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before{content:'Monospace'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before{font-family:Georgia,Times New Roman,serif}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before{font-family:Monaco,Courier New,monospace}.ql-snow .ql-picker.ql-size{width:98px}.ql-snow .ql-picker.ql-size .ql-picker-item::before,.ql-snow .ql-picker.ql-size .ql-picker-label::before{content:'Normal'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before{content:'Small'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before{content:'Large'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before{content:'Huge'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before{font-size:10px}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before{font-size:18px}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before{font-size:32px}.ql-snow .ql-color-picker.ql-background .ql-picker-item{background-color:#fff}.ql-snow .ql-color-picker.ql-color .ql-picker-item{background-color:#000}.ql-code-block-container{position:relative}.ql-code-block-container .ql-ui{right:5px;top:5px}.ql-toolbar.ql-snow{border:1px solid #ccc;box-sizing:border-box;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:8px}.ql-toolbar.ql-snow .ql-formats{margin-right:15px}.ql-toolbar.ql-snow .ql-picker-label{border:1px solid transparent}.ql-toolbar.ql-snow .ql-picker-options{border:1px solid transparent;box-shadow:rgba(0,0,0,.2) 0 2px 8px}.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label{border-color:#ccc}.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options{border-color:#ccc}.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover{border-color:#000}.ql-toolbar.ql-snow+.ql-container.ql-snow{border-top:0}.ql-snow .ql-tooltip{background-color:#fff;border:1px solid #ccc;box-shadow:0 0 5px #ddd;color:#444;padding:5px 12px;white-space:nowrap}.ql-snow .ql-tooltip::before{content:\"Visit URL:\";line-height:26px;margin-right:8px}.ql-snow .ql-tooltip input[type=text]{display:none;border:1px solid #ccc;font-size:13px;height:26px;margin:0;padding:3px 5px;width:170px}.ql-snow .ql-tooltip a.ql-preview{display:inline-block;max-width:200px;overflow-x:hidden;text-overflow:ellipsis;vertical-align:top}.ql-snow .ql-tooltip a.ql-action::after{border-right:1px solid #ccc;content:'Edit';margin-left:16px;padding-right:8px}.ql-snow .ql-tooltip a.ql-remove::before{content:'Remove';margin-left:8px}.ql-snow .ql-tooltip a{line-height:26px}.ql-snow .ql-tooltip.ql-editing a.ql-preview,.ql-snow .ql-tooltip.ql-editing a.ql-remove{display:none}.ql-snow .ql-tooltip.ql-editing input[type=text]{display:inline-block}.ql-snow .ql-tooltip.ql-editing a.ql-action::after{border-right:0;content:'Save';padding-right:0}.ql-snow .ql-tooltip[data-mode=link]::before{content:\"Enter link:\"}.ql-snow .ql-tooltip[data-mode=formula]::before{content:\"Enter formula:\"}.ql-snow .ql-tooltip[data-mode=video]::before{content:\"Enter video:\"}.ql-snow a{color:#06c}.ql-container.ql-snow{border:1px solid #ccc}\n        \n        body, html{\n         font-family: \""+v+'", sans-serif !important;\n        -webkit-user-select: text !important;\n        margin:0px !important;\n        background-color:'+u+";\n        color: "+t+";\n        }\n        .ql-font-roboto {\n           font-family: '"+s+"', sans-serif;\n          }\n        .ql-editor.ql-blank::before{\n         font-family: \""+s+'", sans-serif !important;\n        -webkit-user-select: text !important;\n          padding-left:'+r+b3+q+b4+p+b5+o+"px !important;\n          position: center;\n          left:0px;\n          text-align: "+m.b+b6+n+b7+l+b8+k+";\n          font-style: "+i.b+b9+j+';\n          \n        }\n        .ql-container.ql-snow{\n         font-family: "'+h+'", sans-serif !important;\n        -webkit-user-select: text !important;\n          white-space:nowrap !important;\n          margin-top:0px !important;\n          margin-bottom:0px !important;\n          margin:0px !important;\n          width:100%;\n          border:none;\n          font-style: '+f.b+b6+g+b7+e+b8+d+b9+a0+";\n          padding-left:"+a1+"px;\n          padding-right:"+a2+"px;\n          padding-top:"+a3+"px;\n          padding-bottom:"+a4+'px;\n          min-height:100%;\n        \n          contenteditable: true !important;\n          data-gramm: false !important;\n         \n        }\n        .ql-editor { \n         font-family: "'+a5+'", sans-serif !important;\n          -webkit-user-select: text !important;\n          padding-left:'+a6+b3+a7+b4+a8+b5+a9+"px !important;\n        }\n        .ql-toolbar { \n          position: absolute; \n          top: 0;\n          left:0;\n          right:0\n        }\n        .ql-tooltip{\n          display:none; \n        }\n        \n        .ql-editor.ql-blank:focus::before {\n          content: '';\n          }\n        #toolbar-container{\n         display:none;\n        }     \n        #scrolling-container {  \n        overflow-y: scroll  !important;\n          min-height: "+b0+'px !important;\n          -webkit-user-select: text !important;\n           scrollbar-width: none !important; \n         } \n         #scroll-container::-webkit-scrollbar {\n            display: none !important; /* For Chrome, Safari, and Opera */\n          }\n         ::-webkit-scrollbar {\n          width: 0;  /* Remove scrollbar space */\n          background: transparent;  /* Optional: just make scrollbar invisible */\n          } \n        </style>\n   \n        </head>\n        <body>\n         <script>\n           const resizeObserver = new ResizeObserver(entries =>{\n            ///console.log("Offset height has changed:", (entries[0].target.clientHeight).toString())\n                if(true) {\n                  EditorResizeCallback((entries[0].target.clientHeight).toString());\n                } else {\n                  EditorResizeCallback.postMessage((entries[0].target.clientHeight).toString());\n                }            \n            })\n            resizeObserver.observe(document.body)\n          </script>\n         <script>\n          let isTextSelectionInProgress = false;\n\n          // Event handler for text selection start\n          function handleTextSelectionStart() {\n              isTextSelectionInProgress = true;\n             // console.log("Text selection started.");\n          }\n  \n          // Event handler for text selection end\n          function handleTextSelectionEnd() {\n              isTextSelectionInProgress = false;\n             // console.log("Text selection ended.");\n          }\n  \n          // Check if text is being selected while dragging the mouse\n          function handleMouseMove(event) {\n              if (isTextSelectionInProgress) {\n                  // Do something when the text is being selected (dragging the mouse while text is selected)\n                  window.getSelection();\n              }\n          }\n  \n          // Attach event listeners\n          document.addEventListener("mousedown", handleTextSelectionStart);\n          document.addEventListener("mouseup", handleTextSelectionEnd);\n          document.addEventListener("mousemove", handleMouseMove);\n         \n         </script> \n        <!-- Create the toolbar container -->\n        <div id="scrolling-container">\n        <div id="toolbar-container"></div>\n        \n        <!-- Create the editor container -->\n        <div style="position:relative;margin-top:0em;">\n        <div id="editorcontainer" style= "min-height:'+b0+'px;margin-top:0em;">\n        <div id="editor" style="min-height:'+b0+"px; width:100%;\"></div>\n        </div>\n        </div> \n        </div>\n      \n        <!-- Initialize Quill editor -->\n        <script>\n      \n            let fullWindowHeight = window.innerHeight;\n            let keyboardIsProbablyOpen = false;\n            window.addEventListener(\"resize\", function() {\n              if(window.innerHeight == fullWindowHeight) {\n                keyboardIsProbablyOpen = false;\n              } else if(window.innerHeight < fullWindowHeight * 0.9) {\n                keyboardIsProbablyOpen = true;\n              }\n            });\n            \n            function resizeElementHeight(element, ratio) {\n              var height = 0;\n              var body = window.document.body;\n              if(window.innerHeight) {\n                height = window.innerHeight;\n              } else if(body.parentElement.clientHeight) {\n                height = body.parentElement.clientHeight;\n              } else if(body && body.clientHeight) {\n                height = body.clientHeight;\n              }\n              let isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)\n              if(isIOS) {\n                element.style.height = ((height / ratio - element.offsetTop) + \"px\");\n              } else {\n                element.style.height = ((height - element.offsetTop) + \"px\");\n              }  \n            }\n            \n            \n          function replaceSelection(replaceText) {\n              try{\n              var range = quilleditor.getSelection(true);\n                    if (range) {\n                      if (range.length == 0) {\n                       // console.log('User cursor is at index', range.index);\n                      } else {\n                       quilleditor.deleteText(range.index, range.length);\n                       quilleditor.insertText(range.index, replaceText);\n                      \n                      /// replace text with format will be coming in future release\n                      /// quilleditor.insertText(range.index, replaceText, JSON.parse(format));\n                      }\n                    } else {\n                     // console.log('User cursor is not in editor');\n                    }\n                }\n                 catch(e) {\n                    console.log('replaceSelection', e);\n                 } \n            }\n            // Retrieve the Quill editor container element by its ID\n            var quillContainer = document.getElementById('scrolling-container');\n            \n            // Add the focusout event listener to the Quill editor container\n            quillContainer.addEventListener('focusout', function() {\n                 if(true) {\n                FocusChanged(false);\n              } else {\n                FocusChanged.postMessage(false);\n              }\n            });\n            \n             quillContainer.addEventListener('focusin', () => {\n               if(true) {\n                FocusChanged(true);\n              } else {\n                FocusChanged.postMessage(true);\n              }\n             })\n             quillContainer.addEventListener('click', function() {\n              quilleditor.focus(); // Set focus on the Quill editor\n              });\n             \n             /*quilleditor.root.addEventListener(\"blur\", function() {\n               if(true) {\n                FocusChanged(false);\n                } else {\n                var focus  = quilleditor.hasFocus();\n                  FocusChanged.postMessage(isQuillFocused());\n                }\n            });\n            \n            quilleditor.root.addEventListener(\"focus\", function() {\n               if(true) {\n                FocusChanged(true);\n              } else {\n              var focus  = quilleditor.hasFocus();\n                FocusChanged.postMessage(isQuillFocused());\n              }\n            });*/\n            \n            function isQuillFocused() {\n                // Retrieve the Quill editor container element by its ID\n                var quillContainer = document.getElementById('scrolling-container');\n              \n                // Check if the Quill editor container or any of its descendants have focus\n                return quillContainer.contains(document.activeElement);\n              }\n            \n            function getSelectedText() {\n            let text = '';\n              try{\n                var range = quilleditor.getSelection(true);\n                    if (range) {\n                      if (range.length == 0) {\n                       // console.log('User cursor is at index', range.index);\n                      } else {\n                         text = quilleditor.getText(range.index, range.length);\n                      }\n                    } else {\n                    //  console.log('User cursor is not in editor');\n                    }\n                }\n                 catch(e) {\n                    console.log('getSelectedText', e);\n                  } \n                return text;  \n            }\n              \n         \n            function applyGoogleKeyboardWorkaround(editor) {\n              try {\n              \n                let isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)\n\n                if(true || isIOS){\n                  return;\n                }\n                if(editor.applyGoogleKeyboardWorkaround) {\n                  return\n                }\n                editor.applyGoogleKeyboardWorkaround = true\n                editor.on('editor-change', function(eventName, ...args) {\n                  try {\n                    // args[0] will be delta\n                    var ops = args[0]['ops']\n                    if(ops === null) {\n                      return\n                    }\n                    var oldSelection = editor.getSelection(true)\n                    var oldPos = oldSelection.index\n                    var oldSelectionLength = oldSelection.length\n                    if( ops[0][\"retain\"] === undefined || !ops[1] || !ops[1][\"insert\"] || !ops[1][\"insert\"] || ops[1][\"list\"] === \"bullet\" || ops[1][\"list\"] === \"ordered\" || ops[1][\"insert\"] != \"\\n\" || oldSelectionLength > 0) {\n                      return\n                    }\n                    \n                    setTimeout(function() {\n                      var newPos = editor.getSelection(true).index\n                      if(newPos === oldPos) {\n                      console.log('newPos oldPos');\n                        editor.setSelection(editor.getSelection(true).index + 1, 0)\n                      }\n                    }, 30);\n                    //onRangeChanged();\n                  } catch(e) {\n                    console.log('applyGoogleKeyboardWorkaround - editor-change', e);\n                  }\n                });\n              } catch(e) {\n                console.log('applyGoogleKeyboardWorkaround', e);\n              } \n            }\n            \n            /// observer to listen to the editor div changes \n            // select the target node\n            var target = document.querySelector('#editor');\n            \n            // create an observer instance\n            var tempText = \"\";\n            var observer = new MutationObserver(function(mutations) {\n                 var text = quilleditor.root.innerHTML; \n                 if(text != tempText){\n                      tempText = text;\n                     if(true) {\n                      OnTextChanged(text);\n                    } else {\n                      OnTextChanged.postMessage(text);\n                    }\n                     onRangeChanged(); \n                     quilleditor.focus();\n                 }\n            });\n\n            // configuration of the observer:\n            var config = { attributes: true, childList: true, characterData: true, subtree: true };\n\n            // pass in the target node, as well as the observer options\n            observer.observe(target, config);\n    \n           // stops the listener\n           //// observer.disconnect();\n          \n        \n           //// to accept all link formats \n           var Link = Quill.import('formats/link');\n              Link.sanitize = function(url) {\n                // modify url if desired\n                return url;\n              }\n             Quill.register(Link, true);\n           \n            /// quill custom font import\n            var FontStyle = Quill.import('attributors/class/font');\n            Quill.register(FontStyle, true);\n            \n            const Inline = Quill.import('blots/inline');\n            class RequirementBlot extends Inline {}\n            RequirementBlot.blotName = 'requirement';\n            RequirementBlot.tagName = 'requirement';\n            Quill.register(RequirementBlot);\n            \n            class ResponsibilityBlot extends Inline {}\n            ResponsibilityBlot.blotName = 'responsibility';\n            ResponsibilityBlot.tagName = 'responsibility';\n            Quill.register(ResponsibilityBlot);\n            \n             ///// quill shift enter key binding      \n              var bindings = {\n                  linebreak: {\n                      key: 13,\n                      shiftKey: true,\n                      handler: function(range) {\n                          this.quill.insertEmbed(range.index, 'breaker', true, Quill.sources.USER);\n                          this.quill.setSelection(range.index + 1, Quill.sources.SILENT);\n                          return false;\n                      }\n                  },\n                  enter: {\n                      key: 'Enter',\n                      handler: () => {\n                         if(true) {\n                          OnEditingCompleted(quilleditor.root.innerHTML);\n                          } else {\n                          OnEditingCompleted.postMessage(quilleditor.root.innerHTML);\n                          }\n                      }\n                  }\n              };\n              \n              let Embed = Quill.import('blots/embed');\n              \n              class Breaker extends Embed {\n                  static tagName = 'br';\n                  static blotName = 'breaker';\n              }\n              Quill.register(Breaker);\n\n            var quilleditor = new Quill('#editor', {\n              modules: {\n                toolbar: '#toolbar-container',\n                table: true,\n                 keyboard:  {},\n                history: {\n                  delay: 2000,\n                  maxStack: 500,\n                  userOnly: false\n                }\n              },\n              theme: 'snow',\n             scrollingContainer: '#scrolling-container', \n              placeholder: 'Description',\n              clipboard: {\n                matchVisual: true\n              }\n            });\n            \n          \n            const table = quilleditor.getModule('table');\n            quilleditor.enable(true);\n        \n           applyGoogleKeyboardWorkaround(quilleditor);\n            \n            let editorLoaded = false;\n            quilleditor.on('editor-change', function(eventName, ...args) {\n      \n             if (!editorLoaded) {\n                if(true) {\n                    EditorLoaded(true);\n                } else {\n                    EditorLoaded.postMessage(true);\n                }\n                  editorLoaded = true;\n                }\n             \n            });\n            \n            quilleditor.on('selection-change', function(range, oldRange, source)  {\n             /// console.log('selection changed');\n              onRangeChanged();\n              if(true){\n              OnSelectionChanged(getSelectionRange());\n              }else{\n              OnSelectionChanged.postMessage(getSelectionRange());\n              }     \n              \n            });\n                  \n            function onRangeChanged() { \n              try {\n                var range = quilleditor.getSelection(true);\n                if(range != null) {\n                  if(range.length == 0) {\n                    var format = quilleditor.getFormat();\n                    formatParser(format);\n                  } else {\n                    var format = quilleditor.getFormat(range.index, range.length);\n                    formatParser(format);\n                  }\n                } else {\n                 // console.log('Cursor not in the editor');\n                }\n              } catch(e) {\n              ///  console.log(e);\n              }\n            }\n            \n             function redo(){\n              quilleditor.history.redo();\n              return '';\n             }\n             \n             function undo(){\n              quilleditor.history.undo();\n              return '';\n             }\n             function clearHistory(){\n               quilleditor.history.clear();\n               return '';\n             }\n            \n            \n            function formatParser(format) {\n              var formatMap = {};\n              formatMap['bold'] = format['bold'];\n              formatMap['italic'] = format['italic'];\n              formatMap['underline'] = format['underline'];\n              formatMap['strike'] = format['strike'];\n              formatMap['blockqoute'] = format['blockqoute'];\n              formatMap['background'] = format['background'];\n              formatMap['code-block'] = format['code-block'];\n              formatMap['indent'] = format['indent'];\n              formatMap['direction'] = format['direction'];\n              formatMap['size'] = format['size'];\n              formatMap['header'] = format['header'];\n              formatMap['color'] = format['color'];\n              formatMap['font'] = format['font'];\n              formatMap['align'] = format['align'];\n              formatMap['list'] = format['list'];\n              formatMap['image'] = format['image'];\n              formatMap['video'] = format['video'];\n              formatMap['clean'] = format['clean'];\n              formatMap['link'] = format['link'];\n              if(true) {\n                UpdateFormat(JSON.stringify(formatMap));\n              } else {\n                UpdateFormat.postMessage(JSON.stringify(formatMap));\n              }\n            }\n     \n           \n            function getHtmlText() {\n              return quilleditor.root.innerHTML;\n            }\n \n            function getPlainText() {\n              var text = \"\";\n              try{\n                 text =  toPlaintext(quilleditor.getContents());\n              }catch(e){\n                 text = \"\";\n              }\n              return text; \n            }\n            \n            function toPlaintext(delta) {\n              return delta.reduce(function (text, op) {\n                if (!op.insert) throw new TypeError('only `insert` operations can be transformed!');\n                if (typeof op.insert !== 'string') return text + ' ';\n                return text + op.insert;\n              }, '');\n            };\n            \n            function getSelection() {\n            try{\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                return range.length;\n              }\n                }catch(e){\n                console.log('getSelection', e);\n              }\n              return -1;\n            }\n            \n            function getSelectionHtml() {\n              var selection = quilleditor.getSelection(true);\n              if(selection){\n              var selectedContent = quilleditor.getContents(selection.index, selection.length);\n              var tempContainer = document.createElement('div')\n              var tempQuill = new Quill(tempContainer);\n              tempQuill.setContents(selectedContent);\n              return tempContainer.querySelector('.ql-editor').innerHTML;\n              }\n              return '';\n            }\n            \n            function getSelectionRange() {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                var rangeMap = {};\n                rangeMap['length'] = range.length;\n                rangeMap['index'] = range.index;\n                return JSON.stringify(rangeMap);\n              }\n              return {};\n            }\n            \n            function setSelection(index, length) {\n            try{\n              setTimeout(() => quilleditor.setSelection(index, length), 1);\n              }catch(e){\n                console.log('setSelection', e);\n              }\n              return '';\n            }\n            \n            function setHtmlText(htmlString) {\n            try{\n               quilleditor.enable(false);\n               quilleditor.clipboard.dangerouslyPasteHTML(htmlString);   \n            }catch(e){\n               console.log('setHtmlText', e);\n            }\n             setTimeout(() =>   quilleditor.enable(true), 10);  \n              return '';\n            }\n            \n          \n            function setDeltaContent(deltaMap) {   \n              try{\n                  quilleditor.enable(false);\n                  const obj = JSON.parse(deltaMap);\n                  quilleditor.setContents(obj);\n                }catch(e){\n                  console.log('setDeltaContent', e);\n                }\n               setTimeout(() =>   quilleditor.enable(true), 10);  \n              return '';\n            }\n            \n            function getDelta() {\n              return JSON.stringify(quilleditor.getContents()); \n            }\n\n            function requestFocus() {\n              try{\n              var htmlString = quilleditor.root.innerHTML;\n               setTimeout(() => {\n                    quilleditor.setSelection(htmlString.length + 1, htmlString.length + 1);\n                    quilleditor.focus();\n               }, 600);\n              }catch(e){\n                console.log('requestFocus',e);\n              }\n            \n              return '';\n            }\n            \n            function unFocus() {\n              quilleditor.root.blur()\n              return '';\n            }\n  \n            function insertTable(row,column) {\n              table.insertTable(row, column);\n              return '';\n            }\n            \n            function modifyTable(type) {\n                if(type ==\"insertRowAbove\"){\n                 table.insertRowAbove();\n                }else if(type == \"insertRowBelow\"){\n                  table.insertRowBelow();\n                }else if(type == \"insertColumnLeft\"){\n                  table.insertColumnLeft();\n                }else if(type == \"insertColumnRight\"){\n                  table.insertColumnRight();\n                }else if(type == \"deleteRow\"){\n                  table.deleteRow();\n                }else if(type == \"deleteColumn\"){\n                  table.deleteColumn();\n                }else if(type == \"deleteTable\"){\n                  table.deleteTable();\n                }\n              return '';\n            }\n            \n            function insertHtmlText(htmlString, index) {\n              if(index == null) {\n                var range = quilleditor.getSelection(true);\n                if(range) {\n                  quilleditor.clipboard.dangerouslyPasteHTML(range.index, htmlString);\n                }\n              } else {\n                quilleditor.clipboard.dangerouslyPasteHTML(index, htmlString);\n              }\n              return '';\n            }\n            \n            function embedVideo(videoUrl) {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                quilleditor.insertEmbed(range.index, 'video', videoUrl);\n              }\n              return '';\n            }\n            \n            function embedImage(img) {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                quilleditor.insertEmbed(range.index, 'image', img);\n              }\n              return '';\n            }\n            \n            function enableEditor(isEnabled) {\n              quilleditor.enable(isEnabled);\n              return '';\n            }\n            \n            function setFormat(format, value) {\n            try{\n              if(format == 'clean') {\n                var range = quilleditor.getSelection(true);\n                if(range) {\n                  if(range.length == 0) {\n                    quilleditor.removeFormat(range.index, quilleditor.root.innerHTML.length);\n                  } else {\n                    quilleditor.removeFormat(range.index, range.length);\n                  }\n                } else {\n                  quilleditor.format('clean');\n                }\n              } else {\n                \n                quilleditor.format(format, value);\n              }\n            }catch(e){\n            console.log('setFormat',e);\n            }\n              return '';\n            } \n        </script>\n        </body>\n        </html>\n       "}}
 A.at0.prototype={
 af0(){var w,v=this,u=null
-v.a=new B.aO(A.cnV(15),x.h)
-v.b=new B.aO(A.cnV(15),x.Q)
+v.a=new B.aO(A.cnW(15),x.h)
+v.b=new B.aO(A.cnW(15),x.Q)
 w=x.N
 v.c=B.he(u,u,u,u,!1,w)
 v.d=B.he(u,u,u,u,!1,w)},
@@ -913,7 +913,7 @@ return B.k($async$Xq,v)},
 VS(d){return this.brd(d)},
 brd(d){var w=0,v=B.l(x.z),u,t=this,s,r
 var $async$VS=B.h(function(e,f){if(e===1)return B.i(f,v)
-while(true)switch(w){case 0:r=A.cHg(d)
+while(true)switch(w){case 0:r=A.cHh(d)
 if(r==null){w=1
 break}s=t.a.ga_()
 s=s==null?null:s.Rr(r)
@@ -953,7 +953,7 @@ r=r==null?null:r.RX()
 w=3
 return B.c(x._.b(r)?r:B.cx(r,x.z),$async$Pr)
 case 3:s=e
-u=s!=null?A.cjZ(D.as.uf(0,s,null)):new A.BY(0,0)
+u=s!=null?A.ck_(D.as.uf(0,s,null)):new A.BY(0,0)
 w=1
 break
 case 1:return B.j(u,v)}})
@@ -1031,7 +1031,7 @@ t=t.f
 u.push(new A.Ia(v,!1,null,q.x,t,r,s,null))}q.ap()},
 A(d){var w=null,v=this.a,u=v.w
 v=v.z
-u=B.nN(B.aL(w,A3.eN(B.cB_(this.aXr(d),D.h,D.aD,v,w,D.l,D.n,w,w,D.y),w,D.v,w,w,w,v),D.h,w,w,new B.bR(u,w,w,w,w,w,w,D.W),w,w,w,w,w,w,17976931348623157e292),!1,w)
+u=B.nN(B.aL(w,A3.eN(B.cB0(this.aXr(d),D.h,D.aD,v,w,D.l,D.n,w,w,D.y),w,D.v,w,w,w,v),D.h,w,w,new B.bR(u,w,w,w,w,w,w,D.W),w,w,w,w,w,w,17976931348623157e292),!1,w)
 return u},
 bDY(d){var w,v,u,t,s,r,q=this,p="direction",o="color",n="align",m="background"
 q.e=d
@@ -1107,7 +1107,7 @@ s=G.am4("packages/quill_html_editor/assets/camera_roll_icon.png",s.r,n)
 J.t(o.e,"video")
 m.push(B.nh(new B.ah(u,new A.My(new A.bxU(o),C.b42,o.a.d,new B.aM(r,r,s,n),n),n),n,v.c,n,n,C.dZ))}else if(v===C.a2Z){u=o.x
 s=o.a
-s=I.cc(C.aj9,s.r,n,s.f)
+s=I.cd(C.aj9,s.r,n,s.f)
 J.t(o.e,"link")
 m.push(B.nh(new B.ah(u,new A.My(new A.bxV(o),C.b43,o.a.d,s,n),n),n,v.c,n,n,C.dZ))}else if(v===C.b2u){u=o.x
 s=o.a.f
@@ -1157,13 +1157,13 @@ case 22:case 23:case 24:case 26:case 25:case 27:return B.G(["format","undo","val
 aX9(){var w,v=this,u=null,t=v.a.w,s=J.t(v.e,"size")
 if(s==null)s="normal"
 w=B.bH(u,u,v.a.r,u,u,u,u,u,u,u,u,12,u,u,u,u,u,!0,u,u,u,u,u,u,u,u)
-return U.Wj(D.F,new F.wv(A.cea(!0,A.cfW(D.by,t,u,u,!0,B.a([v.RD(8,"Small"),v.RD(12,"Normal"),v.RD(16,"Large"),v.RD(20,"Huge")],x.k),new A.bxQ(v),new A.bxR(v),w,s,x.z),D.Z),u),D.h,R.hW)},
+return U.Wj(D.F,new F.wv(A.cea(!0,A.cfX(D.by,t,u,u,!0,B.a([v.RD(8,"Small"),v.RD(12,"Normal"),v.RD(16,"Large"),v.RD(20,"Huge")],x.k),new A.bxQ(v),new A.bxR(v),w,s,x.z),D.Z),u),D.h,R.hW)},
 RD(d,e){var w=null,v=J.n(J.t(this.e,"size"),e.toLowerCase()),u=this.a
 return F.VG(new A.oi(B.ae(e,w,w,w,w,w,w,w,B.bH(w,w,v?u.x:u.r,w,w,w,w,w,w,w,w,d,w,w,D.aJ,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w),e.toLowerCase(),x.z)},
 RC(d){var w=null,v=this.a
 return new B.aM(w,w,B.ae(d,w,w,w,w,w,w,w,B.bH(w,w,d.toLowerCase()!=="normal"?v.x:v.r,w,w,w,w,w,w,w,w,14,w,w,D.aJ,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w)},
 aQb(){var w=this,v="align",u=w.a.w,t=J.n(J.t(w.e,v),"")||J.t(w.e,v)==null?"left":J.t(w.e,v)
-return new F.wv(A.cea(!1,A.cfW(D.c2,u,D.A,C.aVy,!0,B.a([w.RH("left"),w.RH("center"),w.RH("right"),w.RH("justify")],x.t),new A.bxO(w),null,null,t,x.N),D.Z),null)},
+return new F.wv(A.cea(!1,A.cfX(D.c2,u,D.A,C.aVy,!0,B.a([w.RH("left"),w.RH("center"),w.RH("right"),w.RH("justify")],x.t),new A.bxO(w),null,null,t,x.N),D.Z),null)},
 RH(d){var w,v,u
 if(d==="center")w=C.aj1
 else if(d==="right")w=C.aj4
@@ -1171,7 +1171,7 @@ else w=d==="justify"?C.aj2:C.aj3
 v=J.n(J.t(this.e,"align"),d)
 u=this.a
 v=v?u.x:u.r
-return F.VG(new A.oi(I.cc(w,v,null,u.f),null),d,x.N)},
+return F.VG(new A.oi(I.cd(w,v,null,u.f),null),d,x.N)},
 aY_(d){var w,v,u,t=this,s=null,r="color",q=t.r
 q===$&&B.b()
 w=t.a.f
@@ -1224,11 +1224,11 @@ case 23:return w.kV(C.ajH)
 case 24:return w.kV(C.ajG)
 case 18:case 20:case 17:case 25:case 26:case 27:return D.d3}},
 kV(d){var w=this,v=w.d?w.x:w.w
-return I.cc(d,v,null,w.r)},
+return I.cd(d,v,null,w.r)},
 aiP(d){var w=this,v=w.r
 return new B.aM(v,v,G.am4(d,w.d?w.x:w.w,null),null)},
 i6(d){var w=this
-return A.cIJ(w.x,w.w,w.r,d,null,w.f,w.c)}}
+return A.cIK(w.x,w.w,w.r,d,null,w.f,w.c)}}
 A.iJ.prototype={
 H(){return"ToolBarStyle."+this.b}}
 A.F2.prototype={}
@@ -1288,7 +1288,7 @@ M(){var w=null,v=x.F
 return new A.VR(C.Gp,new B.p7(B.a([],v),w,w),new B.p7(B.a([],v),w,w))}}
 A.VR.prototype={
 VB(){},
-m(){$.ar.lU(this)
+m(){$.ar.lV(this)
 this.am()},
 W(){var w=this
 w.ap()
@@ -1379,7 +1379,7 @@ case 5:s=-1
 q=1
 break}w=v.c
 w=r?new A.axr(w,u):new A.ag2(w,u)
-return V.clj(new V.On(q,B.hQ(u,u,!1,u,w,new B.L(v.e,v.f)),u),u,t,s)},
+return V.clk(new V.On(q,B.hQ(u,u,!1,u,w,new B.L(v.e,v.f)),u),u,t,s)},
 A(d){return this.aYE()}}
 A.Tx.prototype={
 M(){return new A.aBt()}}
@@ -1395,9 +1395,9 @@ v=B.dn(w,B.aL(w,w,D.h,B.V(D.d.ab(255*this.e),v>>>16&255,v>>>8&255,v&255),w,w,w,w
 return v}}
 A.ag2.prototype={
 aU(d,e){var w,v,u,t,s,r=$.ao(),q=r.be()
-r.d0()
+r.d1()
 q.saB(0,this.b)
-w=r.d0()
+w=r.d1()
 r=e.b
 v=r*0.69
 w.bM(0,0,v)
@@ -1415,7 +1415,7 @@ A.axr.prototype={
 aU(d,e){var w,v,u,t,s,r=$.ao(),q=r.be()
 q.st9(!0)
 q.saB(0,this.b)
-w=r.d0()
+w=r.d1()
 r=e.a
 v=r*0.66
 u=e.b
@@ -1577,7 +1577,7 @@ Yc(){var w=0,v=B.l(x.H),u=1,t,s=this,r,q,p,o,n,m,l,k,j
 var $async$Yc=B.h(function(d,e){if(d===1){t=e
 w=u}while(true)switch(w){case 0:u=3
 w=6
-return B.c($.cr8().mn(!1,D.aid,!0),$async$Yc)
+return B.c($.cr9().mn(!1,D.aid,!0),$async$Yc)
 case 6:r=e
 if(r!=null){q=J.h1(r.a)
 p=q.c
@@ -1651,7 +1651,7 @@ A.a4m.prototype={
 gj(d){return this.c.a},
 oY(d,e){var w=this.a
 w===$&&B.b()
-return B.e3(w.mg(d,e),x.z)},
+return B.e3(w.lI(d,e),x.z)},
 a_4(){var w=0,v=B.l(x.H),u=this,t
 var $async$a_4=B.h(function(d,e){if(d===1)return B.i(e,v)
 while(true)switch(w){case 0:t=u.c
@@ -1845,9 +1845,9 @@ w.srcdoc=A.c7u("<br>",!0,C.Bn,v)
 break}if(!D.e.bl(t,B.bx("http[s]?://",!1,!1,!1))){u.a.toString
 return}if(w===C.a1X){w=u.d
 w===$&&B.b()
-w=B.cNN(w.contentWindow)
+w=B.cNO(w.contentWindow)
 w.toString
-J.cwg(J.cvR(w),t)}else u.bhM(d.c,"get",t)
+J.cwh(J.cvS(w),t)}else u.bhM(d.c,"get",t)
 break}},
 S4(d){return this.b0F(d)},
 b0F(d){var w=0,v=B.l(x.H),u,t=this,s,r,q,p,o,n,m
@@ -1872,7 +1872,7 @@ q=n.i(o,"body")
 if(q==null)p=null
 else{n=x.N
 p=B.C(n,n)
-p.UC(p,J.cb(x.j.a(q),new A.c0i(),x.I))}t.aqf(p,t.w.c.a.c,r,m)
+p.UC(p,J.cc(x.j.a(q),new A.c0i(),x.I))}t.aqf(p,t.w.c.a.c,r,m)
 case 1:return B.j(u,v)}})
 return B.k($async$S4,v)},
 aqf(d,e,f,g){this.a1M(d,e,f,g).aK(0,new A.c0l(this,g,e,d),x.P).kz(new A.c0m(this,g))},
@@ -1916,7 +1916,7 @@ w=e.tz(0)
 w.toString
 if(f.length===0&&D.e.bl(w,"www."))v="https://"+w
 else v=w
-u=E.cg1("a")
+u=E.cg2("a")
 u.b.n(0,"href",f+v)
 u.gfI(0).P(0)
 w=E.a36(w)
@@ -2089,7 +2089,7 @@ v=w.a
 v.toString
 if(!w.w){w.w=!0
 v.z.$1(!0)}w=w.a.Q
-w.$1(d!=null?A.cjZ(D.as.uf(0,d,null)):new A.BY(0,0))}catch(u){}},
+w.$1(d!=null?A.ck_(D.as.uf(0,d,null)):new A.BY(0,0))}catch(u){}},
 $S:11}
 A.bm4.prototype={
 $1(d){var w=this.a
@@ -2106,7 +2106,7 @@ A.blT.prototype={
 $1(d){this.a.$0()},
 $S:26}
 A.c1R.prototype={
-$1(d){return"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890".charCodeAt($.cuG().Cr(62))},
+$1(d){return"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890".charCodeAt($.cuH().Cr(62))},
 $S:68}
 A.by9.prototype={
 $0(){},
@@ -2488,7 +2488,7 @@ $1(d){var w=J.a3(d)
 return new B.bu(J.aH(w.i(d,0)),J.aH(w.i(d,1)),x.I)},
 $S:814}
 A.c0l.prototype={
-$1(d){var w,v=this,u=v.a,t=v.b,s=A.cgM(C.ahz,d,'      <base href="'+t+"\">\n      <script>\n\n      document.addEventListener('click', e => {\n        if (frameElement && document.activeElement && document.activeElement.href) {\n          e.preventDefault()\n\n          var returnedObject = JSON.stringify({method: 'get', href: document.activeElement.href});\n          frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n        }\n      })\n      document.addEventListener('submit', e => {\n        if (frameElement && document.activeElement && document.activeElement.form && document.activeElement.form.action) {\n          e.preventDefault()\n\n          if (document.activeElement.form.method === 'post') {\n            var formData = new FormData(document.activeElement.form);\n            \n            var returnedObject = JSON.stringify({method: 'post', href: document.activeElement.form.action, body: [...formData]});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          } else {\n            var urlWithQueryParams = document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form))\n\n            var returnedObject = JSON.stringify({method: 'get', href: urlWithQueryParams});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          }\n        }\n      })\n      </script>\n      "),r=u.d
+$1(d){var w,v=this,u=v.a,t=v.b,s=A.cgN(C.ahz,d,'      <base href="'+t+"\">\n      <script>\n\n      document.addEventListener('click', e => {\n        if (frameElement && document.activeElement && document.activeElement.href) {\n          e.preventDefault()\n\n          var returnedObject = JSON.stringify({method: 'get', href: document.activeElement.href});\n          frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n        }\n      })\n      document.addEventListener('submit', e => {\n        if (frameElement && document.activeElement && document.activeElement.form && document.activeElement.form.action) {\n          e.preventDefault()\n\n          if (document.activeElement.form.method === 'post') {\n            var formData = new FormData(document.activeElement.form);\n            \n            var returnedObject = JSON.stringify({method: 'post', href: document.activeElement.form.action, body: [...formData]});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          } else {\n            var urlWithQueryParams = document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form))\n\n            var returnedObject = JSON.stringify({method: 'get', href: urlWithQueryParams});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          }\n        }\n      })\n      </script>\n      "),r=u.d
 r===$&&B.b()
 u.a.toString
 w=u.e
@@ -2529,7 +2529,7 @@ u(B.a5,[A.N2,A.a00,A.Ia,A.U6,A.adY,A.apY,A.oi])
 u(B.bF,[A.b7S,A.b7T,A.b7R,A.b7U,A.b7Q,A.b7V,A.b7P,A.bLV,A.bLT,A.bLP,A.bLO,A.bLR,A.bLQ,A.bm6,A.bm5,A.bm7,A.blW,A.blZ,A.bm_,A.bm0,A.bm1,A.bm2,A.bm3,A.bm4,A.blU,A.blT,A.c1R,A.bxU,A.bxV,A.bxW,A.bxS,A.bxR,A.bxQ,A.bxO,A.by1,A.bxZ,A.by8,A.by7,A.bI_,A.bHX,A.b1N,A.b1J,A.b1I,A.b1M,A.bNc,A.bNd,A.bN9,A.b83,A.c0k,A.c0f,A.c0e,A.c0j,A.c0i,A.c0l,A.c0m])
 u(B.D,[A.X6,A.a0q,A.a3H,A.VM,A.VQ,A.Tx,A.My,A.Pm,A.a4l])
 u(B.K,[A.aEO,A.a0r,A.a3I,A.aDG,A.aDM,A.aBt,A.aFk,A.aa5,A.aaY])
-u(B.ck,[A.bLW,A.bLX,A.bLU,A.bLN,A.bLS,A.blV,A.blY,A.blX,A.by9,A.bxX,A.bxT,A.bxP,A.bxN,A.by2,A.by0,A.by_,A.bxY,A.by4,A.by5,A.aVm,A.bI0,A.bHZ,A.b1H,A.b1K,A.b1L,A.bNg,A.bNb,A.bNe,A.bNa,A.bNf,A.bX9,A.bX7,A.c0n,A.c0h])
+u(B.cl,[A.bLW,A.bLX,A.bLU,A.bLN,A.bLS,A.blV,A.blY,A.blX,A.by9,A.bxX,A.bxT,A.bxP,A.bxN,A.by2,A.by0,A.by_,A.bxY,A.by4,A.by5,A.aVm,A.bI0,A.bHZ,A.b1H,A.b1K,A.b1L,A.bNg,A.bNb,A.bNe,A.bNa,A.bNf,A.bX9,A.bX7,A.c0n,A.c0h])
 u(B.dl,[A.bm9,A.bm8,A.by3,A.by6,A.aVn,A.bHV,A.bHW,A.bHY,A.bX8,A.bXa,A.b82,A.c0g])
 u(B.z,[A.at0,A.BY,A.fB,A.asz,A.mc,A.b98,A.aWT,A.ro,A.aly,A.bAi,A.zh,A.Im])
 u(B.dW,[A.iJ,A.pX,A.nG,A.b9T,A.axE,A.VV,A.a2x,A.bak,A.aSt])
@@ -2545,7 +2545,7 @@ B.bz(b.typeUniverse,JSON.parse('{"DP":{"es":[],"bb":[],"b9":[],"d":[]},"N2":{"a5
 B.kM(b.typeUniverse,JSON.parse('{"a4n":1}'))
 var y={b:"packages/quill_html_editor/assets/insert_table.png"}
 var x=(function rtii(){var w=B.x
-return{W:w("zh"),v:w("d5"),C:w("ro"),_:w("R<@>"),B:w("R<f?>"),K:w("aly<Im>"),t:w("p<l2<f>>"),k:w("p<l2<@>>"),x:w("p<pX>"),D:w("p<lT<aG>>"),O:w("p<bU>"),d:w("p<hG>"),F:w("p<m3>"),s:w("p<f>"),c:w("p<Ia>"),f:w("p<iJ>"),p:w("p<d>"),b:w("p<Je>"),a:w("p<aQ>"),q:w("aO<VR>"),l:w("aO<nK>"),h:w("aO<a0r>"),A:w("aO<K<D>>"),Q:w("aO<a3I>"),j:w("y<@>"),I:w("bu<f,f>"),g:w("a9<f,@>"),w:w("ft"),P:w("aD"),u:w("p7"),r:w("M"),n:w("BY"),N:w("f"),X:w("cK<f>"),G:w("bW<v>"),U:w("Im"),J:w("eg<od>"),e:w("Q7"),E:w("Qw<ce>"),y:w("v"),z:w("@"),S:w("r"),T:w("f?"),H:w("~")}})();(function constants(){var w=a.makeConstList
+return{W:w("zh"),v:w("d5"),C:w("ro"),_:w("R<@>"),B:w("R<f?>"),K:w("aly<Im>"),t:w("p<l2<f>>"),k:w("p<l2<@>>"),x:w("p<pX>"),D:w("p<lT<aG>>"),O:w("p<bU>"),d:w("p<hG>"),F:w("p<m3>"),s:w("p<f>"),c:w("p<Ia>"),f:w("p<iJ>"),p:w("p<d>"),b:w("p<Je>"),a:w("p<aQ>"),q:w("aO<VR>"),l:w("aO<nK>"),h:w("aO<a0r>"),A:w("aO<K<D>>"),Q:w("aO<a3I>"),j:w("y<@>"),I:w("bu<f,f>"),g:w("a9<f,@>"),w:w("ft"),P:w("aD"),u:w("p7"),r:w("M"),n:w("BY"),N:w("f"),X:w("cK<f>"),G:w("bW<v>"),U:w("Im"),J:w("eg<od>"),e:w("Q7"),E:w("Qw<cf>"),y:w("v"),z:w("@"),S:w("r"),T:w("f?"),H:w("~")}})();(function constants(){var w=a.makeConstList
 C.b8M=new A.aSt(0,"requireUserActionForAllMediaTypes")
 C.a8B=new A.aeW()
 C.a8F=new A.afI()
@@ -2577,7 +2577,7 @@ C.ahy=new A.VV(1,"aboveBodyCloseTag")
 C.ahz=new A.VV(2,"belowHeadOpenTag")
 C.ahA=new A.VV(3,"aboveHeadCloseTag")
 C.aZw=new B.X(!0,null,null,null,null,null,16,D.lU,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-C.b0N=new B.c3("Select Rows x Columns",null,C.aZw,null,null,null,null,null,null,null,null,null,null,null,null)
+C.b0N=new B.c4("Select Rows x Columns",null,C.aZw,null,null,null,null,null,null,null,null,null,null,null,null)
 C.ahM=new B.nH(1,D.eS,C.b0N,null)
 C.aj1=new B.aS(58027,"MaterialIcons",null,!1)
 C.aj2=new B.aS(58028,"MaterialIcons",null,!1)
@@ -2619,12 +2619,12 @@ C.ahg=new A.pX(4,"deleteRow")
 C.ahh=new A.pX(5,"deleteColumn")
 C.ahi=new A.pX(6,"deleteTable")
 C.zn=B.a(w([C.ahc,C.ahd,C.ahe,C.ahf,C.ahg,C.ahh,C.ahi]),x.x)
-C.b1k=new B.c3("Edit Table",null,K.a2y,null,null,null,null,null,null,null,null,null,null,null,null)
+C.b1k=new B.c4("Edit Table",null,K.a2y,null,null,null,null,null,null,null,null,null,null,null,null)
 C.aPm=new B.ah(A5.Gm,C.b1k,null)
 C.ahN=new B.nH(1,D.eS,C.aPm,null)
 C.avS=B.a(w([C.ahN,A2.aaF]),x.p)
 C.aTb=new B.o7(D.a5,D.l,D.n,D.k,null,D.y,null,D.h,C.avS,null)
-C.Bn=new B.ia(D.dm,0,B.x("ia<cYb>"))
+C.Bn=new B.ia(D.dn,0,B.x("ia<cYc>"))
 C.aVy=new B.aM(0,null,null,null)
 C.aVA=new B.aM(15,null,null,null)
 C.aVO=new N.HH(4,0,0,1)
@@ -2655,6 +2655,6 @@ C.a31=new A.iJ("Clears all formats",21,"clean")
 C.b2D=new A.iJ("Insert Youtube/Url",20,"video")
 C.b42=new A.axE(0,"video")
 C.b43=new A.axE(1,"hyperlink")})();(function lazyInitializers(){var w=a.lazy
-w($,"d3F","cuG",()=>B.c8L(null))})()};
+w($,"d3G","cuH",()=>B.c8L(null))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_208",e:"endPart",h:b})})($__dart_deferred_initializers__,"rI9vdcbLXqhBJ7wOV/lgX8aS3Es=");
+a.eventLog.push({p:"main.dart.js_208",e:"endPart",h:b})})($__dart_deferred_initializers__,"mYSDtZ9N6U9EXcvFN6SiM3mCnWE=");
