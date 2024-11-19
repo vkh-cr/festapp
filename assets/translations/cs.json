@@ -224,7 +224,7 @@
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Tato platforma nebo prohlížeč nepodporuje instalaci PWA nebo je aplikace již nainstalována.",
   "The app is already installed.": "Aplikace je již nainstalována.",
   "Download App": "Stáhnout aplikaci",
-  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Instalace selhala. Otevřete prosím tento odkaz ve výchozím systémovém prohlížeči vašeho zařízení (např. Mi Browser nebo Chrome). Poznámka: Některá zařízení nemusí podporovat instalaci webových aplikací.",
+  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Instalace se nezdařila. Otevřete prosím tento odkaz ve výchozím systémovém prohlížeči vašeho zařízení (např. Mi Browser nebo Chrome). Poznámka: Některá zařízení nemusí podporovat instalaci webových aplikací.",
   "Copied to clipboard": "Zkopírováno do schránky",
   "Install for Apple": "Nainstalovat pro Apple",
   "Install for Android": "Nainstalovat pro Android",
