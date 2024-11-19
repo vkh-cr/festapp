@@ -285,5 +285,9 @@
   "Advanced Settings": "Розширені налаштування",
   "Add New Event": "Додати нову подію",
   "Password or code": "Пароль або код",
+  "Copy Link": "Скопіювати посилання",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Відкрий цей вебсайт на своєму телефоні з Android у браузері, наприклад Chrome або Edge, і натисни кнопку Встановити зараз.",
+  "Install Now": "Встановити зараз",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Встанови {title}, щоб отримувати сповіщення, працювати офлайн і мати швидкий доступ через іконку.",
   "_": "_"
 }

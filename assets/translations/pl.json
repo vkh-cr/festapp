@@ -284,5 +284,9 @@
   "Advanced Settings": "Zaawansowane ustawienia",
   "Add New Event": "Dodaj nowe wydarzenie",
   "Password or code": "Hasło lub kod",
+  "Copy Link": "Kopiuj link",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Otwórz tę stronę internetową na swoim telefonie z Androidem w przeglądarce, takiej jak Chrome lub Edge, i kliknij przycisk Zainstaluj teraz.",
+  "Install Now": "Zainstaluj teraz",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Zainstaluj aplikację {title}, aby otrzymywać powiadomienia, korzystać z funkcji offline i mieć szybki dostęp przez ikonę.",
   "_": "_"
 }

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/services/PlatformHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -27,6 +28,11 @@ class _InstallPageState extends State<InstallPage> {
   bool _installFailed = false;
   String platform = "";
   final TextEditingController _urlController = TextEditingController();
+  final List<ExpansionTileController> _controllers = [
+    ExpansionTileController(),
+    ExpansionTileController(),
+    ExpansionTileController(),
+  ];
 
   @override
   void didChangeDependencies() {
@@ -60,6 +66,18 @@ class _InstallPageState extends State<InstallPage> {
 
   bool get _canInstallPWA => !_isAppInstalled && !_installFailed && _isPromptEnabled;
 
+  void _handleExpansion(int index) {
+    setState(() {
+      for (int i = 0; i < _controllers.length; i++) {
+        if (i == index) {
+          _controllers[i].expand();
+        } else {
+          _controllers[i].collapse();
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,18 +90,50 @@ class _InstallPageState extends State<InstallPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(32.0),
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                // App Icon and Explanation
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          image: DecorationImage(
+                            image: AssetImage('assets/icons/fstappicon.png'),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Text(
+                          "Install {title} to get notifications, offline functionality, and a quick launch icon.".tr(namedArgs: {"title":AppConfig.appName}),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: ThemeConfig.blackColor(context),
+                          ),
+                        ).tr(),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 48),
+                // Install Sections
                 buildInstallSection(
                   context,
                   "Install for Apple".tr(),
                   Icons.apple,
                   AppConfig.appStoreLink,
-                  platform == "ios",
+                  0,
                   isApple: true,
                 ),
                 buildInstallSection(
@@ -91,14 +141,15 @@ class _InstallPageState extends State<InstallPage> {
                   "Install for Android".tr(),
                   Icons.android,
                   AppConfig.playStoreLink,
-                  platform == "android",
+                  1,
+                  notice: "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.".tr(),
                 ),
                 buildInstallSection(
                   context,
                   "Install for PC/Mac".tr(),
                   Icons.desktop_windows,
                   AppConfig.desktopAppLink,
-                  platform == "web",
+                  2,
                 ),
               ],
             ),
@@ -113,26 +164,32 @@ class _InstallPageState extends State<InstallPage> {
       String title,
       IconData icon,
       String link,
-      bool initiallyExpanded, {
+      int index, {
         bool isApple = false,
         String? notice,
       }) {
     return ExpansionTile(
-      initiallyExpanded: initiallyExpanded,
+      controller: _controllers[index],
+      initiallyExpanded: platform == "ios" && index == 0 || platform == "android" && index == 1 || platform == "web" && index == 2,
       title: Row(
         children: [
-          Icon(icon),
+          Icon(icon, size: 24),
           const SizedBox(width: 10),
           Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],
       ),
+      onExpansionChanged: (expanded) {
+        if (expanded) {
+          _handleExpansion(index);
+        }
+      },
       children: [
         if (notice != null) ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               notice,
-              style: TextStyle(color: Colors.grey[800]),
+              style: TextStyle(color: ThemeConfig.blackColor(context).withOpacity(0.8)),
             ).tr(),
           ),
           const SizedBox(height: 10),
@@ -143,7 +200,7 @@ class _InstallPageState extends State<InstallPage> {
             children: [
               ButtonsHelper.bigButton(
                 context: context,
-                label: isApple ? "Download App".tr() : "Install App".tr(),
+                label: isApple ? "Download App".tr() : "Install Now".tr(),
                 onPressed: isApple ? () => InstallPage.jsInterop.openLinkInNewTab(link) : _canInstallPWA ? handleInstallButtonPress : null,
                 color: isApple || _canInstallPWA ? ThemeConfig.seed1 : Colors.grey,
                 textColor: Colors.white,
@@ -176,14 +233,14 @@ class _InstallPageState extends State<InstallPage> {
                               readOnly: true,
                             ),
                           ),
-                          IconButton(
-                            icon: Icon(Icons.copy),
+                          const SizedBox(width: 8.0),
+                          TextButton.icon(
                             onPressed: () {
                               Clipboard.setData(ClipboardData(text: _urlController.text));
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Copied to clipboard')),
-                              );
+                              ToastHelper.Show(context, "Copied to clipboard".tr());
                             },
+                            icon: Icon(Icons.copy),
+                            label: Text("Copy Link").tr(),
                           ),
                         ],
                       ),

@@ -285,5 +285,9 @@
   "Advanced Settings": "Pokročilé nastavenia",
   "Add New Event": "Pridať novú udalosť",
   "Password or code": "Heslo alebo kód",
+  "Copy Link": "Kopírovať odkaz",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Otvor túto webovú stránku na svojom telefóne s Androidom v prehliadači, ako je Chrome alebo Edge, a klikni na tlačidlo Nainštalovať teraz.",
+  "Install Now": "Nainštalovať teraz",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Nainštaluj si aplikáciu {title}, aby ti mohli chodiť notifikácie, aby aplikácia mohla fungovať aj offline, a aby sa dala spustiť cez ikonu.",
   "_": "_"
 }
