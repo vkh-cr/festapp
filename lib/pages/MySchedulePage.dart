@@ -10,7 +10,7 @@ import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 
-import '../styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 
 @RoutePage()
 class MySchedulePage extends StatefulWidget {
@@ -72,7 +72,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
         body: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: appMaxWidth),
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
                 child: SingleChildScrollView(
                     child: ScheduleTimeline(
                   eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots, context),

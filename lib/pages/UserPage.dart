@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
@@ -21,7 +22,8 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
@@ -155,7 +157,7 @@ class _UserPageState extends State<UserPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -170,13 +172,14 @@ class _UserPageState extends State<UserPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ButtonsHelper.buildQRCodeButton(
+                        child: ButtonsHelper.buildReferenceButton(
                           context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
-                              userData!.name!,
+                              userData?.occasionUser!.data![Tb.occasion_users.data_name],
                               AppConfig.appName,
-                              userData!.id!),
+                              userData?.occasionUser!.user!??""),
+                          icon: Icons.qr_code,
                           label: "Show my code".tr(),
                         ),
                       ),
@@ -203,7 +206,7 @@ class _UserPageState extends State<UserPage> {
                               }
 
                               final companion =
-                                  userData!.companions![index - 1];
+                                  userData?.companions![index - 1];
 
                               return Padding(
                                 padding:
@@ -221,14 +224,14 @@ class _UserPageState extends State<UserPage> {
                                       child: ExpansionTile(
                                         //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
                                         shape: const Border(),
-                                        title: Text(companion.name, style: TextStyle(
+                                        title: Text(companion!.name, style: TextStyle(
                                             fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),),
                                         subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
                                             style: TextStyle(
                                                 color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 13)),
                                         trailing:
-                                            ButtonsHelper.buildQRCodeButton(
+                                            ButtonsHelper.buildReferenceButton(
                                               context: context,
                                           onPressed: () =>
                                               _showFullScreenDialog(
@@ -237,6 +240,7 @@ class _UserPageState extends State<UserPage> {
                                             AppConfig.appName,
                                             companion.id,
                                           ),
+                                          icon: Icons.qr_code,
                                           label: "Show Code".tr(),
                                         ),
                                         expandedCrossAxisAlignment:
@@ -252,7 +256,7 @@ class _UserPageState extends State<UserPage> {
                                                   onEventPressed: (eventId) async {
                                                     await RouterService.navigateOccasion(
                                                         context,
-                                                        "${EventPage.ROUTE}/$eventId");
+                                                        "${EventPage.ROUTE}/$eventId").then((value) => loadData());
                                                     await loadData();
                                                   },
                                                   nodePosition: 0.3,
@@ -302,11 +306,11 @@ class _UserPageState extends State<UserPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                buildTextField("Name".tr(), userData?.name ?? ""),
-                buildTextField("Surname".tr(), userData?.surname ?? ""),
-                buildTextField("E-mail".tr(), userData?.email ?? ""),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.sex)),
-                buildTextField("Role".tr(), userData?.roleString??""),
+                buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
+                buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
+                buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
+                buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                buildTextField("Role".tr(), userData?.roleString ?? ""),
                 const SizedBox(
                   height: 16,
                 ),
@@ -353,7 +357,7 @@ class _UserPageState extends State<UserPage> {
                             confirmButtonMessage: "Proceed".tr());
                         if (answer) {
                           await AuthService.resetPasswordForEmail(
-                                  userData!.email!)
+                              userData!.occasionUser!.data![Tb.occasion_users.data_email])
                               .then((value) {
                             ToastHelper.Show(
                                 context,
@@ -363,14 +367,14 @@ class _UserPageState extends State<UserPage> {
                                 "Change Password Instructions".tr(),
                                 "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
                                     .tr(namedArgs: {
-                                  "email": userData!.email!
+                                  "email": userData!.occasionUser!.data![Tb.occasion_users.data_email]
                                 }));
                           });
                         }
                       },
                       child: Text(
                         "Change password".tr(),
-                        style: TextStyle(fontSize: normalClickableFontSize),
+                        style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                       ).tr(),
                     )),
                 const SizedBox(
@@ -386,7 +390,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr()),
                         child: Text(
                           "Delete account".tr(),
-                          style: TextStyle(fontSize: normalClickableFontSize),
+                          style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                         ).tr()))
               ],
             ),
@@ -432,7 +436,7 @@ class _UserPageState extends State<UserPage> {
   }
 
   void _redirectToAdminPage() {
-    RouterService.navigateOccasion(context, AdminPage.ROUTE);
+    RouterService.navigateOccasion(context, AdminPage.ROUTE).then((value) => loadData());
   }
 
   Future<void> loadData() async {

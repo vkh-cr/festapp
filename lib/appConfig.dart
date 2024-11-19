@@ -13,7 +13,6 @@ class AppConfig {
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
 
   static const int organization = 1;
@@ -21,6 +20,7 @@ class AppConfig {
   static const String webLink = "https://aksmcz.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/csa-2024/id6479449613";
   static const String playStoreLink = "";
+  static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
   static bool isProLicense = true;
 
@@ -40,11 +40,15 @@ class AppConfig {
     return isNotificationsSupported;
   }
 
-  static List<LanguageModel> availableLanguages = [
+  static List<LanguageModel> availableLanguages() => [
     LanguageModel(const Locale("cs"), "Čeština"),
   ];
 
   static String getUserPrefix(String email){
       return "$organization+$email";
   }
+
+  static List<String> compatibleUrls() => [
+    AppConfig.webLink
+  ];
 }

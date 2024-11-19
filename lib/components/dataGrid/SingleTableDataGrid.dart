@@ -25,7 +25,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
   final T Function(Map<String, dynamic>) fromPlutoJson;
   final BuildContext context;
 
-  final DataGridExtendedActions? actionsExtended;
+  final DataGridActionsController? actionsExtended;
   final List<DataGridAction>? headerChildren;
 
   SingleTableDataGrid(this.context, this.loadData, this.fromPlutoJson, this.firstColumnType, this.idColumn, {required this.columns, this.headerChildren, this.actionsExtended});

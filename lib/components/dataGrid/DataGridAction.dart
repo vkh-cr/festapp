@@ -7,8 +7,9 @@ class DataGridAction{
   DataGridAction({this.action, this.name, this.isEnabled});
 }
 
-class DataGridExtendedActions{
+class DataGridActionsController{
+  bool Function()? isAddActionPossible;
   bool Function()? areAllActionsEnabled;
   DataGridAction? saveAction;
-  DataGridExtendedActions({this.saveAction, this.areAllActionsEnabled});
+  DataGridActionsController({this.saveAction, this.areAllActionsEnabled, this.isAddActionPossible});
 }
