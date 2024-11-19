@@ -53,7 +53,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
-    AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
+    AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),

@@ -78,6 +78,7 @@ Deno.serve(async (req) => {
     .from("email_templates")
     .select()
     .eq("id", "SIGN_IN_CODE")
+    .eq("organization", organizationId)
     .single();
 
   const subs = {
@@ -99,6 +100,7 @@ Deno.serve(async (req) => {
       "from": _DEFAULT_EMAIL,
       "to": userEmail,
       "template": template.data.id,
+      "organization": organizationId
     });
 
   return new Response(JSON.stringify({ "email": userEmail, "code": 200 }), {
