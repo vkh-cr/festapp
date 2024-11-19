@@ -9,7 +9,7 @@ import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:pwa_install/pwa_install.dart';
+import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
@@ -24,15 +24,11 @@ class SynchroService {
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
-          .select(Tb.occasions.data)
+          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
           .eq(Tb.occasions.id, RightsService.currentOccasion!)
           .single();
 
-      if(data[Tb.occasions.data] == null) {
-        toReturn = OccasionSettingsModel.DefaultSettings;
-      } else {
-        toReturn = OccasionSettingsModel.fromJson(data[Tb.occasions.data]);
-      }
+      toReturn = OccasionSettingsModel.fromJson(data);
     }
 
     globalSettingsModel = toReturn;
@@ -60,7 +56,7 @@ class SynchroService {
     var messages = await DbNews.getAllNewsMessages();
     await OfflineDataService.saveAllMessages(messages);
 
-    if (isPwaInstalledOrNative() )
+    if (PlatformHelper.isPwaInstalledOrNative())
     {
       await DbEvents.updateEventDescriptions();
       await DbInformation.updateInfoDescription();
@@ -69,11 +65,13 @@ class SynchroService {
     await DbEvents.synchronizeMySchedule();
   }
 
-  static bool isPwaInstalledOrNative() => !const bool.fromEnvironment('dart.library.js_util') || PWAInstall().launchMode!.installed;
-
-  static Future<OccasionLinkModel> getOccasionFromLink(String link) async {
-    var data = await _supabase.rpc("get_occasion_from_link",
-        params: {"link_txt": link, "org_id": AppConfig.organization});
+  static Future<OccasionLinkModel> getAppConfig(String link) async {
+    var data = await _supabase.rpc("get_app_config",
+        params: {"data_in": {
+          "link": link,
+          "organization": AppConfig.organization,
+          "platform": await PlatformHelper.getPlatform()
+        }});
     return OccasionLinkModel.fromJson(data);
   }
 

@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/services.dart';
 import '../services/js/js_interop.dart';
@@ -37,7 +37,7 @@ class _InstallPageState extends State<InstallPage> {
   }
 
   Future<void> loadSettings() async {
-    bool isAppInstalled = SynchroService.isPwaInstalledOrNative();
+    bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
 
     setState(() {
       _isAppInstalled = isAppInstalled;
@@ -74,7 +74,7 @@ class _InstallPageState extends State<InstallPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

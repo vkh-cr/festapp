@@ -39,7 +39,8 @@ class _UsersTabState extends State<UsersTab> {
     ColumnHelper.INVITED
   ];
 
-  List<UserInfoModel> _allUsers = [];
+  List<UserInfoModel>? _allUsers; // Initialize as null to indicate loading state
+  Key refreshKey = UniqueKey(); // Initialize the refresh key
 
   @override
   void initState() {
@@ -49,40 +50,43 @@ class _UsersTabState extends State<UsersTab> {
 
   Future<void> loadUsers() async {
     _allUsers = await DbUsers.getAllUsersBasics();
-    setState(() {});
+    setState(() {
+      refreshKey = UniqueKey(); // Update the key to force a full rebuild
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleTableDataGrid<OccasionUserModel>(
-      context,
-      DbUsers.getOccasionUsers,
-      OccasionUserModel.fromPlutoJson,
-      DataGridFirstColumn.deleteAndCheck,
-      Tb.occasion_users.user,
-      actionsExtended: DataGridExtendedActions(areAllActionsEnabled: RightsService.canUpdateUsers),
-      headerChildren: [
-        DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
-        DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
-        DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
-        DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
-        DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
-      ],
-      columns: ColumnHelper.generateColumns(columnIdentifiers),
-    ).DataGrid();
-  }
+    if (_allUsers == null) {
+      return Center(child: CircularProgressIndicator()); // Show loading indicator if users are not loaded yet
+    }
 
+    return KeyedSubtree(
+      key: refreshKey,
+      child: SingleTableDataGrid<OccasionUserModel>(
+        context,
+        DbUsers.getOccasionUsers,
+        OccasionUserModel.fromPlutoJson,
+        DataGridFirstColumn.deleteAndCheck,
+        Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(
+            areAllActionsEnabled: RightsService.canUpdateUsers),
+        headerChildren: [
+          DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
+          DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
+          DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
+          DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
+          DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
+        ],
+        columns: ColumnHelper.generateColumns(columnIdentifiers),
+      ).DataGrid(),
+    );
+  }
 
   // Actions (import, invite, change password, add to group, add existing)
   Future<void> _import(SingleTableDataGrid dataGrid) async {
     await UserManagementHelper.import(context);
-    await dataGrid.reloadData();
-  }
-
-  Future<void> _invite(SingleTableDataGrid dataGrid) async {
-    var users = _getCheckedUsers(dataGrid);
-    if (users.isEmpty) return;
-    await _processInvites(users, dataGrid);
+    await loadUsers(); // Reload users and force rebuild
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
@@ -103,16 +107,15 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
-    if (_allUsers.isEmpty) _allUsers = await DbUsers.getAllUsersBasics();
-    var nonAdded = _allUsers.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
-    DialogHelper.chooseUser(context,  (chosenUser) async {
+    if (_allUsers == null) return;
+    var nonAdded = _allUsers!.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
+    DialogHelper.chooseUser(context, (chosenUser) async {
       if (chosenUser != null) {
-          await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
-          ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+        await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
+        ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenUser.toString()}));
+        await loadUsers(); // Reload users and force rebuild
       }
     }, nonAdded, "Add".tr());
-
-    await dataGrid.reloadData();
   }
 
   List<OccasionUserModel> _getCheckedUsers(SingleTableDataGrid dataGrid) {
@@ -123,16 +126,72 @@ class _UsersTabState extends State<UsersTab> {
     );
   }
 
-  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
-    var confirm = await DialogHelper.showConfirmationDialogAsync(context, "Invite".tr(), "${"Users will get invitation via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}");
-    if (confirm) {
-      for (var user in users) {
-        await AuthService.resetPasswordForEmail(user.data![Tb.occasion_users.data_email]);
-        user.data![Tb.occasion_users.data_isInvited] = true;
-        await DbUsers.updateOccasionUser(user);
-        ToastHelper.Show(context, "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}));
+  Future<void> _invite(SingleTableDataGrid dataGrid) async {
+    var users = _getCheckedUsers(dataGrid);
+    if (users.isEmpty) return;
+
+    // Separate already invited users
+    var alreadyInvitedUsers = users.where((user) => user.data![Tb.occasion_users.data_isInvited] == true).toList();
+    var newUsers = users.where((user) => user.data![Tb.occasion_users.data_isInvited] != true).toList();
+
+    if (alreadyInvitedUsers.isNotEmpty) {
+      // Ask the user if they want to reinvite already invited users
+      var reinviteConfirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Invite".tr(),
+        "Some users have already been invited. Do you want to invite them again and send a new sign-in code?".tr(),
+      );
+
+      // If the user chooses not to reinvite, exclude already invited users
+      if (!reinviteConfirm) {
+        await _processInvites(newUsers, dataGrid);
+        return;
       }
-      await dataGrid.reloadData();
+    }
+
+    // Proceed with inviting both new and previously invited users (if reinvite confirmed)
+    await _processInvites(users, dataGrid);
+  }
+
+  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
+    var confirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Invite".tr(),
+        "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
+    );
+
+    if (confirm) {
+      ValueNotifier<int> invitedCount = ValueNotifier(0);
+
+      // Show progress dialog
+      DialogHelper.showProgressDialogAsync(
+        context,
+        "Invite".tr(),
+        users.length,
+        invitedCount,
+      );
+
+      for (var user in users) {
+        // slow down to avoid rate limit SES has 14 email / sec
+        await Future.delayed(Duration(milliseconds: 100));
+        await AuthService.sendSignInCode(user);
+        invitedCount.value++;
+
+        ToastHelper.Show(
+          context,
+          "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
+        );
+      }
+
+      Navigator.of(context).pop(); // Close the dialog
+
+      await loadUsers(); // Reload users
+
+      await DialogHelper.showInformationDialogAsync(
+        context,
+        "Invite".tr(),
+        "Users ({count}) invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
+      );
     }
   }
 }

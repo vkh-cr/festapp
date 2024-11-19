@@ -1,9 +1,11 @@
 import 'package:fstapp/dataModels/CompanionModel.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 
 class UserInfoModel {
@@ -14,12 +16,12 @@ class UserInfoModel {
   String? sex;
   String? role;
   String? phone;
-  String? accommodation;
   DateTime? birthDate;
   bool? isAdmin = false;
   bool? isEditor = false;
   PlaceModel? accommodationPlace;
-  UserGroupInfoModel? userGroup;
+  List<UserGroupInfoModel>? userGroups;
+  UserGroupInfoModel? eventUserGroup;
   OccasionUserModel? occasionUser;
   String? roleString;
   List<CompanionModel>? companions = [];
@@ -31,7 +33,6 @@ class UserInfoModel {
   static const String nameColumn = "name";
   static const String surnameColumn = "surname";
   static const String sexColumn = "sex";
-  static const String accommodationColumn = "accommodation";
   static const String phoneColumn = "phone";
   static const String roleColumn = "role";
   static const String birthDateColumn = "birth_date";
@@ -48,16 +49,7 @@ class UserInfoModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
 
-  static const sexes = ["male", "female"];
-
-  static const migrateColumns =
-  {
-  emailReadonlyColumn:"e-mail",
-  nameColumn:"jméno",
-  surnameColumn:"příjmení",
-  sexColumn:"pohlaví",
-  roleColumn:"role",
-  };
+  static const sexes = ["male", "female", ""];
 
   UserInfoModel({
      this.id,
@@ -70,15 +62,15 @@ class UserInfoModel {
      this.isAdmin,
      this.isEditor,
      this.phone,
-     this.accommodation,
      this.accommodationPlace,
-     this.userGroup,
+     this.eventUserGroup,
      this.occasionUser,
      this.roleString,
      this.companions,
      this.companionParent,
      this.eventIds,
-  });  
+     this.userGroups,
+  });
 
   static UserInfoModel fromJson(Map<String, dynamic> json) {
     return UserInfoModel(
@@ -87,14 +79,8 @@ class UserInfoModel {
       email: json[emailReadonlyColumn]??json[Tb.user_info.data]?[Tb.occasion_users.data_email]??json["email"],
       name: json[nameColumn],
       surname: json[surnameColumn],
-      //todo remove
-      phone: json[phoneColumn],
-      //todo remove
-      role: json[roleColumn],
-      //todo remove
-      accommodation: json[accommodationColumn],
       accommodationPlace: json[placeColumn]!=null?PlaceModel.fromJson(json[placeColumn]):null,
-      userGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
+      eventUserGroup: json[userGroupColumn]!=null?UserGroupInfoModel.fromJson(json[userGroupColumn]):null,
       occasionUser: json[occasionUserColumn]!=null?OccasionUserModel.fromJson(json[occasionUserColumn]):null,
       roleString: json[roleStringColumn],
       companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
@@ -115,13 +101,12 @@ class UserInfoModel {
     phoneColumn: phone,
     roleColumn: role,
     placeColumn: accommodationPlace?.toJson(),
-    userGroupColumn: userGroup?.toJson(),
+    userGroupColumn: eventUserGroup?.toJson(),
     occasionUserColumn: occasionUser?.toUpdateJson(),
     roleStringColumn: roleString,
     sexColumn: sex,
     birthDateColumn: DateFormat(birthDateJsonFormat).format(birthDate??DateTime.fromMicrosecondsSinceEpoch(0)),
     userCompanionsColumn: companions != null ? List<dynamic>.from(companions!.map((c)=>c.toJson())) : null,
-    Tb.user_info.data: {Tb.occasion_users.data_email: email}
   };
 
   @override
@@ -138,24 +123,21 @@ class UserInfoModel {
     return "$name ${(surname!=null && surname!.isNotEmpty) ? "${surname![0]}." : "-"}";
   }
 
-  bool hasGroup() => userGroup != null;
+  bool hasGroup() => eventUserGroup != null;
+
+  UserGroupInfoModel? get getGameUserGroup => userGroups?.firstWhereOrNull((g)=>g.type == InformationModel.gameType);
 
   bool isSignedIn = false;
 
 
-  static String sexToLocale(String? sx) => sx == "male" ? "Male".tr() : "Female".tr();
+  static String sexToLocale(String? sx) {
+    if (sx == "female") {
+      return "Female".tr();
+    } else if (sx == "male") {
+      return "Male".tr();
+    }
 
-  bool importedEquals(Map<String, dynamic> u) {
-    return 
-        u[emailReadonlyColumn].toString().trim().toLowerCase() == email
-        && u[nameColumn].toString().trim() == name
-        && u[surnameColumn].toString().trim() == surname
-        && u[accommodationColumn].toString().trim() == accommodation
-        && u[roleColumn].toString().trim() == role
-        && u[phoneColumn].toString().trim() == phone
-        //todo fix
-        //&& ((u.containsKey(birthDateColumn) && u[birthDateColumn] != null) ? DateTime.parse(u[birthDateColumn]):null) == birthDate
-        && (u[sexColumn].toString().trim().toLowerCase().startsWith("m") ? "male" : "female") == sex;
+    return "Not specified".tr();
   }
 
   @override

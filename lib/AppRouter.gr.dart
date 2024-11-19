@@ -8,38 +8,40 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i23;
-import 'package:flutter/foundation.dart' as _i25;
-import 'package:flutter/material.dart' as _i24;
-import 'package:fstapp/dataModels/PlaceModel.dart' as _i26;
+import 'package:auto_route/auto_route.dart' as _i25;
+import 'package:flutter/foundation.dart' as _i27;
+import 'package:flutter/material.dart' as _i26;
+import 'package:fstapp/dataModels/PlaceModel.dart' as _i28;
 import 'package:fstapp/pages/AdminDashboardPage.dart' deferred as _i1;
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart'
     deferred as _i2;
 import 'package:fstapp/pages/CheckPage.dart' deferred as _i3;
-import 'package:fstapp/pages/EventPage.dart' deferred as _i4;
-import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i5;
-import 'package:fstapp/pages/HomePage.dart' deferred as _i6;
-import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i7;
-import 'package:fstapp/pages/InfoPage.dart' deferred as _i8;
-import 'package:fstapp/pages/InstallPage.dart' deferred as _i9;
-import 'package:fstapp/pages/LoginPage.dart' deferred as _i10;
-import 'package:fstapp/pages/MapPage.dart' deferred as _i11;
-import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i12;
-import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i13;
-import 'package:fstapp/pages/NewsPage.dart' deferred as _i14;
-import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i17;
-import 'package:fstapp/pages/SchedulePage.dart' deferred as _i18;
-import 'package:fstapp/pages/SettingsPage.dart' deferred as _i19;
-import 'package:fstapp/pages/SignupPage.dart' deferred as _i20;
-import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i16;
-import 'package:fstapp/pages/SongPage.dart' deferred as _i21;
-import 'package:fstapp/pages/TimetablePage.dart' deferred as _i15;
-import 'package:fstapp/pages/UserPage.dart' deferred as _i22;
+import 'package:fstapp/pages/EventEditPage.dart' deferred as _i4;
+import 'package:fstapp/pages/EventPage.dart' deferred as _i5;
+import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i6;
+import 'package:fstapp/pages/GamePage.dart' deferred as _i7;
+import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i8;
+import 'package:fstapp/pages/InfoPage.dart' deferred as _i9;
+import 'package:fstapp/pages/InstallPage.dart' deferred as _i10;
+import 'package:fstapp/pages/LoginPage.dart' deferred as _i11;
+import 'package:fstapp/pages/MapPage.dart' deferred as _i12;
+import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i13;
+import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i14;
+import 'package:fstapp/pages/NewsPage.dart' deferred as _i15;
+import 'package:fstapp/pages/OccasionHomePage.dart' deferred as _i16;
+import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i18;
+import 'package:fstapp/pages/SchedulePage.dart' deferred as _i19;
+import 'package:fstapp/pages/SettingsPage.dart' deferred as _i20;
+import 'package:fstapp/pages/SignupPage.dart' deferred as _i21;
+import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i17;
+import 'package:fstapp/pages/SongPage.dart' deferred as _i22;
+import 'package:fstapp/pages/TimetablePage.dart' deferred as _i23;
+import 'package:fstapp/pages/UserPage.dart' deferred as _i24;
 
 /// generated route for
 /// [_i1.AdminDashboardPage]
-class AdminDashboardRoute extends _i23.PageRouteInfo<void> {
-  const AdminDashboardRoute({List<_i23.PageRouteInfo>? children})
+class AdminDashboardRoute extends _i25.PageRouteInfo<void> {
+  const AdminDashboardRoute({List<_i25.PageRouteInfo>? children})
       : super(
           AdminDashboardRoute.name,
           initialChildren: children,
@@ -47,10 +49,10 @@ class AdminDashboardRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'AdminDashboardRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
+      return _i25.DeferredWidget(
         _i1.loadLibrary,
         () => _i1.AdminDashboardPage(),
       );
@@ -60,8 +62,8 @@ class AdminDashboardRoute extends _i23.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i2.AdminPage]
-class AdminRoute extends _i23.PageRouteInfo<void> {
-  const AdminRoute({List<_i23.PageRouteInfo>? children})
+class AdminRoute extends _i25.PageRouteInfo<void> {
+  const AdminRoute({List<_i25.PageRouteInfo>? children})
       : super(
           AdminRoute.name,
           initialChildren: children,
@@ -69,10 +71,10 @@ class AdminRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'AdminRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
+      return _i25.DeferredWidget(
         _i2.loadLibrary,
         () => _i2.AdminPage(),
       );
@@ -82,11 +84,11 @@ class AdminRoute extends _i23.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i3.CheckPage]
-class CheckRoute extends _i23.PageRouteInfo<CheckRouteArgs> {
+class CheckRoute extends _i25.PageRouteInfo<CheckRouteArgs> {
   CheckRoute({
     required int id,
-    _i24.Key? key,
-    List<_i23.PageRouteInfo>? children,
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
           CheckRoute.name,
           args: CheckRouteArgs(
@@ -99,13 +101,13 @@ class CheckRoute extends _i23.PageRouteInfo<CheckRouteArgs> {
 
   static const String name = 'CheckRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<CheckRouteArgs>(
           orElse: () => CheckRouteArgs(id: pathParams.getInt('id')));
-      return _i23.DeferredWidget(
+      return _i25.DeferredWidget(
         _i3.loadLibrary,
         () => _i3.CheckPage(
           id: args.id,
@@ -124,7 +126,7 @@ class CheckRouteArgs {
 
   final int id;
 
-  final _i24.Key? key;
+  final _i26.Key? key;
 
   @override
   String toString() {
@@ -133,12 +135,64 @@ class CheckRouteArgs {
 }
 
 /// generated route for
-/// [_i4.EventPage]
-class EventRoute extends _i23.PageRouteInfo<EventRouteArgs> {
+/// [_i4.EventEditPage]
+class EventEditRoute extends _i25.PageRouteInfo<EventEditRouteArgs> {
+  EventEditRoute({
+    _i26.Key? key,
+    int? id,
+    List<_i25.PageRouteInfo>? children,
+  }) : super(
+          EventEditRoute.name,
+          args: EventEditRouteArgs(
+            key: key,
+            id: id,
+          ),
+          rawPathParams: {'id': id},
+          initialChildren: children,
+        );
+
+  static const String name = 'EventEditRoute';
+
+  static _i25.PageInfo page = _i25.PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<EventEditRouteArgs>(
+          orElse: () => EventEditRouteArgs(id: pathParams.optInt('id')));
+      return _i25.DeferredWidget(
+        _i4.loadLibrary,
+        () => _i4.EventEditPage(
+          key: args.key,
+          id: args.id,
+        ),
+      );
+    },
+  );
+}
+
+class EventEditRouteArgs {
+  const EventEditRouteArgs({
+    this.key,
+    this.id,
+  });
+
+  final _i26.Key? key;
+
+  final int? id;
+
+  @override
+  String toString() {
+    return 'EventEditRouteArgs{key: $key, id: $id}';
+  }
+}
+
+/// generated route for
+/// [_i5.EventPage]
+class EventRoute extends _i25.PageRouteInfo<EventRouteArgs> {
   EventRoute({
     int? id,
-    _i24.Key? key,
-    List<_i23.PageRouteInfo>? children,
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
           EventRoute.name,
           args: EventRouteArgs(
@@ -151,15 +205,15 @@ class EventRoute extends _i23.PageRouteInfo<EventRouteArgs> {
 
   static const String name = 'EventRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<EventRouteArgs>(
           orElse: () => EventRouteArgs(id: pathParams.optInt('id')));
-      return _i23.DeferredWidget(
-        _i4.loadLibrary,
-        () => _i4.EventPage(
+      return _i25.DeferredWidget(
+        _i5.loadLibrary,
+        () => _i5.EventPage(
           id: args.id,
           key: args.key,
         ),
@@ -176,7 +230,7 @@ class EventRouteArgs {
 
   final int? id;
 
-  final _i24.Key? key;
+  final _i26.Key? key;
 
   @override
   String toString() {
@@ -185,9 +239,9 @@ class EventRouteArgs {
 }
 
 /// generated route for
-/// [_i5.ForgotPasswordPage]
-class ForgotPasswordRoute extends _i23.PageRouteInfo<void> {
-  const ForgotPasswordRoute({List<_i23.PageRouteInfo>? children})
+/// [_i6.ForgotPasswordPage]
+class ForgotPasswordRoute extends _i25.PageRouteInfo<void> {
+  const ForgotPasswordRoute({List<_i25.PageRouteInfo>? children})
       : super(
           ForgotPasswordRoute.name,
           initialChildren: children,
@@ -195,46 +249,62 @@ class ForgotPasswordRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'ForgotPasswordRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i5.loadLibrary,
-        () => _i5.ForgotPasswordPage(),
+      return _i25.DeferredWidget(
+        _i6.loadLibrary,
+        () => _i6.ForgotPasswordPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i6.HomePage]
-class HomeRoute extends _i23.PageRouteInfo<void> {
-  const HomeRoute({List<_i23.PageRouteInfo>? children})
-      : super(
-          HomeRoute.name,
+/// [_i7.GamePage]
+class GameRoute extends _i25.PageRouteInfo<GameRouteArgs> {
+  GameRoute({
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
+  }) : super(
+          GameRoute.name,
+          args: GameRouteArgs(key: key),
           initialChildren: children,
         );
 
-  static const String name = 'HomeRoute';
+  static const String name = 'GameRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i6.loadLibrary,
-        () => _i6.HomePage(),
+      final args =
+          data.argsAs<GameRouteArgs>(orElse: () => const GameRouteArgs());
+      return _i25.DeferredWidget(
+        _i7.loadLibrary,
+        () => _i7.GamePage(key: args.key),
       );
     },
   );
 }
 
+class GameRouteArgs {
+  const GameRouteArgs({this.key});
+
+  final _i26.Key? key;
+
+  @override
+  String toString() {
+    return 'GameRouteArgs{key: $key}';
+  }
+}
+
 /// generated route for
-/// [_i7.HtmlEditorPage]
-class HtmlEditorRoute extends _i23.PageRouteInfo<HtmlEditorRouteArgs> {
+/// [_i8.HtmlEditorPage]
+class HtmlEditorRoute extends _i25.PageRouteInfo<HtmlEditorRouteArgs> {
   HtmlEditorRoute({
     Map<String, dynamic>? content,
-    _i24.Key? key,
-    List<_i23.PageRouteInfo>? children,
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
           HtmlEditorRoute.name,
           args: HtmlEditorRouteArgs(
@@ -246,14 +316,14 @@ class HtmlEditorRoute extends _i23.PageRouteInfo<HtmlEditorRouteArgs> {
 
   static const String name = 'HtmlEditorRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
       final args = data.argsAs<HtmlEditorRouteArgs>(
           orElse: () => const HtmlEditorRouteArgs());
-      return _i23.DeferredWidget(
-        _i7.loadLibrary,
-        () => _i7.HtmlEditorPage(
+      return _i25.DeferredWidget(
+        _i8.loadLibrary,
+        () => _i8.HtmlEditorPage(
           content: args.content,
           key: args.key,
         ),
@@ -270,7 +340,7 @@ class HtmlEditorRouteArgs {
 
   final Map<String, dynamic>? content;
 
-  final _i24.Key? key;
+  final _i26.Key? key;
 
   @override
   String toString() {
@@ -279,12 +349,12 @@ class HtmlEditorRouteArgs {
 }
 
 /// generated route for
-/// [_i8.InfoPage]
-class InfoRoute extends _i23.PageRouteInfo<InfoRouteArgs> {
+/// [_i9.InfoPage]
+class InfoRoute extends _i25.PageRouteInfo<InfoRouteArgs> {
   InfoRoute({
     int? id,
-    _i25.Key? key,
-    List<_i23.PageRouteInfo>? children,
+    _i27.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
           InfoRoute.name,
           args: InfoRouteArgs(
@@ -297,15 +367,15 @@ class InfoRoute extends _i23.PageRouteInfo<InfoRouteArgs> {
 
   static const String name = 'InfoRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<InfoRouteArgs>(
           orElse: () => InfoRouteArgs(id: pathParams.optInt('id')));
-      return _i23.DeferredWidget(
-        _i8.loadLibrary,
-        () => _i8.InfoPage(
+      return _i25.DeferredWidget(
+        _i9.loadLibrary,
+        () => _i9.InfoPage(
           id: args.id,
           key: args.key,
         ),
@@ -322,7 +392,7 @@ class InfoRouteArgs {
 
   final int? id;
 
-  final _i25.Key? key;
+  final _i27.Key? key;
 
   @override
   String toString() {
@@ -331,9 +401,9 @@ class InfoRouteArgs {
 }
 
 /// generated route for
-/// [_i9.InstallPage]
-class InstallRoute extends _i23.PageRouteInfo<void> {
-  const InstallRoute({List<_i23.PageRouteInfo>? children})
+/// [_i10.InstallPage]
+class InstallRoute extends _i25.PageRouteInfo<void> {
+  const InstallRoute({List<_i25.PageRouteInfo>? children})
       : super(
           InstallRoute.name,
           initialChildren: children,
@@ -341,21 +411,21 @@ class InstallRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'InstallRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i9.loadLibrary,
-        () => _i9.InstallPage(),
+      return _i25.DeferredWidget(
+        _i10.loadLibrary,
+        () => _i10.InstallPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i10.LoginPage]
-class LoginRoute extends _i23.PageRouteInfo<void> {
-  const LoginRoute({List<_i23.PageRouteInfo>? children})
+/// [_i11.LoginPage]
+class LoginRoute extends _i25.PageRouteInfo<void> {
+  const LoginRoute({List<_i25.PageRouteInfo>? children})
       : super(
           LoginRoute.name,
           initialChildren: children,
@@ -363,25 +433,25 @@ class LoginRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'LoginRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i10.loadLibrary,
-        () => _i10.LoginPage(),
+      return _i25.DeferredWidget(
+        _i11.loadLibrary,
+        () => _i11.LoginPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i11.MapPage]
-class MapRoute extends _i23.PageRouteInfo<MapRouteArgs> {
+/// [_i12.MapPage]
+class MapRoute extends _i25.PageRouteInfo<MapRouteArgs> {
   MapRoute({
     int? id,
-    _i26.PlaceModel? place,
-    _i24.Key? key,
-    List<_i23.PageRouteInfo>? children,
+    _i28.PlaceModel? place,
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
           MapRoute.name,
           args: MapRouteArgs(
@@ -395,15 +465,15 @@ class MapRoute extends _i23.PageRouteInfo<MapRouteArgs> {
 
   static const String name = 'MapRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<MapRouteArgs>(
           orElse: () => MapRouteArgs(id: pathParams.optInt('id')));
-      return _i23.DeferredWidget(
-        _i11.loadLibrary,
-        () => _i11.MapPage(
+      return _i25.DeferredWidget(
+        _i12.loadLibrary,
+        () => _i12.MapPage(
           id: args.id,
           place: args.place,
           key: args.key,
@@ -422,9 +492,9 @@ class MapRouteArgs {
 
   final int? id;
 
-  final _i26.PlaceModel? place;
+  final _i28.PlaceModel? place;
 
-  final _i24.Key? key;
+  final _i26.Key? key;
 
   @override
   String toString() {
@@ -433,9 +503,9 @@ class MapRouteArgs {
 }
 
 /// generated route for
-/// [_i12.MySchedulePage]
-class MyScheduleRoute extends _i23.PageRouteInfo<void> {
-  const MyScheduleRoute({List<_i23.PageRouteInfo>? children})
+/// [_i13.MySchedulePage]
+class MyScheduleRoute extends _i25.PageRouteInfo<void> {
+  const MyScheduleRoute({List<_i25.PageRouteInfo>? children})
       : super(
           MyScheduleRoute.name,
           initialChildren: children,
@@ -443,21 +513,21 @@ class MyScheduleRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'MyScheduleRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i12.loadLibrary,
-        () => _i12.MySchedulePage(),
+      return _i25.DeferredWidget(
+        _i13.loadLibrary,
+        () => _i13.MySchedulePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i13.NewsFormPage]
-class NewsFormRoute extends _i23.PageRouteInfo<void> {
-  const NewsFormRoute({List<_i23.PageRouteInfo>? children})
+/// [_i14.NewsFormPage]
+class NewsFormRoute extends _i25.PageRouteInfo<void> {
+  const NewsFormRoute({List<_i25.PageRouteInfo>? children})
       : super(
           NewsFormRoute.name,
           initialChildren: children,
@@ -465,21 +535,21 @@ class NewsFormRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'NewsFormRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i13.loadLibrary,
-        () => _i13.NewsFormPage(),
+      return _i25.DeferredWidget(
+        _i14.loadLibrary,
+        () => _i14.NewsFormPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i14.NewsPage]
-class NewsRoute extends _i23.PageRouteInfo<void> {
-  const NewsRoute({List<_i23.PageRouteInfo>? children})
+/// [_i15.NewsPage]
+class NewsRoute extends _i25.PageRouteInfo<void> {
+  const NewsRoute({List<_i25.PageRouteInfo>? children})
       : super(
           NewsRoute.name,
           initialChildren: children,
@@ -487,43 +557,43 @@ class NewsRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'NewsRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i14.loadLibrary,
-        () => _i14.NewsPage(),
+      return _i25.DeferredWidget(
+        _i15.loadLibrary,
+        () => _i15.NewsPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i15.ProgramViewPage]
-class ProgramViewRoute extends _i23.PageRouteInfo<void> {
-  const ProgramViewRoute({List<_i23.PageRouteInfo>? children})
+/// [_i16.OccasionHomePage]
+class OccasionHomeRoute extends _i25.PageRouteInfo<void> {
+  const OccasionHomeRoute({List<_i25.PageRouteInfo>? children})
       : super(
-          ProgramViewRoute.name,
+          OccasionHomeRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'ProgramViewRoute';
+  static const String name = 'OccasionHomeRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i15.loadLibrary,
-        () => _i15.ProgramViewPage(),
+      return _i25.DeferredWidget(
+        _i16.loadLibrary,
+        () => _i16.OccasionHomePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i16.ResetPasswordPage]
-class ResetPasswordRoute extends _i23.PageRouteInfo<void> {
-  const ResetPasswordRoute({List<_i23.PageRouteInfo>? children})
+/// [_i17.ResetPasswordPage]
+class ResetPasswordRoute extends _i25.PageRouteInfo<void> {
+  const ResetPasswordRoute({List<_i25.PageRouteInfo>? children})
       : super(
           ResetPasswordRoute.name,
           initialChildren: children,
@@ -531,21 +601,21 @@ class ResetPasswordRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'ResetPasswordRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i16.loadLibrary,
-        () => _i16.ResetPasswordPage(),
+      return _i25.DeferredWidget(
+        _i17.loadLibrary,
+        () => _i17.ResetPasswordPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i17.ScheduleNavigationPage]
-class ScheduleNavigationRoute extends _i23.PageRouteInfo<void> {
-  const ScheduleNavigationRoute({List<_i23.PageRouteInfo>? children})
+/// [_i18.ScheduleNavigationPage]
+class ScheduleNavigationRoute extends _i25.PageRouteInfo<void> {
+  const ScheduleNavigationRoute({List<_i25.PageRouteInfo>? children})
       : super(
           ScheduleNavigationRoute.name,
           initialChildren: children,
@@ -553,21 +623,21 @@ class ScheduleNavigationRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'ScheduleNavigationRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i17.loadLibrary,
-        () => _i17.ScheduleNavigationPage(),
+      return _i25.DeferredWidget(
+        _i18.loadLibrary,
+        () => _i18.ScheduleNavigationPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i18.SchedulePage]
-class ScheduleRoute extends _i23.PageRouteInfo<void> {
-  const ScheduleRoute({List<_i23.PageRouteInfo>? children})
+/// [_i19.SchedulePage]
+class ScheduleRoute extends _i25.PageRouteInfo<void> {
+  const ScheduleRoute({List<_i25.PageRouteInfo>? children})
       : super(
           ScheduleRoute.name,
           initialChildren: children,
@@ -575,21 +645,21 @@ class ScheduleRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'ScheduleRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i18.loadLibrary,
-        () => _i18.SchedulePage(),
+      return _i25.DeferredWidget(
+        _i19.loadLibrary,
+        () => _i19.SchedulePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i19.SettingsPage]
-class SettingsRoute extends _i23.PageRouteInfo<void> {
-  const SettingsRoute({List<_i23.PageRouteInfo>? children})
+/// [_i20.SettingsPage]
+class SettingsRoute extends _i25.PageRouteInfo<void> {
+  const SettingsRoute({List<_i25.PageRouteInfo>? children})
       : super(
           SettingsRoute.name,
           initialChildren: children,
@@ -597,21 +667,21 @@ class SettingsRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'SettingsRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i19.loadLibrary,
-        () => _i19.SettingsPage(),
+      return _i25.DeferredWidget(
+        _i20.loadLibrary,
+        () => _i20.SettingsPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i20.SignupPage]
-class SignupRoute extends _i23.PageRouteInfo<void> {
-  const SignupRoute({List<_i23.PageRouteInfo>? children})
+/// [_i21.SignupPage]
+class SignupRoute extends _i25.PageRouteInfo<void> {
+  const SignupRoute({List<_i25.PageRouteInfo>? children})
       : super(
           SignupRoute.name,
           initialChildren: children,
@@ -619,59 +689,81 @@ class SignupRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'SignupRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i20.loadLibrary,
-        () => _i20.SignupPage(),
+      return _i25.DeferredWidget(
+        _i21.loadLibrary,
+        () => _i21.SignupPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i21.SongPage]
-class SongRoute extends _i23.PageRouteInfo<SongRouteArgs> {
-  SongRoute({
-    _i24.Key? key,
-    List<_i23.PageRouteInfo>? children,
+/// [_i22.SongbookPage]
+class SongbookRoute extends _i25.PageRouteInfo<SongbookRouteArgs> {
+  SongbookRoute({
+    _i26.Key? key,
+    List<_i25.PageRouteInfo>? children,
   }) : super(
-          SongRoute.name,
-          args: SongRouteArgs(key: key),
+          SongbookRoute.name,
+          args: SongbookRouteArgs(key: key),
           initialChildren: children,
         );
 
-  static const String name = 'SongRoute';
+  static const String name = 'SongbookRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      final args =
-          data.argsAs<SongRouteArgs>(orElse: () => const SongRouteArgs());
-      return _i23.DeferredWidget(
-        _i21.loadLibrary,
-        () => _i21.SongPage(key: args.key),
+      final args = data.argsAs<SongbookRouteArgs>(
+          orElse: () => const SongbookRouteArgs());
+      return _i25.DeferredWidget(
+        _i22.loadLibrary,
+        () => _i22.SongbookPage(key: args.key),
       );
     },
   );
 }
 
-class SongRouteArgs {
-  const SongRouteArgs({this.key});
+class SongbookRouteArgs {
+  const SongbookRouteArgs({this.key});
 
-  final _i24.Key? key;
+  final _i26.Key? key;
 
   @override
   String toString() {
-    return 'SongRouteArgs{key: $key}';
+    return 'SongbookRouteArgs{key: $key}';
   }
 }
 
 /// generated route for
-/// [_i22.UserPage]
-class UserRoute extends _i23.PageRouteInfo<void> {
-  const UserRoute({List<_i23.PageRouteInfo>? children})
+/// [_i23.TimetablePage]
+class TimetableRoute extends _i25.PageRouteInfo<void> {
+  const TimetableRoute({List<_i25.PageRouteInfo>? children})
+      : super(
+          TimetableRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'TimetableRoute';
+
+  static _i25.PageInfo page = _i25.PageInfo(
+    name,
+    builder: (data) {
+      return _i25.DeferredWidget(
+        _i23.loadLibrary,
+        () => _i23.TimetablePage(),
+      );
+    },
+  );
+}
+
+/// generated route for
+/// [_i24.UserPage]
+class UserRoute extends _i25.PageRouteInfo<void> {
+  const UserRoute({List<_i25.PageRouteInfo>? children})
       : super(
           UserRoute.name,
           initialChildren: children,
@@ -679,12 +771,12 @@ class UserRoute extends _i23.PageRouteInfo<void> {
 
   static const String name = 'UserRoute';
 
-  static _i23.PageInfo page = _i23.PageInfo(
+  static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
-      return _i23.DeferredWidget(
-        _i22.loadLibrary,
-        () => _i22.UserPage(),
+      return _i25.DeferredWidget(
+        _i24.loadLibrary,
+        () => _i24.UserPage(),
       );
     },
   );

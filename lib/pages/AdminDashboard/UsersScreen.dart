@@ -29,7 +29,7 @@ class _UsersScreenState extends State<UsersScreen> {
       OccasionUserModel.fromPlutoJson,
       DataGridFirstColumn.deleteAndCheck,
       Tb.occasion_users.user,
-      actionsExtended: DataGridExtendedActions(
+      actionsExtended: DataGridActionsController(
         saveAction: DataGridAction(
           action: (datagrid, [action]) async {
             await action!();

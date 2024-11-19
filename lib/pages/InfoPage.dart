@@ -2,17 +2,22 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/FeatureModel.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/pages/GamePage.dart';
+import 'package:fstapp/pages/SongPage.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import '../services/ToastHelper.dart';
 import '../services/js/js_interop.dart';
@@ -57,56 +62,104 @@ class _InfoPageState extends State<InfoPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             controller: _scrollController,
-            child: ExpansionPanelList(
-              expansionCallback: (panelIndex, isExpanded) async {
-                await handleExpansion(panelIndex, isExpanded);
-              },
-              children: _informationList == null
-                  ? []
-                  : _informationList!.map<ExpansionPanel>((InformationModel item) {
-                int index = _informationList!.indexOf(item);
-                return ExpansionPanel(
-                  backgroundColor: ThemeConfig.backgroundColor(context),
-                  headerBuilder: (BuildContext context, bool isExpanded) {
-                    return ListTile(
-                      title: Text(item.title ?? ""),
-                    );
-                  },
-                  body: _isItemLoading[index] ?? false
-                      ? const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                      : Column(
-                    children: [
-                      if (RightsService.isEditor())
-                        ElevatedButton(
-                          onPressed: () async {
-                            var result = await RouterService.navigatePageInfo(
-                                context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
-                            if (result != null) {
-                              setState(() {
-                                item.description = result as String;
-                              });
-                              await DbInformation.updateInformation(item);
-                              ToastHelper.Show(context, "Content has been changed.".tr());
-                            }
-                          },
-                          child: const Text("Edit content").tr(),
-                        ),
-                      Padding(
-                        padding: const EdgeInsetsDirectional.all(12),
-                        child: HtmlView(html: item.description ?? "", isSelectable: true),
-                      )
-                    ],
+            child: Column(
+              children: [
+                if(SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME) ||
+                    SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[300]!),
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Game button
+                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME))
+                            ButtonsHelper.buildReferenceButton(
+                              context: context,
+                              onPressed: () {
+                                if (!AuthService.isLoggedIn()) {
+                                  ToastHelper.Show(context, "Sign in to participate in the game.".tr());
+                                  return;
+                                }
+                                RouterService.navigateOccasion(context, GamePage.ROUTE);
+                              },
+                              icon: Icons.gamepad,
+                              label: "Game",
+                            ),
+                          const SizedBox(width: 16), // Add spacing between buttons
+                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
+                            ButtonsHelper.buildReferenceButton(
+                              context: context,
+                              onPressed: () {
+                                RouterService.navigateOccasion(context, SongbookPage.ROUTE); // Replace with your songbook route
+                              },
+                              icon: Icons.library_music,
+                              label: "Songbook",
+                            ),
+                        ],
+                      ),
+                    ),
                   ),
-                  isExpanded: item.isExpanded,
-                  canTapOnHeader: true,
-                );
-              }).toList(),
+                // Information list
+                ExpansionPanelList(
+                  expansionCallback: (panelIndex, isExpanded) async {
+                    await handleExpansion(panelIndex, isExpanded);
+                  },
+                  children: _informationList == null
+                      ? []
+                      : _informationList!.map<ExpansionPanel>((InformationModel item) {
+                    int index = _informationList!.indexOf(item);
+                    return ExpansionPanel(
+                      backgroundColor: ThemeConfig.backgroundColor(context),
+                      headerBuilder: (BuildContext context, bool isExpanded) {
+                        return ListTile(
+                          title: Text(item.title ?? ""),
+                        );
+                      },
+                      body: _isItemLoading[index] ?? false
+                          ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                          : Column(
+                        children: [
+                          if (RightsService.isEditor())
+                            ElevatedButton(
+                              onPressed: () async {
+                                var result = await RouterService.navigatePageInfo(
+                                    context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
+                                if (result != null) {
+                                  setState(() {
+                                    item.description = result as String;
+                                  });
+                                  await DbInformation.updateInformation(item);
+                                  ToastHelper.Show(context, "Content has been changed.".tr());
+                                }
+                              },
+                              child: const Text("Edit content").tr(),
+                            ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.all(12),
+                            child: HtmlView(html: item.description ?? "", isSelectable: true),
+                          ),
+                        ],
+                      ),
+                      isExpanded: item.isExpanded,
+                      canTapOnHeader: true,
+                    );
+                  }).toList(),
+                ),
+              ],
             ),
           ),
         ),
@@ -122,8 +175,8 @@ class _InfoPageState extends State<InfoPage> {
     await loadDataOffline();
     if (widget.id != null) {
       var focused = allInfo.firstWhereOrNull((b) => b.id == widget.id);
-      if (focused != null) {
-        var index = allInfo.indexOf(focused);
+      if (focused != null && _informationList != null) {
+        var index = _informationList!.indexWhere((i)=>i.id == focused.id);
         await handleExpansion(index, true);
         _scrollToExpandedItem(index);
       }
@@ -160,26 +213,17 @@ class _InfoPageState extends State<InfoPage> {
     });
 
     var info = _informationList![index];
-    await fillDescriptionFromOffline(info);
+    await DbInformation.fillDescriptionFromOffline(info);
     setState(() {
       if (info.description != null) {
         _isItemLoading[index] = false;
       }
     });
     await DbInformation.updateInfoDescription([info.id!]);
-    await fillDescriptionFromOffline(info);
+    await DbInformation.fillDescriptionFromOffline(info);
     setState(() {
       _isItemLoading[index] = false;
     });
-  }
-
-  Future<void> fillDescriptionFromOffline(InformationModel info) async {
-    var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
-    if (infoDesc != null) {
-      setState(() {
-        info.description = infoDesc.description ?? "";
-      });
-    }
   }
 
   Future<void> loadDataOffline() async {

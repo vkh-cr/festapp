@@ -17,12 +17,12 @@ class UserManagementHelper{
       return;
     }
     var users = await ImportHelper.getUsersFromFile(file);
-    var addOrUpdateUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() != "storno");
-    var deleteUsers = users.where((element) => element[Tb.user_info.accommodation]?.toLowerCase() == "storno");
+    var addOrUpdateUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() != "storno");
+    var deleteUsers = users.where((element) => element[Tb.occasion_users.data_text4]?.toLowerCase() == "storno");
 
     var really = await DialogHelper.showConfirmationDialogAsync(context,
         "Importing users".tr(),
-        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
+        "${"Users".tr()} (${users.length}):\n${users.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
         confirmButtonMessage: "Proceed".tr());
 
     if(!really)
@@ -34,9 +34,9 @@ class UserManagementHelper{
 
     List<Map<String, dynamic>> toBeCreated = [];
     List<Map<String, dynamic>> toBeUpdated = [];
-    for(var u in addOrUpdateUsers)
+    for(var u in users)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email]!.toLowerCase() == u[Tb.user_info.email_readonly]!.toLowerCase());
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email]?.toLowerCase() == u[Tb.occasion_users.data_email]?.toLowerCase());
       if(existing == null) {
         toBeCreated.add(u);
         continue;
@@ -55,13 +55,13 @@ class UserManagementHelper{
           "Creating users".tr(),
           "New users found. Do you want to create them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeCreated.length}):\n${toBeCreated.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeCreated.forEach((u) async {
           await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
-          ToastHelper.Show(context, "Created {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
+          ToastHelper.Show(context, "Created {item}.".tr(namedArgs: {"item": u[Tb.occasion_users.data_email]}));
         });
       }
     }
@@ -71,13 +71,15 @@ class UserManagementHelper{
           "Updating users".tr(),
           "These users have some changes. Do you want to update them?".tr() +
           "\n" +
-          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[Tb.user_info.email_readonly]).toList().join(",\n")}",
+          "${"Users".tr()} (${toBeUpdated.length}):\n${toBeUpdated.map((value) => value[Tb.occasion_users.data_email]).toList().join(",\n")}",
           confirmButtonMessage: "Proceed".tr());
 
       if(really) {
         toBeUpdated.forEach((u) async {
-          await DbUsers.updateExistingImportedOccasionUser(OccasionUserModel.fromImportedJson(u));
-          ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": u[Tb.user_info.email_readonly]}));
+          await DbUsers.updateExistingImportedOccasionUser(
+              OccasionUserModel.fromImportedJson(u,
+                  existingUsers.firstWhereOrNull((e)=>e.data?[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email])));
+          ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": u[Tb.occasion_users.data_email]}));
         });
       }
     }
@@ -85,8 +87,8 @@ class UserManagementHelper{
     List<OccasionUserModel> toBeDeleted = [];
     for(var u in deleteUsers)
     {
-      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email] == u[Tb.user_info.email_readonly]);
-      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[Tb.user_info.email_readonly] == u[Tb.user_info.email_readonly]);
+      var existing = existingUsers.firstWhereOrNull((element) => element.data?[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email]);
+      var duplicated = addOrUpdateUsers.firstWhereOrNull((element) => element[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email]);
 
       if(existing != null && duplicated == null) {
         toBeDeleted.add(existing);

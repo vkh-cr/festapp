@@ -1,16 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import '../styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 @RoutePage()
@@ -30,12 +30,12 @@ class _SignupPageState extends State<SignupPage> {
   final dynamic fields =
   {"fields":
   [
-    {"type":"name"},
-    {"type":"surname"},
-    {"type":"sex"},
-    {"type":"email"},
-    {"type":"city"},
-    {"type":"birthYear"},
+    {"type":FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeSex},
+    {"type":FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
+    {"type":FormHelper.fieldTypeBirthYear},
   ]};
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -57,7 +57,7 @@ class _SignupPageState extends State<SignupPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),
@@ -69,7 +69,7 @@ class _SignupPageState extends State<SignupPage> {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          style: const TextStyle(fontSize: 18, color: Colors.black),
+                          style: TextStyle(fontSize: 18, color: ThemeConfig.blackColor(context)),
                           text: "Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.".tr(namedArgs: {"email": fieldsData?["email"]}),
                         ),
                         const WidgetSpan(
@@ -85,7 +85,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getFormFields(fields),
+                    ...FormHelper.getFormFields(fields["fields"]),
                       const SizedBox(
                         height: 16,
                       ),

@@ -103,9 +103,6 @@ class _ServiceDialogState extends State<ServiceDialog> {
               TextField(
                 controller: titleController,
                 decoration: InputDecoration(labelText: "Title".tr()),
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(30),
-                ],
               ),
               const SizedBox(height: 10),
               TextField(
@@ -113,7 +110,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
                 decoration: InputDecoration(labelText: widget.referenceString),
                 keyboardType: TextInputType.number,
                 inputFormatters: [
-                  LengthLimitingTextInputFormatter(5),
+                  LengthLimitingTextInputFormatter(10),
                   FilteringTextInputFormatter.digitsOnly,
                 ],
               ),
@@ -154,9 +151,6 @@ class _ServiceDialogState extends State<ServiceDialog> {
               TextField(
                 controller: _titleController,
                 decoration: InputDecoration(labelText: "Title".tr()),
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(30),
-                ],
               ),
               const SizedBox(height: 10),
               Row(
@@ -166,9 +160,6 @@ class _ServiceDialogState extends State<ServiceDialog> {
                     child: TextField(
                       controller: _codeController,
                       decoration: InputDecoration(labelText: "Code".tr()),
-                      inputFormatters: [
-                        LengthLimitingTextInputFormatter(20),
-                      ],
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -179,7 +170,7 @@ class _ServiceDialogState extends State<ServiceDialog> {
                       decoration: InputDecoration(labelText: widget.referenceString),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
-                        LengthLimitingTextInputFormatter(5),
+                        LengthLimitingTextInputFormatter(10),
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                     ),

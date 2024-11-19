@@ -80,15 +80,6 @@ class ColumnHelper {
         width: 100,
       ),
     ],
-    ACCOMMODATION: [
-      PlutoColumn(
-        title: "Accommodation".tr(),
-        enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_accommodation,
-        type: PlutoColumnType.text(),
-        width: 100,
-      ),
-    ],
     PHONE: [
       PlutoColumn(
         title: "Phone".tr(),
@@ -138,7 +129,7 @@ class ColumnHelper {
       PlutoColumn(
         title: "Note".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text3,
+        field: Tb.occasion_users.data_note,
         type: PlutoColumnType.text(),
         width: 200,
       ),
@@ -147,7 +138,7 @@ class ColumnHelper {
       PlutoColumn(
         title: "Diet".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
-        field: Tb.occasion_users.data_text4,
+        field: Tb.occasion_users.data_diet,
         type: PlutoColumnType.text(),
         width: 200,
       ),
@@ -163,6 +154,20 @@ class ColumnHelper {
       }
 
       return columns;
+    },
+    ACCOMMODATION: (Map<String, dynamic> data) {
+      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList();
+      select ??= [];
+      select.add("");
+      return [
+        PlutoColumn(
+        title: "Accommodation".tr(),
+        field: DbOccasions.serviceTypeAccommodation,
+        type: PlutoColumnType.select(select),
+        applyFormatterInEditing: true,
+        enableEditingMode: true,
+        width: 100
+      )];
     },
     ADMINISTRATOR: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
