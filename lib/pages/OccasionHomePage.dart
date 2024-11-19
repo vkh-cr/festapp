@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -50,6 +51,9 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: ThemeConfig.appBarColor(),
+    ));
     StylesHelper.setMetaThemeColor(ThemeConfig.seed1);
   }
 
