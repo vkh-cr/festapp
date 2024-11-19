@@ -285,5 +285,9 @@
   "Advanced Settings": "Advanced Settings",
   "Add New Event": "Add New Event",
   "Password or code": "Password or code",
+  "Copy Link": "Copy Link",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",
+  "Install Now": "Install Now",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Install {title} to get notifications, offline functionality, and a quick launch icon.",
   "_":"_"
 }
