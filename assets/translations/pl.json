@@ -223,7 +223,7 @@
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Ta platforma lub przeglądarka nie obsługuje instalacji PWA lub aplikacja jest już zainstalowana.",
   "The app is already installed.": "Aplikacja jest już zainstalowana.",
   "Download App": "Pobierz aplikację",
-  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Instalacja nie powiodła się. Spróbuj otworzyć ten link w przeglądarce Chrome, Edge lub innej.",
+  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Instalacja nie powiodła się. Proszę otworzyć ten link w domyślnej przeglądarce systemowej urządzenia (np. Mi Browser lub Chrome). Uwaga: Niektóre urządzenia mogą nie obsługiwać instalacji aplikacji internetowych.",
   "Copied to clipboard": "Skopiowane do schowka",
   "Install for Apple": "Zainstaluj dla Apple",
   "Install for Android": "Zainstaluj dla Android",

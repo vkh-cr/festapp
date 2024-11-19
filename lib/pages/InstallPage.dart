@@ -113,7 +113,7 @@ class _InstallPageState extends State<InstallPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 22),
                       Expanded(
                         child: Text(
                           "Install {title} to get notifications, offline functionality, and a quick launch icon.".tr(namedArgs: {"title":AppConfig.appName}),
@@ -220,7 +220,7 @@ class _InstallPageState extends State<InstallPage> {
                   child: Column(
                     children: [
                       const Text(
-                        "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",
+                        "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",
                         style: TextStyle(color: Colors.red),
                         textAlign: TextAlign.center,
                       ).tr(),

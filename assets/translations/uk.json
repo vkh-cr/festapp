@@ -224,7 +224,7 @@
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Ця платформа або браузер не підтримує встановлення PWA або додаток уже встановлено.",
   "The app is already installed.": "Додаток уже встановлено.",
   "Download App": "Завантажити додаток",
-  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Не вдалося встановити. Спробуйте відкрити це посилання в браузері Chrome, Edge або іншому.",
+  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Інсталяція не вдалася. Будь ласка, відкрийте це посилання у стандартному системному браузері вашого пристрою (наприклад, Mi Browser або Chrome). Примітка: Деякі пристрої можуть не підтримувати встановлення вебзастосунків.",
   "Copied to clipboard": "Скопійовано до буфера обміну",
   "Install for Apple": "Встановити для Apple",
   "Install for Android": "Встановити для Android",
