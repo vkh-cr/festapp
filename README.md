@@ -42,7 +42,7 @@ Both technologies were chosen to speed up development, and they have effectively
 ## Currently in production
 
 - [Absolventský Velehrad](https://av23.cz)
-- [Člověk a Víra](https://ff23.cz)
+- [Člověk a Víra](https://clovekavira.netlify.app)
 - [BISCUP](https://biscup.netlify.app)
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app)
 - [Festival Slunovrat](https://app.festivalslunovrat.cz)

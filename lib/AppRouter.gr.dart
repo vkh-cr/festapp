@@ -20,15 +20,15 @@ import 'package:fstapp/pages/EventEditPage.dart' deferred as _i4;
 import 'package:fstapp/pages/EventPage.dart' deferred as _i5;
 import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i6;
 import 'package:fstapp/pages/GamePage.dart' deferred as _i7;
-import 'package:fstapp/pages/HomePage.dart' deferred as _i8;
-import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i9;
-import 'package:fstapp/pages/InfoPage.dart' deferred as _i10;
-import 'package:fstapp/pages/InstallPage.dart' deferred as _i11;
-import 'package:fstapp/pages/LoginPage.dart' deferred as _i12;
-import 'package:fstapp/pages/MapPage.dart' deferred as _i13;
-import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i14;
-import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i15;
-import 'package:fstapp/pages/NewsPage.dart' deferred as _i16;
+import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i8;
+import 'package:fstapp/pages/InfoPage.dart' deferred as _i9;
+import 'package:fstapp/pages/InstallPage.dart' deferred as _i10;
+import 'package:fstapp/pages/LoginPage.dart' deferred as _i11;
+import 'package:fstapp/pages/MapPage.dart' deferred as _i12;
+import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i13;
+import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i14;
+import 'package:fstapp/pages/NewsPage.dart' deferred as _i15;
+import 'package:fstapp/pages/OccasionHomePage.dart' deferred as _i16;
 import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i19;
 import 'package:fstapp/pages/SchedulePage.dart' deferred as _i20;
 import 'package:fstapp/pages/SettingsPage.dart' deferred as _i21;
@@ -299,29 +299,7 @@ class GameRouteArgs {
 }
 
 /// generated route for
-/// [_i8.HomePage]
-class HomeRoute extends _i25.PageRouteInfo<void> {
-  const HomeRoute({List<_i25.PageRouteInfo>? children})
-      : super(
-          HomeRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'HomeRoute';
-
-  static _i25.PageInfo page = _i25.PageInfo(
-    name,
-    builder: (data) {
-      return _i25.DeferredWidget(
-        _i8.loadLibrary,
-        () => _i8.HomePage(),
-      );
-    },
-  );
-}
-
-/// generated route for
-/// [_i9.HtmlEditorPage]
+/// [_i8.HtmlEditorPage]
 class HtmlEditorRoute extends _i25.PageRouteInfo<HtmlEditorRouteArgs> {
   HtmlEditorRoute({
     Map<String, dynamic>? content,
@@ -344,8 +322,8 @@ class HtmlEditorRoute extends _i25.PageRouteInfo<HtmlEditorRouteArgs> {
       final args = data.argsAs<HtmlEditorRouteArgs>(
           orElse: () => const HtmlEditorRouteArgs());
       return _i25.DeferredWidget(
-        _i9.loadLibrary,
-        () => _i9.HtmlEditorPage(
+        _i8.loadLibrary,
+        () => _i8.HtmlEditorPage(
           content: args.content,
           key: args.key,
         ),
@@ -371,7 +349,7 @@ class HtmlEditorRouteArgs {
 }
 
 /// generated route for
-/// [_i10.InfoPage]
+/// [_i9.InfoPage]
 class InfoRoute extends _i25.PageRouteInfo<InfoRouteArgs> {
   InfoRoute({
     int? id,
@@ -396,8 +374,8 @@ class InfoRoute extends _i25.PageRouteInfo<InfoRouteArgs> {
       final args = data.argsAs<InfoRouteArgs>(
           orElse: () => InfoRouteArgs(id: pathParams.optInt('id')));
       return _i25.DeferredWidget(
-        _i10.loadLibrary,
-        () => _i10.InfoPage(
+        _i9.loadLibrary,
+        () => _i9.InfoPage(
           id: args.id,
           key: args.key,
         ),
@@ -423,7 +401,7 @@ class InfoRouteArgs {
 }
 
 /// generated route for
-/// [_i11.InstallPage]
+/// [_i10.InstallPage]
 class InstallRoute extends _i25.PageRouteInfo<void> {
   const InstallRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -437,15 +415,15 @@ class InstallRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i11.loadLibrary,
-        () => _i11.InstallPage(),
+        _i10.loadLibrary,
+        () => _i10.InstallPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i12.LoginPage]
+/// [_i11.LoginPage]
 class LoginRoute extends _i25.PageRouteInfo<void> {
   const LoginRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -459,15 +437,15 @@ class LoginRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i12.loadLibrary,
-        () => _i12.LoginPage(),
+        _i11.loadLibrary,
+        () => _i11.LoginPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i13.MapPage]
+/// [_i12.MapPage]
 class MapRoute extends _i25.PageRouteInfo<MapRouteArgs> {
   MapRoute({
     int? id,
@@ -494,8 +472,8 @@ class MapRoute extends _i25.PageRouteInfo<MapRouteArgs> {
       final args = data.argsAs<MapRouteArgs>(
           orElse: () => MapRouteArgs(id: pathParams.optInt('id')));
       return _i25.DeferredWidget(
-        _i13.loadLibrary,
-        () => _i13.MapPage(
+        _i12.loadLibrary,
+        () => _i12.MapPage(
           id: args.id,
           place: args.place,
           key: args.key,
@@ -525,7 +503,7 @@ class MapRouteArgs {
 }
 
 /// generated route for
-/// [_i14.MySchedulePage]
+/// [_i13.MySchedulePage]
 class MyScheduleRoute extends _i25.PageRouteInfo<void> {
   const MyScheduleRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -539,15 +517,15 @@ class MyScheduleRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i14.loadLibrary,
-        () => _i14.MySchedulePage(),
+        _i13.loadLibrary,
+        () => _i13.MySchedulePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i15.NewsFormPage]
+/// [_i14.NewsFormPage]
 class NewsFormRoute extends _i25.PageRouteInfo<void> {
   const NewsFormRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -561,15 +539,15 @@ class NewsFormRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
-        _i15.loadLibrary,
-        () => _i15.NewsFormPage(),
+        _i14.loadLibrary,
+        () => _i14.NewsFormPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i16.NewsPage]
+/// [_i15.NewsPage]
 class NewsRoute extends _i25.PageRouteInfo<void> {
   const NewsRoute({List<_i25.PageRouteInfo>? children})
       : super(
@@ -583,8 +561,30 @@ class NewsRoute extends _i25.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i25.DeferredWidget(
+        _i15.loadLibrary,
+        () => _i15.NewsPage(),
+      );
+    },
+  );
+}
+
+/// generated route for
+/// [_i16.OccasionHomePage]
+class OccasionHomeRoute extends _i25.PageRouteInfo<void> {
+  const OccasionHomeRoute({List<_i25.PageRouteInfo>? children})
+      : super(
+          OccasionHomeRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'OccasionHomeRoute';
+
+  static _i25.PageInfo page = _i25.PageInfo(
+    name,
+    builder: (data) {
+      return _i25.DeferredWidget(
         _i16.loadLibrary,
-        () => _i16.NewsPage(),
+        () => _i16.OccasionHomePage(),
       );
     },
   );
