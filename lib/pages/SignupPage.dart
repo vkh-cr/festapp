@@ -34,8 +34,8 @@ class _SignupPageState extends State<SignupPage> {
     {"type":FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
     {"type":FormHelper.fieldTypeSex},
     {"type":FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeBirthYear},
+    // {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
+    // {"type":FormHelper.fieldTypeBirthYear},
   ]};
   final _formKey = GlobalKey<FormBuilderState>();
 
