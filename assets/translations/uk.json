@@ -45,7 +45,7 @@
   "Sign in other": "Зареєструвати іншого",
   "Sign in someone": "Зареєструвати",
   "Place": "Місце",
-  "You need to have an account to sign in to the event.": "Вам потрібно зареєструватися на цю подію. Спочатку увійдіть в додаток.",
+  "An account is required to join this event.": "Для участі в цій події потрібен обліковий запис.",
   "Participants have been copied.": "Учасники були скопійовані.",
   "Moderator": "Модератор",
   "Participants": "Учасники",
@@ -224,7 +224,7 @@
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "Ця платформа або браузер не підтримує встановлення PWA або додаток уже встановлено.",
   "The app is already installed.": "Додаток уже встановлено.",
   "Download App": "Завантажити додаток",
-  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Не вдалося встановити. Спробуйте відкрити це посилання в браузері Chrome, Edge або іншому.",
+  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Інсталяція не вдалася. Будь ласка, відкрийте це посилання у стандартному системному браузері вашого пристрою (наприклад, Mi Browser або Chrome). Примітка: Деякі пристрої можуть не підтримувати встановлення вебзастосунків.",
   "Copied to clipboard": "Скопійовано до буфера обміну",
   "Install for Apple": "Встановити для Apple",
   "Install for Android": "Встановити для Android",
@@ -285,5 +285,10 @@
   "Advanced Settings": "Розширені налаштування",
   "Add New Event": "Додати нову подію",
   "Password or code": "Пароль або код",
+  "Copy Link": "Скопіювати посилання",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Відкрий цей вебсайт на своєму телефоні з Android у браузері, наприклад Chrome або Edge, і натисни кнопку Встановити зараз.",
+  "Install Now": "Встановити зараз",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Встанови {title}, щоб отримувати сповіщення, працювати офлайн і мати швидкий доступ через іконку.",
+  "Click here to sign in.": "Натисни тут, щоб увійти.",
   "_": "_"
 }

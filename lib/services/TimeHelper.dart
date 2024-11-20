@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:intl/intl.dart';
 
@@ -28,6 +29,24 @@ class TimeHelper {
     int differenceInMillis = end.difference(start).inMilliseconds;
     double hoursDifference = differenceInMillis / (1000 * 60 * 60);
     return hoursDifference;
+  }
+
+  static Future<TimeOfDay?> showUniversalTimePicker({
+    required BuildContext context,
+    required TimeOfDay initialTime,
+    TimePickerEntryMode initialEntryMode = TimePickerEntryMode.dial,
+  }) async {
+    return await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+      initialEntryMode: initialEntryMode,
+      builder: (BuildContext context, Widget? child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
   }
 }
 

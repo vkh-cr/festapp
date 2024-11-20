@@ -121,7 +121,7 @@ class UserManagementHelper{
     {
       throw Exception("User must be created first.");
     }
-    var pw = await DialogHelper.showPasswordInputDialog(context, "Password".tr(), "Insert here".tr(), "Storno".tr(), "Ok".tr());
+    var pw = await DialogHelper.showPasswordInputDialog(context, "Password".tr(), "Insert here".tr());
     if(pw==null || pw.isEmpty)
     {
       throw Exception("Password has not been set.");

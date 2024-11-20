@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
@@ -22,6 +23,7 @@ import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/AddNewEventDialog.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -248,15 +250,23 @@ class _EventPageState extends State<EventPage> {
                               ),
                             )))),
                 Visibility(
-                    visible: EventModel.isEventSupportingSignIn(_event) &&
-                        !AuthService.isLoggedIn(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        "You need to have an account to sign in to the event.",
-                        style: TextStyle(color: ThemeConfig.attentionColor(context)),
-                      ).tr(),
-                    )),
+                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: HtmlView(
+                      html: '''
+                      <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
+                        <div>${"An account is required to join this event.".tr()}</div>
+                        <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                          ${"Click here to sign in.".tr()}
+                        </a>
+                      </div>
+                    ''',
+                      isSelectable: true,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
                 Visibility(
                     visible: EventModel.isEventFull(_event) &&
                         AuthService.isLoggedIn(),
