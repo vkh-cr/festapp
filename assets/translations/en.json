@@ -43,7 +43,7 @@
   "Sign in other":"Sign in other",
   "Sign in someone":"Sign in",
   "Place":"Place",
-  "You need to have an account to sign in to the event.":"You need to have an account to sign in to the event.",
+  "An account is required to join this event.":"An account is required to join this event.",
   "Participants have been copied.":"Participants have been copied.",
   "Moderator":"Moderator",
   "Participants":"Participants",
@@ -224,7 +224,7 @@
   "This platform or browser does not support the PWA install prompt or the app is already installed.": "This platform or browser does not support the PWA install prompt or the app is already installed.",
   "The app is already installed.": "The app is already installed.",
   "Download App": "Download App",
-  "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.": "Installation failed. Please try opening this link in Chrome, Edge, or a different browser.",
+  "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.": "Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",
   "Copied to clipboard": "Copied to clipboard",
   "Install for Apple": "Install for Apple",
   "Install for Android": "Install for Android",
@@ -285,5 +285,10 @@
   "Advanced Settings": "Advanced Settings",
   "Add New Event": "Add New Event",
   "Password or code": "Password or code",
+  "Copy Link": "Copy Link",
+  "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",
+  "Install Now": "Install Now",
+  "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Install {title} to get notifications, offline functionality, and a quick launch icon.",
+  "Click here to sign in.": "Click here to sign in.",
   "_":"_"
 }

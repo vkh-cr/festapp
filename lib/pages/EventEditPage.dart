@@ -12,6 +12,7 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -204,7 +205,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                 text: startTime?.format(context),
                               ),
                               onTap: () async {
-                                final pickedTime = await showTimePicker(
+                                final pickedTime = await TimeHelper.showUniversalTimePicker(
                                   context: context,
                                   initialTime: startTime ?? TimeOfDay.now(),
                                   initialEntryMode: timePickerMode,
@@ -253,7 +254,7 @@ class _EventEditPageState extends State<EventEditPage> {
                                 text: endTime?.format(context),
                               ),
                               onTap: () async {
-                                final pickedTime = await showTimePicker(
+                                final pickedTime = await TimeHelper.showUniversalTimePicker(
                                   context: context,
                                   initialTime: endTime ?? TimeOfDay.now(),
                                   initialEntryMode: timePickerMode,
