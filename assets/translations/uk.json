@@ -290,5 +290,6 @@
   "Install Now": "Встановити зараз",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Встанови {title}, щоб отримувати сповіщення, працювати офлайн і мати швидкий доступ через іконку.",
   "Click here to sign in.": "Натисни тут, щоб увійти.",
+  "Failed to invite {user}. Number of retries: ({retries}).": "Не вдалося запросити {user}. Кількість спроб: ({retries}).",
   "_": "_"
 }
