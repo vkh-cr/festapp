@@ -43,7 +43,7 @@
   "Sign in other":"Sign in other",
   "Sign in someone":"Sign in",
   "Place":"Place",
-  "You need to have an account to sign in to the event.":"You need to have an account to sign in to the event.",
+  "An account is required to join this event.":"An account is required to join this event.",
   "Participants have been copied.":"Participants have been copied.",
   "Moderator":"Moderator",
   "Participants":"Participants",
@@ -289,5 +289,6 @@
   "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",
   "Install Now": "Install Now",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Install {title} to get notifications, offline functionality, and a quick launch icon.",
+  "Click here to sign in.": "Click here to sign in.",
   "_":"_"
 }
