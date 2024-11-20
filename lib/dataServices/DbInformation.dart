@@ -20,22 +20,59 @@ class DbInformation {
   static Future<List<InformationModel>> getAllInformationForDataGrid([String? informationType]) async {
     var data = await _supabase.from(Tb.information.table).select(
         "${Tb.information.id},"
-        "${Tb.information.occasion},"
-        "${Tb.information.created_at},"
-        "${Tb.information.updated_at},"
-        "${Tb.information.is_hidden},"
-        "${Tb.information.title},"
-        "${Tb.information.order},"
-        "${Tb.information.type},"
-        "${Tb.information.data}")
-    .eq(Tb.information.occasion, RightsService.currentOccasion!)
-    .filter(Tb.information.type, "eq", informationType??"");
+            "${Tb.information.occasion},"
+            "${Tb.information.created_at},"
+            "${Tb.information.updated_at},"
+            "${Tb.information.is_hidden},"
+            "${Tb.information.title},"
+            "${Tb.information.order},"
+            "${Tb.information.type},"
+            "${Tb.information.data},"
+            "${Tb.information_hidden.table}(*)")
+        .eq(Tb.information.occasion, RightsService.currentOccasion!)
+        .filter(Tb.information.type, "eq", informationType ?? "");
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
-    infoList.sortBy((element) => element.title??"".toLowerCase());
-    infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
+
+    infoList.sort((a, b) {
+      // Sort by order first
+      final orderComparison = a.getOrder().compareTo(b.getOrder());
+      if (orderComparison != 0) {
+        return orderComparison;
+      }
+      // If order is the same, sort naturally by title
+      return _naturalCompare(
+          a.title?.toLowerCase() ?? "", b.title?.toLowerCase() ?? "");
+    });
+
     return infoList;
+  }
+
+  static int _naturalCompare(String a, String b) {
+    final regex = RegExp(r'\d+|\D+');
+    final aMatches = regex.allMatches(a).map((m) => m.group(0)!).toList();
+    final bMatches = regex.allMatches(b).map((m) => m.group(0)!).toList();
+
+    for (var i = 0; i < aMatches.length && i < bMatches.length; i++) {
+      final aPart = aMatches[i];
+      final bPart = bMatches[i];
+
+      // Compare numbers as numbers
+      if (RegExp(r'^\d+$').hasMatch(aPart) && RegExp(r'^\d+$').hasMatch(bPart)) {
+        final aNum = int.parse(aPart);
+        final bNum = int.parse(bPart);
+        final numCompare = aNum.compareTo(bNum);
+        if (numCompare != 0) return numCompare;
+      } else {
+        // Compare non-numeric parts lexicographically
+        final strCompare = aPart.compareTo(bPart);
+        if (strCompare != 0) return strCompare;
+      }
+    }
+
+    // If all parts are equal so far, compare lengths
+    return aMatches.length.compareTo(bMatches.length);
   }
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
@@ -84,24 +121,31 @@ class DbInformation {
 
   static Future<void> updateInformation(InformationModel info) async {
     if(info.type == InformationModel.gameType){
-      var upsertObj = {
-        Tb.hidden_info.data: {Tb.hidden_info.data_correct: info.data?[Tb.information.data_correct]},
+
+
+      Map<String, dynamic> upsertObj = {
+        Tb.information_hidden.data: info.informationHidden?.data,
+        Tb.information_hidden.occasion: RightsService.currentOccasion!
       };
-      if(info.data?[Tb.information.data_correct_reference] != null){
-        upsertObj.addAll({Tb.hidden_info.id: info.data?[Tb.information.data_correct_reference]});
+      Map<String, dynamic> ref;
+      if(info.informationHidden?.id != null){
+        upsertObj.addAll({
+          Tb.information_hidden.id: info.informationHidden?.id,
+        });
+        ref = await _supabase.from(Tb.information_hidden.table).update(upsertObj).eq(Tb.information_hidden.id, info.informationHidden!.id!).select(Tb.information_hidden.id).single();
+      } else {
+        ref = await _supabase.from(Tb.information_hidden.table).insert(upsertObj).select(Tb.information_hidden.id).single();
       }
 
-      var ref = await _supabase.from(Tb.hidden_info.table).upsert(upsertObj).select(Tb.hidden_info.id).single();
-      info.data?[Tb.information.data_correct_reference] = ref[Tb.hidden_info.id];
-      //todo add safety
-      //info.data?.remove(Tb.information.data_correct);
+      info.informationHidden = InformationHiddenModel(id: ref[Tb.information_hidden.id]);
     }
     var upsertObj = {
       Tb.information.title: info.title,
       Tb.information.type: info.type,
       Tb.information.is_hidden: info.isHidden,
       Tb.information.order: info.order,
-      Tb.information.data: info.data
+      Tb.information.data: info.data,
+      Tb.information.information_hidden: info.informationHidden?.id
     };
     if(info.description!=null) {
       upsertObj.addAll({Tb.information.description: info.description});
@@ -142,6 +186,13 @@ class DbInformation {
       for (var e in fullEvents) {
         await OfflineDataService.saveInfoDescription(e);
       }
+    }
+  }
+
+  static Future<void> fillDescriptionFromOffline(InformationModel info) async {
+    var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
+    if (infoDesc != null) {
+      info.description = infoDesc.description ?? "";
     }
   }
 

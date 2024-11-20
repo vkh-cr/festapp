@@ -10,7 +10,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/HomePage.dart';
+import 'package:fstapp/pages/OccasionHomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -22,17 +22,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'styles/Styles.dart';
-
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
   await initializeEverything();
   runApp(
     EasyLocalization(
         supportedLocales:
-        AppConfig.availableLanguages.map((e) => e.locale).toList(),
+        AppConfig.availableLanguages().map((e) => e.locale).toList(),
         path: "assets/translations",
-        fallbackLocale: AppConfig.availableLanguages.map((e) => e.locale).first,
+        fallbackLocale: AppConfig.availableLanguages().map((e) => e.locale).first,
         useOnlyLangCode: true,
         saveLocale: true,
         child: MyApp()),
@@ -156,7 +154,7 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        title: HomePage.HOME_PAGE,
+        title: OccasionHomePage.HOME_PAGE,
         theme: theme,
         darkTheme: darkTheme,
       ).animate().fadeIn(

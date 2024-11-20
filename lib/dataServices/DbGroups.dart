@@ -1,6 +1,8 @@
+import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -29,8 +31,22 @@ class DbGroups {
             "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
     .eq(Tb.user_group_info.occasion, RightsService.currentOccasion!)
     .filter(Tb.user_group_info.type, type == null ? "is" : "eq", type);
-    return List<UserGroupInfoModel>.from(
+
+    var toReturn = List<UserGroupInfoModel>.from(
         data.map((x) => UserGroupInfoModel.fromJson(x)));
+
+    if(type == InformationModel.gameType) {
+      var gameDef = await DbInformation.getAllInformationForDataGrid(InformationModel.gameType);
+      Map<int, String> dict = Map.fromIterable(
+        gameDef,
+        key: (item) => item.id!,       // Set the key as the "id"
+        value: (item) => item.title!,   // Set the value as the "title"
+      );
+      for(var u in toReturn){
+        u.checkpointTitlesDict = dict;
+      }
+    }
+    return toReturn;
   }
 
   static Future<UserGroupInfoModel?> getUserGroupInfo(int id) async {
@@ -125,4 +141,26 @@ class DbGroups {
     }
   }
 
+  static Future<List<int>> getCorrectlyGuessedCheckpoints() async {
+
+    var response = await await _supabase
+        .rpc('game_get_correctly_guessed_checkpoints', params: {'oc': RightsService.currentOccasion});
+    if (response == null || response["code"] != 200) {
+      return [];
+    }
+    List<int> checkPoints = List<int>.from(response["data"].map((entry) => entry['check_point']));
+
+    return checkPoints;
+  }
+
+  static Future<List<UserGroupInfoModel>> getUserGroups() async {
+    List<UserGroupInfoModel> userGroups = [];
+    final response = await _supabase.rpc('groups_get_user_groups');
+    if (response != null) {
+      for (var groupJson in response['data']) {
+        userGroups.add(UserGroupInfoModel.fromJson(groupJson));
+      }
+    }
+    return userGroups;
+  }
 }

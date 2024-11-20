@@ -18,6 +18,6 @@ VALUES
 
 --copy icons for organization
 INSERT INTO public.icons (link, created_at, data, updated_at, organization)
-SELECT link, created_at, data, updated_at, 2 AS organization
+SELECT link, created_at, data, updated_at, 3 AS organization
 FROM public.icons
 WHERE organization = 1;

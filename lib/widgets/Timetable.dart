@@ -181,7 +181,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               padding: EdgeInsets.fromLTRB(
                   i == 0 ? 0 : i * pixelsInHour - pixelsInHour / 2, 0, 0, 0),
               child: Container(
-                color: ThemeConfig.color1,
+                color: ThemeConfig.seed1,
                 height: timelineHeight,
                 width: (i == hourCount! || i == 0)
                     ? pixelsInHour / 2
@@ -195,7 +195,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     "$hour:00",
-                    style: TextStyle(color: ThemeConfig.whiteColor),
+                    style: TextStyle(color: ThemeConfig.whiteColor(context)),
                   ),
                 ),
               ),
@@ -294,8 +294,8 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               height: itemHeight,
               decoration: BoxDecoration(
                 color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                    ? ThemeConfig.eventTypeToColor(item.eventType).withOpacity(1)
-                    : ThemeConfig.eventTypeToColor(item.eventType).withOpacity(0.3),
+                    ? ThemeConfig.eventTypeToColor(context, item.eventType).withOpacity(1)
+                    : ThemeConfig.eventTypeToColor(context, item.eventType).withOpacity(0.3),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Stack(
@@ -308,15 +308,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
                       await addToMyProgram(item);
                     }, () async {
                       await removeFromMyProgram(item);
-                    }, ThemeConfig.whiteColor, ThemeConfig.blackColor),
+                    }, ThemeConfig.whiteColor(context), ThemeConfig.blackColor(context)),
                   ),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 8, 40, 8),
                     child: Text(item.text,
                         style: TextStyle(
                             color: (item.itemType == TimetableItemType.saved || item.itemType == TimetableItemType.signedIn)
-                                ? ThemeConfig.whiteColor
-                                : ThemeConfig.blackColor),
+                                ? ThemeConfig.whiteColor(context)
+                                : ThemeConfig.blackColor(context)),
                         overflow: TextOverflow.fade),
                   ),
                 ],
@@ -332,14 +332,14 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   Future<void> addToMyProgram(TimetableItem item) async {
-    await DbEvents.addToMySchedule(item.id);
+    await DbEvents.addToMySchedule(context, item.id);
     setState(() {
       item.itemType = TimetableItemType.saved;
     });
   }
 
   Future<void> removeFromMyProgram(TimetableItem item) async {
-    await DbEvents.removeFromMySchedule(item.id);
+    await DbEvents.removeFromMySchedule(context, item.id);
     setState(() {
       item.itemType = TimetableItemType.canSave;
     });

@@ -23,25 +23,36 @@ class PlacesTab extends StatefulWidget {
 class _PlacesTabState extends State<PlacesTab> {
   List<IconModel> svgIcons = [];
   List<int?> mapIcons = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    loadIcons(); // Load icons when the tab is initialized
+    loadIcons();
   }
 
   Future<void> loadIcons() async {
-    // Fetch the list of SVG icons and their IDs
-    var icons = await DbPlaces.getAllIcons();
-    setState(() {
-      svgIcons = icons;
-      mapIcons = svgIcons.map((icon) => icon.id).toList();
-      mapIcons.add(null); // Add a null option for "no icon"
-    });
+    try {
+      var icons = await DbPlaces.getAllIcons();
+      setState(() {
+        svgIcons = icons;
+        mapIcons = svgIcons.map((icon) => icon.id).toList();
+        mapIcons.add(null); // Add a null option for "no icon"
+        isLoading = false; // Loading complete
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false; // Stop loading on error
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return SingleTableDataGrid<PlaceModel>(
       context,
       DbPlaces.getAllPlaces,
@@ -49,13 +60,15 @@ class _PlacesTabState extends State<PlacesTab> {
       DataGridFirstColumn.deleteAndDuplicate,
       Tb.places.id,
       columns: [
+        // Same columns as before
         PlutoColumn(
           title: "Id".tr(),
           field: Tb.places.id,
           type: PlutoColumnType.number(defaultValue: -1),
           readOnly: true,
           width: 50,
-          renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+          renderer: (rendererContext) =>
+              DataGridHelper.idRenderer(rendererContext),
         ),
         PlutoColumn(
           title: "Hide".tr(),
@@ -64,7 +77,8 @@ class _PlacesTabState extends State<PlacesTab> {
           applyFormatterInEditing: true,
           enableEditingMode: false,
           width: 100,
-          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.places.is_hidden),
+          renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+              rendererContext, Tb.places.is_hidden),
         ),
         PlutoColumn(
           title: "Title".tr(),
@@ -83,12 +97,14 @@ class _PlacesTabState extends State<PlacesTab> {
           field: Tb.places.icon,
           applyFormatterInEditing: true,
           formatter: (d) {
-            return svgIcons.firstWhereOrNull((i) => i.id == d)?.link ?? PlaceModel.WithouValue;
+            return svgIcons.firstWhereOrNull((i) => i.id == d)?.link ??
+                PlaceModel.WithouValue;
           },
           type: PlutoColumnType.select(mapIcons, builder: (icon) {
             return DataGridHelper.iconToRow(context, icon, svgIcons);
           }),
-          renderer: (rendererContext) => DataGridHelper.mapIconRenderer(context, rendererContext, svgIcons),
+          renderer: (rendererContext) =>
+              DataGridHelper.mapIconRenderer(context, rendererContext, svgIcons),
         ),
         PlutoColumn(
           width: 150,
@@ -97,19 +113,30 @@ class _PlacesTabState extends State<PlacesTab> {
           enableContextMenu: false,
           enableSorting: false,
           field: Tb.places.coordinates,
-          type: PlutoColumnType.text(defaultValue: SynchroService.globalSettingsModel!.defaultMapLocation),
+          type: PlutoColumnType.text(
+              defaultValue: SynchroService
+                  .globalSettingsModel!.defaultMapLocation),
           renderer: (rendererContext) {
             return ElevatedButton(
               onPressed: () async {
-                var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                RouterService.navigatePageInfo(context, MapRoute(place: placeModel)).then((value) async {
+                var placeModel =
+                PlaceModel.fromPlutoJson(rendererContext.row.toJson());
+                RouterService.navigatePageInfo(
+                    context, MapRoute(place: placeModel))
+                    .then((value) async {
                   if (value != null) {
                     var cell = rendererContext.row.cells[Tb.places.coordinates]!;
-                    rendererContext.stateManager.changeCellValue(cell, value, force: true);
+                    rendererContext.stateManager
+                        .changeCellValue(cell, value, force: true);
                   }
                 });
               },
-              child: Row(children: [const Icon(Icons.edit), Padding(padding: const EdgeInsets.all(6), child: const Text("Edit").tr())]),
+              child: Row(children: [
+                const Icon(Icons.edit),
+                Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: const Text("Edit").tr())
+              ]),
             );
           },
         ),

@@ -9,9 +9,10 @@ DECLARE
     game_start TIMESTAMPTZ;
     game_end TIMESTAMPTZ;
     user_id UUID := auth.uid();  -- Retrieve the user ID from the authentication context
+    existing_game_data JSONB;
 BEGIN
-    -- Step 1: Get the reference to `hidden_info` in `information` and check if it exists
-    SELECT (data->>'correct_reference')::BIGINT INTO correct_reference
+    -- Step 1: Get the reference to `information_hidden` in `information` and check if it exists
+    SELECT information_hidden::BIGINT INTO correct_reference
     FROM information
     WHERE id = check_point_id;
 
@@ -19,9 +20,9 @@ BEGIN
         RETURN jsonb_build_object('code', 4041, 'message', 'Correct reference not found in information');
     END IF;
 
-    -- Step 2: Retrieve the correct answer from `hidden_info.data` under the "correct" key and the occasion
+    -- Step 2: Retrieve the correct answer from `information_hidden.data` under the "correct" key and the occasion
     SELECT data->>'correct', occasion INTO hidden_value, user_occasion
-    FROM hidden_info
+    FROM information_hidden
     WHERE id = correct_reference;
 
     IF hidden_value IS NULL THEN
@@ -69,18 +70,43 @@ BEGIN
 
     -- Step 7: Compare `guess` with `hidden_value` (ignoring diacritics, case, and trimming whitespace)
     IF unaccent(LOWER(TRIM(guess))) = unaccent(LOWER(TRIM(hidden_value))) THEN
-        -- Step 8: Add the correct answer to `user_group_info.data`, setting `check_point` to `check_point_id`
-        UPDATE user_group_info
-        SET data = COALESCE(data, '{}'::jsonb) || jsonb_build_object('game', jsonb_build_array(
-            jsonb_build_object('check_point', check_point_id, 'time', current_time)
-        ))
+
+        -- Step 8: Retrieve existing `game` array from `data` JSON and check if checkpoint already exists
+        SELECT COALESCE(data->'game', '[]'::jsonb) INTO existing_game_data
+        FROM user_group_info
         WHERE id = (
             SELECT "group"
             FROM user_groups
             WHERE "user" = user_id
               AND "group" IN (SELECT id FROM user_group_info WHERE occasion = user_occasion AND type = 'game')
-            LIMIT 1  -- Optimization to avoid any ambiguity
+            LIMIT 1
         );
+
+        -- If `game` array does not exist, initialize it as an empty array
+        IF existing_game_data IS NULL OR existing_game_data = 'null'::jsonb THEN
+            existing_game_data := '[]'::jsonb;
+        END IF;
+
+        -- Append the new checkpoint if it does not already exist in the `game` array
+        IF NOT EXISTS (
+            SELECT 1 FROM jsonb_array_elements(existing_game_data) AS elem
+            WHERE (elem->>'check_point')::INT = check_point_id
+        ) THEN
+            existing_game_data := existing_game_data || jsonb_build_array(
+                jsonb_build_object('check_point', check_point_id, 'time', current_time)
+            );
+
+            -- Update the `data` JSON with the modified `game` array
+            UPDATE user_group_info
+            SET data = jsonb_set(COALESCE(data, '{}'::jsonb), '{game}', existing_game_data, true)
+            WHERE id = (
+                SELECT "group"
+                FROM user_groups
+                WHERE "user" = user_id
+                  AND "group" IN (SELECT id FROM user_group_info WHERE occasion = user_occasion AND type = 'game')
+                LIMIT 1
+            );
+        END IF;
 
         RETURN jsonb_build_object('code', 200, 'message', 'Correct answer');
     ELSE
