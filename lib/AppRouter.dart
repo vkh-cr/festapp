@@ -47,13 +47,13 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
     AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
     AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
-    AutoRoute(page: ProgramViewRoute.page, path: "/:{$LINK}/${ProgramViewPage.ROUTE}"),
+    AutoRoute(page: TimetableRoute.page, path: "/:{$LINK}/${TimetablePage.ROUTE}"),
     AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
     AutoRoute(page: SongbookRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
     AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
-    AutoRoute(page: HomeRoute.page, path: "/:{$LINK}", children: [
+    AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),

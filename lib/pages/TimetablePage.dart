@@ -17,16 +17,16 @@ import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 
 @RoutePage()
-class ProgramViewPage extends StatefulWidget {
+class TimetablePage extends StatefulWidget {
   static const ROUTE = "timetable";
 
-  const ProgramViewPage({super.key});
+  const TimetablePage({super.key});
 
   @override
-  _ProgramViewPageState createState() => _ProgramViewPageState();
+  _TimetablePageState createState() => _TimetablePageState();
 }
 
-class _ProgramViewPageState extends State<ProgramViewPage>
+class _TimetablePageState extends State<TimetablePage>
     with TickerProviderStateMixin {
   TabController? _tabController;
 
