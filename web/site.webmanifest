@@ -2,6 +2,7 @@
   "name": "Aplikace Člověk a Víra",
   "short_name": "ČaV",
   "description": "Aplikace pro Člověk a Víra.",
+  "start_url": ".",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
