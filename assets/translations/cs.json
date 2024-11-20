@@ -45,7 +45,7 @@
   "Sign in other": "Přihlásit někoho",
   "Sign in someone":"Přihlásit",
   "Place": "Místo",
-  "You need to have an account to sign in to the event.": "K přihlášení na tuto událost je potřeba mít vytvořený účet.",
+  "An account is required to join this event.": "Pro připojení k této události je potřeba mít účet.",
   "Participants have been copied.": "Účastníci byli zkopírováni.",
   "Moderator": "Moderátor",
   "Participants": "Účastníci",
@@ -289,5 +289,6 @@
   "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Otevři tuto webovou stránku na svém telefonu s Androidem v prohlížeči, jako je Chrome nebo Edge, a klikni na tlačítko Nainstalovat teď.",
   "Install Now": "Nainstalovat teď",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Nainstaluj si aplikaci {title}, aby ti mohly chodit notifikace, aby aplikace mohla fungovat i offline, a aby se dala spustit přes ikonku.",
+  "Click here to sign in.": "Klikni sem pro přihlášení.",
   "_": "_"
 }

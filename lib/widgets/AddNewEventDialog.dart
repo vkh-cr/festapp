@@ -7,6 +7,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
@@ -199,7 +200,7 @@ class AddNewEventDialog {
               text: time != null ? time.format(context) : "",
             ),
             onTap: () async {
-              final pickedTime = await showTimePicker(
+              final pickedTime = await TimeHelper.showUniversalTimePicker(
                 context: context,
                 initialTime: time ?? TimeOfDay.now(),
                 initialEntryMode: timePickerMode,

@@ -45,7 +45,7 @@
   "Sign in other": "Anderen anmelden",
   "Sign in someone": "Anmelden",
   "Place": "Ort",
-  "You need to have an account to sign in to the event.": "Du musst dich für diese Veranstaltung anmelden. Zuerst in der App anmelden.",
+  "An account is required to join this event.": "Ein Konto ist erforderlich, um an diesem Event teilzunehmen.",
   "Participants have been copied.": "Teilnehmer wurden kopiert.",
   "Moderator": "Moderator",
   "Participants": "Teilnehmer",
@@ -289,5 +289,6 @@
   "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Öffne diese Webseite auf deinem Android-Telefon in einem Browser wie Chrome oder Edge und klicke auf die Schaltfläche Jetzt installieren.",
   "Install Now": "Jetzt installieren",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Installiere {title}, um Benachrichtigungen zu erhalten, offline zu arbeiten und eine Schnellstart-Icon zu nutzen.",
+  "Click here to sign in.": "Klicke hier, um dich anzumelden.",
   "_": "_"
 }
