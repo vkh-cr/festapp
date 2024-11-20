@@ -290,5 +290,6 @@
   "Install Now": "Nainštalovať teraz",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Nainštaluj si aplikáciu {title}, aby ti mohli chodiť notifikácie, aby aplikácia mohla fungovať aj offline, a aby sa dala spustiť cez ikonu.",
   "Click here to sign in.": "Klikni sem pre prihlásenie.",
+  "Failed to invite {user}. Number of retries: ({retries}).": "Nepodarilo sa pozvať {user}. Počet pokusov: ({retries}).",
   "_": "_"
 }
