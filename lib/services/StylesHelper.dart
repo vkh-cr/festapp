@@ -16,4 +16,9 @@ class StylesHelper{
       jsInterop.callMethod("setMetaThemeColor", [color.toHexString()]);
     }
   }
+  static void setBodyBackgroundColor(Color color) {
+    if(kIsWeb) {
+      jsInterop.callMethod("setBodyBackgroundColor", [color.toHexString()]);
+    }
+  }
 }

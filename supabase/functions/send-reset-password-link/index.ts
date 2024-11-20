@@ -19,12 +19,12 @@ Deno.serve(async (req) => {
 
   const reqData = await req.json();
   const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
-  const organization = reqData.organization;
+  const organizationId = reqData.organization;
 
   const orgData = await _supabase
     .from("organizations")
     .select("data")
-    .eq("id", organization)
+    .eq("id", organizationId)
     .single();
 
   if (orgData.error || !orgData.data) {
@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
   const userData = await _supabase
     .from("user_info")
     .select()
-    .eq("organization", organization)
+    .eq("organization", organizationId)
     .ilike("email_readonly", userEmail)
     .maybeSingle();
 
@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     .from("email_templates")
     .select()
     .eq("id", "RESET_PASSWORD")
-    .eq("organization", organization)
+    .eq("organization", organizationId)
     .single();
 
   if (template.error || !template.data) {
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       "from": _DEFAULT_EMAIL,
       "to": userEmail,
       "template": template.data.id,
-      "organization": organization
+      "organization": organizationId
     });
 
   return new Response(JSON.stringify({ "email": userEmail }), {
