@@ -14,6 +14,7 @@ class GameSettingsContent extends StatefulWidget {
 class _GameSettingsContentState extends State<GameSettingsContent> {
   DateTime? _startDateTime;
   DateTime? _endDateTime;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -30,16 +31,17 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
         _endDateTime = gameSettings.end?.toLocal();
       });
     }
+    setState(() {
+      _isLoading = false; // Set loading to false after data is loaded
+    });
   }
 
   Future<void> saveData() async {
-    // Validate that start time is earlier than end time
     if (_startDateTime != null && _endDateTime != null && _startDateTime!.isAfter(_endDateTime!)) {
       ToastHelper.Show(context, "Start time must be earlier than end time.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
 
-    // Convert to UTC before saving to the database
     final gameSettings = GameSettingsModel(
       start: _startDateTime?.toUtc(),
       end: _endDateTime?.toUtc(),
@@ -47,9 +49,9 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
 
     final success = await DbOccasions.updateGameSettings(gameSettings);
     if (success) {
-      ToastHelper.Show(context, "Game settings saved successfully!".tr(), severity: ToastSeverity.Ok);
+      ToastHelper.Show(context, "Saved".tr(), severity: ToastSeverity.Ok);
     } else {
-      ToastHelper.Show(context, "Failed to save game settings.".tr(), severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, "Failed to save game settings.", severity: ToastSeverity.NotOk);
     }
   }
 
@@ -89,6 +91,11 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
 
   @override
   Widget build(BuildContext context) {
+    // Show a loading indicator if data is still loading
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -99,11 +106,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
               Text("Start".tr()),
               TextButton(
                 onPressed: () => _selectDateTime(context, true),
-                child: Text(
-                  _startDateTime != null
-                      ? _startDateTime!.toLocal().toString()  // Convert to local when displaying
-                      : "Select Start Time".tr(),
-                ),
+                child: Text(_startDateTime?.toLocal().toString() ?? ""),
               ),
             ],
           ),
@@ -113,11 +116,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
               Text("End".tr()),
               TextButton(
                 onPressed: () => _selectDateTime(context, false),
-                child: Text(
-                  _endDateTime != null
-                      ? _endDateTime!.toLocal().toString()  // Convert to local when displaying
-                      : "Select End Time".tr(),
-                ),
+                child: Text(_endDateTime?.toLocal().toString() ?? ""),
               ),
             ],
           ),

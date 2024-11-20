@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/LanguageModel.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/services/PlatformHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:pwa_install/pwa_install.dart';
@@ -42,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> loadSettings() async {
     bool isEnabled = await NotificationHelper.isNotificationOnOff();
     Locale currentLocale = context.locale;
-    LanguageModel? currentLanguage = AppConfig.availableLanguages.firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
+    LanguageModel? currentLanguage = AppConfig.availableLanguages().firstWhere((language) => language.locale.languageCode == currentLocale.languageCode);
     bool isAppInstalled = PlatformHelper.isPwaInstalledOrNative();
     var themeMode = await AdaptiveTheme.getThemeMode();
     setState(()  {
@@ -88,11 +87,11 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: appMaxWidth),
+            constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (AppConfig.availableLanguages.length > 1) ...[
+                if (AppConfig.availableLanguages().length > 1) ...[
                   const Text("Language Settings", style: TextStyle(fontSize: 20)).tr(),
                   const SizedBox(height: 16),
                   Row(

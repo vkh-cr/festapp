@@ -7,7 +7,7 @@ class Tb {
   static UserNewsViewsTb user_news_views = const UserNewsViewsTb();
   static UserNewsTb user_news = const UserNewsTb();
   static InformationTb information = const InformationTb();
-  static HiddenInfo hidden_info = const HiddenInfo();
+  static InformationHidden information_hidden = const InformationHidden();
   static EventsTb events = const EventsTb();
   static EventUserTb event_users = const EventUserTb();
   static EventUsersSavedTb event_users_saved = const EventUsersSavedTb();
@@ -17,10 +17,7 @@ class Tb {
   static PlacesTb places = const PlacesTb();
   static UserGroupsTb user_groups = const UserGroupsTb();
   static UserGroupInfoTb user_group_info = const UserGroupInfoTb();
-  static NotificationRecordsTb notification_records = const NotificationRecordsTb();
   static LogNotificationsTb log_notifications = const LogNotificationsTb();
-  static AccommodationPlacesTb accommodation_places = const AccommodationPlacesTb();
-  static GlobalSettingsTb global_settings = const GlobalSettingsTb();
   static EventRolesTb event_roles = const EventRolesTb();
   static RoleInfoTb role_info = const RoleInfoTb();
   static UserCompanionsTb user_companions = const UserCompanionsTb();
@@ -62,6 +59,9 @@ class OccasionsTb {
   String get data_game_end => "end";
 
   String get services => "services";
+  String get data_features => "features";
+  String get data_features_code => "code";
+  String get data_features_is_enabled => "is_enabled";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -81,7 +81,6 @@ class OccasionUsersTb{
   String get data_sex => "sex";
   String get data_birthDate => "birthDate";
   String get data_phone => "phone";
-  String get data_accommodation => "accommodation";
   String get data_isInvited => "is_invited";
   String get data_note => "note";
   String get data_diet => "diet";
@@ -123,7 +122,6 @@ class UserInfoTb{
   String get name => "name";
   String get surname => "surname";
   String get sex => "sex";
-  String get accommodation => "accommodation";
   String get phone => "phone";
   String get role => "role";
   String get birth_date => "birth_date";
@@ -168,13 +166,15 @@ class InformationTb{
   String get type => "type";
   String get description => "description";
   String get order => "order";
+  String get information_hidden => "information_hidden";
   String get data => "data";
   String get data_correct => "correct";
   String get data_correct_reference => "correct_reference";
 }
-class HiddenInfo{
-  const HiddenInfo();
-  String get table => "hidden_info";
+class InformationHidden{
+  const InformationHidden();
+  String get table => "information_hidden";
+  String get occasion => "occasion";
   String get id => "id";
   String get data => "data";
   String get data_correct => "correct";
@@ -263,16 +263,7 @@ class UserGroupsTb{
   String get table => "user_groups";
   String get user => "user";
   String get group => "group";
-}
-//todo delete
-class NotificationRecordsTb{
-  const NotificationRecordsTb();
-  String get table => "notification_records";
-  String get id => "id";
-  String get created_at => "created_at";
-  String get user_id => "user_id";
-  String get heading => "heading";
-  String get content => "content";
+  String get is_admin => "is_admin";
 }
 class LogNotificationsTb{
   const LogNotificationsTb();
@@ -285,20 +276,6 @@ class LogNotificationsTb{
   String get heading => "heading";
   String get content => "content";
   String get to => "to";
-}
-//todo migrate and delete
-class AccommodationPlacesTb{
-  const AccommodationPlacesTb();
-  String get table => "accommodation_places";
-  String get place => "place";
-  String get accommodation_type => "accommodation_type";
-}
-//todo delete
-class GlobalSettingsTb{
-  const GlobalSettingsTb();
-  String get table => "global_settings";
-  String get id => "id";
-  String get json => "json";
 }
 class UserCompanionsTb{
   const UserCompanionsTb();

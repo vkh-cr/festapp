@@ -22,7 +22,8 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/Styles.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
@@ -156,7 +157,7 @@ class _UserPageState extends State<UserPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
@@ -171,13 +172,14 @@ class _UserPageState extends State<UserPage> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ButtonsHelper.buildQRCodeButton(
+                        child: ButtonsHelper.buildReferenceButton(
                           context: context,
                           onPressed: () => _showFullScreenDialog(
                               context,
                               userData?.occasionUser!.data![Tb.occasion_users.data_name],
                               AppConfig.appName,
                               userData?.occasionUser!.user!??""),
+                          icon: Icons.qr_code,
                           label: "Show my code".tr(),
                         ),
                       ),
@@ -229,7 +231,7 @@ class _UserPageState extends State<UserPage> {
                                                 color: Theme.of(context).colorScheme.onSurface,
                                             fontSize: 13)),
                                         trailing:
-                                            ButtonsHelper.buildQRCodeButton(
+                                            ButtonsHelper.buildReferenceButton(
                                               context: context,
                                           onPressed: () =>
                                               _showFullScreenDialog(
@@ -238,6 +240,7 @@ class _UserPageState extends State<UserPage> {
                                             AppConfig.appName,
                                             companion.id,
                                           ),
+                                          icon: Icons.qr_code,
                                           label: "Show Code".tr(),
                                         ),
                                         expandedCrossAxisAlignment:
@@ -306,7 +309,7 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
                 buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
                 buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                buildTextField("Sex".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 buildTextField("Role".tr(), userData?.roleString ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),
@@ -405,7 +408,7 @@ class _UserPageState extends State<UserPage> {
                       },
                       child: Text(
                         "Change password".tr(),
-                        style: TextStyle(fontSize: normalClickableFontSize),
+                        style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                       ).tr(),
                     )),
                 const SizedBox(
@@ -421,7 +424,7 @@ class _UserPageState extends State<UserPage> {
                                 .tr()),
                         child: Text(
                           "Delete account".tr(),
-                          style: TextStyle(fontSize: normalClickableFontSize),
+                          style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
                         ).tr()))
               ],
             ),

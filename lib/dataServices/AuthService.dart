@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
@@ -56,7 +57,12 @@ class AuthService {
         .eq(Tb.user_info.id, _supabase.auth.currentUser!.id)
         .single();
     currentUser = UserInfoModel.fromJson(jsonUser);
-    currentUser!.userGroup = await getCurrentUserGroup();
+
+    currentUser!.userGroups = await DbGroups.getUserGroups();
+    var eUserGroup = currentUser!.userGroups!.firstWhereOrNull((g)=>g.type == null);
+    if(eUserGroup!=null) {
+      currentUser!.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
+    }
     return currentUser!;
   }
 
@@ -75,9 +81,10 @@ class AuthService {
     if(RightsService.currentUserOccasion?.role != null) {
       user.roleString = await getRoleInfo(RightsService.currentUserOccasion!.role!);
     }
-    var myGroup = await getCurrentUserGroup();
-    if(myGroup!=null) {
-      user.userGroup = await DbGroups.getUserGroupInfo(myGroup.id!);
+    user.userGroups = await DbGroups.getUserGroups();
+    var eUserGroup = user.userGroups!.firstWhereOrNull((g)=>g.type == null);
+    if(eUserGroup!=null) {
+      user.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
     }
     if(SynchroService.globalSettingsModel!.isEnabledEntryCode??false) {
       user.companions = await DbCompanions.getAllCompanions();
@@ -96,37 +103,6 @@ class AuthService {
         .eq(Tb.role_info.id, role)
         .single();
     return data[Tb.role_info.title];
-  }
-
-  static Future<UserGroupInfoModel?> getCurrentUserGroup() async {
-    UserGroupInfoModel? group;
-    var partOfGroup = await _supabase
-        .from(Tb.user_group_info.table)
-        .select("${Tb.user_group_info.id},"
-        "${Tb.user_group_info.title},"
-        "${Tb.user_info_public.table}!${Tb.user_group_info.leader}(${Tb.user_info_public.id}),"
-        "${Tb.places.table}(${Tb.places.id})")
-        .eq(Tb.user_group_info.leader, currentUserId())
-        .limit(1)
-        .maybeSingle();
-    if(partOfGroup!=null)
-    {
-      group = UserGroupInfoModel.fromJson(partOfGroup);
-    }
-    if(group==null)
-    {
-      partOfGroup = await _supabase
-          .from(Tb.user_groups.table)
-          .select("${Tb.user_group_info.table}(${Tb.user_group_info.id}, ${Tb.user_group_info.title})")
-          .eq(Tb.user_groups.user, currentUserId())
-          .limit(1)
-          .maybeSingle();
-      if(partOfGroup!=null)
-      {
-        group = UserGroupInfoModel.fromJson(partOfGroup[Tb.user_group_info.table]);
-      }
-    }
-    return group;
   }
 
   static Future<bool> refreshSession() async {
@@ -168,15 +144,15 @@ class AuthService {
   }
 
   static UserGroupInfoModel? currentUserGroup() {
-    return currentUser?.userGroup;
+    return currentUser?.eventUserGroup;
   }
 
   static hasGroup() {
-    return currentUser?.userGroup != null;
+    return currentUser?.eventUserGroup != null;
   }
 
   static isGroupLeader() {
-    return hasGroup() && currentUser?.userGroup?.leader?.id == currentUserId();
+    return hasGroup() && currentUser?.eventUserGroup?.leader?.id == currentUserId();
   }
 
   static String? currentUserEmail() {

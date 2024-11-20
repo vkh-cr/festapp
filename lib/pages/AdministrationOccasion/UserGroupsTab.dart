@@ -192,11 +192,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     },
                     child: Row(children: [const Icon(Icons.location_pin), Padding(padding: const EdgeInsets.all(6), child: const Text("Location").tr()) ])
                 );
-              }),
-          PlutoColumn(
-              title: "Type".tr(),
-              field: Tb.user_group_info.type,
-              type: PlutoColumnType.text()),
+              })
         ]).DataGrid();
   }
 }

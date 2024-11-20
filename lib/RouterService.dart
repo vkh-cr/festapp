@@ -121,4 +121,8 @@ class RouterService {
 
     return canContinue;
   }
+
+  static void popTwo(BuildContext context) {
+    Navigator.of(context)..pop()..pop();
+  }
 }

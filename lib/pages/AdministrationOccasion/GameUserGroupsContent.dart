@@ -1,18 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -59,6 +54,13 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
           PlutoColumn(
               title: "Name".tr(),
               field: Tb.user_group_info.title,
+              type: PlutoColumnType.text(),
+              width: 200
+          ),
+          PlutoColumn(
+              title: "Progress".tr(),
+              field: UserGroupInfoModel.progressColumn,
+              readOnly: true,
               type: PlutoColumnType.text(),
               width: 200
           ),

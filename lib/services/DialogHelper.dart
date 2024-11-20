@@ -7,6 +7,7 @@ import 'package:fstapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
 
@@ -148,7 +149,7 @@ class DialogHelper{
   static Future<LanguageModel?> chooseLanguage(
       BuildContext context,
       ) async {
-    var locales = AppConfig.availableLanguages;
+    var locales = AppConfig.availableLanguages();
     LanguageModel? selectedLocale;
     await SelectDialog.showModal<LanguageModel>(
       context,
@@ -186,12 +187,13 @@ class DialogHelper{
   static Future<String?> showPasswordInputDialog(
       BuildContext context,
       String titleMessage,
-      String hint,
-      [String confirmButtonMessage = "Ok",
-      String cancelButtonMessage = "Storno"]
-      ) async {
+      String hint, [
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      ]) async {
     final TextEditingController _messageController = TextEditingController();
     String? result;
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -200,12 +202,11 @@ class DialogHelper{
           content: SingleChildScrollView(
             child: Column(
               children: [
-                TextField(
+                PasswordField(
+                  label: hint,
                   controller: _messageController,
-                  obscureText: true,
-                  decoration: InputDecoration(hintText: hint),
-                  onChanged: (str){ result = str;},
-                )
+                  passwordType: AutofillHints.password,
+                ),
               ],
             ),
           ),
@@ -214,8 +215,8 @@ class DialogHelper{
               onPressed: () => Navigator.pop(context),
               child: Text(cancelButtonMessage),
             ),
-            TextButton(
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 result = _messageController.text;
                 _messageController.clear();
                 Navigator.pop(context);
@@ -308,8 +309,16 @@ class DialogHelper{
       BuildContext context,
       String title,
       int total,
-      ValueNotifier<int> progressNotifier,
-      ) async {
+      ValueNotifier<int> progressNotifier, {
+        List<Future<void>>? futures,
+      }) async {
+    if (futures != null) {
+      for (var future in futures) {
+        await future;
+        progressNotifier.value++;
+      }
+    }
+
     await showDialog(
       context: context,
       barrierDismissible: false,
