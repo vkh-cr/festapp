@@ -45,7 +45,7 @@
   "Sign in other": "Зареєструвати іншого",
   "Sign in someone": "Зареєструвати",
   "Place": "Місце",
-  "You need to have an account to sign in to the event.": "Вам потрібно зареєструватися на цю подію. Спочатку увійдіть в додаток.",
+  "An account is required to join this event.": "Для участі в цій події потрібен обліковий запис.",
   "Participants have been copied.": "Учасники були скопійовані.",
   "Moderator": "Модератор",
   "Participants": "Учасники",
@@ -289,5 +289,6 @@
   "Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.": "Відкрий цей вебсайт на своєму телефоні з Android у браузері, наприклад Chrome або Edge, і натисни кнопку Встановити зараз.",
   "Install Now": "Встановити зараз",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Встанови {title}, щоб отримувати сповіщення, працювати офлайн і мати швидкий доступ через іконку.",
+  "Click here to sign in.": "Натисни тут, щоб увійти.",
   "_": "_"
 }
