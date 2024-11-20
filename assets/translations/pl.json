@@ -289,5 +289,6 @@
   "Install Now": "Zainstaluj teraz",
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Zainstaluj aplikację {title}, aby otrzymywać powiadomienia, korzystać z funkcji offline i mieć szybki dostęp przez ikonę.",
   "Click here to sign in.": "Kliknij tutaj, aby się zalogować.",
+  "Failed to invite {user}. Number of retries: ({retries}).": "Nie udało się zaprosić {user}. Liczba prób: ({retries}).",
   "_": "_"
 }
