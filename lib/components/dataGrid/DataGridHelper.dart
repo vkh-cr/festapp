@@ -109,9 +109,9 @@ class DataGridHelper
     String currentState = rendererContext.cell.value ?? DbOccasions.serviceNone;
 
     return CustomThreeStateCheckbox(
-      noneStateIcon: Icons.circle_outlined,
-      paidStateIcon: Icons.flatware,
-      usedStateIcon: Icons.restaurant_menu,
+      noneStateIcon: Icons.close,
+      paidStateIcon: Icons.radio_button_checked,
+      usedStateIcon: Icons.radio_button_off,
       currentState: currentState,
       onStateChanged: (String newState) {
         var cell = rendererContext.row.cells[idString]!;
