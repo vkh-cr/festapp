@@ -32,11 +32,11 @@ class _UsersTabState extends State<UsersTab> {
     ColumnHelper.BIRTHDAY,
     ColumnHelper.TEXT1,
     ColumnHelper.TEXT2,
+    ColumnHelper.TEXT3,
     ColumnHelper.ADMINISTRATOR,
     ColumnHelper.EDITOR,
     ColumnHelper.APPROVER,
     ColumnHelper.INVITED,
-    ColumnHelper.TEXT3
   ];
 
   List<UserInfoModel>? _allUsers; // Initialize as null to indicate loading state
@@ -73,11 +73,11 @@ class _UsersTabState extends State<UsersTab> {
             areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
           DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
-          DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
+          //DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
           DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
-          DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
-          DataGridAction(name: "Přidat do týmu (hra)", action: (SingleTableDataGrid p0, [_]) => _addToGameGroup(p0)),
+          DataGridAction(name: "Přidat do týmu (hra)", action: (SingleTableDataGrid p0, [_]) => _addToGameGroup(p0), isEnabled: RightsService.isEditor),
+          DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0), isEnabled: RightsService.isEditor),
         ],
         columns: ColumnHelper.generateColumns(columnIdentifiers),
       ).DataGrid(),
