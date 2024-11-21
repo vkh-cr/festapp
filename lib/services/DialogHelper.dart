@@ -309,8 +309,16 @@ class DialogHelper{
       BuildContext context,
       String title,
       int total,
-      ValueNotifier<int> progressNotifier,
-      ) async {
+      ValueNotifier<int> progressNotifier, {
+        List<Future<void>>? futures,
+      }) async {
+    if (futures != null) {
+      for (var future in futures) {
+        await future;
+        progressNotifier.value++;
+      }
+    }
+
     await showDialog(
       context: context,
       barrierDismissible: false,
