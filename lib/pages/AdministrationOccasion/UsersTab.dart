@@ -153,7 +153,11 @@ class _UsersTabState extends State<UsersTab> {
     await _processInvites(users, dataGrid);
   }
 
-  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
+  Future<void> _processInvites(
+      List<OccasionUserModel> users,
+      SingleTableDataGrid dataGrid,
+      {int retryLimit = 3}
+      ) async {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
         context,
         "Invite".tr(),
@@ -162,36 +166,52 @@ class _UsersTabState extends State<UsersTab> {
 
     if (confirm) {
       ValueNotifier<int> invitedCount = ValueNotifier(0);
+      Map<OccasionUserModel, int> retryAttempts = { for (var user in users) user: 0 };
 
-      // Show progress dialog
-      DialogHelper.showProgressDialogAsync(
+      // Prepare futures for progress dialog
+      List<Future<void>> inviteFutures = users.map((user) async {
+        while (retryAttempts[user]! < retryLimit) {
+          try {
+            // Send sign-in code and update progress
+            await AuthService.sendSignInCode(user);
+            invitedCount.value++;
+
+            ToastHelper.Show(
+              context,
+              "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
+            );
+            return; // Exit retry loop on success
+          } catch (e) {
+            retryAttempts[user] = retryAttempts[user]! + 1;
+
+            if (retryAttempts[user]! >= retryLimit) {
+              ToastHelper.Show(
+                context,
+                "Failed to invite {user}. Number of retries: ({retries}).".tr(
+                    namedArgs: {
+                      "retries": retryLimit.toString(),
+                      "user": user.data![Tb.occasion_users.data_email]
+                    }
+                ),
+                severity: ToastSeverity.NotOk,
+              );
+              print("Failed to invite user: ${user.data![Tb.occasion_users.data_email]}. Error: $e");
+            } else {
+              print("Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
+            }
+          } finally {
+            // Ensure delay happens regardless of success or failure
+            await Future.delayed(Duration(milliseconds: 500));
+          }
+        }
+      }).toList();
+
+      // Show progress dialog while processing
+      await DialogHelper.showProgressDialogAsync(
         context,
         "Invite".tr(),
         users.length,
         invitedCount,
+        futures: inviteFutures,
       );
-
-      for (var user in users) {
-        // slow down to avoid rate limit SES has 14 email / sec
-        await Future.delayed(Duration(milliseconds: 100));
-        await AuthService.sendSignInCode(user);
-        invitedCount.value++;
-
-        ToastHelper.Show(
-          context,
-          "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
-        );
-      }
-
-      Navigator.of(context).pop(); // Close the dialog
-
-      await loadUsers(); // Reload users
-
-      await DialogHelper.showInformationDialogAsync(
-        context,
-        "Invite".tr(),
-        "Users ({count}) invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
-      );
-    }
-  }
 }
