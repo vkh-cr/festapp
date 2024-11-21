@@ -177,7 +177,6 @@ class _UsersTabState extends State<UsersTab> {
     );
 
     if (confirm) {
-      ValueNotifier<int> invitedCount = ValueNotifier(0);
       Map<OccasionUserModel, int> retryAttempts = {
         for (var user in users) user: 0
       };
@@ -188,8 +187,6 @@ class _UsersTabState extends State<UsersTab> {
           try {
             // Send sign-in code and update progress
             await AuthService.sendSignInCode(user);
-            invitedCount.value++;
-
             ToastHelper.Show(
               context,
               "Invited: {user}.".tr(namedArgs: {
@@ -229,7 +226,6 @@ class _UsersTabState extends State<UsersTab> {
         context,
         "Invite".tr(),
         users.length,
-        invitedCount,
         futures: inviteFutures,
       );
     }
