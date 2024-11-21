@@ -170,52 +170,51 @@ class _UsersTabState extends State<UsersTab> {
         for (var user in users) user: 0
       };
 
-      // Prepare futures for progress dialog
-      List<Future<void>> inviteFutures = users.map((user) async {
-        while (retryAttempts[user]! < retryLimit) {
-          try {
-            // Send sign-in code and update progress
-            await AuthService.sendSignInCode(user);
-            ToastHelper.Show(
-              context,
-              "Invited: {user}.".tr(namedArgs: {
-                "user": user.data![Tb.occasion_users.data_email]
-              }),
-            );
-            return; // Exit retry loop on success
-          } catch (e) {
-            retryAttempts[user] = retryAttempts[user]! + 1;
+      List<Future<void> Function()> inviteFutures = users.map((user) {
+        return () async {
+          while (retryAttempts[user]! < retryLimit) {
+            try {
+              // Uncomment this line to send the actual sign-in code
+              await AuthService.sendSignInCode(user);
 
-            if (retryAttempts[user]! >= retryLimit) {
+              // Show success toast
               ToastHelper.Show(
                 context,
-                "Failed to invite {user}. Number of retries: ({retries}).".tr(
-                    namedArgs: {
-                      "retries": retryLimit.toString(),
-                      "user": user.data![Tb.occasion_users.data_email]
-                    }
-                ),
-                severity: ToastSeverity.NotOk,
+                "Invited: {user}.".tr(namedArgs: {
+                  "user": user.data![Tb.occasion_users.data_email]
+                }),
               );
-              print("Failed to invite user: ${user.data![Tb.occasion_users
-                  .data_email]}. Error: $e");
-            } else {
-              print("Retrying to invite user: ${user.data![Tb.occasion_users
-                  .data_email]}. Attempt: ${retryAttempts[user]}");
+              return; // Exit retry loop on success
+            } catch (e) {
+              retryAttempts[user] = retryAttempts[user]! + 1;
+
+              if (retryAttempts[user]! >= retryLimit) {
+                ToastHelper.Show(
+                  context,
+                  "Failed to invite {user}. Number of retries: ({retries}).".tr(
+                      namedArgs: {
+                        "retries": retryLimit.toString(),
+                        "user": user.data![Tb.occasion_users.data_email]
+                      }),
+                  severity: ToastSeverity.NotOk,
+                );
+                print(
+                    "Failed to invite user: ${user.data![Tb.occasion_users.data_email]}. Error: $e");
+              } else {
+                print(
+                    "Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
+              }
             }
-          } finally {
-            // Ensure delay happens regardless of success or failure
-            await Future.delayed(Duration(milliseconds: 500));
           }
-        }
+        };
       }).toList();
 
       // Show progress dialog while processing
       await DialogHelper.showProgressDialogAsync(
         context,
-        "Invite".tr(),
-        users.length,
+        "Invite".tr(), inviteFutures.length,
         futures: inviteFutures,
+        delay: Duration(milliseconds: 500)
       );
     }
   }
