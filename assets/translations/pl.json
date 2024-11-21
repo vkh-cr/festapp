@@ -290,5 +290,9 @@
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Zainstaluj aplikację {title}, aby otrzymywać powiadomienia, korzystać z funkcji offline i mieć szybki dostęp przez ikonę.",
   "Click here to sign in.": "Kliknij tutaj, aby się zalogować.",
   "Failed to invite {user}. Number of retries: ({retries}).": "Nie udało się zaprosić {user}. Liczba prób: ({retries}).",
+  "Processing...": "Przetwarzanie...",
+  "The processing has finished with error.": "Przetwarzanie zakończyło się błędem.",
+  "The processing has been cancelled.": "Przetwarzanie zostało anulowane.",
+  "The processing has completed successfully.": "Przetwarzanie zakończyło się pomyślnie.",
   "_": "_"
 }
