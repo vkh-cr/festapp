@@ -16,7 +16,7 @@ class ImportHelper {
         Tb.occasion_users.data_text2: "Přípravný tým:",
         Tb.occasion_users.data_text3: "Číslo týmu",
         Tb.occasion_users.data_birthDate: "Datum narození:",
-        Tb.occasion_users.data_note: "Poznámka:",
+        Tb.occasion_users.data_note: "Poznámka",
         Tb.occasion_users.data_diet: "Stravovací omezení:",
         Tb.occasion_users.services_food: "Stravování:",
       };
