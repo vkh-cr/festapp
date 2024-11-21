@@ -215,7 +215,7 @@ class ColumnHelper {
       cellPadding: EdgeInsets.all(0),
       width: 100,
       renderer: (rendererContext) =>
-          DataGridHelper.threeStateCheckBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
+          DataGridHelper.foodCheckBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
     );
   }
 }
