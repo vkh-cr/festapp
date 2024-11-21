@@ -6,25 +6,20 @@ class CustomThreeStateCheckbox extends StatelessWidget {
   final void Function(String) onStateChanged;
   final bool isEnabled;
 
+  // Optional custom icons for each state
+  final IconData? noneStateIcon;
+  final IconData? paidStateIcon;
+  final IconData? usedStateIcon;
+
   CustomThreeStateCheckbox({
     Key? key,
     required this.currentState,
     required this.onStateChanged,
     this.isEnabled = true,
+    this.noneStateIcon,
+    this.paidStateIcon,
+    this.usedStateIcon,
   }) : super(key: key);
-
-  // Define colors for each state
-  Color _getBackgroundColor(String state) {
-    switch (state) {
-      // case DbOccasions.servicePaid:
-      //   return Colors.green.withOpacity(0.5); // light green background
-      // case DbOccasions.serviceUsed:
-      //   return Colors.blue.withOpacity(0.5).changeColorLightness(0.2); // light blue background
-      case DbOccasions.serviceNone:
-      default:
-        return Colors.grey.withOpacity(0.5); // light grey background
-    }
-  }
 
   // Define the next state in the cycle
   String _getNextState(String currentState) {
@@ -50,10 +45,11 @@ class CustomThreeStateCheckbox extends StatelessWidget {
           : null,
       child: Icon(
         currentState == DbOccasions.serviceNone
-            ? Icons.check_box_outline_blank
+            ? noneStateIcon ?? Icons.check_box_outline_blank // Default icon
             : currentState == DbOccasions.servicePaid
-            ? Icons.check_box_outlined
-            : Icons.check_box,
+            ? paidStateIcon ?? Icons.check_box_outlined // Default icon
+            : usedStateIcon ?? Icons.check_box, // Default icon
+        color: isEnabled ? Colors.black : Colors.grey, // Optional: Disabled color
       ),
     );
   }
