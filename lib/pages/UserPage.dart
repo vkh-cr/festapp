@@ -312,8 +312,8 @@ class _UserPageState extends State<UserPage> {
                 //buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 buildTextField("Typ účastníka", userData?.occasionUser?.data![Tb.occasion_users.data_text1] ?? ""),
                 buildTextField("Přípravný tým", userData?.occasionUser?.data![Tb.occasion_users.data_text2] ?? ""),
-                if(userData?.occasionUser?.data![Tb.occasion_users.data_text3]?.isNotEmpty == true)
-                buildTextField("Číslo týmu (hra)", userData?.occasionUser?.data![Tb.occasion_users.data_text3] ?? ""),
+                if(userData?.getGameUserGroup != null)
+                buildTextField("Tým (hra)", userData?.getGameUserGroup?.title ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
