@@ -291,5 +291,9 @@
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Nainstaluj si aplikaci {title}, aby ti mohly chodit notifikace, aby aplikace mohla fungovat i offline, a aby se dala spustit přes ikonku.",
   "Click here to sign in.": "Klikni sem pro přihlášení.",
   "Failed to invite {user}. Number of retries: ({retries}).": "Nepodařilo se pozvat {user}. Počet pokusů: ({retries}).",
+  "Processing...": "Zpracovává se...",
+  "The processing has finished with error.": "Zpracování skončilo chybou.",
+  "The processing has been cancelled.": "Zpracování bylo zrušeno.",
+  "The processing has completed successfully.": "Zpracování bylo úspěšně dokončeno.",
   "_": "_"
 }

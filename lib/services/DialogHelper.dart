@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fstapp/dataModels/LanguageModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -7,6 +9,7 @@ import 'package:fstapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
@@ -308,18 +311,20 @@ class DialogHelper{
   static Future<void> showProgressDialogAsync(
       BuildContext context,
       String title,
-      int total,
-      ValueNotifier<int> progressNotifier, {
-        List<Future<void>>? futures,
+      int total, {
+        List<Future<void> Function()>? futures,
+        Duration? delay,
       }) async {
-    if (futures != null) {
-      for (var future in futures) {
-        await future;
-        progressNotifier.value++;
-      }
-    }
+    final completer = Completer<void>();
+    final progressNotifier = ValueNotifier<int>(0);
+    final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
+    final statusMessage = ValueNotifier<String>(""); // Track status message
+    final isStornoActive = ValueNotifier<bool>(true); // Track Storno button state
+    final isOkActive = ValueNotifier<bool>(false); // Track Ok button state
+    bool hasError = false; // Track if any error occurred
 
-    await showDialog(
+    // Show the dialog
+    showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -334,6 +339,65 @@ class DialogHelper{
                   Text("${"Progress".tr()}: $progress/$total"),
                   SizedBox(height: 20),
                   LinearProgressIndicator(value: total > 0 ? progress / total : 0),
+                  SizedBox(height: 20),
+                  ValueListenableBuilder<String>(
+                    valueListenable: statusMessage,
+                    builder: (context, message, _) {
+                      return Text(
+                        message,
+                        style: TextStyle(
+                          color: hasError
+                              ? ThemeConfig.redColor(context)
+                              : ThemeConfig.blackColor(context),
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // Center the row
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isStornoActive,
+                        builder: (context, isActive, _) {
+                          return SizedBox(
+                            width: 100, // Set equal width for both buttons
+                            child: ElevatedButton(
+                              onPressed: isActive
+                                  ? () {
+                                isCancelled.value = true; // Mark as cancelled
+                                isStornoActive.value = false; // Disable Storno
+                                isOkActive.value = true; // Enable Ok button
+                                statusMessage.value =
+                                    "The processing has been cancelled.".tr(); // Update status
+                              }
+                                  : null,
+                              child: Text("Storno".tr()),
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(width: 20), // Add space between buttons
+                      ValueListenableBuilder<bool>(
+                        valueListenable: isOkActive,
+                        builder: (context, isActive, _) {
+                          return SizedBox(
+                            width: 100, // Set equal width for both buttons
+                            child: ElevatedButton(
+                              onPressed: isActive
+                                  ? () {
+                                Navigator.of(context).pop();
+                                completer.complete();
+                              }
+                                  : null,
+                              child: Text("Ok".tr()),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             );
@@ -341,5 +405,44 @@ class DialogHelper{
         );
       },
     );
+
+    // Execute futures sequentially
+    if (futures != null && futures.isNotEmpty) {
+      for (var future in futures) {
+        if (isCancelled.value) break; // Stop execution if cancelled
+        try {
+          statusMessage.value = "Processing...".tr(); // Update processing message
+          await future.call(); // Wait for each future to finish
+          progressNotifier.value++;
+          if (delay != null) {
+            await Future.delayed(delay);
+          }
+        } catch (e) {
+          // On error: Stop further execution and display the error
+          statusMessage.value = "$e";
+          isCancelled.value = true; // Stop further processing
+          isStornoActive.value = false; // Disable Storno button
+          isOkActive.value = true; // Enable Ok button
+          hasError = true; // Mark that an error occurred
+          break;
+        }
+      }
+    }
+
+    // Mark actions as completed
+    isOkActive.value = true; // Enable Ok button after actions are completed
+    isStornoActive.value = false; // Disable Storno button whenever Ok is enabled
+    if (hasError) {
+      statusMessage.value = "The processing has finished with error.".tr();
+    } else if (isCancelled.value) {
+      statusMessage.value = "The processing has been cancelled.".tr();
+    } else {
+      statusMessage.value = "The processing has completed successfully.".tr();
+    }
+
+    // Await the completer if not already completed
+    if (!completer.isCompleted) {
+      await completer.future;
+    }
   }
 }
