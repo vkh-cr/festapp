@@ -34,7 +34,8 @@ class _UsersTabState extends State<UsersTab> {
     ColumnHelper.ADMINISTRATOR,
     ColumnHelper.EDITOR,
     ColumnHelper.APPROVER,
-    ColumnHelper.INVITED
+    ColumnHelper.INVITED,
+    ColumnHelper.TEXT3
   ];
 
   List<UserInfoModel>? _allUsers; // Initialize as null to indicate loading state
