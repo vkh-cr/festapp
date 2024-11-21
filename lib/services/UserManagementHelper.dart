@@ -96,7 +96,7 @@ class UserManagementHelper{
       context,
       "Creating users".tr(),
       toBeCreated.length,
-      futures: toBeCreated.map((u) async {
+      futures: toBeCreated.map((u) => () async {
         await DbUsers.updateOccasionUser(OccasionUserModel.fromImportedJson(u));
         ToastHelper.Show(context, "Created {item}.".tr(namedArgs: {"item": u[Tb.occasion_users.data_email]}));
       }).toList(),
@@ -123,7 +123,7 @@ class UserManagementHelper{
       context,
       "Updating users".tr(),
       toBeUpdated.length,
-      futures: toBeUpdated.map((u) async {
+      futures: toBeUpdated.map((u) => () async {
         var existing = existingUsers.firstWhere(
               (e) => e.data?[Tb.occasion_users.data_email] == u[Tb.occasion_users.data_email],
         );
@@ -154,7 +154,7 @@ class UserManagementHelper{
       context,
       "Removing users".tr(),
       toBeDeleted.length,
-      futures: toBeDeleted.map((existing) async {
+      futures: toBeDeleted.map((existing) => ()  async {
         await DbUsers.deleteUser(existing.user!, existing.occasion!);
         ToastHelper.Show(context, "Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
       }).toList(),
