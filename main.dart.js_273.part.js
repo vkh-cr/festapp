@@ -213,7 +213,7 @@ o.toString
 w=p.lS(o)}else w=!1
 o=A.ad(r.f,q,q,q,q,q,q,q,q,q,q,q,q,q)
 o=H.k0(q,!0,q,q,q,q,q,L.pM(new B.bL3(d)),q,o)
-v=A.a([new A.cV(C.aS,q,q,new A.dD(new A.a7(0,820,0,1/0),I.WX(q,C.v,D.aVP,new B.bL4(r),r.d.length,q,C.aI,q,C.K,!1),q),q)],y.u)
+v=A.a([new A.cV(C.aS,q,q,new A.dD(new A.a7(0,820,0,1/0),I.WX(q,C.v,D.aVO,new B.bL4(r),r.d.length,q,C.aI,q,C.K,!1),q),q)],y.u)
 if(!r.z)v.push(r.QI(A.O("For playing the game, you must be assigned to a game group",q)))
 if(r.z&&x)v.push(r.QI(A.O("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.eP(8)
@@ -223,7 +223,7 @@ v.push(A.ie(q,A.aM(q,A.ad(A.O("Time left: {time}",A.G(["time",""+C.c.aY(t,36e8)+
 if(r.Q)v.push(r.QI(A.O("You are offline. Please check your internet connection.",q)))
 return U.hI(o,q,A.dz(C.ah,v,C.B,C.af,q),q,q,q,q)},
 QI(d){var x=null
-return A.aM(C.F,A.d0(new A.ah(P.dA,A.ad(d,x,x,x,x,x,x,x,D.b_i,C.bM,x,x,x,x),x),x,x),C.h,C.am,x,x,x,x,x,x,x,x,x)},
+return A.aM(C.F,A.d0(new A.ah(P.dA,A.ad(d,x,x,x,x,x,x,x,D.b_h,C.bM,x,x,x,x),x),x,x),C.h,C.am,x,x,x,x,x,x,x,x,x)},
 TE(d,e){return this.bff(d,e)},
 bff(d,e){var x=0,w=A.l(y.v),v=this,u,t
 var $async$TE=A.h(function(f,g){if(f===1)return A.i(g,w)
@@ -249,7 +249,7 @@ $1(d){var x=this.a
 x.G(new B.bL5(x,d))},
 $S:728}
 B.bL5.prototype={
-$0(){this.a.Q=J.lI(this.b,C.xL)},
+$0(){this.a.Q=J.lI(this.b,C.xM)},
 $S:0}
 B.bL9.prototype={
 $1(d){return d.x==="game"},
@@ -292,7 +292,7 @@ if(t.e.p(0,t.d[e].a))x=A.I(d).ax.a===C.z?C.aU:N.EU
 else x=C.ec
 w=A.eP(8)
 v=t.d[e].d
-return A.dn(u,A.aM(C.F,A.ad(v==null?"-":v,u,u,u,u,u,u,u,D.b_j,C.bM,u,u,u,u),C.h,u,u,new A.bR(x,u,u,w,u,u,u,C.W),u,u,u,u,u,u,u),C.v,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new B.bL2(t,d,e),u,u,u,u,u,u,!1,C.ad)},
+return A.dn(u,A.aM(C.F,A.ad(v==null?"-":v,u,u,u,u,u,u,u,D.b_i,C.bM,u,u,u,u),C.h,u,u,new A.bR(x,u,u,w,u,u,u,C.W),u,u,u,u,u,u,u),C.v,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new B.bL2(t,d,e),u,u,u,u,u,u,!1,C.ad)},
 $S:729}
 B.bL2.prototype={
 $0(){return this.a.TE(this.b,this.c)},
@@ -303,7 +303,7 @@ s=A.ad(A.O("Check point {title}",A.G(["title",u.c],s,s)),t,t,t,t,t,t,t,t,t,t,t,t
 x=u.a
 w=y.u
 v=A.bk(A.a([E.kg(!0,C.br,!1,t,!0,C.B,t,E.lG(),t,t,t,t,t,t,2,E.ew(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.O("Take a guess",t),t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t),C.v,!0,t,!0,t,!1,t,O.bx,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.bL_(x),t,t,t,!1,t,!1,t,!0,t,G.bV,t,t,C.bt,C.bn,t,t,t,t,t,t,t,C.a_,t,G.c0,t,t,t,t)],w),C.j,C.l,C.ac,t,C.y)
-return T.lJ(A.a([A.dO(!1,R.bD(D.b0U,t),t,t,C.G,t,t,t,t,new B.bL0(x,u.b,u.d,u.e,d),t,t)],w),t,v,t,t,s)},
+return T.lJ(A.a([A.dO(!1,R.bD(D.b0T,t),t,t,C.G,t,t,t,t,new B.bL0(x,u.b,u.d,u.e,d),t,t)],w),t,v,t,t,s)},
 $S:z+0}
 B.bL_.prototype={
 $1(d){return this.a.a=d},
@@ -338,9 +338,9 @@ w(A.cl,[B.bL5,B.bLa,B.bLc,B.bL8,B.bLe,B.bL3,B.bL2,B.bL0,B.bKZ])})()
 A.bz(b.typeUniverse,JSON.parse('{"A6":{"D":[],"d":[]},"aEC":{"K":["A6"]}}'))
 var y=(function rtii(){var x=A.x
 return{i:x("Q<@>"),p:x("p<fe>"),u:x("p<d>"),r:x("p<r>"),x:x("y<r>"),w:x("f"),B:x("v"),b:x("@"),e:x("r"),v:x("~")}})();(function constants(){D.aga=new A.aP(5e6)
-D.aVP=new K.HL(4,8,8,0.75)
-D.b_j=new A.X(!0,C.o,null,null,null,null,16,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b_i=new A.X(!0,C.o,null,null,null,null,24,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0U=new A.c2("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.ceU=null})()};
+D.aVO=new K.HL(4,8,8,0.75)
+D.b_i=new A.X(!0,C.o,null,null,null,null,16,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b_h=new A.X(!0,C.o,null,null,null,null,24,C.aJ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b0T=new A.c2("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.ceU=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_273",e:"endPart",h:b})})($__dart_deferred_initializers__,"6DwCkxaugLgaG928C5OVU9QBrrk=");
+a.eventLog.push({p:"main.dart.js_273",e:"endPart",h:b})})($__dart_deferred_initializers__,"twukg+Z09DxoBIV72XcDrFqBYyI=");

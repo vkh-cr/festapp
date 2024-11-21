@@ -343,7 +343,7 @@ return B.c(L.c3e(B.dt(d,0,null)),$async$adV)
 case 4:x=f?2:3
 break
 case 2:x=5
-return B.c(N.acO(B.dt(d,0,null),O.alw,"_self"),$async$adV)
+return B.c(N.acO(B.dt(d,0,null),O.alv,"_self"),$async$adV)
 case 5:case 3:return B.j(null,w)}})
 return B.k($async$adV,w)},
 aiq(){var x=0,w=B.l(y.S),v,u,t,s
@@ -672,7 +672,7 @@ x=new B.je(0,C.u)
 w=y.J
 v=this.f
 v===$&&B.b()
-w=B.bsL(new A.aSU(this,!1,x,null).$0(),new B.b8(v,new B.aw(D.aNc,C.f,w),w.h("b8<aY.T>")),null,!0)
+w=B.bsL(new A.aSU(this,!1,x,null).$0(),new B.b8(v,new B.aw(D.aNb,C.f,w),w.h("b8<aY.T>")),null,!0)
 return w},
 aQ(d){var x,w,v=this
 v.ba(d)
@@ -1379,7 +1379,7 @@ A.bi0.prototype={
 $1(d){return $.c5K().i(0,d).e},
 $S:726}
 A.b_A.prototype={
-$1(d){var x=null,w=F.bD(B.ad("Notifications",x,x,x,x,x,x,x,x,x,x,x,x,x),x),v=y.p,u=Q.eN(R.c8a(B.a([F.bD(D.b0O,x)],v),C.K),x,C.v,x,x,x,C.K),t=this.a
+$1(d){var x=null,w=F.bD(B.ad("Notifications",x,x,x,x,x,x,x,x,x,x,x,x,x),x),v=y.p,u=Q.eN(R.c8a(B.a([F.bD(D.b0N,x)],v),C.K),x,C.v,x,x,x,C.K),t=this.a
 return A0.lJ(B.a([B.dO(!1,F.bD(B.ad("Disable",x,x,x,x,x,x,x,x,x,x,x,x,x),x),x,x,C.G,x,x,x,x,new A.b_y(t,d),x,x),B.eD(!1,F.bD(B.ad("Enable",x,x,x,x,x,x,x,x,x,x,x,x,x),x),x,x,C.G,x,x,x,x,new A.b_z(t,d),x,x)],v),x,u,x,x,w)},
 $S:z+6}
 A.b_y.prototype={
@@ -1435,42 +1435,42 @@ w(A.aNU,B.em)})()
 B.bz(b.typeUniverse,JSON.parse('{"a36":{"bc":[],"ba":[],"d":[]},"awp":{"jo":[],"al":[]},"a50":{"D":[],"d":[]},"a73":{"D":[],"d":[]},"a74":{"K":["a73"]},"aet":{"D":[],"d":[]},"JV":{"K":["1"]},"a51":{"K":["a50"]},"Ts":{"D":[],"d":[]},"aeE":{"K":["Ts"]},"aeD":{"a5":[],"d":[]},"ams":{"al":[]},"axw":{"al":[]},"ajz":{"hA":[]},"Ty":{"D":[],"d":[]},"aBv":{"a5":[],"d":[]},"aLO":{"a5":[],"d":[]},"aLP":{"a5":[],"d":[]},"aFE":{"a5":[],"d":[]},"a5a":{"K":["Ty"]},"aBl":{"a5":[],"d":[]},"aId":{"al":[]},"amo":{"j1":["Ao"]},"aqk":{"j1":["~"]},"auw":{"j1":["~"]},"axP":{"j1":["~"]},"B2":{"D":[],"d":[]},"a85":{"K":["B2"],"em":[]},"cxL":{"bc":[],"ba":[],"d":[]}}'))
 B.kM(b.typeUniverse,JSON.parse('{"JV":1,"aJy":1}'))
 var y=(function rtii(){var x=B.x
-return{e:x("oF"),Y:x("hm<@>"),x:x("z8"),C:x("cxL"),L:x("oK"),I:x("fm"),D:x("p<oF>"),M:x("p<hm<@>>"),_:x("p<oK>"),G:x("p<jo>"),s:x("p<f>"),p:x("p<d>"),A:x("aO<a74>"),v:x("aD"),w:x("fo"),P:x("aB"),u:x("xE"),N:x("co<v>"),q:x("co<~>"),B:x("a36"),J:x("aw<m>"),t:x("aw<E>"),U:x("e_"),a:x("cK<r>"),l:x("d"),Q:x("di"),R:x("d1l"),y:x("v"),z:x("@"),S:x("r"),h:x("dU?"),X:x("z?"),H:x("~")}})();(function constants(){D.b8O=new A.aSS(0,"slide")
+return{e:x("oF"),Y:x("hm<@>"),x:x("z8"),C:x("cxL"),L:x("oK"),I:x("fm"),D:x("p<oF>"),M:x("p<hm<@>>"),_:x("p<oK>"),G:x("p<jo>"),s:x("p<f>"),p:x("p<d>"),A:x("aO<a74>"),v:x("aD"),w:x("fo"),P:x("aB"),u:x("xE"),N:x("co<v>"),q:x("co<~>"),B:x("a36"),J:x("aw<m>"),t:x("aw<E>"),U:x("e_"),a:x("cK<r>"),l:x("d"),Q:x("di"),R:x("d1l"),y:x("v"),z:x("@"),S:x("r"),h:x("dU?"),X:x("z?"),H:x("~")}})();(function constants(){D.b8N=new A.aSS(0,"slide")
 D.a5m=new A.aST(0,"circle")
 D.DR=new A.Tz(0,"spread")
 D.a6K=new A.Tz(1,"centered")
 D.a6L=new A.Tz(2,"linear")
 D.a6N=new A.aTu(0,"fixed")
 D.a8O=new A.ajz()
-D.aNc=new B.m(-0.5,0.9)
-D.b93=new A.bsM()
-D.b8S=new A.aSR()
-D.b8T=new A.aSW()
+D.aNb=new B.m(-0.5,0.9)
+D.b92=new A.bsM()
+D.b8R=new A.aSR()
+D.b8S=new A.aSW()
 D.aiH=new B.aS(57411,"MaterialIcons",null,!1)
-D.aj4=new B.aS(58136,"MaterialIcons",null,!1)
-D.aj6=new B.aS(58173,"MaterialIcons",null,!1)
-D.aj8=new B.aS(58312,"MaterialIcons",null,!1)
-D.ajb=new B.aS(58447,"MaterialIcons",null,!1)
+D.aj3=new B.aS(58136,"MaterialIcons",null,!1)
+D.aj5=new B.aS(58173,"MaterialIcons",null,!1)
+D.aj7=new B.aS(58312,"MaterialIcons",null,!1)
+D.aja=new B.aS(58447,"MaterialIcons",null,!1)
 D.ajI=new B.aS(60981,"MaterialIcons",null,!1)
-D.ajN=new B.aS(61703,"MaterialIcons",null,!1)
-D.ajQ=new B.aS(61870,"MaterialIcons",null,!1)
-D.ajR=new B.aS(62005,"MaterialIcons",null,!1)
+D.ajM=new B.aS(61703,"MaterialIcons",null,!1)
+D.ajP=new B.aS(61870,"MaterialIcons",null,!1)
+D.ajQ=new B.aS(62005,"MaterialIcons",null,!1)
 D.a2r=new B.X(!0,C.o,null,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b0O=new B.c2("Notifications will inform you about schedule changes and other selected news.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cdU=!1
+D.b0N=new B.c2("Notifications will inform you about schedule changes and other selected news.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cdU=!1
 $.c6n=!1
 $.c8s=!1})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"d1k","ccS",()=>B.mf(1,1.5,B.x("E")))
 x($,"d_m","c5K",()=>{var w,v,u,t,s,r,q=null,p=B.O("Home",q)
-p=A.aqD(D.aj4,D.ajN,"home",p,!1,new A.auw("ScheduleNavigationRoute",q,C.bv,C.bv,q,"",q))
+p=A.aqD(D.aj3,D.ajM,"home",p,!1,new A.auw("ScheduleNavigationRoute",q,C.bv,C.bv,q,"",q))
 w=B.O("News",q)
-w=A.aqD(D.ajb,D.ajR,"news",w,!1,new A.aqk("NewsRoute",q,C.bv,C.bv,q,"",q))
-v=A.aqD(D.aj8,D.ajQ,"map",B.O("Map",q),!1,V.c8f(q))
+w=A.aqD(D.aja,D.ajQ,"news",w,!1,new A.aqk("NewsRoute",q,C.bv,C.bv,q,"",q))
+v=A.aqD(D.aj7,D.ajP,"map",B.O("Map",q),!1,V.c8f(q))
 u=B.O("More",q)
 t=B.cCJ(q,q)
 s=B.x("f")
 r=B.G(["id",null],s,y.z)
-u=A.aqD(W.yA,D.aj6,"more",u,!1,new A.amo("InfoRoute",t,r,C.bv,q,"",q))
+u=A.aqD(W.yA,D.aj5,"more",u,!1,new A.amo("InfoRoute",t,r,C.bv,q,"",q))
 return B.G(["home",p,"news",w,"map",v,"more",u,"user",A.aqD(D.aiH,D.ajI,"user","",!0,new A.axP("UserRoute",q,C.bv,C.bv,q,"",q))],s,B.x("aqC"))})
 x($,"d0s","csO",()=>new B.MI())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"87uYSutyaT7QT3w8or3b9IpzK14=");
+a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"Tt879NbDAv6KE1OIAyaNgTmEQsg=");

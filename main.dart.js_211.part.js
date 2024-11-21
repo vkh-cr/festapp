@@ -3,7 +3,7 @@ a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_211",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,D,Q,R,A_,S,A0,L,E,T,M,A1,U,N,A2,V,H,A3,K,A={
 ces(d,e,f){var w=null
-return new A.DT(B.c6C(d,w,w,w,w,36,w,w,D.E1,w,88,f,w,w,D.wW),e,w)},
+return new A.DT(B.c6C(d,w,w,w,w,36,w,w,D.E1,w,88,f,w,w,D.wX),e,w)},
 DT:function DT(d,e,f){this.w=d
 this.b=e
 this.a=f},
@@ -556,7 +556,7 @@ v=B.V(10,v.gj(v)>>>16&255,v.gj(v)>>>8&255,v.gj(v)&255)}u=p.aDJ(s)
 t=new B.a7(p.a,1/0,p.b,1/0).aun(r,r)
 return B.cjH(D.L,!1,s.dx,D.h,t,0,2,!0,o,w,4,r,q.cy,8,v,4,q.f,r,r,r,s.c,u,s.fx,q.k2,n,q.Q)}}
 A.Xc.prototype={
-M(){return new A.aEV(B.a([C.b2p,C.b2r,C.b2x,C.b2w,C.a2Y,C.a31,C.a2Z],x.f),D.jt)}}
+M(){return new A.aEV(B.a([C.b2o,C.b2q,C.b2w,C.b2v,C.a2Y,C.a31,C.a2Z],x.f),D.jt)}}
 A.aEV.prototype={
 W(){var w,v=this
 v.ap()
@@ -568,7 +568,7 @@ B.cU(D.i6,new A.bMf(v))},
 m(){this.a.d.m()
 this.am()},
 A(d){var w=this,v=null,u=w.a.d,t=x.p,s=B.a([],t),r=u.b,q=w.a.d
-return B.bo(B.a([new B.aG(50,v,new A.a3L(w.f,u,s,25,D.aH,w.r,K.EN,D.aI,D.K,D.j,r),v),new B.fD(1,D.eS,new A.a0u(200,v,!0,q,new A.bM6(),D.aG,new A.bM7(w),new A.bM8(),new A.bM9(),new A.bMa(),C.aYP,C.agL,C.aZ2,D.a_,P.agY,!1,new A.bMb(w),q.a),v)],t),D.aD,D.l,D.n,v)},
+return B.bo(B.a([new B.aG(50,v,new A.a3L(w.f,u,s,25,D.aH,w.r,K.EN,D.aI,D.K,D.j,r),v),new B.fD(1,D.eS,new A.a0u(200,v,!0,q,new A.bM6(),D.aG,new A.bM7(w),new A.bM8(),new A.bM9(),new A.bMa(),C.aYO,C.agL,C.aZ1,D.a_,P.agY,!1,new A.bMb(w),q.a),v)],t),D.aD,D.l,D.n,v)},
 rf(d){return this.aFV(d)},
 aFV(d){var w=0,v=B.l(x.H),u=this
 var $async$rf=B.h(function(e,f){if(e===1)return B.i(f,v)
@@ -802,12 +802,12 @@ l=A.a3G(l==null?D.t:l)
 k=A.a3G(b1.a.y)
 j=b1.a.ch
 i=j.x
-if(i==null)i=D.yn
+if(i==null)i=D.yo
 j=A.ckS(j.w)
 h=b1.z
 g=b1.a.ax
 f=g.x
-if(f==null)f=D.yn
+if(f==null)f=D.yo
 g=g.r
 g=B.n(g==null?"14":g)
 e=b1.a.ax.b
@@ -1095,29 +1095,29 @@ aXp(d){var w,v,u,t,s,r,q,p,o=this,n=null,m=B.a([],x.p)
 for(w=0;v=o.d,w<v.length;++w){u={}
 t=u.a=v[w]
 v=t.c
-if(v===C.b2q)m.push(B.ni(new B.ah(o.x,o.aX7(),n),n,v.c,n,n,C.e_))
+if(v===C.b2p)m.push(B.ni(new B.ah(o.x,o.aX7(),n),n,v.c,n,n,C.e_))
 else if(v===C.a2Y){u=o.x
 s=o.a.f
-m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aQ9(),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2t){u=o.x
+m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aQ9(),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2s){u=o.x
 s=o.a.f
-m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aXY(w),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2D){u=o.x
+m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aXY(w),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2C){u=o.x
 s=o.a
 r=s.f-2
 s=G.am8("packages/quill_html_editor/assets/camera_roll_icon.png",s.r,n)
 J.t(o.e,"video")
-m.push(B.ni(new B.ah(u,new A.MD(new A.by5(o),C.b42,o.a.d,new B.aG(r,r,s,n),n),n),n,v.c,n,n,C.e_))}else if(v===C.a2Z){u=o.x
+m.push(B.ni(new B.ah(u,new A.MD(new A.by5(o),C.b41,o.a.d,new B.aG(r,r,s,n),n),n),n,v.c,n,n,C.e_))}else if(v===C.a2Z){u=o.x
 s=o.a
-s=I.cc(C.aj7,s.r,n,s.f)
+s=I.cc(C.aj6,s.r,n,s.f)
 J.t(o.e,"link")
-m.push(B.ni(new B.ah(u,new A.MD(new A.by6(o),C.b43,o.a.d,s,n),n),n,v.c,n,n,C.e_))}else if(v===C.b2u){u=o.x
+m.push(B.ni(new B.ah(u,new A.MD(new A.by6(o),C.b42,o.a.d,s,n),n),n,v.c,n,n,C.e_))}else if(v===C.b2t){u=o.x
 s=o.a.f
-m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aXX(w),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2B){u=o.x
+m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aXX(w),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2A){u=o.x
 s=o.a.f
-m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aYz(w,d),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2s){u=o.x
+m.push(B.ni(new B.ah(u,new B.aG(s,s,o.aYz(w,d),n),n),n,v.c,n,n,C.e_))}else if(v===C.b2r){u=o.x
 s=o.a
 r=s.r
 q=s.f
-m.push(B.ni(new A.VS(s.w,r,q,u,new A.by7(o),n),n,v.c,n,n,C.e_))}else if(v===C.b2C){u=o.a
+m.push(B.ni(new A.VS(s.w,r,q,u,new A.by7(o),n),n,v.c,n,n,C.e_))}else if(v===C.b2B){u=o.a
 s=u.z
 v=v.c
 r=o.x
@@ -1163,11 +1163,11 @@ return F.VM(new A.ok(B.ad(e,w,w,w,w,w,w,w,B.bH(w,w,v?u.x:u.r,w,w,w,w,w,w,w,w,d,w
 RC(d){var w=null,v=this.a
 return new B.aG(w,w,B.ad(d,w,w,w,w,w,w,w,B.bH(w,w,d.toLowerCase()!=="normal"?v.x:v.r,w,w,w,w,w,w,w,w,14,w,w,D.aJ,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w)},
 aQ9(){var w=this,v="align",u=w.a.w,t=J.o(J.t(w.e,v),"")||J.t(w.e,v)==null?"left":J.t(w.e,v)
-return new F.wx(A.ces(!1,A.cgd(D.c2,u,D.A,C.aVy,!0,B.a([w.RH("left"),w.RH("center"),w.RH("right"),w.RH("justify")],x.t),new A.by_(w),null,null,t,x.N),D.Y),null)},
+return new F.wx(A.ces(!1,A.cgd(D.c2,u,D.A,C.aVx,!0,B.a([w.RH("left"),w.RH("center"),w.RH("right"),w.RH("justify")],x.t),new A.by_(w),null,null,t,x.N),D.Y),null)},
 RH(d){var w,v,u
-if(d==="center")w=C.aj_
-else if(d==="right")w=C.aj2
-else w=d==="justify"?C.aj0:C.aj1
+if(d==="center")w=C.aiZ
+else if(d==="right")w=C.aj1
+else w=d==="justify"?C.aj_:C.aj0
 v=J.o(J.t(this.e,"align"),d)
 u=this.a
 v=v?u.x:u.r
@@ -1205,7 +1205,7 @@ case 1:return w.kV(C.ajx)
 case 2:return w.kV(C.ajE)
 case 3:return w.kV(C.ajB)
 case 4:return w.kV(C.ajA)
-case 5:return w.kV(H.ov)
+case 5:return w.kV(H.ow)
 case 7:return w.kV(C.ajw)
 case 6:return w.kV(C.ajv)
 case 8:return w.kV(C.ajD)
@@ -1218,7 +1218,7 @@ case 16:return w.kV(C.ajy)
 case 10:return w.aiQ("packages/quill_html_editor/assets/h1_dark.png")
 case 11:return w.aiQ("packages/quill_html_editor/assets/h2_dark.png")
 case 13:return w.kV(C.ajs)
-case 19:return w.kV(C.aj5)
+case 19:return w.kV(C.aj4)
 case 22:return w.kV(C.ajH)
 case 23:return w.kV(C.ajG)
 case 24:return w.kV(C.ajF)
@@ -1234,7 +1234,7 @@ H(){return"ToolBarStyle."+this.b}}
 A.F6.prototype={}
 A.Ud.prototype={
 A(d){var w=null
-return B.aM(w,L.WX(w,D.v,C.aVO,new A.aVu(this),19,w,Q.oc,w,D.K,!0),D.h,D.o,w,w,w,120,w,w,w,w,120)}}
+return B.aM(w,L.WX(w,D.v,C.aVN,new A.aVu(this),19,w,Q.oc,w,D.K,!0),D.h,D.o,w,w,w,120,w,w,w,w,120)}}
 A.VS.prototype={
 M(){return new A.aDN()},
 byB(d){return this.r.$1(d)}}
@@ -1616,7 +1616,7 @@ r.b=f
 w=B.at(h,s,x.w).w
 v=A.b7e("#E7F0FE")
 u=B.eP(10)
-return new A.ok(A7.A4(s,s,new B.ah(new B.as(0,0,0,w.f.d),B.aM(D.F,B.bo(B.a([A_.kJ,new B.fD(1,D.bW,new B.ah(D.lO,B.aM(s,A8.lu(s,!1,s,C.akQ,!1,s,s,s,s,1,1,!1,new A.bNv(t),s,s,s,s,!1,s,s,D.a_,s,new A.bNw()),D.h,s,s,new B.bR(new A.F6(v>>>0),s,s,u,s,s,s,D.W),s,s,s,s,s,s,s),s),s),M.dg(s,s,s,s,s,C.ak9,s,s,new A.bNx(r,t,g,!0,h),s,s,s,s,s),K.vs,M.dg(s,s,s,s,s,C.akl,s,s,new A.bNy(r,t,!0,h),s,s,s,s,s),K.vs],x.p),D.j,D.l,D.n,s),D.h,s,s,s,s,60,s,s,s,s,s),s),t.d,s,s),s)}}
+return new A.ok(A7.A4(s,s,new B.ah(new B.as(0,0,0,w.f.d),B.aM(D.F,B.bo(B.a([A_.kJ,new B.fD(1,D.bW,new B.ah(D.lO,B.aM(s,A8.lu(s,!1,s,C.akP,!1,s,s,s,s,1,1,!1,new A.bNv(t),s,s,s,s,!1,s,s,D.a_,s,new A.bNw()),D.h,s,s,new B.bR(new A.F6(v>>>0),s,s,u,s,s,s,D.W),s,s,s,s,s,s,s),s),s),M.dg(s,s,s,s,s,C.ak8,s,s,new A.bNx(r,t,g,!0,h),s,s,s,s,s),K.vt,M.dg(s,s,s,s,s,C.akk,s,s,new A.bNy(r,t,!0,h),s,s,s,s,s),K.vt],x.p),D.j,D.l,D.n,s),D.h,s,s,s,s,60,s,s,s,s,s),s),t.d,s,s),s)}}
 A.axI.prototype={
 H(){return"UrlInputType."+this.b}}
 A.Ps.prototype={
@@ -1725,7 +1725,7 @@ if(e!==v){w=!1
 if(e instanceof A.Iq)if(e.a===v.a)if(e.b===v.b)w=e.d==v.d}else w=!0
 return w},
 gv(d){var w=this
-return(D.e.gv(w.a)^B.dh(w.b)^D.ox.gv(w.c)^J.J(w.d))>>>0}}
+return(D.e.gv(w.a)^B.dh(w.b)^D.oy.gv(w.c)^J.J(w.d))>>>0}}
 A.bav.prototype={
 H(){return"JavascriptMode."+this.b}}
 A.aSA.prototype={
@@ -1805,11 +1805,11 @@ u.allowFullscreen=!0
 v.a.toString
 w=u.sandbox
 w.toString
-D.b.aI(C.ayE,D.afH.gk9(w))
+D.b.aI(C.ayD,D.afH.gk9(w))
 v.a.toString
 u.sandbox.add("allow-scripts")
 v.a.toString
-u.allow=D.b.fJ(C.aqT,new A.c0z())
+u.allow=D.b.fJ(C.aqS,new A.c0z())
 return u},
 bjc(){var w=this.w
 w===$&&B.b()
@@ -1881,7 +1881,7 @@ a1N(d,e,f,g){return this.aWx(d,e,f,g)},
 aWx(d,e,f,g){var w=0,v=B.l(x.N),u,t=this,s,r,q,p,o,n
 var $async$a1N=B.h(function(h,i){if(h===1)return B.i(i,v)
 while(true)$async$outer:switch(w){case 0:t.a.toString
-p=B.H(C.ay0,!0,x.W)
+p=B.H(C.ay_,!0,x.W)
 D.b.aHr(p)
 s=p
 t.a.toString
@@ -2126,22 +2126,22 @@ var $async$$0=B.h(function(d,e){if(d===1)return B.i(e,v)
 while(true)switch(w){case 0:o=u.a
 n=o.a
 m=n.c
-w=m===C.b2z?2:4
+w=m===C.b2y?2:4
 break
 case 2:u.b.a.d.Vc()
 w=3
 break
-case 4:w=m===C.b2y?5:7
+case 4:w=m===C.b2x?5:7
 break
 case 5:u.b.a.d.uY()
 w=6
 break
-case 7:w=m===C.b2v?8:10
+case 7:w=m===C.b2u?8:10
 break
 case 8:u.b.a.d.uM()
 w=9
 break
-case 10:w=m===C.b2A?11:13
+case 10:w=m===C.b2z?11:13
 break
 case 11:w=14
 return B.c(new A.b9j(new A.by3(u.b)).Yc(),$async$$0)
@@ -2255,7 +2255,7 @@ return Y.lJ(w,w,new A.ok(new B.f9(new A.byj(this.a),w),w),D.Y,new B.ev(B.eP(8),D
 $S:z+8}
 A.byj.prototype={
 $1(d){var w=null,v=x.p
-return new B.aG(300,310,B.bk(B.a([B.bo(B.a([C.aVA,C.ahL,M.dg(w,w,w,w,w,T.Hm,w,w,new A.byh(d),w,w,w,w,w)],v),D.j,D.l,D.ac,w),B.cL(new A.Ps(new A.byi(this.a,d),8,w),1,w),S.iR],v),D.j,D.bC,D.ac,w,D.y),w)},
+return new B.aG(300,310,B.bk(B.a([B.bo(B.a([C.aVz,C.ahL,M.dg(w,w,w,w,w,T.Hm,w,w,new A.byh(d),w,w,w,w,w)],v),D.j,D.l,D.ac,w),B.cL(new A.Ps(new A.byi(this.a,d),8,w),1,w),S.iR],v),D.j,D.bC,D.ac,w,D.y),w)},
 $S:312}
 A.byh.prototype={
 $0(){return B.cR(this.a,!1).eV()},
@@ -2294,7 +2294,7 @@ A.bIf.prototype={
 $1(d){var w,v=this,u=null,t=x.w
 if(B.at(d,u,t).w.a.a<380)t=Z.mP(!0,u,new A.bId(v.a,v.b),7,u,u,u,!1,D.K,!0)
 else{w=L.WX(u,D.v,new N.HL(B.at(d,u,t).w.a.a<380?1:2,0,0,3.3333333333333335),new A.bIe(v.a,v.b),7,u,u,u,D.K,!0)
-t=w}return new B.aG(400,u,B.bk(B.a([C.aTa,new B.fD(1,D.bW,new B.ah(D.eR,t,u),u),S.iR],x.p),D.j,D.l,D.ac,u,D.y),u)},
+t=w}return new B.aG(400,u,B.bk(B.a([C.aT9,new B.fD(1,D.bW,new B.ah(D.eR,t,u),u),S.iR],x.p),D.j,D.l,D.ac,u,D.y),u)},
 $S:312}
 A.bId.prototype={
 $2(d,e){var w=B.a(C.zo.slice(0),x.x)
@@ -2546,14 +2546,14 @@ B.kM(b.typeUniverse,JSON.parse('{"a4r":1}'))
 var y={b:"packages/quill_html_editor/assets/insert_table.png"}
 var x=(function rtii(){var w=B.x
 return{W:w("zi"),v:w("d5"),C:w("rr"),_:w("Q<@>"),B:w("Q<f?>"),K:w("alC<Iq>"),t:w("p<l1<f>>"),k:w("p<l1<@>>"),x:w("p<q0>"),D:w("p<lT<aH>>"),O:w("p<bV>"),d:w("p<hG>"),F:w("p<m3>"),s:w("p<f>"),c:w("p<Ie>"),f:w("p<iI>"),p:w("p<d>"),b:w("p<Jj>"),a:w("p<aQ>"),q:w("aO<VX>"),l:w("aO<nM>"),h:w("aO<a0v>"),A:w("aO<K<D>>"),Q:w("aO<a3M>"),j:w("y<@>"),I:w("bu<f,f>"),g:w("a8<f,@>"),w:w("fo"),P:w("aB"),u:w("pa"),r:w("N"),n:w("C1"),N:w("f"),X:w("cK<f>"),G:w("bJ<v>"),U:w("Iq"),J:w("eh<of>"),e:w("Qd"),E:w("QC<cf>"),y:w("v"),z:w("@"),S:w("r"),T:w("f?"),H:w("~")}})();(function constants(){var w=a.makeConstList
-C.b8M=new A.aSA(0,"requireUserActionForAllMediaTypes")
+C.b8L=new A.aSA(0,"requireUserActionForAllMediaTypes")
 C.a8B=new A.aeZ()
 C.a8F=new A.afL()
 C.aa0=new A.ayh()
-C.ay0=B.a(w([C.a8B,C.a8F,C.aa0]),B.x("p<zi>"))
-C.ayE=B.a(w(["allow-downloads","allow-forms","allow-modals","allow-orientation-lock","allow-pointer-lock","allow-popups","allow-popups-to-escape-sandbox","allow-presentation","allow-same-origin"]),x.s)
-C.aqT=B.a(w(["accelerometer","clipboard-write","encrypted-media","gyroscope","picture-in-picture"]),x.s)
-C.b8V=new A.aX0()
+C.ay_=B.a(w([C.a8B,C.a8F,C.aa0]),B.x("p<zi>"))
+C.ayD=B.a(w(["allow-downloads","allow-forms","allow-modals","allow-orientation-lock","allow-pointer-lock","allow-popups","allow-popups-to-escape-sandbox","allow-presentation","allow-same-origin"]),x.s)
+C.aqS=B.a(w(["accelerometer","clipboard-write","encrypted-media","gyroscope","picture-in-picture"]),x.s)
+C.b8U=new A.aX0()
 C.aa2=new A.bAB()
 C.aaB=new B.zt(D.CM,0.4,null,null,null,null,null,null,null)
 C.aas=new B.ku(D.F,null,null,C.aaB,null)
@@ -2576,15 +2576,15 @@ C.aht=new A.fB(16,10,0,0)
 C.ahx=new A.W0(1,"aboveBodyCloseTag")
 C.ahy=new A.W0(2,"belowHeadOpenTag")
 C.ahz=new A.W0(3,"aboveHeadCloseTag")
-C.aZw=new B.X(!0,null,null,null,null,null,16,D.lU,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-C.b0N=new B.c2("Select Rows x Columns",null,C.aZw,null,null,null,null,null,null,null,null,null,null,null,null)
-C.ahL=new B.nJ(1,D.eS,C.b0N,null)
-C.aj_=new B.aS(58027,"MaterialIcons",null,!1)
-C.aj0=new B.aS(58028,"MaterialIcons",null,!1)
-C.aj1=new B.aS(58029,"MaterialIcons",null,!1)
-C.aj2=new B.aS(58030,"MaterialIcons",null,!1)
-C.aj5=new B.aS(58162,"MaterialIcons",null,!1)
-C.aj7=new B.aS(58240,"MaterialIcons",null,!1)
+C.aZv=new B.X(!0,null,null,null,null,null,16,D.lU,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+C.b0M=new B.c2("Select Rows x Columns",null,C.aZv,null,null,null,null,null,null,null,null,null,null,null,null)
+C.ahL=new B.nJ(1,D.eS,C.b0M,null)
+C.aiZ=new B.aS(58027,"MaterialIcons",null,!1)
+C.aj_=new B.aS(58028,"MaterialIcons",null,!1)
+C.aj0=new B.aS(58029,"MaterialIcons",null,!1)
+C.aj1=new B.aS(58030,"MaterialIcons",null,!1)
+C.aj4=new B.aS(58162,"MaterialIcons",null,!1)
+C.aj6=new B.aS(58240,"MaterialIcons",null,!1)
 C.ajs=new B.aS(59812,"MaterialIcons",null,!1)
 C.ajt=new B.aS(59816,"MaterialIcons",null,!1)
 C.Hh=new B.aS(59818,"MaterialIcons",null,!1)
@@ -2602,14 +2602,14 @@ C.ajE=new B.aS(59837,"MaterialIcons",null,!1)
 C.ajF=new B.aS(60007,"MaterialIcons",null,!1)
 C.ajG=new B.aS(60424,"MaterialIcons",null,!0)
 C.ajH=new B.aS(60802,"MaterialIcons",null,!0)
-C.ajU=new B.aS(63030,"MaterialIcons",null,!1)
-C.ak9=new B.er(C.ajU,null,H.Ai,null,null)
-C.ajV=new B.aS(63047,"MaterialIcons",null,!1)
-C.akl=new B.er(C.ajV,null,D.eB,null,null)
-C.b9n=new A.ba3(0,"newline")
-C.aZg=new B.X(!0,null,null,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-C.akQ=new Aa.Aq(null,null,null,null,null,null,null,null,null,null," Type URL",C.aZg,null,null,null,null,null,null,null,null,null,null,D.Gi,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,P.cS,null,null,null,null,P.cS,!0,null,!0,null)
-C.b9p=new A.bav(1,"unrestricted")
+C.ajT=new B.aS(63030,"MaterialIcons",null,!1)
+C.ak8=new B.er(C.ajT,null,H.Ai,null,null)
+C.ajU=new B.aS(63047,"MaterialIcons",null,!1)
+C.akk=new B.er(C.ajU,null,D.eB,null,null)
+C.b9m=new A.ba3(0,"newline")
+C.aZf=new B.X(!0,null,null,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+C.akP=new Aa.Aq(null,null,null,null,null,null,null,null,null,null," Type URL",C.aZf,null,null,null,null,null,null,null,null,null,null,D.Gi,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,P.cS,null,null,null,null,P.cS,!0,null,!0,null)
+C.b9o=new A.bav(1,"unrestricted")
 C.Ka=B.a(w(["#000000","#FFFFFF","#F44336","#E91E63","#9C27B0","#673AB7","#3F51B5","#2196F3","#03A9F4","#00BCD4","#009688","#4CAF50","#8BC34A","#CDDC39","#FFEB3B","#FFC107","#FF9800","#FF5722","#795548"]),x.s)
 C.ahb=new A.q0(0,"insertRowAbove")
 C.ahc=new A.q0(1,"insertRowBelow")
@@ -2619,42 +2619,42 @@ C.ahf=new A.q0(4,"deleteRow")
 C.ahg=new A.q0(5,"deleteColumn")
 C.ahh=new A.q0(6,"deleteTable")
 C.zo=B.a(w([C.ahb,C.ahc,C.ahd,C.ahe,C.ahf,C.ahg,C.ahh]),x.x)
-C.b1k=new B.c2("Edit Table",null,K.a2y,null,null,null,null,null,null,null,null,null,null,null,null)
-C.aPl=new B.ah(A5.Gm,C.b1k,null)
-C.ahM=new B.nJ(1,D.eS,C.aPl,null)
-C.avR=B.a(w([C.ahM,A2.aaF]),x.p)
-C.aTa=new B.o9(D.a5,D.l,D.n,D.j,null,D.y,null,D.h,C.avR,null)
+C.b1j=new B.c2("Edit Table",null,K.a2y,null,null,null,null,null,null,null,null,null,null,null,null)
+C.aPk=new B.ah(A5.Gm,C.b1j,null)
+C.ahM=new B.nJ(1,D.eS,C.aPk,null)
+C.avQ=B.a(w([C.ahM,A2.aaF]),x.p)
+C.aT9=new B.o9(D.a5,D.l,D.n,D.j,null,D.y,null,D.h,C.avQ,null)
 C.Bo=new B.i9(D.dn,0,B.x("i9<cYB>"))
-C.aVy=new B.aG(0,null,null,null)
-C.aVA=new B.aG(15,null,null,null)
-C.aVO=new N.HL(4,0,0,1)
+C.aVx=new B.aG(0,null,null,null)
+C.aVz=new B.aG(15,null,null,null)
+C.aVN=new N.HL(4,0,0,1)
 C.a1W=new A.a2A(0,"html")
 C.a1X=new A.a2A(1,"url")
 C.a1Y=new A.a2A(2,"urlBypass")
-C.aYP=new B.X(!0,null,null,'"PT Sans", Calibri, Tahoma, sans-serif',null,null,16,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-C.aZ2=new B.X(!0,D.cU,null,null,null,null,18,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+C.aYO=new B.X(!0,null,null,'"PT Sans", Calibri, Tahoma, sans-serif',null,null,16,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+C.aZ1=new B.X(!0,D.cU,null,null,null,null,18,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 C.a2Y=new A.iI("Alignment",14,"align")
-C.b2p=new A.iI("Bold",0,"bold")
-C.b2q=new A.iI("Font Size",17,"size")
+C.b2o=new A.iI("Bold",0,"bold")
+C.b2p=new A.iI("Font Size",17,"size")
 C.a2Z=new A.iI("Hyperlink",18,"link")
 C.a3_=new A.iI("Header H2",11,"headerTwo")
-C.b2r=new A.iI("Italic",1,"italic")
-C.b2s=new A.iI("Edit table",26,"editTable")
-C.b2t=new A.iI("Font color",12,"color")
-C.b2u=new A.iI("Background color",13,"background")
-C.b2v=new A.iI("Redo",23,"redo")
-C.b2w=new A.iI("Strikethrough",3,"strike")
+C.b2q=new A.iI("Italic",1,"italic")
+C.b2r=new A.iI("Edit table",26,"editTable")
+C.b2s=new A.iI("Font color",12,"color")
+C.b2t=new A.iI("Background color",13,"background")
+C.b2u=new A.iI("Redo",23,"redo")
+C.b2v=new A.iI("Strikethrough",3,"strike")
 C.a30=new A.iI("Header H1",10,"headerOne")
-C.b2x=new A.iI("Underline",2,"underline")
-C.b2y=new A.iI("Undo",22,"undo")
-C.b2z=new A.iI("Clear History",24,"clearHistory")
-C.b2A=new A.iI("Insert image",19,"image")
-C.b2B=new A.iI("Add a table",25,"addTable")
-C.b2C=new A.iI("separator",27,"separator")
+C.b2w=new A.iI("Underline",2,"underline")
+C.b2x=new A.iI("Undo",22,"undo")
+C.b2y=new A.iI("Clear History",24,"clearHistory")
+C.b2z=new A.iI("Insert image",19,"image")
+C.b2A=new A.iI("Add a table",25,"addTable")
+C.b2B=new A.iI("separator",27,"separator")
 C.a31=new A.iI("Clears all formats",21,"clean")
-C.b2D=new A.iI("Insert Youtube/Url",20,"video")
-C.b42=new A.axI(0,"video")
-C.b43=new A.axI(1,"hyperlink")})();(function lazyInitializers(){var w=a.lazy
+C.b2C=new A.iI("Insert Youtube/Url",20,"video")
+C.b41=new A.axI(0,"video")
+C.b42=new A.axI(1,"hyperlink")})();(function lazyInitializers(){var w=a.lazy
 w($,"d44","cv_",()=>B.c94(null))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_211",e:"endPart",h:b})})($__dart_deferred_initializers__,"+BH4ztB6zrsGpr/1uxMTgz9c4nM=");
+a.eventLog.push({p:"main.dart.js_211",e:"endPart",h:b})})($__dart_deferred_initializers__,"da9Od8/QjYvQI8Do9HUn+GzSL08=");
