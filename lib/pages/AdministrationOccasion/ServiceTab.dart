@@ -73,11 +73,13 @@ class _ServiceTabState extends State<ServiceTab> {
           DataGridAction(
               name: "Accommodation settings".tr(),
               action: (SingleTableDataGrid p0, [_]) =>
-                  _accommodationDefinition(p0)),
+                  _accommodationDefinition(p0),
+              isEnabled: RightsService.isManager),
           DataGridAction(
               name: "Food settings".tr(),
               action: (SingleTableDataGrid p0, [_]) =>
-                  _foodDefinition(p0)),
+                  _foodDefinition(p0),
+              isEnabled: RightsService.isManager),
         ],
         columns: ColumnHelper.generateColumns(columnIdentifiers, data: {
           ColumnHelper.FOOD: allFood,
