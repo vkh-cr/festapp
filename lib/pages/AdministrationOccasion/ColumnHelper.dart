@@ -21,6 +21,7 @@ class ColumnHelper {
   static const String ROLE = "role";
   static const String TEXT1 = "text1";
   static const String TEXT2 = "text2";
+  static const String TEXT3 = "text3";
   static const String NOTE = "note";
   static const String DIET = "diet";
   static const String ADMINISTRATOR = "administrator";
@@ -121,6 +122,15 @@ class ColumnHelper {
         title: "Text2".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text2,
+        type: PlutoColumnType.text(),
+        width: 100,
+      ),
+    ],
+    TEXT3: [
+      PlutoColumn(
+        title: "Číslo týmu (hra)",
+        enableEditingMode: RightsService.canUpdateUsers(),
+        field: Tb.occasion_users.data_text3,
         type: PlutoColumnType.text(),
         width: 100,
       ),
