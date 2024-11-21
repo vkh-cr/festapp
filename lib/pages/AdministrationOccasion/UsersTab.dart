@@ -86,7 +86,7 @@ class _UsersTabState extends State<UsersTab> {
   // Actions (import, invite, change password, add to group, add existing)
   Future<void> _import(SingleTableDataGrid dataGrid) async {
     await UserManagementHelper.import(context);
-    await loadUsers(); // Reload users and force rebuild
+    await loadUsers();
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
@@ -144,18 +144,19 @@ class _UsersTabState extends State<UsersTab> {
 
       // If the user chooses not to reinvite, exclude already invited users
       if (!reinviteConfirm) {
-        await _processInvites(newUsers, dataGrid);
+        await _processInvites(newUsers);
+        await loadUsers(); // Ensure data is updated
         return;
       }
     }
 
     // Proceed with inviting both new and previously invited users (if reinvite confirmed)
-    await _processInvites(users, dataGrid);
+    await _processInvites(users);
+    await loadUsers(); // Ensure data is updated
   }
 
   Future<void> _processInvites(
       List<OccasionUserModel> users,
-      SingleTableDataGrid dataGrid,
       {int retryLimit = 3}
       ) async {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
