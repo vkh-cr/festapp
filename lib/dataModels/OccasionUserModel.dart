@@ -57,7 +57,7 @@ class OccasionUserModel extends IPlutoRowModel {
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
         occasion: RightsService.currentOccasion!,
-        user: json[Tb.occasion_users.user],
+        user: original?.user ?? json[Tb.occasion_users.user],
         role: json[Tb.occasion_users.role],
         data: {
           Tb.occasion_users.data_email: json[Tb.occasion_users.data_email],
