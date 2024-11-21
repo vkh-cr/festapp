@@ -204,7 +204,7 @@ class _UsersTabState extends State<UsersTab> {
                 print(
                     "Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
               }
-              Future.delayed(Duration(milliseconds: 500));
+              await Future.delayed(Duration(milliseconds: 500));
             }
           }
         };
