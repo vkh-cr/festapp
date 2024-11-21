@@ -194,7 +194,7 @@ G.kD(x,"event/"+d,y.X).aL(0,new B.bTZ(this),y.H)},
 A(d){var x,w,v=this,u=null,t=A.J(d).ax.a===C.z?"assets/icons/fstapplogo.dark.svg":"assets/icons/fstapplogo.svg",s=A.dn(u,new N.HS(200,u,L.hW,new P.Pg(t,u,u,u,u),u,!1,"Festapp logo",!1,u,u),C.v,!1,u,new B.bU2(v,d),u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,!1,C.ad),r=A.cg(C.aU)
 r=A.cg(new A.c3(r.a,r.b,0.4,r.d).d_())
 r=new A.c3(r.a,r.b,r.c,0.1).d_()
-if(A.J(d).ax.a===C.z)x=A.J(d).ax.a===C.z?$.fy():C.cT
+if(A.J(d).ax.a===C.z)x=A.J(d).ax.a===C.z?$.fq():C.cT
 else x=C.ec
 w=y.p
 r=A.bq(A.a([s,M.hM,A.bk(A.a([new B.afi(v.gbdI(),K.cc(R.ow,x,u,u),r,u),A.af(A.P("My schedule",u),u,u,u,u,u,u,u,u,u,u,u,u,u)],w),C.k,C.l,C.ac,u,C.y)],w),C.k,C.bJ,C.n,u)
@@ -313,4 +313,4 @@ D.aVr=new A.L(70,50)
 D.aVs=new A.L(80,60)
 D.aVv=new A.L(1/0,46)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"WETfr4uF2ceLXSI7NQM3gzEiFFs=");
+a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"cd3qkqM8cb6GU1MVJFoBfGEK//I=");

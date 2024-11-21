@@ -78,7 +78,7 @@ x=A.aL(u,u,B.h,u,u,new A.bR(u,L.cf6(B.F,N.DY,new O.DI("assets/icons/fstappicon.p
 w=y.g
 w=A.P("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.G(["title","Festapp"],w,w))
 v=y.e
-return H.hI(t,u,new A.cV(B.aS,u,u,new A.ah(D.ah2,new A.dD(new A.a7(0,820,0,1/0),A.bk(A.a([A.d0(A.bq(A.a([x,D.aVC,A.cL(E.bD(A.af(w,u,u,u,u,u,u,u,A.bI(u,u,A.J(d).ax.a===B.z?$.fy():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.k,B.bJ,B.n,u),u,u),D.aVI,this.bm0(d,A.P("Install for Apple",u),D.ak1,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bm1(d,A.P("Install for Android",u),D.aiJ,"",1,A.P("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bm_(d,A.P("Install for PC/Mac",u),D.aiV,"",2)],v),B.k,B.l,B.n,u,B.y),u),u),u),u,u,u,u)},
+return H.hI(t,u,new A.cV(B.aS,u,u,new A.ah(D.ah2,new A.dD(new A.a7(0,820,0,1/0),A.bk(A.a([A.d0(A.bq(A.a([x,D.aVC,A.cL(E.bD(A.af(w,u,u,u,u,u,u,u,A.bI(u,u,A.J(d).ax.a===B.z?$.fq():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.k,B.bJ,B.n,u),u,u),D.aVI,this.bm0(d,A.P("Install for Apple",u),D.ak1,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bm1(d,A.P("Install for Android",u),D.aiJ,"",1,A.P("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bm_(d,A.P("Install for PC/Mac",u),D.aiV,"",2)],v),B.k,B.l,B.n,u,B.y),u),u),u),u,u,u,u)},
 a6e(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
 if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
 else o=n
@@ -86,7 +86,7 @@ else o=n
 n=y.e
 x=A.bq(A.a([H.cc(f,q,q,24),R.kJ,A.af(e,q,q,q,q,q,q,q,B.iV,q,q,q,q,q)],n),B.k,B.l,B.n,q)
 w=A.a([],n)
-if(j!=null){v=(A.J(d).ax.a===B.z?$.fy():B.t).a
+if(j!=null){v=(A.J(d).ax.a===B.z?$.fq():B.t).a
 B.b.I(w,A.a([new A.ah(B.cW,E.bD(A.af(j,q,q,q,q,q,q,q,A.bI(q,q,A.V(204,v>>>16&255,v>>>8&255,v&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),S.iR],n))}v=i?A.P("Download App",q):A.P("Install Now",q)
 if(i)u=new C.bNm(g)
 else u=!r.d&&!r.f&&r.e?r.ga8y():q
@@ -156,4 +156,4 @@ D.b0V=new A.c4("Installation failed. Please open this link in your device's defa
 D.b19=new A.c4("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"cYM","ccb",()=>new A.MF())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_121",e:"endPart",h:b})})($__dart_deferred_initializers__,"0FOhHTZKC3Pl6TNfbXJGOPLsD9Q=");
+a.eventLog.push({p:"main.dart.js_121",e:"endPart",h:b})})($__dart_deferred_initializers__,"VyIyH4PkissKm1UkB449NdecIdI=");

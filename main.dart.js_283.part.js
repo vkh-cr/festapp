@@ -1427,7 +1427,7 @@ v(A.ajx,B.hA)
 v(A.a57,A.abq)
 u(B.j0,[A.amm,A.aqi,A.auu,A.axK])
 v(A.a82,A.aNP)
-x(A.abo,B.fw)
+x(A.abo,B.fx)
 w(A.aNC,A.aJt)
 x(A.a50,B.ef)
 x(A.abq,B.ef)
@@ -1473,4 +1473,4 @@ u=A.aqB(W.yA,D.aj6,"more",u,!1,new A.amm("InfoRoute",t,r,C.bv,q,"",q))
 return B.G(["home",p,"news",w,"map",v,"more",u,"user",A.aqB(D.aiH,D.ajI,"user","",!0,new A.axK("UserRoute",q,C.bv,C.bv,q,"",q))],s,B.x("aqA"))})
 x($,"d05","csx",()=>new B.MF())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"RKcxBeHTjdAdS8vocu9CbGb9Lno=");
+a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"idui0NwlYCnSXwoIuk7alGJxoFw=");

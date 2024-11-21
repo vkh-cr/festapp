@@ -744,11 +744,11 @@ w.push(H.vt)
 u=A.P("Install App",r)
 v=!s.e
 t=v&&s.r&&s.f?s.ga8y():r
-if(v&&s.r&&s.f)v=A.J(d).ax.a===C.z?$.fy():C.t
+if(v&&s.r&&s.f)v=A.J(d).ax.a===C.z?$.fq():C.t
 else v=C.ec
 x=A.a([S.DS(v,d,50,!0,u,t,A.J(d).ax.a===C.z?$.nr():C.o,250)],x)
 if(!s.r)x.push(new A.ah(F.lK,E.bD(D.b16,r),r))
-if(s.e||!s.f)x.push(new A.ah(F.lK,E.bD(A.af("The app is already installed.",r,r,r,r,r,r,r,A.bI(r,r,A.J(d).ax.a===C.z?$.fy():C.t,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.bS,r,r,r,r),r),r))
+if(s.e||!s.f)x.push(new A.ah(F.lK,E.bD(A.af("The app is already installed.",r,r,r,r,r,r,r,A.bI(r,r,A.J(d).ax.a===C.z?$.fq():C.t,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.bS,r,r,r,r),r),r))
 w.push(A.d0(A.bk(x,C.k,C.l,C.n,r,C.y),r,r))
 return W.hI(q,r,new A.cV(C.aS,r,r,new A.ah(Q.dA,new A.dD(new A.a7(0,820,0,1/0),A.bk(w,C.aD,C.l,C.n,r,C.y),r),r),r),r,r,r,r)}}
 var z=a.updateTypes(["E(E)","Q<~>()"])
@@ -917,4 +917,4 @@ D.b1s=new A.c4("Appearance",null,G.kP,null,null,null,null,null,null,null,null,nu
 D.b4w=new A.bA(C.hH,A.x("bA<hb>"))
 D.b4z=new A.bA(C.Y,A.x("bA<f1>"))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_82",e:"endPart",h:b})})($__dart_deferred_initializers__,"/fmMTHV83ToBndRkvd6JteQ7LOk=");
+a.eventLog.push({p:"main.dart.js_82",e:"endPart",h:b})})($__dart_deferred_initializers__,"v0U/Bxr2yPFPBbeOj/fKGznbWoM=");
