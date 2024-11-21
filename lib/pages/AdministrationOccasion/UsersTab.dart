@@ -161,12 +161,15 @@ class _UsersTabState extends State<UsersTab> {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
         context,
         "Invite".tr(),
-        "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
+        "${"Users will get a sign-in code via e-mail.".tr()} (${users
+            .length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
     );
 
     if (confirm) {
       ValueNotifier<int> invitedCount = ValueNotifier(0);
-      Map<OccasionUserModel, int> retryAttempts = { for (var user in users) user: 0 };
+      Map<OccasionUserModel, int> retryAttempts = {
+        for (var user in users) user: 0
+      };
 
       // Prepare futures for progress dialog
       List<Future<void>> inviteFutures = users.map((user) async {
@@ -178,7 +181,9 @@ class _UsersTabState extends State<UsersTab> {
 
             ToastHelper.Show(
               context,
-              "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
+              "Invited: {user}.".tr(namedArgs: {
+                "user": user.data![Tb.occasion_users.data_email]
+              }),
             );
             return; // Exit retry loop on success
           } catch (e) {
@@ -195,9 +200,11 @@ class _UsersTabState extends State<UsersTab> {
                 ),
                 severity: ToastSeverity.NotOk,
               );
-              print("Failed to invite user: ${user.data![Tb.occasion_users.data_email]}. Error: $e");
+              print("Failed to invite user: ${user.data![Tb.occasion_users
+                  .data_email]}. Error: $e");
             } else {
-              print("Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
+              print("Retrying to invite user: ${user.data![Tb.occasion_users
+                  .data_email]}. Attempt: ${retryAttempts[user]}");
             }
           } finally {
             // Ensure delay happens regardless of success or failure
@@ -214,4 +221,6 @@ class _UsersTabState extends State<UsersTab> {
         invitedCount,
         futures: inviteFutures,
       );
+    }
+  }
 }
