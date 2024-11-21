@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fstapp/dataModels/LanguageModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -308,18 +310,14 @@ class DialogHelper{
   static Future<void> showProgressDialogAsync(
       BuildContext context,
       String title,
-      int total,
-      ValueNotifier<int> progressNotifier, {
+      int total, {
         List<Future<void>>? futures,
       }) async {
-    if (futures != null) {
-      for (var future in futures) {
-        await future;
-        progressNotifier.value++;
-      }
-    }
-
-    await showDialog(
+    // Completer to control the dialog lifecycle
+    final completer = Completer<void>();
+    var progressNotifier = ValueNotifier<int>(0);
+    // Show the dialog immediately
+    showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -334,6 +332,16 @@ class DialogHelper{
                   Text("${"Progress".tr()}: $progress/$total"),
                   SizedBox(height: 20),
                   LinearProgressIndicator(value: total > 0 ? progress / total : 0),
+                  if (progress >= total) ...[
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        completer.complete();
+                      },
+                      child: Text("Ok".tr()),
+                    ),
+                  ],
                 ],
               ),
             );
@@ -341,5 +349,20 @@ class DialogHelper{
         );
       },
     );
+
+    // Process the futures, updating progress
+    if (futures != null) {
+      for (var future in futures) {
+        await future;
+        progressNotifier.value++;
+      }
+    }
+
+    // Wait for the user to press "OK" if not already completed
+    if (!completer.isCompleted) {
+      await completer.future;
+    }
   }
+
+
 }
