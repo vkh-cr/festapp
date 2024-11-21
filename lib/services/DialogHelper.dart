@@ -311,12 +311,13 @@ class DialogHelper{
       BuildContext context,
       String title,
       int total, {
-        List<Future<void>>? futures,
+        List<Future<void> Function()>? futures,
+        Duration? delay,
       }) async {
-    // Completer to control the dialog lifecycle
     final completer = Completer<void>();
-    var progressNotifier = ValueNotifier<int>(0);
-    // Show the dialog immediately
+    final progressNotifier = ValueNotifier<int>(0);
+
+    // Show the dialog
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -332,16 +333,17 @@ class DialogHelper{
                   Text("${"Progress".tr()}: $progress/$total"),
                   SizedBox(height: 20),
                   LinearProgressIndicator(value: total > 0 ? progress / total : 0),
-                  if (progress >= total) ...[
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        completer.complete();
-                      },
-                      child: Text("Ok".tr()),
-                    ),
-                  ],
+                  if (progress >= total)
+                    ...[
+                      SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          completer.complete();
+                        },
+                        child: Text("Ok".tr()),
+                      ),
+                    ],
                 ],
               ),
             );
@@ -350,19 +352,28 @@ class DialogHelper{
       },
     );
 
-    // Process the futures, updating progress
-    if (futures != null) {
+    // Execute futures sequentially
+    if (futures !=null && futures.isNotEmpty) {
       for (var future in futures) {
-        await future;
-        progressNotifier.value++;
+        try {
+          await future.call(); // Wait for each future to finish
+          progressNotifier.value++;
+          if(delay!=null){
+            await Future.delayed(delay);
+          }
+        } catch (e) {
+          ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
+        }
       }
+    } else {
+      // Complete immediately if no futures are provided
+      completer.complete();
+      Navigator.of(context).pop();
     }
 
-    // Wait for the user to press "OK" if not already completed
+    // Await the completer if not already completed
     if (!completer.isCompleted) {
       await completer.future;
     }
   }
-
-
 }
