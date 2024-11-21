@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -76,6 +77,7 @@ class _UsersTabState extends State<UsersTab> {
           DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
           DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
+          DataGridAction(name: "Přidat do týmu (hra)", action: (SingleTableDataGrid p0, [_]) => _addToGameGroup(p0)),
         ],
         columns: ColumnHelper.generateColumns(columnIdentifiers),
       ).DataGrid(),
@@ -98,6 +100,16 @@ class _UsersTabState extends State<UsersTab> {
   Future<void> _addToGroup(SingleTableDataGrid dataGrid) async {
     var users = _getCheckedUsers(dataGrid);
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, await DbGroups.getAllUserGroupInfo());
+    if (chosenGroup != null) {
+      chosenGroup.participants!.addAll(users.map((u) => UserInfoModel(id: u.user)));
+      await DbGroups.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
+      ToastHelper.Show(context, "Updated {item}.".tr(namedArgs: {"item": chosenGroup.title}));
+    }
+  }
+
+  Future<void> _addToGameGroup(SingleTableDataGrid dataGrid) async {
+    var users = _getCheckedUsers(dataGrid);
+    var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(context, await DbGroups.getAllUserGroupInfo(InformationModel.gameType));
     if (chosenGroup != null) {
       chosenGroup.participants!.addAll(users.map((u) => UserInfoModel(id: u.user)));
       await DbGroups.updateUserGroupParticipants(chosenGroup, chosenGroup.participants!);
