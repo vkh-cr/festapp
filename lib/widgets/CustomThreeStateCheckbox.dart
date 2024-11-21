@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class CustomThreeStateCheckbox extends StatelessWidget {
   final String currentState;
@@ -49,7 +50,7 @@ class CustomThreeStateCheckbox extends StatelessWidget {
             : currentState == DbOccasions.servicePaid
             ? paidStateIcon ?? Icons.check_box_outlined // Default icon
             : usedStateIcon ?? Icons.check_box, // Default icon
-        color: isEnabled ? Colors.black : Colors.grey, // Optional: Disabled color
+        color: isEnabled ? ThemeConfig.blackColor(context) : Colors.grey, // Optional: Disabled color
       ),
     );
   }
