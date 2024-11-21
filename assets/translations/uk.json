@@ -291,5 +291,9 @@
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Встанови {title}, щоб отримувати сповіщення, працювати офлайн і мати швидкий доступ через іконку.",
   "Click here to sign in.": "Натисни тут, щоб увійти.",
   "Failed to invite {user}. Number of retries: ({retries}).": "Не вдалося запросити {user}. Кількість спроб: ({retries}).",
+  "Processing...": "Обробка...",
+  "The processing has finished with error.": "Обробка завершилася з помилкою.",
+  "The processing has been cancelled.": "Обробку було скасовано.",
+  "The processing has completed successfully.": "Обробку успішно завершено.",
   "_": "_"
 }

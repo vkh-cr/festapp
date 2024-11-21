@@ -291,5 +291,9 @@
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Install {title} to get notifications, offline functionality, and a quick launch icon.",
   "Click here to sign in.": "Click here to sign in.",
   "Failed to invite {user}. Number of retries: ({retries}).": "Failed to invite {user}. Number of retries: ({retries}).",
+  "Processing...": "Processing...",
+  "The processing has finished with error.": "The processing has finished with error.",
+  "The processing has been cancelled.": "The processing has been cancelled.",
+  "The processing has completed successfully.": "The processing has completed successfully.",
   "_":"_"
 }
