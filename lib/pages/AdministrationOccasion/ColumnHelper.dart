@@ -175,7 +175,7 @@ class ColumnHelper {
         field: DbOccasions.serviceTypeAccommodation,
         type: PlutoColumnType.select(select),
         applyFormatterInEditing: true,
-        enableEditingMode: true,
+        enableEditingMode: RightsService.canUpdateUsers(),
         width: 100
       )];
     },
