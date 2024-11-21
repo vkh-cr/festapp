@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 class ImportHelper {
   static Map<String, String> get migrateColumns => {
         Tb.occasion_users.data_email: "E-mailová adresa",
+        Tb.occasion_users.data_sex: "Jsi:",
         Tb.occasion_users.data_name: "Jméno:",
         Tb.occasion_users.data_surname: "Příjmení:",
         Tb.occasion_users.services_accommodation: "Ubytování:",
@@ -68,7 +69,7 @@ class ImportHelper {
             break;
           }
           trimmedString =
-              trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
+          (trimmedString.toLowerCase().startsWith("m") || trimmedString.toLowerCase().startsWith("k")) ? "male" : "female";
         } else if (entry.key == Tb.occasion_users.data_birthDate) {
           if (trimmedString.isEmpty) {
             continue;
