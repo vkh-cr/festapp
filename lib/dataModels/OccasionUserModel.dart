@@ -63,6 +63,7 @@ class OccasionUserModel extends IPlutoRowModel {
           Tb.occasion_users.data_email: json[Tb.occasion_users.data_email],
           Tb.occasion_users.data_name: json[Tb.occasion_users.data_name],
           Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname],
+          Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex],
           Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
           Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
           Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
@@ -263,6 +264,7 @@ class OccasionUserModel extends IPlutoRowModel {
     return compareField(iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email)
         && compareField(iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name)
         && compareField(iu, Tb.occasion_users.data_surname, Tb.occasion_users.data_surname)
+        && compareField(iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex)
         && iu[Tb.user_info.role] == role
         && compareField(iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone)
         && compareField(iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1)
