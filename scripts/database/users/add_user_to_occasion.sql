@@ -32,7 +32,7 @@ BEGIN
 
     -- If the occasion is not open, raise an exception
     IF NOT occasion_open THEN
-        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE OR (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
+        IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
     END IF;
