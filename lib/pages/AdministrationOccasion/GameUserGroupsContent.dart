@@ -7,8 +7,10 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
+import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class GameUserGroupsContent extends StatefulWidget {
@@ -50,6 +52,22 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
             enableEditingMode: false,
             width: 50,
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+          ),
+          PlutoColumn(
+              title: "Poslat zprávu o zařazení",
+              field: Tb.user_group_info.type,
+              type: PlutoColumnType.text(),
+              renderer: (rendererContext) {
+                return ElevatedButton(onPressed: () async {
+                  var groupTitle = (rendererContext.row.cells[Tb.user_group_info.title]?.value as String);
+                  var participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as Set<UserInfoModel>);
+                  var message = "Jsi v týmu: ${groupTitle}.";
+                  var title = "Velká hra";
+                  await DbNews.sendGroupNotification(participants.map((p)=>p.id.toString()).toList(), message, title);
+                  ToastHelper.Show(context, "Zpráva o rozřazení odeslána týmu: ${groupTitle}");
+                }, child: Text("Poslat zprávu o zařazení"));
+              },
+              width: 200
           ),
           PlutoColumn(
               title: "Name".tr(),
