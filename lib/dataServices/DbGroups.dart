@@ -6,6 +6,7 @@ import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbGroups {
@@ -46,6 +47,10 @@ class DbGroups {
         u.checkpointTitlesDict = dict;
       }
     }
+
+    toReturn.sort((a, b) {
+      return Utilities.naturalCompare(a.title, b.title);
+    });
     return toReturn;
   }
 
