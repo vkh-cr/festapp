@@ -308,20 +308,21 @@ class DialogHelper{
     return result;
   }
 
-  static Future<void> showProgressDialogAsync(
+  static Future<bool> showProgressDialogAsync(
       BuildContext context,
       String title,
       int total, {
         List<Future<void> Function()>? futures,
         Duration? delay,
+        bool isBasic = false, // New isBasic option
       }) async {
-    final completer = Completer<void>();
+    final completer = Completer<bool>();
     final progressNotifier = ValueNotifier<int>(0);
     final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
     final statusMessage = ValueNotifier<String>(""); // Track status message
-    final isStornoActive = ValueNotifier<bool>(true); // Track Storno button state
-    final isOkActive = ValueNotifier<bool>(false); // Track Ok button state
-    bool hasError = false; // Track if any error occurred
+    final isStornoActive = ValueNotifier<bool>(!isBasic); // Storno button state depends on isBasic
+    final isOkActive = ValueNotifier<bool>(false); // Ok button state
+    final hasError = ValueNotifier<bool>(false); // Track if any error occurred
 
     // Show the dialog
     showDialog(
@@ -346,7 +347,7 @@ class DialogHelper{
                       return Text(
                         message,
                         style: TextStyle(
-                          color: hasError
+                          color: hasError.value
                               ? ThemeConfig.redColor(context)
                               : ThemeConfig.blackColor(context),
                         ),
@@ -354,49 +355,62 @@ class DialogHelper{
                       );
                     },
                   ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center, // Center the row
-                    children: [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isStornoActive,
-                        builder: (context, isActive, _) {
-                          return SizedBox(
-                            width: 100, // Set equal width for both buttons
-                            child: ElevatedButton(
-                              onPressed: isActive
-                                  ? () {
-                                isCancelled.value = true; // Mark as cancelled
-                                isStornoActive.value = false; // Disable Storno
-                                isOkActive.value = true; // Enable Ok button
-                                statusMessage.value =
-                                    "The processing has been cancelled.".tr(); // Update status
-                              }
-                                  : null,
-                              child: Text("Storno".tr()),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: hasError,
+                    builder: (context, errorOccurred, _) {
+                      if (!isBasic || errorOccurred) {
+                        return Column(
+                          children: [
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center, // Center the row
+                              children: [
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: isStornoActive,
+                                  builder: (context, isActive, _) {
+                                    return SizedBox(
+                                      width: 100, // Equal width for both buttons
+                                      child: ElevatedButton(
+                                        onPressed: isActive
+                                            ? () {
+                                          isCancelled.value = true; // Mark as cancelled
+                                          isStornoActive.value = false; // Disable Storno
+                                          isOkActive.value = true; // Enable Ok button
+                                          statusMessage.value =
+                                              "The processing has been cancelled.".tr(); // Update status
+                                        }
+                                            : null,
+                                        child: Text("Storno".tr()),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SizedBox(width: 20), // Space between buttons
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: isOkActive,
+                                  builder: (context, isActive, _) {
+                                    return SizedBox(
+                                      width: 100, // Equal width for both buttons
+                                      child: ElevatedButton(
+                                        onPressed: isActive
+                                            ? () {
+                                          Navigator.of(context).pop();
+                                          completer.complete(false); // Cancel or error result
+                                        }
+                                            : null,
+                                        child: Text("Ok".tr()),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                      SizedBox(width: 20), // Add space between buttons
-                      ValueListenableBuilder<bool>(
-                        valueListenable: isOkActive,
-                        builder: (context, isActive, _) {
-                          return SizedBox(
-                            width: 100, // Set equal width for both buttons
-                            child: ElevatedButton(
-                              onPressed: isActive
-                                  ? () {
-                                Navigator.of(context).pop();
-                                completer.complete();
-                              }
-                                  : null,
-                              child: Text("Ok".tr()),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                          ],
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
                   ),
                 ],
               ),
@@ -423,7 +437,7 @@ class DialogHelper{
           isCancelled.value = true; // Stop further processing
           isStornoActive.value = false; // Disable Storno button
           isOkActive.value = true; // Enable Ok button
-          hasError = true; // Mark that an error occurred
+          hasError.value = true; // Mark that an error occurred
           break;
         }
       }
@@ -432,17 +446,24 @@ class DialogHelper{
     // Mark actions as completed
     isOkActive.value = true; // Enable Ok button after actions are completed
     isStornoActive.value = false; // Disable Storno button whenever Ok is enabled
-    if (hasError) {
+    if (hasError.value) {
       statusMessage.value = "The processing has finished with error.".tr();
     } else if (isCancelled.value) {
       statusMessage.value = "The processing has been cancelled.".tr();
     } else {
       statusMessage.value = "The processing has completed successfully.".tr();
+      if (isBasic && !hasError.value) {
+        Navigator.of(context).pop(); // Automatically close dialog for basic mode
+        completer.complete(true); // Success result
+      }
     }
 
     // Await the completer if not already completed
     if (!completer.isCompleted) {
-      await completer.future;
+      completer.complete(!hasError.value && !isCancelled.value); // Return result based on state
     }
+
+    return completer.future;
   }
+
 }

@@ -548,10 +548,17 @@ class NewsFormRoute extends _i25.PageRouteInfo<void> {
 
 /// generated route for
 /// [_i15.NewsPage]
-class NewsRoute extends _i25.PageRouteInfo<void> {
-  const NewsRoute({List<_i25.PageRouteInfo>? children})
-      : super(
+class NewsRoute extends _i25.PageRouteInfo<NewsRouteArgs> {
+  NewsRoute({
+    _i26.Key? key,
+    _i26.VoidCallback? onSetAsRead,
+    List<_i25.PageRouteInfo>? children,
+  }) : super(
           NewsRoute.name,
+          args: NewsRouteArgs(
+            key: key,
+            onSetAsRead: onSetAsRead,
+          ),
           initialChildren: children,
         );
 
@@ -560,12 +567,33 @@ class NewsRoute extends _i25.PageRouteInfo<void> {
   static _i25.PageInfo page = _i25.PageInfo(
     name,
     builder: (data) {
+      final args =
+          data.argsAs<NewsRouteArgs>(orElse: () => const NewsRouteArgs());
       return _i25.DeferredWidget(
         _i15.loadLibrary,
-        () => _i15.NewsPage(),
+        () => _i15.NewsPage(
+          key: args.key,
+          onSetAsRead: args.onSetAsRead,
+        ),
       );
     },
   );
+}
+
+class NewsRouteArgs {
+  const NewsRouteArgs({
+    this.key,
+    this.onSetAsRead,
+  });
+
+  final _i26.Key? key;
+
+  final _i26.VoidCallback? onSetAsRead;
+
+  @override
+  String toString() {
+    return 'NewsRouteArgs{key: $key, onSetAsRead: $onSetAsRead}';
+  }
 }
 
 /// generated route for
