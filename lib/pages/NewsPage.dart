@@ -19,13 +19,45 @@ import 'HtmlEditorPage.dart';
 @RoutePage()
 class NewsPage extends StatefulWidget {
   static const ROUTE = "news";
-  const NewsPage({Key? key}) : super(key: key);
+  final VoidCallback? onSetAsRead;
+
+  const NewsPage({super.key, this.onSetAsRead});
+
   @override
   _NewsPageState createState() => _NewsPageState();
 }
 
 class _NewsPageState extends State<NewsPage> {
   List<NewsModel> newsMessages = [];
+  bool _isSetAsReadCalled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Check visibility when dependencies change
+    _checkAsRead();
+  }
+
+  Future<void> _checkAsRead() async {
+    if (ModalRoute.of(context)?.isCurrent == true && !_isSetAsReadCalled) {
+      if (AuthService.isLoggedIn() && newsMessages.isNotEmpty && newsMessages.first.isRead == false) {
+        await DbNews.setMessagesAsRead(newsMessages.first.id);
+        widget.onSetAsRead?.call();
+        _isSetAsReadCalled = true;
+      }
+    }
+  }
 
   void _showMessageDialog(BuildContext context) {
     RouterService.navigateOccasion(context, NewsFormPage.ROUTE).then((value) async {
@@ -41,7 +73,7 @@ class _NewsPageState extends State<NewsPage> {
         await DbNews.insertNewsMessage(context, heading, headingDefault, message, addToNews, withNotification, to);
 
         if (addToNews) {
-          await loadNewsMessages();
+          await loadData();
         }
       }
     });
@@ -54,13 +86,10 @@ class _NewsPageState extends State<NewsPage> {
     });
   }
 
-  @override
-  Future<void> didChangeDependencies() async {
-    super.didChangeDependencies();
-    newsMessages = await OfflineDataService.getAllMessages();
-    setState(() {});
+  Future<void> loadData() async {
     await loadNewsMessages();
     await OfflineDataService.saveAllMessages(newsMessages);
+    _checkAsRead();
   }
 
   @override
@@ -126,7 +155,7 @@ class _NewsPageState extends State<NewsPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
-                                   Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
+                                  Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
                                   const SizedBox(width: 6),
                                   Text(message.views.toString(), style: TextStyle(color: Theme.of(context).disabledColor, fontWeight: FontWeight.bold)),
                                   const SizedBox(width: 10),
@@ -155,7 +184,7 @@ class _NewsPageState extends State<NewsPage> {
                             }
                           });
                         }
-                        await loadNewsMessages();
+                        await loadData();
                       },
                       icon: const Icon(Icons.more_horiz),
                       itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
