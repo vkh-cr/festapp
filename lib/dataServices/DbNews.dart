@@ -135,13 +135,13 @@ class DbNews {
     return lastMessageId;
   }
 
-  static void setMessagesAsRead(int newId, int oldId) async {
+  static Future<void> setMessagesAsRead(int newId) async {
     AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
         .delete()
         .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq(Tb.user_news.news_id, oldId);
+        .eq(Tb.user_news.occasion, RightsService.currentOccasion!);
 
     await _supabase
         .from(Tb.user_news.table)
@@ -175,10 +175,6 @@ class DbNews {
       if (AuthService.isLoggedIn()) {
         message.isRead = lastReadMessageId >= message.id;
       }
-    }
-
-    if (AuthService.isLoggedIn() && loadedMessages.isNotEmpty) {
-      DbNews.setMessagesAsRead(loadedMessages.first.id, lastReadMessageId);
     }
 
     return loadedMessages;

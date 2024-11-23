@@ -1,17 +1,12 @@
-// ignore_for_file: unused_import
-
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataModels/CompanionModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbInformation {
@@ -42,37 +37,11 @@ class DbInformation {
         return orderComparison;
       }
       // If order is the same, sort naturally by title
-      return _naturalCompare(
+      return Utilities.naturalCompare(
           a.title?.toLowerCase() ?? "", b.title?.toLowerCase() ?? "");
     });
 
     return infoList;
-  }
-
-  static int _naturalCompare(String a, String b) {
-    final regex = RegExp(r'\d+|\D+');
-    final aMatches = regex.allMatches(a).map((m) => m.group(0)!).toList();
-    final bMatches = regex.allMatches(b).map((m) => m.group(0)!).toList();
-
-    for (var i = 0; i < aMatches.length && i < bMatches.length; i++) {
-      final aPart = aMatches[i];
-      final bPart = bMatches[i];
-
-      // Compare numbers as numbers
-      if (RegExp(r'^\d+$').hasMatch(aPart) && RegExp(r'^\d+$').hasMatch(bPart)) {
-        final aNum = int.parse(aPart);
-        final bNum = int.parse(bPart);
-        final numCompare = aNum.compareTo(bNum);
-        if (numCompare != 0) return numCompare;
-      } else {
-        // Compare non-numeric parts lexicographically
-        final strCompare = aPart.compareTo(bPart);
-        if (strCompare != 0) return strCompare;
-      }
-    }
-
-    // If all parts are equal so far, compare lengths
-    return aMatches.length.compareTo(bMatches.length);
   }
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
