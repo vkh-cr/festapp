@@ -52,6 +52,37 @@ Links to phone install are usually saved in info section.
 ---
 ## Latest development
 
+**2024.11**
+- Cyber Space game added to the app, enabling group gameplay and submission of codes found in the real world.
+- Schedule event editing page introduced, along with a new quick add button for the schedule.
+- Songbook now supports a changeable dark/light theme and adjustable text size.
+- Food support added, including information about user's choice.
+- Dynamic definition of accommodation with links to places on the map.
+- Invitation system implemented using codes.
+- Progress dialog in DataGrids now indicates success or error, with the option to cancel mid-action.
+- Update prompt now allows setting a minimum version requirement for each platform.
+- Launch event logging includes app version and platform details.
+- Install screen updated with enhancements and instructions.
+- Profile button moved to the bottom app bar for better accessibility.
+- Admin page refined with sub-tabs, preparing for dynamic configuration features.
+- Event page sign-in link is now clickable for easier access.
+
+**2024.10**
+- Support for multi-organizations.
+- New bottom app bar.
+- Dark/light mode, styles, and colors refactoring (e.g., clickable links are in different colors now).
+
+**2024.09**
+- Refactoring and support for multiple events.
+- Support for linking multiple events.
+
+**2024.08**
+- Admin dashboard to support multiple events.
+- Better support of linking of anything inside the app.
+- Optimized loading for information.
+- Compression for large images and automatically converting links, emails, and phone numbers to clickable hypertext.
+- Colorful emoji for web.
+
 **2024.07**
 - Full support for offline display mode on web (and pwa app).
 - Notifications support for web (and pwa app).
