@@ -37,7 +37,7 @@ class _SongDialogState extends State<SongDialog> {
 
   double buttonVisibleOpacity(BuildContext context) =>
       ThemeConfig.isDarkMode(context) ? 1 : 0.9;
-  static const double buttonHiddenOpacity = 0.3;
+  static const double buttonHiddenOpacity = 0.4;
   static const int buttonFadeAnimationDuration = 400;
 
   @override
