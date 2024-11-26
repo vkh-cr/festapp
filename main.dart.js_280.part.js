@@ -167,7 +167,7 @@ while(true)switch(x){case 0:s=v.e
 x=s.length===0?2:3
 break
 case 2:x=4
-return A.c(V.o1("events",A.zS(),y.l),$async$te)
+return A.c(V.o2("events",A.zS(),y.l),$async$te)
 case 4:u=e
 x=5
 return A.c(F.ZN(u),$async$te)
@@ -181,7 +181,7 @@ case 3:x=$.dN().gdv().d!=null?6:7
 break
 case 6:r=B
 x=8
-return A.c(A.o2("user_info",A.a41(),null,y.U),$async$te)
+return A.c(A.o3("user_info",A.a41(),null,y.U),$async$te)
 case 8:v.G(new r.bUx(v,e))
 case 7:return A.j(null,w)}})
 return A.k($async$te,w)},
@@ -313,4 +313,4 @@ D.aVr=new A.L(70,50)
 D.aVs=new A.L(80,60)
 D.aVv=new A.L(1/0,46)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_280",e:"endPart",h:b})})($__dart_deferred_initializers__,"liP1xZmSvUNNmjIU7Q4ZEPO2Rn8=");
+a.eventLog.push({p:"main.dart.js_280",e:"endPart",h:b})})($__dart_deferred_initializers__,"lhKKvVDmgkmIFaml+x23DHFWTr0=");

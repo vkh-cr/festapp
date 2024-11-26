@@ -56,7 +56,7 @@ return A.k($async$cv,w)},
 j_(){var x=0,w=A.l(y.v),v=this,u,t,s,r,q,p,o
 var $async$j_=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(O.o1("events",A.zS(),y.u),$async$j_)
+return A.c(O.o2("events",A.zS(),y.u),$async$j_)
 case 2:r=e
 x=3
 return A.c(P.aqL(r),$async$j_)
@@ -66,7 +66,7 @@ case 4:q=J
 p=r
 o=B
 x=5
-return A.c(A.o2("user_info",A.a41(),null,y.p),$async$j_)
+return A.c(A.o3("user_info",A.a41(),null,y.p),$async$j_)
 case 5:u=q.iU(p,new o.bQA(e))
 t=v.d
 C.b.P(t)
@@ -156,4 +156,4 @@ var y={u:A.x("de"),F:A.x("p<de>"),j:A.x("p<db>"),p:A.x("dZ"),q:A.x("z?"),v:A.x("
 D.b0E=new A.c2("My schedule",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b0I=new A.c2("There will appear your events.",null,I.kP,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_242",e:"endPart",h:b})})($__dart_deferred_initializers__,"BGIsFk0kAzhSpH2sRQ9C5jQ7ceQ=");
+a.eventLog.push({p:"main.dart.js_242",e:"endPart",h:b})})($__dart_deferred_initializers__,"amZdT2fIjEN9rODKuD4WlOBkjRw=");

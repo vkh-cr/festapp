@@ -111,7 +111,7 @@ return A.dP(!1,A.aM(C.by,A.ad(w,x,x,x,x,x,x,x,A.bH(x,x,x,x,x,x,x,x,x,x,x,18,x,x,
 cv(){var x=0,w=A.l(y.v),v=this,u,t
 var $async$cv=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(S.o1("information",A.b9X(),y.s),$async$cv)
+return A.c(S.o2("information",A.b9X(),y.s),$async$cv)
 case 2:t=e
 v.a.toString
 v.d=F.c85(t,"song")
@@ -139,7 +139,7 @@ $0(){var x=this.a
 x.G(new B.bW7(x))},
 $S:0}
 B.bW7.prototype={
-$0(){this.a.e=0.3},
+$0(){this.a.e=0.4},
 $S:0}
 B.bW9.prototype={
 $0(){var x=this.a,w=x.r
@@ -147,7 +147,7 @@ if(w==null){w=x.c
 w.toString}x.e=A.I(w).ax.a===C.z?1:0.9},
 $S:0}
 B.bWa.prototype={
-$0(){this.a.e=0.3},
+$0(){this.a.e=0.4},
 $S:0}
 B.bWg.prototype={
 $1(d){var x,w,v,u,t,s,r,q,p,o,n=null,m=this.a
@@ -287,4 +287,4 @@ D.ajq=new A.aS(59097,"MaterialIcons",null,!1)
 D.aVB=new A.aG(20,null,null,null)})();(function staticFields(){$.aKC=18
 $.aKE=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_263",e:"endPart",h:b})})($__dart_deferred_initializers__,"TvmWf5WN+nq4XRJi6wZE76KLdqg=");
+a.eventLog.push({p:"main.dart.js_263",e:"endPart",h:b})})($__dart_deferred_initializers__,"TfOXEl0lSxLdvbUB9a2B5kJRLO0=");
