@@ -57,13 +57,13 @@ Links to phone install are usually saved in info section.
 - Schedule event editing page introduced, along with a new quick add button for the schedule.
 - Songbook now supports a changeable dark/light theme and adjustable text size.
 - Food support added, including information about user's choice.
-- Dynamic definition of accommodation with links to places on the map.
-- Invitation system implemented using codes.
+- Accommodation support added with links to places on the map.
+- Invitation based system implemented using invitation codes.
 - Progress dialog in DataGrids now indicates success or error, with the option to cancel mid-action.
 - Update prompt now allows setting a minimum version requirement for each platform.
 - Launch event logging includes app version and platform details.
 - Install screen updated with enhancements and instructions.
-- Profile button moved to the bottom app bar for better accessibility.
+- Profile button moved to the bottom app bar.
 - Admin page refined with sub-tabs, preparing for dynamic configuration features.
 - Event page sign-in link is now clickable for easier access.
 
