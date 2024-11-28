@@ -87,7 +87,7 @@ class _FormPageState extends State<FormPage> {
                             color: ThemeConfig.blackColor(context)),
                         text:
                         "Your order was successfully sent to your email {email}."
-                            .tr(namedArgs: {"email": formData?["email"] ?? ""}),
+                            .tr(namedArgs: {"email": formData?[FormHelper.fieldTypeEmail] ?? ""}),
                       ),
                       const WidgetSpan(
                         child: Padding(
@@ -195,12 +195,12 @@ class _FormPageState extends State<FormPage> {
         {FormHelper.metaType: FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeNote},
         if (foodType != null)
-          {
-            FormHelper.metaType: FormHelper.fieldTypeOptions,
-            FormHelper.metaOptions: foodOptions,
-            FormHelper.metaLabel: foodType.title,
-            FormHelper.metaOptionsType: ItemModel.foodType
-          },
+        {
+          FormHelper.metaType: FormHelper.fieldTypeOptions,
+          FormHelper.metaOptions: foodOptions,
+          FormHelper.metaLabel: foodType.title,
+          FormHelper.metaOptionsType: ItemModel.foodType
+        },
       ]
     };
 
