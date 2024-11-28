@@ -299,5 +299,7 @@
   "Your order was successfully sent to your email {email}.": "Your order was successfully sent to your email {email}.",
   "Your order has been sent successfully!": "Your order has been sent successfully!",
   "Total Price: {price}": "Total Price: {price}",
+  "Ticket {number}": "Ticket {number}",
+  "Add another ticket": "Add another ticket",
   "_":"_"
 }

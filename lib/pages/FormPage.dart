@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
+import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -59,8 +60,18 @@ class _FormPageState extends State<FormPage> {
 
       // Calculate price for tickets
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-        for (var ticketData in FormHelper.getFieldData(_formKey, FormHelper.fieldTypeTicket, ticketKeys: FormHelper.ticketKeys) ?? []) {
-          _totalPrice += ticketData.values.first.price ?? 0.0;
+        var ticketDataList = FormHelper.getFieldData(
+            _formKey,
+            FormHelper.fieldTypeTicket,
+            ticketKeys: FormHelper.ticketKeys
+        ) ?? [];
+
+        for (var ticketData in ticketDataList) {
+          for (var ticketValue in ticketData.values) {
+            if (ticketValue is FormOptionModel) {
+              _totalPrice += ticketValue.price ?? 0.0;
+            }
+          }
         }
       }
     }
@@ -174,6 +185,35 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
+  // Function to generate options for a specific item type and add them to the ticket fields
+  Map<String, dynamic> generateOptionsForItemType(
+      List<ItemTypeModel> allItems,
+      String itemType
+      ) {
+    var itemTypeModel = allItems.firstWhereOrNull((item) => item.type == itemType);
+
+    if (itemTypeModel == null || itemTypeModel.items == null) {
+      return {};
+    }
+
+    List<Map<String, dynamic>> options = [];
+
+    for (var item in itemTypeModel.items!) {
+      options.add({
+        FormHelper.metaOptionsName: item.title.toString(),
+        FormHelper.metaOptionsCode: item.id.toString(),
+        FormHelper.metaOptionsPrice: item.price ?? 0.0, // Include price in the options
+      });
+    }
+
+    return {
+      FormHelper.metaType: FormHelper.fieldTypeOptions,
+      FormHelper.metaOptions: options,
+      FormHelper.metaLabel: itemTypeModel.title,
+      FormHelper.metaOptionsType: itemType,
+    };
+  }
+
   Future<void> loadData() async {
     setState(() {
       _isLoading = true;
@@ -181,19 +221,8 @@ class _FormPageState extends State<FormPage> {
 
     // Fetching items
     var allItems = await DbEshop.getItems(context, 13);
-    var foodType = allItems.firstWhereOrNull((a) => a.type == ItemModel.foodType);
-    List<Map<String, dynamic>> foodOptions = [];
-
-    if (foodType != null) {
-      for (var f in foodType.items!) {
-        Map<String, dynamic> entry = {
-          FormHelper.metaOptionsName: f.title.toString(),
-          FormHelper.metaOptionsCode: f.id.toString(),
-          FormHelper.metaOptionsPrice: f.price ?? 0.0, // Include price in the options
-        };
-        foodOptions.add(entry);
-      }
-    }
+    var foodOptionsField = generateOptionsForItemType(allItems, ItemModel.foodType);
+    var taxiOptionsField = generateOptionsForItemType(allItems, ItemModel.taxiType);
 
     // Updating form fields
     fields = {
@@ -206,13 +235,8 @@ class _FormPageState extends State<FormPage> {
           FormHelper.metaType: FormHelper.fieldTypeTicket,
           FormHelper.metaMaxTickets: 6,
           FormHelper.metaFields: [
-            if (foodType != null)
-              {
-                FormHelper.metaType: FormHelper.fieldTypeOptions,
-                FormHelper.metaOptions: foodOptions,
-                FormHelper.metaLabel: foodType.title,
-                FormHelper.metaOptionsType: ItemModel.foodType,
-              },
+            if (taxiOptionsField.isNotEmpty) taxiOptionsField,
+            if (foodOptionsField.isNotEmpty) foodOptionsField,
           ],
         },
       ],

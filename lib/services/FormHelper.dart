@@ -169,42 +169,45 @@ class FormHelper {
             for (int i = 0; i < ticketValues.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: ThemeConfig.whiteColor(context),
-                    border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Ticket ${i + 1}".tr(),
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                child: Align(
+                  alignment: Alignment.center, // Center the ticket
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: ThemeConfig.whiteColor(context),
+                      border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                          if (i > 0)
-                            IconButton(
-                              onPressed: () => removeTicket(i),
-                              icon: Icon(Icons.delete),
-                              tooltip: "Delete Ticket".tr(),
-                            ),
-                        ],
-                      ),
-                      FormBuilder(
-                        key: ticketKeys[i],
-                        onChanged: updateTotalPrice, // Trigger price update on change
-                        child: Column(
-                          children: FormHelper.getFormFields(ticketValues[i][FormHelper.metaFields]),
+                            if (i > 0)
+                              IconButton(
+                                onPressed: () => removeTicket(i),
+                                icon: Icon(Icons.delete),
+                                tooltip: "Delete".tr(),
+                              ),
+                          ],
                         ),
-                      ),
-                    ],
+                        FormBuilder(
+                          key: ticketKeys[i], // Assign the corresponding key
+                          onChanged: updateTotalPrice, // Trigger price update on change
+                          child: Column(
+                            children: FormHelper.getFormFields(ticketValues[i][FormHelper.metaFields]),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
