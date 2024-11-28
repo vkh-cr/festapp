@@ -151,8 +151,6 @@ class _FormPageState extends State<FormPage> {
                           }
                         },
                         label: "Send".tr(),
-                        color: ThemeConfig.seed1,
-                        textColor: ThemeConfig.whiteColor(context),
                         isEnabled: !_isLoading,
                         height: 50.0,
                         width: 250.0,

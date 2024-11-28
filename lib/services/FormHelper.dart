@@ -45,6 +45,9 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
+  static List<Map<String, dynamic>> ticketValues = [];
+  static List<GlobalKey<FormBuilderState>> ticketKeys = [];
+
   // Public method to generate form fields from configuration
   static List<Widget> getFormFields(dynamic fields) {
     return fields.map<Widget>((field) => createFormField(field)).toList();
@@ -54,24 +57,49 @@ class FormHelper {
   static Map<String, dynamic> getDataFromForm(GlobalKey<FormBuilderState> key, dynamic fields) {
     Map<String, dynamic> toReturn = {};
     for (var k in fields) {
-      toReturn[k[metaType]] = getFieldData(key, k[metaType]);
+      toReturn[k[metaType]] = getFieldData(key, k[metaType], ticketKeys: ticketKeys);
     }
     return toReturn;
   }
 
   // Determine the correct data from the form based on type
-  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType) {
+  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType, {List<GlobalKey<FormBuilderState>>? ticketKeys}) {
     var fieldValue = formKey.currentState?.fields[fieldType]?.value;
+
     if (fieldType == fieldTypeSex) {
-      if(fieldValue == null){
+      if (fieldValue == null) {
         return null;
       }
       return (fieldValue as FormOptionModel).code;
     } else if (fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
+    } else if (fieldType == fieldTypeTicket) {
+      // Collect ticket data from multiple ticket forms
+      List<Map<String, dynamic>> tickets = [];
+
+      if (ticketKeys != null) {
+        for (int i = 0; i < ticketKeys.length; i++) {
+          final ticketKey = ticketKeys[i];
+          if (ticketKey.currentState == null) continue;
+
+          Map<String, dynamic> ticketData = {};
+
+          for (FormBuilderFieldState<FormBuilderField<dynamic>, dynamic> ticketSubField in ticketKey.currentState?.fields.values ?? []) {
+            var subFieldType = ticketSubField.widget.name;
+            var subFieldValue = ticketSubField.value;
+            ticketData[subFieldType] = subFieldValue;
+          }
+
+          tickets.add(ticketData);
+        }
+      }
+
+      return tickets; // Return ticket data with all subfields and prices
     }
+
     return fieldValue?.trim();
   }
+
 
   // Create individual form field widget based on configuration
   static Widget createFormField(Map<String, dynamic> field) {
@@ -94,36 +122,45 @@ class FormHelper {
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       case fieldTypeTicket:
-        return buildTicketField(field);
+        return buildTicketField(field, ticketValues, ticketKeys);
       default:
         return const SizedBox.shrink();
     }
   }
 
-  static Widget buildTicketField(Map<String, dynamic> field) {
+  static Widget buildTicketField(
+      Map<String, dynamic> field,
+      List<Map<String, dynamic>> ticketValues,
+      List<GlobalKey<FormBuilderState>> ticketKeys) {
     final maxTickets = field[metaMaxTickets] ?? 1;
-    final List<Map<String, dynamic>> ticketFields = [];
-    final List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
-    // Add initial ticket
-    ticketFields.add({...field});
-    ticketKeys.add(GlobalKey<FormBuilderState>());
+    // Ensure ticketValues and ticketKeys are initialized
+    if (ticketValues.isEmpty) {
+      ticketValues.add({...field}); // Clone the field structure for the first ticket
+      ticketKeys.add(GlobalKey<FormBuilderState>()); // Add a unique key for the first ticket
+    }
 
     return StatefulBuilder(
       builder: (context, setState) {
         void addTicket() {
-          if (ticketFields.length < maxTickets) {
+          if (ticketValues.length < maxTickets) {
             setState(() {
-              ticketFields.add({...field});
+              // Add a new ticket form configuration
+              ticketValues.add({...field}); // Clone the field structure for the new ticket
+
+              // Add a new unique key for the new ticket form
               ticketKeys.add(GlobalKey<FormBuilderState>());
             });
           }
         }
 
         void removeTicket(int index) {
-          if (ticketFields.length > 1) {
+          if (ticketValues.length > 1) {
             setState(() {
-              ticketFields.removeAt(index);
+              // Remove the ticket field structure
+              ticketValues.removeAt(index);
+
+              // Remove the corresponding key
               ticketKeys.removeAt(index);
             });
           }
@@ -132,7 +169,7 @@ class FormHelper {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int i = 0; i < ticketFields.length; i++)
+            for (int i = 0; i < ticketValues.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Container(
@@ -155,25 +192,25 @@ class FormHelper {
                               fontSize: 16,
                             ),
                           ),
-                          if (i > 0) // Do not show remove icon for the first ticket
+                          if (i > 0) // Do not show the remove button for the first ticket
                             IconButton(
                               onPressed: () => removeTicket(i),
-                              icon: Icon(Icons.delete),
+                              icon: Icon(Icons.delete, color: Colors.red),
                               tooltip: "Delete Ticket".tr(),
                             ),
                         ],
                       ),
                       FormBuilder(
-                        key: ticketKeys[i],
+                        key: ticketKeys[i], // Assign the corresponding key
                         child: Column(
-                          children: getFormFields(ticketFields[i][metaFields]),
+                          children: getFormFields(ticketValues[i][metaFields]),
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            if (ticketFields.length < maxTickets)
+            if (ticketValues.length < maxTickets)
               Align(
                 alignment: Alignment.center,
                 child: ElevatedButton.icon(
@@ -187,6 +224,7 @@ class FormHelper {
       },
     );
   }
+
 
   // Build a simple text field with optional validation
   static FormBuilderTextField buildTextField(String name, String label, bool isRequired, [List<String>? autofillHints]) {
