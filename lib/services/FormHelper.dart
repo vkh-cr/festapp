@@ -158,7 +158,7 @@ class FormHelper {
                           if (i > 0) // Do not show remove icon for the first ticket
                             IconButton(
                               onPressed: () => removeTicket(i),
-                              icon: Icon(Icons.delete, color: ThemeConfig.redColor(context)),
+                              icon: Icon(Icons.delete),
                               tooltip: "Delete Ticket".tr(),
                             ),
                         ],
