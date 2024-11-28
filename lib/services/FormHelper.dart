@@ -84,12 +84,10 @@ class FormHelper {
 
           Map<String, dynamic> ticketData = {};
 
-          for (FormBuilderFieldState<FormBuilderField<dynamic>, dynamic> ticketSubField in ticketKey.currentState?.fields.values ?? []) {
-            var subFieldType = ticketSubField.widget.name;
-            var subFieldValue = ticketSubField.value;
-            ticketData[subFieldType] = subFieldValue;
+          for (MapEntry<String, FormBuilderFieldState<FormBuilderField<dynamic>, dynamic>> ticketSubField in ticketKey.currentState?.fields.entries ?? []) {
+            var subFieldType = ticketSubField.key;
+            ticketData[subFieldType] = getFieldData(ticketKey, subFieldType, ticketKeys: ticketKeys);
           }
-
           tickets.add(ticketData);
         }
       }
@@ -97,7 +95,10 @@ class FormHelper {
       return tickets; // Return ticket data with all subfields and prices
     }
 
-    return fieldValue?.trim();
+    if(fieldValue is String){
+      return fieldValue.trim();
+    }
+    return fieldValue;
   }
 
 
@@ -106,7 +107,7 @@ class FormHelper {
     final bool isRequiredField = field[IS_REQUIRED] ?? false;
     switch (field[metaType]) {
       case fieldTypeNote:
-        return buildTextField(fieldTypeName, noteLabel(), isRequiredField, []);
+        return buildTextField(fieldTypeNote, noteLabel(), isRequiredField, []);
       case fieldTypeName:
         return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
       case fieldTypeSurname:
