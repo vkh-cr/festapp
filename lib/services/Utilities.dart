@@ -1,4 +1,23 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 class Utilities {
+  static formatPrice(BuildContext context, double price) {
+    // Get locale from context or fallback to Czech locale
+    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+
+    // Configure the currency formatter
+    final NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: locale,
+      symbol: 'KČ', // Use the CZK symbol
+    );
+
+    return currencyFormatter.format(price); // Format the price as currency
+  }
+
+
+
   static int naturalCompare(String a, String b) {
     final regex = RegExp(r'\d+|\D+');
     final aMatches = regex.allMatches(a).map((m) => m.group(0)!).toList();

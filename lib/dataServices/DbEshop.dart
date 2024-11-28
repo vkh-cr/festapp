@@ -1,13 +1,15 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbEshop {
   static final _supabase = Supabase.instance.client.schema("eshop");
 
-  static Future<List<ItemTypeModel>> getItems(int currentOccasion) async {
+  static Future<List<ItemTypeModel>> getItems(BuildContext context, int currentOccasion) async {
     var data = await _supabase
         .from(TbEshop.item_types.table)
         .select(
@@ -24,7 +26,7 @@ class DbEshop {
           toReturn.items = toReturn.items?.sortedBy((i) => i.title ?? "");
           toReturn.items = toReturn.items?.sortedBy<num>((i) => i.price ?? 0);
           for (ItemModel v in toReturn.items??[]){
-            v.title = v.price != null && v.price! > 0 ? "${v.title} (${v.price} KČ)" : v.title;
+            v.title = v.price != null && v.price! > 0 ? "${v.title} (${Utilities.formatPrice(context, v.price!)})" : v.title;
           }
           return toReturn;
         }));

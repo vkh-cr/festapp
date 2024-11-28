@@ -5,6 +5,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -26,8 +27,8 @@ class FormPage extends StatefulWidget {
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
   bool _isSendSuccess = false;
+  double _totalPrice = 0.0; // Total price
   Map<String, dynamic>? formData;
-
   Map<String, dynamic>? fields;
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -40,6 +41,23 @@ class _FormPageState extends State<FormPage> {
 
     await loadData();
     super.didChangeDependencies();
+  }
+
+  void _updateTotalPrice() {
+    // Reset total price
+    _totalPrice = 0.0;
+
+    // Calculate total price from selected options
+    for (var field in fields?["fields"] ?? []) {
+      if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
+        var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
+        if (selectedOption is FormOptionModel) {
+          _totalPrice += selectedOption.price;
+        }
+      }
+    }
+
+    setState(() {}); // Update the UI
   }
 
   @override
@@ -67,7 +85,8 @@ class _FormPageState extends State<FormPage> {
                         style: TextStyle(
                             fontSize: 18,
                             color: ThemeConfig.blackColor(context)),
-                        text: "Your order was successfully sent to your email {email}."
+                        text:
+                        "Your order was successfully sent to your email {email}."
                             .tr(namedArgs: {"email": formData?["email"] ?? ""}),
                       ),
                       const WidgetSpan(
@@ -86,10 +105,20 @@ class _FormPageState extends State<FormPage> {
               )
                   : FormBuilder(
                 key: _formKey,
+                onChanged: _updateTotalPrice, // Listen for form changes
                 child: AutofillGroup(
                   child: Column(
                     children: [
                       ...FormHelper.getFormFields(fields?["fields"]),
+                      const SizedBox(height: 16),
+                      if (_totalPrice > 0)
+                        Text(
+                          "Total Price: {price}".tr(namedArgs: {"price": Utilities.formatPrice(context, _totalPrice)}),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       const SizedBox(height: 16),
                       ButtonsHelper.bigButton(
                         context: context,
@@ -143,22 +172,20 @@ class _FormPageState extends State<FormPage> {
     });
 
     // Fetching items
-    var allItems = await DbEshop.getItems(13);
-    var foodType = allItems.firstWhereOrNull((a)=>a.type == ItemModel.foodType);
-    List<Map<String, String>> foodOptions = [];
+    var allItems = await DbEshop.getItems(context, 13);
+    var foodType = allItems.firstWhereOrNull((a) => a.type == ItemModel.foodType);
+    List<Map<String, dynamic>> foodOptions = [];
 
-    if(foodType != null){
+    if (foodType != null) {
       for (var f in foodType.items!) {
-        Map<String, String> entry = {
+        Map<String, dynamic> entry = {
           FormHelper.metaOptionsName: f.title.toString(),
-          FormHelper.metaOptionsCode: f.id.toString()
+          FormHelper.metaOptionsCode: f.id.toString(),
+          FormHelper.metaOptionsPrice: f.price ?? 0.0 // Include price in the options
         };
         foodOptions.add(entry);
       }
     }
-
-
-    //var foodDefinition = {FormHelper.metaLabel: "Jidlo", FormHelper.metaOptionsType: ItemModel.foodType, FormHelper.metaOptions: foodOptions};
 
     // Updating form fields
     fields = {
@@ -167,13 +194,13 @@ class _FormPageState extends State<FormPage> {
         {FormHelper.metaType: FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeNote},
-        if(foodType != null)
-        {
-          FormHelper.metaType: FormHelper.fieldTypeOptions,
-          FormHelper.metaOptions: foodOptions,
-          FormHelper.metaLabel: foodType.title,
-          FormHelper.metaOptionsType: ItemModel.foodType
-        },
+        if (foodType != null)
+          {
+            FormHelper.metaType: FormHelper.fieldTypeOptions,
+            FormHelper.metaOptions: foodOptions,
+            FormHelper.metaLabel: foodType.title,
+            FormHelper.metaOptionsType: ItemModel.foodType
+          },
       ]
     };
 
@@ -182,4 +209,6 @@ class _FormPageState extends State<FormPage> {
     });
   }
 }
+
+
 
