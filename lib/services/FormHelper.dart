@@ -12,11 +12,23 @@ class FormHelper {
   static const String fieldTypeEmail = "email";
   static const String fieldTypeSex = "sex";
   static const String fieldTypeBirthYear = "birth_year";
+  static const String fieldTypeNote = "note";
+
+
+  static const String metaType = "type";
+  static const String metaLabel = "label";
+  static const String metaOptions = "options";
+  static const String metaOptionsType = "optionsType";
+  static const String metaOptionsCode = "code";
+  static const String metaOptionsName = "name";
+
+  static const String fieldTypeOptions = "options";
 
   // Field Attribute Constants
   static const String IS_REQUIRED = "is_required";
 
   // Labels and messages
+  static String noteLabel() => "Note".tr();
   static String nameLabel() => "Name".tr();
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
@@ -59,7 +71,9 @@ class FormHelper {
   // Create individual form field widget based on configuration
   static Widget createFormField(Map<String, dynamic> field) {
     final bool isRequiredField = field[IS_REQUIRED] ?? false;
-    switch (field["type"]) {
+    switch (field[metaType]) {
+      case fieldTypeNote:
+        return buildTextField(fieldTypeName, noteLabel(), isRequiredField, []);
       case fieldTypeName:
         return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
       case fieldTypeSurname:
@@ -70,6 +84,8 @@ class FormHelper {
         return buildEmailField(isRequiredField);
       case fieldTypeSex:
         return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
+      case fieldTypeOptions:
+        return buildGenericOptions(field[metaOptionsType], field[metaLabel], field[metaOptions]);
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       default:
@@ -117,6 +133,29 @@ class FormHelper {
     );
   }
 
+  static FormBuilderRadioGroup buildGenericOptions(
+      String name, String label, List<dynamic> optionsIn) {
+    List<FormBuilderFieldOption<FormOptionModel>> options = [];
+
+    for (var o in optionsIn) {
+      options.add(FormBuilderFieldOption(
+          value: FormOptionModel(o[metaOptionsCode], o[metaOptionsName])));
+    }
+
+    // Use the first option as the default initial value
+    final initialValue = options.isNotEmpty ? options.first.value : null;
+
+    return FormBuilderRadioGroup<FormOptionModel>(
+      name: name,
+      decoration: InputDecoration(labelText: label),
+      validator: FormBuilderValidators.required(),
+      options: options,
+      initialValue: initialValue,
+      orientation: OptionsOrientation.vertical,
+      wrapDirection: Axis.vertical, // Ensures buttons are arranged vertically
+    );
+  }
+
   static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
     return FormBuilderTextField(
       name: name,
@@ -150,4 +189,12 @@ class FormOptionModel {
 
   @override
   String toString() => name;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is FormOptionModel && runtimeType == other.runtimeType && code == other.code;
+
+  @override
+  int get hashCode => code.hashCode;
 }
