@@ -181,21 +181,29 @@ class FormHelper {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Stack(
                           children: [
-                            Text(
-                              "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Align(
+                                alignment: Alignment.center, // Center the title across the entire row
+                                child: Text(
+                                  "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
                               ),
                             ),
                             if (i > 0)
-                              IconButton(
-                                onPressed: () => removeTicket(i),
-                                icon: Icon(Icons.delete),
-                                tooltip: "Delete".tr(),
+                              Align(
+                                alignment: Alignment.centerRight, // Align the delete button to the right
+                                child: IconButton(
+                                  onPressed: () => removeTicket(i),
+                                  icon: Icon(Icons.delete),
+                                  tooltip: "Delete".tr(),
+                                ),
                               ),
                           ],
                         ),
