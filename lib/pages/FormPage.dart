@@ -237,6 +237,7 @@ class _FormPageState extends State<FormPage> {
           FormHelper.metaFields: [
             if (taxiOptionsField.isNotEmpty) taxiOptionsField,
             if (foodOptionsField.isNotEmpty) foodOptionsField,
+            {FormHelper.metaType: FormHelper.fieldTypeNote},
           ],
         },
       ],
