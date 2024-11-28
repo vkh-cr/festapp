@@ -172,7 +172,7 @@ class FormHelper {
                 child: Container(
                   decoration: BoxDecoration(
                     color: ThemeConfig.whiteColor(context),
-                    border: Border.all(color: Theme.of(context).primaryColor),
+                    border: Border.all(color: Theme.of(context).primaryColor, width: 2.0),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.all(12),
