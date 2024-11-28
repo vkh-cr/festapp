@@ -28,14 +28,14 @@ class _SignupPageState extends State<SignupPage> {
   Map<String, dynamic>? fieldsData;
 
   final dynamic fields =
-  {"fields":
+  {FormHelper.metaFields:
   [
-    {"type":FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeSex},
-    {"type":FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeBirthYear},
+    { FormHelper.metaType : FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeSex},
+    { FormHelper.metaType : FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeBirthYear},
   ]};
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -85,7 +85,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getFormFields(fields["fields"]),
+                    ...FormHelper.getFormFields(fields[FormHelper.metaFields]),
                       const SizedBox(
                         height: 16,
                       ),
@@ -97,7 +97,7 @@ class _SignupPageState extends State<SignupPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                            var data = FormHelper.getDataFromForm(_formKey, fields[FormHelper.metaFields]);
                             fieldsData = data;
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {

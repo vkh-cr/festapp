@@ -48,7 +48,7 @@ class _FormPageState extends State<FormPage> {
     _totalPrice = 0.0;
 
     // Calculate total price from selected options
-    for (var field in fields?["fields"] ?? []) {
+    for (var field in fields?[FormHelper.metaFields] ?? []) {
       if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
         var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
         if (selectedOption is FormOptionModel) {
@@ -109,7 +109,7 @@ class _FormPageState extends State<FormPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                      ...FormHelper.getFormFields(fields?["fields"]),
+                      ...FormHelper.getFormFields(fields?[FormHelper.metaFields]),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
@@ -133,7 +133,7 @@ class _FormPageState extends State<FormPage> {
                               _isLoading = true;
                             });
                             var data = FormHelper.getDataFromForm(
-                                _formKey, fields?["fields"]);
+                                _formKey, fields?[FormHelper.metaFields]);
                             formData = data;
 
                             // Simulate sending process
