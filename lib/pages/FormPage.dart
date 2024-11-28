@@ -113,7 +113,9 @@ class _FormPageState extends State<FormPage> {
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
-                          "Total Price: {price}".tr(namedArgs: {"price": Utilities.formatPrice(context, _totalPrice)}),
+                          "Total Price: {price}".tr(namedArgs: {
+                            "price": Utilities.formatPrice(context, _totalPrice)
+                          }),
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -181,7 +183,7 @@ class _FormPageState extends State<FormPage> {
         Map<String, dynamic> entry = {
           FormHelper.metaOptionsName: f.title.toString(),
           FormHelper.metaOptionsCode: f.id.toString(),
-          FormHelper.metaOptionsPrice: f.price ?? 0.0 // Include price in the options
+          FormHelper.metaOptionsPrice: f.price ?? 0.0, // Include price in the options
         };
         foodOptions.add(entry);
       }
@@ -189,19 +191,25 @@ class _FormPageState extends State<FormPage> {
 
     // Updating form fields
     fields = {
-      "fields": [
+      FormHelper.metaFields: [
         {FormHelper.metaType: FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
         {FormHelper.metaType: FormHelper.fieldTypeNote},
-        if (foodType != null)
         {
-          FormHelper.metaType: FormHelper.fieldTypeOptions,
-          FormHelper.metaOptions: foodOptions,
-          FormHelper.metaLabel: foodType.title,
-          FormHelper.metaOptionsType: ItemModel.foodType
+          FormHelper.metaType: FormHelper.fieldTypeTicket,
+          FormHelper.metaMaxTickets: 6,
+          FormHelper.metaFields: [
+            if (foodType != null)
+              {
+                FormHelper.metaType: FormHelper.fieldTypeOptions,
+                FormHelper.metaOptions: foodOptions,
+                FormHelper.metaLabel: foodType.title,
+                FormHelper.metaOptionsType: ItemModel.foodType,
+              },
+          ],
         },
-      ]
+      ],
     };
 
     setState(() {
@@ -209,6 +217,7 @@ class _FormPageState extends State<FormPage> {
     });
   }
 }
+
 
 
 

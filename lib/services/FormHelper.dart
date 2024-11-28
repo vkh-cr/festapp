@@ -3,6 +3,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -14,7 +15,10 @@ class FormHelper {
   static const String fieldTypeBirthYear = "birth_year";
   static const String fieldTypeNote = "note";
 
+  static const String fieldTypeTicket = "ticket";
 
+  static const String metaMaxTickets = "max_tickets";
+  static const String metaFields = "fields";
   static const String metaType = "type";
   static const String metaLabel = "label";
   static const String metaOptions = "options";
@@ -89,9 +93,99 @@ class FormHelper {
         return buildGenericOptions(field[metaOptionsType], field[metaLabel], field[metaOptions]);
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
+      case fieldTypeTicket:
+        return buildTicketField(field);
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  static Widget buildTicketField(Map<String, dynamic> field) {
+    final maxTickets = field[metaMaxTickets] ?? 1;
+    final List<Map<String, dynamic>> ticketFields = [];
+    final List<GlobalKey<FormBuilderState>> ticketKeys = [];
+
+    // Add initial ticket
+    ticketFields.add({...field});
+    ticketKeys.add(GlobalKey<FormBuilderState>());
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        void addTicket() {
+          if (ticketFields.length < maxTickets) {
+            setState(() {
+              ticketFields.add({...field});
+              ticketKeys.add(GlobalKey<FormBuilderState>());
+            });
+          }
+        }
+
+        void removeTicket(int index) {
+          if (ticketFields.length > 1) {
+            setState(() {
+              ticketFields.removeAt(index);
+              ticketKeys.removeAt(index);
+            });
+          }
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (int i = 0; i < ticketFields.length; i++)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: ThemeConfig.whiteColor(context),
+                    border: Border.all(color: Theme.of(context).primaryColor),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Ticket ${i + 1}".tr(),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          if (i > 0) // Do not show remove icon for the first ticket
+                            IconButton(
+                              onPressed: () => removeTicket(i),
+                              icon: Icon(Icons.delete, color: ThemeConfig.redColor(context)),
+                              tooltip: "Delete Ticket".tr(),
+                            ),
+                        ],
+                      ),
+                      FormBuilder(
+                        key: ticketKeys[i],
+                        child: Column(
+                          children: getFormFields(ticketFields[i][metaFields]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (ticketFields.length < maxTickets)
+              Align(
+                alignment: Alignment.center,
+                child: ElevatedButton.icon(
+                  onPressed: addTicket,
+                  icon: Icon(Icons.add, color: ThemeConfig.whiteColor(context)),
+                  label: const Text("Add another ticket").tr(),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 
   // Build a simple text field with optional validation
