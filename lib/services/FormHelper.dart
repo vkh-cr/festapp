@@ -54,7 +54,7 @@ class FormHelper {
   static Map<String, dynamic> getDataFromForm(GlobalKey<FormBuilderState> key, dynamic fields) {
     Map<String, dynamic> toReturn = {};
     for (var k in fields) {
-      toReturn[k["type"]] = getFieldData(key, k["type"]);
+      toReturn[k[metaType]] = getFieldData(key, k[metaType]);
     }
     return toReturn;
   }
