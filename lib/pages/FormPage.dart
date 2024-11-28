@@ -47,18 +47,27 @@ class _FormPageState extends State<FormPage> {
     // Reset total price
     _totalPrice = 0.0;
 
-    // Calculate total price from selected options
+    // Iterate over all fields and calculate total price
     for (var field in fields?[FormHelper.metaFields] ?? []) {
+      // Calculate price for regular options
       if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
         var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
         if (selectedOption is FormOptionModel) {
           _totalPrice += selectedOption.price;
         }
       }
+
+      // Calculate price for tickets
+      if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
+        for (var ticketData in FormHelper.getFieldData(_formKey, FormHelper.fieldTypeTicket, ticketKeys: FormHelper.ticketKeys) ?? []) {
+          _totalPrice += ticketData.values.first.price ?? 0.0;
+        }
+      }
     }
 
     setState(() {}); // Update the UI
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +92,10 @@ class _FormPageState extends State<FormPage> {
                     children: [
                       TextSpan(
                         style: TextStyle(
-                            fontSize: 18,
-                            color: ThemeConfig.blackColor(context)),
-                        text:
-                        "Your order was successfully sent to your email {email}."
+                          fontSize: 18,
+                          color: ThemeConfig.blackColor(context),
+                        ),
+                        text: "Your order was successfully sent to your email {email}."
                             .tr(namedArgs: {"email": formData?[FormHelper.fieldTypeEmail] ?? ""}),
                       ),
                       const WidgetSpan(
@@ -105,16 +114,15 @@ class _FormPageState extends State<FormPage> {
               )
                   : FormBuilder(
                 key: _formKey,
-                onChanged: _updateTotalPrice, // Listen for form changes
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                      ...FormHelper.getFormFields(fields?[FormHelper.metaFields]),
+                      ...FormHelper.getFormFields(fields?[FormHelper.metaFields], _updateTotalPrice),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
                           "Total Price: {price}".tr(namedArgs: {
-                            "price": Utilities.formatPrice(context, _totalPrice)
+                            "price": Utilities.formatPrice(context, _totalPrice),
                           }),
                           style: TextStyle(
                             fontSize: 18,

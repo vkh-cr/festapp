@@ -49,8 +49,8 @@ class FormHelper {
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
   // Public method to generate form fields from configuration
-  static List<Widget> getFormFields(dynamic fields) {
-    return fields.map<Widget>((field) => createFormField(field)).toList();
+  static List<Widget> getFormFields(dynamic fields, [void Function()? updateTotalPrice]) {
+    return fields.map<Widget>((field) => createFormField(field, updateTotalPrice)).toList();
   }
 
   // Retrieve form data by iterating over defined fields
@@ -102,7 +102,7 @@ class FormHelper {
 
 
   // Create individual form field widget based on configuration
-  static Widget createFormField(Map<String, dynamic> field) {
+  static Widget createFormField(Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
     final bool isRequiredField = field[IS_REQUIRED] ?? false;
     switch (field[metaType]) {
       case fieldTypeNote:
@@ -122,7 +122,7 @@ class FormHelper {
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       case fieldTypeTicket:
-        return buildTicketField(field, ticketValues, ticketKeys);
+        return buildTicketField(field, ticketValues, ticketKeys, updateTotalPrice);
       default:
         return const SizedBox.shrink();
     }
@@ -131,13 +131,14 @@ class FormHelper {
   static Widget buildTicketField(
       Map<String, dynamic> field,
       List<Map<String, dynamic>> ticketValues,
-      List<GlobalKey<FormBuilderState>> ticketKeys) {
-    final maxTickets = field[metaMaxTickets] ?? 1;
+      List<GlobalKey<FormBuilderState>> ticketKeys,
+      [void Function()? updateTotalPrice] // Pass the updateTotalPrice function
+      ) {
+    final maxTickets = field[FormHelper.metaMaxTickets] ?? 1;
 
-    // Ensure ticketValues and ticketKeys are initialized
     if (ticketValues.isEmpty) {
-      ticketValues.add({...field}); // Clone the field structure for the first ticket
-      ticketKeys.add(GlobalKey<FormBuilderState>()); // Add a unique key for the first ticket
+      ticketValues.add({...field});
+      ticketKeys.add(GlobalKey<FormBuilderState>());
     }
 
     return StatefulBuilder(
@@ -145,25 +146,21 @@ class FormHelper {
         void addTicket() {
           if (ticketValues.length < maxTickets) {
             setState(() {
-              // Add a new ticket form configuration
-              ticketValues.add({...field}); // Clone the field structure for the new ticket
-
-              // Add a new unique key for the new ticket form
+              ticketValues.add({...field});
               ticketKeys.add(GlobalKey<FormBuilderState>());
             });
           }
+          updateTotalPrice?.call(); // Update the total price when adding a ticket
         }
 
         void removeTicket(int index) {
           if (ticketValues.length > 1) {
             setState(() {
-              // Remove the ticket field structure
               ticketValues.removeAt(index);
-
-              // Remove the corresponding key
               ticketKeys.removeAt(index);
             });
           }
+          updateTotalPrice?.call(); // Update the total price when removing a ticket
         }
 
         return Column(
@@ -192,18 +189,19 @@ class FormHelper {
                               fontSize: 16,
                             ),
                           ),
-                          if (i > 0) // Do not show the remove button for the first ticket
+                          if (i > 0)
                             IconButton(
                               onPressed: () => removeTicket(i),
-                              icon: Icon(Icons.delete, color: Colors.red),
+                              icon: Icon(Icons.delete),
                               tooltip: "Delete Ticket".tr(),
                             ),
                         ],
                       ),
                       FormBuilder(
-                        key: ticketKeys[i], // Assign the corresponding key
+                        key: ticketKeys[i],
+                        onChanged: updateTotalPrice, // Trigger price update on change
                         child: Column(
-                          children: getFormFields(ticketValues[i][metaFields]),
+                          children: FormHelper.getFormFields(ticketValues[i][FormHelper.metaFields]),
                         ),
                       ),
                     ],
