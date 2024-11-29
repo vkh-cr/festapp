@@ -18,6 +18,7 @@ DECLARE
     item_details JSONB := '[]'::JSONB;
     item_data RECORD;
     ticket_id BIGINT;
+    order_item_ticket_id BIGINT;
 BEGIN
     -- Validate input data and extract occasion
     IF input_data IS NULL OR input_data->'occasion' IS NULL THEN
@@ -45,11 +46,8 @@ BEGIN
             RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Invalid or unrelated spot');
         END IF;
 
-        -- Check if spot is already used or its state is not NULL
-        IF used_spots @> JSONB_BUILD_ARRAY(spot_data.id) THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1008, 'message', 'Spot already used');
-        END IF;
-        IF spot_data.state IS NOT NULL THEN
+        -- Check if spot is already used (order_item_ticket is not NULL)
+        IF spot_data.order_item_ticket IS NOT NULL THEN
             RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', 'Spot is already reserved or in use');
         END IF;
 
@@ -112,7 +110,15 @@ BEGIN
 
                 -- Link ticket and item to the order
                 INSERT INTO eshop.order_item_ticket ("order", item, ticket)
-                VALUES (order_id, item_id, ticket_id);
+                VALUES (order_id, item_id, ticket_id)
+                RETURNING id INTO order_item_ticket_id;
+
+                -- Assign the order_item_ticket ID to the spot
+                IF item_id = spot_data.item THEN
+                    UPDATE eshop.spots
+                    SET order_item_ticket = order_item_ticket_id, updated_at = now
+                    WHERE id = spot_data.id;
+                END IF;
             END IF;
         END LOOP;
     END LOOP;
@@ -140,16 +146,6 @@ BEGIN
         'ordered',
         calculated_price
     );
-
-    -- Update spot states
-    FOR spot_id IN
-        SELECT value::BIGINT
-        FROM JSONB_ARRAY_ELEMENTS_TEXT(used_spots) AS value
-    LOOP
-        UPDATE eshop.spots
-        SET state = 'ordered', updated_at = now
-        WHERE id = spot_id;
-    END LOOP;
 
     -- Return success response with order ID and items
     RETURN JSONB_BUILD_OBJECT(
