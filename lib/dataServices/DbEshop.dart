@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -7,10 +8,11 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbEshop {
-  static final _supabase = Supabase.instance.client.schema("eshop");
+  static final _supabaseEshop = Supabase.instance.client.schema("eshop");
+  static final _supabase = Supabase.instance.client;
 
   static Future<List<ItemTypeModel>> getItems(BuildContext context, int currentOccasion) async {
-    var data = await _supabase
+    var data = await _supabaseEshop
         .from(TbEshop.item_types.table)
         .select(
         "${TbEshop.item_types.id},"
@@ -32,6 +34,17 @@ class DbEshop {
         }));
 
     return infoList;
+  }
+
+  static Future<FormModel?> getForm(String formKey) async {
+    final response = await _supabase
+        .rpc('get_form', params: {'form_key': formKey});
+
+    if(response["code"] == 200){
+      var form = FormModel.fromJson(response["data"]);
+      return form;
+    }
+    return null;
   }
 
 }

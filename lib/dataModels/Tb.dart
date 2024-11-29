@@ -24,6 +24,7 @@ class Tb {
   static IconsTb icons = const IconsTb();
   static OrganizationsTb organizations = const OrganizationsTb();
   static OrganizationUsersTb organization_users = const OrganizationUsersTb();
+  static FormsTb forms = const FormsTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -311,4 +312,17 @@ class OrganizationUsersTb{
   String get organization => "organization";
   String get user => "user";
   String get is_admin => "is_admin";
+}
+class FormsTb {
+  const FormsTb();
+  String get table => "forms";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get data => "data";
+  String get key => "key";
+  String get occasion => "occasion";
+  String get type => "type";
+  String get bank_account => "bank_account";
+  String get deadline_duration => "deadline_duration";
+  String get is_open => "is_open";
 }

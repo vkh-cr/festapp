@@ -10,6 +10,7 @@ import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/services/UuidConverter.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -156,11 +157,8 @@ class _FormPageState extends State<FormPage> {
                             });
                             var data = FormHelper.getDataFromForm(
                                 _formKey, fields?[FormHelper.metaFields]);
-                            // Convert to JSON
-                            // Convert to JSON string
 
                             formData = data;
-                            var stri = data.toString();
 
                             // Simulate sending process
                             await Future.delayed(const Duration(seconds: 2));
@@ -226,29 +224,52 @@ class _FormPageState extends State<FormPage> {
       _isLoading = true;
     });
 
+    // if(widget.id == null) {
+    //   return;
+    // }
+    //var key = UuidConverter.base62ToUuid(widget.id!);
+    var form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
+    if(form == null) {
+      return;
+    }
     // Fetching items
-    var allItems = await DbEshop.getItems(context, 13);
-    var foodOptionsField = generateOptionsForItemType(allItems, ItemModel.foodType);
-    var taxiOptionsField = generateOptionsForItemType(allItems, ItemModel.taxiType);
+    var allItems = await DbEshop.getItems(context, form.occasion!);
+    // New fields to replace existing ones
+    List<dynamic> updatedFields = [];
 
-    // Updating form fields
-    fields = {
-      FormHelper.metaFields: [
-        {FormHelper.metaType: FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
-        {FormHelper.metaType: FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
-        {FormHelper.metaType: FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
-        {FormHelper.metaType: FormHelper.fieldTypeNote},
-        {
-          FormHelper.metaType: FormHelper.fieldTypeTicket,
-          FormHelper.metaMaxTickets: 6,
-          FormHelper.metaFields: [
-            if (taxiOptionsField.isNotEmpty) taxiOptionsField,
-            if (foodOptionsField.isNotEmpty) foodOptionsField,
-            {FormHelper.metaType: FormHelper.fieldTypeNote},
-          ],
-        },
-      ],
-    };
+    // Loop through the fields in form.data
+    for (var field in form.data![FormHelper.metaFields]) {
+      // Check if the field is a ticket
+      if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
+        // Process the fields inside the ticket
+        List<dynamic> updatedTicketFields = [];
+        for (var ticketField in field[FormHelper.metaFields]) {
+          // Check if the ticket field has an optionsType
+          if (ticketField.containsKey(FormHelper.metaOptionsType)) {
+            var optionsType = ticketField[FormHelper.metaOptionsType];
+            var generatedOptions = generateOptionsForItemType(allItems, optionsType);
+            updatedTicketFields.add(generatedOptions);
+          } else {
+            // Directly add the ticket field if no optionsType is present
+            updatedTicketFields.add(ticketField);
+          }
+        }
+
+        // Replace the fields inside the ticket
+        updatedFields.add({
+          FormHelper.metaType: field[FormHelper.metaType],
+          FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
+          FormHelper.metaFields: updatedTicketFields,
+        });
+      } else {
+        // Directly add the field if it's not a ticket
+        updatedFields.add(field);
+      }
+    }
+
+    form.data![FormHelper.metaFields] = updatedFields;
+
+    fields = form.data;
 
     setState(() {
       _isLoading = false;
