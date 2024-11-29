@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
@@ -153,7 +156,11 @@ class _FormPageState extends State<FormPage> {
                             });
                             var data = FormHelper.getDataFromForm(
                                 _formKey, fields?[FormHelper.metaFields]);
+                            // Convert to JSON
+                            // Convert to JSON string
+
                             formData = data;
+                            var stri = data.toString();
 
                             // Simulate sending process
                             await Future.delayed(const Duration(seconds: 2));
@@ -200,9 +207,9 @@ class _FormPageState extends State<FormPage> {
 
     for (var item in itemTypeModel.items!) {
       options.add({
-        FormHelper.metaOptionsName: item.title.toString(),
-        FormHelper.metaOptionsCode: item.id.toString(),
-        FormHelper.metaOptionsPrice: item.price ?? 0.0, // Include price in the options
+        FormOptionModel.metaOptionsName: item.title.toString(),
+        FormOptionModel.metaOptionsId: item.id.toString(),
+        FormOptionModel.metaOptionsPrice: item.price ?? 0.0, // Include price in the options
       });
     }
 

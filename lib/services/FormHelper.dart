@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -23,9 +24,7 @@ class FormHelper {
   static const String metaLabel = "label";
   static const String metaOptions = "options";
   static const String metaOptionsType = "optionsType";
-  static const String metaOptionsCode = "code";
-  static const String metaOptionsName = "name";
-  static const String metaOptionsPrice = "price";
+
 
   static const String fieldTypeOptions = "options";
 
@@ -283,9 +282,9 @@ class FormHelper {
     for (var o in optionsIn) {
       options.add(FormBuilderFieldOption(
           value: FormOptionModel(
-            o[metaOptionsCode],
-            o[metaOptionsName],
-            price: o[metaOptionsPrice] ?? 0.0, // Use price from the option or default to 0.0
+            o[FormOptionModel.metaOptionsId],
+            o[FormOptionModel.metaOptionsName],
+            price: o[FormOptionModel.metaOptionsPrice] ?? 0.0, // Use price from the option or default to 0.0
           )));
     }
 
@@ -327,24 +326,4 @@ class FormHelper {
       keyboardType: TextInputType.number,
     );
   }
-}
-
-class FormOptionModel {
-  FormOptionModel(this.code, this.name, {this.price = 0.0});
-  final String name;
-  final String code;
-  final double price;
-
-  @override
-  String toString() => name;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is FormOptionModel &&
-              runtimeType == other.runtimeType &&
-              code == other.code;
-
-  @override
-  int get hashCode => code.hashCode;
 }
