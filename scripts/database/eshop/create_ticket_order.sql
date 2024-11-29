@@ -15,11 +15,16 @@ DECLARE
     item_id BIGINT;
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
-    item_details JSONB := '[]'::JSONB;
+    ticket_details JSONB := '[]'::JSONB;
     item_data RECORD;
     ticket_id BIGINT;
     order_item_ticket_id BIGINT;
     ticket_symbol TEXT;
+    ticket_items JSONB := '[]'::JSONB;
+    payment_info_id BIGINT;
+    generated_variable_symbol BIGINT; -- Explicitly renamed to avoid ambiguity
+    bank_account_id BIGINT;
+    form_id BIGINT;
 BEGIN
     -- Validate input data and extract occasion
     IF input_data IS NULL OR input_data->'occasion' IS NULL THEN
@@ -27,14 +32,32 @@ BEGIN
     END IF;
     occasion_id := (input_data->'occasion')::BIGINT;
 
+    -- Extract form_id from input_data
+    IF input_data->'form' IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Missing form ID in input data');
+    END IF;
+    form_id := (input_data->'form')::BIGINT;
+
     -- Validate occasion and fetch organization
     SELECT * INTO occasion_data
     FROM public.occasions
     WHERE id = occasion_id AND is_hidden = FALSE AND is_open = TRUE;
 
     IF occasion_data IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Invalid or closed occasion');
+        RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Invalid or closed occasion');
     END IF;
+
+    -- Get bank_account_id for payment_info using form_id
+    SELECT bank_account INTO bank_account_id
+    FROM public.forms
+    WHERE id = form_id;
+
+    IF bank_account_id IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'No bank account found for the given form');
+    END IF;
+
+    -- Generate variable symbol for payment
+    generated_variable_symbol := generate_variable_symbol(bank_account_id);
 
     -- Process tickets
     FOR ticket_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'ticket') LOOP
@@ -44,12 +67,12 @@ BEGIN
         WHERE id = (ticket_data->'spot')::BIGINT AND occasion = occasion_id;
 
         IF spot_data IS NULL THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Invalid or unrelated spot');
+            RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'Invalid or unrelated spot');
         END IF;
 
         -- Check if spot is already used (order_item_ticket is not NULL)
         IF spot_data.order_item_ticket IS NOT NULL THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', 'Spot is already reserved or in use');
+            RETURN JSONB_BUILD_OBJECT('code', 1006, 'message', 'Spot is already reserved or in use');
         END IF;
 
         -- Add spot to used spots
@@ -58,10 +81,10 @@ BEGIN
         -- Secret validation
         spot_secret := (input_data->>'secret')::UUID;
         IF spot_data.secret IS DISTINCT FROM spot_secret THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'Invalid secret for spot');
+            RETURN JSONB_BUILD_OBJECT('code', 1007, 'message', 'Invalid secret for spot');
         END IF;
         IF spot_data.secret_expiration_time < now THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'Secret expired');
+            RETURN JSONB_BUILD_OBJECT('code', 1008, 'message', 'Secret expired');
         END IF;
 
         -- Generate ticket symbol
@@ -71,6 +94,9 @@ BEGIN
         INSERT INTO eshop.tickets (state, occasion, ticket_symbol, created_at, updated_at)
         VALUES ('ordered', occasion_id, ticket_symbol, now, now)
         RETURNING id INTO ticket_id;
+
+        -- Initialize ticket items array
+        ticket_items := '[]'::JSONB;
 
         -- Process taxi, food, and spot items
         FOREACH item_id IN ARRAY ARRAY[
@@ -92,16 +118,15 @@ BEGIN
 
                 IF item_data IS NULL THEN
                     RETURN JSONB_BUILD_OBJECT(
-                        'code', 1006,
+                        'code', 1009,
                         'message', 'Item not found or not part of occasion',
                         'details', item_id
                     );
                 END IF;
 
-                -- Build item details, conditionally including spot-specific keys and ticket_id
-                item_details := item_details || JSONB_BUILD_OBJECT(
+                -- Add item details to ticket items
+                ticket_items := ticket_items || JSONB_BUILD_OBJECT(
                     'item_id', item_id,
-                    'ticket_id', ticket_id,
                     'title', item_data.title,
                     'type', item_data.type,
                     'price', item_data.final_price,
@@ -125,10 +150,22 @@ BEGIN
                 END IF;
             END IF;
         END LOOP;
+
+        -- Add ticket with its items to ticket details
+        ticket_details := ticket_details || JSONB_BUILD_OBJECT(
+            'ticket_id', ticket_id,
+            'ticket_symbol', ticket_symbol,
+            'items', ticket_items
+        );
     END LOOP;
 
-    -- Create order with calculated price
-    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion)
+    -- Create payment info
+    INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at)
+    VALUES (bank_account_id, generated_variable_symbol, calculated_price, now)
+    RETURNING id INTO payment_info_id;
+
+    -- Create order with calculated price and payment info
+    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion, payment_info)
     VALUES (
         now, now, calculated_price, 'ordered',
         JSONB_BUILD_OBJECT(
@@ -138,27 +175,33 @@ BEGIN
             'note', input_data->>'note',
             'price', calculated_price
         ),
-        occasion_id
+        occasion_id,
+        payment_info_id
     ) RETURNING id INTO order_id;
 
-    -- Log order to orders_history with price
+    -- Log order to orders_history with price and tickets
     INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
     VALUES (
         now,
-        JSONB_BUILD_OBJECT('input_data', input_data, 'items', item_details, 'price', calculated_price),
+        JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details, 'price', calculated_price),
         order_id,
         'ordered',
         calculated_price
     );
 
-    -- Return success response with order ID and items
+    -- Return success response with order ID, tickets, and payment info
     RETURN JSONB_BUILD_OBJECT(
         'code', 200,
         'order_id', order_id,
-        'items', item_details
+        'tickets', ticket_details,
+        'payment_info', JSONB_BUILD_OBJECT(
+            'payment_info_id', payment_info_id,
+            'variable_symbol', generated_variable_symbol,
+            'amount', calculated_price
+        )
     );
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1009, 'message', SQLERRM);
+        RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', SQLERRM);
 END;
 $$;
