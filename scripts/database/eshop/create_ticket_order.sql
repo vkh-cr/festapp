@@ -19,6 +19,7 @@ DECLARE
     item_data RECORD;
     ticket_id BIGINT;
     order_item_ticket_id BIGINT;
+    ticket_symbol TEXT;
 BEGIN
     -- Validate input data and extract occasion
     IF input_data IS NULL OR input_data->'occasion' IS NULL THEN
@@ -63,9 +64,12 @@ BEGIN
             RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'Secret expired');
         END IF;
 
-        -- Create ticket first
-        INSERT INTO eshop.tickets (alias, state, occasion, created_at, updated_at)
-        VALUES (ticket_data->>'note', 'ordered', occasion_id, now, now)
+        -- Generate ticket symbol
+        ticket_symbol := generate_ticket_symbol(occasion_data.organization, occasion_id);
+
+        -- Create ticket with ticket symbol
+        INSERT INTO eshop.tickets (state, occasion, ticket_symbol, created_at, updated_at)
+        VALUES ('ordered', occasion_id, ticket_symbol, now, now)
         RETURNING id INTO ticket_id;
 
         -- Process taxi, food, and spot items
