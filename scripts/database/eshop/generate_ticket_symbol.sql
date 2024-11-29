@@ -1,5 +1,8 @@
 CREATE OR REPLACE FUNCTION generate_ticket_symbol(organization_id BIGINT, occasion_id BIGINT)
-RETURNS TEXT AS $$
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
     visible_id TEXT;
     org_suffix TEXT;
@@ -38,4 +41,4 @@ BEGIN
         END IF;
     END LOOP;
 END;
-$$ LANGUAGE plpgsql;
+$$;
