@@ -22,9 +22,11 @@ DECLARE
     ticket_symbol TEXT;
     ticket_items JSONB := '[]'::JSONB;
     payment_info_id BIGINT;
-    generated_variable_symbol BIGINT; -- Explicitly renamed to avoid ambiguity
+    generated_variable_symbol BIGINT;
     bank_account_id BIGINT;
     form_id BIGINT;
+    deadline TIMESTAMPTZ;
+    form_deadline_duration BIGINT; -- Renamed variable to avoid ambiguity
 BEGIN
     -- Validate input data and extract occasion
     IF input_data IS NULL OR input_data->'occasion' IS NULL THEN
@@ -47,8 +49,8 @@ BEGIN
         RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Invalid or closed occasion');
     END IF;
 
-    -- Get bank_account_id for payment_info using form_id
-    SELECT bank_account INTO bank_account_id
+    -- Get bank_account_id and deadline duration for payment_info using form_id
+    SELECT bank_account, deadline_duration_seconds INTO bank_account_id, form_deadline_duration
     FROM public.forms
     WHERE id = form_id;
 
@@ -56,8 +58,34 @@ BEGIN
         RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'No bank account found for the given form');
     END IF;
 
+    -- Calculate deadline if form_deadline_duration is not null
+    IF form_deadline_duration IS NOT NULL THEN
+        deadline := now + make_interval(secs => form_deadline_duration);
+    ELSE
+        deadline := NULL;
+    END IF;
+
     -- Generate variable symbol for payment
     generated_variable_symbol := generate_variable_symbol(bank_account_id);
+
+    -- Create payment info
+    INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
+    VALUES (bank_account_id, generated_variable_symbol, calculated_price, now, deadline)
+    RETURNING id INTO payment_info_id;
+
+    -- Create the order before processing tickets
+    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion, payment_info)
+    VALUES (
+        now, now, 0, 'pending',
+        JSONB_BUILD_OBJECT(
+            'name', input_data->>'name',
+            'surname', input_data->>'surname',
+            'email', input_data->>'email',
+            'note', input_data->>'note'
+        ),
+        occasion_id,
+        payment_info_id
+    ) RETURNING id INTO order_id;
 
     -- Process tickets
     FOR ticket_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'ticket') LOOP
@@ -159,25 +187,10 @@ BEGIN
         );
     END LOOP;
 
-    -- Create payment info
-    INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at)
-    VALUES (bank_account_id, generated_variable_symbol, calculated_price, now)
-    RETURNING id INTO payment_info_id;
-
-    -- Create order with calculated price and payment info
-    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion, payment_info)
-    VALUES (
-        now, now, calculated_price, 'ordered',
-        JSONB_BUILD_OBJECT(
-            'name', input_data->>'name',
-            'surname', input_data->>'surname',
-            'email', input_data->>'email',
-            'note', input_data->>'note',
-            'price', calculated_price
-        ),
-        occasion_id,
-        payment_info_id
-    ) RETURNING id INTO order_id;
+    -- Update the order with the calculated price
+    UPDATE eshop.orders
+    SET price = calculated_price, state = 'ordered'
+    WHERE id = order_id;
 
     -- Log order to orders_history with price and tickets
     INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
@@ -197,7 +210,8 @@ BEGIN
         'payment_info', JSONB_BUILD_OBJECT(
             'payment_info_id', payment_info_id,
             'variable_symbol', generated_variable_symbol,
-            'amount', calculated_price
+            'amount', calculated_price,
+            'deadline', deadline
         )
     );
 EXCEPTION

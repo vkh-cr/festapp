@@ -14,7 +14,7 @@ BEGIN
         IF NOT EXISTS (
             SELECT 1
             FROM eshop.payment_info
-            WHERE v_symbol = v_symbol AND bank_account = bank_account_id
+            WHERE variable_symbol = v_symbol AND bank_account = bank_account_id
         ) THEN
             RETURN v_symbol; -- Return the unique variable symbol
         END IF;
