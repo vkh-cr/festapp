@@ -15,6 +15,7 @@ class FormHelper {
   static const String fieldTypeSex = "sex";
   static const String fieldTypeBirthYear = "birth_year";
   static const String fieldTypeNote = "note";
+  static const String fieldTypeSpot = "spot";
 
   static const String fieldTypeTicket = "ticket";
 
@@ -36,6 +37,7 @@ class FormHelper {
   static String nameLabel() => "Name".tr();
   static String surnameLabel() => "Surname".tr();
   static String cityLabel() => "City".tr();
+  static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
@@ -69,8 +71,10 @@ class FormHelper {
       if (fieldValue == null) {
         return null;
       }
-      return (fieldValue as FormOptionModel).code;
+      return (fieldValue as FormOptionModel).id;
     } else if (fieldType == fieldTypeBirthYear) {
+      return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
+    } else if (fieldType == fieldTypeSpot) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
     } else if (fieldType == fieldTypeTicket) {
       // Collect ticket data from multiple ticket forms
@@ -113,6 +117,8 @@ class FormHelper {
         return buildTextField(fieldTypeSurname, surnameLabel(), isRequiredField, [AutofillHints.familyName]);
       case fieldTypeCity:
         return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
+      case fieldTypeSpot:
+        return buildTextField(fieldTypeSpot, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
       case fieldTypeEmail:
         return buildEmailField(isRequiredField);
       case fieldTypeSex:

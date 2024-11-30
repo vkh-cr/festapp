@@ -158,35 +158,16 @@ class _FormPageState extends State<FormPage> {
                             var data = FormHelper.getDataFromForm(
                                 _formKey, fields?[FormHelper.metaFields]);
 
+                            data["secret"] = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
+                            data["form"] = "7f4e3892-a544-4385-b933-61117e9755c3";
                             formData = data;
 
-                            var response = await DbEshop.sendTicketOrder({
-                              "secret": "0fb80818-4c8d-4eb7-8205-859b1d786fb3",
-                              "form": "7f4e3892-a544-4385-b933-61117e9755c3",
-                              "name": "dfas",
-                              "surname": "dfsa",
-                              "email": "bujnmi@gmail.com",
-                              "note": "a",
-                              "ticket": [
-                                {
-                                  "taxi": {
-                                    "name": "Bez odvozu",
-                                    "id": 11,
-                                    "price": 0
-                                  },
-                                  "food": {
-                                    "name": "Ratatouille s br. kaší (bez lepku a masa) (KČ160.00)",
-                                    "id": 3,
-                                    "price": 160
-                                  },
-                                  "note": null,
-                                  "spot": 2
-                                }
-                              ]
-                            });
+
+                            var response = await DbEshop.sendTicketOrder(data);
 
                             if(response.data["code"] != 200){
-                              ToastHelper.Show(context, "There was an error during ordering.", severity: ToastSeverity.NotOk);
+                              ToastHelper.Show(context, "There was an error during ordering. Error code: ${response.data["code"]}", severity: ToastSeverity.NotOk);
+                              _isLoading = false;
                             }
 
                             setState(() {

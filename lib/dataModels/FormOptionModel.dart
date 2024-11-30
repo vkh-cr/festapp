@@ -1,12 +1,12 @@
 class FormOptionModel {
-  static const String metaOptionsId = "code";
+  static const String metaOptionsId = "id";
   static const String metaOptionsName = "name";
   static const String metaOptionsPrice = "price";
 
-  FormOptionModel(this.code, this.name, {this.price = 0.0});
+  FormOptionModel(this.id, this.name, {this.price = 0.0});
 
   final String name;
-  final String code;
+  final String id;
   final double price;
 
   @override
@@ -17,15 +17,15 @@ class FormOptionModel {
       identical(this, other) ||
           other is FormOptionModel &&
               runtimeType == other.runtimeType &&
-              code == other.code;
+              id == other.id;
 
   @override
-  int get hashCode => code.hashCode;
+  int get hashCode => id.hashCode;
 
   Map<String, dynamic> toJson() {
     return {
       metaOptionsName: name,
-      metaOptionsId: code,
+      metaOptionsId: id,
       metaOptionsPrice: price,
     };
   }

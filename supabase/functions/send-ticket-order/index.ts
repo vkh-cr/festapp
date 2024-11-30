@@ -76,9 +76,9 @@ Deno.serve(async (req) => {
 
     if (ticketError || ticketOrder.code !== 200) {
       console.error("Error creating ticket order:", ticketError);
-      return new Response(JSON.stringify({ error: "Failed to create ticket order. Error code: " + ticketOrder.code }), {
+      return new Response(JSON.stringify({ "code": ticketOrder.code }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: 200,
       });
     }
 
