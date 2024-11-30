@@ -168,6 +168,7 @@ class _FormPageState extends State<FormPage> {
                             if(response.data["code"] != 200){
                               ToastHelper.Show(context, "There was an error during ordering. Error code: ${response.data["code"]}", severity: ToastSeverity.NotOk);
                               _isLoading = false;
+                              return;
                             }
 
                             setState(() {
