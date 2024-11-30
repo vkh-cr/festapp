@@ -25,7 +25,7 @@ BEGIN
             'data', f.data,
             'type', f.type,
             'occasion', f.occasion,
-            'deadline_duration', f.deadline_duration,
+            'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number
         )
     )

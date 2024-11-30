@@ -160,8 +160,34 @@ class _FormPageState extends State<FormPage> {
 
                             formData = data;
 
-                            // Simulate sending process
-                            await Future.delayed(const Duration(seconds: 2));
+                            var response = await DbEshop.sendTicketOrder({
+                              "secret": "0fb80818-4c8d-4eb7-8205-859b1d786fb3",
+                              "form": "7f4e3892-a544-4385-b933-61117e9755c3",
+                              "name": "dfas",
+                              "surname": "dfsa",
+                              "email": "bujnmi@gmail.com",
+                              "note": "a",
+                              "ticket": [
+                                {
+                                  "taxi": {
+                                    "name": "Bez odvozu",
+                                    "id": 11,
+                                    "price": 0
+                                  },
+                                  "food": {
+                                    "name": "Ratatouille s br. kaší (bez lepku a masa) (KČ160.00)",
+                                    "id": 3,
+                                    "price": 160
+                                  },
+                                  "note": null,
+                                  "spot": 2
+                                }
+                              ]
+                            });
+
+                            if(response.data["code"] != 200){
+                              ToastHelper.Show(context, "There was an error during ordering.", severity: ToastSeverity.NotOk);
+                            }
 
                             setState(() {
                               _isSendSuccess = true;

@@ -1,4 +1,3 @@
-// _shared/emailClient.ts
 import { SMTPClient } from "https://deno.land/x/denomailer/mod.ts";
 
 const _SMTP_HOSTNAME = Deno.env.get("SMTP_HOSTNAME")!;
@@ -17,6 +16,12 @@ const smtpClient = new SMTPClient({
     },
   },
 });
+
+// Sanitize HTML to avoid Gmail-specific issues
+export function sanitizeHtml(html: string): string {
+  // Removes extra spaces and line breaks, and ensures email-friendly formatting
+  return html.replace(/(\r\n|\n|\r)/gm, "").replace(/ {2,}/g, " ").trim();
+}
 
 export async function sendEmail({
   to,
@@ -66,6 +71,9 @@ export async function sendEmailWithSubs({
     processedSubject = processedSubject.replaceAll(placeholder, value);
   }
 
-  // Use the sendEmail function to send the processed email
-  await sendEmail({ to, subject: processedSubject, html: processedHtml, from });
+  // Sanitize the processed HTML content
+  const sanitizedHtml = sanitizeHtml(processedHtml);
+
+  // Use the sendEmail function to send the processed and sanitized email
+  await sendEmail({ to, subject: processedSubject, html: sanitizedHtml, from });
 }

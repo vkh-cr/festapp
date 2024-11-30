@@ -323,6 +323,6 @@ class FormsTb {
   String get occasion => "occasion";
   String get type => "type";
   String get bank_account => "bank_account";
-  String get deadline_duration => "deadline_duration";
+  String get deadline_duration_seconds => "deadline_duration_seconds";
   String get is_open => "is_open";
 }

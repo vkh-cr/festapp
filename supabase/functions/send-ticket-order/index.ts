@@ -1,5 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -24,6 +24,43 @@ function formatDatetime(datetime: string): string {
   }).format(date);
 }
 
+function generateFullOrder(orderDetails: any, tickets: any[]): string {
+  const { name, surname, email, note } = orderDetails;
+
+  const orderHeader = `
+    <div style="border-radius:10px;border:2px solid #122640;font-size:16px;margin:20px 0;padding:20px;text-align:center;">
+      <p style="text-align:left;"><strong>Rekapitulace Vaší objednávky:</strong></p>
+      <p style="text-align:left;">
+        <span style="display:block; margin-left:20px;">Jméno: ${name}</span>
+        <span style="display:block; margin-left:20px;">Příjmení: ${surname}</span>
+        <span style="display:block; margin-left:20px;">E-mail: ${email}</span>
+        ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
+      </p><p></p>
+  `;
+
+  const ticketsDetails = tickets
+    .map((ticket) => {
+      const ticketSymbol = ticket.ticket_symbol;
+      const seat = ticket.items.find((item: any) => item.type === "spot")?.spot_title || "N/A";
+      const food = ticket.items.find((item: any) => item.type === "food")?.title;
+      const taxi = ticket.items.find((item: any) => item.type === "taxi")?.title;
+      const note = ticket.items.find((item: any) => item.note) || "";
+
+      return `
+        <p style="text-align:left;">
+          <span style="display:block; margin-left:20px;"><strong>Vstupenka ${ticketSymbol}</strong></span>
+          <span style="display:block; margin-left:20px;">Místo: ${seat}</span>
+          ${food ? `<span style="display:block; margin-left:20px;">Večeře: ${food}</span>` : ""}
+          ${taxi ? `<span style="display:block; margin-left:20px;">Odvoz: ${taxi}</span>` : ""}
+          ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
+        </p>
+      `;
+    })
+    .join("");
+
+  return `${orderHeader}${ticketsDetails}</div>`;
+}
+
 Deno.serve(async (req) => {
   try {
     if (req.method === 'OPTIONS') {
@@ -33,33 +70,8 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     const { orderDetails } = reqData;
 
-    const hardcodedOrderDetails = {
-      secret: "0fb80818-4c8d-4eb7-8205-859b1d786fb3",
-      form: "7f4e3892-a544-4385-b933-61117e9755c3",
-      name: "Jan",
-      surname: "Vicha",
-      email: "bujnmi@gmail.com",
-      note: "a",
-      ticket: [
-        {
-          taxi: {
-            name: "Bez odvozu",
-            id: 11,
-            price: 0,
-          },
-          food: {
-            name: "Ratatouille s br. kaší (bez lepku a masa) (KČ160.00)",
-            id: 3,
-            price: 160,
-          },
-          note: null,
-          spot: 1,
-        },
-      ],
-    };
-
     const { data: ticketOrder, error: ticketError } = await supabaseAdmin.rpc("create_ticket_order", {
-      input_data: hardcodedOrderDetails,
+      input_data: orderDetails,
     });
 
     if (ticketError || ticketOrder.code !== 200) {
@@ -99,17 +111,19 @@ Deno.serve(async (req) => {
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
 
+    const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
+
     const subs = {
       occasionTitle: occasion.occasion_title,
       price: paymentInfo.amount,
       accountNumber: paymentInfo.account_number,
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formattedDeadline,
-      fullOrder: "nope",
+      fullOrder,
     };
 
     await sendEmailWithSubs({
-      to: hardcodedOrderDetails.email,
+      to: orderDetails.email,
       subject: template.data.subject,
       content: template.data.html,
       subs,
@@ -120,7 +134,7 @@ Deno.serve(async (req) => {
       .from("log_emails")
       .insert({
         "from": _DEFAULT_EMAIL,
-        "to": hardcodedOrderDetails.email,
+        "to": orderDetails.email,
         "template": "TICKET_ORDER_CONFIRMATION",
         "organization": occasion.id,
         "occasion": occasion.id,

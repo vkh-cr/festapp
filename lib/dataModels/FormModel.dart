@@ -36,7 +36,7 @@ class FormModel {
       occasion: json[Tb.forms.occasion],
       type: json[Tb.forms.type],
       bankAccount: json[Tb.forms.bank_account],
-      deadlineDuration: json[Tb.forms.deadline_duration],
+      deadlineDuration: json[Tb.forms.deadline_duration_seconds],
       isOpen: json[Tb.forms.is_open],
       accountNumber: json['account_number'], // Assuming it's added to the RPC response
     );
@@ -50,7 +50,7 @@ class FormModel {
     Tb.forms.occasion: occasion,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount,
-    Tb.forms.deadline_duration: deadlineDuration,
+    Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     'account_number': accountNumber, // Including in serialization
   };
