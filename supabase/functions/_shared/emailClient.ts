@@ -58,12 +58,14 @@ export async function sendEmailWithSubs({
   from?: string;
 }) {
   // Replace placeholders in content with values from subs
-  let html = content;
+  let processedSubject = subject;
+  let processedHtml = content;
   for (const [key, value] of Object.entries(subs)) {
     const placeholder = `{{${key}}}`;
-    html = html.replaceAll(placeholder, value);
+    processedHtml = processedHtml.replaceAll(placeholder, value);
+    processedSubject = processedSubject.replaceAll(placeholder, value);
   }
 
   // Use the sendEmail function to send the processed email
-  await sendEmail({ to, subject, html, from });
+  await sendEmail({ to, subject: processedSubject, html: processedHtml, from });
 }

@@ -36,6 +36,10 @@ class DbEshop {
     return infoList;
   }
 
+  static Future<dynamic> sendTicketOrder(Map<String, dynamic> data) async {
+    return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": {}});
+  }
+
   static Future<FormModel?> getForm(String formKey) async {
     final response = await _supabase
         .rpc('get_form', params: {'form_key': formKey});

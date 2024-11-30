@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION eshop.validate_item_type(item_id BIGINT, required_type TEXT)
+CREATE OR REPLACE FUNCTION validate_item_type(item_id BIGINT, required_type TEXT)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
 AS $$

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION eshop.create_ticket_order(input_data JSONB)
+CREATE OR REPLACE FUNCTION create_ticket_order(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -220,11 +220,11 @@ BEGIN
             'variable_symbol', generated_variable_symbol,
             'amount', calculated_price,
             'deadline', deadline,
-            'accountNumber', account_number
+            'account_number', account_number
         ),
         'occasion', JSONB_BUILD_OBJECT(
             'id', occasion_id,
-            'occasionTitle', occasion_title
+            'occasion_title', occasion_title
         )
     );
 EXCEPTION

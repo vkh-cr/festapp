@@ -20,83 +20,103 @@ Deno.serve(async (req) => {
     }
 
     const reqData = await req.json();
-    const userId = reqData.usr;  // ID of the user to invite
-    const occasionId = reqData.oc;  // ID of the occasion
+    const { orderDetails } = reqData; // Ticket details from request
 
+    // Hardcoded orderDetails
+    const hardcodedOrderDetails = {
+      secret: "0fb80818-4c8d-4eb7-8205-859b1d786fb3",
+      form: "7f4e3892-a544-4385-b933-61117e9755c3",
+      name: "Jan",
+      surname: "Vicha",
+      email: "bujnmi@gmail.com",
+      note: "a",
+      ticket: [
+        {
+          taxi: {
+            name: "Bez odvozu",
+            id: 11,
+            price: 0,
+          },
+          food: {
+            name: "Ratatouille s br. kaší (bez lepku a masa) (KČ160.00)",
+            id: 3,
+            price: 160,
+          },
+          note: null,
+          spot: 1,
+        },
+      ],
+    };
 
-    const { data: answer, error: passwordSetError } = await supabaseAdmin.rpc("set_user_password",
-    {
-        usr: userId,
-        oc: occasionId,
-        password: code
+    // Call the `create_ticket_order` function
+    const { data: ticketOrder, error: ticketError } = await supabaseAdmin.rpc("create_ticket_order", {
+      input_data: hardcodedOrderDetails,
     });
 
-    const { data: occasionData, error: occasionError } = await supabaseAdmin
-      .from("occasions")
-      .select("organization")
-      .eq("id", occasionId)
-      .single();
-
-    if (occasionError) {
-      console.error("Occasion not found.");
-      return new Response(JSON.stringify({ error: "Occasion not found" }), {
+    if (ticketError || ticketOrder.code != 200) {
+      console.error("Error creating ticket order:", ticketError);
+      return new Response(JSON.stringify({ error: "Failed to create ticket order. Error code: " + ticketOrder.code }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
+        status: 500,
       });
     }
+
+    const occasion = ticketOrder.occasion;
+    const paymentInfo = ticketOrder.payment_info;
+
+    const { data: occasionData, error: occasionError } = await supabaseAdmin
+          .from("occasions")
+          .select("organization")
+          .eq("id", occasion.id)
+          .single();
 
     const organizationId = occasionData.organization;
 
-    const orgData = await supabaseAdmin
-        .from("organizations")
-        .select("data")
-        .eq("id", organizationId)
-        .single();
-
-    const orgConfig = orgData.data.data;
-    const appName = orgConfig.APP_NAME || "";
-    const defaultUrl = orgConfig.DEFAULT_URL || "";
-
-    // Fetch email template based on the organization
     const template = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("occasion", occasionId)
-      .eq("code", "TICKET_ORDER_CONFIRMATION")
-      .single();
+          .from("email_templates")
+          .select()
+          .eq("organization", organizationId)
+          .eq("occasion", occasion.id)
+          .eq("code", "TICKET_ORDER_CONFIRMATION")
+          .single();
 
     if (template.error || !template.data) {
-      console.error("Email template not found for the occasion.");
-      return new Response(JSON.stringify({ error: "Email template not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
-    }
+          console.error("Email template not found for the occasion.");
+          return new Response(JSON.stringify({ error: "Email template not found" }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 404,
+          });
+        }
 
     const subs = {
-      code: code,
-      email: occasionUser.data.data.email, // Access the user's email from the data field
+      occasionTitle: occasion.occasion_title,
+      price: paymentInfo.amount,
+      accountNumber: paymentInfo.account_number,
+      variableSymbol: paymentInfo.variable_symbol,
+      deadline: paymentInfo.deadline,
+      fullOrder: "nope",
     };
 
+    // Send email using the substitutions
     await sendEmailWithSubs({
-      to: occasionUser.data.data.email,  // Use the user’s email from the data field
+      to: hardcodedOrderDetails.email,
       subject: template.data.subject,
       content: template.data.html,
       subs,
-      from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
+      from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
     });
 
-  await supabaseAdmin
-    .from("log_emails")
-    .insert({
-      "from": _DEFAULT_EMAIL,
-      "to": occasionUser.data.data.email,
-      "template": template.data.id,
-      "organization": organizationId
-    });
+    await supabaseAdmin
+      .from("log_emails")
+      .insert({
+        "from": _DEFAULT_EMAIL,
+        "to": hardcodedOrderDetails.email,
+        "template": "TICKET_ORDER_CONFIRMATION",
+        "organization": occasion.id,
+        "occasion": occasion.id,
+      });
 
-
-    return new Response(JSON.stringify({ "user": userId, "code": 200 }), {
+    return new Response(JSON.stringify({ "ticketOrder": ticketOrder, "code": 200 }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
