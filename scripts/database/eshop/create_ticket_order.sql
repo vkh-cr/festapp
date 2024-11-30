@@ -15,6 +15,8 @@ DECLARE
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
     organization_id BIGINT;
+    occasion_title TEXT;
+    account_number TEXT;
     ticket_details JSONB := '[]'::JSONB;
     item_data RECORD;
     ticket_id BIGINT;
@@ -32,6 +34,11 @@ BEGIN
     IF input_data IS NULL OR input_data->'form' IS NULL THEN
         RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Missing form key in input data');
     END IF;
+
+    IF input_data->>'email' IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Missing email in input data');
+    END IF;
+
     form_key := (input_data->>'form')::UUID;
 
     -- Fetch form data, including occasion, bank account, and deadline duration
@@ -41,19 +48,28 @@ BEGIN
     WHERE key = form_key;
 
     IF occasion_id IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Form is not linked to any occasion');
+        RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion');
     END IF;
     IF bank_account_id IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any bank account');
+        RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'Form is not linked to any bank account');
     END IF;
 
-    -- Fetch organization_id from the occasion
-    SELECT organization INTO organization_id
+    -- Fetch organization_id and occasion_title from the occasion
+    SELECT organization, title INTO organization_id, occasion_title
     FROM public.occasions
     WHERE id = occasion_id;
 
     IF organization_id IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'No organization found for the occasion');
+        RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion');
+    END IF;
+
+    -- Fetch account number from the bank account
+    SELECT bank_accounts.account_number INTO account_number
+    FROM eshop.bank_accounts
+    WHERE id = bank_account_id;
+
+    IF account_number IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1006, 'message', 'No account number found for the bank account');
     END IF;
 
     -- Calculate deadline if form_deadline_duration is not null
@@ -67,12 +83,7 @@ BEGIN
     INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion)
     VALUES (
         now, now, 0, 'pending',
-        JSONB_BUILD_OBJECT(
-            'name', input_data->>'name',
-            'surname', input_data->>'surname',
-            'email', input_data->>'email',
-            'note', input_data->>'note'
-        ),
+        input_data, -- Store all input_data directly
         occasion_id
     ) RETURNING id INTO order_id;
 
@@ -84,12 +95,12 @@ BEGIN
         WHERE id = (ticket_data->'spot')::BIGINT AND occasion = occasion_id;
 
         IF spot_data IS NULL THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'Invalid or unrelated spot');
+            RETURN JSONB_BUILD_OBJECT('code', 1007, 'message', 'Invalid or unrelated spot');
         END IF;
 
         -- Check if spot is already used (order_item_ticket is not NULL)
         IF spot_data.order_item_ticket IS NOT NULL THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1006, 'message', 'Spot is already reserved or in use');
+            RETURN JSONB_BUILD_OBJECT('code', 1008, 'message', 'Spot is already reserved or in use');
         END IF;
 
         -- Add spot to used spots
@@ -98,10 +109,10 @@ BEGIN
         -- Secret validation
         spot_secret := (input_data->>'secret')::UUID;
         IF spot_data.secret IS DISTINCT FROM spot_secret THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1007, 'message', 'Invalid secret for spot');
+            RETURN JSONB_BUILD_OBJECT('code', 1009, 'message', 'Invalid secret for spot');
         END IF;
         IF spot_data.secret_expiration_time < now THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1008, 'message', 'Secret expired');
+            RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', 'Secret expired');
         END IF;
 
         -- Generate ticket symbol
@@ -135,7 +146,7 @@ BEGIN
 
                 IF item_data IS NULL THEN
                     RETURN JSONB_BUILD_OBJECT(
-                        'code', 1009,
+                        'code', 1011,
                         'message', 'Item not found or not part of occasion',
                         'details', item_id
                     );
@@ -208,11 +219,16 @@ BEGIN
             'payment_info_id', payment_info_id,
             'variable_symbol', generated_variable_symbol,
             'amount', calculated_price,
-            'deadline', deadline
+            'deadline', deadline,
+            'accountNumber', account_number
+        ),
+        'occasion', JSONB_BUILD_OBJECT(
+            'id', occasion_id,
+            'occasionTitle', occasion_title
         )
     );
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', SQLERRM);
+        RETURN JSONB_BUILD_OBJECT('code', 1012, 'message', SQLERRM);
 END;
 $$;
