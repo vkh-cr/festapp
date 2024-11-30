@@ -61,12 +61,12 @@ Deno.serve(async (req) => {
     const template = await supabaseAdmin
       .from("email_templates")
       .select()
-      .eq("organization", organizationId)
-      .eq("id", "SIGN_IN_CODE")
+      .eq("occasion", occasionId)
+      .eq("code", "TICKET_ORDER_CONFIRMATION")
       .single();
 
     if (template.error || !template.data) {
-      console.error("Email template not found for the organization.");
+      console.error("Email template not found for the occasion.");
       return new Response(JSON.stringify({ error: "Email template not found" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 404,
