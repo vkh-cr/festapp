@@ -13,6 +13,17 @@ const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+function formatDatetime(datetime: string): string {
+  const date = new Date(datetime);
+  return new Intl.DateTimeFormat("cs-CZ", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 Deno.serve(async (req) => {
   try {
     if (req.method === 'OPTIONS') {
@@ -20,9 +31,8 @@ Deno.serve(async (req) => {
     }
 
     const reqData = await req.json();
-    const { orderDetails } = reqData; // Ticket details from request
+    const { orderDetails } = reqData;
 
-    // Hardcoded orderDetails
     const hardcodedOrderDetails = {
       secret: "0fb80818-4c8d-4eb7-8205-859b1d786fb3",
       form: "7f4e3892-a544-4385-b933-61117e9755c3",
@@ -48,12 +58,11 @@ Deno.serve(async (req) => {
       ],
     };
 
-    // Call the `create_ticket_order` function
     const { data: ticketOrder, error: ticketError } = await supabaseAdmin.rpc("create_ticket_order", {
       input_data: hardcodedOrderDetails,
     });
 
-    if (ticketError || ticketOrder.code != 200) {
+    if (ticketError || ticketOrder.code !== 200) {
       console.error("Error creating ticket order:", ticketError);
       return new Response(JSON.stringify({ error: "Failed to create ticket order. Error code: " + ticketOrder.code }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -65,39 +74,40 @@ Deno.serve(async (req) => {
     const paymentInfo = ticketOrder.payment_info;
 
     const { data: occasionData, error: occasionError } = await supabaseAdmin
-          .from("occasions")
-          .select("organization")
-          .eq("id", occasion.id)
-          .single();
+      .from("occasions")
+      .select("organization")
+      .eq("id", occasion.id)
+      .single();
 
     const organizationId = occasionData.organization;
 
     const template = await supabaseAdmin
-          .from("email_templates")
-          .select()
-          .eq("organization", organizationId)
-          .eq("occasion", occasion.id)
-          .eq("code", "TICKET_ORDER_CONFIRMATION")
-          .single();
+      .from("email_templates")
+      .select()
+      .eq("organization", organizationId)
+      .eq("occasion", occasion.id)
+      .eq("code", "TICKET_ORDER_CONFIRMATION")
+      .single();
 
     if (template.error || !template.data) {
-          console.error("Email template not found for the occasion.");
-          return new Response(JSON.stringify({ error: "Email template not found" }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 404,
-          });
-        }
+      console.error("Email template not found for the occasion.");
+      return new Response(JSON.stringify({ error: "Email template not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404,
+      });
+    }
+
+    const formattedDeadline = formatDatetime(paymentInfo.deadline);
 
     const subs = {
       occasionTitle: occasion.occasion_title,
       price: paymentInfo.amount,
       accountNumber: paymentInfo.account_number,
       variableSymbol: paymentInfo.variable_symbol,
-      deadline: paymentInfo.deadline,
+      deadline: formattedDeadline,
       fullOrder: "nope",
     };
 
-    // Send email using the substitutions
     await sendEmailWithSubs({
       to: hardcodedOrderDetails.email,
       subject: template.data.subject,
