@@ -8,13 +8,13 @@ DECLARE
     ticket_data JSONB;
     spot_data RECORD;
     spot_id BIGINT;
-    occasion_data RECORD;
     now TIMESTAMP WITH TIME ZONE := NOW();
     calculated_price DOUBLE PRECISION := 0;
     spot_secret UUID;
     item_id BIGINT;
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
+    organization_id BIGINT;
     ticket_details JSONB := '[]'::JSONB;
     item_data RECORD;
     ticket_id BIGINT;
@@ -24,38 +24,36 @@ DECLARE
     payment_info_id BIGINT;
     generated_variable_symbol BIGINT;
     bank_account_id BIGINT;
-    form_id BIGINT;
+    form_key UUID;
     deadline TIMESTAMPTZ;
-    form_deadline_duration BIGINT; -- Renamed variable to avoid ambiguity
+    form_deadline_duration BIGINT;
 BEGIN
-    -- Validate input data and extract occasion
-    IF input_data IS NULL OR input_data->'occasion' IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Invalid input data or missing occasion');
+    -- Validate input data and extract form key
+    IF input_data IS NULL OR input_data->'form' IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Missing form key in input data');
     END IF;
-    occasion_id := (input_data->'occasion')::BIGINT;
+    form_key := (input_data->>'form')::UUID;
 
-    -- Extract form_id from input_data
-    IF input_data->'form' IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Missing form ID in input data');
-    END IF;
-    form_id := (input_data->'form')::BIGINT;
-
-    -- Validate occasion and fetch organization
-    SELECT * INTO occasion_data
-    FROM public.occasions
-    WHERE id = occasion_id AND is_hidden = FALSE AND is_open = TRUE;
-
-    IF occasion_data IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Invalid or closed occasion');
-    END IF;
-
-    -- Get bank_account_id and deadline duration for payment_info using form_id
-    SELECT bank_account, deadline_duration_seconds INTO bank_account_id, form_deadline_duration
+    -- Fetch form data, including occasion, bank account, and deadline duration
+    SELECT occasion, bank_account, deadline_duration_seconds
+    INTO occasion_id, bank_account_id, form_deadline_duration
     FROM public.forms
-    WHERE id = form_id;
+    WHERE key = form_key;
 
+    IF occasion_id IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Form is not linked to any occasion');
+    END IF;
     IF bank_account_id IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'No bank account found for the given form');
+        RETURN JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any bank account');
+    END IF;
+
+    -- Fetch organization_id from the occasion
+    SELECT organization INTO organization_id
+    FROM public.occasions
+    WHERE id = occasion_id;
+
+    IF organization_id IS NULL THEN
+        RETURN JSONB_BUILD_OBJECT('code', 1004, 'message', 'No organization found for the occasion');
     END IF;
 
     -- Calculate deadline if form_deadline_duration is not null
@@ -107,7 +105,7 @@ BEGIN
         END IF;
 
         -- Generate ticket symbol
-        ticket_symbol := generate_ticket_symbol(occasion_data.organization, occasion_id);
+        ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
 
         -- Create ticket with ticket symbol
         INSERT INTO eshop.tickets (state, occasion, ticket_symbol, created_at, updated_at)
