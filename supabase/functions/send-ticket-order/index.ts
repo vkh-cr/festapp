@@ -29,7 +29,7 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
 
   const orderHeader = `
     <div style="border-radius:10px;border:2px solid #122640;font-size:16px;margin:20px 0;padding:20px;text-align:center;">
-      <p style="text-align:left;"><strong>Rekapitulace Vaší objednávky:</strong></p>
+      <p style="text-align:center;"><strong>Rekapitulace Vaší objednávky:</strong></p>
       <p style="text-align:left;">
         <span style="display:block; margin-left:20px;">Jméno: ${name}</span>
         <span style="display:block; margin-left:20px;">Příjmení: ${surname}</span>
