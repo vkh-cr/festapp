@@ -2,7 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
-const _supabase = createClient(
+const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
   const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
   const organizationId = reqData.organization;
 
-  const orgData = await _supabase
+  const orgData = await supabaseAdmin
     .from("organizations")
     .select("data")
     .eq("id", organizationId)
@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
   const appName = orgConfig.APP_NAME || "DefaultAppName";
   const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
 
-  const userData = await _supabase
+  const userData = await supabaseAdmin
     .from("user_info")
     .select()
     .eq("organization", organizationId)
@@ -56,22 +56,22 @@ Deno.serve(async (req) => {
   const userId = userData.data.id;
   const token = crypto.randomUUID();
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .delete()
     .eq("user", userId);
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .insert({
       "user": userId,
       "token": token,
     });
 
-  const template = await _supabase
+  const template = await supabaseAdmin
     .from("email_templates")
     .select()
-    .eq("id", "RESET_PASSWORD")
+    .eq("code", "RESET_PASSWORD")
     .eq("organization", organizationId)
     .single();
 
@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
-  await _supabase
+  await supabaseAdmin
     .from("log_emails")
     .insert({
       "from": _DEFAULT_EMAIL,

@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 
-const _supabase = createClient(
+const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   const url = 'https://onesignal.com/api/v1/notifications';
 
   // Fetch organization data to get ONESIGNAL_APP_ID, ONESIGNAL_REST_API_KEY, and DEFAULT_URL
-  const orgData = await _supabase
+  const orgData = await supabaseAdmin
     .from("organizations")
     .select("data")
     .eq("id", organizationId)
@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
   }
 
   // Fetch the link for the current occasion
-  const currentLink = await _supabase
+  const currentLink = await supabaseAdmin
     .from("occasions")
     .select("link")
     .eq("id", record.occasion)

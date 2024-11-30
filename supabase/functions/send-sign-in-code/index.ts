@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
       return new Response('ok', { headers: corsHeaders });
     }
 
-    const supabase = createClient(
+    const supabaseUser = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     // this function will also check if requester is manager on the occasion or if requester is admin
-    const { data: answer, error: passwordSetError } = await supabase.rpc("set_user_password",
+    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password",
     {
         usr: userId,
         oc: occasionId,
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const occasionUser = await supabase
+    const occasionUser = await supabaseAdmin
       .from("occasion_users")
       .select("data")
       .eq("user", userId)
@@ -62,7 +62,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { data: occasionData, error: occasionError } = await supabase
+    const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
       .select("organization")
       .eq("id", occasionId)
@@ -89,11 +89,11 @@ Deno.serve(async (req) => {
     const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
 
     // Fetch email template based on the organization
-    const template = await supabase
+    const template = await supabaseAdmin
       .from("email_templates")
       .select()
       .eq("organization", organizationId)
-      .eq("id", "SIGN_IN_CODE")
+      .eq("code", "SIGN_IN_CODE")
       .single();
 
     if (template.error || !template.data) {
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
     });
 
     occasionUser.data.data.is_invited = true;
-    const { error: updateError } = await supabase
+    const { error: updateError } = await supabaseAdmin
       .from("occasion_users")
       .update({ data: occasionUser.data.data }) // Preserve other data, update only is_invited
       .eq("user", userId)
