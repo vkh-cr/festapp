@@ -65,16 +65,8 @@ BEGIN
         deadline := NULL;
     END IF;
 
-    -- Generate variable symbol for payment
-    generated_variable_symbol := generate_variable_symbol(bank_account_id);
-
-    -- Create payment info
-    INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
-    VALUES (bank_account_id, generated_variable_symbol, calculated_price, now, deadline)
-    RETURNING id INTO payment_info_id;
-
     -- Create the order before processing tickets
-    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion, payment_info)
+    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion)
     VALUES (
         now, now, 0, 'pending',
         JSONB_BUILD_OBJECT(
@@ -83,8 +75,7 @@ BEGIN
             'email', input_data->>'email',
             'note', input_data->>'note'
         ),
-        occasion_id,
-        payment_info_id
+        occasion_id
     ) RETURNING id INTO order_id;
 
     -- Process tickets
@@ -187,9 +178,17 @@ BEGIN
         );
     END LOOP;
 
-    -- Update the order with the calculated price
+    -- Generate variable symbol for payment
+    generated_variable_symbol := generate_variable_symbol(bank_account_id);
+
+    -- Insert payment info after calculating price
+    INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
+    VALUES (bank_account_id, generated_variable_symbol, calculated_price, now, deadline)
+    RETURNING id INTO payment_info_id;
+
+    -- Update the order with the calculated price and payment info
     UPDATE eshop.orders
-    SET price = calculated_price, state = 'ordered'
+    SET price = calculated_price, state = 'ordered', payment_info = payment_info_id
     WHERE id = order_id;
 
     -- Log order to orders_history with price and tickets
