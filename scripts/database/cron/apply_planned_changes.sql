@@ -7,6 +7,7 @@ BEGIN
         SELECT *
         FROM eshop.planned_changes
         WHERE change_time <= NOW() AND applied = FALSE
+        ORDER BY change_time ASC
     LOOP
         IF change.change_type = 'items.price' THEN
             -- Update item price
