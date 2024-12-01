@@ -20,7 +20,8 @@ class DbEshop {
         "${TbEshop.item_types.title},"
         "${TbEshop.items.table}(${TbEshop.items.id},${TbEshop.items.title},${TbEshop.items.price})"
         )
-        .eq(TbEshop.item_types.occasion, currentOccasion);
+        .eq(TbEshop.item_types.occasion, currentOccasion)
+        .eq("${TbEshop.items.table}.${TbEshop.items.is_hidden}", false);
 
     var infoList = List<ItemTypeModel>.from(
         data.map((x) {

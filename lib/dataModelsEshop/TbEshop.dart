@@ -25,6 +25,7 @@ class ItemsTb {
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
+  String get is_hidden => "is_hidden";
   String get title => "title";
   String get description => "description";
   String get price => "price";

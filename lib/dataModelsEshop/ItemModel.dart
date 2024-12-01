@@ -5,6 +5,7 @@ class ItemModel {
   DateTime? createdAt;
   DateTime? updatedAt;
   String? title;
+  bool? isHidden;
   String? description;
   double? price;
   Map<String, dynamic>? data;
@@ -20,6 +21,7 @@ class ItemModel {
       createdAt: json[TbEshop.items.created_at] != null ? DateTime.parse(json[TbEshop.items.created_at]) : null,
       updatedAt: json[TbEshop.items.updated_at] != null ? DateTime.parse(json[TbEshop.items.updated_at]) : null,
       title: json[TbEshop.items.title],
+      isHidden: json[TbEshop.items.is_hidden],
       description: json[TbEshop.items.description],
       price: json[TbEshop.items.price] != null ? double.tryParse(json[TbEshop.items.price].toString()) : null,
       data: json[TbEshop.items.data],
@@ -33,6 +35,7 @@ class ItemModel {
     TbEshop.items.created_at: createdAt?.toIso8601String(),
     TbEshop.items.updated_at: updatedAt?.toIso8601String(),
     TbEshop.items.title: title,
+    TbEshop.items.is_hidden: isHidden,
     TbEshop.items.description: description,
     TbEshop.items.price: price,
     TbEshop.items.data: data,
@@ -47,6 +50,7 @@ class ItemModel {
     this.createdAt,
     this.updatedAt,
     this.title,
+    this.isHidden,
     this.description,
     this.price,
     this.data,
