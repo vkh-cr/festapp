@@ -113,9 +113,6 @@ BEGIN
         IF spot_data.secret IS DISTINCT FROM spot_secret THEN
             RETURN JSONB_BUILD_OBJECT('code', 1009, 'message', 'Invalid secret for spot');
         END IF;
-        IF spot_data.secret_expiration_time < now THEN
-            RETURN JSONB_BUILD_OBJECT('code', 1010, 'message', 'Secret expired');
-        END IF;
 
         -- Generate ticket symbol
         ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
@@ -194,7 +191,7 @@ BEGIN
     END LOOP;
 
     -- Generate variable symbol for payment
-    generated_variable_symbol := generate_variable_symbol(bank_account_id);
+    generated_variable_symbol := generate_ticket_symbol(bank_account_id);
 
     -- Insert payment info after calculating price
     INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
