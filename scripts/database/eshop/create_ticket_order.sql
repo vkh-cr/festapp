@@ -17,6 +17,7 @@ DECLARE
     organization_id BIGINT;
     occasion_title TEXT;
     account_number TEXT;
+    account_number_human_readable TEXT;
     ticket_details JSONB := '[]'::JSONB;
     item_data RECORD;
     ticket_id BIGINT;
@@ -63,8 +64,9 @@ BEGIN
         RETURN JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion');
     END IF;
 
-    -- Fetch account number from the bank account
-    SELECT bank_accounts.account_number INTO account_number
+    -- Fetch account number and account number human readable from the bank account
+    SELECT bank_accounts.account_number, bank_accounts.account_number_human_readable
+    INTO account_number, account_number_human_readable
     FROM eshop.bank_accounts
     WHERE id = bank_account_id;
 
@@ -220,7 +222,8 @@ BEGIN
             'variable_symbol', generated_variable_symbol,
             'amount', calculated_price,
             'deadline', deadline,
-            'account_number', account_number
+            'account_number', account_number,
+            'account_number_human_readable', account_number_human_readable
         ),
         'occasion', JSONB_BUILD_OBJECT(
             'id', occasion_id,

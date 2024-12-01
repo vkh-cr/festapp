@@ -15,9 +15,10 @@ const supabaseAdmin = createClient(
 );
 
 // Function to generate QR code as base64
-async function generateQrCode(paymentInfo: any): Promise<Uint8Array> {
-  const qrData = `bitcoin:${paymentInfo.account_number}?amount=${paymentInfo.amount}&label=Payment`;
-
+async function generateQrCode(paymentInfo: any, orderDetails: any): Promise<Uint8Array> {
+  const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
+    2
+  )}*CC:CZK*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
   const base64QrCode = await qrcode(qrData, { size: 500 });
   console.log("QR Code Output:", base64QrCode);
 
@@ -126,13 +127,13 @@ Deno.serve(async (req) => {
     }
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
-    const qrCode = await generateQrCode(paymentInfo); // Generate QR code as Uint8Array
+    const qrCode = await generateQrCode(paymentInfo, orderDetails);
     const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
 
     const subs = {
       occasionTitle: occasion.occasion_title,
       price: paymentInfo.amount,
-      accountNumber: paymentInfo.account_number,
+      accountNumber: paymentInfo.account_number_human_readable,
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formattedDeadline,
       fullOrder,
