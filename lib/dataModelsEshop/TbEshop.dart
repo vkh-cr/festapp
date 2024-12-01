@@ -3,7 +3,6 @@ class TbEshop {
   static ItemsTb items = const ItemsTb();
   static OrderItemTicketTb order_item_ticket = const OrderItemTicketTb();
   static OrdersTb orders = const OrdersTb();
-  static PriceWavesTb price_waves = const PriceWavesTb();
   static TicketsTb tickets = const TicketsTb();
 }
 
@@ -54,16 +53,6 @@ class OrdersTb {
   String get state => "state";
   String get data => "data";
   String get occasion => "occasion";
-}
-
-class PriceWavesTb {
-  const PriceWavesTb();
-  String get table => "price_waves";
-  String get id => "id";
-  String get created_at => "created_at";
-  String get start_time => "start_time";
-  String get price => "price";
-  String get item => "item";
 }
 
 class TicketsTb {

@@ -135,15 +135,10 @@ BEGIN
             spot_data.item
         ] LOOP
             IF item_id IS NOT NULL THEN
-                SELECT i.*, it.type, COALESCE(pw.price, i.price) AS final_price
+                SELECT i.*, it.type, i.price, i.is_hidden
                 INTO item_data
                 FROM eshop.items i
                 LEFT JOIN eshop.item_types it ON i.item_type = it.id
-                LEFT JOIN (
-                    SELECT * FROM eshop.price_waves
-                    WHERE start_time <= now
-                    ORDER BY start_time DESC LIMIT 1
-                ) pw ON pw.item = i.id
                 WHERE i.id = item_id AND i.occasion = occasion_id;
 
                 IF item_data IS NULL THEN
@@ -154,18 +149,27 @@ BEGIN
                     );
                 END IF;
 
+                -- Check if item is hidden
+                IF item_data.is_hidden THEN
+                    RETURN JSONB_BUILD_OBJECT(
+                        'code', 1012,
+                        'message', 'Selected item is hidden and cannot be ordered',
+                        'item_id', item_id
+                    );
+                END IF;
+
                 -- Add item details to ticket items
                 ticket_items := ticket_items || JSONB_BUILD_OBJECT(
                     'item_id', item_id,
                     'title', item_data.title,
                     'type', item_data.type,
-                    'price', item_data.final_price,
+                    'price', item_data.price,
                     'spot_title', CASE WHEN item_id = spot_data.item THEN spot_data.title ELSE NULL END,
                     'description', CASE WHEN item_id = spot_data.item THEN item_data.description ELSE NULL END
                 );
 
                 -- Add item price to calculated total
-                calculated_price := calculated_price + COALESCE(item_data.final_price, item_data.price, 0);
+                calculated_price := calculated_price + COALESCE(item_data.price, 0);
 
                 -- Link ticket and item to the order
                 INSERT INTO eshop.order_item_ticket ("order", item, ticket)
@@ -232,6 +236,6 @@ BEGIN
     );
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN JSONB_BUILD_OBJECT('code', 1012, 'message', SQLERRM);
+        RETURN JSONB_BUILD_OBJECT('code', 1013, 'message', SQLERRM);
 END;
 $$;
