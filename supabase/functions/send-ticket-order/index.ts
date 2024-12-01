@@ -1,5 +1,6 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
+import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -12,6 +13,21 @@ const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
+
+// Function to generate QR code as base64
+async function generateQrCode(paymentInfo: any): Promise<Uint8Array> {
+  const qrData = `bitcoin:${paymentInfo.account_number}?amount=${paymentInfo.amount}&label=Payment`;
+
+  const base64QrCode = await qrcode(qrData, { size: 500 });
+  console.log("QR Code Output:", base64QrCode);
+
+  if (typeof base64QrCode !== "string") {
+    throw new Error("Unexpected QR code format returned by qrcode function.");
+  }
+
+  const base64String = base64QrCode.split(",")[1]; // Remove the `data:image/...` prefix
+  return Uint8Array.from(atob(base64String), (c) => c.charCodeAt(0)); // Convert Base64 to binary
+}
 
 function formatDatetime(datetime: string): string {
   const date = new Date(datetime);
@@ -110,7 +126,7 @@ Deno.serve(async (req) => {
     }
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
-
+    const qrCode = await generateQrCode(paymentInfo); // Generate QR code as Uint8Array
     const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
 
     const subs = {
@@ -128,6 +144,14 @@ Deno.serve(async (req) => {
       content: template.data.html,
       subs,
       from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
+      attachments: [
+        {
+            filename: "payment-qr-code.gif", // Name of the file
+            content: qrCode, // Ensure qrCode is a Uint8Array
+            contentType: "image/gif", // MIME type for GIF
+            encoding: "binary", // Specify binary encoding
+        },
+      ],
     });
 
     await supabaseAdmin
