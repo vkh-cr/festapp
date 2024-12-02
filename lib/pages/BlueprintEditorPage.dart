@@ -9,6 +9,7 @@ import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
 
 import '../components/seatReservation/model/SeatLayoutStateModel.dart';
@@ -80,7 +81,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 16),
-                buildDimensionControls(), // Dimension controls above layout
+                buildDimensionControls(),
                 const SizedBox(height: 12),
                 Flexible(
                   child: blueprint == null
@@ -97,17 +98,37 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                buildLegend(), // Legend moved below layout
-                const SizedBox(height: 12),
-                buildEditorActions(), // Save and cancel buttons
-                const SizedBox(height: 12),
+                buildLegend(),
+                const SizedBox(height: 24),
               ],
             ),
           ),
         ),
       ),
+      bottomNavigationBar: Container(
+        color: ThemeConfig.appBarColor(),
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+              ),
+              child: Text("Storno").tr(),
+            ),
+            const SizedBox(width: 16),
+            ElevatedButton(
+              onPressed: saveChanges,
+              child: Text("Save").tr(),
+            ),
+          ],
+        ),
+      ),
     );
   }
+
 
   Widget buildDimensionControls() {
     return Row(
