@@ -5,6 +5,7 @@ import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 
 import '../components/seatReservation/model/BoxGroupModel.dart';
 import '../components/seatReservation/model/BoxModel.dart';
@@ -53,7 +54,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       body: SafeArea(
         child: Center(
           child: Container(
-            constraints: const BoxConstraints(maxWidth: 440),
+            constraints: const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -136,49 +137,45 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                 Visibility(
                   visible: currentBoxes != null,
                   child: Flexible(
-                    child: SizedBox(
-                      width: currentWidth * boxSize.toDouble(),
-                      height: currentHeight * boxSize.toDouble(),
-                      child: SeatLayoutWidget(
-                        onSeatTap: (model) {
-                          if (currentSelectionMode == selectionMode.addBlack) {
-                            model.seatState = SeatState.black;
-                            changedBoxes.add(model);
-                          } else if (currentSelectionMode == selectionMode.addAvailable) {
+                    child: SeatLayoutWidget(
+                      onSeatTap: (model) {
+                        if (currentSelectionMode == selectionMode.addBlack) {
+                          model.seatState = SeatState.black;
+                          changedBoxes.add(model);
+                        } else if (currentSelectionMode == selectionMode.addAvailable) {
+                          model.seatState = SeatState.available;
+                          model.boxModel = model.boxModel ?? BoxModel(x: model.colI, y: model.rowI);
+                          model.boxModel!.boxGroupId = currentBoxGroup!.id;
+                          model.boxModel!.name = currentBoxGroup!.getNextBoxName();
+                          currentBoxGroup!.boxes!.add(model.boxModel!);
+
+                          changedBoxes.add(model);
+                          ToastHelper.Show(context, "Přidáno sedadlo ${model.boxModel!.name}.");
+                        } else if (currentSelectionMode == selectionMode.normal) {
+                          if (model.seatState == SeatState.selected) {
                             model.seatState = SeatState.available;
-                            model.boxModel = model.boxModel ?? BoxModel(x: model.colI, y: model.rowI);
-                            model.boxModel!.boxGroupId = currentBoxGroup!.id;
-                            model.boxModel!.name = currentBoxGroup!.getNextBoxName();
-                            currentBoxGroup!.boxes!.add(model.boxModel!);
-
-                            changedBoxes.add(model);
-                            ToastHelper.Show(context, "Přidáno sedadlo ${model.boxModel!.name}.");
-                          } else if (currentSelectionMode == selectionMode.normal) {
-                            if (model.seatState == SeatState.selected) {
-                              model.seatState = SeatState.available;
-                              changedBoxes.remove(model);
-                              return;
-                            } else if (model.seatState != SeatState.available) {
-                              return;
-                            }
-
-                            // available
-                            var alreadySelected = allBoxes.where((b) => b.seatState == SeatState.selected);
-                            if (alreadySelected.isNotEmpty) {
-                              ToastHelper.Show(context, "Je možné vybrat pouze jedno místo!");
-                              return;
-                            }
-                            model.seatState = SeatState.selected;
-                            changedBoxes.add(model);
+                            changedBoxes.remove(model);
+                            return;
+                          } else if (model.seatState != SeatState.available) {
+                            return;
                           }
-                        },
-                        stateModel: SeatLayoutStateModel(
-                          rows: currentHeight,
-                          cols: currentWidth,
-                          seatSize: boxSize,
-                          currentBoxes: currentBoxes ?? [],
-                          allBoxes: allBoxes,
-                        ),
+
+                          // available
+                          var alreadySelected = allBoxes.where((b) => b.seatState == SeatState.selected);
+                          if (alreadySelected.isNotEmpty) {
+                            ToastHelper.Show(context, "Je možné vybrat pouze jedno místo!");
+                            return;
+                          }
+                          model.seatState = SeatState.selected;
+                          changedBoxes.add(model);
+                        }
+                      },
+                      stateModel: SeatLayoutStateModel(
+                        rows: currentHeight,
+                        cols: currentWidth,
+                        seatSize: boxSize,
+                        currentBoxes: currentBoxes ?? [],
+                        allBoxes: allBoxes,
                       ),
                     ),
                   ),

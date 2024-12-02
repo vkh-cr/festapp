@@ -1,76 +1,100 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
 import '../utils/SeatState.dart';
 import 'SeatWidget.dart';
 
-
-
-class SeatLayoutWidget extends StatelessWidget {
-
+class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
-  void Function(SeatModel model)? onSeatTap;
+  final void Function(SeatModel model)? onSeatTap;
 
-  SeatLayoutWidget({
+  const SeatLayoutWidget({
     Key? key,
     required this.stateModel,
     this.onSeatTap,
   }) : super(key: key);
 
+  @override
+  _SeatLayoutWidgetState createState() => _SeatLayoutWidgetState();
+}
+
+class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
+  final TransformationController _controller = TransformationController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fitLayout();
+    });
+  }
+
+  void _fitLayout() {
+    if (!mounted) return;
+
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    double widgetWidth = renderBox.size.width;
+    double widgetHeight = renderBox.size.height;
+
+    int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
+    int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
+
+    double scaleX = widgetWidth / layoutWidth;
+    double scaleY = widgetHeight / layoutHeight;
+    double scaleFactor = scaleX < scaleY ? scaleX : scaleY;
+
+    setState(() {
+      _controller.value = Matrix4.identity()
+        ..scale(scaleFactor)
+        ..setTranslationRaw(
+          (widgetWidth - layoutWidth * scaleFactor) / 2,
+          (widgetHeight - layoutHeight * scaleFactor) / 2,
+          0,
+        );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      alignment: Alignment.topLeft,
+      minScale: 0.1,
       maxScale: 5,
-      minScale: 0.8,
-      boundaryMargin: const EdgeInsets.all(8),
+      boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
+      transformationController: _controller,
       child: Column(
-        children: [
-          ...List<int>.generate(stateModel.rows, (rowI) => rowI)
-              .map<Row>(
-                (rowI) => Row(
-                  children: [
-                    ...List<int>.generate(stateModel.cols, (colI) => colI)
-                        .map<Widget>((colI) {
-                          var seatModel = createSeat(colI, rowI);
-                          if(seatModel.boxModel != null)
-                          {
-                            return Tooltip(
-                              showDuration: const Duration(seconds: 0),
-                              message: seatModel.boxModel!.toShortString()??"",
-                              child: SeatWidget(
-                                model: seatModel,
-                                onSeatTap: onSeatTap,
-                              ),
-                            );
-                          }
-
-                          return SeatWidget(
-                            model: seatModel,
-                            onSeatTap: onSeatTap,
-                          );
-                        })
-                  ],
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(widget.stateModel.rows, (rowI) {
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(widget.stateModel.cols, (colI) {
+              final seatModel = _createSeat(colI, rowI);
+              return Tooltip(
+                showDuration: const Duration(seconds: 0),
+                message: seatModel.boxModel?.toShortString() ?? "",
+                child: SeatWidget(
+                  model: seatModel,
+                  onSeatTap: widget.onSeatTap,
                 ),
-              )
-        ],
+              );
+            }),
+          );
+        }),
       ),
     );
   }
 
-  SeatModel createSeat(int colI, int rowI) {
-    var model =  SeatModel(
-      boxModel: stateModel.currentBoxes.firstWhereOrNull((b)=>b.x==colI&&b.y==rowI),
-      seatState: stateModel.currentBoxes.firstWhereOrNull((b)=>b.x==colI&&b.y==rowI)?.type??SeatState.empty,
+  SeatModel _createSeat(int colI, int rowI) {
+    var boxModel = widget.stateModel.currentBoxes
+        .firstWhereOrNull((b) => b.x == colI && b.y == rowI);
+    return SeatModel(
+      boxModel: boxModel,
+      seatState: boxModel?.type ?? SeatState.empty,
       rowI: rowI,
       colI: colI,
-      seatSize: stateModel.seatSize,
+      seatSize: widget.stateModel.seatSize,
     );
-    stateModel.allBoxes.add(model);
-    return model;
   }
 }
