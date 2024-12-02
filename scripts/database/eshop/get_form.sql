@@ -21,10 +21,12 @@ BEGIN
         'code', 200,
         'data', jsonb_build_object(
             'id', f.id,
+            'key', f.key,
             'created_at', f.created_at,
             'data', f.data,
             'type', f.type,
             'occasion', f.occasion,
+            'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number
         )

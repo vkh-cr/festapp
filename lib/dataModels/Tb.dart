@@ -321,6 +321,7 @@ class FormsTb {
   String get data => "data";
   String get key => "key";
   String get occasion => "occasion";
+  String get blueprint => "blueprint";
   String get type => "type";
   String get bank_account => "bank_account";
   String get deadline_duration_seconds => "deadline_duration_seconds";

@@ -4,8 +4,9 @@ class FormModel {
   int? id;
   DateTime? createdAt;
   Map<String, dynamic>? data;
-  String? key;
+  String? formKey;
   int? occasion;
+  int? blueprint;
   String? type;
   int? bankAccount;
   int? deadlineDuration;
@@ -16,8 +17,9 @@ class FormModel {
     this.id,
     this.createdAt,
     this.data,
-    this.key,
+    this.formKey,
     this.occasion,
+    this.blueprint,
     this.type,
     this.bankAccount,
     this.deadlineDuration,
@@ -32,8 +34,9 @@ class FormModel {
           ? DateTime.parse(json[Tb.forms.created_at])
           : null,
       data: json[Tb.forms.data],
-      key: json[Tb.forms.key],
+      formKey: json[Tb.forms.key],
       occasion: json[Tb.forms.occasion],
+      blueprint: json[Tb.forms.blueprint],
       type: json[Tb.forms.type],
       bankAccount: json[Tb.forms.bank_account],
       deadlineDuration: json[Tb.forms.deadline_duration_seconds],
@@ -46,8 +49,9 @@ class FormModel {
     Tb.forms.id: id,
     Tb.forms.created_at: createdAt?.toIso8601String(),
     Tb.forms.data: data,
-    Tb.forms.key: key,
+    Tb.forms.key: formKey,
     Tb.forms.occasion: occasion,
+    Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
     Tb.forms.bank_account: bankAccount,
     Tb.forms.deadline_duration_seconds: deadlineDuration,

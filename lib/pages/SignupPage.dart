@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -10,7 +11,6 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 @RoutePage()
@@ -27,8 +27,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _isRegistrationSuccess = false;
   Map<String, dynamic>? fieldsData;
 
-  final dynamic fields =
-  {FormHelper.metaFields:
+  final FormModel form = FormModel(data: {FormHelper.metaFields:
   [
     { FormHelper.metaType : FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
@@ -36,7 +35,7 @@ class _SignupPageState extends State<SignupPage> {
     { FormHelper.metaType : FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeBirthYear},
-  ]};
+  ]});
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -85,7 +84,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getFormFields(fields[FormHelper.metaFields]),
+                    ...FormHelper.getAllFormFields(context, form.data![FormHelper.metaFields]),
                       const SizedBox(
                         height: 16,
                       ),
@@ -97,7 +96,7 @@ class _SignupPageState extends State<SignupPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(_formKey, fields[FormHelper.metaFields]);
+                            var data = FormHelper.getDataFromForm(_formKey, form.data![FormHelper.metaFields]);
                             fieldsData = data;
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {

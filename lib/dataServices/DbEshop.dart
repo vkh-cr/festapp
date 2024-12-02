@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -52,4 +53,20 @@ class DbEshop {
     return null;
   }
 
+  static Future<BlueprintModel?> getBlueprint(String mySecret, String formKey, int blueprintId) async {
+    final response = await _supabase.rpc(
+      'get_blueprint',
+      params: {
+        'my_secret': mySecret,
+        'form_key': formKey,
+        'blueprint_id': blueprintId,
+      },
+    );
+
+    if (response["code"] != 200) {
+      return null;
+    }
+
+    return BlueprintModel.fromJson(response["data"]);
+  }
 }

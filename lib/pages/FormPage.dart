@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemModel.dart';
 import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
@@ -34,7 +35,7 @@ class _FormPageState extends State<FormPage> {
   bool _isSendSuccess = false;
   double _totalPrice = 0.0; // Total price
   Map<String, dynamic>? formData;
-  Map<String, dynamic>? fields;
+  FormModel? form;
 
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -53,7 +54,7 @@ class _FormPageState extends State<FormPage> {
     _totalPrice = 0.0;
 
     // Iterate over all fields and calculate total price
-    for (var field in fields?[FormHelper.metaFields] ?? []) {
+    for (var field in form?.data?[FormHelper.metaFields] ?? []) {
       // Calculate price for regular options
       if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
         var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
@@ -73,7 +74,7 @@ class _FormPageState extends State<FormPage> {
         for (var ticketData in ticketDataList) {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
-              _totalPrice += ticketValue.price ?? 0.0;
+              _totalPrice += ticketValue.price;
             }
           }
         }
@@ -123,7 +124,7 @@ class _FormPageState extends State<FormPage> {
                   ),
                 ),
               )
-                  : fields == null
+                  : form?.data == null
                   ? const Center(
                 child: CircularProgressIndicator(),
               )
@@ -132,7 +133,7 @@ class _FormPageState extends State<FormPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                      ...FormHelper.getFormFields(fields?[FormHelper.metaFields], _updateTotalPrice),
+                      ...FormHelper.getAllFormFields(context, form!, _updateTotalPrice),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
@@ -156,7 +157,7 @@ class _FormPageState extends State<FormPage> {
                               _isLoading = true;
                             });
                             var data = FormHelper.getDataFromForm(
-                                _formKey, fields?[FormHelper.metaFields]);
+                                _formKey, form?.data?[FormHelper.metaFields]);
 
                             data["secret"] = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
                             data["form"] = "7f4e3892-a544-4385-b933-61117e9755c3";
@@ -238,17 +239,17 @@ class _FormPageState extends State<FormPage> {
     //   return;
     // }
     //var key = UuidConverter.base62ToUuid(widget.id!);
-    var form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
+    form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
     if(form == null) {
       return;
     }
     // Fetching items
-    var allItems = await DbEshop.getItems(context, form.occasion!);
+    var allItems = await DbEshop.getItems(context, form!.occasion!);
     // New fields to replace existing ones
     List<dynamic> updatedFields = [];
 
     // Loop through the fields in form.data
-    for (var field in form.data![FormHelper.metaFields]) {
+    for (var field in form?.data![FormHelper.metaFields]) {
       // Check if the field is a ticket
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
         // Process the fields inside the ticket
@@ -277,9 +278,8 @@ class _FormPageState extends State<FormPage> {
       }
     }
 
-    form.data![FormHelper.metaFields] = updatedFields;
 
-    fields = form.data;
+    form?.data![FormHelper.metaFields] = updatedFields;
 
     setState(() {
       _isLoading = false;

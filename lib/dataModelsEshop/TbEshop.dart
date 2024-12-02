@@ -4,6 +4,7 @@ class TbEshop {
   static OrderItemTicketTb order_item_ticket = const OrderItemTicketTb();
   static OrdersTb orders = const OrdersTb();
   static TicketsTb tickets = const TicketsTb();
+  static BlueprintTb blueprints = const BlueprintTb();
 }
 
 class ItemTypesTb {
@@ -65,4 +66,17 @@ class TicketsTb {
   String get alias => "alias";
   String get state => "state";
   String get occasion => "occasion";
+}
+
+class BlueprintTb {
+  const BlueprintTb();
+  String get table => "blueprints";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get data => "data";
+  String get title => "title";
+  String get organization => "organization";
+  String get configuration => "configuration";
+  String get objects => "objects";
+  String get groups => "groups";
 }

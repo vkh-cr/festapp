@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/SeatReservationWidget.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -49,9 +52,17 @@ class FormHelper {
   static List<Map<String, dynamic>> ticketValues = [];
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
-  // Public method to generate form fields from configuration
-  static List<Widget> getFormFields(dynamic fields, [void Function()? updateTotalPrice]) {
-    return fields.map<Widget>((field) => createFormField(field, updateTotalPrice)).toList();
+  //static String secret = UniqueKey().toString();
+
+  static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
+
+
+  static List<Widget> getAllFormFields(BuildContext context, FormModel form, [void Function()? updateTotalPrice]) {
+    return form.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, form, field, updateTotalPrice)).toList();
+  }
+
+  static List<Widget> getFormFields(BuildContext context, FormModel form, dynamic fields, [void Function()? updateTotalPrice]) {
+    return fields.map<Widget>((field) => createFormField(context, form, field, updateTotalPrice)).toList();
   }
 
   // Retrieve form data by iterating over defined fields
@@ -106,7 +117,7 @@ class FormHelper {
 
 
   // Create individual form field widget based on configuration
-  static Widget createFormField(Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
+  static Widget createFormField(BuildContext context, FormModel form, Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
     final bool isRequiredField = field[IS_REQUIRED] ?? false;
     switch (field[metaType]) {
       case fieldTypeNote:
@@ -118,7 +129,7 @@ class FormHelper {
       case fieldTypeCity:
         return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
       case fieldTypeSpot:
-        return buildTextField(fieldTypeSpot, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
+        return buildSpotField(context, form, fieldTypeSpot, spotLabel());
       case fieldTypeEmail:
         return buildEmailField(isRequiredField);
       case fieldTypeSex:
@@ -128,13 +139,14 @@ class FormHelper {
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       case fieldTypeTicket:
-        return buildTicketField(field, ticketValues, ticketKeys, updateTotalPrice);
+        return buildTicketField(form, field, ticketValues, ticketKeys, updateTotalPrice);
       default:
         return const SizedBox.shrink();
     }
   }
 
   static Widget buildTicketField(
+      FormModel form,
       Map<String, dynamic> field,
       List<Map<String, dynamic>> ticketValues,
       List<GlobalKey<FormBuilderState>> ticketKeys,
@@ -217,7 +229,7 @@ class FormHelper {
                           key: ticketKeys[i], // Assign the corresponding key
                           onChanged: updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: FormHelper.getFormFields(ticketValues[i][FormHelper.metaFields]),
+                            children: getFormFields(context, form, ticketValues[i][FormHelper.metaFields]),
                           ),
                         ),
                       ],
@@ -240,6 +252,32 @@ class FormHelper {
     );
   }
 
+
+  // Build a simple text field with optional validation
+  static FormBuilderTextField buildSpotField(BuildContext context, FormModel form, String name, String label) {
+    return FormBuilderTextField(
+      name: name,
+      enableInteractiveSelection: false,
+      readOnly: true,
+      decoration: InputDecoration(labelText: label, suffixIcon: Icon(Icons.event_seat), labelStyle: StylesConfig.textStyleBig),
+      validator: FormBuilderValidators.compose([
+        FormBuilderValidators.required(),
+      ]),
+      onTap: () async {
+        await showGeneralDialog(
+          context: context,
+          barrierColor: Colors.black12.withOpacity(0.6), // Background color
+          barrierDismissible: false,
+          barrierLabel: 'Dialog',
+          transitionDuration: const Duration(milliseconds: 300),
+          pageBuilder: (context, __, ___) {
+            return SeatReservationWidget(secret: secret, formKey: form.formKey!, blueprintId: form.blueprint!);
+          },
+        );
+        //_formKey.currentState?.fields[TicketModel.boxColumn]!.didChange(selectedSeats.firstOrNull?.toString());
+      },
+    );
+  }
 
   // Build a simple text field with optional validation
   static FormBuilderTextField buildTextField(String name, String label, bool isRequired, [List<String>? autofillHints]) {
