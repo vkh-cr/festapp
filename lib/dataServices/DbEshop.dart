@@ -5,6 +5,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -68,5 +69,18 @@ class DbEshop {
     }
 
     return BlueprintModel.fromJson(response["data"]);
+  }
+
+  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId) async {
+
+    final response = await _supabaseEshop
+        .from(TbEshop.blueprints.table)
+        .select()
+        .eq(TbEshop.blueprints.id, blueprintId)
+        .single();
+    var spots = await _supabaseEshop.from(TbEshop.spots.table).select().eq(TbEshop.spots.occasion, RightsService.currentOccasion!);
+    response[BlueprintModel.metaSpots] = spots;
+
+    return BlueprintModel.fromJson(response);
   }
 }

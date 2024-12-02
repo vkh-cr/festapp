@@ -5,6 +5,7 @@ class TbEshop {
   static OrdersTb orders = const OrdersTb();
   static TicketsTb tickets = const TicketsTb();
   static BlueprintTb blueprints = const BlueprintTb();
+  static SpotsTb spots = const SpotsTb();
 }
 
 class ProductTypesTb {
@@ -76,7 +77,22 @@ class BlueprintTb {
   String get data => "data";
   String get title => "title";
   String get organization => "organization";
+  String get occasion => "occasion";
   String get configuration => "configuration";
   String get objects => "objects";
   String get groups => "groups";
+}
+
+class SpotsTb {
+  const SpotsTb();
+  String get table => "spots";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get updated_at => "updated_at";
+  String get occasion => "occasion";
+  String get product => "product";
+  String get secret => "secret";
+  String get secret_expiration_time => "secret_expiration_time";
+  String get title => "title";
+  String get order_product_ticket => "order_product_ticket";
 }

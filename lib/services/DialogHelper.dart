@@ -466,4 +466,38 @@ class DialogHelper{
     return completer.future;
   }
 
+  static Future<String?> showInputDialog({
+    required BuildContext context,
+    required String initialValue,
+    required String dialogTitle,
+    required String labelText,
+  }) async {
+    final TextEditingController controller = TextEditingController(text: initialValue);
+
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(dialogTitle),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(labelText: labelText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Cancel button
+              child: const Text("Storno").tr(),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, controller.text.trim()); // Return the input
+              },
+              child: const Text("Save").tr(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 }

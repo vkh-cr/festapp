@@ -13,6 +13,8 @@ import '../components/seatReservation/utils/SeatState.dart';
 import '../components/seatReservation/widgets/SeatLayoutWidget.dart';
 
 class SeatReservationWidget extends StatefulWidget {
+  static const int boxSize = 15;
+
   final int blueprintId;
   final String secret;
   final String formKey;
@@ -27,7 +29,6 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   SeatModel? selectedSeat;
   List<SeatModel> allObjects = [];
 
-  static int boxSize = 15;
 
   BlueprintModel? blueprint;
   _SeatReservationWidgetState();
@@ -78,7 +79,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         children: [
                           SeatWidget.buildSeat(
                             state: SeatState.available,
-                            size: boxSize.toDouble(),
+                            size: SeatReservationWidget.boxSize.toDouble(),
                           ),
                           const SizedBox(width: 8),
                           const Text("dostupné"),
@@ -89,7 +90,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         children: [
                           SeatWidget.buildSeat(
                             state: SeatState.selected,
-                            size: boxSize.toDouble(),
+                            size: SeatReservationWidget.boxSize.toDouble(),
                           ),
                           const SizedBox(width: 8),
                           const Text("vybrané"),
@@ -130,7 +131,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                     stateModel: SeatLayoutStateModel(
                       rows: currentHeight,
                       cols: currentWidth,
-                      seatSize: boxSize,
+                      seatSize: SeatReservationWidget.boxSize,
                       currentObjects: currentObjects ?? [],
                       allBoxes: allObjects,
                     ),
