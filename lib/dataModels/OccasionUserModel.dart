@@ -254,9 +254,6 @@ class OccasionUserModel extends IPlutoRowModel {
   }
 
   bool compareField(Map<String, dynamic> u, dynamic dataField, dynamic uField) {
-    if(!compareStrings(u[uField], data?[dataField])){
-      var x= 1;
-    }
     return compareStrings(u[uField], data?[dataField]);
   }
 

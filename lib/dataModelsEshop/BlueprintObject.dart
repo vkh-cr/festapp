@@ -1,5 +1,3 @@
-import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-
 class BlueprintObject {
   static const String metaX = "x";
   static const String metaY = "y";
