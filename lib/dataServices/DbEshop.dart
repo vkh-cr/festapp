@@ -2,8 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/ItemModel.dart';
-import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,24 +12,24 @@ class DbEshop {
   static final _supabaseEshop = Supabase.instance.client.schema("eshop");
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<ItemTypeModel>> getItems(BuildContext context, int currentOccasion) async {
+  static Future<List<ProductTypeModel>> getProducts(BuildContext context, int currentOccasion) async {
     var data = await _supabaseEshop
-        .from(TbEshop.item_types.table)
+        .from(TbEshop.product_types.table)
         .select(
-        "${TbEshop.item_types.id},"
-        "${TbEshop.item_types.type},"
-        "${TbEshop.item_types.title},"
-        "${TbEshop.items.table}(${TbEshop.items.id},${TbEshop.items.title},${TbEshop.items.price})"
+        "${TbEshop.product_types.id},"
+        "${TbEshop.product_types.type},"
+        "${TbEshop.product_types.title},"
+        "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price})"
         )
-        .eq(TbEshop.item_types.occasion, currentOccasion)
-        .eq("${TbEshop.items.table}.${TbEshop.items.is_hidden}", false);
+        .eq(TbEshop.product_types.occasion, currentOccasion)
+        .eq("${TbEshop.products.table}.${TbEshop.products.is_hidden}", false);
 
-    var infoList = List<ItemTypeModel>.from(
+    var infoList = List<ProductTypeModel>.from(
         data.map((x) {
-          var toReturn = ItemTypeModel.fromJson(x);
-          toReturn.items = toReturn.items?.sortedBy((i) => i.title ?? "");
-          toReturn.items = toReturn.items?.sortedBy<num>((i) => i.price ?? 0);
-          for (ItemModel v in toReturn.items??[]){
+          var toReturn = ProductTypeModel.fromJson(x);
+          toReturn.products = toReturn.products?.sortedBy((i) => i.title ?? "");
+          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.price ?? 0);
+          for (ProductModel v in toReturn.products??[]){
             v.title = v.price != null && v.price! > 0 ? "${v.title} (${Utilities.formatPrice(context, v.price!)})" : v.title;
           }
           return toReturn;

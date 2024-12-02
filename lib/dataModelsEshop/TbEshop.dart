@@ -1,15 +1,15 @@
 class TbEshop {
-  static ItemTypesTb item_types = const ItemTypesTb();
-  static ItemsTb items = const ItemsTb();
-  static OrderItemTicketTb order_item_ticket = const OrderItemTicketTb();
+  static ProductTypesTb product_types = const ProductTypesTb();
+  static ProductsTb products = const ProductsTb();
+  static OrderProductTicketTb order_product_ticket = const OrderProductTicketTb();
   static OrdersTb orders = const OrdersTb();
   static TicketsTb tickets = const TicketsTb();
   static BlueprintTb blueprints = const BlueprintTb();
 }
 
-class ItemTypesTb {
-  const ItemTypesTb();
-  String get table => "item_types";
+class ProductTypesTb {
+  const ProductTypesTb();
+  String get table => "product_types";
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
@@ -20,9 +20,9 @@ class ItemTypesTb {
   String get occasion => "occasion";
 }
 
-class ItemsTb {
-  const ItemsTb();
-  String get table => "items";
+class ProductsTb {
+  const ProductsTb();
+  String get table => "products";
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
@@ -31,17 +31,17 @@ class ItemsTb {
   String get description => "description";
   String get price => "price";
   String get data => "data";
-  String get item_type => "item_type";
+  String get product_type => "product_type";
   String get occasion => "occasion";
 }
 
-class OrderItemTicketTb {
-  const OrderItemTicketTb();
-  String get table => "order_item_ticket";
+class OrderProductTicketTb {
+  const OrderProductTicketTb();
+  String get table => "order_product_ticket";
   String get id => "id";
   String get created_at => "created_at";
   String get order => "order";
-  String get item => "item";
+  String get product => "product";
   String get ticket => "ticket";
 }
 

@@ -39,7 +39,8 @@ BEGIN
         'data', b.data,
         'title', b.title,
         'configuration', b.configuration,
-        'objects', b.objects
+        'objects', b.objects,
+        'groups', b.groups
     )
     INTO blueprintData
     FROM eshop.blueprints b
@@ -59,7 +60,7 @@ BEGIN
         'id', s.id,
         'title', s.title,
         'state', CASE
-            WHEN s.order_item_ticket IS NOT NULL THEN 'ordered'
+            WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
             WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN
                 CASE
                     WHEN s.secret = my_secret THEN 'selected_by_me'

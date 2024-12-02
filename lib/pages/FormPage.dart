@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModelsEshop/ItemModel.dart';
-import 'package:fstapp/dataModelsEshop/ItemTypeModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -203,18 +203,18 @@ class _FormPageState extends State<FormPage> {
 
   // Function to generate options for a specific item type and add them to the ticket fields
   Map<String, dynamic> generateOptionsForItemType(
-      List<ItemTypeModel> allItems,
+      List<ProductTypeModel> allItems,
       String itemType
       ) {
     var itemTypeModel = allItems.firstWhereOrNull((item) => item.type == itemType);
 
-    if (itemTypeModel == null || itemTypeModel.items == null) {
+    if (itemTypeModel == null || itemTypeModel.products == null) {
       return {};
     }
 
     List<Map<String, dynamic>> options = [];
 
-    for (var item in itemTypeModel.items!) {
+    for (var item in itemTypeModel.products!) {
       options.add({
         FormOptionModel.metaOptionsName: item.title.toString(),
         FormOptionModel.metaOptionsId: item.id.toString(),
@@ -244,7 +244,7 @@ class _FormPageState extends State<FormPage> {
       return;
     }
     // Fetching items
-    var allItems = await DbEshop.getItems(context, form!.occasion!);
+    var allItems = await DbEshop.getProducts(context, form!.occasion!);
     // New fields to replace existing ones
     List<dynamic> updatedFields = [];
 
