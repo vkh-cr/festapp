@@ -73,7 +73,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
               final seatModel = _createSeat(colI, rowI);
               return Tooltip(
                 showDuration: const Duration(seconds: 0),
-                message: seatModel.boxModel?.toShortString() ?? "",
+                message: seatModel.objectModel?.title ?? "",
                 child: SeatWidget(
                   model: seatModel,
                   onSeatTap: widget.onSeatTap,
@@ -87,11 +87,11 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   }
 
   SeatModel _createSeat(int colI, int rowI) {
-    var boxModel = widget.stateModel.currentBoxes
+    var boxModel = widget.stateModel.currentObjects
         .firstWhereOrNull((b) => b.x == colI && b.y == rowI);
     return SeatModel(
-      boxModel: boxModel,
-      seatState: boxModel?.type ?? SeatState.empty,
+      objectModel: boxModel,
+      seatState: boxModel?.stateEnum ?? SeatState.empty,
       rowI: rowI,
       colI: colI,
       seatSize: widget.stateModel.seatSize,

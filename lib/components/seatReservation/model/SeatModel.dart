@@ -1,5 +1,6 @@
+import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+
 import '../utils/SeatState.dart';
-import 'BoxModel.dart';
 
 
 class SeatModel {
@@ -7,10 +8,10 @@ class SeatModel {
   final int rowI;
   final int colI;
   final int seatSize;
-  BoxModel? boxModel;
+  BlueprintObjectModel? objectModel;
 
   SeatModel({
-    required this.boxModel,
+    required this.objectModel,
     required this.seatState,
     required this.rowI,
     required this.colI,
