@@ -9,7 +9,7 @@ DECLARE
     spot_data RECORD;
     spot_id BIGINT;
     now TIMESTAMP WITH TIME ZONE := NOW();
-    calculated_price DOUBLE PRECISION := 0;
+    calculated_price NUMERIC(10,2) := 0;
     spot_secret UUID;
     product_id BIGINT;
     used_spots JSONB := '[]'::JSONB;
@@ -30,6 +30,8 @@ DECLARE
     form_key UUID;
     deadline TIMESTAMPTZ;
     form_deadline_duration BIGINT;
+    currency_code TEXT; -- Variable for currency_code
+    first_currency_code TEXT := NULL; -- Variable to store the first product's currency
 BEGIN
     -- Validate input data and extract form key
     IF input_data IS NULL OR input_data->'form' IS NULL THEN
@@ -132,7 +134,7 @@ BEGIN
             spot_data.product
         ] LOOP
             IF product_id IS NOT NULL THEN
-                SELECT i.*, it.type, i.price, i.is_hidden
+                SELECT i.*, it.type
                 INTO product_data
                 FROM eshop.products i
                 LEFT JOIN eshop.product_types it ON i.product_type = it.id
@@ -141,7 +143,7 @@ BEGIN
                 IF product_data IS NULL THEN
                     RETURN JSONB_BUILD_OBJECT(
                         'code', 1011,
-                        'message', 'product not found or not part of occasion',
+                        'message', 'Product not found or not part of occasion',
                         'details', product_id
                     );
                 END IF;
@@ -155,18 +157,34 @@ BEGIN
                     );
                 END IF;
 
+                -- Check if product currency matches
+                IF first_currency_code IS NULL THEN
+                    first_currency_code := product_data.currency_code; -- Set the currency for the first product
+                ELSE
+                    IF product_data.currency_code IS DISTINCT FROM first_currency_code THEN
+                        RETURN JSONB_BUILD_OBJECT(
+                            'code', 1014,
+                            'message', 'Products in the order must have the same currency',
+                            'product_id', product_id,
+                            'expected_currency', first_currency_code,
+                            'actual_currency', product_data.currency_code
+                        );
+                    END IF;
+                END IF;
+
                 -- Add product details to ticket products
                 ticket_products := ticket_products || JSONB_BUILD_OBJECT(
                     'product_id', product_id,
                     'title', product_data.title,
                     'type', product_data.type,
                     'price', product_data.price,
+                    'currency_code', product_data.currency_code,
                     'spot_title', CASE WHEN product_id = spot_data.product THEN spot_data.title ELSE NULL END,
                     'description', CASE WHEN product_id = spot_data.product THEN product_data.description ELSE NULL END
                 );
 
                 -- Add product price to calculated total
-                calculated_price := calculated_price + COALESCE(product_data.price, 0);
+                calculated_price := calculated_price + COALESCE(product_data.price, 0)::NUMERIC(10,2);
 
                 -- Link ticket and product to the order
                 INSERT INTO eshop.order_product_ticket ("order", product, ticket)
@@ -191,7 +209,7 @@ BEGIN
     END LOOP;
 
     -- Generate variable symbol for payment
-    generated_variable_symbol := generate_ticket_symbol(bank_account_id);
+    generated_variable_symbol := generate_variable_symbol(bank_account_id);
 
     -- Insert payment info after calculating price
     INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
@@ -207,7 +225,7 @@ BEGIN
     INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
     VALUES (
         now,
-        JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details, 'price', calculated_price),
+        JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details, 'price', calculated_price, 'currency_code', first_currency_code),
         order_id,
         'ordered',
         calculated_price
@@ -224,7 +242,8 @@ BEGIN
             'amount', calculated_price,
             'deadline', deadline,
             'account_number', account_number,
-            'account_number_human_readable', account_number_human_readable
+            'account_number_human_readable', account_number_human_readable,
+            'currency_code', first_currency_code
         ),
         'occasion', JSONB_BUILD_OBJECT(
             'id', occasion_id,

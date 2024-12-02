@@ -18,7 +18,7 @@ const supabaseAdmin = createClient(
 async function generateQrCode(paymentInfo: any, orderDetails: any): Promise<Uint8Array> {
   const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
     2
-  )}*CC:CZK*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  )}*CC:${paymentInfo.currency_code}*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
   const base64QrCode = await qrcode(qrData, { size: 500 });
   console.log("QR Code Output:", base64QrCode);
 
@@ -39,6 +39,13 @@ function formatDatetime(datetime: string): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function formatCurrency(amount, currencyCode) {
+  return new Intl.NumberFormat("cs-CZ", {
+    style: "currency",
+    currency: currencyCode,
+  }).format(amount);
 }
 
 function generateFullOrder(orderDetails: any, tickets: any[]): string {
@@ -133,6 +140,8 @@ Deno.serve(async (req) => {
     const subs = {
       occasionTitle: occasion.occasion_title,
       price: paymentInfo.amount,
+      currencyCode: paymentInfo.currency_code,
+      amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       accountNumber: paymentInfo.account_number_human_readable,
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formattedDeadline,
