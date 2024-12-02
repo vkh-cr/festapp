@@ -119,7 +119,7 @@ class OccasionUserModel extends IPlutoRowModel {
     if(value.isEmpty){
       return emptyResult;
     }
-    var first = value.first.formKey;
+    var first = value.first.key;
     cell = PlutoCell(value: first);
     return { serviceType : cell };
   }
