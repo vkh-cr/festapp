@@ -15,6 +15,7 @@ DECLARE
     occasion_id BIGINT;
     organization_id BIGINT;
     product_id BIGINT;
+    spot_title TEXT; -- Updated variable name for title
 BEGIN
     -- Validate input data
     IF input_data IS NULL THEN
@@ -68,6 +69,9 @@ BEGIN
         FOR object_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'objects') LOOP
             -- Handle "spot" type objects
             IF object_data->>'type' = 'spot' THEN
+                -- Extract spot title
+                spot_title := object_data->>'title';
+
                 -- Validate product_id
                 product_id := NULL;
                 IF object_data ? 'product' AND object_data->>'product' IS NOT NULL THEN
@@ -99,9 +103,12 @@ BEGIN
                 IF object_data ? 'id' AND object_data->>'id' IS NOT NULL THEN
                     spot_ids_in_objects := spot_ids_in_objects || (object_data->>'id')::BIGINT;
 
-                    -- Update the spot's product if applicable
+                    -- Update the spot's product and title if applicable
                     UPDATE eshop.spots
-                    SET product = product_id, updated_at = now
+                    SET
+                        product = product_id,
+                        title = spot_title, -- Save the extracted spot title
+                        updated_at = now
                     WHERE id = (object_data->>'id')::BIGINT;
                 ELSE
                     -- Create a new spot if ID is null
@@ -110,7 +117,7 @@ BEGIN
                         updated_at,
                         occasion,
                         blueprint,
-                        title,
+                        title,  -- Save the extracted spot title
                         product
                     )
                     VALUES (
@@ -118,7 +125,7 @@ BEGIN
                         now,
                         occasion_id,
                         blueprint_id,
-                        object_data->>'title',
+                        spot_title,
                         product_id
                     )
                     RETURNING id INTO spot_id;
@@ -129,6 +136,9 @@ BEGIN
                     -- Update the object with the new spot ID
                     object_data := jsonb_set(object_data, '{id}', TO_JSONB(spot_id));
                 END IF;
+
+                -- Remove title and product from the object before adding to updated_objects
+                object_data := object_data - 'title' - 'product';
             END IF;
 
             -- Add updated object to the updated_objects array
@@ -163,7 +173,6 @@ BEGIN
                     'message', 'Cannot delete spot due to invalid state',
                     'spot_id', spot.id,
                     'details', JSONB_BUILD_OBJECT(
-                    'x', spot_ids_in_objects
                         'secret', spot.secret,
                         'secret_expiration_time', spot.secret_expiration_time,
                         'order_product_ticket', spot.order_product_ticket

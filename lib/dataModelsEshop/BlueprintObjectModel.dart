@@ -63,6 +63,7 @@ class BlueprintObjectModel {
     metaX: x,
     metaY: y,
     metaType: type,
+    metaTitle: title,
     if (id != null) metaId: id,
     if (group?.id != null) metaGroupId: group?.id,
     if (product != null) metaProduct: product,
