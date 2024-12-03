@@ -247,16 +247,19 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void addGroup() async {
+    final defaultName = "Stůl ${blueprint!.groups!.length + 1}";
+
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
       dialogTitle: "Přidat nový stůl",
       labelText: "Název stolu",
+      initialValue: defaultName, // Pre-fill input with default name
     );
 
     if (newTitle != null && newTitle.isNotEmpty) {
       setState(() {
         blueprint!.groups!.add(BlueprintGroupModel(title: newTitle));
-        blueprint!.groups!.sort((a,b) => Utilities.naturalCompare(a.title!, b.title!));
+        blueprint!.groups!.sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
       });
     }
   }
