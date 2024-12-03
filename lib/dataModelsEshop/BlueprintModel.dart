@@ -1,5 +1,6 @@
 import 'package:fstapp/components/seatReservation/utils/SeatState.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'BlueprintConfiguration.dart';
 import 'BlueprintObjectModel.dart';
@@ -7,6 +8,7 @@ import 'package:collection/collection.dart';
 
 class BlueprintModel {
   static const String metaSpots = "spots";
+  static const String metaProducts = "products";
   static const String metaDefaultProduct = "default_product";
   static const String metaTableAreaType = "table";
   static const String metaSpotType = "spot";
@@ -17,7 +19,7 @@ class BlueprintModel {
   String? title;
   int? organization;
   int? occasion;
-  int? defaultProduct;
+  ProductModel? defaultProduct;
   BlueprintConfiguration? configuration;
   List<BlueprintObjectModel>? objects;
   List<BlueprintObjectModel>? spots;
@@ -27,8 +29,8 @@ class BlueprintModel {
     final List<BlueprintGroupModel> groups = _parseGroups(json);
     final List<BlueprintObjectModel>? rawObjects = _parseObjects(json);
     final List<BlueprintObjectModel>? spots = _parseSpots(json);
-
-    final List<BlueprintObjectModel>? enrichedObjects = _enrichObjects(rawObjects, spots);
+    final List<ProductModel>? products = _parseProducts(json);
+    final List<BlueprintObjectModel>? enrichedObjects = _enrichObjects(rawObjects, spots, products);
 
     _assignObjectsToGroups(enrichedObjects, groups);
 
@@ -72,8 +74,16 @@ class BlueprintModel {
         : null;
   }
 
+  static List<ProductModel>? _parseProducts(Map<String, dynamic> json) {
+    return json[BlueprintModel.metaProducts] != null
+        ? List<ProductModel>.from(
+        json[BlueprintModel.metaProducts].map((spot) => ProductModel.fromJson(spot)))
+        : null;
+  }
+
+
   static List<BlueprintObjectModel>? _enrichObjects(
-      List<BlueprintObjectModel>? rawObjects, List<BlueprintObjectModel>? spots) {
+      List<BlueprintObjectModel>? rawObjects, List<BlueprintObjectModel>? spots, List<ProductModel>? products) {
     if (rawObjects == null) return null;
 
     return rawObjects.map((object) {
@@ -82,7 +92,8 @@ class BlueprintModel {
         return BlueprintObjectModel(
           id: object.id,
           type: object.type,
-          product: matchingSpot?.product,
+          spotProduct: matchingSpot?.spotProduct,
+          product: products?.firstWhereOrNull((p)=>p.id == matchingSpot?.spotProduct),
           groupId: object.groupId,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries

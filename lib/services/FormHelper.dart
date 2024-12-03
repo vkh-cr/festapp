@@ -88,7 +88,7 @@ class FormHelper {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
     } else if (fieldType == fieldTypeSpot) {
       if (fieldValue is SeatModel) {
-        return fieldValue.objectModel?.id;
+        return fieldValue.objectModel;
       }
       return null;
     } else if (fieldType == fieldTypeTicket) {
@@ -133,7 +133,7 @@ class FormHelper {
       case fieldTypeCity:
         return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
       case fieldTypeSpot:
-        return buildSpotField(context, formKey, form, fieldTypeSpot, spotLabel());
+        return buildSpotField(context, formKey, form, fieldTypeSpot, spotLabel(), updateTotalPrice);
       case fieldTypeEmail:
         return buildEmailField(isRequiredField);
       case fieldTypeSex:
@@ -260,7 +260,12 @@ class FormHelper {
 
   // Build a simple text field with optional validation
   static Widget buildSpotField(
-      BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, String name, String label) {
+      BuildContext context,
+      GlobalKey<FormBuilderState> formKey,
+      FormModel form,
+      String name,
+      String label,
+      void Function()? updateTotalPrice) {
     // Create a TextEditingController to control the displayed text
     TextEditingController textController = TextEditingController();
 
@@ -309,6 +314,7 @@ class FormHelper {
 
             if (selectedSeat != null) {
               // Update the form field and display value
+              updateTotalPrice?.call();
               field.didChange(selectedSeat);
               textController.text =
                   selectedSeat.objectModel?.title ?? "---";

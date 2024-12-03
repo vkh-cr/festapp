@@ -94,7 +94,7 @@ class DbEshop {
         .eq(TbEshop.product_types.type, ProductModel.spotType);
     var x = defaultProducts.map((x) => ProductTypeModel.fromJson(x)).first.products!.first;
 
-    response[BlueprintModel.metaDefaultProduct] = x.id;
+    response[BlueprintModel.metaDefaultProduct] = x;
     return BlueprintModel.fromJson(response);
   }
 

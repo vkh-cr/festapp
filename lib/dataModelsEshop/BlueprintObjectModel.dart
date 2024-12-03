@@ -1,5 +1,6 @@
 import 'package:fstapp/components/seatReservation/utils/SeatState.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 
 class BlueprintObjectModel {
   static const String metaX = "x";
@@ -42,7 +43,8 @@ class BlueprintObjectModel {
   String? type;
   String? state;
   String? title;
-  int? product;
+  ProductModel? product;
+  int? spotProduct;
   BlueprintGroupModel? group;
   SeatState? stateEnum;
 
@@ -55,7 +57,7 @@ class BlueprintObjectModel {
       type: json[metaType],
       state: json[metaState],
       title: json[metaTitle],
-      product: json[metaProduct],
+      spotProduct: json[metaProduct],
     );
   }
 
@@ -66,7 +68,7 @@ class BlueprintObjectModel {
     metaTitle: title,
     if (id != null) metaId: id,
     if (group?.id != null) metaGroupId: group?.id,
-    if (product != null) metaProduct: product,
+    if (spotProduct != null) metaProduct: spotProduct,
   };
 
   BlueprintObjectModel({
@@ -78,6 +80,7 @@ class BlueprintObjectModel {
     this.state,
     this.stateEnum,
     this.title,
+    this.spotProduct,
     this.product,
   });
 }

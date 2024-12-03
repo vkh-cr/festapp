@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
+import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -75,6 +75,8 @@ class _FormPageState extends State<FormPage> {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
+            } else if (ticketValue is BlueprintObjectModel){
+              _totalPrice += ticketValue.product?.price??0;
             }
           }
         }

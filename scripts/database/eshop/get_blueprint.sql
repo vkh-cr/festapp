@@ -10,6 +10,8 @@ AS $$
 DECLARE
     blueprintData JSONB;
     spotsData JSONB;
+    productsData JSONB;
+    valid_spots JSONB; -- Temporary variable to hold valid spot IDs
 BEGIN
     -- Validate the form and blueprint association
     IF NOT EXISTS (
@@ -30,8 +32,6 @@ BEGIN
         );
     END IF;
 
-
-
     -- Fetch blueprint details
     SELECT jsonb_build_object(
         'id', b.id,
@@ -46,19 +46,20 @@ BEGIN
     FROM eshop.blueprints b
     WHERE b.id = blueprint_id;
 
-    -- Extract valid spot IDs from blueprint.objects
-    WITH valid_spots AS (
-        SELECT (obj->>'id')::BIGINT AS spot_id
-        FROM jsonb_array_elements(
-            (SELECT b.objects FROM eshop.blueprints b WHERE b.id = blueprint_id)
-        ) obj
-        WHERE obj->>'type' = 'spot'
-          AND obj->>'id' IS NOT NULL
-    )
+    -- Fetch valid spot IDs
+    SELECT jsonb_agg((obj->>'id')::BIGINT)
+    INTO valid_spots
+    FROM jsonb_array_elements(
+        (SELECT b.objects FROM eshop.blueprints b WHERE b.id = blueprint_id)
+    ) obj
+    WHERE obj->>'type' = 'spot'
+      AND obj->>'id' IS NOT NULL;
+
     -- Fetch enriched spots data
     SELECT jsonb_agg(jsonb_build_object(
         'id', s.id,
         'title', s.title,
+        'product', s.product,
         'state', CASE
             WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
             WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN
@@ -71,16 +72,37 @@ BEGIN
     ))
     INTO spotsData
     FROM eshop.spots s
-    JOIN valid_spots v ON s.id = v.spot_id
-    WHERE s.occasion = (
+    WHERE s.id = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+      AND s.occasion = (
         SELECT occasion FROM public.forms WHERE key = form_key
-    );
+      );
+
+    -- Fetch product data for all spots
+    SELECT jsonb_agg(jsonb_build_object(
+        'id', p.id,
+        'title', p.title,
+        'price', p.price
+    ))
+    INTO productsData
+    FROM eshop.products p
+    JOIN eshop.spots s ON s.product = p.id
+    WHERE s.id = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+      AND s.occasion = (
+        SELECT occasion FROM public.forms WHERE key = form_key
+      );
 
     -- Add spots data to the blueprint object
     blueprintData = jsonb_set(
         blueprintData,
         '{spots}',
         COALESCE(spotsData, '[]'::jsonb)
+    );
+
+    -- Add products data to the blueprint object
+    blueprintData = jsonb_set(
+        blueprintData,
+        '{products}',
+        COALESCE(productsData, '[]'::jsonb)
     );
 
     -- Return combined data
