@@ -158,14 +158,14 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
   Widget buildGroupsSection() {
     return blueprint == null
-    ? const Center(child: CircularProgressIndicator()) :
-    Column(
+        ? const Center(child: CircularProgressIndicator())
+        : Column(
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Stoly (Skupiny):",
+              "Skupiny (Stoly):",
               style: Theme.of(context).textTheme.titleMedium,
             ),
             Row(
@@ -190,41 +190,61 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           ],
         ),
         const SizedBox(height: 8),
-        SizedBox(
-          height: 120, // Limit height for the group list
+        Expanded(
           child: ListView.builder(
             itemCount: blueprint!.groups!.length,
             itemBuilder: (context, index) {
               final group = blueprint!.groups![index];
+              final isSelected = currentGroup == group;
               return GestureDetector(
                 onTap: () {
                   setState(() {
                     currentGroup = group;
                   });
                 },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
-                    color: currentGroup == group
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                    color: isSelected
+                        ? Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withOpacity(0.2)
                         : Colors.transparent,
                     border: Border.all(
-                      color: currentGroup == group
+                      color: isSelected
                           ? Theme.of(context).colorScheme.primary
                           : Colors.grey,
+                      width: isSelected ? 2 : 1,
                     ),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         group.title!,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.primary
+                              : null,
+                          fontWeight:
+                          isSelected ? FontWeight.bold : null,
+                        ),
                       ),
-                      Text(
-                        "${group.objects.length}",
-                        style: Theme.of(context).textTheme.bodySmall,
+                      Row(
+                        children: [
+                          Text(
+                            "${group.objects.length}",
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
                     ],
                   ),
