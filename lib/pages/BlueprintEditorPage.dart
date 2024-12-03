@@ -482,6 +482,11 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void handleSeatTap(SeatModel model) {
+    if (model.seatState == SeatState.ordered) {
+      ToastHelper.Show(context, "Místa, která byla objednána není možné měnit.", severity: ToastSeverity.NotOk);
+      return;
+    }
+
     switch (currentSelectionMode) {
       case selectionMode.addBlack:
         _handleAddBlack(model);
@@ -517,7 +522,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   /// Handle adding an available (spot) seat.
   void _handleAddAvailable(SeatModel model) {
     if(currentGroup == null){
-      ToastHelper.Show(context, "Nejdřív vyberte/vytvořte skupinu pro přidání místa (vpravo).");
+      ToastHelper.Show(context, "Nejdřív vyberte/vytvořte skupinu pro přidání místa (vpravo).", severity: ToastSeverity.NotOk);
       return;
     }
     model.seatState = SeatState.available;
