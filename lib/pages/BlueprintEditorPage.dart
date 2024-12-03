@@ -61,21 +61,14 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Center(
-              child: Text(
-                blueprint?.title ?? "",
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: editBlueprintTitle,
-            ),
-          ],
-        ),
+        title: Text(blueprint?.title??"Edit".tr()),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: "Změnit název".tr(),
+            onPressed: editBlueprintTitle,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Center(
