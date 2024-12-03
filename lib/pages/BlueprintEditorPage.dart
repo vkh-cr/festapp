@@ -348,7 +348,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
         const SizedBox(height: 8),
         buildLegendItem(
           "Vybrané",
-          SeatState.selected,
+          SeatState.selected_by_me,
           isActive: false, // Not clickable
           grayedOut: true,
         ),

@@ -85,7 +85,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           SeatWidgetHelper.buildSeat(
-                            state: SeatState.selected,
+                            state: SeatState.selected_by_me,
                             size: SeatReservationWidget.boxSize.toDouble(),
                           ),
                           const SizedBox(width: 8),
@@ -113,14 +113,14 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       ? const Center(child: CircularProgressIndicator()) :
                   SeatLayoutWidget(
                     onSeatTap: (model) {
-                      if (model.seatState == SeatState.selected) {
+                      if (model.seatState == SeatState.selected_by_me) {
                         model.seatState = SeatState.available;
                         selectedSeat = null;
                       } else if (model.seatState == SeatState.available) {
                         if (selectedSeat != null) {
                           selectedSeat!.seatState = SeatState.available;
                         }
-                        model.seatState = SeatState.selected;
+                        model.seatState = SeatState.selected_by_me;
                         selectedSeat = model;
                       }
                       setState(() {});

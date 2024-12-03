@@ -4,6 +4,7 @@ import '../utils/SeatState.dart';
 
 class SeatWidgetHelper {
   static const double padding = 2.0;
+  static const double selectedByMePadding = 1.0;
 
   /// Static method to create a seat widget with a given seat state and size.
   /// This allows external calls to render a seat without relying on the `SeatModel`.
@@ -21,7 +22,7 @@ class SeatWidgetHelper {
       height: size,
       width: size,
       child: Container(
-        margin: hasPadding ? EdgeInsets.all(padding) : EdgeInsets.zero,
+        margin: hasPadding ? EdgeInsets.all(state == SeatState.selected_by_me ? selectedByMePadding : padding) : EdgeInsets.zero,
         decoration: BoxDecoration(
           color: _getSeatColor(state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
@@ -34,11 +35,11 @@ class SeatWidgetHelper {
   static Color _getSeatColor(SeatState state) {
     switch (state) {
       case SeatState.available:
-        return Colors.green;
+        return Colors.blueAccent;
       case SeatState.selected_by_me:
-        return Colors.blue;
+        return Colors.purple;
       case SeatState.selected:
-        return Colors.blue;
+        return Colors.black54;
       case SeatState.black:
         return Colors.black;
       case SeatState.ordered:
