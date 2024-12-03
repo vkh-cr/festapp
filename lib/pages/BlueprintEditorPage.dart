@@ -482,42 +482,90 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void handleSeatTap(SeatModel model) {
-    if (currentSelectionMode == selectionMode.addBlack) {
-      model.seatState = SeatState.black;
-      if(model.objectModel != null && model.objectModel!.type !=  BlueprintModel.metaTableAreaType) {
-        blueprint!.objects!.remove(model.objectModel!);
-      }
-      model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
-      model.objectModel!.type = BlueprintModel.metaTableAreaType;
-      blueprint!.objects!.add(model.objectModel!);
-    } else if (currentSelectionMode == selectionMode.addAvailable) {
-      model.seatState = SeatState.available;
-      if(model.objectModel != null && model.objectModel!.type !=  BlueprintModel.metaSpotType) {
-        blueprint!.objects!.remove(model.objectModel!);
-        //here go through all groups and remove model.objectModel!
-      }
-      model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
-      model.objectModel!.type = BlueprintModel.metaSpotType;
-      model.objectModel!.group = currentGroup;
-      model.objectModel!.title = currentGroup?.getNextBoxName();
-      currentGroup?.objects.add(model.objectModel!);
-      blueprint!.objects!.add(model.objectModel!);
-      ToastHelper.Show(context, "Přidáno sedadlo ${model.objectModel!.title}.");
-    } else if (currentSelectionMode == selectionMode.emptyArea) {
-      if (model.objectModel != null) {
-        if(model.seatState == SeatState.black){
-          ToastHelper.Show(context, "Odstraněna plocha.");
-        } else {
-          ToastHelper.Show(context, "Odstraněno místo.");
-        }
-        blueprint!.objects!.remove(model.objectModel);
-        //here go through all groups and remove model.objectModel!
-
-        model.objectModel = null;
-        model.seatState = SeatState.empty;
-      }
+    switch (currentSelectionMode) {
+      case selectionMode.addBlack:
+        _handleAddBlack(model);
+        break;
+      case selectionMode.addAvailable:
+        _handleAddAvailable(model);
+        break;
+      case selectionMode.emptyArea:
+        _handleEmptyArea(model);
+        break;
+      default:
+      // Do nothing for other cases
+        break;
     }
     setState(() {});
+  }
+
+  /// Handle adding a black (table area) seat.
+  void _handleAddBlack(SeatModel model) {
+    model.seatState = SeatState.black;
+
+    // Remove existing object if it's not a table area
+    if (model.objectModel != null && model.objectModel!.type != BlueprintModel.metaTableAreaType) {
+      blueprint!.objects!.remove(model.objectModel!);
+    }
+
+    // Create or update the object model
+    model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
+    model.objectModel!.type = BlueprintModel.metaTableAreaType;
+    blueprint!.objects!.add(model.objectModel!);
+  }
+
+  /// Handle adding an available (spot) seat.
+  void _handleAddAvailable(SeatModel model) {
+    if(currentGroup == null){
+      ToastHelper.Show(context, "Nejdřív vyberte/vytvořte skupinu pro přidání místa (vpravo).");
+      return;
+    }
+    model.seatState = SeatState.available;
+
+    // Remove existing object if it's not a spot
+    if (model.objectModel != null && model.objectModel!.type != BlueprintModel.metaSpotType) {
+      blueprint!.objects!.remove(model.objectModel!);
+
+      // Remove the object from all groups
+      for (var group in blueprint!.groups!) {
+        group.objects.remove(model.objectModel);
+      }
+    }
+
+    // Create or update the object model
+    model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
+    model.objectModel!.type = BlueprintModel.metaSpotType;
+    model.objectModel!.group = currentGroup;
+    model.objectModel!.title = currentGroup?.getNextBoxName();
+
+    // Add the object to the current group and blueprint
+    currentGroup?.objects.add(model.objectModel!);
+    blueprint!.objects!.add(model.objectModel!);
+
+    // Notify the user
+    ToastHelper.Show(context, "Přidáno sedadlo ${model.objectModel!.title}.");
+  }
+
+  /// Handle clearing an area (emptying a seat).
+  void _handleEmptyArea(SeatModel model) {
+    if (model.objectModel != null) {
+      // Determine the type of area being removed and notify the user
+      if (model.seatState == SeatState.black) {
+        ToastHelper.Show(context, "Odstraněna plocha.");
+      } else {
+        ToastHelper.Show(context, "Odstraněno místo.");
+      }
+
+      // Remove the object from blueprint and all groups
+      blueprint!.objects!.remove(model.objectModel);
+      for (var group in blueprint!.groups!) {
+        group.objects.remove(model.objectModel);
+      }
+
+      // Clear the object model and reset the seat state
+      model.objectModel = null;
+      model.seatState = SeatState.empty;
+    }
   }
 
   void saveChanges() async {
