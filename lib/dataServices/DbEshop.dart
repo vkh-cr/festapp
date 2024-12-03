@@ -6,6 +6,7 @@ import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -84,12 +85,20 @@ class DbEshop {
     return BlueprintModel.fromJson(response);
   }
 
-  static Future<void> updateBlueprint(BlueprintModel blueprint) async {
-    var json = blueprint.toJson();
-    if(blueprint.id==null) {
-      await _supabaseEshop.from(TbEshop.blueprints.table).insert(json);
-    } else {
-      await _supabaseEshop.from(TbEshop.blueprints.table).update(json).eq(TbEshop.blueprints.id, blueprint.id!);
+  static Future<bool> updateBlueprint(context, BlueprintModel blueprint) async {
+    final response = await _supabase.rpc(
+      'update_blueprint',
+      params: {
+        'input_data': blueprint.toJson(),
+      },
+    );
+
+    var code = response["code"];
+    if (code != 200) {
+      ToastHelper.Show(context, code.toString(), severity: ToastSeverity.NotOk);
+      return false;
     }
+
+    return true;
   }
 }

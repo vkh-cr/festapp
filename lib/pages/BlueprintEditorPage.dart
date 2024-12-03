@@ -574,9 +574,11 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void saveChanges() async {
-    await DbEshop.updateBlueprint(blueprint!);
-    ToastHelper.Show(context, "Změny byly uloženy.");
-    await loadData();
+    var success = await DbEshop.updateBlueprint(context, blueprint!);
+    if(success){
+      ToastHelper.Show(context, "Změny byly uloženy.");
+      await loadData();
+    }
   }
 
   Future<void> loadData() async {
