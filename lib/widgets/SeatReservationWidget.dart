@@ -116,16 +116,13 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       if (model.seatState == SeatState.selected) {
                         model.seatState = SeatState.available;
                         selectedSeat = null;
-                        return;
-                      } else if (model.seatState != SeatState.available) {
-                        return;
+                      } else if (model.seatState == SeatState.available) {
+                        if (selectedSeat != null) {
+                          selectedSeat!.seatState = SeatState.available;
+                        }
+                        model.seatState = SeatState.selected;
+                        selectedSeat = model;
                       }
-
-                      if(selectedSeat != null) {
-                        selectedSeat?.seatState = SeatState.available;
-                      }
-                      model.seatState = SeatState.selected;
-                      selectedSeat = model;
                       setState(() {});
                     },
                     stateModel: SeatLayoutStateModel(

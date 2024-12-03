@@ -42,7 +42,7 @@ class SeatWidgetHelper {
       case SeatState.black:
         return Colors.black;
       case SeatState.ordered:
-        return Colors.red;
+        return Colors.black54;
       case SeatState.empty:
         return Colors.grey.shade300;
       default:
