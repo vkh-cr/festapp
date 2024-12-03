@@ -39,11 +39,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     loadData();
   }
 
-  List<BlueprintObjectModel>? currentObjects;
   BlueprintGroupModel? currentBoxGroup;
-
-  int currentWidth = 20;
-  int currentHeight = 20;
 
   @override
   Widget build(BuildContext context) {
@@ -125,14 +121,18 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         return;
                       }
 
+                      if(selectedSeat != null) {
+                        selectedSeat?.seatState = SeatState.available;
+                      }
                       model.seatState = SeatState.selected;
                       selectedSeat = model;
+                      setState(() {});
                     },
                     stateModel: SeatLayoutStateModel(
-                      rows: currentHeight,
-                      cols: currentWidth,
+                      rows: blueprint!.configuration!.height!,
+                      cols: blueprint!.configuration!.width!,
                       seatSize: SeatReservationWidget.boxSize,
-                      currentObjects: currentObjects ?? [],
+                      currentObjects: blueprint!.objects!,
                       allBoxes: allObjects,
                     ),
                   ),
@@ -172,11 +172,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       return;
     }
 
-    setState(() {
-      currentObjects = blueprint!.objects;
-      currentHeight = blueprint!.configuration!.height!;
-      currentWidth = blueprint!.configuration!.width!;
-    });
+    setState(() {});
   }
 }
 
