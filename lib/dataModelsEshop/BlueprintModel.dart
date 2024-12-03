@@ -73,9 +73,8 @@ class BlueprintModel {
           id: object.id,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries
-              .firstWhere(
-                  (entry) => entry.value == matchingSpot?.state,
-              orElse: () => MapEntry(SeatState.available, BlueprintObjectModel.availableType)).key,
+              .firstWhereOrNull(
+                  (entry) => entry.value == matchingSpot?.state)?.key??SeatState.available,
           x: object.x,
           y: object.y,
         );

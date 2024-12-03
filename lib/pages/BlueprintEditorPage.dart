@@ -35,10 +35,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   List<BlueprintObjectModel>? currentBoxes;
   BlueprintGroupModel? currentGroup;
 
-  int currentWidth = 20;
-  int currentHeight = 20;
 
-  List<SeatModel> changedBoxes = [];
   List<SeatModel> allBoxes = [];
 
   selectionMode currentSelectionMode = selectionMode.none;
@@ -83,7 +80,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text(
-                        "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
+                        "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě.",
                         style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.left,
                       ),
@@ -99,6 +96,8 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 16),
+                    blueprint == null
+                        ? const SizedBox.shrink() :
                     buildDimensionControls(),
                     const SizedBox(height: 16),
                     Flexible(
@@ -108,8 +107,8 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                         controller: seatLayoutController,
                         onSeatTap: handleSeatTap,
                         stateModel: SeatLayoutStateModel(
-                          rows: currentHeight,
-                          cols: currentWidth,
+                          rows: blueprint!.configuration!.height!,
+                          cols: blueprint!.configuration!.width!,
                           seatSize: SeatReservationWidget.boxSize,
                           currentObjects: currentBoxes ?? [],
                           allBoxes: allBoxes,
@@ -223,7 +222,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                       Text(
-                        "${group.objects.length} objektů",
+                        "${group.objects.length}",
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
@@ -238,13 +237,13 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void addGroup() async {
-    final defaultName = "Stůl ${blueprint!.groups!.length + 1}";
+    final defaultName = "${blueprint!.groups!.length + 1}";
 
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
       dialogTitle: "Přidat nový stůl",
-      labelText: "Název stolu",
-      initialValue: defaultName, // Pre-fill input with default name
+      labelText: "Číslo stolu",
+      initialValue: defaultName,
     );
 
     if (newTitle != null && newTitle.isNotEmpty) {
@@ -304,6 +303,17 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           onTap: () {
             setState(() {
               currentSelectionMode = selectionMode.addAvailable;
+            });
+          },
+        ),
+        const SizedBox(height: 8),
+        buildLegendItem(
+          "Prázdné",
+          SeatState.empty,
+          isActive: currentSelectionMode == selectionMode.emptyArea,
+          onTap: () {
+            setState(() {
+              currentSelectionMode = selectionMode.emptyArea;
             });
           },
         ),
@@ -372,10 +382,10 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
       children: [
         buildDimensionEditor(
           "Šířka",
-          currentWidth,
+          blueprint!.configuration!.width!,
               (value) {
             setState(() {
-              currentWidth = value;
+              blueprint!.configuration!.width = value;
             });
             seatLayoutController.fitLayout(); // Fit layout after width change
           },
@@ -383,10 +393,10 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
         const SizedBox(width: 12), // Reduced spacing between editors
         buildDimensionEditor(
           "Výška",
-          currentHeight,
+          blueprint!.configuration!.height!,
               (value) {
             setState(() {
-              currentHeight = value;
+              blueprint!.configuration!.height = value;
             });
             seatLayoutController.fitLayout(); // Fit layout after height change
           },
@@ -474,15 +484,38 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   void handleSeatTap(SeatModel model) {
     if (currentSelectionMode == selectionMode.addBlack) {
       model.seatState = SeatState.black;
-      changedBoxes.add(model);
+      if(model.objectModel != null && model.objectModel!.type !=  BlueprintModel.metaTableAreaType) {
+        blueprint!.objects!.remove(model.objectModel!);
+      }
+      model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
+      model.objectModel!.type = BlueprintModel.metaTableAreaType;
+      blueprint!.objects!.add(model.objectModel!);
     } else if (currentSelectionMode == selectionMode.addAvailable) {
       model.seatState = SeatState.available;
+      if(model.objectModel != null && model.objectModel!.type !=  BlueprintModel.metaSpotType) {
+        blueprint!.objects!.remove(model.objectModel!);
+        //here go through all groups and remove model.objectModel!
+      }
       model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
-      model.objectModel!.group = currentGroup!;
-      model.objectModel!.title = currentGroup!.getNextBoxName();
-      currentGroup!.objects.add(model.objectModel!);
-      changedBoxes.add(model);
+      model.objectModel!.type = BlueprintModel.metaSpotType;
+      model.objectModel!.group = currentGroup;
+      model.objectModel!.title = currentGroup?.getNextBoxName();
+      currentGroup?.objects.add(model.objectModel!);
+      blueprint!.objects!.add(model.objectModel!);
       ToastHelper.Show(context, "Přidáno sedadlo ${model.objectModel!.title}.");
+    } else if (currentSelectionMode == selectionMode.emptyArea) {
+      if (model.objectModel != null) {
+        if(model.seatState == SeatState.black){
+          ToastHelper.Show(context, "Odstraněna plocha.");
+        } else {
+          ToastHelper.Show(context, "Odstraněno místo.");
+        }
+        blueprint!.objects!.remove(model.objectModel);
+        //here go through all groups and remove model.objectModel!
+
+        model.objectModel = null;
+        model.seatState = SeatState.empty;
+      }
     }
     setState(() {});
   }
@@ -498,11 +531,9 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
     setState(() {
       currentBoxes = blueprint!.toBlueprintObjects();
-      currentHeight = blueprint!.configuration!.height!;
-      currentWidth = blueprint!.configuration!.width!;
     });
   }
 }
 
 
-enum selectionMode { none, addBlack, addAvailable }
+enum selectionMode { none, emptyArea, addBlack, addAvailable }
