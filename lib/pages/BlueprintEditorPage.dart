@@ -167,17 +167,48 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center, // Center legend items
         children: [
-          buildLegendItem("Obsazené", SeatState.ordered),
-          buildLegendItem("Dostupné", SeatState.available, selectable: true, onTap: () {
-            currentSelectionMode = selectionMode.addAvailable;
+          buildLegendItem("Obsazené", SeatState.ordered, isActive: currentSelectionMode == selectionMode.none),
+          const SizedBox(width: 8), // Reduce spacing
+          buildLegendItem("Dostupné", SeatState.available, isActive: currentSelectionMode == selectionMode.addAvailable, onTap: () {
+            setState(() {
+              currentSelectionMode = selectionMode.addAvailable;
+            });
           }),
-          buildLegendItem("Vybrané", SeatState.selected),
-          buildLegendItem("Stůl", SeatState.black, selectable: true, onTap: () {
-            currentSelectionMode = selectionMode.addBlack;
+          const SizedBox(width: 8),
+          buildLegendItem("Vybrané", SeatState.selected, isActive: currentSelectionMode == selectionMode.none),
+          const SizedBox(width: 8),
+          buildLegendItem("Stůl", SeatState.black, isActive: currentSelectionMode == selectionMode.addBlack, onTap: () {
+            setState(() {
+              currentSelectionMode = selectionMode.addBlack;
+            });
           }),
         ],
+      ),
+    );
+  }
+
+  Widget buildLegendItem(String label, SeatState state, {bool isActive = false, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isActive ? Colors.blue : Colors.transparent, // Highlight active state
+            width: 2,
+          ),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SeatWidget.buildSeat(state: state, size: SeatReservationWidget.boxSize.toDouble()),
+            const SizedBox(width: 4),
+            Text(label),
+          ],
+        ),
       ),
     );
   }
@@ -209,20 +240,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           ],
         ),
       ],
-    );
-  }
-
-  Widget buildLegendItem(String label, SeatState state, {bool selectable = false, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: selectable ? onTap : null,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SeatWidget.buildSeat(state: state, size: SeatReservationWidget.boxSize.toDouble()),
-          const SizedBox(width: 8),
-          Text(label),
-        ],
-      ),
     );
   }
 
