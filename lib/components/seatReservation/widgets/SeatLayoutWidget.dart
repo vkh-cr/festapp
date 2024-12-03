@@ -8,11 +8,13 @@ import 'SeatWidget.dart';
 
 class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
+  final SeatLayoutWidgetController? controller;
   final void Function(SeatModel model)? onSeatTap;
 
   const SeatLayoutWidget({
     Key? key,
     required this.stateModel,
+    this.controller,
     this.onSeatTap,
   }) : super(key: key);
 
@@ -26,6 +28,9 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   @override
   void initState() {
     super.initState();
+
+    widget.controller?.attachFitLayout(_fitLayout);
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitLayout();
     });
@@ -96,5 +101,19 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
       colI: colI,
       seatSize: widget.stateModel.seatSize,
     );
+  }
+}
+
+class SeatLayoutWidgetController {
+  Function()? _fitLayout;
+
+  /// Attach a fit layout method
+  void attachFitLayout(Function()? fitLayout) {
+    _fitLayout = fitLayout;
+  }
+
+  /// Call the fit layout method
+  void fitLayout() {
+    _fitLayout?.call();
   }
 }

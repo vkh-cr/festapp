@@ -42,6 +42,9 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
   selectionMode currentSelectionMode = selectionMode.none;
 
+  final SeatLayoutWidgetController seatLayoutController =
+  SeatLayoutWidgetController();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -87,6 +90,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                   child: blueprint == null
                       ? const Center(child: CircularProgressIndicator())
                       : SeatLayoutWidget(
+                    controller: seatLayoutController,
                     onSeatTap: handleSeatTap,
                     stateModel: SeatLayoutStateModel(
                       rows: currentHeight,
@@ -137,17 +141,23 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
         buildDimensionEditor(
           "Šířka",
           currentWidth,
-              (value) => setState(() {
-            currentWidth = value;
-          }),
+              (value) {
+            setState(() {
+              currentWidth = value;
+            });
+            seatLayoutController.fitLayout(); // Fit layout after width change
+          },
         ),
         const SizedBox(width: 16),
         buildDimensionEditor(
           "Výška",
           currentHeight,
-              (value) => setState(() {
-            currentHeight = value;
-          }),
+              (value) {
+            setState(() {
+              currentHeight = value;
+            });
+            seatLayoutController.fitLayout(); // Fit layout after height change
+          },
         ),
       ],
     );
