@@ -87,7 +87,10 @@ class FormHelper {
     } else if (fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
     } else if (fieldType == fieldTypeSpot) {
-      return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
+      if (fieldValue is SeatModel) {
+        return fieldValue.objectModel?.id;
+      }
+      return null;
     } else if (fieldType == fieldTypeTicket) {
       // Collect ticket data from multiple ticket forms
       List<Map<String, dynamic>> tickets = [];
@@ -107,7 +110,7 @@ class FormHelper {
         }
       }
 
-      return tickets; // Return ticket data with all subfields and prices
+      return tickets;
     }
 
     if(fieldValue is String){
@@ -256,27 +259,62 @@ class FormHelper {
 
 
   // Build a simple text field with optional validation
-  static FormBuilderTextField buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, String name, String label) {
-    return FormBuilderTextField(
+  static Widget buildSpotField(
+      BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, String name, String label) {
+    // Create a TextEditingController to control the displayed text
+    TextEditingController textController = TextEditingController();
+
+    return FormBuilderField<SeatModel>(
       name: name,
-      enableInteractiveSelection: false,
-      readOnly: true,
-      decoration: InputDecoration(labelText: label, suffixIcon: Icon(Icons.event_seat), labelStyle: StylesConfig.textStyleBig),
       validator: FormBuilderValidators.compose([
         FormBuilderValidators.required(),
+            (value) {
+          if (value == null) {
+            return "Please select a seat.".tr();
+          }
+          return null;
+        },
       ]),
-      onTap: () async {
-        SeatModel? selectedSeat = await showGeneralDialog(
-          context: context,
-          barrierColor: Colors.black12.withOpacity(0.6), // Background color
-          barrierDismissible: false,
-          barrierLabel: 'Dialog',
-          transitionDuration: const Duration(milliseconds: 300),
-          pageBuilder: (context, __, ___) {
-            return SeatReservationWidget(secret: secret, formDataKey: form.formKey!, blueprintId: form.blueprint!);
+      builder: (FormFieldState<SeatModel?> field) {
+        SeatModel? seat = field.value;
+        textController.text = seat?.objectModel?.title ?? "---";
+
+        return TextField(
+          controller: textController,
+          readOnly: true,
+          canRequestFocus: false,
+          decoration: InputDecoration(
+            labelText: label,
+            suffixIcon: const Icon(Icons.event_seat),
+            labelStyle: StylesConfig.textStyleBig,
+            errorText: field.errorText, // Display validation error
+          ),
+          onTap: () async {
+            // Show the seat reservation dialog and await the result
+            SeatModel? selectedSeat = await showGeneralDialog<SeatModel>(
+              context: context,
+              barrierColor: Colors.black12.withOpacity(0.6),
+              barrierDismissible: false,
+              barrierLabel: 'Dialog',
+              transitionDuration: const Duration(milliseconds: 300),
+              pageBuilder: (context, __, ___) {
+                return SeatReservationWidget(
+                  secret: secret,
+                  formDataKey: form.formKey!,
+                  blueprintId: form.blueprint!,
+                  selectedSeat: field.value,
+                );
+              },
+            );
+
+            if (selectedSeat != null) {
+              // Update the form field and display value
+              field.didChange(selectedSeat);
+              textController.text =
+                  selectedSeat.objectModel?.title ?? "---";
+            }
           },
         );
-        formKey.currentState?.fields[name]?.didChange(selectedSeat?.objectModel?.title??"---");
       },
     );
   }

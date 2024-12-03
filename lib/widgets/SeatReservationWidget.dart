@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
@@ -17,15 +18,15 @@ class SeatReservationWidget extends StatefulWidget {
   final int blueprintId;
   final String secret;
   final String formDataKey;
+  SeatModel? selectedSeat;
 
-  SeatReservationWidget({Key? key, required this.blueprintId, required this.secret, required this.formDataKey}) : super(key: key);
+  SeatReservationWidget({Key? key, required this.blueprintId, required this.secret, required this.formDataKey, this.selectedSeat}) : super(key: key);
 
   @override
   State<SeatReservationWidget> createState() => _SeatReservationWidgetState();
 }
 
 class _SeatReservationWidgetState extends State<SeatReservationWidget> {
-  SeatModel? selectedSeat;
   List<SeatModel> allObjects = [];
 
 
@@ -112,15 +113,15 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       ? const Center(child: CircularProgressIndicator()) :
                   SeatLayoutWidget(
                     onSeatTap: (model) {
-                      if (model.seatState == SeatState.selected_by_me) {
+                      if (model.seatState == SeatState.selected_by_me_focused) {
                         model.seatState = SeatState.available;
-                        selectedSeat = null;
+                        widget.selectedSeat = null;
                       } else if (model.seatState == SeatState.available) {
-                        if (selectedSeat != null) {
-                          selectedSeat!.seatState = SeatState.available;
+                        if (widget.selectedSeat != null) {
+                          widget.selectedSeat!.seatState = SeatState.available;
                         }
-                        model.seatState = SeatState.selected_by_me;
-                        selectedSeat = model;
+                        model.seatState = SeatState.selected_by_me_focused;
+                        widget.selectedSeat = model;
                       }
                       setState(() {});
                     },
@@ -143,11 +144,11 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       },
                       child: const Text("Storno").tr(),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 24),
                     ElevatedButton(
                       onPressed: () {
                         // Save changes logic
-                        Navigator.pop(context, selectedSeat);
+                        Navigator.pop(context, widget.selectedSeat);
                       },
                       child: const Text("Save").tr(),
                     ),
@@ -167,6 +168,13 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     if (blueprint == null) {
       return;
     }
+
+    if (widget.selectedSeat != null) {
+      blueprint?.objects
+          ?.firstWhereOrNull((object) => object.id == widget.selectedSeat?.objectModel?.id)
+          ?.stateEnum = SeatState.selected_by_me_focused;
+    }
+
 
     setState(() {});
   }

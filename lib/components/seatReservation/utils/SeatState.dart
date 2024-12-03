@@ -4,6 +4,9 @@ enum SeatState {
   selected,
 
   /// current user selected this seat
+  selected_by_me_focused,
+
+  /// current user selected this seat
   selected_by_me,
 
   /// but it is available to be booked
