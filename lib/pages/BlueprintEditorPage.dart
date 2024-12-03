@@ -39,6 +39,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
   List<SeatModel> changedBoxes = [];
   List<SeatModel> allBoxes = [];
+  bool showHint = true;
 
   selectionMode currentSelectionMode = selectionMode.none;
 
@@ -85,7 +86,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
               children: [
                 const SizedBox(height: 16),
                 buildDimensionControls(),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Flexible(
                   child: blueprint == null
                       ? const Center(child: CircularProgressIndicator())
@@ -102,6 +103,15 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
+                if (showHint)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 buildLegend(),
                 const SizedBox(height: 16),
               ],
@@ -169,33 +179,56 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center, // Center legend items
         children: [
-          buildLegendItem("Obsazené", SeatState.ordered, isActive: currentSelectionMode == selectionMode.none),
-          const SizedBox(width: 8), // Reduce spacing
-          buildLegendItem("Dostupné", SeatState.available, isActive: currentSelectionMode == selectionMode.addAvailable, onTap: () {
-            setState(() {
-              currentSelectionMode = selectionMode.addAvailable;
-            });
-          }),
+          buildLegendItem(
+            "Obsazené",
+            SeatState.ordered,
+            isActive: false, // None state is not active
+          ),
           const SizedBox(width: 8),
-          buildLegendItem("Vybrané", SeatState.selected, isActive: currentSelectionMode == selectionMode.none),
+          buildLegendItem(
+            "Dostupné",
+            SeatState.available,
+            isActive: currentSelectionMode == selectionMode.addAvailable,
+            onTap: () {
+              setState(() {
+                currentSelectionMode = selectionMode.addAvailable;
+                showHint = false; // Hide hint on click
+              });
+            },
+          ),
           const SizedBox(width: 8),
-          buildLegendItem("Stůl", SeatState.black, isActive: currentSelectionMode == selectionMode.addBlack, onTap: () {
-            setState(() {
-              currentSelectionMode = selectionMode.addBlack;
-            });
-          }),
+          buildLegendItem(
+            "Vybrané",
+            SeatState.selected,
+            isActive: false, // None state is not active
+          ),
+          const SizedBox(width: 8),
+          buildLegendItem(
+            "Stůl",
+            SeatState.black,
+            isActive: currentSelectionMode == selectionMode.addBlack,
+            onTap: () {
+              setState(() {
+                currentSelectionMode = selectionMode.addBlack;
+                showHint = false; // Hide hint on click
+              });
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget buildLegendItem(String label, SeatState state, {bool isActive = false, VoidCallback? onTap}) {
+  Widget buildLegendItem(String label, SeatState state,
+      {bool isActive = false, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: isActive ? Colors.blue : Colors.transparent, // Highlight active state
+            color: isActive
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent, // Use primary color for active state
             width: 2,
           ),
           borderRadius: BorderRadius.circular(4),
@@ -204,7 +237,10 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SeatWidget.buildSeat(state: state, size: SeatReservationWidget.boxSize.toDouble()),
+            SeatWidget.buildSeat(
+              state: state,
+              size: SeatReservationWidget.boxSize.toDouble(),
+            ),
             const SizedBox(width: 4),
             Text(label),
           ],
@@ -315,5 +351,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
     });
   }
 }
+
 
 enum selectionMode { none, addBlack, addAvailable }
