@@ -84,7 +84,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getAllFormFields(context, form.data![FormHelper.metaFields]),
+                    ...FormHelper.getAllFormFields(context, _formKey, form.data![FormHelper.metaFields]),
                       const SizedBox(
                         height: 16,
                       ),

@@ -34,7 +34,7 @@ class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
   bool _isSendSuccess = false;
   double _totalPrice = 0.0; // Total price
-  Map<String, dynamic>? formData;
+  Map<String, dynamic>? formResult;
   FormModel? form;
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -112,7 +112,7 @@ class _FormPageState extends State<FormPage> {
                           color: ThemeConfig.blackColor(context),
                         ),
                         text: "Your order was successfully sent to your email {email}."
-                            .tr(namedArgs: {"email": formData?[FormHelper.fieldTypeEmail] ?? ""}),
+                            .tr(namedArgs: {"email": formResult?[FormHelper.fieldTypeEmail] ?? ""}),
                       ),
                       const WidgetSpan(
                         child: Padding(
@@ -133,7 +133,7 @@ class _FormPageState extends State<FormPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                      ...FormHelper.getAllFormFields(context, form!, _updateTotalPrice),
+                      ...FormHelper.getAllFormFields(context, _formKey, form!, _updateTotalPrice),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
@@ -161,7 +161,7 @@ class _FormPageState extends State<FormPage> {
 
                             data["secret"] = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
                             data["form"] = "7f4e3892-a544-4385-b933-61117e9755c3";
-                            formData = data;
+                            formResult = data;
 
 
                             var response = await DbEshop.sendTicketOrder(data);

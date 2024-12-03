@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 
@@ -17,9 +16,9 @@ class SeatReservationWidget extends StatefulWidget {
 
   final int blueprintId;
   final String secret;
-  final String formKey;
+  final String formDataKey;
 
-  SeatReservationWidget({Key? key, required this.blueprintId, required this.secret, required this.formKey}) : super(key: key);
+  SeatReservationWidget({Key? key, required this.blueprintId, required this.secret, required this.formDataKey}) : super(key: key);
 
   @override
   State<SeatReservationWidget> createState() => _SeatReservationWidgetState();
@@ -164,7 +163,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   }
 
   void loadData() async {
-    blueprint = await DbEshop.getBlueprint(widget.secret, widget.formKey, widget.blueprintId);
+    blueprint = await DbEshop.getBlueprint(widget.secret, widget.formDataKey, widget.blueprintId);
     if (blueprint == null) {
       return;
     }

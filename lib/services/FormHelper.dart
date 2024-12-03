@@ -58,12 +58,12 @@ class FormHelper {
   static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
 
 
-  static List<Widget> getAllFormFields(BuildContext context, FormModel form, [void Function()? updateTotalPrice]) {
-    return form.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, form, field, updateTotalPrice)).toList();
+  static List<Widget> getAllFormFields(BuildContext context,  GlobalKey<FormBuilderState> formKey, FormModel formData, [void Function()? updateTotalPrice]) {
+    return formData.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
   }
 
-  static List<Widget> getFormFields(BuildContext context, FormModel form, dynamic fields, [void Function()? updateTotalPrice]) {
-    return fields.map<Widget>((field) => createFormField(context, form, field, updateTotalPrice)).toList();
+  static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel formData, dynamic fields, [void Function()? updateTotalPrice]) {
+    return fields.map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
   }
 
   // Retrieve form data by iterating over defined fields
@@ -118,7 +118,7 @@ class FormHelper {
 
 
   // Create individual form field widget based on configuration
-  static Widget createFormField(BuildContext context, FormModel form, Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
+  static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
     final bool isRequiredField = field[IS_REQUIRED] ?? false;
     switch (field[metaType]) {
       case fieldTypeNote:
@@ -130,7 +130,7 @@ class FormHelper {
       case fieldTypeCity:
         return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
       case fieldTypeSpot:
-        return buildSpotField(context, form, fieldTypeSpot, spotLabel());
+        return buildSpotField(context, formKey, form, fieldTypeSpot, spotLabel());
       case fieldTypeEmail:
         return buildEmailField(isRequiredField);
       case fieldTypeSex:
@@ -140,14 +140,15 @@ class FormHelper {
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       case fieldTypeTicket:
-        return buildTicketField(form, field, ticketValues, ticketKeys, updateTotalPrice);
+        return buildTicketField(formKey, form, field, ticketValues, ticketKeys, updateTotalPrice);
       default:
         return const SizedBox.shrink();
     }
   }
 
   static Widget buildTicketField(
-      FormModel form,
+      GlobalKey<FormBuilderState> formKey,
+      FormModel formData,
       Map<String, dynamic> field,
       List<Map<String, dynamic>> ticketValues,
       List<GlobalKey<FormBuilderState>> ticketKeys,
@@ -230,7 +231,7 @@ class FormHelper {
                           key: ticketKeys[i], // Assign the corresponding key
                           onChanged: updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, form, ticketValues[i][FormHelper.metaFields]),
+                            children: getFormFields(context, ticketKeys[i], formData, ticketValues[i][FormHelper.metaFields]),
                           ),
                         ),
                       ],
@@ -255,7 +256,7 @@ class FormHelper {
 
 
   // Build a simple text field with optional validation
-  static FormBuilderTextField buildSpotField(BuildContext context, FormModel form, String name, String label) {
+  static FormBuilderTextField buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, String name, String label) {
     return FormBuilderTextField(
       name: name,
       enableInteractiveSelection: false,
@@ -272,10 +273,10 @@ class FormHelper {
           barrierLabel: 'Dialog',
           transitionDuration: const Duration(milliseconds: 300),
           pageBuilder: (context, __, ___) {
-            return SeatReservationWidget(secret: secret, formKey: form.formKey!, blueprintId: form.blueprint!);
+            return SeatReservationWidget(secret: secret, formDataKey: form.formKey!, blueprintId: form.blueprint!);
           },
         );
-        (FormBuilder.of(context)?.fields[name])?.didChange(selectedSeat?.objectModel?.title??"---");
+        formKey.currentState?.fields[name]?.didChange(selectedSeat?.objectModel?.title??"---");
       },
     );
   }
