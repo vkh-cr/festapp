@@ -42,7 +42,7 @@ class BlueprintModel {
       groups: json[TbEshop.blueprints.groups] != null
           ? List<BlueprintGroupModel>.from(
           json[TbEshop.blueprints.groups].map((g) => BlueprintGroupModel.fromJson(g)))
-          : null,
+          : [],
     );
   }
 

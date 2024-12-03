@@ -468,7 +468,7 @@ class DialogHelper{
 
   static Future<String?> showInputDialog({
     required BuildContext context,
-    required String initialValue,
+    String? initialValue,
     required String dialogTitle,
     required String labelText,
   }) async {

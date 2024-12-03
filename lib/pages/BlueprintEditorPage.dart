@@ -8,6 +8,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
@@ -63,8 +64,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text("Editor Blueprintu:"),
-            Flexible(
+            Center(
               child: Text(
                 blueprint?.title ?? "",
                 overflow: TextOverflow.ellipsis,
@@ -79,43 +79,64 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
       ),
       body: SafeArea(
         child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16),
-                buildDimensionControls(),
-                const SizedBox(height: 16),
-                Flexible(
-                  child: blueprint == null
-                      ? const Center(child: CircularProgressIndicator())
-                      : SeatLayoutWidget(
-                    controller: seatLayoutController,
-                    onSeatTap: handleSeatTap,
-                    stateModel: SeatLayoutStateModel(
-                      rows: currentHeight,
-                      cols: currentWidth,
-                      seatSize: SeatReservationWidget.boxSize,
-                      currentObjects: currentBoxes ?? [],
-                      allBoxes: allBoxes,
-                    ),
-                  ),
+          child: Row(
+            children: [
+              // Left panel (Legend)
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (showHint)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(
+                          "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
+                          style: Theme.of(context).textTheme.bodySmall,
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    buildLegend(),
+                  ],
                 ),
-                const SizedBox(height: 16),
-                if (showHint)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: Text(
-                      "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
+              ),
+              const SizedBox(width: 16), // Padding between legend and main content
+              // Main content section
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 16),
+                    buildDimensionControls(),
+                    const SizedBox(height: 16),
+                    Flexible(
+                      child: blueprint == null
+                          ? const Center(child: CircularProgressIndicator())
+                          : SeatLayoutWidget(
+                        controller: seatLayoutController,
+                        onSeatTap: handleSeatTap,
+                        stateModel: SeatLayoutStateModel(
+                          rows: currentHeight,
+                          cols: currentWidth,
+                          seatSize: SeatReservationWidget.boxSize,
+                          currentObjects: currentBoxes ?? [],
+                          allBoxes: allBoxes,
+                        ),
+                      ),
                     ),
-                  ),
-                buildLegend(),
-                const SizedBox(height: 16),
-              ],
-            ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16), // Padding between main content and groups
+              // Right panel (Groups)
+              Container(
+                width: 250,
+                padding: const EdgeInsets.all(16.0),
+                child: buildGroupsSection(),
+              ),
+            ],
           ),
         ),
       ),
@@ -144,6 +165,215 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
 
+  Widget buildGroupsSection() {
+    return blueprint == null
+    ? const Center(child: CircularProgressIndicator()) :
+    Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Stoly (Skupiny):",
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  tooltip: "Přidat nový stůl",
+                  onPressed: addGroup,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  tooltip: "Smazat vybraný stůl",
+                  onPressed: deleteGroup,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  tooltip: "Přejmenovat vybraný stůl",
+                  onPressed: renameGroup,
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Container(
+          height: 120, // Limit height for the group list
+          child: ListView.builder(
+            itemCount: blueprint!.groups!.length,
+            itemBuilder: (context, index) {
+              final group = blueprint!.groups![index];
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    currentGroup = group;
+                  });
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: currentGroup == group
+                        ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+                        : Colors.transparent,
+                    border: Border.all(
+                      color: currentGroup == group
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.grey,
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        group.title!,
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      Text(
+                        "${group.objects.length} objektů",
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  void addGroup() async {
+    final newTitle = await DialogHelper.showInputDialog(
+      context: context,
+      dialogTitle: "Přidat nový stůl",
+      labelText: "Název stolu",
+    );
+
+    if (newTitle != null && newTitle.isNotEmpty) {
+      setState(() {
+        blueprint!.groups!.add(BlueprintGroupModel(title: newTitle));
+        blueprint!.groups!.sort((a,b) => Utilities.naturalCompare(a.title!, b.title!));
+      });
+    }
+  }
+
+  void deleteGroup() {
+    if (currentGroup == null) return;
+
+    setState(() {
+      blueprint!.groups!.remove(currentGroup);
+      currentGroup = null;
+    });
+  }
+
+  void renameGroup() async {
+    if (currentGroup == null) return;
+
+    final newTitle = await DialogHelper.showInputDialog(
+      context: context,
+      dialogTitle: "Přejmenovat stůl",
+      labelText: "Nový název",
+      initialValue: currentGroup!.title,
+    );
+
+    if (newTitle != null && newTitle.isNotEmpty) {
+      setState(() {
+        currentGroup!.title = newTitle;
+        blueprint!.groups!.sort((a,b) => Utilities.naturalCompare(a.title!, b.title!));
+      });
+    }
+  }
+
+  Widget buildLegend() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildLegendItem(
+          "Stůl",
+          SeatState.black,
+          isActive: currentSelectionMode == selectionMode.addBlack,
+          onTap: () {
+            setState(() {
+              currentSelectionMode = selectionMode.addBlack;
+              showHint = false; // Hide hint on click
+            });
+          },
+        ),
+        const SizedBox(height: 8),
+        buildLegendItem(
+          "Dostupné",
+          SeatState.available,
+          isActive: currentSelectionMode == selectionMode.addAvailable,
+          onTap: () {
+            setState(() {
+              currentSelectionMode = selectionMode.addAvailable;
+              showHint = false; // Hide hint on click
+            });
+          },
+        ),
+        const SizedBox(height: 8),
+        buildLegendItem(
+          "Obsazené",
+          SeatState.ordered,
+          isActive: false, // Not clickable
+          grayedOut: true,
+        ),
+        const SizedBox(height: 8),
+        buildLegendItem(
+          "Vybrané",
+          SeatState.selected,
+          isActive: false, // Not clickable
+          grayedOut: true,
+        ),
+      ],
+    );
+  }
+
+  Widget buildLegendItem(String label, SeatState state,
+      {bool isActive = false, VoidCallback? onTap, bool grayedOut = false}) {
+    return MouseRegion(
+      cursor: grayedOut ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: grayedOut ? null : onTap,
+        child: Opacity(
+          opacity: grayedOut ? 0.4 : 1.0, // Reduce opacity for grayed-out items
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isActive
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.transparent, // Highlight active items
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SeatWidget.buildSeat(
+                  state: state,
+                  size: SeatReservationWidget.boxSize.toDouble(),
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: grayedOut ? Colors.grey : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildDimensionControls() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -158,7 +388,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
             seatLayoutController.fitLayout(); // Fit layout after width change
           },
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 12), // Reduced spacing between editors
         buildDimensionEditor(
           "Výška",
           currentHeight,
@@ -173,91 +403,23 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
     );
   }
 
-  Widget buildLegend() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Center legend items
-        children: [
-          buildLegendItem(
-            "Obsazené",
-            SeatState.ordered,
-            isActive: false, // None state is not active
-          ),
-          const SizedBox(width: 8),
-          buildLegendItem(
-            "Dostupné",
-            SeatState.available,
-            isActive: currentSelectionMode == selectionMode.addAvailable,
-            onTap: () {
-              setState(() {
-                currentSelectionMode = selectionMode.addAvailable;
-                showHint = false; // Hide hint on click
-              });
-            },
-          ),
-          const SizedBox(width: 8),
-          buildLegendItem(
-            "Vybrané",
-            SeatState.selected,
-            isActive: false, // None state is not active
-          ),
-          const SizedBox(width: 8),
-          buildLegendItem(
-            "Stůl",
-            SeatState.black,
-            isActive: currentSelectionMode == selectionMode.addBlack,
-            onTap: () {
-              setState(() {
-                currentSelectionMode = selectionMode.addBlack;
-                showHint = false; // Hide hint on click
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildLegendItem(String label, SeatState state,
-      {bool isActive = false, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isActive
-                ? Theme.of(context).colorScheme.primary
-                : Colors.transparent, // Use primary color for active state
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SeatWidget.buildSeat(
-              state: state,
-              size: SeatReservationWidget.boxSize.toDouble(),
-            ),
-            const SizedBox(width: 4),
-            Text(label),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget buildDimensionEditor(String label, int currentValue, ValueChanged<int> onChanged) {
     return Column(
       children: [
-        Text(label),
-        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+          ),
+        ),
+        const SizedBox(height: 4),
         Row(
           children: [
             IconButton(
               icon: const Icon(Icons.remove),
+              iconSize: 16,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               onPressed: () {
                 if (currentValue > 1) {
                   onChanged(currentValue - 1);
@@ -265,10 +427,16 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
               },
             ),
             Text(
-                "$currentValue"
+              "$currentValue",
+              style: TextStyle(
+                fontSize: 14,
+              ),
             ),
             IconButton(
               icon: const Icon(Icons.add),
+              iconSize: 16,
+              padding: const EdgeInsets.all(4),
+              constraints: const BoxConstraints(),
               onPressed: () {
                 onChanged(currentValue + 1);
               },
