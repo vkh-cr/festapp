@@ -83,4 +83,13 @@ class DbEshop {
 
     return BlueprintModel.fromJson(response);
   }
+
+  static Future<void> updateBlueprint(BlueprintModel blueprint) async {
+    var json = blueprint.toJson();
+    if(blueprint.id==null) {
+      await _supabaseEshop.from(TbEshop.blueprints.table).insert(json);
+    } else {
+      await _supabaseEshop.from(TbEshop.blueprints.table).update(json).eq(TbEshop.blueprints.id, blueprint.id!);
+    }
+  }
 }

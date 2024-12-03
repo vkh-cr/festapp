@@ -9,6 +9,7 @@ class BlueprintObjectModel {
   static const String metaState = "state";
   static const String metaTitle = "title";
   static const String metaId = "id";
+  static const String metaGroupId = "group_id";
 
   static const String soldType = "sold";
   static const String selectedType = "selected";
@@ -27,18 +28,18 @@ class BlueprintObjectModel {
   @override
   toString()
   {
-    return "stůl $group, sedadlo $title";
+    return "stůl ${group?.title}, sedadlo $title";
   }
 
   toShortString()
   {
-    return "${group??""}${title??""}";
+    return "${group?.title??""}${title??""}";
   }
 
   int? x;
   int? y;
   int? id;
-  int? spot;
+  int? groupId;
   String? type;
   String? state;
   String? title;
@@ -50,7 +51,7 @@ class BlueprintObjectModel {
       x: json[metaX],
       y: json[metaY],
       id: json[metaId],
-      spot: json[metaSpot],
+      groupId: json[metaGroupId],
       type: json[metaType],
       state: json[metaState],
       title: json[metaTitle],
@@ -61,17 +62,15 @@ class BlueprintObjectModel {
     metaX: x,
     metaY: y,
     metaId: id,
-    metaSpot: spot,
+    metaGroupId: group?.id,
     metaType: type,
-    metaState: state,
-    metaTitle: title,
   };
 
   BlueprintObjectModel({
     this.x,
     this.y,
     this.id,
-    this.spot,
+    this.groupId,
     this.type,
     this.state,
     this.stateEnum,

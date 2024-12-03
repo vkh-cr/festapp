@@ -1,20 +1,24 @@
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 
 class BlueprintGroupModel {
+  static const String metaId = "id";
   static const String metaTitle = "title";
   static const String metaItems = "items";
 
+  int? id;
   String? title;
   List<int>? objectIds;
   List<BlueprintObjectModel> objects = [];
 
   BlueprintGroupModel({
+    this.id,
     this.title,
     this.objectIds,
   });
 
   factory BlueprintGroupModel.fromJson(Map<String, dynamic> json) {
     return BlueprintGroupModel(
+      id: json[metaId],
       title: json[metaTitle],
       objectIds: json[metaItems] != null
           ? List<int>.from(json[metaItems])
@@ -23,6 +27,7 @@ class BlueprintGroupModel {
   }
 
   Map<String, dynamic> toJson() => {
+    metaId: id,
     metaTitle: title,
     metaItems: objectIds,
   };

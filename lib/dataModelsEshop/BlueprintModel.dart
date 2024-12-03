@@ -3,6 +3,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'BlueprintConfiguration.dart';
 import 'BlueprintObjectModel.dart';
+import 'package:collection/collection.dart';
 
 class BlueprintModel {
   static const String metaSpots = "spots";
@@ -14,6 +15,7 @@ class BlueprintModel {
   Map<String, dynamic>? data;
   String? title;
   int? organization;
+  int? occasion;
   BlueprintConfiguration? configuration;
   List<BlueprintObjectModel>? objects;
   List<BlueprintObjectModel>? spots;
@@ -28,6 +30,7 @@ class BlueprintModel {
       data: json[TbEshop.blueprints.data],
       title: json[TbEshop.blueprints.title],
       organization: json[TbEshop.blueprints.organization],
+      occasion: json[TbEshop.blueprints.occasion],
       configuration: json[TbEshop.blueprints.configuration] != null
           ? BlueprintConfiguration.fromJson(json[TbEshop.blueprints.configuration])
           : null,
@@ -35,9 +38,9 @@ class BlueprintModel {
           ? List<BlueprintObjectModel>.from(
           json[TbEshop.blueprints.objects].map((obj) => BlueprintObjectModel.fromJson(obj)))
           : null,
-      spots: json[metaSpotType] != null
+      spots: json[metaSpots] != null
           ? List<BlueprintObjectModel>.from(
-          json[metaSpotType].map((spot) => BlueprintObjectModel.fromJson(spot)))
+          json[metaSpots].map((spot) => BlueprintObjectModel.fromJson(spot)))
           : null,
       groups: json[TbEshop.blueprints.groups] != null
           ? List<BlueprintGroupModel>.from(
@@ -51,10 +54,11 @@ class BlueprintModel {
     TbEshop.blueprints.created_at: createdAt?.toIso8601String(),
     TbEshop.blueprints.data: data,
     TbEshop.blueprints.title: title,
+    TbEshop.blueprints.occasion: occasion,
     TbEshop.blueprints.organization: organization,
-    TbEshop.blueprints.configuration: configuration?.toJson(),
-    TbEshop.blueprints.objects: objects?.map((obj) => obj.toJson()),
-    TbEshop.blueprints.groups: groups?.map((g) => g.toJson()),
+    TbEshop.blueprints.configuration: configuration,
+    TbEshop.blueprints.objects: objects,
+    TbEshop.blueprints.groups: groups,
   };
 
   String toBasicString() => title ?? id.toString();
@@ -64,9 +68,9 @@ class BlueprintModel {
 
     return objects!.map((object) {
       if (object.type == metaSpotType) {
-        final matchingSpot = spots?.firstWhere((spot) => spot.id == object.spot);
+        final matchingSpot = spots?.firstWhereOrNull((spot) => spot.id == object.id);
         return BlueprintObjectModel(
-          id: object.spot,
+          id: object.id,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries
               .firstWhere(
@@ -77,9 +81,9 @@ class BlueprintModel {
         );
       } else if (object.type == metaTableAreaType) {
         return BlueprintObjectModel(
-          id: object.spot, // Use object spot ID or null
-          title: object.title, // Use object title
-          stateEnum: SeatState.black, // "table" type always results in black state
+          id: object.id,
+          title: object.title,
+          stateEnum: SeatState.black,
           x: object.x,
           y: object.y,
         );
@@ -95,6 +99,7 @@ class BlueprintModel {
     this.data,
     this.title,
     this.organization,
+    this.occasion,
     this.configuration,
     this.objects,
     this.spots,

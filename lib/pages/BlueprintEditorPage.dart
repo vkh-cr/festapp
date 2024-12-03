@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
@@ -39,7 +40,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
   List<SeatModel> changedBoxes = [];
   List<SeatModel> allBoxes = [];
-  bool showHint = true;
 
   selectionMode currentSelectionMode = selectionMode.none;
 
@@ -80,15 +80,14 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (showHint)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Text(
-                          "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.left,
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: Text(
+                        "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě (Dostupné nebo Stůl).",
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.left,
                       ),
+                    ),
                     buildLegend(),
                   ],
                 ),
@@ -294,7 +293,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           onTap: () {
             setState(() {
               currentSelectionMode = selectionMode.addBlack;
-              showHint = false; // Hide hint on click
             });
           },
         ),
@@ -306,7 +304,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           onTap: () {
             setState(() {
               currentSelectionMode = selectionMode.addAvailable;
-              showHint = false; // Hide hint on click
             });
           },
         ),
@@ -491,20 +488,12 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void saveChanges() async {
-    var updatedObjects = changedBoxes.map((e) {
-      var newObject = e.objectModel ?? BlueprintObjectModel(x: e.colI, y: e.rowI);
-      newObject.stateEnum = e.seatState;
-      return newObject;
-    }).toList();
-
-    // Save changes to the backend
-    // DataService.updateBlueprintObjects(updatedObjects);
-
+    await DbEshop.updateBlueprint(blueprint!);
     ToastHelper.Show(context, "Změny byly uloženy.");
-    Navigator.pop(context);
+    await loadData();
   }
 
-  void loadData() async {
+  Future<void> loadData() async {
     blueprint = await DbEshop.getBlueprintForEdit(widget.id!);
 
     setState(() {
