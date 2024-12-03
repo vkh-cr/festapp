@@ -14,6 +14,7 @@ class ProductModel {
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
+  static const String spotType = "spot";
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(

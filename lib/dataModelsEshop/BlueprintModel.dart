@@ -24,27 +24,13 @@ class BlueprintModel {
   List<BlueprintGroupModel>? groups;
 
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
-    List<BlueprintGroupModel>? groups = json[TbEshop.blueprints.groups] != null
-        ? List<BlueprintGroupModel>.from(
-        json[TbEshop.blueprints.groups].map((g) => BlueprintGroupModel.fromJson(g)))
-        : [];
+    final List<BlueprintGroupModel> groups = _parseGroups(json);
+    final List<BlueprintObjectModel>? rawObjects = _parseObjects(json);
+    final List<BlueprintObjectModel>? spots = _parseSpots(json);
 
-    List<BlueprintObjectModel>? objects = json[TbEshop.blueprints.objects] != null
-        ? List<BlueprintObjectModel>.from(
-        json[TbEshop.blueprints.objects].map((obj) => BlueprintObjectModel.fromJson(obj)))
-        : null;
+    final List<BlueprintObjectModel>? enrichedObjects = _enrichObjects(rawObjects, spots);
 
-    // Assign objects to groups
-    if (objects != null) {
-      for (var obj in objects) {
-        if (obj.groupId != null) {
-          final group = groups.firstWhereOrNull((g) => g.id == obj.groupId);
-          if (group != null) {
-            group.objects.add(obj);
-          }
-        }
-      }
-    }
+    _assignObjectsToGroups(enrichedObjects, groups);
 
     return BlueprintModel(
       id: json[TbEshop.blueprints.id],
@@ -59,13 +45,80 @@ class BlueprintModel {
       configuration: json[TbEshop.blueprints.configuration] != null
           ? BlueprintConfiguration.fromJson(json[TbEshop.blueprints.configuration])
           : null,
-      objects: objects,
-      spots: json[BlueprintModel.metaSpots] != null
-          ? List<BlueprintObjectModel>.from(
-          json[BlueprintModel.metaSpots].map((spot) => BlueprintObjectModel.fromJson(spot)))
-          : null,
+      objects: enrichedObjects,
       groups: groups,
     );
+  }
+
+  // Helper Methods
+  static List<BlueprintGroupModel> _parseGroups(Map<String, dynamic> json) {
+    return json[TbEshop.blueprints.groups] != null
+        ? List<BlueprintGroupModel>.from(
+        json[TbEshop.blueprints.groups].map((g) => BlueprintGroupModel.fromJson(g)))
+        : [];
+  }
+
+  static List<BlueprintObjectModel>? _parseObjects(Map<String, dynamic> json) {
+    return json[TbEshop.blueprints.objects] != null
+        ? List<BlueprintObjectModel>.from(
+        json[TbEshop.blueprints.objects].map((obj) => BlueprintObjectModel.fromJson(obj)))
+        : null;
+  }
+
+  static List<BlueprintObjectModel>? _parseSpots(Map<String, dynamic> json) {
+    return json[BlueprintModel.metaSpots] != null
+        ? List<BlueprintObjectModel>.from(
+        json[BlueprintModel.metaSpots].map((spot) => BlueprintObjectModel.fromJson(spot)))
+        : null;
+  }
+
+  static List<BlueprintObjectModel>? _enrichObjects(
+      List<BlueprintObjectModel>? rawObjects, List<BlueprintObjectModel>? spots) {
+    if (rawObjects == null) return null;
+
+    return rawObjects.map((object) {
+      if (object.type == metaSpotType) {
+        final matchingSpot = spots?.firstWhereOrNull((spot) => spot.id == object.id);
+        return BlueprintObjectModel(
+          id: object.id,
+          type: object.type,
+          product: matchingSpot?.product,
+          groupId: object.groupId,
+          title: matchingSpot?.title ?? object.title,
+          stateEnum: BlueprintObjectModel.States.entries
+              .firstWhereOrNull(
+                  (entry) => entry.value == matchingSpot?.state)?.key ??
+              SeatState.available,
+          x: object.x,
+          y: object.y,
+        );
+      } else if (object.type == metaTableAreaType) {
+        return BlueprintObjectModel(
+          id: object.id,
+          type: object.type,
+          title: object.title,
+          stateEnum: SeatState.black,
+          x: object.x,
+          y: object.y,
+        );
+      }
+      return null; // Skip unrecognized object types
+    }).whereType<BlueprintObjectModel>().toList(); // Filter out null values
+  }
+
+  static void _assignObjectsToGroups(
+      List<BlueprintObjectModel>? objects, List<BlueprintGroupModel>? groups) {
+    // Assign objects to groups
+    if (objects != null) {
+      for (var obj in objects) {
+        if (obj.groupId != null) {
+          final group = groups?.firstWhereOrNull((g) => g.id == obj.groupId);
+          if (group != null) {
+            group.objects.add(obj);
+          }
+        }
+      }
+    }
   }
 
 
@@ -83,35 +136,6 @@ class BlueprintModel {
 
   String toBasicString() => title ?? id.toString();
 
-  List<BlueprintObjectModel> toBlueprintObjects() {
-    if (objects == null) return [];
-
-    return objects!.map((object) {
-      if (object.type == metaSpotType) {
-        final matchingSpot = spots?.firstWhereOrNull((spot) => spot.id == object.id);
-        return BlueprintObjectModel(
-          id: object.id,
-          product: matchingSpot?.product,
-          title: matchingSpot?.title ?? object.title,
-          stateEnum: BlueprintObjectModel.States.entries
-              .firstWhereOrNull(
-                  (entry) => entry.value == matchingSpot?.state)?.key??SeatState.available,
-          x: object.x,
-          y: object.y,
-        );
-      } else if (object.type == metaTableAreaType) {
-        return BlueprintObjectModel(
-          id: object.id,
-          title: object.title,
-          stateEnum: SeatState.black,
-          x: object.x,
-          y: object.y,
-        );
-      }
-      // If the object type is neither "spot" nor "table", skip it
-      return null;
-    }).whereType<BlueprintObjectModel>().toList(); // Filter out null values
-  }
 
   BlueprintModel({
     this.id,

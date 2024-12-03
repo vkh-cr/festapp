@@ -7,6 +7,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -110,7 +111,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                           rows: blueprint!.configuration!.height!,
                           cols: blueprint!.configuration!.width!,
                           seatSize: SeatReservationWidget.boxSize,
-                          currentObjects: currentBoxes ?? [],
+                          currentObjects: blueprint!.objects!,
                           allBoxes: allBoxes,
                         ),
                       ),
@@ -189,7 +190,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           ],
         ),
         const SizedBox(height: 8),
-        Container(
+        SizedBox(
           height: 120, // Limit height for the group list
           child: ListView.builder(
             itemCount: blueprint!.groups!.length,
@@ -248,7 +249,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
     if (newTitle != null && newTitle.isNotEmpty) {
       setState(() {
-        blueprint!.groups!.add(BlueprintGroupModel(title: newTitle));
+        blueprint!.groups!.add(BlueprintGroupModel(title: newTitle, id: blueprint!.getFirstAvailableGroupId()));
         blueprint!.groups!.sort((a, b) => Utilities.naturalCompare(a.title!, b.title!));
       });
     }
@@ -357,7 +358,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SeatWidget.buildSeat(
+                SeatWidgetHelper.buildSeat(
                   state: state,
                   size: SeatReservationWidget.boxSize.toDouble(),
                 ),
@@ -508,6 +509,9 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   void _handleAddBlack(SeatModel model) {
     model.seatState = SeatState.black;
 
+    if (model.objectModel != null && model.objectModel!.type == BlueprintModel.metaTableAreaType) {
+      return;
+    }
     // Remove existing object if it's not a table area
     if (model.objectModel != null && model.objectModel!.type != BlueprintModel.metaTableAreaType) {
       blueprint!.objects!.remove(model.objectModel!);
@@ -525,21 +529,21 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
       ToastHelper.Show(context, "Nejdřív vyberte/vytvořte skupinu pro přidání místa (vpravo).", severity: ToastSeverity.NotOk);
       return;
     }
+
     model.seatState = SeatState.available;
 
-    // Remove existing object if it's not a spot
+    if (model.objectModel != null && model.objectModel!.type == BlueprintModel.metaSpotType) {
+      return;
+    }
+
     if (model.objectModel != null && model.objectModel!.type != BlueprintModel.metaSpotType) {
       blueprint!.objects!.remove(model.objectModel!);
-
-      // Remove the object from all groups
-      for (var group in blueprint!.groups!) {
-        group.objects.remove(model.objectModel);
-      }
     }
 
     // Create or update the object model
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
+    model.objectModel!.product = blueprint!.defaultProduct;
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName();
 
@@ -582,10 +586,10 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   Future<void> loadData() async {
-    blueprint = await DbEshop.getBlueprintForEdit(widget.id!);
+    blueprint = await DbEshop.getBlueprintForEdit(widget.id!, RightsService.currentOccasion!);
 
     setState(() {
-      currentBoxes = blueprint!.toBlueprintObjects();
+      currentBoxes = blueprint!.objects;
     });
   }
 }

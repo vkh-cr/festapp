@@ -24,6 +24,7 @@ class SeatLayoutWidget extends StatefulWidget {
 
 class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   final TransformationController _controller = TransformationController();
+  late List<SeatModel> _seats;
 
   @override
   void initState() {
@@ -31,9 +32,31 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
 
     widget.controller?.attachFitLayout(_fitLayout);
 
+    _seats = _generateSeatModels();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitLayout();
     });
+  }
+
+  List<SeatModel> _generateSeatModels() {
+    final List<SeatModel> seats = [];
+    for (int row = 0; row < widget.stateModel.rows; row++) {
+      for (int col = 0; col < widget.stateModel.cols; col++) {
+        var boxModel = widget.stateModel.currentObjects
+            .firstWhereOrNull((b) => b.x == col && b.y == row);
+        seats.add(
+          SeatModel(
+            objectModel: boxModel,
+            seatState: boxModel?.stateEnum ?? SeatState.empty,
+            rowI: row,
+            colI: col,
+            seatSize: widget.stateModel.seatSize,
+          ),
+        );
+      }
+    }
+    return seats;
   }
 
   void _fitLayout() {
@@ -75,13 +98,21 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: List.generate(widget.stateModel.cols, (colI) {
-              final seatModel = _createSeat(colI, rowI);
+              final seatModel =
+              _seats.firstWhere((seat) => seat.rowI == rowI && seat.colI == colI);
               return Tooltip(
                 showDuration: const Duration(seconds: 0),
                 message: seatModel.objectModel?.title ?? "",
-                child: SeatWidget(
-                  model: seatModel,
-                  onSeatTap: widget.onSeatTap,
+                child: GestureDetector(
+                  onTap: () {
+                    if (widget.onSeatTap != null) {
+                      widget.onSeatTap!(seatModel);
+                    }
+                  },
+                  child: SeatWidgetHelper.buildSeat(
+                    state: seatModel.seatState,
+                    size: seatModel.seatSize.toDouble(),
+                  ),
                 ),
               );
             }),
@@ -91,16 +122,23 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     );
   }
 
-  SeatModel _createSeat(int colI, int rowI) {
-    var boxModel = widget.stateModel.currentObjects
-        .firstWhereOrNull((b) => b.x == colI && b.y == rowI);
-    return SeatModel(
-      objectModel: boxModel,
-      seatState: boxModel?.stateEnum ?? SeatState.empty,
-      rowI: rowI,
-      colI: colI,
-      seatSize: widget.stateModel.seatSize,
-    );
+  @override
+  void didUpdateWidget(covariant SeatLayoutWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Check if rows or columns have changed
+    if (widget.stateModel.rows != oldWidget.stateModel.rows ||
+        widget.stateModel.cols != oldWidget.stateModel.cols ||
+        !const DeepCollectionEquality().equals(
+            widget.stateModel.currentObjects, oldWidget.stateModel.currentObjects)) {
+      setState(() {
+        _seats = _generateSeatModels();
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _fitLayout();
+      });
+    }
   }
 }
 

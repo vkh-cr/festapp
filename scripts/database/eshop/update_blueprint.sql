@@ -14,6 +14,7 @@ DECLARE
     existing_spot_ids BIGINT[];
     occasion_id BIGINT;
     organization_id BIGINT;
+    product_id BIGINT;
 BEGIN
     -- Validate input data
     IF input_data IS NULL THEN
@@ -67,9 +68,41 @@ BEGIN
         FOR object_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'objects') LOOP
             -- Handle "spot" type objects
             IF object_data->>'type' = 'spot' THEN
+                -- Validate product_id
+                product_id := NULL;
+                IF object_data ? 'product' AND object_data->>'product' IS NOT NULL THEN
+                    product_id := (object_data->>'product')::BIGINT;
+
+                    -- Ensure the product exists in eshop.products
+                    IF NOT EXISTS (
+                        SELECT 1
+                        FROM eshop.products
+                        WHERE id = product_id AND occasion = occasion_id
+                    ) THEN
+                        product_id := NULL;
+                    END IF;
+                END IF;
+
+                -- Return error for invalid or missing product_id
+                IF product_id IS NULL THEN
+                    RETURN JSONB_BUILD_OBJECT(
+                        'code', 400,
+                        'message', 'Invalid or missing product. Ensure the product exists and is part of the occasion.',
+                        'details', JSONB_BUILD_OBJECT(
+                            'product_id', NULL,
+                            'object', object_data
+                        )
+                    );
+                END IF;
+
                 -- Collect spot IDs from objects
                 IF object_data ? 'id' AND object_data->>'id' IS NOT NULL THEN
                     spot_ids_in_objects := spot_ids_in_objects || (object_data->>'id')::BIGINT;
+
+                    -- Update the spot's product if applicable
+                    UPDATE eshop.spots
+                    SET product = product_id, updated_at = now
+                    WHERE id = (object_data->>'id')::BIGINT;
                 ELSE
                     -- Create a new spot if ID is null
                     INSERT INTO eshop.spots (
@@ -77,20 +110,24 @@ BEGIN
                         updated_at,
                         occasion,
                         blueprint,
-                        title
+                        title,
+                        product
                     )
                     VALUES (
                         now,
                         now,
                         occasion_id,
                         blueprint_id,
-                        object_data->>'title'
+                        object_data->>'title',
+                        product_id
                     )
                     RETURNING id INTO spot_id;
 
+                    -- Append the new spot ID to the list
+                    spot_ids_in_objects := spot_ids_in_objects || spot_id;
+
                     -- Update the object with the new spot ID
                     object_data := jsonb_set(object_data, '{id}', TO_JSONB(spot_id));
-                    spot_ids_in_objects := spot_ids_in_objects || spot_id;
                 END IF;
             END IF;
 
@@ -115,17 +152,18 @@ BEGIN
             SELECT * INTO spot FROM eshop.spots WHERE id = spot_id;
 
             -- Check conditions for deletion
-            IF (spot.secret_expiration_time IS NOT NULL AND spot.secret_expiration_time < now AND spot.secret IS NOT NULL)
-               AND spot.order_product_ticket IS NOT NULL THEN
-                -- Delete the spot
+            IF (spot.secret_expiration_time IS NULL OR spot.secret_expiration_time < now OR spot.secret IS NULL)
+               AND spot.order_product_ticket IS NULL THEN
+                -- Safe to delete
                 DELETE FROM eshop.spots WHERE id = spot.id;
             ELSE
-                -- Return error if the spot cannot be deleted
+                -- Spot cannot be deleted, return error
                 RETURN JSONB_BUILD_OBJECT(
                     'code', 403,
                     'message', 'Cannot delete spot due to invalid state',
                     'spot_id', spot.id,
                     'details', JSONB_BUILD_OBJECT(
+                    'x', spot_ids_in_objects
                         'secret', spot.secret,
                         'secret_expiration_time', spot.secret_expiration_time,
                         'order_product_ticket', spot.order_product_ticket

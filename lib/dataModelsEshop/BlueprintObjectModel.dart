@@ -10,6 +10,7 @@ class BlueprintObjectModel {
   static const String metaTitle = "title";
   static const String metaId = "id";
   static const String metaGroupId = "group";
+  static const String metaProduct = "product";
 
   static const String soldType = "sold";
   static const String selectedType = "selected";
@@ -26,14 +27,12 @@ class BlueprintObjectModel {
   };
 
   @override
-  toString()
-  {
+  toString() {
     return "stůl ${group?.title}, sedadlo $title";
   }
 
-  toShortString()
-  {
-    return "${group?.title??""}${title??""}";
+  toShortString() {
+    return "${group?.title ?? ""}${title ?? ""}";
   }
 
   int? x;
@@ -43,6 +42,7 @@ class BlueprintObjectModel {
   String? type;
   String? state;
   String? title;
+  int? product;
   BlueprintGroupModel? group;
   SeatState? stateEnum;
 
@@ -55,15 +55,17 @@ class BlueprintObjectModel {
       type: json[metaType],
       state: json[metaState],
       title: json[metaTitle],
+      product: json[metaProduct],
     );
   }
 
   Map<String, dynamic> toJson() => {
     metaX: x,
     metaY: y,
-    metaId: id,
-    metaGroupId: group?.id,
     metaType: type,
+    if (id != null) metaId: id,
+    if (group?.id != null) metaGroupId: group?.id,
+    if (product != null) metaProduct: product,
   };
 
   BlueprintObjectModel({
@@ -75,5 +77,6 @@ class BlueprintObjectModel {
     this.state,
     this.stateEnum,
     this.title,
+    this.product,
   });
 }

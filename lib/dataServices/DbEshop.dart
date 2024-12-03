@@ -5,7 +5,6 @@ import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -72,24 +71,39 @@ class DbEshop {
     return BlueprintModel.fromJson(response["data"]);
   }
 
-  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId) async {
+  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId, int occasion) async {
 
     final response = await _supabaseEshop
         .from(TbEshop.blueprints.table)
         .select()
         .eq(TbEshop.blueprints.id, blueprintId)
         .single();
-    var spots = await _supabaseEshop.from(TbEshop.spots.table).select().eq(TbEshop.spots.occasion, RightsService.currentOccasion!);
+
+    var spots = await _supabaseEshop.from(TbEshop.spots.table).select().eq(TbEshop.spots.occasion, occasion);
     response[BlueprintModel.metaSpots] = spots;
 
+    var defaultProducts = await _supabaseEshop
+        .from(TbEshop.product_types.table)
+        .select(
+        "${TbEshop.product_types.id},"
+            "${TbEshop.product_types.type},"
+            "${TbEshop.product_types.title},"
+            "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price})"
+        )
+        .eq(TbEshop.product_types.occasion, occasion)
+        .eq(TbEshop.product_types.type, ProductModel.spotType);
+    var x = defaultProducts.map((x) => ProductTypeModel.fromJson(x)).first.products!.first;
+
+    response[BlueprintModel.metaDefaultProduct] = x.id;
     return BlueprintModel.fromJson(response);
   }
 
   static Future<bool> updateBlueprint(context, BlueprintModel blueprint) async {
+    var json = blueprint.toJson();
     final response = await _supabase.rpc(
       'update_blueprint',
       params: {
-        'input_data': blueprint.toJson(),
+        'input_data': json,
       },
     );
 

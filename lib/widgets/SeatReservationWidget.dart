@@ -66,7 +66,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SeatWidget.buildSeat(
+                          SeatWidgetHelper.buildSeat(
                             state: SeatState.ordered,
                             size: 15.0,
                           ),
@@ -77,7 +77,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SeatWidget.buildSeat(
+                          SeatWidgetHelper.buildSeat(
                             state: SeatState.available,
                             size: SeatReservationWidget.boxSize.toDouble(),
                           ),
@@ -88,7 +88,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SeatWidget.buildSeat(
+                          SeatWidgetHelper.buildSeat(
                             state: SeatState.selected,
                             size: SeatReservationWidget.boxSize.toDouble(),
                           ),
@@ -99,7 +99,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          SeatWidget.buildSeat(
+                          SeatWidgetHelper.buildSeat(
                             state: SeatState.black,
                             size: 15.0,
                           ),
@@ -173,7 +173,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     }
 
     setState(() {
-      currentObjects = blueprint!.toBlueprintObjects();
+      currentObjects = blueprint!.objects;
       currentHeight = blueprint!.configuration!.height!;
       currentWidth = blueprint!.configuration!.width!;
     });

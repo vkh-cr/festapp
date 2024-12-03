@@ -1,29 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../model/SeatModel.dart';
 import '../utils/SeatState.dart';
 
-class SeatWidget extends StatefulWidget {
-  final SeatModel model;
-  final void Function(SeatModel model)? onSeatTap;
+class SeatWidgetHelper {
+  static const double padding = 2.0;
 
-  const SeatWidget({
-    Key? key,
-    required this.model,
-    this.onSeatTap,
-  }) : super(key: key);
-
-  @override
-  State<SeatWidget> createState() => _SeatWidgetState();
-
-  static double padding = 2.0;
   /// Static method to create a seat widget with a given seat state and size.
   /// This allows external calls to render a seat without relying on the `SeatModel`.
   static Widget buildSeat({
     required SeatState state,
-    double size = 40.0
+    double size = 40.0,
   }) {
-    // Adjust padding for sold, selected, and available states
     final bool hasPadding = state == SeatState.ordered ||
         state == SeatState.selected ||
         state == SeatState.available;
@@ -61,30 +48,3 @@ class SeatWidget extends StatefulWidget {
   }
 }
 
-class _SeatWidgetState extends State<SeatWidget> {
-  late SeatState seatState;
-
-  @override
-  void initState() {
-    super.initState();
-    seatState = widget.model.seatState;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        if (widget.onSeatTap != null) {
-          widget.onSeatTap!(widget.model);
-          setState(() {
-            seatState = widget.model.seatState;
-          });
-        }
-      },
-      child: SeatWidget.buildSeat(
-        state: seatState,
-        size: widget.model.seatSize.toDouble(),
-      ),
-    );
-  }
-}
