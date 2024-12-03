@@ -9,7 +9,7 @@ class BlueprintObjectModel {
   static const String metaState = "state";
   static const String metaTitle = "title";
   static const String metaId = "id";
-  static const String metaGroupId = "group_id";
+  static const String metaGroupId = "group";
 
   static const String soldType = "sold";
   static const String selectedType = "selected";
