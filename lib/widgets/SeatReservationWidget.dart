@@ -151,7 +151,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                     ElevatedButton(
                       onPressed: () {
                         // Save changes logic
-                        Navigator.pop(context);
+                        Navigator.pop(context, selectedSeat);
                       },
                       child: const Text("Save").tr(),
                     ),
@@ -174,10 +174,4 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
 
     setState(() {});
   }
-}
-
-enum selectionMode {
-  normal,
-  addBlack,
-  addAvailable,
 }

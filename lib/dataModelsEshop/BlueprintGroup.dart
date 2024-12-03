@@ -28,8 +28,7 @@ class BlueprintGroupModel {
 
   Map<String, dynamic> toJson() => {
     metaId: id,
-    metaTitle: title,
-    metaItems: objectIds,
+    metaTitle: title
   };
 
   List<String> alphabet = [

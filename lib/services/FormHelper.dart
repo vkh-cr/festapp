@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -264,7 +265,7 @@ class FormHelper {
         FormBuilderValidators.required(),
       ]),
       onTap: () async {
-        await showGeneralDialog(
+        SeatModel? selectedSeat = await showGeneralDialog(
           context: context,
           barrierColor: Colors.black12.withOpacity(0.6), // Background color
           barrierDismissible: false,
@@ -274,7 +275,7 @@ class FormHelper {
             return SeatReservationWidget(secret: secret, formKey: form.formKey!, blueprintId: form.blueprint!);
           },
         );
-        //_formKey.currentState?.fields[TicketModel.boxColumn]!.didChange(selectedSeats.firstOrNull?.toString());
+        (FormBuilder.of(context)?.fields[name])?.didChange(selectedSeat?.objectModel?.title??"---");
       },
     );
   }

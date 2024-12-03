@@ -48,12 +48,12 @@ BEGIN
 
     -- Extract valid spot IDs from blueprint.objects
     WITH valid_spots AS (
-        SELECT (obj->>'spot')::BIGINT AS spot_id
+        SELECT (obj->>'id')::BIGINT AS spot_id
         FROM jsonb_array_elements(
             (SELECT b.objects FROM eshop.blueprints b WHERE b.id = blueprint_id)
         ) obj
         WHERE obj->>'type' = 'spot'
-          AND obj->>'spot' IS NOT NULL
+          AND obj->>'id' IS NOT NULL
     )
     -- Fetch enriched spots data
     SELECT jsonb_agg(jsonb_build_object(

@@ -12,7 +12,7 @@ class BlueprintObjectModel {
   static const String metaGroupId = "group";
   static const String metaProduct = "product";
 
-  static const String soldType = "sold";
+  static const String orderedType = "ordered";
   static const String selectedType = "selected";
   static const String selectedByMeType = "selected_by_me";
   static const String blackType = "black";
@@ -23,7 +23,7 @@ class BlueprintObjectModel {
     SeatState.available: availableType,
     SeatState.selected: selectedType,
     SeatState.selected_by_me: selectedByMeType,
-    SeatState.ordered: soldType,
+    SeatState.ordered: orderedType,
   };
 
   @override
