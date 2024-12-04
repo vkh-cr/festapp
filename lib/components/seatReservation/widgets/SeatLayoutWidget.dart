@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:fstapp/services/Utilities.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
@@ -100,9 +101,10 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
             children: List.generate(widget.stateModel.cols, (colI) {
               final seatModel =
               _seats.firstWhere((seat) => seat.rowI == rowI && seat.colI == colI);
-              return Tooltip(
+              return seatModel.objectModel != null && seatModel.objectModel!.id != null
+                  ? Tooltip(
                 showDuration: const Duration(seconds: 0),
-                message: seatModel.objectModel?.title ?? "",
+                message: "${seatModel.objectModel?.title ?? ""}\n${Utilities.formatPrice(context, seatModel.objectModel?.product?.price ?? 0)}",
                 child: GestureDetector(
                   onTap: () {
                     if (widget.onSeatTap != null) {
@@ -113,6 +115,17 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                     state: seatModel.seatState,
                     size: seatModel.seatSize.toDouble(),
                   ),
+                ),
+              )
+                  : GestureDetector(
+                onTap: () {
+                  if (widget.onSeatTap != null) {
+                    widget.onSeatTap!(seatModel);
+                  }
+                },
+                child: SeatWidgetHelper.buildSeat(
+                  state: seatModel.seatState,
+                  size: seatModel.seatSize.toDouble(),
                 ),
               );
             }),

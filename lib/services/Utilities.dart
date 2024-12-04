@@ -5,12 +5,14 @@ import 'package:intl/intl.dart';
 class Utilities {
   static formatPrice(BuildContext context, double price) {
     // Get locale from context or fallback to Czech locale
-    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    //final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    final locale = 'cs_CZ';
 
     // Configure the currency formatter
     final NumberFormat currencyFormatter = NumberFormat.currency(
       locale: locale,
       symbol: 'KČ', // Use the CZK symbol
+      decimalDigits: 0
     );
 
     return currencyFormatter.format(price); // Format the price as currency

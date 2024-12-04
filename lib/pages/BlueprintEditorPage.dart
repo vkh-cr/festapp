@@ -241,7 +241,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                       Row(
                         children: [
                           Text(
-                            "${group.objects.length}",
+                            "(${group.objects.length})",
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
