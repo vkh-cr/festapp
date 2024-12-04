@@ -14,6 +14,7 @@ import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -135,7 +136,19 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
               );
             }).toList(),
           ),
-          body: child,
+          body: Builder(
+            builder: (context) {
+              if (visibleTabKeys[tabsRouter.activeIndex] == OccasionTab.news) {
+                // Inject the onDataLoaded callback into NewsPage
+                return NewsPage(onSetAsRead: () {
+                  setState(() {
+                    _messageCount = 0;
+                  });
+                });
+              }
+              return child;
+            },
+          ),
         );
       },
     );

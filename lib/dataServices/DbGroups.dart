@@ -6,6 +6,7 @@ import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbGroups {
@@ -46,6 +47,10 @@ class DbGroups {
         u.checkpointTitlesDict = dict;
       }
     }
+
+    toReturn.sort((a, b) {
+      return Utilities.naturalCompare(a.title, b.title);
+    });
     return toReturn;
   }
 
@@ -69,8 +74,7 @@ class DbGroups {
   }
 
   static updateUserGroupInfo(UserGroupInfoModel model) async {
-    if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId()))
-    {
+    if(!(RightsService.isEditor() || model.leader!.id == AuthService.currentUserId())) {
       throw Exception("Must be leader or admin to change the group.");
     }
 
@@ -79,29 +83,25 @@ class DbGroups {
       Tb.user_group_info.leader: model.leader?.id,
     };
 
-    if(model.type != null)
-    {
+    if(model.type != null) {
       upsertObj.addAll({Tb.user_group_info.type: model.type});
     }
-    if(model.description != null)
-    {
+    if(model.description != null) {
       upsertObj.addAll({Tb.user_group_info.description: model.description});
     }
-    if(model.place != null)
-    {
+    if(model.place != null) {
       model.place = await DbPlaces.updatePlace(model.place!);
       upsertObj.addAll({Tb.user_group_info.place: model.place!.id.toString()});
     }
     dynamic eventData;
     if(model.id!=null) {
       upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
-      eventData = await _supabase.from(Tb.user_group_info.table).upsert(upsertObj).eq(Tb.user_group_info.id, model.id!).select().single();
-    }
-    else
-    {
+      eventData = await _supabase.from(Tb.user_group_info.table).update(upsertObj).eq(Tb.user_group_info.id, model.id!).select().single();
+    } else {
       upsertObj.addAll({Tb.user_group_info.occasion: RightsService.currentOccasion!});
       eventData = await _supabase.from(Tb.user_group_info.table).insert(upsertObj).select().single();
     }
+
     var updated = UserGroupInfoModel.fromJson(eventData);
     await updateUserGroupParticipants(updated, model.participants!);
   }
@@ -112,8 +112,7 @@ class DbGroups {
         .delete()
         .eq(Tb.user_groups.group, group.id!);
 
-    for(var p in participants)
-    {
+    for(var p in participants) {
       await _supabase
           .from(Tb.user_groups.table)
           .insert({
@@ -132,8 +131,8 @@ class DbGroups {
         .from(Tb.user_group_info.table)
         .delete()
         .eq(Tb.user_group_info.id, model.id!);
-    if(model.place!=null)
-    {
+
+    if(model.place!=null) {
       await _supabase
           .from(Tb.places.table)
           .delete()

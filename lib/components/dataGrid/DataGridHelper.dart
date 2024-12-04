@@ -103,12 +103,15 @@ class DataGridHelper
         },
     );}
 
-  static Widget threeStateCheckBoxRenderer(
+  static Widget foodCheckBoxRenderer(
       rendererContext, String idString, [bool Function()? isEnabled]) {
     // Get the current state (default to "none" if the value is null or invalid)
     String currentState = rendererContext.cell.value ?? DbOccasions.serviceNone;
 
     return CustomThreeStateCheckbox(
+      noneStateIcon: Icons.close,
+      paidStateIcon: Icons.radio_button_checked,
+      usedStateIcon: Icons.radio_button_off,
       currentState: currentState,
       onStateChanged: (String newState) {
         var cell = rendererContext.row.cells[idString]!;

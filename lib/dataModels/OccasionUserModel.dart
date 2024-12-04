@@ -57,12 +57,13 @@ class OccasionUserModel extends IPlutoRowModel {
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
         occasion: RightsService.currentOccasion!,
-        user: json[Tb.occasion_users.user],
+        user: original?.user ?? json[Tb.occasion_users.user],
         role: json[Tb.occasion_users.role],
         data: {
           Tb.occasion_users.data_email: json[Tb.occasion_users.data_email],
           Tb.occasion_users.data_name: json[Tb.occasion_users.data_name],
           Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname],
+          Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex],
           Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone],
           Tb.occasion_users.data_text1: json[Tb.occasion_users.data_text1],
           Tb.occasion_users.data_text2: json[Tb.occasion_users.data_text2],
@@ -102,7 +103,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> serviceToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -126,7 +127,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> servicesToPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -253,9 +254,6 @@ class OccasionUserModel extends IPlutoRowModel {
   }
 
   bool compareField(Map<String, dynamic> u, dynamic dataField, dynamic uField) {
-    if(!compareStrings(u[uField], data?[dataField])){
-      var x= 1;
-    }
     return compareStrings(u[uField], data?[dataField]);
   }
 
@@ -263,6 +261,7 @@ class OccasionUserModel extends IPlutoRowModel {
     return compareField(iu, Tb.occasion_users.data_email, Tb.occasion_users.data_email)
         && compareField(iu, Tb.occasion_users.data_name, Tb.occasion_users.data_name)
         && compareField(iu, Tb.occasion_users.data_surname, Tb.occasion_users.data_surname)
+        && compareField(iu, Tb.occasion_users.data_sex, Tb.occasion_users.data_sex)
         && iu[Tb.user_info.role] == role
         && compareField(iu, Tb.occasion_users.data_phone, Tb.occasion_users.data_phone)
         && compareField(iu, Tb.occasion_users.data_text1, Tb.occasion_users.data_text1)

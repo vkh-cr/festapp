@@ -62,6 +62,19 @@ class DbNews {
         .eq(Tb.news.id, message.id);
   }
 
+  static Future<void> sendGroupNotification(List<String> to, String message, String title) async {
+    await _supabase.from(Tb.log_notifications.table)
+        .insert(
+        {
+          Tb.log_notifications.occasion: RightsService.currentOccasion!,
+          Tb.log_notifications.to: to,
+          Tb.log_notifications.content: message,
+          Tb.log_notifications.heading: title,
+          Tb.log_notifications.organization: AppConfig.organization,
+        }
+    );
+  }
+
   static insertNewsMessage(BuildContext context, String? heading, String headingDefault, String message, bool addToNews, bool withNotification, List<String>? to) async {
     if (addToNews) {
       var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
@@ -135,13 +148,13 @@ class DbNews {
     return lastMessageId;
   }
 
-  static void setMessagesAsRead(int newId, int oldId) async {
+  static Future<void> setMessagesAsRead(int newId) async {
     AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
         .delete()
         .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq(Tb.user_news.news_id, oldId);
+        .eq(Tb.user_news.occasion, RightsService.currentOccasion!);
 
     await _supabase
         .from(Tb.user_news.table)
@@ -175,10 +188,6 @@ class DbNews {
       if (AuthService.isLoggedIn()) {
         message.isRead = lastReadMessageId >= message.id;
       }
-    }
-
-    if (AuthService.isLoggedIn() && loadedMessages.isNotEmpty) {
-      DbNews.setMessagesAsRead(loadedMessages.first.id, lastReadMessageId);
     }
 
     return loadedMessages;

@@ -588,8 +588,8 @@ class DbEvents {
     }
     var updatedEvent = EventModel.fromJson(eventData);
 
+    await removeEventFromEventGroups(updatedEvent);
     if(event.parentEventIds?.isNotEmpty ?? false) {
-      await removeEventFromEventGroups(updatedEvent);
       var insert = [];
       for(var eParent in event.parentEventIds!)
       {
