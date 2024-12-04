@@ -161,6 +161,7 @@ class _FormPageState extends State<FormPage> {
                             var data = FormHelper.getDataFromForm(
                                 _formKey, form?.data?[FormHelper.metaFields]);
 
+                            data = FormHelper.replaceSpotWithId(data);
                             data["secret"] = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
                             data["form"] = "7f4e3892-a544-4385-b933-61117e9755c3";
                             formResult = data;

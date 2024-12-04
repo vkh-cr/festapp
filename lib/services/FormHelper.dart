@@ -6,6 +6,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
@@ -416,4 +417,24 @@ class FormHelper {
       keyboardType: TextInputType.number,
     );
   }
+
+  static Map<String, dynamic> replaceSpotWithId(Map<String, dynamic> inputData) {
+    if (inputData.containsKey(fieldTypeTicket) && inputData[fieldTypeTicket] is List) {
+      List<dynamic> tickets = inputData[fieldTypeTicket];
+
+      // Process each ticket in the list using an index
+      for (int i = 0; i < tickets.length; i++) {
+        var ticket = tickets[i];
+        if (ticket is Map<String, dynamic> && ticket.containsKey(fieldTypeSpot)) {
+          // Replace the spot value with spot['id']
+          var spot = ticket[fieldTypeSpot];
+          if (spot is BlueprintObjectModel) {
+            ticket[fieldTypeSpot] = spot.id;
+          }
+        }
+      }
+    }
+    return inputData;
+  }
+
 }

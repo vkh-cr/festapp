@@ -65,10 +65,10 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
   const ticketsDetails = tickets
     .map((ticket) => {
       const ticketSymbol = ticket.ticket_symbol;
-      const seat = ticket.items.find((item: any) => item.type === "spot")?.spot_title || "N/A";
-      const food = ticket.items.find((item: any) => item.type === "food")?.title;
-      const taxi = ticket.items.find((item: any) => item.type === "taxi")?.title;
-      const note = ticket.items.find((item: any) => item.note) || "";
+      const seat = ticket.products.find((p: any) => p.type === "spot")?.spot_title || "N/A";
+      const food = ticket.products.find((p: any) => p.type === "food")?.title;
+      const taxi = ticket.products.find((p: any) => p.type === "taxi")?.title;
+      const note = ticket.note || "";
 
       return `
         <p style="text-align:left;">
@@ -105,6 +105,9 @@ Deno.serve(async (req) => {
         status: 200,
       });
     }
+
+    console.log(orderDetails);
+    console.log(ticketOrder);
 
     const occasion = ticketOrder.occasion;
     const paymentInfo = ticketOrder.payment_info;
