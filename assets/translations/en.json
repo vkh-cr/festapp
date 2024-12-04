@@ -291,5 +291,15 @@
   "Install {title} to get notifications, offline functionality, and a quick launch icon.": "Install {title} to get notifications, offline functionality, and a quick launch icon.",
   "Click here to sign in.": "Click here to sign in.",
   "Failed to invite {user}. Number of retries: ({retries}).": "Failed to invite {user}. Number of retries: ({retries}).",
+  "Processing...": "Processing...",
+  "The processing has finished with error.": "The processing has finished with error.",
+  "The processing has been cancelled.": "The processing has been cancelled.",
+  "The processing has completed successfully.": "The processing has completed successfully.",
+  "Saving changes": "Saving changes",
+  "Your order was successfully sent to your email {email}.": "Your order was successfully sent to your email {email}.",
+  "Your order has been sent successfully!": "Your order has been sent successfully!",
+  "Total Price: {price}": "Total Price: {price}",
+  "Ticket {number}": "Ticket {number}",
+  "Add another ticket": "Add another ticket",
   "_":"_"
 }

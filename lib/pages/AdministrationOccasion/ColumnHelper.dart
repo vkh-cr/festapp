@@ -21,6 +21,7 @@ class ColumnHelper {
   static const String ROLE = "role";
   static const String TEXT1 = "text1";
   static const String TEXT2 = "text2";
+  static const String TEXT3 = "text3";
   static const String NOTE = "note";
   static const String DIET = "diet";
   static const String ADMINISTRATOR = "administrator";
@@ -125,6 +126,15 @@ class ColumnHelper {
         width: 100,
       ),
     ],
+    TEXT3: [
+      PlutoColumn(
+        title: "Číslo týmu (hra)",
+        enableEditingMode: RightsService.canUpdateUsers(),
+        field: Tb.occasion_users.data_text3,
+        type: PlutoColumnType.text(),
+        width: 100,
+      ),
+    ],
     NOTE: [
       PlutoColumn(
         title: "Note".tr(),
@@ -156,7 +166,7 @@ class ColumnHelper {
       return columns;
     },
     ACCOMMODATION: (Map<String, dynamic> data) {
-      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList();
+      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.id).toList();
       select ??= [];
       select.add("");
       return [
@@ -165,7 +175,7 @@ class ColumnHelper {
         field: DbOccasions.serviceTypeAccommodation,
         type: PlutoColumnType.select(select),
         applyFormatterInEditing: true,
-        enableEditingMode: true,
+        enableEditingMode: RightsService.canUpdateUsers(),
         width: 100
       )];
     },
@@ -215,7 +225,7 @@ class ColumnHelper {
       cellPadding: EdgeInsets.all(0),
       width: 100,
       renderer: (rendererContext) =>
-          DataGridHelper.threeStateCheckBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
+          DataGridHelper.foodCheckBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
     );
   }
 }

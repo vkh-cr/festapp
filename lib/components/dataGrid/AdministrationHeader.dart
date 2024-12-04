@@ -115,32 +115,23 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
     }
   }
 
-  Future<void> _saveChanges() async{
+  Future<void> _saveChanges() async {
     var toDelete = dataGrid.deletedRows.toList();
     dataGrid.updatedRows.removeAll(toDelete);
+
     var deleteList = List<T>.from(
         toDelete.map((x) => fromPlutoJson(x.toJson())));
-    if(deleteList.isNotEmpty)
-    {
-      var result = await DialogHelper.showConfirmationDialogAsync(context,
-          "Confirm removal".tr(), "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",);
-      if(!result) {
-        return;
-      }
-    }
 
-    for (var element in deleteList)
-    {
-      try
-      {
-        await element.deleteMethod();
-      }
-      catch(e)
-      {
-        ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
+    // Confirm deletion
+    if (deleteList.isNotEmpty) {
+      var result = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Confirm removal".tr(),
+        "${"Items".tr()}:\n ${deleteList.map((value) => value.toBasicString()).toList().join(",\n")}\n?",
+      );
+      if (!result) {
         return;
       }
-      ToastHelper.Show(context, "${"Deleted".tr()}: ${element.toBasicString()}");
     }
 
     var updatedSet = Set<T>.from(
@@ -151,20 +142,46 @@ class _AdministrationHeaderState<T extends IPlutoRowModel> extends State<Adminis
 
     updatedSet.addAll(newSet);
 
-    for (var element in updatedSet.toList())
-    {
-      try
-      {
-        await element.updateMethod();
-      }
-      catch(e)
-      {
-        ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
-        return;
-      }
-      ToastHelper.Show(context, "${"Saved".tr()}: ${element.toBasicString()}");
+    List<Future<void> Function()> actions = [];
+
+    // Add deletion actions
+    for (var element in deleteList) {
+      actions.add(() async {
+        try {
+          await element.deleteMethod();
+          ToastHelper.Show(context, "${"Deleted".tr()}: ${element.toBasicString()}");
+        } catch (e) {
+          ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
+          rethrow; // Rethrow to indicate failure
+        }
+      });
     }
-    await loadData();
+
+    // Add save/update actions
+    for (var element in updatedSet) {
+      actions.add(() async {
+        try {
+          await element.updateMethod();
+          ToastHelper.Show(context, "${"Saved".tr()}: ${element.toBasicString()}");
+        } catch (e) {
+          ToastHelper.Show(context, e.toString(), severity: ToastSeverity.NotOk);
+          rethrow; // Rethrow to indicate failure
+        }
+      });
+    }
+
+    // Execute actions with progress dialog
+    var success = await DialogHelper.showProgressDialogAsync(
+      context,
+      "Saving changes".tr(),
+      actions.length,
+      futures: actions,
+      isBasic: true,
+    );
+
+    if (success) {
+      await loadData();
+    }
   }
 
   Future<void> _cancelChanges() async {

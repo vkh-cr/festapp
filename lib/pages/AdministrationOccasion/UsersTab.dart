@@ -72,10 +72,10 @@ class _UsersTabState extends State<UsersTab> {
         actionsExtended: DataGridActionsController(
             areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
-          DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0)),
+          DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
-          DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0)),
-          DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0)),
+          DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0), isEnabled: RightsService.canUpdateUsers),
+          DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
         ],
         columns: ColumnHelper.generateColumns(columnIdentifiers),
@@ -86,7 +86,7 @@ class _UsersTabState extends State<UsersTab> {
   // Actions (import, invite, change password, add to group, add existing)
   Future<void> _import(SingleTableDataGrid dataGrid) async {
     await UserManagementHelper.import(context);
-    await loadUsers(); // Reload users and force rebuild
+    await loadUsers();
   }
 
   Future<void> _setPassword(SingleTableDataGrid dataGrid) async {
@@ -144,53 +144,79 @@ class _UsersTabState extends State<UsersTab> {
 
       // If the user chooses not to reinvite, exclude already invited users
       if (!reinviteConfirm) {
-        await _processInvites(newUsers, dataGrid);
+        await _processInvites(newUsers);
+        await loadUsers(); // Ensure data is updated
         return;
       }
     }
 
     // Proceed with inviting both new and previously invited users (if reinvite confirmed)
-    await _processInvites(users, dataGrid);
+    await _processInvites(users);
+    await loadUsers(); // Ensure data is updated
   }
 
-  Future<void> _processInvites(List<OccasionUserModel> users, SingleTableDataGrid dataGrid) async {
+  Future<void> _processInvites(
+      List<OccasionUserModel> users,
+      {int retryLimit = 3}
+      ) async {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
         context,
         "Invite".tr(),
-        "${"Users will get a sign-in code via e-mail.".tr()} (${users.length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
+        "${"Users will get a sign-in code via e-mail.".tr()} (${users
+            .length}):\n${users.map((u) => u.toBasicString()).join(",\n")}"
     );
 
     if (confirm) {
-      ValueNotifier<int> invitedCount = ValueNotifier(0);
+      Map<OccasionUserModel, int> retryAttempts = {
+        for (var user in users) user: 0
+      };
 
-      // Show progress dialog
-      DialogHelper.showProgressDialogAsync(
+      List<Future<void> Function()> inviteFutures = users.map((user) {
+        return () async {
+          while (retryAttempts[user]! < retryLimit) {
+            try {
+              // Uncomment this line to send the actual sign-in code
+              await AuthService.sendSignInCode(user);
+
+              // Show success toast
+              ToastHelper.Show(
+                context,
+                "Invited: {user}.".tr(namedArgs: {
+                  "user": user.data![Tb.occasion_users.data_email]
+                }),
+              );
+              return; // Exit retry loop on success
+            } catch (e) {
+              retryAttempts[user] = retryAttempts[user]! + 1;
+
+              if (retryAttempts[user]! >= retryLimit) {
+                ToastHelper.Show(
+                  context,
+                  "Failed to invite {user}. Number of retries: ({retries}).".tr(
+                      namedArgs: {
+                        "retries": retryLimit.toString(),
+                        "user": user.data![Tb.occasion_users.data_email]
+                      }),
+                  severity: ToastSeverity.NotOk,
+                );
+                print(
+                    "Failed to invite user: ${user.data![Tb.occasion_users.data_email]}. Error: $e");
+              } else {
+                print(
+                    "Retrying to invite user: ${user.data![Tb.occasion_users.data_email]}. Attempt: ${retryAttempts[user]}");
+              }
+              await Future.delayed(Duration(milliseconds: 500));
+            }
+          }
+        };
+      }).toList();
+
+      // Show progress dialog while processing
+      await DialogHelper.showProgressDialogAsync(
         context,
-        "Invite".tr(),
-        users.length,
-        invitedCount,
-      );
-
-      for (var user in users) {
-        // slow down to avoid rate limit SES has 14 email / sec
-        await Future.delayed(Duration(milliseconds: 100));
-        await AuthService.sendSignInCode(user);
-        invitedCount.value++;
-
-        ToastHelper.Show(
-          context,
-          "Invited: {user}.".tr(namedArgs: {"user": user.data![Tb.occasion_users.data_email]}),
-        );
-      }
-
-      Navigator.of(context).pop(); // Close the dialog
-
-      await loadUsers(); // Reload users
-
-      await DialogHelper.showInformationDialogAsync(
-        context,
-        "Invite".tr(),
-        "Users ({count}) invited successfully.".tr(namedArgs: {"count": invitedCount.value.toString()}),
+        "Invite".tr(), inviteFutures.length,
+        futures: inviteFutures,
+        delay: Duration(milliseconds: 500)
       );
     }
   }

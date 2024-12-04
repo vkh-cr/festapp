@@ -1,5 +1,8 @@
 CREATE OR REPLACE FUNCTION game_guess(check_point_id BIGINT, guess TEXT)
-RETURNS JSONB AS $$
+RETURNS JSONB
+LANGUAGE plpgsql VOLATILE
+SECURITY DEFINER
+AS $$
 DECLARE
     hidden_value TEXT;
     correct_reference BIGINT;
@@ -113,4 +116,4 @@ BEGIN
         RETURN jsonb_build_object('code', 4001, 'message', 'Incorrect guess');
     END IF;
 END;
-$$ LANGUAGE plpgsql;
+$$;

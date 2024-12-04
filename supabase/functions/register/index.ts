@@ -1,5 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
   const template = await supabaseAdmin
     .from("email_templates")
     .select()
-    .eq("id", "SIGN_IN_CODE")
+    .eq("code", "SIGN_IN_CODE")
     .eq("organization", organizationId)
     .single();
 

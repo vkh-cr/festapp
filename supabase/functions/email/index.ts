@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
   const template = await supabaseAdmin
     .from("email_templates")
     .select()
-    .eq("id", "RESET_PASSWORD")
+    .eq("code", "RESET_PASSWORD")
     .eq("organization", organization)
     .single();
 
