@@ -68,7 +68,7 @@ class BlueprintObjectModel {
     metaTitle: title,
     if (id != null) metaId: id,
     if (group?.id != null) metaGroupId: group?.id,
-    if (spotProduct != null) metaProduct: spotProduct,
+    if (spotProduct != null || product != null) metaProduct: spotProduct ?? product?.id,
   };
 
   BlueprintObjectModel({
