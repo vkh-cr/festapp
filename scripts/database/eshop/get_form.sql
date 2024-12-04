@@ -2,6 +2,7 @@ CREATE OR REPLACE FUNCTION get_form(form_key UUID)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
+    generated_secret UUID := gen_random_uuid();
 BEGIN
     -- Check if the form is open
     IF NOT EXISTS (
@@ -28,7 +29,8 @@ BEGIN
             'occasion', f.occasion,
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
-            'account_number', ba.account_number
+            'account_number', ba.account_number,
+            'secret', generated_secret
         )
     )
     INTO allData

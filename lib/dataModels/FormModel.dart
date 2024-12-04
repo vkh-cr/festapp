@@ -13,6 +13,8 @@ class FormModel {
   bool? isOpen;
   String? accountNumber;
 
+  String? secret;
+
   FormModel({
     this.id,
     this.createdAt,
@@ -25,6 +27,7 @@ class FormModel {
     this.deadlineDuration,
     this.isOpen,
     this.accountNumber,
+    this.secret
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -41,7 +44,8 @@ class FormModel {
       bankAccount: json[Tb.forms.bank_account],
       deadlineDuration: json[Tb.forms.deadline_duration_seconds],
       isOpen: json[Tb.forms.is_open],
-      accountNumber: json['account_number'], // Assuming it's added to the RPC response
+      accountNumber: json['account_number'],
+      secret: json['secret'],
     );
   }
 
@@ -56,6 +60,6 @@ class FormModel {
     Tb.forms.bank_account: bankAccount,
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
-    'account_number': accountNumber, // Including in serialization
+    'account_number': accountNumber,
   };
 }

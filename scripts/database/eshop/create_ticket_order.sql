@@ -7,7 +7,6 @@ DECLARE
     order_id BIGINT;
     ticket_data JSONB;
     spot_data RECORD;
-    spot_id BIGINT;
     now TIMESTAMP WITH TIME ZONE := NOW();
     calculated_price NUMERIC(10,2) := 0;
     spot_secret UUID;

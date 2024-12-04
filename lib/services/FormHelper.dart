@@ -30,7 +30,8 @@ class FormHelper {
   static const String metaLabel = "label";
   static const String metaOptions = "options";
   static const String metaOptionsType = "optionsType";
-
+  static const String metaSecret = "secret";
+  static const String metaForm = "form";
 
   static const String fieldTypeOptions = "options";
 
@@ -54,9 +55,8 @@ class FormHelper {
   static List<Map<String, dynamic>> ticketValues = [];
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
-  //static String secret = UniqueKey().toString();
 
-  static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
+  //static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
 
 
   static List<Widget> getAllFormFields(BuildContext context,  GlobalKey<FormBuilderState> formKey, FormModel formData, [void Function()? updateTotalPrice]) {
@@ -305,7 +305,7 @@ class FormHelper {
               transitionDuration: const Duration(milliseconds: 300),
               pageBuilder: (context, __, ___) {
                 return SeatReservationWidget(
-                  secret: secret,
+                  secret: form.secret!,
                   formDataKey: form.formKey!,
                   blueprintId: form.blueprint!,
                   selectedSeat: field.value,

@@ -94,19 +94,20 @@ Deno.serve(async (req) => {
     const reqData = await req.json();
     const { orderDetails } = reqData;
 
+    console.log(orderDetails);
+
     const { data: ticketOrder, error: ticketError } = await supabaseAdmin.rpc("create_ticket_order", {
       input_data: orderDetails,
     });
 
     if (ticketError || ticketOrder.code !== 200) {
       console.error("Error creating ticket order:", ticketError);
-      return new Response(JSON.stringify({ "code": ticketOrder.code }), {
+      return new Response(JSON.stringify({ "code": ticketOrder.code + ": " + ticketOrder.message }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
 
-    console.log(orderDetails);
     console.log(ticketOrder);
 
     const occasion = ticketOrder.occasion;
