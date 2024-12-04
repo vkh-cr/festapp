@@ -112,16 +112,23 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                   blueprint == null
                       ? const Center(child: CircularProgressIndicator()) :
                   SeatLayoutWidget(
-                    onSeatTap: (model) {
+                    onSeatTap: (model) async {
                       if (model.seatState == SeatState.selected_by_me_focused) {
-                        model.seatState = SeatState.available;
-                        widget.selectedSeat = null;
+                        if(await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, false)){
+                          model.seatState = SeatState.available;
+                          widget.selectedSeat = null;
+                        }
                       } else if (model.seatState == SeatState.available) {
                         if (widget.selectedSeat != null) {
-                          widget.selectedSeat!.seatState = SeatState.available;
+                          if(await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, false)){
+                            widget.selectedSeat!.seatState = SeatState.available;
+                          }
                         }
                         model.seatState = SeatState.selected_by_me_focused;
                         widget.selectedSeat = model;
+                        if(!await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, true)){
+                          model.seatState = SeatState.available;
+                        }
                       }
                       setState(() {});
                     },

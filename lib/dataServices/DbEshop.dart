@@ -115,4 +115,25 @@ class DbEshop {
 
     return true;
   }
+
+  static Future<bool> selectSpot(context, String formKey, String secret, int spotId, bool selecting) async {
+    final response = await _supabase.rpc(
+      'select_spot',
+      params: {
+        'form_key': formKey,
+        'secret_id': secret,
+        'spot_id': spotId,
+        'selecting': selecting,
+      },
+    );
+
+    var code = response["code"];
+    var message = response["message"];
+
+    if (code != 200) {
+      ToastHelper.Show(context, message.toString(), severity: ToastSeverity.NotOk);
+      return false;
+    }
+    return true;
+  }
 }
