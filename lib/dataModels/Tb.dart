@@ -326,4 +326,6 @@ class FormsTb {
   String get bank_account => "bank_account";
   String get deadline_duration_seconds => "deadline_duration_seconds";
   String get is_open => "is_open";
+  String get header => "header";
+  String get footer => "footer";
 }

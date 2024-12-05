@@ -12,8 +12,9 @@ class FormModel {
   int? deadlineDuration;
   bool? isOpen;
   String? accountNumber;
-
   String? secret;
+  String? header;
+  String? footer;
 
   FormModel({
     this.id,
@@ -27,7 +28,9 @@ class FormModel {
     this.deadlineDuration,
     this.isOpen,
     this.accountNumber,
-    this.secret
+    this.secret,
+    this.header,
+    this.footer,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +49,8 @@ class FormModel {
       isOpen: json[Tb.forms.is_open],
       accountNumber: json['account_number'],
       secret: json['secret'],
+      header: json[Tb.forms.header],
+      footer: json[Tb.forms.footer],
     );
   }
 
@@ -61,5 +66,8 @@ class FormModel {
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     'account_number': accountNumber,
+    'secret': secret,
+    Tb.forms.header: header,
+    Tb.forms.footer: footer,
   };
 }
