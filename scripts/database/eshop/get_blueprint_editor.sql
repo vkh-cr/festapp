@@ -35,7 +35,7 @@ BEGIN
         'configuration', b.configuration,
         'objects', b.objects,
         'groups', b.groups,
-        'background_svg', b.groups
+        'background_svg', b.background_svg
     )
     INTO blueprintData
     FROM eshop.blueprints b
@@ -80,7 +80,7 @@ BEGIN
     WHERE pt.type IN ('spot', 'taxi', 'food')
       AND pt.occasion = occasion_id;
 
-    -- Fetch tickets associated with the occasion
+    -- Fetch relevant tickets associated with the valid spots
     SELECT jsonb_agg(jsonb_build_object(
         'id', t.id,
         'ticket_symbol', t.ticket_symbol,
@@ -89,9 +89,11 @@ BEGIN
     ))
     INTO ticketsData
     FROM eshop.tickets t
-    WHERE t.occasion = occasion_id;
+    JOIN eshop.order_product_ticket opt ON opt.ticket = t.id
+    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+      AND t.occasion = occasion_id;
 
-    -- Fetch orders associated with the occasion
+    -- Fetch relevant orders associated with the valid spots
     SELECT jsonb_agg(jsonb_build_object(
         'id', o.id,
         'created_at', o.created_at,
@@ -103,9 +105,11 @@ BEGIN
     ))
     INTO ordersData
     FROM eshop.orders o
-    WHERE o.occasion = occasion_id;
+    JOIN eshop.order_product_ticket opt ON opt."order" = o.id
+    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+      AND o.occasion = occasion_id;
 
-    -- Fetch order-product-ticket data
+    -- Fetch relevant order-product-ticket data associated with the valid spots
     SELECT jsonb_agg(jsonb_build_object(
         'id', opt.id,
         'order_id', opt."order",
@@ -115,8 +119,7 @@ BEGIN
     ))
     INTO orderProductTicketsData
     FROM eshop.order_product_ticket opt
-    JOIN eshop.orders o ON o.id = opt."order"
-    WHERE o.occasion = occasion_id;
+    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT);
 
     -- Add spots data to the blueprint object
     blueprintData = jsonb_set(
@@ -132,21 +135,21 @@ BEGIN
         COALESCE(productsData, '[]'::jsonb)
     );
 
-    -- Add tickets data to the blueprint object
+    -- Add relevant tickets data to the blueprint object
     blueprintData = jsonb_set(
         blueprintData,
         '{tickets}',
         COALESCE(ticketsData, '[]'::jsonb)
     );
 
-    -- Add orders data to the blueprint object
+    -- Add relevant orders data to the blueprint object
     blueprintData = jsonb_set(
         blueprintData,
         '{orders}',
         COALESCE(ordersData, '[]'::jsonb)
     );
 
-    -- Add order-product-ticket data to the blueprint object
+    -- Add relevant order-product-ticket data to the blueprint object
     blueprintData = jsonb_set(
         blueprintData,
         '{order_product_ticket}',
