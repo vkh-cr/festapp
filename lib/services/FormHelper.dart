@@ -53,6 +53,8 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
+  static double fontSizeFactor = 1.2;
+
   static List<Map<String, dynamic>> ticketValues = [];
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
@@ -222,7 +224,7 @@ class FormHelper {
                                   "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 16 * fontSizeFactor,
                                   ),
                                 ),
                               ),
@@ -291,7 +293,6 @@ class FormHelper {
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
         textController.text = seat?.objectModel?.title ?? metaEmpty;
-
         return TextField(
           controller: textController,
           readOnly: true,
@@ -299,7 +300,7 @@ class FormHelper {
           decoration: InputDecoration(
             labelText: label,
             suffixIcon: const Icon(Icons.event_seat),
-            labelStyle: StylesConfig.textStyleBig,
+            labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
             errorText: field.errorText, // Display validation error
           ),
           onTap: () async {
@@ -339,7 +340,8 @@ class FormHelper {
     return FormBuilderTextField(
       name: name,
       autofillHints: autofillHints,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: isRequired ? FormBuilderValidators.required() : null,
     );
   }
@@ -349,7 +351,8 @@ class FormHelper {
     return FormBuilderTextField(
       name: fieldTypeEmail,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(labelText: emailLabel()),
+      decoration: InputDecoration(labelText: emailLabel(),
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
         if (isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: emailInvalidMessage()),
@@ -368,7 +371,8 @@ class FormHelper {
     }
     return FormBuilderRadioGroup(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
       validator: isRequired ? FormBuilderValidators.required() : null,
       options: options,
     );
@@ -384,7 +388,12 @@ class FormHelper {
             o[FormOptionModel.metaOptionsId],
             o[FormOptionModel.metaOptionsName],
             price: o[FormOptionModel.metaOptionsPrice] ?? 0.0, // Use price from the option or default to 0.0
-          )));
+          ),
+        child: Text(
+          o[FormOptionModel.metaOptionsName],
+          style: TextStyle(fontSize: 14.0 * fontSizeFactor), // Adjust font size dynamically
+        ),
+      ));
     }
 
     // Use the first option as the default initial value
@@ -392,7 +401,8 @@ class FormHelper {
 
     return FormBuilderRadioGroup<FormOptionModel>(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.required(),
       options: options,
       initialValue: initialValue,
@@ -404,7 +414,8 @@ class FormHelper {
   static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
     return FormBuilderTextField(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
         if (isRequired) FormBuilderValidators.required(),
         // Allow empty for optional field; validate only if non-empty
