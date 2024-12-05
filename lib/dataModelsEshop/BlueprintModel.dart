@@ -24,6 +24,7 @@ class BlueprintModel {
   List<BlueprintObjectModel>? objects;
   List<BlueprintObjectModel>? spots;
   List<BlueprintGroupModel>? groups;
+  String? backgroundSvg;
 
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
     final List<BlueprintGroupModel> groups = _parseGroups(json);
@@ -49,6 +50,7 @@ class BlueprintModel {
           : null,
       objects: enrichedObjects,
       groups: groups,
+      backgroundSvg: json[TbEshop.blueprints.background_svg],
     );
   }
 
@@ -81,9 +83,10 @@ class BlueprintModel {
         : null;
   }
 
-
   static List<BlueprintObjectModel>? _enrichObjects(
-      List<BlueprintObjectModel>? rawObjects, List<BlueprintObjectModel>? spots, List<ProductModel>? products) {
+      List<BlueprintObjectModel>? rawObjects,
+      List<BlueprintObjectModel>? spots,
+      List<ProductModel>? products) {
     if (rawObjects == null) return null;
 
     return rawObjects.map((object) {
@@ -93,12 +96,12 @@ class BlueprintModel {
           id: object.id,
           type: object.type,
           spotProduct: matchingSpot?.spotProduct,
-          product: products?.firstWhereOrNull((p)=>p.id == matchingSpot?.spotProduct),
+          product: products?.firstWhereOrNull((p) => p.id == matchingSpot?.spotProduct),
           groupId: object.groupId,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries
-              .firstWhereOrNull(
-                  (entry) => entry.value == matchingSpot?.state)?.key ??
+              .firstWhereOrNull((entry) => entry.value == matchingSpot?.state)
+              ?.key ??
               SeatState.available,
           x: object.x,
           y: object.y,
@@ -119,11 +122,11 @@ class BlueprintModel {
 
   static void _assignObjectsToGroups(
       List<BlueprintObjectModel>? objects, List<BlueprintGroupModel>? groups) {
-    // Assign objects to groups
     if (objects != null) {
       for (var obj in objects) {
         if (obj.groupId != null) {
           final group = groups?.firstWhereOrNull((g) => g.id == obj.groupId);
+          obj.group = group;
           if (group != null) {
             group.objects.add(obj);
           }
@@ -131,7 +134,6 @@ class BlueprintModel {
       }
     }
   }
-
 
   Map<String, dynamic> toJson() => {
     TbEshop.blueprints.id: id,
@@ -143,10 +145,10 @@ class BlueprintModel {
     TbEshop.blueprints.configuration: configuration,
     TbEshop.blueprints.objects: objects,
     TbEshop.blueprints.groups: groups,
+    TbEshop.blueprints.background_svg: backgroundSvg, // Include background SVG
   };
 
   String toBasicString() => title ?? id.toString();
-
 
   BlueprintModel({
     this.id,
@@ -160,11 +162,12 @@ class BlueprintModel {
     this.objects,
     this.spots,
     this.groups,
+    this.backgroundSvg, // Add to constructor
   });
 
   int getFirstAvailableGroupId() {
     int id = 1;
-    while (groups?.any((group) => group.id == id)??false) {
+    while (groups?.any((group) => group.id == id) ?? false) {
       id++;
     }
     return id;

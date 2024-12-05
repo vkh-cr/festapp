@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:flutter_svg/flutter_svg.dart'; // Add flutter_svg package
 import 'package:fstapp/services/Utilities.dart';
 
 import '../model/SeatLayoutStateModel.dart';
@@ -87,50 +88,70 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
 
   @override
   Widget build(BuildContext context) {
+    int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
+    int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
+
     return InteractiveViewer(
       minScale: 0.1,
       maxScale: 5,
       boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
       transformationController: _controller,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: List.generate(widget.stateModel.rows, (rowI) {
-          return Row(
+      child: Stack(
+        children: [
+          // Background SVG
+          if (widget.stateModel.backgroundSvg != null)
+            Positioned.fill(
+              child: SvgPicture.string(
+                widget.stateModel.backgroundSvg!,
+                width: layoutWidth.toDouble(),
+                height: layoutHeight.toDouble(),
+                fit: BoxFit.fitWidth,
+              ),
+            ),
+          // Seat Layout
+          Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.stateModel.cols, (colI) {
-              final seatModel =
-              _seats.firstWhere((seat) => seat.rowI == rowI && seat.colI == colI);
-              return seatModel.objectModel != null && seatModel.objectModel!.id != null
-                  ? Tooltip(
-                showDuration: const Duration(seconds: 0),
-                message: "${seatModel.objectModel?.title ?? ""}\n${Utilities.formatPrice(context, seatModel.objectModel?.product?.price ?? 0)}",
-                child: GestureDetector(
-                  onTap: () {
-                    if (widget.onSeatTap != null) {
-                      widget.onSeatTap!(seatModel);
-                    }
-                  },
-                  child: SeatWidgetHelper.buildSeat(
-                    state: seatModel.seatState,
-                    size: seatModel.seatSize.toDouble(),
-                  ),
-                ),
-              )
-                  : GestureDetector(
-                onTap: () {
-                  if (widget.onSeatTap != null) {
-                    widget.onSeatTap!(seatModel);
-                  }
-                },
-                child: SeatWidgetHelper.buildSeat(
-                  state: seatModel.seatState,
-                  size: seatModel.seatSize.toDouble(),
-                ),
+            children: List.generate(widget.stateModel.rows, (rowI) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: List.generate(widget.stateModel.cols, (colI) {
+                  final seatModel = _seats.firstWhere(
+                          (seat) => seat.rowI == rowI && seat.colI == colI);
+                  return seatModel.objectModel != null &&
+                      seatModel.objectModel!.id != null
+                      ? Tooltip(
+                    showDuration: const Duration(seconds: 0),
+                    message:
+                    "${seatModel.objectModel?.title ?? ""}\n${Utilities.formatPrice(context, seatModel.objectModel?.product?.price ?? 0)}",
+                    child: GestureDetector(
+                      onTap: () {
+                        if (widget.onSeatTap != null) {
+                          widget.onSeatTap!(seatModel);
+                        }
+                      },
+                      child: SeatWidgetHelper.buildSeat(
+                        state: seatModel.seatState,
+                        size: seatModel.seatSize.toDouble(),
+                      ),
+                    ),
+                  )
+                      : GestureDetector(
+                    onTap: () {
+                      if (widget.onSeatTap != null) {
+                        widget.onSeatTap!(seatModel);
+                      }
+                    },
+                    child: SeatWidgetHelper.buildSeat(
+                      state: seatModel.seatState,
+                      size: seatModel.seatSize.toDouble(),
+                    ),
+                  );
+                }),
               );
             }),
-          );
-        }),
+          ),
+        ],
       ),
     );
   }

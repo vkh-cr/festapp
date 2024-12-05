@@ -113,6 +113,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                           seatSize: SeatReservationWidget.boxSize,
                           currentObjects: blueprint!.objects!,
                           allBoxes: allBoxes,
+                          backgroundSvg: blueprint!.backgroundSvg
                         ),
                       ),
                     ),

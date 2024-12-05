@@ -107,7 +107,7 @@ BEGIN
                     UPDATE eshop.spots
                     SET
                         product = product_id,
-                        title = spot_title, -- Save the extracted spot title
+                        title = spot_title,
                         updated_at = now
                     WHERE id = (object_data->>'id')::BIGINT;
                 ELSE
@@ -117,7 +117,7 @@ BEGIN
                         updated_at,
                         occasion,
                         blueprint,
-                        title,  -- Save the extracted spot title
+                        title,
                         product
                     )
                     VALUES (

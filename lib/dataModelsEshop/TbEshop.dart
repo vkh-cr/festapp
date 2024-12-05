@@ -81,6 +81,7 @@ class BlueprintTb {
   String get configuration => "configuration";
   String get objects => "objects";
   String get groups => "groups";
+  String get background_svg => "background_svg";
 }
 
 class SpotsTb {

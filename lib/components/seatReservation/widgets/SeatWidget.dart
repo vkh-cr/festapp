@@ -48,9 +48,9 @@ class SeatWidgetHelper {
       case SeatState.ordered:
         return Colors.black38;
       case SeatState.empty:
-        return Colors.grey.shade300;
+        return Colors.black.withOpacity(0.1);
       default:
-        return Colors.grey.shade300;
+        return Colors.black.withOpacity(0.1);
     }
   }
 }
