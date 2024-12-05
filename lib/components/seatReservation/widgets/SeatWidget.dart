@@ -19,7 +19,7 @@ class SeatWidgetHelper {
         state == SeatState.available;
 
     return Container(
-      color: _getSeatColor(SeatState.empty),
+      color: hasPadding ? Colors.black.withOpacity(0.2) : _getSeatColor(SeatState.empty),
       height: size,
       width: size,
       child: Container(
@@ -48,9 +48,9 @@ class SeatWidgetHelper {
       case SeatState.ordered:
         return Colors.black38;
       case SeatState.empty:
-        return Colors.grey.shade300;
+        return Colors.black.withOpacity(0.1);
       default:
-        return Colors.grey.shade300;
+        return Colors.black.withOpacity(0.1);
     }
   }
 }

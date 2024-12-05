@@ -1,7 +1,10 @@
 import 'package:fstapp/components/seatReservation/utils/SeatState.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
+import 'package:fstapp/dataModelsEshop/OrderModel.dart';
+import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'BlueprintConfiguration.dart';
 import 'BlueprintObjectModel.dart';
 import 'package:collection/collection.dart';
@@ -9,7 +12,6 @@ import 'package:collection/collection.dart';
 class BlueprintModel {
   static const String metaSpots = "spots";
   static const String metaProducts = "products";
-  static const String metaDefaultProduct = "default_product";
   static const String metaTableAreaType = "table";
   static const String metaSpotType = "spot";
 
@@ -19,17 +21,25 @@ class BlueprintModel {
   String? title;
   int? organization;
   int? occasion;
-  ProductModel? defaultProduct;
   BlueprintConfiguration? configuration;
   List<BlueprintObjectModel>? objects;
   List<BlueprintObjectModel>? spots;
   List<BlueprintGroupModel>? groups;
+  String? backgroundSvg;
+  List<ProductModel>? products;
+  List<TicketModel>? tickets;
+  List<OrderModel>? orders;
+  List<OrderProductTicketModel>? orderProductTickets;
 
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
     final List<BlueprintGroupModel> groups = _parseGroups(json);
     final List<BlueprintObjectModel>? rawObjects = _parseObjects(json);
     final List<BlueprintObjectModel>? spots = _parseSpots(json);
     final List<ProductModel>? products = _parseProducts(json);
+    final List<TicketModel>? tickets = _parseTickets(json);
+    final List<OrderModel>? orders = _parseOrders(json);
+    final List<OrderProductTicketModel>? orderProductTickets = _parseOrderProductTickets(json);
+
     final List<BlueprintObjectModel>? enrichedObjects = _enrichObjects(rawObjects, spots, products);
 
     _assignObjectsToGroups(enrichedObjects, groups);
@@ -43,12 +53,16 @@ class BlueprintModel {
       title: json[TbEshop.blueprints.title],
       organization: json[TbEshop.blueprints.organization],
       occasion: json[TbEshop.blueprints.occasion],
-      defaultProduct: json[BlueprintModel.metaDefaultProduct],
       configuration: json[TbEshop.blueprints.configuration] != null
           ? BlueprintConfiguration.fromJson(json[TbEshop.blueprints.configuration])
           : null,
       objects: enrichedObjects,
       groups: groups,
+      backgroundSvg: json[TbEshop.blueprints.background_svg],
+      products: products,
+      tickets: tickets,
+      orders: orders,
+      orderProductTickets: orderProductTickets,
     );
   }
 
@@ -75,15 +89,37 @@ class BlueprintModel {
   }
 
   static List<ProductModel>? _parseProducts(Map<String, dynamic> json) {
-    return json[BlueprintModel.metaProducts] != null
+    return json[TbEshop.products.table] != null
         ? List<ProductModel>.from(
-        json[BlueprintModel.metaProducts].map((spot) => ProductModel.fromJson(spot)))
+        json[TbEshop.products.table].map((p) => ProductModel.fromJson(p)))
         : null;
   }
 
+  static List<TicketModel>? _parseTickets(Map<String, dynamic> json) {
+    return json[TbEshop.tickets.table] != null
+        ? List<TicketModel>.from(
+        json[TbEshop.tickets.table].map((t) => TicketModel.fromJson(t)))
+        : null;
+  }
+
+  static List<OrderModel>? _parseOrders(Map<String, dynamic> json) {
+    return json[TbEshop.orders.table] != null
+        ? List<OrderModel>.from(
+        json[TbEshop.orders.table].map((o) => OrderModel.fromJson(o)))
+        : null;
+  }
+
+  static List<OrderProductTicketModel>? _parseOrderProductTickets(Map<String, dynamic> json) {
+    return json[TbEshop.order_product_ticket.table] != null
+        ? List<OrderProductTicketModel>.from(
+        json[TbEshop.order_product_ticket.table].map((o) => OrderProductTicketModel.fromJson(o)))
+        : null;
+  }
 
   static List<BlueprintObjectModel>? _enrichObjects(
-      List<BlueprintObjectModel>? rawObjects, List<BlueprintObjectModel>? spots, List<ProductModel>? products) {
+      List<BlueprintObjectModel>? rawObjects,
+      List<BlueprintObjectModel>? spots,
+      List<ProductModel>? products) {
     if (rawObjects == null) return null;
 
     return rawObjects.map((object) {
@@ -93,12 +129,13 @@ class BlueprintModel {
           id: object.id,
           type: object.type,
           spotProduct: matchingSpot?.spotProduct,
-          product: products?.firstWhereOrNull((p)=>p.id == matchingSpot?.spotProduct),
+          product: products?.firstWhereOrNull((p) => p.id == matchingSpot?.spotProduct),
+          orderProductTicket: matchingSpot?.orderProductTicket,
           groupId: object.groupId,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries
-              .firstWhereOrNull(
-                  (entry) => entry.value == matchingSpot?.state)?.key ??
+              .firstWhereOrNull((entry) => entry.value == matchingSpot?.state)
+              ?.key ??
               SeatState.available,
           x: object.x,
           y: object.y,
@@ -119,11 +156,11 @@ class BlueprintModel {
 
   static void _assignObjectsToGroups(
       List<BlueprintObjectModel>? objects, List<BlueprintGroupModel>? groups) {
-    // Assign objects to groups
     if (objects != null) {
       for (var obj in objects) {
         if (obj.groupId != null) {
           final group = groups?.firstWhereOrNull((g) => g.id == obj.groupId);
+          obj.group = group;
           if (group != null) {
             group.objects.add(obj);
           }
@@ -131,7 +168,6 @@ class BlueprintModel {
       }
     }
   }
-
 
   Map<String, dynamic> toJson() => {
     TbEshop.blueprints.id: id,
@@ -143,10 +179,14 @@ class BlueprintModel {
     TbEshop.blueprints.configuration: configuration,
     TbEshop.blueprints.objects: objects,
     TbEshop.blueprints.groups: groups,
+    TbEshop.blueprints.background_svg: backgroundSvg,
+    TbEshop.products.table: products,
+    TbEshop.tickets.table: tickets,
+    TbEshop.orders.table: orders,
+    TbEshop.order_product_ticket.table: orderProductTickets,
   };
 
   String toBasicString() => title ?? id.toString();
-
 
   BlueprintModel({
     this.id,
@@ -155,16 +195,26 @@ class BlueprintModel {
     this.title,
     this.organization,
     this.occasion,
-    this.defaultProduct,
     this.configuration,
     this.objects,
     this.spots,
     this.groups,
+    this.backgroundSvg,
+    this.products,
+    this.tickets,
+    this.orders,
+    this.orderProductTickets,
   });
+
+  void assignAllSpotsWithBlueprint(){
+    for(var o in objects??[]){
+      o.blueprint = this;
+    }
+  }
 
   int getFirstAvailableGroupId() {
     int id = 1;
-    while (groups?.any((group) => group.id == id)??false) {
+    while (groups?.any((group) => group.id == id) ?? false) {
       id++;
     }
     return id;

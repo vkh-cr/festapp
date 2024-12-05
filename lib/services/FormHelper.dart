@@ -32,6 +32,7 @@ class FormHelper {
   static const String metaOptionsType = "optionsType";
   static const String metaSecret = "secret";
   static const String metaForm = "form";
+  static const String metaEmpty = "---";
 
   static const String fieldTypeOptions = "options";
 
@@ -52,12 +53,10 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
+  static double fontSizeFactor = 1.2;
+
   static List<Map<String, dynamic>> ticketValues = [];
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
-
-
-  //static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
-
 
   static List<Widget> getAllFormFields(BuildContext context,  GlobalKey<FormBuilderState> formKey, FormModel formData, [void Function()? updateTotalPrice]) {
     return formData.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
@@ -65,6 +64,16 @@ class FormHelper {
 
   static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel formData, dynamic fields, [void Function()? updateTotalPrice]) {
     return fields.map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
+  }
+
+  static bool saveAndValidate(GlobalKey<FormBuilderState> key){
+    bool toReturn = key.currentState?.saveAndValidate() ?? false;
+    for(var k in ticketKeys){
+      if(!(k.currentState?.saveAndValidate() ?? false)){
+        toReturn = false;
+      }
+    }
+    return toReturn;
   }
 
   // Retrieve form data by iterating over defined fields
@@ -215,7 +224,7 @@ class FormHelper {
                                   "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                    fontSize: 16 * fontSizeFactor,
                                   ),
                                 ),
                               ),
@@ -283,8 +292,7 @@ class FormHelper {
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
-        textController.text = seat?.objectModel?.title ?? "---";
-
+        textController.text = seat?.objectModel?.title ?? metaEmpty;
         return TextField(
           controller: textController,
           readOnly: true,
@@ -292,7 +300,7 @@ class FormHelper {
           decoration: InputDecoration(
             labelText: label,
             suffixIcon: const Icon(Icons.event_seat),
-            labelStyle: StylesConfig.textStyleBig,
+            labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
             errorText: field.errorText, // Display validation error
           ),
           onTap: () async {
@@ -318,7 +326,8 @@ class FormHelper {
               updateTotalPrice?.call();
               field.didChange(selectedSeat);
               textController.text =
-                  selectedSeat.objectModel?.title ?? "---";
+                  selectedSeat.objectModel?.title ?? metaEmpty;
+              field.validate();
             }
           },
         );
@@ -331,7 +340,8 @@ class FormHelper {
     return FormBuilderTextField(
       name: name,
       autofillHints: autofillHints,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: isRequired ? FormBuilderValidators.required() : null,
     );
   }
@@ -341,7 +351,8 @@ class FormHelper {
     return FormBuilderTextField(
       name: fieldTypeEmail,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(labelText: emailLabel()),
+      decoration: InputDecoration(labelText: emailLabel(),
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
         if (isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: emailInvalidMessage()),
@@ -360,7 +371,8 @@ class FormHelper {
     }
     return FormBuilderRadioGroup(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
       validator: isRequired ? FormBuilderValidators.required() : null,
       options: options,
     );
@@ -376,7 +388,12 @@ class FormHelper {
             o[FormOptionModel.metaOptionsId],
             o[FormOptionModel.metaOptionsName],
             price: o[FormOptionModel.metaOptionsPrice] ?? 0.0, // Use price from the option or default to 0.0
-          )));
+          ),
+        child: Text(
+          o[FormOptionModel.metaOptionsName],
+          style: TextStyle(fontSize: 14.0 * fontSizeFactor), // Adjust font size dynamically
+        ),
+      ));
     }
 
     // Use the first option as the default initial value
@@ -384,7 +401,8 @@ class FormHelper {
 
     return FormBuilderRadioGroup<FormOptionModel>(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.required(),
       options: options,
       initialValue: initialValue,
@@ -396,7 +414,8 @@ class FormHelper {
   static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
     return FormBuilderTextField(
       name: name,
-      decoration: InputDecoration(labelText: label),
+      decoration: InputDecoration(labelText: label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
         if (isRequired) FormBuilderValidators.required(),
         // Allow empty for optional field; validate only if non-empty

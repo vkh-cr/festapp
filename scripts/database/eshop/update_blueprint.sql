@@ -19,19 +19,23 @@ DECLARE
 BEGIN
     -- Validate input data
     IF input_data IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 400, 'message', 'Input data is missing');
+        RETURN JSONB_BUILD_OBJECT('code', 4001, 'message', 'Input data is missing');
     END IF;
 
     -- Get occasion ID from input data
     IF input_data->>'occasion' IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 400, 'message', 'Missing occasion ID in input data');
+        RETURN JSONB_BUILD_OBJECT('code', 4002, 'message', 'Missing occasion ID in input data');
     END IF;
 
     occasion_id := (input_data->>'occasion')::BIGINT;
 
+    IF (SELECT get_is_editor_on_occasion(occasion_id)) <> TRUE THEN
+        RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to edit this occasion');
+    END IF;
+
     -- Get organization ID from input data
     IF input_data->>'organization' IS NULL THEN
-        RETURN JSONB_BUILD_OBJECT('code', 400, 'message', 'Missing organization ID in input data');
+        RETURN JSONB_BUILD_OBJECT('code', 4003, 'message', 'Missing organization ID in input data');
     END IF;
 
     organization_id := (input_data->>'organization')::BIGINT;
@@ -90,7 +94,7 @@ BEGIN
                 -- Return error for invalid or missing product_id
                 IF product_id IS NULL THEN
                     RETURN JSONB_BUILD_OBJECT(
-                        'code', 400,
+                        'code', 4004,
                         'message', 'Invalid or missing product. Ensure the product exists and is part of the occasion.',
                         'details', JSONB_BUILD_OBJECT(
                             'product_id', NULL,
@@ -107,7 +111,7 @@ BEGIN
                     UPDATE eshop.spots
                     SET
                         product = product_id,
-                        title = spot_title, -- Save the extracted spot title
+                        title = spot_title,
                         updated_at = now
                     WHERE id = (object_data->>'id')::BIGINT;
                 ELSE
@@ -117,7 +121,7 @@ BEGIN
                         updated_at,
                         occasion,
                         blueprint,
-                        title,  -- Save the extracted spot title
+                        title,
                         product
                     )
                     VALUES (
@@ -169,7 +173,7 @@ BEGIN
             ELSE
                 -- Spot cannot be deleted, return error
                 RETURN JSONB_BUILD_OBJECT(
-                    'code', 403,
+                    'code', 4031,
                     'message', 'Cannot delete spot due to invalid state',
                     'spot_id', spot.id,
                     'details', JSONB_BUILD_OBJECT(
@@ -205,6 +209,6 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        RETURN JSONB_BUILD_OBJECT('code', 500, 'message', SQLERRM);
+        RETURN JSONB_BUILD_OBJECT('code', 5001, 'message', SQLERRM);
 END;
 $$;

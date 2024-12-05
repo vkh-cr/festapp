@@ -301,5 +301,7 @@
   "Total Price: {price}": "Total Price: {price}",
   "Ticket {number}": "Ticket {number}",
   "Add another ticket": "Add another ticket",
+  "Price": "Price",
+  "Ticket": "Ticket",
   "_":"_"
 }
