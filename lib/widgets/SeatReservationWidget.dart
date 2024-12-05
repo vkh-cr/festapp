@@ -139,6 +139,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                       seatSize: SeatReservationWidget.boxSize,
                       currentObjects: blueprint!.objects!,
                       allBoxes: allObjects,
+                      backgroundSvg: blueprint!.backgroundSvg
                     ),
                   ),
                 ),
