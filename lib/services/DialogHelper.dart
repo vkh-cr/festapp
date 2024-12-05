@@ -233,21 +233,29 @@ class DialogHelper{
     return result;
   }
 
-  static Future<XFile?>  dropFilesHere(
+  static Future<XFile?> dropFilesHere(
       BuildContext context,
       String titleMessage,
       String confirmButtonMessage,
       String cancelButtonMessage,
       ) async {
     XFile? filePath;
-    Widget dropFile = DropFile(onFilePathChanged: (f) => filePath = f);
+    final dropFileWidget = DropFile(
+      onFilePathChanged: (file) => filePath = file,
+    );
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(titleMessage),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            titleMessage,
+          ),
           content: SingleChildScrollView(
-            child: dropFile,
+            child: dropFileWidget,
           ),
           actions: [
             TextButton(
@@ -257,8 +265,8 @@ class DialogHelper{
               },
               child: Text(cancelButtonMessage),
             ),
-            TextButton(
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context);
               },
               child: Text(confirmButtonMessage),
@@ -267,8 +275,10 @@ class DialogHelper{
         );
       },
     );
+
     return filePath;
   }
+
 
 
   static Future<bool> showNotificationPermissionDialog(BuildContext context) async {

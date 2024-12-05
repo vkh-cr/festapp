@@ -46,24 +46,10 @@ BEGIN
     IF blueprint_id IS NULL THEN
         -- Create a new blueprint
         INSERT INTO eshop.blueprints (
-            created_at,
-            data,
-            title,
-            organization,
-            configuration,
-            objects,
-            groups,
-            occasion
+            created_at
         )
         VALUES (
-            now,
-            input_data->'data',
-            input_data->>'title',
-            organization_id,
-            input_data->'configuration',
-            '[]'::JSONB,
-            input_data->'groups',
-            occasion_id
+            now
         )
         RETURNING id INTO blueprint_id;
     END IF;
@@ -189,12 +175,13 @@ BEGIN
     -- Update blueprint's objects field
     UPDATE eshop.blueprints
     SET
-        objects = updated_objects,
         updated_at = now,
         data = input_data->'data',
         title = input_data->>'title',
         configuration = input_data->'configuration',
         groups = input_data->'groups',
+        objects = updated_objects,
+        background_svg = (input_data->>'background_svg')::TEXT,
         occasion = occasion_id,
         organization = organization_id
     WHERE id = blueprint_id;

@@ -7,15 +7,14 @@ class DropFile extends StatefulWidget {
   const DropFile({Key? key, required this.onFilePathChanged}) : super(key: key);
 
   final void Function(XFile) onFilePathChanged;
+
   @override
   _DropFileState createState() => _DropFileState();
 }
 
 class _DropFileState extends State<DropFile> {
   XFile? file;
-
   bool _dragging = false;
-
   Offset? offset;
 
   @override
@@ -27,13 +26,14 @@ class _DropFileState extends State<DropFile> {
           widget.onFilePathChanged(file!);
         });
 
-
-        debugPrint('onDragDone:');
-        for (final file in detail.files) {
-          debugPrint('  ${file.path} ${file.name}'
-              '  ${await file.lastModified()}'
-              '  ${await file.length()}'
-              '  ${file.mimeType}');
+        debugPrint('File dropped:');
+        for (final droppedFile in detail.files) {
+          debugPrint(
+            '  ${droppedFile.path} ${droppedFile.name} '
+                '  ${await droppedFile.lastModified()} '
+                '  ${await droppedFile.length()} '
+                '  ${droppedFile.mimeType}',
+          );
         }
       },
       onDragUpdated: (details) {
@@ -54,16 +54,58 @@ class _DropFileState extends State<DropFile> {
         });
       },
       child: Container(
-        height: 200,
-        width: 200,
-        color: _dragging ? Colors.blue.withOpacity(0.4) : Colors.black26,
-        child: Stack(
-          children: [
-            if (file == null)
-              Center(child: Text("Drop files here").tr())
-            else
-              Text(file?.path??"")
-          ],
+        height: 250,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: _dragging ? Colors.blue.withOpacity(0.2) : Colors.grey.shade200,
+          border: Border.all(
+            color: _dragging ? Colors.blue : Colors.grey.shade400,
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: file == null
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cloud_upload,
+                size: 50,
+                color: _dragging ? Colors.blue : Colors.grey,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Drop file here".tr(),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _dragging ? Colors.blue : Colors.black54,
+                ),
+              ),
+            ],
+          )
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.insert_drive_file,
+                size: 50,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                file!.name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
