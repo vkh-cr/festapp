@@ -29,8 +29,8 @@ DECLARE
     form_key UUID;
     deadline TIMESTAMPTZ;
     form_deadline_duration BIGINT;
-    currency_code TEXT; -- Variable for currency_code
-    first_currency_code TEXT := NULL; -- Variable to store the first product's currency
+    currency_code TEXT;
+    first_currency_code TEXT := NULL;
 BEGIN
     -- Validate input data and extract form key
     IF input_data IS NULL OR input_data->'form' IS NULL THEN
@@ -118,9 +118,16 @@ BEGIN
         -- Generate ticket symbol
         ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
 
-        -- Create ticket with ticket symbol
-        INSERT INTO eshop.tickets (state, occasion, ticket_symbol, created_at, updated_at)
-        VALUES ('ordered', occasion_id, ticket_symbol, now, now)
+        -- Create ticket with ticket symbol and note
+        INSERT INTO eshop.tickets (state, occasion, ticket_symbol, note, created_at, updated_at)
+        VALUES (
+            'ordered',
+            occasion_id,
+            ticket_symbol,
+            ticket_data->>'note',
+            now,
+            now
+        )
         RETURNING id INTO ticket_id;
 
         -- Initialize ticket products array
@@ -199,10 +206,11 @@ BEGIN
             END IF;
         END LOOP;
 
-        -- Add ticket with its products to ticket details
+        -- Add ticket with its products and note to ticket details
         ticket_details := ticket_details || JSONB_BUILD_OBJECT(
             'ticket_id', ticket_id,
             'ticket_symbol', ticket_symbol,
+            'note', ticket_data->>'note',
             'products', ticket_products
         );
     END LOOP;
