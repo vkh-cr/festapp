@@ -32,6 +32,7 @@ class FormHelper {
   static const String metaOptionsType = "optionsType";
   static const String metaSecret = "secret";
   static const String metaForm = "form";
+  static const String metaEmpty = "---";
 
   static const String fieldTypeOptions = "options";
 
@@ -55,16 +56,22 @@ class FormHelper {
   static List<Map<String, dynamic>> ticketValues = [];
   static List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
-
-  //static String secret = "0fb80818-4c8d-4eb7-8205-859b1d786fb3";
-
-
   static List<Widget> getAllFormFields(BuildContext context,  GlobalKey<FormBuilderState> formKey, FormModel formData, [void Function()? updateTotalPrice]) {
     return formData.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
   }
 
   static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel formData, dynamic fields, [void Function()? updateTotalPrice]) {
     return fields.map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
+  }
+
+  static bool saveAndValidate(GlobalKey<FormBuilderState> key){
+    bool toReturn = key.currentState?.saveAndValidate() ?? false;
+    for(var k in ticketKeys){
+      if(!(k.currentState?.saveAndValidate() ?? false)){
+        toReturn = false;
+      }
+    }
+    return toReturn;
   }
 
   // Retrieve form data by iterating over defined fields
@@ -283,7 +290,7 @@ class FormHelper {
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
-        textController.text = seat?.objectModel?.title ?? "---";
+        textController.text = seat?.objectModel?.title ?? metaEmpty;
 
         return TextField(
           controller: textController,
@@ -318,7 +325,8 @@ class FormHelper {
               updateTotalPrice?.call();
               field.didChange(selectedSeat);
               textController.text =
-                  selectedSeat.objectModel?.title ?? "---";
+                  selectedSeat.objectModel?.title ?? metaEmpty;
+              field.validate();
             }
           },
         );
