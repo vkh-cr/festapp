@@ -115,7 +115,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                           seatSize: SeatReservationWidget.boxSize,
                           currentObjects: blueprint!.objects!,
                           allBoxes: allBoxes,
-                          //backgroundSvg: blueprint!.backgroundSvg
+                          backgroundSvg: blueprint!.backgroundSvg
                         ),
                       ),
                     ),
@@ -425,6 +425,26 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
             seatLayoutController.fitLayout(); // Fit layout after height change
           },
         ),
+        const SizedBox(width: 12),
+        IconButton(
+          icon: const Icon(Icons.grid_on),
+          tooltip: "Background of the blueprint",
+          onPressed: () async {
+            var file = await DialogHelper.dropFilesHere(
+              context,
+              "Import SVG pozadí".tr(),
+              "Ok".tr(),
+              "Storno".tr(),
+            );
+            if (file != null) {
+              var content = await file.readAsString();
+              setState(() {
+                blueprint!.backgroundSvg = content;
+              });
+              ToastHelper.Show(context, "SVG pozadí bylo úspěšně nahráno.");
+            }
+          },
+        ),
       ],
     );
   }
@@ -506,7 +526,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void handleSeatTap(SeatModel model) {
-    if (model.seatState == SeatState.ordered) {
+    if (model.objectModel?.isOrdered() ?? false) {
       ToastHelper.Show(context, "Místa, která byla objednána není možné měnit.", severity: ToastSeverity.NotOk);
       return;
     }
