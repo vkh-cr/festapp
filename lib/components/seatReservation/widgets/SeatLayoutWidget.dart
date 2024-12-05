@@ -123,7 +123,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       ? Tooltip(
                     showDuration: const Duration(seconds: 0),
                     message:
-                    "${seatModel.objectModel?.title ?? ""}\n${Utilities.formatPrice(context, seatModel.objectModel?.product?.price ?? 0)}",
+                    "${seatModel.objectModel?.blueprintTooltip(context)}",
                     child: GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {

@@ -29,6 +29,10 @@ BEGIN
 
     occasion_id := (input_data->>'occasion')::BIGINT;
 
+    IF (SELECT get_is_editor_on_occasion(occasion_id)) <> TRUE THEN
+        RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to edit this occasion');
+    END IF;
+
     -- Get organization ID from input data
     IF input_data->>'organization' IS NULL THEN
         RETURN JSONB_BUILD_OBJECT('code', 4003, 'message', 'Missing organization ID in input data');

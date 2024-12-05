@@ -40,7 +40,8 @@ BEGIN
         'title', b.title,
         'configuration', b.configuration,
         'objects', b.objects,
-        'groups', b.groups
+        'groups', b.groups,
+        'background_svg', b.groups
     )
     INTO blueprintData
     FROM eshop.blueprints b

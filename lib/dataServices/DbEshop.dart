@@ -68,34 +68,27 @@ class DbEshop {
       return null;
     }
 
-    return BlueprintModel.fromJson(response["data"]);
+    var b = BlueprintModel.fromJson(response["data"]);
+    b.assignAllSpotsWithBlueprint();
+    return b;
   }
 
-  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId, int occasion) async {
+  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId) async {
 
-    final response = await _supabaseEshop
-        .from(TbEshop.blueprints.table)
-        .select()
-        .eq(TbEshop.blueprints.id, blueprintId)
-        .single();
+    final response = await _supabase.rpc(
+      'get_blueprint_editor',
+      params: {
+        'blueprint_id': blueprintId,
+      },
+    );
 
-    var spots = await _supabaseEshop.from(TbEshop.spots.table).select().eq(TbEshop.spots.occasion, occasion);
-    response[BlueprintModel.metaSpots] = spots;
+    if (response["code"] != 200) {
+      return null;
+    }
 
-    var defaultProducts = await _supabaseEshop
-        .from(TbEshop.product_types.table)
-        .select(
-        "${TbEshop.product_types.id},"
-            "${TbEshop.product_types.type},"
-            "${TbEshop.product_types.title},"
-            "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price})"
-        )
-        .eq(TbEshop.product_types.occasion, occasion)
-        .eq(TbEshop.product_types.type, ProductModel.spotType);
-    var x = defaultProducts.map((x) => ProductTypeModel.fromJson(x)).first.products!.first;
-
-    response[BlueprintModel.metaDefaultProduct] = x;
-    return BlueprintModel.fromJson(response);
+    var b = BlueprintModel.fromJson(response["data"]);
+    b.assignAllSpotsWithBlueprint();
+    return b;
   }
 
   static Future<bool> updateBlueprint(context, BlueprintModel blueprint) async {

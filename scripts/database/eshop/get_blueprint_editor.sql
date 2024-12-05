@@ -55,6 +55,7 @@ BEGIN
         'id', s.id,
         'title', s.title,
         'product', s.product,
+        'order_product_ticket', s.order_product_ticket,
         'state', CASE
             WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
             WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN 'selected'
@@ -76,11 +77,11 @@ BEGIN
     ))
     INTO productsData
     FROM eshop.products p
-    JOIN eshop.product_types pt ON pt.id = p.id
+    JOIN eshop.product_types pt ON pt.id = p.product_type
     WHERE pt.type IN ('spot', 'taxi', 'food')
       AND pt.occasion = occasion_id;
 
-    -- Fetch relevant tickets associated with the valid spots
+    -- Fetch relevant tickets associated with the order_product_ticket in spots
     SELECT jsonb_agg(jsonb_build_object(
         'id', t.id,
         'ticket_symbol', t.ticket_symbol,
@@ -90,10 +91,11 @@ BEGIN
     INTO ticketsData
     FROM eshop.tickets t
     JOIN eshop.order_product_ticket opt ON opt.ticket = t.id
-    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+    JOIN eshop.spots s ON s.order_product_ticket = opt.id
+    WHERE s.id = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
       AND t.occasion = occasion_id;
 
-    -- Fetch relevant orders associated with the valid spots
+    -- Fetch relevant orders associated with the order_product_ticket in spots
     SELECT jsonb_agg(jsonb_build_object(
         'id', o.id,
         'created_at', o.created_at,
@@ -106,20 +108,26 @@ BEGIN
     INTO ordersData
     FROM eshop.orders o
     JOIN eshop.order_product_ticket opt ON opt."order" = o.id
-    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
+    JOIN eshop.spots s ON s.order_product_ticket = opt.id
+    WHERE s.id = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
       AND o.occasion = occasion_id;
 
-    -- Fetch relevant order-product-ticket data associated with the valid spots
+    -- Extract order IDs from ordersData JSONB
+    WITH order_ids AS (
+        SELECT (order_obj->>'id')::BIGINT AS id
+        FROM jsonb_array_elements(ordersData) order_obj
+    )
+    -- Fetch relevant order-product-ticket data based on extracted order IDs
     SELECT jsonb_agg(jsonb_build_object(
-        'id', opt.id,
-        'order_id', opt."order",
-        'product_id', opt.product,
-        'ticket_id', opt.ticket,
-        'created_at', opt.created_at
-    ))
+            'id', opt.id,
+            'order', opt."order",
+            'product', opt.product,
+            'ticket', opt.ticket,
+            'created_at', opt.created_at
+        ))
     INTO orderProductTicketsData
     FROM eshop.order_product_ticket opt
-    WHERE opt.product = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT);
+    WHERE opt."order" IN (SELECT id FROM order_ids);
 
     -- Add spots data to the blueprint object
     blueprintData = jsonb_set(

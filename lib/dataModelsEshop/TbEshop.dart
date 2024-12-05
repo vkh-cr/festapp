@@ -56,6 +56,10 @@ class OrdersTb {
   String get state => "state";
   String get data => "data";
   String get occasion => "occasion";
+  String get form => "form";
+  String get payment_info => "payment_info";
+  String get currency_code => "currency_code";
+
 }
 
 class TicketsTb {
@@ -64,9 +68,10 @@ class TicketsTb {
   String get id => "id";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
-  String get alias => "alias";
+  String get ticket_symbol => "ticket_symbol";
   String get state => "state";
   String get occasion => "occasion";
+  String get note => "note";
 }
 
 class BlueprintTb {

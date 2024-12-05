@@ -6,13 +6,15 @@ import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
+import 'package:collection/collection.dart';
+
 
 import '../components/seatReservation/model/SeatLayoutStateModel.dart';
 import '../components/seatReservation/model/SeatModel.dart';
@@ -113,7 +115,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                           seatSize: SeatReservationWidget.boxSize,
                           currentObjects: blueprint!.objects!,
                           allBoxes: allBoxes,
-                          backgroundSvg: blueprint!.backgroundSvg
+                          //backgroundSvg: blueprint!.backgroundSvg
                         ),
                       ),
                     ),
@@ -564,7 +566,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
     // Create or update the object model
     model.objectModel = model.objectModel ?? BlueprintObjectModel(x: model.colI, y: model.rowI);
     model.objectModel!.type = BlueprintModel.metaSpotType;
-    model.objectModel!.product = blueprint!.defaultProduct;
+    model.objectModel!.product = blueprint!.products?.firstWhereOrNull((p)=>p.productTypeString == ProductModel.spotType);
     model.objectModel!.group = currentGroup;
     model.objectModel!.title = currentGroup?.getNextBoxName();
 
@@ -607,7 +609,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   Future<void> loadData() async {
-    blueprint = await DbEshop.getBlueprintForEdit(widget.id!, RightsService.currentOccasion!);
+    blueprint = await DbEshop.getBlueprintForEdit(widget.id!);
 
     setState(() {
       currentBoxes = blueprint!.objects;

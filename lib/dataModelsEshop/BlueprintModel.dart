@@ -26,6 +26,7 @@ class BlueprintModel {
   List<BlueprintObjectModel>? spots;
   List<BlueprintGroupModel>? groups;
   String? backgroundSvg;
+  List<ProductModel>? products;
   List<TicketModel>? tickets;
   List<OrderModel>? orders;
   List<OrderProductTicketModel>? orderProductTickets;
@@ -58,6 +59,7 @@ class BlueprintModel {
       objects: enrichedObjects,
       groups: groups,
       backgroundSvg: json[TbEshop.blueprints.background_svg],
+      products: products,
       tickets: tickets,
       orders: orders,
       orderProductTickets: orderProductTickets,
@@ -128,6 +130,7 @@ class BlueprintModel {
           type: object.type,
           spotProduct: matchingSpot?.spotProduct,
           product: products?.firstWhereOrNull((p) => p.id == matchingSpot?.spotProduct),
+          orderProductTicket: matchingSpot?.orderProductTicket,
           groupId: object.groupId,
           title: matchingSpot?.title ?? object.title,
           stateEnum: BlueprintObjectModel.States.entries
@@ -177,6 +180,7 @@ class BlueprintModel {
     TbEshop.blueprints.objects: objects,
     TbEshop.blueprints.groups: groups,
     TbEshop.blueprints.background_svg: backgroundSvg,
+    TbEshop.products.table: products,
     TbEshop.tickets.table: tickets,
     TbEshop.orders.table: orders,
     TbEshop.order_product_ticket.table: orderProductTickets,
@@ -196,10 +200,17 @@ class BlueprintModel {
     this.spots,
     this.groups,
     this.backgroundSvg,
+    this.products,
     this.tickets,
     this.orders,
     this.orderProductTickets,
   });
+
+  void assignAllSpotsWithBlueprint(){
+    for(var o in objects??[]){
+      o.blueprint = this;
+    }
+  }
 
   int getFirstAvailableGroupId() {
     int id = 1;
