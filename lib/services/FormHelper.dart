@@ -292,7 +292,7 @@ class FormHelper {
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
-        textController.text = seat?.objectModel?.title ?? metaEmpty;
+        textController.text = seat?.objectModel?.toString() ?? metaEmpty;
         return TextField(
           controller: textController,
           readOnly: true,
@@ -326,7 +326,7 @@ class FormHelper {
               updateTotalPrice?.call();
               field.didChange(selectedSeat);
               textController.text =
-                  selectedSeat.objectModel?.title ?? metaEmpty;
+                  selectedSeat.objectModel?.toString() ?? metaEmpty;
               field.validate();
             }
           },
