@@ -54,6 +54,46 @@ class BlueprintObjectModel {
   BlueprintGroupModel? group;
   SeatState? stateEnum;
   BlueprintModel? blueprint;
+
+  factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
+    return BlueprintObjectModel(
+      x: json[metaX],
+      y: json[metaY],
+      id: json[metaId],
+      groupId: json[metaGroupId],
+      orderProductTicket: json[TbEshop.spots.order_product_ticket],
+      type: json[metaType],
+      state: json[metaState],
+      title: json[metaTitle],
+      spotProduct: json[TbEshop.spots.product],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    metaX: x,
+    metaY: y,
+    metaType: type,
+    metaTitle: title,
+    if (id != null) metaId: id,
+    if (group?.id != null) metaGroupId: group?.id,
+    if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
+  };
+
+  BlueprintObjectModel({
+    this.x,
+    this.y,
+    this.id,
+    this.groupId,
+    this.orderProductTicket,
+    this.type,
+    this.state,
+    this.stateEnum,
+    this.title,
+    this.spotProduct,
+    this.product,
+    this.blueprint,
+  });
+
   String blueprintTooltip(BuildContext context) {
     // Find the matching order product ticket
     var opt = blueprint?.orderProductTickets?.firstWhereOrNull((t) => t.id == orderProductTicket);
@@ -96,42 +136,7 @@ class BlueprintObjectModel {
     return "${product?.title} ${title ?? ""}\n${"Price".tr()}: ${Utilities.formatPrice(context, product?.price ?? 0)}";
   }
 
-  factory BlueprintObjectModel.fromJson(Map<String, dynamic> json) {
-    return BlueprintObjectModel(
-      x: json[metaX],
-      y: json[metaY],
-      id: json[metaId],
-      groupId: json[metaGroupId],
-      orderProductTicket: json[TbEshop.spots.order_product_ticket],
-      type: json[metaType],
-      state: json[metaState],
-      title: json[metaTitle],
-      spotProduct: json[TbEshop.spots.product],
-    );
+  bool isOrdered(){
+    return orderProductTicket != null;
   }
-
-  Map<String, dynamic> toJson() => {
-    metaX: x,
-    metaY: y,
-    metaType: type,
-    metaTitle: title,
-    if (id != null) metaId: id,
-    if (group?.id != null) metaGroupId: group?.id,
-    if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
-  };
-
-  BlueprintObjectModel({
-    this.x,
-    this.y,
-    this.id,
-    this.groupId,
-    this.orderProductTicket,
-    this.type,
-    this.state,
-    this.stateEnum,
-    this.title,
-    this.spotProduct,
-    this.product,
-    this.blueprint,
-  });
 }

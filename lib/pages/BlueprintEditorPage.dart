@@ -506,7 +506,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   void handleSeatTap(SeatModel model) {
-    if (model.seatState == SeatState.ordered) {
+    if (model.objectModel?.isOrdered() ?? false) {
       ToastHelper.Show(context, "Místa, která byla objednána není možné měnit.", severity: ToastSeverity.NotOk);
       return;
     }
