@@ -19,7 +19,7 @@ class SeatWidgetHelper {
         state == SeatState.available;
 
     return Container(
-      color: _getSeatColor(SeatState.empty),
+      color: hasPadding ? Colors.black.withOpacity(0.2) : _getSeatColor(SeatState.empty),
       height: size,
       width: size,
       child: Container(
