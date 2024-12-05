@@ -154,7 +154,7 @@ class _FormPageState extends State<FormPage> {
                             ? null
                             : () async {
                           TextInput.finishAutofillContext();
-                          if (_formKey.currentState?.saveAndValidate() ?? false) {
+                          if (FormHelper.saveAndValidate(_formKey)) {
                             setState(() {
                               _isLoading = true;
                             });

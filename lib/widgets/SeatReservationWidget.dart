@@ -127,6 +127,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         model.seatState = SeatState.selected_by_me_focused;
                         widget.selectedSeat = model;
                         if(!await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, true)){
+                          widget.selectedSeat = null;
                           model.seatState = SeatState.available;
                         }
                       }

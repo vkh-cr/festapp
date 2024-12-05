@@ -11,7 +11,7 @@ DECLARE
     blueprintData JSONB;
     spotsData JSONB;
     productsData JSONB;
-    valid_spots JSONB; -- Temporary variable to hold valid spot IDs
+    valid_spots JSONB;
 BEGIN
     -- Validate the form and blueprint association
     IF NOT EXISTS (
@@ -40,7 +40,8 @@ BEGIN
         'title', b.title,
         'configuration', b.configuration,
         'objects', b.objects,
-        'groups', b.groups
+        'groups', b.groups,
+        'background_svg', b.groups
     )
     INTO blueprintData
     FROM eshop.blueprints b

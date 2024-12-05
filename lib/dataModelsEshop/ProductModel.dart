@@ -11,10 +11,12 @@ class ProductModel {
   Map<String, dynamic>? data;
   int? productType;
   int? occasion;
+  String? productTypeString;
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
   static const String spotType = "spot";
+  static const String metaTypeField = "type";
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -28,6 +30,7 @@ class ProductModel {
       data: json[TbEshop.products.data],
       productType: json[TbEshop.products.product_type],
       occasion: json[TbEshop.products.occasion],
+      productTypeString: json[metaTypeField],
     );
   }
 
@@ -57,5 +60,6 @@ class ProductModel {
     this.data,
     this.productType,
     this.occasion,
+    this.productTypeString,
   });
 }
