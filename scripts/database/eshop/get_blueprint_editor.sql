@@ -32,6 +32,8 @@ BEGIN
         'created_at', b.created_at,
         'data', b.data,
         'title', b.title,
+        'occasion', b.occasion,
+        'organization', b.organization,
         'configuration', b.configuration,
         'objects', b.objects,
         'groups', b.groups,

@@ -18,6 +18,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 
 @RoutePage()
 class FormPage extends StatefulWidget {
@@ -135,6 +136,11 @@ class _FormPageState extends State<FormPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
+                      if(form!.footer!=null)
+                        Column(children: [
+                          HtmlView(html: form!.header!, isSelectable: true,),
+                          const SizedBox(height: 16),
+                        ],),
                       ...FormHelper.getAllFormFields(context, _formKey, form!, _updateTotalPrice),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
@@ -148,6 +154,11 @@ class _FormPageState extends State<FormPage> {
                           ),
                         ),
                       const SizedBox(height: 16),
+                      if(form!.footer!=null)
+                        Column(children: [
+                          HtmlView(html: form!.footer!, isSelectable: true,),
+                          const SizedBox(height: 16),
+                        ],),
                       ButtonsHelper.bigButton(
                         context: context,
                         onPressed: _isLoading

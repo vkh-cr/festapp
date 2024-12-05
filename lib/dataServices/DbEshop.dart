@@ -92,11 +92,10 @@ class DbEshop {
   }
 
   static Future<bool> updateBlueprint(context, BlueprintModel blueprint) async {
-    var json = blueprint.toJson();
     final response = await _supabase.rpc(
       'update_blueprint',
       params: {
-        'input_data': json,
+        'input_data': blueprint,
       },
     );
 

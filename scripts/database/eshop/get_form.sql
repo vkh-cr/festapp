@@ -26,6 +26,8 @@ BEGIN
             'created_at', f.created_at,
             'data', f.data,
             'type', f.type,
+            'header', f.header,
+            'footer', f.footer,
             'occasion', f.occasion,
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,

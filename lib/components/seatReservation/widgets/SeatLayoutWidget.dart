@@ -106,7 +106,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 widget.stateModel.backgroundSvg!,
                 width: layoutWidth.toDouble(),
                 height: layoutHeight.toDouble(),
-                fit: BoxFit.fitWidth,
+                fit: BoxFit.cover,
               ),
             ),
           // Seat Layout

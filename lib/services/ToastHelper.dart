@@ -16,6 +16,6 @@ class ToastHelper {
       color = Colors.red;
       webColor  = "#d8392b";
     }
-    Fluttertoast.showToast(msg: value, timeInSecForIosWeb: 3, webBgColor: webColor, backgroundColor: color);
+    Fluttertoast.showToast(msg: value, timeInSecForIosWeb: 3, webBgColor: webColor, backgroundColor: color, webPosition: "left");
   }
 }
