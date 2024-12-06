@@ -92,7 +92,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
 
     return InteractiveViewer(
-      minScale: 0.1,
+      minScale: 0.5,
       maxScale: 5,
       boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
