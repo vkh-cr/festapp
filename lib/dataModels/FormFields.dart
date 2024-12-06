@@ -17,10 +17,13 @@ class FieldHolder {
 
   String getFieldTypeValue() => FormHelper.getFieldTypeValue(this);
 
+  String? label;
+
   FieldHolder({
     required this.fieldType,
     required this.isRequired,
     this.defaultValue,
+    this.label
   });
 
   factory FieldHolder.fromJson(Map<String, dynamic> json) {
@@ -48,7 +51,6 @@ class OptionsFieldHolder extends FieldHolder {
   static const String metaOptionsType = "optionsType";
   static const String metaOptions = "options";
 
-  final String label;
   final String optionsType;
   final List<FormOptionModel> options;
 
@@ -56,16 +58,16 @@ class OptionsFieldHolder extends FieldHolder {
     required String fieldType,
     dynamic value,
     required this.options,
-    required this.label,
     required this.optionsType,
-  }) : super(fieldType: fieldType, defaultValue: value, isRequired: true);
+    required label,
+  }) : super(fieldType: fieldType, defaultValue: value, isRequired: true, label: label);
 
   factory OptionsFieldHolder.fromJson(Map<String, dynamic> json) {
     return OptionsFieldHolder(
       fieldType: json[FieldHolder.metaType],
       value: json[FieldHolder.metaValue],
       label: json[metaLabel],
-      options: List<FormOptionModel>.from(json[metaOptions].map((o)=>FormOptionModel.fromJson(o))),
+      options: List<FormOptionModel>.from(json[metaOptions].map((o) => FormOptionModel.fromJson(o))),
       optionsType: json[metaOptionsType],
     );
   }

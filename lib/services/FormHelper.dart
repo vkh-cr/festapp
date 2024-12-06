@@ -141,24 +141,32 @@ class FormHelper {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeNote:
+        field.label = noteLabel();
         return buildTextField(fieldTypeNote, noteLabel(), isRequiredField, []);
       case fieldTypeName:
+        field.label = nameLabel();
         return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
       case fieldTypeSurname:
+        field.label = surnameLabel();
         return buildTextField(fieldTypeSurname, surnameLabel(), isRequiredField, [AutofillHints.familyName]);
       case fieldTypeCity:
+        field.label = cityLabel();
         return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
       case fieldTypeSpot:
+        field.label = spotLabel();
         return buildSpotField(context, formKey, formHolder, fieldTypeSpot, spotLabel());
       case fieldTypeEmail:
+        field.label = emailLabel();
         return buildEmailField(isRequiredField);
       case fieldTypeSex:
+        field.label = sexLabel();
         return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
       case fieldTypeOptions:
         var opt = field as OptionsFieldHolder;
-        return buildGenericOptions(opt.optionsType, opt.label, opt.options);
+        return buildGenericOptions(opt.optionsType, opt.label!, opt.options);
       case fieldTypeBirthYear:
-        return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
+        field.label = birthYearLabel();
+        return buildBirthYearField(field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return buildTicketField(formHolder, ticketHolder);
@@ -414,13 +422,13 @@ class FormHelper {
     );
   }
 
-  static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
+  static FormBuilderTextField buildBirthYearField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: name,
-      decoration: InputDecoration(labelText: label,
+      name: fieldHolder.fieldType,
+      decoration: InputDecoration(labelText: fieldHolder.label,
         labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
-        if (isRequired) FormBuilderValidators.required(),
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
         // Allow empty for optional field; validate only if non-empty
             (value) {
           if (value == null || value.isEmpty || value == "") {

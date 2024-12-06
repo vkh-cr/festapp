@@ -10,6 +10,7 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/pages/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/services/UuidConverter.dart';
@@ -53,12 +54,9 @@ class _FormPageState extends State<FormPage> {
   }
 
   void _updateTotalPrice() {
-    // Reset total price
     _totalPrice = 0.0;
 
-    // Iterate over all fields and calculate total price
     for (var field in formHolder!.fields) {
-      // Calculate price for regular options
       if (field.fieldType == FormHelper.fieldTypeOptions) {
         var selectedOption = field.getValue(formHolder!.controller!.globalKey);
         if (selectedOption is FormOptionModel) {
@@ -66,19 +64,15 @@ class _FormPageState extends State<FormPage> {
         }
       }
 
-      // Calculate price for tickets
       if (field.fieldType == FormHelper.fieldTypeTicket) {
-        var ticketDataList = FormHelper.getFieldData(
-            _formKey,
-            field
-        ) ?? [];
+        var ticketDataList = FormHelper.getFieldData(_formKey, field) ?? [];
 
         for (var ticketData in ticketDataList) {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
-            } else if (ticketValue is BlueprintObjectModel){
-              _totalPrice += ticketValue.product?.price??0;
+            } else if (ticketValue is BlueprintObjectModel) {
+              _totalPrice += ticketValue.product?.price ?? 0;
             }
           }
         }
@@ -88,6 +82,57 @@ class _FormPageState extends State<FormPage> {
     setState(() {}); // Update the UI
   }
 
+  void _showOrderPreview() {
+    TextInput.finishAutofillContext();
+    if (FormHelper.saveAndValidate(formHolder!))
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return OrderPreviewScreen(
+          formHolder: formHolder!,
+          totalPrice: _totalPrice,
+          onSendPressed: _sendOrder,
+        );
+      },
+    );
+  }
+
+  Future<void> _sendOrder() async {
+    if (formHolder == null || form == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    var data = FormHelper.getDataFromForm(formHolder!);
+    data = FormHelper.replaceSpotWithId(data);
+    data[FormHelper.metaSecret] = form!.secret;
+    data[FormHelper.metaForm] = form!.formKey;
+    formResult = data;
+
+    var response = await DbEshop.sendTicketOrder(data);
+
+    if (response.data["code"] != 200) {
+      ToastHelper.Show(
+        context,
+        "There was an error during ordering. Error code: ${response.data["code"]}",
+        severity: ToastSeverity.NotOk,
+      );
+    } else {
+      setState(() {
+        _isSendSuccess = true;
+      });
+      ToastHelper.Show(
+        context,
+        "Your order has been sent successfully!".tr(),
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,11 +182,13 @@ class _FormPageState extends State<FormPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                      if(form!.footer!=null)
-                        Column(children: [
-                          HtmlView(html: form!.header!, isSelectable: true,),
-                          const SizedBox(height: 16),
-                        ],),
+                      if (form!.footer != null)
+                        Column(
+                          children: [
+                            HtmlView(html: form!.header!, isSelectable: true),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
@@ -155,51 +202,17 @@ class _FormPageState extends State<FormPage> {
                           ),
                         ),
                       const SizedBox(height: 16),
-                      if(form!.footer!=null)
-                        Column(children: [
-                          HtmlView(html: form!.footer!, isSelectable: true,),
-                          const SizedBox(height: 16),
-                        ],),
+                      if (form!.footer != null)
+                        Column(
+                          children: [
+                            HtmlView(html: form!.footer!, isSelectable: true),
+                            const SizedBox(height: 16),
+                          ],
+                        ),
                       ButtonsHelper.bigButton(
                         context: context,
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                          TextInput.finishAutofillContext();
-                          if (FormHelper.saveAndValidate(formHolder!)) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                            var data = FormHelper.getDataFromForm(formHolder!);
-
-                            data = FormHelper.replaceSpotWithId(data);
-                            data[FormHelper.metaSecret] = form!.secret;
-                            data[FormHelper.metaForm] = form!.formKey;
-                            formResult = data;
-
-
-                            var response = await DbEshop.sendTicketOrder(data);
-
-                            if(response.data["code"] != 200){
-                              ToastHelper.Show(context, "There was an error during ordering. Error code: ${response.data["code"]}", severity: ToastSeverity.NotOk);
-                              setState(() {
-                                _isLoading = false;
-                              });
-                              return;
-                            }
-
-                            setState(() {
-                              //_isSendSuccess = true;
-                              _isLoading = false;
-                            });
-
-                            ToastHelper.Show(
-                                context,
-                                "Your order has been sent successfully!"
-                                    .tr());
-                          }
-                        },
-                        label: "Send".tr(),
+                        onPressed: _isLoading ? null : _showOrderPreview,
+                        label: "Continue".tr(),
                         isEnabled: !_isLoading,
                         height: 50.0,
                         width: 250.0,
@@ -255,47 +268,44 @@ class _FormPageState extends State<FormPage> {
     //var key = UuidConverter.base62ToUuid(widget.id!);
 
     form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
-    if(form == null) {
+    if (form == null) {
       return;
     }
-    // Fetching items
     var allItems = await DbEshop.getProducts(context, form!.occasion!);
-    // New fields to replace existing ones
     List<Map<String, dynamic>> updatedFields = [];
 
-    // Loop through the fields in form.data
     for (var field in form?.data![FormHelper.metaFields]) {
-      // Check if the field is a ticket
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-        // Process the fields inside the ticket
         List<Map<String, dynamic>> updatedTicketFields = [];
         for (var ticketField in field[FormHelper.metaFields]) {
-          // Check if the ticket field has an optionsType
           if (ticketField.containsKey(FormHelper.metaOptionsType)) {
             var optionsType = ticketField[FormHelper.metaOptionsType];
             var generatedOptions = generateOptionsForItemType(allItems, optionsType);
             updatedTicketFields.add(generatedOptions);
           } else {
-            // Directly add the ticket field if no optionsType is present
             updatedTicketFields.add(ticketField);
           }
         }
 
-        // Replace the fields inside the ticket
         updatedFields.add({
           FormHelper.metaType: field[FormHelper.metaType],
           FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
           FormHelper.metaFields: updatedTicketFields,
         });
       } else {
-        // Directly add the field if it's not a ticket
         updatedFields.add(field);
       }
     }
-    Map<String, dynamic> json = {FormHelper.metaFields : updatedFields};
+    Map<String, dynamic> json = {FormHelper.metaFields: updatedFields};
 
     formHolder = FormHolder.fromJson(json);
-    formHolder!.controller = FormHolderController(secret: form!.secret, blueprintId: form!.blueprint, globalKey: _formKey, formKey: form!.formKey!, updateTotalPrice: _updateTotalPrice);
+    formHolder!.controller = FormHolderController(
+      secret: form!.secret,
+      blueprintId: form!.blueprint,
+      globalKey: _formKey,
+      formKey: form!.formKey!,
+      updateTotalPrice: _updateTotalPrice,
+    );
     form!.data![FormHelper.metaFields] = updatedFields;
 
     setState(() {
@@ -303,7 +313,3 @@ class _FormPageState extends State<FormPage> {
     });
   }
 }
-
-
-
-
