@@ -55,9 +55,6 @@ class FormHelper {
 
   static double fontSizeFactor = 1.2;
 
-  static List<List<FieldHolder>> ticketValues = [];
-  static List<GlobalKey<FormBuilderState>> ticketKeys = [];
-
   static List<Widget> getAllFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder) {
     return formHolder.fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
   }
@@ -66,9 +63,9 @@ class FormHelper {
     return fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
   }
 
-  static bool saveAndValidate(GlobalKey<FormBuilderState> key){
-    bool toReturn = key.currentState?.saveAndValidate() ?? false;
-    for(var k in ticketKeys){
+  static bool saveAndValidate(FormHolder formHolder){
+    bool toReturn = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
+    for(var k in formHolder.getTicket()!.ticketKeys){
       if(!(k.currentState?.saveAndValidate() ?? false)){
         toReturn = false;
       }
@@ -80,13 +77,13 @@ class FormHelper {
   static Map<String, dynamic> getDataFromForm(FormHolder formHolder) {
     Map<String, dynamic> toReturn = {};
     for (var k in formHolder.fields) {
-      toReturn[k.fieldType] = getFieldData(formHolder.controller!.globalKey, k.fieldType);
+      toReturn[k.fieldType] = getFieldData(formHolder.controller!.globalKey, k.fieldType, formHolder);
     }
     return toReturn;
   }
 
   // Determine the correct data from the form based on type
-  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType) {
+  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType, FormHolder formHolder) {
     var fieldValue = formKey.currentState?.fields[fieldType]?.value;
 
     if (fieldType == fieldTypeSex) {
@@ -105,15 +102,16 @@ class FormHelper {
       // Collect ticket data from multiple ticket forms
       List<Map<String, dynamic>> tickets = [];
 
-      for (int i = 0; i < ticketKeys.length; i++) {
-        final ticketKey = ticketKeys[i];
+      var ticket = formHolder.getTicket()!;
+      for (int i = 0; i < ticket.ticketKeys.length; i++) {
+        final ticketKey = ticket.ticketKeys[i];
         if (ticketKey.currentState == null) continue;
 
         Map<String, dynamic> ticketData = {};
 
         for (MapEntry<String, FormBuilderFieldState<FormBuilderField<dynamic>, dynamic>> ticketSubField in ticketKey.currentState?.fields.entries ?? []) {
           var subFieldType = ticketSubField.key;
-          ticketData[subFieldType] = getFieldData(ticketKey, subFieldType);
+          ticketData[subFieldType] = getFieldData(ticketKey, subFieldType, formHolder);
         }
         tickets.add(ticketData);
       }
@@ -165,28 +163,28 @@ class FormHelper {
       ) {
     final maxTickets = ticket.maxTickets;
 
-    if (ticketValues.isEmpty) {
-      ticketValues.add(ticket.fields);
-      ticketKeys.add(GlobalKey<FormBuilderState>());
+    if (ticket.ticketValues.isEmpty) {
+      ticket.ticketValues.add(ticket.fields);
+      ticket.ticketKeys.add(GlobalKey<FormBuilderState>());
     }
 
     return StatefulBuilder(
       builder: (context, setState) {
         void addTicket() {
-          if (ticketValues.length < maxTickets) {
+          if (ticket.ticketValues.length < maxTickets) {
             setState(() {
-              ticketValues.add(ticket.fields);
-              ticketKeys.add(GlobalKey<FormBuilderState>());
+              ticket.ticketValues.add(ticket.fields);
+              ticket.ticketKeys.add(GlobalKey<FormBuilderState>());
             });
           }
           formHolder.controller!.updateTotalPrice?.call(); // Update the total price when adding a ticket
         }
 
         void removeTicket(int index) {
-          if (ticketValues.length > 1) {
+          if (ticket.ticketValues.length > 1) {
             setState(() {
-              ticketValues.removeAt(index);
-              ticketKeys.removeAt(index);
+              ticket.ticketValues.removeAt(index);
+              ticket.ticketKeys.removeAt(index);
             });
           }
           formHolder.controller!.updateTotalPrice?.call();
@@ -195,7 +193,7 @@ class FormHelper {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int i = 0; i < ticketValues.length; i++)
+            for (int i = 0; i < ticket.ticketValues.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Align(
@@ -237,10 +235,10 @@ class FormHelper {
                           ],
                         ),
                         FormBuilder(
-                          key: ticketKeys[i], // Assign the corresponding key
+                          key: ticket.ticketKeys[i], // Assign the corresponding key
                           onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, ticketKeys[i], formHolder, ticketValues[i]),
+                            children: getFormFields(context, ticket.ticketKeys[i], formHolder, ticket.ticketValues[i]),
                           ),
                         ),
                       ],
@@ -248,7 +246,7 @@ class FormHelper {
                   ),
                 ),
               ),
-            if (ticketValues.length < maxTickets)
+            if (ticket.ticketValues.length < maxTickets)
               Align(
                 alignment: Alignment.center,
                 child: ElevatedButton.icon(

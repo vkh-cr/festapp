@@ -70,7 +70,8 @@ class _FormPageState extends State<FormPage> {
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
         var ticketDataList = FormHelper.getFieldData(
             _formKey,
-            FormHelper.fieldTypeTicket
+            FormHelper.fieldTypeTicket,
+            formHolder!
         ) ?? [];
 
         for (var ticketData in ticketDataList) {
@@ -166,7 +167,7 @@ class _FormPageState extends State<FormPage> {
                             ? null
                             : () async {
                           TextInput.finishAutofillContext();
-                          if (FormHelper.saveAndValidate(_formKey)) {
+                          if (FormHelper.saveAndValidate(formHolder!)) {
                             setState(() {
                               _isLoading = true;
                             });

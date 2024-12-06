@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
@@ -82,7 +83,9 @@ class TicketHolder extends FieldHolder {
   static const String metaFields = "fields";
   static const String metaTicket = "ticket";
   static const String metaMaxTickets = "max_tickets";
+
   List<List<FieldHolder>> ticketValues = [];
+  List<GlobalKey<FormBuilderState>> ticketKeys = [];
 
   final int maxTickets;
   final List<FieldHolder> fields;
@@ -133,6 +136,7 @@ class FormHolder {
   FormHolderController? controller;
   final List<FieldHolder> fields;
 
+  TicketHolder? getTicket() => fields.firstWhereOrNull((f)=>f is TicketHolder) as TicketHolder;
 
   FormHolder({required this.fields});
 
