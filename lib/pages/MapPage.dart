@@ -24,7 +24,9 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
+import 'package:maplibre_gl/maplibre_gl.dart' as ml;
 import 'package:url_launcher/url_launcher.dart';
+
 
 @RoutePage()
 class MapPage extends StatefulWidget {
@@ -213,112 +215,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(pageTitle),
-          leading: PopButton(),
-      ),
-      body: Stack(
-        children: [
-          _mapCenter == null ? const SizedBox.shrink() : _map = FlutterMap(
-            mapController: _animatedMapController.mapController,
-            options: MapOptions(
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.doubleTapDragZoom |
-                  InteractiveFlag.doubleTapZoom |
-                  InteractiveFlag.pinchMove |
-                  InteractiveFlag.pinchZoom |
-                  InteractiveFlag.flingAnimation |
-                  InteractiveFlag.drag |
-                  InteractiveFlag.scrollWheelZoom),
-                initialZoom: SynchroService.globalSettingsModel!.defaultMapZoom,
-                maxZoom: 19,
-                initialCenter: _mapCenter!,
-                onTap: (_, location) => onMapTap(location)),
-            children: [
-              TileLayer(
-                tileProvider: CancellableNetworkTileProvider(),
-                maxZoom: 19,
-                urlTemplate: SynchroService.globalSettingsModel!.mapLayerLayerLink ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              ),
-              if(SynchroService.globalSettingsModel!.mapLayerLogo != null || SynchroService.globalSettingsModel!.mapLayerText != null)
-              RichAttributionWidget(
-                showFlutterMapAttribution: false,
-                animationConfig: const ScaleRAWA(),
-                attributions: [
-                  if (SynchroService.globalSettingsModel!.mapLayerLogo != null)
-                    LogoSourceAttribution(
-                      SvgPicture.network(
-                        SynchroService.globalSettingsModel!.mapLayerLogo!,
-                        height: 28,
-                      ),
-                      onTap: SynchroService.globalSettingsModel!.mapLayerLogoLink != null
-                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerLogoLink!))
-                          : null,
-                    ),
-                  if (SynchroService.globalSettingsModel!.mapLayerText != null)
-                    TextSourceAttribution(
-                      SynchroService.globalSettingsModel!.mapLayerText!,
-                      onTap: SynchroService.globalSettingsModel!.mapLayerTextLink != null
-                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerTextLink!))
-                          : null,
-                    ),
-                ],
-              ),
-              CurrentLocationLayer(),
-              PopupMarkerLayer(
-                options: PopupMarkerLayerOptions(
-                  popupController: _popupLayerController,
-                  markers: selectedMarker != null ? _selectedMarkers : _markers,
-                  popupDisplayOptions: PopupDisplayOptions(
-                      snap: PopupSnap.markerTop,
-                      builder: (BuildContext context, Marker marker) {
-                        if (marker is MapMarkerWithText) {
-                          return MapDescriptionPopup(marker, selectedMarker);
-                        }
-                        return const SizedBox.shrink();
-                      }),
-                ),
-              ),
-            ],
-          ),
-          Visibility(
-            visible: selectedMarker != null,
-            child: Column(
-              children: [
-                Container(
-                  color: Colors.white,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                          onPressed: cancelNewPosition,
-                          child: const Text("Storno").tr()),
-                      const Padding(padding: EdgeInsets.all(16.0)),
-                      Visibility(
-                        visible: !isOnlyEditMode,
-                        child: ElevatedButton(
-                            onPressed: showAllGroups,
-                            child: const Text("Show groups").tr()),
-                      ),
-                      const Padding(padding: EdgeInsets.all(16.0)),
-                      ElevatedButton(
-                          onPressed: saveNewPosition,
-                          child: const Text("Save location").tr()),
-                    ],
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: const Text(
-                          "You can change location by tapping on the map.")
-                      .tr(),
-                ),
-                Expanded(child: Container()),
-              ],
-            ),
-          )
-        ],
+      body: ml.MapLibreMap(
+        styleString: "https://api.maptiler.com/maps/005b5661-cd29-4445-bb4f-0e56c3de021f/style.json?key=zM1Re72zizWVlLwwrQoJ",
+        myLocationEnabled: true,
+        initialCameraPosition: const ml.CameraPosition(target: ml.LatLng(41.90268, 12.457128), tilt: 60, zoom: 16.67, bearing: -113.6),
+        trackCameraPosition: true,
       ),
     );
   }

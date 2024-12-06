@@ -80,6 +80,7 @@ dependencies:
   auto_route: ^9.2.2
   adaptive_theme: ^3.6.0
   connectivity_plus: ^6.1.0
+  maplibre_gl: ^0.20.0
 
 dev_dependencies:
   auto_route_generator: ^9.0.0
