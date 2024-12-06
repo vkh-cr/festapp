@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
@@ -36,6 +37,7 @@ class _FormPageState extends State<FormPage> {
   bool _isSendSuccess = false;
   double _totalPrice = 0.0; // Total price
   Map<String, dynamic>? formResult;
+  FormHolder? formHolder;
   FormModel? form;
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -68,8 +70,7 @@ class _FormPageState extends State<FormPage> {
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
         var ticketDataList = FormHelper.getFieldData(
             _formKey,
-            FormHelper.fieldTypeTicket,
-            ticketKeys: FormHelper.ticketKeys
+            FormHelper.fieldTypeTicket
         ) ?? [];
 
         for (var ticketData in ticketDataList) {
@@ -127,7 +128,7 @@ class _FormPageState extends State<FormPage> {
                   ),
                 ),
               )
-                  : form?.data == null
+                  : formHolder == null
                   ? const Center(
                 child: CircularProgressIndicator(),
               )
@@ -141,7 +142,7 @@ class _FormPageState extends State<FormPage> {
                           HtmlView(html: form!.header!, isSelectable: true,),
                           const SizedBox(height: 16),
                         ],),
-                      ...FormHelper.getAllFormFields(context, _formKey, form!, _updateTotalPrice),
+                      ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
                       const SizedBox(height: 16),
                       if (_totalPrice > 0)
                         Text(
@@ -169,8 +170,7 @@ class _FormPageState extends State<FormPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(
-                                _formKey, form?.data?[FormHelper.metaFields]);
+                            var data = FormHelper.getDataFromForm(formHolder!);
 
                             data = FormHelper.replaceSpotWithId(data);
                             data[FormHelper.metaSecret] = form!.secret;
@@ -261,14 +261,14 @@ class _FormPageState extends State<FormPage> {
     // Fetching items
     var allItems = await DbEshop.getProducts(context, form!.occasion!);
     // New fields to replace existing ones
-    List<dynamic> updatedFields = [];
+    List<Map<String, dynamic>> updatedFields = [];
 
     // Loop through the fields in form.data
     for (var field in form?.data![FormHelper.metaFields]) {
       // Check if the field is a ticket
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
         // Process the fields inside the ticket
-        List<dynamic> updatedTicketFields = [];
+        List<Map<String, dynamic>> updatedTicketFields = [];
         for (var ticketField in field[FormHelper.metaFields]) {
           // Check if the ticket field has an optionsType
           if (ticketField.containsKey(FormHelper.metaOptionsType)) {
@@ -292,9 +292,11 @@ class _FormPageState extends State<FormPage> {
         updatedFields.add(field);
       }
     }
+    Map<String, dynamic> json = {FormHelper.metaFields : updatedFields};
 
-
-    form?.data![FormHelper.metaFields] = updatedFields;
+    formHolder = FormHolder.fromJson(json);
+    formHolder!.controller = FormHolderController(secret: form!.secret, blueprintId: form!.blueprint, globalKey: _formKey, formKey: form!.formKey!, updateTotalPrice: _updateTotalPrice);
+    form!.data![FormHelper.metaFields] = updatedFields;
 
     setState(() {
       _isLoading = false;
