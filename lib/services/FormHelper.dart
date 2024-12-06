@@ -77,46 +77,56 @@ class FormHelper {
   static Map<String, dynamic> getDataFromForm(FormHolder formHolder) {
     Map<String, dynamic> toReturn = {};
     for (var k in formHolder.fields) {
-      toReturn[k.fieldType] = getFieldData(formHolder.controller!.globalKey, k.fieldType, formHolder);
+      toReturn[k.getFieldTypeValue()] = getFieldData(formHolder.controller!.globalKey, k);
     }
     return toReturn;
   }
 
-  // Determine the correct data from the form based on type
-  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType, FormHolder formHolder) {
-    var fieldValue = formKey.currentState?.fields[fieldType]?.value;
+  static String getFieldTypeValue(FieldHolder fieldHolder){
+    if(fieldHolder is OptionsFieldHolder){
+      return fieldHolder.optionsType;
+    }
+    return fieldHolder.fieldType;
+  }
 
-    if (fieldType == fieldTypeSex) {
+  // Determine the correct data from the form based on type
+  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, FieldHolder fieldHolder) {
+    var fieldValue = formKey.currentState?.fields[fieldHolder.fieldType]?.value;
+
+    if (fieldHolder.fieldType == fieldTypeSex) {
       if (fieldValue == null) {
         return null;
       }
       return (fieldValue as FormOptionModel).id;
-    } else if (fieldType == fieldTypeBirthYear) {
+    } else if (fieldHolder.fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
-    } else if (fieldType == fieldTypeSpot) {
+    } else if (fieldHolder.fieldType == fieldTypeSpot) {
       if (fieldValue is SeatModel) {
         return fieldValue.objectModel;
       }
       return null;
-    } else if (fieldType == fieldTypeTicket) {
+    } else if (fieldHolder.fieldType == fieldTypeTicket) {
       // Collect ticket data from multiple ticket forms
       List<Map<String, dynamic>> tickets = [];
 
-      var ticket = formHolder.getTicket()!;
+      var ticket = fieldHolder as TicketHolder;
       for (int i = 0; i < ticket.ticketKeys.length; i++) {
         final ticketKey = ticket.ticketKeys[i];
         if (ticketKey.currentState == null) continue;
 
         Map<String, dynamic> ticketData = {};
 
-        for (MapEntry<String, FormBuilderFieldState<FormBuilderField<dynamic>, dynamic>> ticketSubField in ticketKey.currentState?.fields.entries ?? []) {
-          var subFieldType = ticketSubField.key;
-          ticketData[subFieldType] = getFieldData(ticketKey, subFieldType, formHolder);
+        for(var subFieldHolder in ticket.fields){
+          ticketData[subFieldHolder.getFieldTypeValue()] = getFieldData(ticketKey, subFieldHolder);
         }
         tickets.add(ticketData);
       }
 
       return tickets;
+    } else if (fieldHolder.fieldType == fieldTypeOptions) {
+      if(fieldHolder is OptionsFieldHolder) {
+        return formKey.currentState?.fields[fieldHolder.optionsType]!.value;
+      }
     }
 
     if(fieldValue is String){
@@ -146,7 +156,7 @@ class FormHelper {
         return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
       case fieldTypeOptions:
         var opt = field as OptionsFieldHolder;
-        return buildGenericOptions(opt.optionsType, opt.label, field.options);
+        return buildGenericOptions(opt.optionsType, opt.label, opt.options);
       case fieldTypeBirthYear:
         return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
       case fieldTypeTicket:

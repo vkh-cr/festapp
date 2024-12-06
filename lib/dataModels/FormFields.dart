@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/services/FormHelper.dart';
 
 class FieldHolder {
   static const String metaIsRequired = "is_required";
@@ -10,19 +11,23 @@ class FieldHolder {
 
   final bool isRequired;
   final String fieldType;
-  dynamic value;
+  dynamic defaultValue;
+  dynamic getValue(GlobalKey<FormBuilderState> formKey) =>
+     FormHelper.getFieldData(formKey, this);
+
+  String getFieldTypeValue() => FormHelper.getFieldTypeValue(this);
 
   FieldHolder({
     required this.fieldType,
     required this.isRequired,
-    this.value,
+    this.defaultValue,
   });
 
   factory FieldHolder.fromJson(Map<String, dynamic> json) {
     return FieldHolder(
       isRequired: json[metaIsRequired] ?? false,
       fieldType: json[metaType],
-      value: json[metaValue],
+      defaultValue: json[metaValue],
     );
   }
 
@@ -30,12 +35,12 @@ class FieldHolder {
     return {
       metaIsRequired: isRequired,
       metaType: fieldType,
-      metaValue: value,
+      metaValue: defaultValue,
     };
   }
 
   @override
-  String toString() => 'FieldHolder(type: $fieldType, value: $value)';
+  String toString() => 'FieldHolder(type: $fieldType, value: $defaultValue)';
 }
 
 class OptionsFieldHolder extends FieldHolder {
@@ -53,7 +58,7 @@ class OptionsFieldHolder extends FieldHolder {
     required this.options,
     required this.label,
     required this.optionsType,
-  }) : super(fieldType: fieldType, value: value, isRequired: true);
+  }) : super(fieldType: fieldType, defaultValue: value, isRequired: true);
 
   factory OptionsFieldHolder.fromJson(Map<String, dynamic> json) {
     return OptionsFieldHolder(

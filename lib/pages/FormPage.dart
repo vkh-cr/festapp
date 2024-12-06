@@ -57,21 +57,20 @@ class _FormPageState extends State<FormPage> {
     _totalPrice = 0.0;
 
     // Iterate over all fields and calculate total price
-    for (var field in form?.data?[FormHelper.metaFields] ?? []) {
+    for (var field in formHolder!.fields) {
       // Calculate price for regular options
-      if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
-        var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
+      if (field.fieldType == FormHelper.fieldTypeOptions) {
+        var selectedOption = field.getValue(formHolder!.controller!.globalKey);
         if (selectedOption is FormOptionModel) {
           _totalPrice += selectedOption.price;
         }
       }
 
       // Calculate price for tickets
-      if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
+      if (field.fieldType == FormHelper.fieldTypeTicket) {
         var ticketDataList = FormHelper.getFieldData(
             _formKey,
-            FormHelper.fieldTypeTicket,
-            formHolder!
+            field
         ) ?? [];
 
         for (var ticketData in ticketDataList) {
