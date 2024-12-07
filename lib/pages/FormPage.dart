@@ -10,6 +10,7 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/pages/AdministrationOccasion/OrderFinishScreen.dart';
 import 'package:fstapp/pages/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -19,7 +20,6 @@ import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 
 @RoutePage()
@@ -35,13 +35,13 @@ class FormPage extends StatefulWidget {
 
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
-  bool _isSendSuccess = false;
   double _totalPrice = 0.0; // Total price
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
   FormModel? form;
 
   final _formKey = GlobalKey<FormBuilderState>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Future<void> didChangeDependencies() async {
@@ -98,6 +98,10 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
+  void _scrollToTop() {
+    _scrollController.jumpTo(0.0);
+  }
+
   Future<void> _sendOrder() async {
     if (formHolder == null || form == null) return;
 
@@ -111,23 +115,27 @@ class _FormPageState extends State<FormPage> {
     data[FormHelper.metaForm] = form!.formKey;
     formResult = data;
 
-    var response = await DbEshop.sendTicketOrder(data);
-
-    if (response.data["code"] != 200) {
-      ToastHelper.Show(
-        context,
-        "There was an error during ordering. Error code: ${response.data["code"]}",
-        severity: ToastSeverity.NotOk,
-      );
-    } else {
-      setState(() {
-        _isSendSuccess = true;
-      });
-      ToastHelper.Show(
-        context,
-        "Your order has been sent successfully!".tr(),
-      );
-    }
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // Disable dismissing by tapping outside
+      barrierLabel: "FinishOrderDialog",
+      pageBuilder: (context, anim1, anim2) => FinishOrderScreen(
+        orderFutureFunction: () async {
+          return await DbEshop.sendTicketOrder(data);
+        },
+        onResetForm: () async {
+          Navigator.of(context).pop(); // Close the FinishOrderScreen
+          await loadData(); // Reload data
+          _scrollToTop(); // Scroll to the top
+        },
+      ),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1, // Fade animation
+          child: child,
+        );
+      },
+    );
 
     setState(() {
       _isLoading = false;
@@ -142,34 +150,10 @@ class _FormPageState extends State<FormPage> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(12.0),
-              child: _isSendSuccess
-                  ? Padding(
-                padding: const EdgeInsets.fromLTRB(12, 88, 12, 12),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ThemeConfig.blackColor(context),
-                        ),
-                        text: "Your order was successfully sent to your email {email}."
-                            .tr(namedArgs: {"email": formResult?[FormHelper.fieldTypeEmail] ?? ""}),
-                      ),
-                      const WidgetSpan(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(6, 0, 0, 0),
-                          child: Icon(Icons.check_circle),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-                  : formHolder == null
+              child: formHolder == null
                   ? const Center(
                 child: CircularProgressIndicator(),
               )
