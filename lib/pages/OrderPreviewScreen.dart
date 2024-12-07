@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 
@@ -22,53 +23,80 @@ class OrderPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Center(
-                child: Text(
-                  "Rekapitulace Vaší objednávky:".tr(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      child: Stack(
+        children: [
+          IntrinsicHeight(
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: StylesConfig.appMaxWidth, // Limit width for horizontal centering
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min, // Keep height minimal
+                      children: [
+                        // Header
+                        Center(
+                          child: Text(
+                            "Rekapitulace Vaší objednávky:".tr(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+            
+                        // Personal Info Section
+                        _buildPersonalInfoSection(context),
+            
+                        const SizedBox(height: 16),
+                        const Divider(),
+            
+                        // Tickets Section
+                        _buildTicketsSection(context),
+            
+                        const SizedBox(height: 16),
+            
+                        // Total Price
+                        _buildTotalPrice(context),
+            
+                        const SizedBox(height: 16),
+            
+                        // Submit Button
+                        Center(
+                          child: ButtonsHelper.bigButton(
+                            context: context,
+                            onPressed: onSendPressed,
+                            label: "Odeslat objednávku".tr(),
+                            height: 50.0,
+                            width: 250.0,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-
-              // Personal Info Section
-              _buildPersonalInfoSection(context),
-
-              const SizedBox(height: 16),
-              const Divider(),
-
-              // Tickets Section
-              _buildTicketsSection(context),
-
-              const SizedBox(height: 16),
-
-              // Total Price
-              _buildTotalPrice(context),
-
-              const SizedBox(height: 16),
-
-              // Submit Button
-              Center(
-                child: ButtonsHelper.bigButton(
-                  context: context,
-                  onPressed: onSendPressed,
-                  label: "Odeslat objednávku".tr(),
-                  height: 50.0,
-                  width: 250.0,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+
+          // Close Icon
+          Positioned(
+            top: 0,
+            right: 0,
+            child: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the modal
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -94,8 +122,8 @@ class OrderPreviewScreen extends StatelessWidget {
       }).toList(),
     );
   }
+
   Widget _buildTicketsSection(BuildContext context) {
-    // Filter ticket-related fields
     final ticketHolder = formHolder.fields
         .firstWhere((field) => field.fieldType == FormHelper.fieldTypeTicket) as TicketHolder;
 
