@@ -19,6 +19,7 @@ class StylesConfig {
 
   // Dimensions
   static const double appMaxWidth = 820;
+  static const double formMaxWidth = 680;
 
   static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 

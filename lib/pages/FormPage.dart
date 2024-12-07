@@ -84,7 +84,7 @@ class _FormPageState extends State<FormPage> {
 
   void _showOrderPreview() {
     TextInput.finishAutofillContext();
-    if (FormHelper.saveAndValidate(formHolder!))
+    //if (FormHelper.saveAndValidate(formHolder!))
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -137,14 +137,10 @@ class _FormPageState extends State<FormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Form Page").tr(),
-      ),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(12.0),

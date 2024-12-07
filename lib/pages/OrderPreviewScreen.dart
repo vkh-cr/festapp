@@ -13,6 +13,8 @@ class OrderPreviewScreen extends StatelessWidget {
   final double totalPrice; // Injected total price
   final VoidCallback onSendPressed;
 
+  static const double fontSizeFactor = 1.2; // Reused font size factor
+
   const OrderPreviewScreen({
     super.key,
     required this.formHolder,
@@ -30,43 +32,43 @@ class OrderPreviewScreen extends StatelessWidget {
               alignment: Alignment.bottomCenter,
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  maxWidth: StylesConfig.appMaxWidth, // Limit width for horizontal centering
+                  maxWidth: StylesConfig.formMaxWidth,
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min, // Keep height minimal
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         // Header
                         Center(
                           child: Text(
                             "Rekapitulace Vaší objednávky:".tr(),
-                            style: const TextStyle(
-                              fontSize: 18,
+                            style: StylesConfig.textStyleBig.copyWith(
+                              fontSize: 18 * fontSizeFactor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         const SizedBox(height: 16),
-            
+
                         // Personal Info Section
                         _buildPersonalInfoSection(context),
-            
+
                         const SizedBox(height: 16),
                         const Divider(),
-            
+
                         // Tickets Section
                         _buildTicketsSection(context),
-            
+
                         const SizedBox(height: 16),
-            
+
                         // Total Price
                         _buildTotalPrice(context),
-            
+
                         const SizedBox(height: 16),
-            
+
                         // Submit Button
                         Center(
                           child: ButtonsHelper.bigButton(
@@ -90,10 +92,14 @@ class OrderPreviewScreen extends StatelessWidget {
             top: 0,
             right: 0,
             child: IconButton(
-              icon: const Icon(Icons.close),
+              icon: Icon(
+                Icons.close,
+                size: 24 * fontSizeFactor, // Make the icon size scalable with the factor
+              ),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the modal
               },
+              tooltip: "Close".tr(),
             ),
           ),
         ],
@@ -157,8 +163,8 @@ class OrderPreviewScreen extends StatelessWidget {
             // Display ticket index at the top of the container
             Text(
               "Ticket {number}".tr(namedArgs: {"number": (index).toString()}),
-              style: const TextStyle(
-                fontSize: 16,
+              style: StylesConfig.textStyleBig.copyWith(
+                fontSize: 16 * fontSizeFactor,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -186,10 +192,17 @@ class OrderPreviewScreen extends StatelessWidget {
         children: [
           Text(
             "$label: ",
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 14 * fontSizeFactor,
+            ),
           ),
           Expanded(
-            child: Text(value),
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14 * fontSizeFactor, // Regular style for value
+              ),
+            ),
           ),
         ],
       ),
@@ -202,8 +215,8 @@ class OrderPreviewScreen extends StatelessWidget {
         "Total Price: {price}".tr(namedArgs: {
           "price": Utilities.formatPrice(context, totalPrice),
         }),
-        style: const TextStyle(
-          fontSize: 16,
+        style: StylesConfig.textStyleBig.copyWith(
+          fontSize: 16 * fontSizeFactor,
           fontWeight: FontWeight.bold,
         ),
       ),
