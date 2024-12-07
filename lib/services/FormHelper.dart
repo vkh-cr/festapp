@@ -91,7 +91,7 @@ class FormHelper {
 
   // Determine the correct data from the form based on type
   static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, FieldHolder fieldHolder) {
-    var fieldValue = formKey.currentState?.fields[fieldHolder.fieldType]?.value;
+    var fieldValue = formKey.currentState?.fields[fieldHolder.getFieldTypeValue()]?.value;
 
     if (fieldHolder.fieldType == fieldTypeSex) {
       if (fieldValue == null) {
@@ -123,10 +123,6 @@ class FormHelper {
       }
 
       return tickets;
-    } else if (fieldHolder.fieldType == fieldTypeOptions) {
-      if(fieldHolder is OptionsFieldHolder) {
-        return formKey.currentState?.fields[fieldHolder.optionsType]!.value;
-      }
     }
 
     if(fieldValue is String){
@@ -142,28 +138,35 @@ class FormHelper {
     switch (field.fieldType) {
       case fieldTypeNote:
         field.label = noteLabel();
-        return buildTextField(fieldTypeNote, noteLabel(), isRequiredField, []);
+        return buildTextField(field, []);
       case fieldTypeName:
         field.label = nameLabel();
-        return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
+        return buildTextField(field, [AutofillHints.givenName]);
       case fieldTypeSurname:
         field.label = surnameLabel();
-        return buildTextField(fieldTypeSurname, surnameLabel(), isRequiredField, [AutofillHints.familyName]);
+        return buildTextField(field, [AutofillHints.familyName]);
       case fieldTypeCity:
         field.label = cityLabel();
-        return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
+        return buildTextField(field, [AutofillHints.addressCity]);
       case fieldTypeSpot:
         field.label = spotLabel();
-        return buildSpotField(context, formKey, formHolder, fieldTypeSpot, spotLabel());
+        return buildSpotField(context, formKey, formHolder, field);
       case fieldTypeEmail:
         field.label = emailLabel();
-        return buildEmailField(isRequiredField);
+        return buildEmailField(field);
       case fieldTypeSex:
         field.label = sexLabel();
-        return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
+        var sexOptions = [
+          FormOptionModel(UserInfoModel.sexes[0], maleLabel()),
+          FormOptionModel(UserInfoModel.sexes[1], femaleLabel()),
+        ];
+        if (!isRequiredField) {
+          sexOptions.insert(0, FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel()));
+        }
+        return buildRadioField(field, sexOptions);
       case fieldTypeOptions:
-        var opt = field as OptionsFieldHolder;
-        return buildGenericOptions(opt.optionsType, opt.label!, opt.options);
+        var optionsField = field as OptionsFieldHolder;
+        return buildRadioField(optionsField, optionsField.options);
       case fieldTypeBirthYear:
         field.label = birthYearLabel();
         return buildBirthYearField(field);
@@ -281,25 +284,14 @@ class FormHelper {
 
 
   // Build a simple text field with optional validation
-  static Widget buildSpotField(
-      BuildContext context,
-      GlobalKey<FormBuilderState> formKey,
-      FormHolder formHolder,
-      String name,
-      String label) {
-    // Create a TextEditingController to control the displayed text
+  static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder fieldHolder) {
     TextEditingController textController = TextEditingController();
 
     return FormBuilderField<SeatModel>(
-      name: name,
+      name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-            (value) {
-          if (value == null) {
-            return "Please select a seat.".tr();
-          }
-          return null;
-        },
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
+            (value) => value == null ? "Please select a seat.".tr() : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
@@ -309,13 +301,12 @@ class FormHelper {
           readOnly: true,
           canRequestFocus: false,
           decoration: InputDecoration(
-            labelText: label,
+            labelText: fieldHolder.label,
             suffixIcon: const Icon(Icons.event_seat),
             labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
-            errorText: field.errorText, // Display validation error
+            errorText: field.errorText,
           ),
           onTap: () async {
-            // Show the seat reservation dialog and await the result
             SeatModel? selectedSeat = await showGeneralDialog<SeatModel>(
               context: context,
               barrierColor: Colors.black12.withOpacity(0.6),
@@ -333,11 +324,9 @@ class FormHelper {
             );
 
             if (selectedSeat != null) {
-              // Update the form field and display value
               formHolder.controller!.updateTotalPrice?.call();
               field.didChange(selectedSeat);
-              textController.text =
-                  selectedSeat.objectModel?.toString() ?? metaEmpty;
+              textController.text = selectedSeat.objectModel?.toString() ?? metaEmpty;
               field.validate();
             }
           },
@@ -347,45 +336,56 @@ class FormHelper {
   }
 
   // Build a simple text field with optional validation
-  static FormBuilderTextField buildTextField(String name, String label, bool isRequired, [List<String>? autofillHints]) {
+  static FormBuilderTextField buildTextField(FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return FormBuilderTextField(
-      name: name,
+      name: fieldHolder.fieldType,
       autofillHints: autofillHints,
-      decoration: InputDecoration(labelText: label,
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
-      validator: isRequired ? FormBuilderValidators.required() : null,
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+      ),
+      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
     );
   }
 
-  // Build an email field with validation for format and required status
-  static FormBuilderTextField buildEmailField(bool isRequired) {
+  static FormBuilderTextField buildEmailField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: fieldTypeEmail,
+      name: fieldHolder.fieldType,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(labelText: emailLabel(),
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+      ),
       validator: FormBuilderValidators.compose([
-        if (isRequired) FormBuilderValidators.required(),
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: emailInvalidMessage()),
       ]),
     );
   }
 
-  // Build a radio group for selecting sex
-  static FormBuilderRadioGroup buildRadioField(String name, String label, bool isRequired) {
-    var options = [
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[0], maleLabel())),
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[1], femaleLabel()))
-    ];
-    if(!isRequired){
-      options.insert(0, FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel())));
-    }
-    return FormBuilderRadioGroup(
-      name: name,
-      decoration: InputDecoration(labelText: label,
-        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
-      validator: isRequired ? FormBuilderValidators.required() : null,
+  // Build a radio group field using the FieldHolder as parameter
+  static FormBuilderRadioGroup buildRadioField(FieldHolder fieldHolder, List<FormOptionModel> optionsIn) {
+    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn.map(
+          (o) => FormBuilderFieldOption(
+        value: FormOptionModel(o.id, o.name, price: o.price),
+        child: Text(
+          o.name,
+          style: TextStyle(fontSize: 14.0 * fontSizeFactor),
+        ),
+      ),
+    ).toList();
+
+    return FormBuilderRadioGroup<FormOptionModel>(
+      name: fieldHolder.getFieldTypeValue(),
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
+      ),
+      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
       options: options,
+      initialValue: options.isNotEmpty ? options.first.value : null,
+      orientation: OptionsOrientation.vertical,
+      wrapDirection: Axis.vertical,
     );
   }
 
