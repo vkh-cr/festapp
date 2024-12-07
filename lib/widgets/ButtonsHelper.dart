@@ -123,4 +123,46 @@ class ButtonsHelper {
       ),
     );
   }
+
+  static Widget primaryButton({
+    required BuildContext context,
+    required VoidCallback? onPressed,
+    required String label,
+    bool isLoading = false,
+    double height = 50.0,
+    double? width,
+    EdgeInsetsGeometry? padding,
+    double borderRadius = 8.0,
+  }) {
+    return SizedBox(
+      height: height,
+      width: width ?? double.infinity,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          padding: padding ?? EdgeInsets.symmetric(horizontal: 16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          elevation: isLoading ? 0 : 4.0,
+          shadowColor: Colors.black26,
+        ),
+        child: isLoading
+            ? CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).colorScheme.onPrimary,
+          ),
+        )
+            : Text(
+          label.tr(),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
 }

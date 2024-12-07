@@ -35,7 +35,8 @@ class FormPage extends StatefulWidget {
 
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
-  double _totalPrice = 0.0; // Total price
+  double _totalPrice = 0.0;
+  int _totalTickets = 0;
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
   FormModel? form;
@@ -55,6 +56,7 @@ class _FormPageState extends State<FormPage> {
 
   void _updateTotalPrice() {
     _totalPrice = 0.0;
+    _totalTickets = 0;
 
     for (var field in formHolder!.fields) {
       if (field.fieldType == FormHelper.fieldTypeOptions) {
@@ -64,7 +66,8 @@ class _FormPageState extends State<FormPage> {
         }
       }
 
-      if (field.fieldType == FormHelper.fieldTypeTicket) {
+      if (field is TicketHolder) {
+        _totalTickets = field.ticketKeys.length;
         var ticketDataList = FormHelper.getFieldData(_formKey, field) ?? [];
 
         for (var ticketData in ticketDataList) {
@@ -79,7 +82,52 @@ class _FormPageState extends State<FormPage> {
       }
     }
 
-    setState(() {}); // Update the UI
+    setState(() {});
+  }
+
+  Widget _buildPriceAndTicketInfo() {
+    if (_totalPrice <= 0) return SizedBox(); // Do not display if total price is 0
+
+    return Positioned(
+      top: 16,
+      right: 16,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor, // Primary color background
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "${_totalTickets}x",
+              style: const TextStyle(
+                fontSize: 18, // Increased font size
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White bold text
+              ),
+            ),
+            const SizedBox(width: 6), // Increased spacing
+            Icon(
+              Icons.local_activity, // Ticket icon
+              color: Colors.white,
+              size: 24, // Increased icon size
+            ),
+            const SizedBox(width: 10), // Increased spacing
+            Text(
+              Utilities.formatPrice(context, _totalPrice),
+              style: const TextStyle(
+                fontSize: 18, // Increased font size
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White bold text
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showOrderPreview() {
@@ -125,8 +173,9 @@ class _FormPageState extends State<FormPage> {
         },
         onResetForm: () async {
           Navigator.of(context).pop(); // Close the FinishOrderScreen
-          await loadData(); // Reload data
-          _scrollToTop(); // Scroll to the top
+          _scrollToTop();
+          await loadData();
+          _updateTotalPrice();
         },
       ),
       transitionBuilder: (context, anim1, anim2, child) {
@@ -145,65 +194,51 @@ class _FormPageState extends State<FormPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: formHolder == null
-                  ? const Center(
-                child: CircularProgressIndicator(),
-              )
-                  : FormBuilder(
-                key: _formKey,
-                child: AutofillGroup(
-                  child: Column(
-                    children: [
-                      if (form!.footer != null)
-                        Column(
-                          children: [
-                            HtmlView(html: form!.header!, isSelectable: true),
-                            const SizedBox(height: 16),
-                          ],
-                        ),
-                      ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
-                      const SizedBox(height: 16),
-                      if (_totalPrice > 0)
-                        Text(
-                          "Total Price: {price}".tr(namedArgs: {
-                            "price": Utilities.formatPrice(context, _totalPrice),
-                          }),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: formHolder == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : FormBuilder(
+                    key: _formKey,
+                    child: AutofillGroup(
+                      child: Column(
+                        children: [
+                          if (form!.footer != null)
+                            Column(
+                              children: [
+                                HtmlView(html: form!.header!, isSelectable: true),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
+                          const SizedBox(height: 32),
+                          ButtonsHelper.primaryButton(
+                            context: context,
+                            onPressed: _isLoading ? null : _showOrderPreview,
+                            label: "Continue",
+                            isLoading: _isLoading,
+                            height: 50.0,
+                            width: 250.0,
                           ),
-                        ),
-                      const SizedBox(height: 16),
-                      if (form!.footer != null)
-                        Column(
-                          children: [
-                            HtmlView(html: form!.footer!, isSelectable: true),
-                            const SizedBox(height: 16),
-                          ],
-                        ),
-                      ButtonsHelper.bigButton(
-                        context: context,
-                        onPressed: _isLoading ? null : _showOrderPreview,
-                        label: "Continue".tr(),
-                        isEnabled: !_isLoading,
-                        height: 50.0,
-                        width: 250.0,
+                          const SizedBox(height: 32),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          _buildPriceAndTicketInfo(),
+        ],
       ),
     );
   }

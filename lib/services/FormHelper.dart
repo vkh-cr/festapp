@@ -198,7 +198,7 @@ class FormHelper {
               ticket.ticketKeys.add(GlobalKey<FormBuilderState>());
             });
           }
-          formHolder.controller!.updateTotalPrice?.call(); // Update the total price when adding a ticket
+          formHolder.controller!.updateTotalPrice?.call();
         }
 
         void removeTicket(int index) {
