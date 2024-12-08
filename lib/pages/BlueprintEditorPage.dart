@@ -35,9 +35,7 @@ class BlueprintEditorPage extends StatefulWidget {
 
 class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   BlueprintModel? blueprint;
-  List<BlueprintObjectModel>? currentBoxes;
   BlueprintGroupModel? currentGroup;
-
 
   List<SeatModel> allBoxes = [];
 
@@ -107,6 +105,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
                       child: blueprint == null
                           ? const Center(child: CircularProgressIndicator())
                           : SeatLayoutWidget(
+                        isEditorMode: true,
                         controller: seatLayoutController,
                         onSeatTap: handleSeatTap,
                         stateModel: SeatLayoutStateModel(
@@ -426,9 +425,7 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
           },
         ),
         const SizedBox(width: 12),
-        IconButton(
-          icon: const Icon(Icons.grid_on),
-          tooltip: "Background of the blueprint",
+        TextButton(
           onPressed: () async {
             var file = await DialogHelper.dropFilesHere(
               context,
@@ -444,6 +441,14 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
               ToastHelper.Show(context, "SVG pozadí bylo úspěšně nahráno.");
             }
           },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Import background"),
+              const SizedBox(width: 8), // Optional spacing between text and icon
+              const Icon(Icons.grid_on),
+            ],
+          ),
         ),
       ],
     );
@@ -630,10 +635,6 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
 
   Future<void> loadData() async {
     blueprint = await DbEshop.getBlueprintForEdit(widget.id!);
-
-    setState(() {
-      currentBoxes = blueprint!.objects;
-    });
   }
 }
 

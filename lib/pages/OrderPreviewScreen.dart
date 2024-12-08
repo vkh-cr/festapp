@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -10,7 +9,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 
 class OrderPreviewScreen extends StatelessWidget {
   final FormHolder formHolder;
-  final double totalPrice; // Injected total price
+  final double totalPrice;
   final VoidCallback onSendPressed;
 
   static const double fontSizeFactor = 1.2; // Reused font size factor
@@ -71,14 +70,13 @@ class OrderPreviewScreen extends StatelessWidget {
 
                         // Submit Button
                         Center(
-                          child: ButtonsHelper.bigButton(
-                            context: context,
-                            onPressed: onSendPressed,
-                            label: "Odeslat objednávku".tr(),
-                            height: 50.0,
-                            width: 250.0,
-                          ),
-                        ),
+                          child: ButtonsHelper.primaryButton(
+                              context: context,
+                              onPressed: onSendPressed,
+                              label: "Odeslat objednávku",
+                              height: 50.0,
+                              width: 250.0
+                          )),
                       ],
                     ),
                   ),
@@ -133,18 +131,20 @@ class OrderPreviewScreen extends StatelessWidget {
     final ticketHolder = formHolder.fields
         .firstWhere((field) => field.fieldType == FormHelper.fieldTypeTicket) as TicketHolder;
 
-    return Column(
-      children: ticketHolder.ticketValues.asMap().entries.map((entry) {
-        final index = entry.key; // Index for ticket values
-        final ticketFields = entry.value;
-        final ticketKey = ticketHolder.ticketKeys[index]; // Get the corresponding key for this ticket
+    final ticketWidgets = ticketHolder.tickets.asMap().entries.map((entry) {
+      final ticketIndex = entry.key;
+      final ticket = entry.value;
 
-        return _buildTicketCard(context, ticketFields, ticketKey, index + 1); // Pass ticket key and index
-      }).toList(),
+      // Build a card for the ticket with the index (1-based)
+      return _buildTicketCard(context, ticket, ticketIndex + 1);
+    }).toList();
+
+    return Column(
+      children: ticketWidgets,
     );
   }
 
-  Widget _buildTicketCard(BuildContext context, List<FieldHolder> fieldData, GlobalKey<FormBuilderState> ticketKey, int index) {
+  Widget _buildTicketCard(BuildContext context, FormTicketModel ticket, int index) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Container(
@@ -170,13 +170,14 @@ class OrderPreviewScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
+            _buildInfoRow("Spot".tr(), ticket.seat.objectModel.toString()),
             // Display ticket details
-            ...fieldData.where((entry) {
+            ...ticket.ticketValues.where((entry) {
               // Filter out rows with null values
-              final value = entry.getValue(ticketKey);
+              final value = entry.getValue(ticket.ticketKey);
               return value != null && value.toString().isNotEmpty;
             }).map((entry) {
-              return _buildInfoRow(entry.label!, entry.getValue(ticketKey).toString());
+              return _buildInfoRow(entry.label!, entry.getValue(ticket.ticketKey).toString());
             }),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/services/FormHelper.dart';
 
@@ -91,8 +92,7 @@ class TicketHolder extends FieldHolder {
   static const String metaTicket = "ticket";
   static const String metaMaxTickets = "max_tickets";
 
-  List<List<FieldHolder>> ticketValues = [];
-  List<GlobalKey<FormBuilderState>> ticketKeys = [];
+  List<FormTicketModel> tickets = [];
 
   final int maxTickets;
   final List<FieldHolder> fields;
@@ -125,6 +125,36 @@ class TicketHolder extends FieldHolder {
   @override
   String toString() =>
       'TicketHolder(fields: $fields)';
+
+  /// Updates the tickets based on the provided list of [seats].
+  void updateTickets(List<SeatModel> seats) {
+    // Create a map of existing tickets for fast lookup.
+    final existingTicketsMap = {
+      for (var ticket in tickets) ticket.seat.objectModel!.id!: ticket
+    };
+
+    // New list of tickets to build.
+    final List<FormTicketModel> updatedTickets = [];
+
+    for (var seat in seats) {
+      if (existingTicketsMap.containsKey(seat.objectModel!.id!)) {
+        // Keep the existing ticket if it matches the seat.
+        updatedTickets.add(existingTicketsMap[seat.objectModel!.id!]!);
+      } else {
+        // Add a new ticket for the seat if it does not exist.
+        updatedTickets.add(
+          FormTicketModel(
+            seat,
+            fields,
+            GlobalKey<FormBuilderState>(),
+          ),
+        );
+      }
+    }
+
+    // Replace the tickets list with the updated tickets.
+    tickets = updatedTickets;
+  }
 }
 
 class FormHolderController{
@@ -133,8 +163,10 @@ class FormHolderController{
   final GlobalKey<FormBuilderState> globalKey;
   final String? formKey;
   void Function()? updateTotalPrice;
+  Future<List<SeatModel>?> Function(List<SeatModel>)? showSeatReservation;
+  void Function(List<SeatModel>?)? onCloseSeatReservation;
 
-  FormHolderController({this.secret, this.blueprintId, required this.globalKey, this.formKey, this.updateTotalPrice});
+  FormHolderController({this.secret, this.blueprintId, required this.globalKey, this.formKey, this.updateTotalPrice, this.showSeatReservation, this.onCloseSeatReservation});
 }
 
 class FormHolder {
@@ -173,14 +205,25 @@ class FormHolder {
     };
   }
 
-  void addField(FieldHolder field) {
-    fields.add(field);
-  }
-
-  void addTicket(TicketHolder ticket) {
-    fields.add(ticket);
-  }
-
   @override
   String toString() => 'FormHolder(fields: $fields)';
+}
+
+class FormTicketModel {
+
+  final SeatModel seat;
+  final List<FieldHolder> ticketValues;
+  final GlobalKey<FormBuilderState> ticketKey;
+
+  FormTicketModel(this.seat, this.ticketValues, this.ticketKey);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is FormTicketModel &&
+              runtimeType == other.runtimeType &&
+              seat.objectModel!.id! == other.seat.objectModel!.id!;
+
+  @override
+  int get hashCode => seat.objectModel!.id!.hashCode;
 }

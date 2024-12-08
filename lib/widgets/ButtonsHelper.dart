@@ -133,20 +133,25 @@ class ButtonsHelper {
     double? width,
     EdgeInsetsGeometry? padding,
     double borderRadius = 8.0,
+    Widget? prefixIcon,
+    Widget? suffixIcon,
+    bool? isEnabled,
   }) {
     return SizedBox(
       height: height,
       width: width ?? double.infinity,
       child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
+        onPressed: (isEnabled ?? true) && !isLoading ? onPressed : null,
         style: ElevatedButton.styleFrom(
           padding: padding ?? EdgeInsets.symmetric(horizontal: 16.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: (isEnabled ?? true)
+              ? Theme.of(context).primaryColor
+              : Theme.of(context).disabledColor,
           foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          elevation: isLoading ? 0 : 4.0,
+          elevation: (isEnabled ?? true) && !isLoading ? 4.0 : 0,
           shadowColor: Colors.black26,
         ),
         child: isLoading
@@ -155,12 +160,25 @@ class ButtonsHelper {
             Theme.of(context).colorScheme.onPrimary,
           ),
         )
-            : Text(
-          label.tr(),
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+            : Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (prefixIcon != null) ...[
+              prefixIcon,
+              const SizedBox(width: 8.0),
+            ],
+            Text(
+              label.tr(),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (suffixIcon != null) ...[
+              const SizedBox(width: 8.0),
+              suffixIcon,
+            ],
+          ],
         ),
       ),
     );

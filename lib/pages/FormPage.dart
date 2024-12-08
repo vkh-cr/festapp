@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
@@ -21,6 +23,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/SeatReservationWidget.dart';
 
 @RoutePage()
 class FormPage extends StatefulWidget {
@@ -40,6 +43,7 @@ class _FormPageState extends State<FormPage> {
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
   FormModel? form;
+  List<SeatModel> selectedSeats = [];
 
   final _formKey = GlobalKey<FormBuilderState>();
   final ScrollController _scrollController = ScrollController();
@@ -52,6 +56,58 @@ class _FormPageState extends State<FormPage> {
 
     await loadData();
     super.didChangeDependencies();
+  }
+
+  bool _isSeatReservationVisible = false;
+  Completer<List<SeatModel>?>? _seatReservationCompleter;
+
+  /// Simulates the showDialog functionality for SeatReservation
+  Future<List<SeatModel>?> _showSeatReservation(List<SeatModel> seats) {
+    selectedSeats = seats;
+    setState(() {
+      _isSeatReservationVisible = true;
+    });
+
+    _seatReservationCompleter = Completer<List<SeatModel>?>();
+
+    return _seatReservationCompleter!.future;
+  }
+
+  /// Hides the SeatReservationWidget and resolves the completer
+  void _hideSeatReservation(List<SeatModel>? seats) {
+    setState(() {
+      _isSeatReservationVisible = false;
+    });
+
+    _seatReservationCompleter!.complete(seats);
+    _seatReservationCompleter = null;
+  }
+
+  Widget _buildSeatReservationOverlay() {
+    if (!_isSeatReservationVisible) return const SizedBox.shrink();
+
+    return Positioned.fill(
+      child: Container(
+        color: ThemeConfig.dddBackground, // Dim background
+        child: Center(
+          child: SeatReservationWidget(
+            secret: formHolder!.controller!.secret!,
+            formDataKey: formHolder!.controller!.formKey!,
+            blueprintId: formHolder!.controller!.blueprintId!,
+            selectedSeats: selectedSeats,
+            onSelectionChanged: (sts) {
+              _totalTickets = sts.length;
+              _totalPrice = 0;
+              for(var s in sts){
+                _totalPrice += s.objectModel?.product?.price ?? 0;
+              }
+              setState(() {});
+            },
+            onCloseSeatReservation: formHolder!.controller!.onCloseSeatReservation!,
+          ),
+        ),
+      ),
+    );
   }
 
   void _updateTotalPrice() {
@@ -67,7 +123,22 @@ class _FormPageState extends State<FormPage> {
       }
 
       if (field is TicketHolder) {
-        _totalTickets = field.ticketKeys.length;
+        if(_isSeatReservationVisible){
+          _totalTickets = selectedSeats.length;
+        } else {
+          _totalTickets = field.tickets.length;
+        }
+
+        if(_isSeatReservationVisible){
+          for (var s in selectedSeats) {
+            _totalPrice += s.objectModel!.product!.price!;
+          }
+        } else {
+          for (var s in field.tickets) {
+            _totalPrice += s.seat.objectModel!.product!.price!;
+          }
+        }
+
         var ticketDataList = FormHelper.getFieldData(_formKey, field) ?? [];
 
         for (var ticketData in ticketDataList) {
@@ -75,7 +146,7 @@ class _FormPageState extends State<FormPage> {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
             } else if (ticketValue is BlueprintObjectModel) {
-              _totalPrice += ticketValue.product?.price ?? 0;
+              //_totalPrice += ticketValue.product?.price ?? 0;
             }
           }
         }
@@ -94,7 +165,7 @@ class _FormPageState extends State<FormPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor, // Primary color background
+          color: Theme.of(context).primaryColor.withOpacity(0.7), // Primary color background
           borderRadius: BorderRadius.circular(8.0),
           boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
         ),
@@ -132,7 +203,7 @@ class _FormPageState extends State<FormPage> {
 
   void _showOrderPreview() {
     TextInput.finishAutofillContext();
-    //if (FormHelper.saveAndValidate(formHolder!))
+    if (FormHelper.saveAndValidate(formHolder!))
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -211,7 +282,7 @@ class _FormPageState extends State<FormPage> {
                     child: AutofillGroup(
                       child: Column(
                         children: [
-                          if (form!.footer != null)
+                          if (form!.header != null)
                             Column(
                               children: [
                                 HtmlView(html: form!.header!, isSelectable: true),
@@ -227,6 +298,7 @@ class _FormPageState extends State<FormPage> {
                             isLoading: _isLoading,
                             height: 50.0,
                             width: 250.0,
+                            isEnabled: _totalPrice > 0
                           ),
                           const SizedBox(height: 32),
                         ],
@@ -237,6 +309,7 @@ class _FormPageState extends State<FormPage> {
               ),
             ),
           ),
+          _buildSeatReservationOverlay(),
           _buildPriceAndTicketInfo(),
         ],
       ),
@@ -320,6 +393,8 @@ class _FormPageState extends State<FormPage> {
       globalKey: _formKey,
       formKey: form!.formKey!,
       updateTotalPrice: _updateTotalPrice,
+      showSeatReservation: _showSeatReservation,
+      onCloseSeatReservation: _hideSeatReservation
     );
     form!.data![FormHelper.metaFields] = updatedFields;
 

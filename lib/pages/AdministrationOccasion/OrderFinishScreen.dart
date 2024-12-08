@@ -99,8 +99,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: WillPopScope(
-        onWillPop: () async => false, // Disable back navigation
+      body: PopScope(
         child: Center(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 500), // Smooth transition
@@ -150,7 +149,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
             height: 150,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _isSuccess ? Colors.green : Colors.red,
+              color: _isSuccess ? ThemeConfig.greenColor() : ThemeConfig.redColor(context),
             ),
             child: Icon(
               _isSuccess ? Icons.check_circle : Icons.error,
@@ -168,7 +167,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: _isSuccess ? Colors.green : Colors.red,
+            color: _isSuccess ? ThemeConfig.greenColor() : ThemeConfig.redColor(context),
           ),
           textAlign: TextAlign.center,
         ),

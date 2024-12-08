@@ -9,7 +9,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/SeatReservationWidget.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -65,8 +65,8 @@ class FormHelper {
 
   static bool saveAndValidate(FormHolder formHolder){
     bool toReturn = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
-    for(var k in formHolder.getTicket()!.ticketKeys){
-      if(!(k.currentState?.saveAndValidate() ?? false)){
+    for(var k in formHolder.getTicket()!.tickets){
+      if(!(k.ticketKey.currentState?.saveAndValidate() ?? false)){
         toReturn = false;
       }
     }
@@ -110,8 +110,8 @@ class FormHelper {
       List<Map<String, dynamic>> tickets = [];
 
       var ticket = fieldHolder as TicketHolder;
-      for (int i = 0; i < ticket.ticketKeys.length; i++) {
-        final ticketKey = ticket.ticketKeys[i];
+      for (int i = 0; i < ticket.tickets.length; i++) {
+        final ticketKey = ticket.tickets[i].ticketKey;
         if (ticketKey.currentState == null) continue;
 
         Map<String, dynamic> ticketData = {};
@@ -119,6 +119,7 @@ class FormHelper {
         for(var subFieldHolder in ticket.fields){
           ticketData[subFieldHolder.getFieldTypeValue()] = getFieldData(ticketKey, subFieldHolder);
         }
+        ticketData[fieldTypeSpot] = ticket.tickets[i].seat.objectModel;
         tickets.add(ticketData);
       }
 
@@ -184,37 +185,37 @@ class FormHelper {
       ) {
     final maxTickets = ticket.maxTickets;
 
-    if (ticket.ticketValues.isEmpty) {
-      ticket.ticketValues.add(ticket.fields);
-      ticket.ticketKeys.add(GlobalKey<FormBuilderState>());
-    }
-
     return StatefulBuilder(
       builder: (context, setState) {
-        void addTicket() {
-          if (ticket.ticketValues.length < maxTickets) {
-            setState(() {
-              ticket.ticketValues.add(ticket.fields);
-              ticket.ticketKeys.add(GlobalKey<FormBuilderState>());
-            });
-          }
-          formHolder.controller!.updateTotalPrice?.call();
-        }
-
         void removeTicket(int index) {
-          if (ticket.ticketValues.length > 1) {
-            setState(() {
-              ticket.ticketValues.removeAt(index);
-              ticket.ticketKeys.removeAt(index);
-            });
-          }
+          setState(() {
+            ticket.tickets.removeAt(index);
+          });
           formHolder.controller!.updateTotalPrice?.call();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int i = 0; i < ticket.ticketValues.length; i++)
+            const SizedBox(height: 12),
+            Center(
+              child: ButtonsHelper.primaryButton(
+                context: context,
+                onPressed: () async {
+                  var seats = await formHolder.controller!.showSeatReservation!(ticket.tickets.map((t)=>t.seat).toList());
+                  if(seats != null){
+                    ticket.updateTickets(seats);
+                  }
+                  formHolder.controller!.updateTotalPrice?.call();
+                },
+                label: "Výběr místa",
+                height: 50.0,
+                width: 250.0,
+                suffixIcon: Icon(Icons.event_seat)
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (int i = 0; i < ticket.tickets.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Align(
@@ -244,36 +245,33 @@ class FormHelper {
                                 ),
                               ),
                             ),
-                            if (i > 0)
-                              Align(
-                                alignment: Alignment.centerRight, // Align the delete button to the right
-                                child: IconButton(
-                                  onPressed: () => removeTicket(i),
-                                  icon: Icon(Icons.delete),
-                                  tooltip: "Delete".tr(),
-                                ),
+                            Align(
+                              alignment: Alignment.centerRight, // Align the delete button to the right
+                              child: IconButton(
+                                onPressed: () => removeTicket(i),
+                                icon: Icon(Icons.delete),
+                                tooltip: "Delete".tr(),
                               ),
+                            ),
                           ],
                         ),
+                        Text("${ticket.tickets[i].seat.objectModel}",
+                          style: TextStyle(
+                          fontSize: 14 * fontSizeFactor,
+                        ),),
+                        Divider(
+                            color: Colors.black
+                        ),
                         FormBuilder(
-                          key: ticket.ticketKeys[i], // Assign the corresponding key
+                          key: ticket.tickets[i].ticketKey, // Assign the corresponding key
                           onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, ticket.ticketKeys[i], formHolder, ticket.ticketValues[i]),
+                            children: getFormFields(context, ticket.tickets[i].ticketKey, formHolder, ticket.tickets[i].ticketValues),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            if (ticket.ticketValues.length < maxTickets)
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton.icon(
-                  onPressed: addTicket,
-                  icon: Icon(Icons.add, color: ThemeConfig.whiteColor(context)),
-                  label: const Text("Add another ticket").tr(),
                 ),
               ),
           ],
@@ -307,28 +305,7 @@ class FormHelper {
             errorText: field.errorText,
           ),
           onTap: () async {
-            SeatModel? selectedSeat = await showGeneralDialog<SeatModel>(
-              context: context,
-              barrierColor: Colors.black12.withOpacity(0.6),
-              barrierDismissible: false,
-              barrierLabel: 'Dialog',
-              transitionDuration: const Duration(milliseconds: 300),
-              pageBuilder: (context, __, ___) {
-                return SeatReservationWidget(
-                  secret: formHolder.controller!.secret!,
-                  formDataKey: formHolder.controller!.formKey!,
-                  blueprintId: formHolder.controller!.blueprintId!,
-                  selectedSeat: field.value,
-                );
-              },
-            );
-
-            if (selectedSeat != null) {
-              formHolder.controller!.updateTotalPrice?.call();
-              field.didChange(selectedSeat);
-              textController.text = selectedSeat.objectModel?.toString() ?? metaEmpty;
-              field.validate();
-            }
+            await formHolder.controller!.showSeatReservation!(seat == null ? []:[seat]);
           },
         );
       },

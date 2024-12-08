@@ -11,13 +11,13 @@ class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
   final SeatLayoutWidgetController? controller;
   final void Function(SeatModel model)? onSeatTap;
-  final bool? isEditor;
+  final bool? isEditorMode;
   const SeatLayoutWidget({
     Key? key,
     required this.stateModel,
     this.controller,
     this.onSeatTap,
-    this.isEditor,
+    this.isEditorMode,
   }) : super(key: key);
 
   @override
@@ -113,14 +113,24 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
       transformationController: _controller,
       child: Stack(
         children: [
-          // Background SVG
           if (widget.stateModel.backgroundSvg != null)
             Positioned.fill(
-              child: SvgPicture.string(
-                widget.stateModel.backgroundSvg!,
+              child: Container(
                 width: layoutWidth.toDouble(),
                 height: layoutHeight.toDouble(),
-                fit: BoxFit.cover,
+                decoration: BoxDecoration(
+                  color: Colors.transparent, // No background color
+                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12.0), // Match the rounded corners
+                  child: SvgPicture.string(
+                    widget.stateModel.backgroundSvg!,
+                    width: layoutWidth.toDouble(),
+                    height: layoutHeight.toDouble(),
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
             ),
           // Seat Layout with Positioned widgets
@@ -128,13 +138,28 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
             width: layoutWidth.toDouble(),
             height: layoutHeight.toDouble(),
             child: Stack(
-              children: _seats.where((seatModel)=>(seatModel.objectModel != null &&
-                  seatModel.objectModel!.id != null) || widget.isEditor == true).map((seatModel) {
+              children: _seats
+                  .where((seatModel) =>
+              (seatModel.objectModel != null &&
+                  seatModel.objectModel!.id != null) ||
+                  widget.isEditorMode == true)
+                  .map((seatModel) {
                 return Positioned(
                   left: seatModel.colI * seatModel.seatSize.toDouble(),
                   top: seatModel.rowI * seatModel.seatSize.toDouble(),
-                  child:
-                      Tooltip(
+                  child: seatModel.objectModel == null ?
+                      GestureDetector(
+                        onTap: () {
+                          if (widget.onSeatTap != null) {
+                            widget.onSeatTap!(seatModel);
+                          }
+                        },
+                        child: SeatWidgetHelper.buildSeat(
+                          state: seatModel.seatState,
+                          size: seatModel.seatSize.toDouble(),
+                        ),
+                      )
+                      : Tooltip(
                     showDuration: const Duration(seconds: 0),
                     message:
                     "${seatModel.objectModel?.blueprintTooltip(context)}",
@@ -149,7 +174,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         size: seatModel.seatSize.toDouble(),
                       ),
                     ),
-                  )
+                  ),
                 );
               }).toList(),
             ),
@@ -157,7 +182,6 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
         ],
       ),
     );
-
   }
 
   @override
