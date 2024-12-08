@@ -91,10 +91,12 @@ class _FormPageState extends State<FormPage> {
         color: ThemeConfig.dddBackground, // Dim background
         child: Center(
           child: SeatReservationWidget(
+
             secret: formHolder!.controller!.secret!,
             formDataKey: formHolder!.controller!.formKey!,
             blueprintId: formHolder!.controller!.blueprintId!,
             selectedSeats: selectedSeats,
+            maxTickets: formHolder!.getTicket()?.maxTickets,
             onSelectionChanged: (sts) {
               _totalTickets = sts.length;
               _totalPrice = 0;
