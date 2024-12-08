@@ -11,12 +11,13 @@ class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
   final SeatLayoutWidgetController? controller;
   final void Function(SeatModel model)? onSeatTap;
-
+  final bool? isEditor;
   const SeatLayoutWidget({
     Key? key,
     required this.stateModel,
     this.controller,
     this.onSeatTap,
+    this.isEditor,
   }) : super(key: key);
 
   @override
@@ -122,18 +123,18 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 fit: BoxFit.cover,
               ),
             ),
-          // Seat Layout
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.stateModel.rows, (rowI) {
-              return Row(
-                mainAxisSize: MainAxisSize.min,
-                children: List.generate(widget.stateModel.cols, (colI) {
-                  final seatModel = _seats.firstWhere(
-                          (seat) => seat.rowI == rowI && seat.colI == colI);
-                  return seatModel.objectModel != null &&
-                      seatModel.objectModel!.id != null
-                      ? Tooltip(
+          // Seat Layout with Positioned widgets
+          SizedBox(
+            width: layoutWidth.toDouble(),
+            height: layoutHeight.toDouble(),
+            child: Stack(
+              children: _seats.where((seatModel)=>(seatModel.objectModel != null &&
+                  seatModel.objectModel!.id != null) || widget.isEditor == true).map((seatModel) {
+                return Positioned(
+                  left: seatModel.colI * seatModel.seatSize.toDouble(),
+                  top: seatModel.rowI * seatModel.seatSize.toDouble(),
+                  child:
+                      Tooltip(
                     showDuration: const Duration(seconds: 0),
                     message:
                     "${seatModel.objectModel?.blueprintTooltip(context)}",
@@ -149,24 +150,14 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       ),
                     ),
                   )
-                      : GestureDetector(
-                    onTap: () {
-                      if (widget.onSeatTap != null) {
-                        widget.onSeatTap!(seatModel);
-                      }
-                    },
-                    child: SeatWidgetHelper.buildSeat(
-                      state: seatModel.seatState,
-                      size: seatModel.seatSize.toDouble(),
-                    ),
-                  );
-                }),
-              );
-            }),
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
     );
+
   }
 
   @override
