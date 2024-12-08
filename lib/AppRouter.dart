@@ -47,9 +47,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:id"),
-    AutoRoute(page: FormEditRoute.page, path: "/${FormEditPage.ROUTE}", children: [
-      AutoRoute(path: ':formKey', page: FormEditRoute.page,),
-    ]),
+    AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formKey/edit"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
@@ -65,7 +63,7 @@ class AppRouter extends RootStackRouter {
       AutoRoute(path: ':id', page: BlueprintEditorRoute.page,),
     ]),
     AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
-      AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
+      AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
                   AutoRoute(page: EventRoute.page, path: ":id")

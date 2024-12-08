@@ -32,7 +32,7 @@ import 'package:fstapp/widgets/SeatReservationWidget.dart';
 class FormPage extends StatefulWidget {
   static const ROUTE = "form";
 
-  String? id;
+  String? formKey;
   FormPage({super.key});
 
   @override
@@ -53,8 +53,8 @@ class _FormPageState extends State<FormPage> {
 
   @override
   Future<void> didChangeDependencies() async {
-    if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id = context.routeData.pendingChildren[0].pathParams.getString("id");
+    if (widget.formKey == null && context.routeData.hasPendingChildren) {
+      widget.formKey = context.routeData.pendingChildren[0].pathParams.getString("formKey");
     }
 
     await loadData();
@@ -324,7 +324,7 @@ class _FormPageState extends State<FormPage> {
           onPressed: () {
             RouterService.navigate(
                 context,
-                "${FormEditPage.ROUTE}/${form!.formKey}")
+                "${FormPage.ROUTE}/${form!.formKey}/edit")
                 .then((value) => loadData());
           },
           child: const Icon(Icons.edit),
