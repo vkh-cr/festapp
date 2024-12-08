@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
+import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/pages/AdministrationOccasion/OrderFinishScreen.dart';
+import 'package:fstapp/pages/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/services/UuidConverter.dart';
@@ -17,8 +22,8 @@ import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/SeatReservationWidget.dart';
 
 @RoutePage()
 class FormPage extends StatefulWidget {
@@ -33,12 +38,15 @@ class FormPage extends StatefulWidget {
 
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
-  bool _isSendSuccess = false;
-  double _totalPrice = 0.0; // Total price
+  double _totalPrice = 0.0;
+  int _totalTickets = 0;
   Map<String, dynamic>? formResult;
+  FormHolder? formHolder;
   FormModel? form;
+  List<SeatModel> selectedSeats = [];
 
   final _formKey = GlobalKey<FormBuilderState>();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Future<void> didChangeDependencies() async {
@@ -50,167 +58,260 @@ class _FormPageState extends State<FormPage> {
     super.didChangeDependencies();
   }
 
-  void _updateTotalPrice() {
-    // Reset total price
-    _totalPrice = 0.0;
+  bool _isSeatReservationVisible = false;
+  Completer<List<SeatModel>?>? _seatReservationCompleter;
 
-    // Iterate over all fields and calculate total price
-    for (var field in form?.data?[FormHelper.metaFields] ?? []) {
-      // Calculate price for regular options
-      if (field[FormHelper.metaType] == FormHelper.fieldTypeOptions) {
-        var selectedOption = _formKey.currentState?.fields[field[FormHelper.metaOptionsType]]?.value;
+  /// Simulates the showDialog functionality for SeatReservation
+  Future<List<SeatModel>?> _showSeatReservation(List<SeatModel> seats) {
+    selectedSeats = seats;
+    setState(() {
+      _isSeatReservationVisible = true;
+    });
+
+    _seatReservationCompleter = Completer<List<SeatModel>?>();
+
+    return _seatReservationCompleter!.future;
+  }
+
+  /// Hides the SeatReservationWidget and resolves the completer
+  void _hideSeatReservation(List<SeatModel>? seats) {
+    setState(() {
+      _isSeatReservationVisible = false;
+    });
+
+    _seatReservationCompleter!.complete(seats);
+    _seatReservationCompleter = null;
+  }
+
+  Widget _buildSeatReservationOverlay() {
+    if (!_isSeatReservationVisible) return const SizedBox.shrink();
+
+    return Positioned.fill(
+      child: Container(
+        color: ThemeConfig.dddBackground, // Dim background
+        child: Center(
+          child: SeatReservationWidget(
+            secret: formHolder!.controller!.secret!,
+            formDataKey: formHolder!.controller!.formKey!,
+            blueprintId: formHolder!.controller!.blueprintId!,
+            selectedSeats: selectedSeats,
+            onSelectionChanged: (sts) {
+              _totalTickets = sts.length;
+              _totalPrice = 0;
+              for(var s in sts){
+                _totalPrice += s.objectModel?.product?.price ?? 0;
+              }
+              setState(() {});
+            },
+            onCloseSeatReservation: formHolder!.controller!.onCloseSeatReservation!,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _updateTotalPrice() {
+    _totalPrice = 0.0;
+    _totalTickets = 0;
+
+    for (var field in formHolder!.fields) {
+      if (field.fieldType == FormHelper.fieldTypeOptions) {
+        var selectedOption = field.getValue(formHolder!.controller!.globalKey);
         if (selectedOption is FormOptionModel) {
           _totalPrice += selectedOption.price;
         }
       }
 
-      // Calculate price for tickets
-      if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-        var ticketDataList = FormHelper.getFieldData(
-            _formKey,
-            FormHelper.fieldTypeTicket,
-            ticketKeys: FormHelper.ticketKeys
-        ) ?? [];
+      if (field is TicketHolder) {
+        if(_isSeatReservationVisible){
+          _totalTickets = selectedSeats.length;
+        } else {
+          _totalTickets = field.tickets.length;
+        }
+
+        if(_isSeatReservationVisible){
+          for (var s in selectedSeats) {
+            _totalPrice += s.objectModel!.product!.price!;
+          }
+        } else {
+          for (var s in field.tickets) {
+            _totalPrice += s.seat.objectModel!.product!.price!;
+          }
+        }
+
+        var ticketDataList = FormHelper.getFieldData(_formKey, field) ?? [];
 
         for (var ticketData in ticketDataList) {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
-            } else if (ticketValue is BlueprintObjectModel){
-              _totalPrice += ticketValue.product?.price??0;
+            } else if (ticketValue is BlueprintObjectModel) {
+              //_totalPrice += ticketValue.product?.price ?? 0;
             }
           }
         }
       }
     }
 
-    setState(() {}); // Update the UI
+    setState(() {});
   }
 
+  Widget _buildPriceAndTicketInfo() {
+    if (_totalPrice <= 0) return SizedBox(); // Do not display if total price is 0
+
+    return Positioned(
+      top: 16,
+      right: 16,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColor.withOpacity(0.7), // Primary color background
+          borderRadius: BorderRadius.circular(8.0),
+          boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "${_totalTickets}x",
+              style: const TextStyle(
+                fontSize: 18, // Increased font size
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White bold text
+              ),
+            ),
+            const SizedBox(width: 6), // Increased spacing
+            Icon(
+              Icons.local_activity, // Ticket icon
+              color: Colors.white,
+              size: 24, // Increased icon size
+            ),
+            const SizedBox(width: 10), // Increased spacing
+            Text(
+              Utilities.formatPrice(context, _totalPrice),
+              style: const TextStyle(
+                fontSize: 18, // Increased font size
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // White bold text
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showOrderPreview() {
+    TextInput.finishAutofillContext();
+    if (FormHelper.saveAndValidate(formHolder!))
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return OrderPreviewScreen(
+          formHolder: formHolder!,
+          totalPrice: _totalPrice,
+          onSendPressed: _sendOrder,
+        );
+      },
+    );
+  }
+
+  void _scrollToTop() {
+    _scrollController.jumpTo(0.0);
+  }
+
+  Future<void> _sendOrder() async {
+    if (formHolder == null || form == null) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    var data = FormHelper.getDataFromForm(formHolder!);
+    data = FormHelper.replaceSpotWithId(data);
+    data[FormHelper.metaSecret] = form!.secret;
+    data[FormHelper.metaForm] = form!.formKey;
+    formResult = data;
+
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false, // Disable dismissing by tapping outside
+      barrierLabel: "FinishOrderDialog",
+      pageBuilder: (context, anim1, anim2) => FinishOrderScreen(
+        orderFutureFunction: () async {
+          return await DbEshop.sendTicketOrder(data);
+        },
+        onResetForm: () async {
+          Navigator.of(context).pop(); // Close the FinishOrderScreen
+          _scrollToTop();
+          await loadData();
+          _updateTotalPrice();
+        },
+      ),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return FadeTransition(
+          opacity: anim1, // Fade animation
+          child: child,
+        );
+      },
+    );
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text("Form Page").tr(),
-      ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: _isSendSuccess
-                  ? Padding(
-                padding: const EdgeInsets.fromLTRB(12, 88, 12, 12),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: ThemeConfig.blackColor(context),
-                        ),
-                        text: "Your order was successfully sent to your email {email}."
-                            .tr(namedArgs: {"email": formResult?[FormHelper.fieldTypeEmail] ?? ""}),
-                      ),
-                      const WidgetSpan(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(6, 0, 0, 0),
-                          child: Icon(Icons.check_circle),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-                  : form?.data == null
-                  ? const Center(
-                child: CircularProgressIndicator(),
-              )
-                  : FormBuilder(
-                key: _formKey,
-                child: AutofillGroup(
-                  child: Column(
-                    children: [
-                      if(form!.footer!=null)
-                        Column(children: [
-                          HtmlView(html: form!.header!, isSelectable: true,),
-                          const SizedBox(height: 16),
-                        ],),
-                      ...FormHelper.getAllFormFields(context, _formKey, form!, _updateTotalPrice),
-                      const SizedBox(height: 16),
-                      if (_totalPrice > 0)
-                        Text(
-                          "Total Price: {price}".tr(namedArgs: {
-                            "price": Utilities.formatPrice(context, _totalPrice),
-                          }),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: formHolder == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : FormBuilder(
+                    key: _formKey,
+                    child: AutofillGroup(
+                      child: Column(
+                        children: [
+                          if (form!.header != null)
+                            Column(
+                              children: [
+                                HtmlView(html: form!.header!, isSelectable: true),
+                                const SizedBox(height: 16),
+                              ],
+                            ),
+                          ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
+                          const SizedBox(height: 32),
+                          ButtonsHelper.primaryButton(
+                            context: context,
+                            onPressed: _isLoading ? null : _showOrderPreview,
+                            label: "Continue",
+                            isLoading: _isLoading,
+                            height: 50.0,
+                            width: 250.0,
+                            isEnabled: _totalPrice > 0
                           ),
-                        ),
-                      const SizedBox(height: 16),
-                      if(form!.footer!=null)
-                        Column(children: [
-                          HtmlView(html: form!.footer!, isSelectable: true,),
-                          const SizedBox(height: 16),
-                        ],),
-                      ButtonsHelper.bigButton(
-                        context: context,
-                        onPressed: _isLoading
-                            ? null
-                            : () async {
-                          TextInput.finishAutofillContext();
-                          if (FormHelper.saveAndValidate(_formKey)) {
-                            setState(() {
-                              _isLoading = true;
-                            });
-                            var data = FormHelper.getDataFromForm(
-                                _formKey, form?.data?[FormHelper.metaFields]);
-
-                            data = FormHelper.replaceSpotWithId(data);
-                            data[FormHelper.metaSecret] = form!.secret;
-                            data[FormHelper.metaForm] = form!.formKey;
-                            formResult = data;
-
-
-                            var response = await DbEshop.sendTicketOrder(data);
-
-                            if(response.data["code"] != 200){
-                              ToastHelper.Show(context, "There was an error during ordering. Error code: ${response.data["code"]}", severity: ToastSeverity.NotOk);
-                              setState(() {
-                                _isLoading = false;
-                              });
-                              return;
-                            }
-
-                            setState(() {
-                              //_isSendSuccess = true;
-                              _isLoading = false;
-                            });
-
-                            ToastHelper.Show(
-                                context,
-                                "Your order has been sent successfully!"
-                                    .tr());
-                          }
-                        },
-                        label: "Send".tr(),
-                        isEnabled: !_isLoading,
-                        height: 50.0,
-                        width: 250.0,
+                          const SizedBox(height: 32),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
+          _buildSeatReservationOverlay(),
+          _buildPriceAndTicketInfo(),
+        ],
       ),
     );
   }
@@ -255,53 +356,50 @@ class _FormPageState extends State<FormPage> {
     //var key = UuidConverter.base62ToUuid(widget.id!);
 
     form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
-    if(form == null) {
+    if (form == null) {
       return;
     }
-    // Fetching items
     var allItems = await DbEshop.getProducts(context, form!.occasion!);
-    // New fields to replace existing ones
-    List<dynamic> updatedFields = [];
+    List<Map<String, dynamic>> updatedFields = [];
 
-    // Loop through the fields in form.data
     for (var field in form?.data![FormHelper.metaFields]) {
-      // Check if the field is a ticket
       if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-        // Process the fields inside the ticket
-        List<dynamic> updatedTicketFields = [];
+        List<Map<String, dynamic>> updatedTicketFields = [];
         for (var ticketField in field[FormHelper.metaFields]) {
-          // Check if the ticket field has an optionsType
           if (ticketField.containsKey(FormHelper.metaOptionsType)) {
             var optionsType = ticketField[FormHelper.metaOptionsType];
             var generatedOptions = generateOptionsForItemType(allItems, optionsType);
             updatedTicketFields.add(generatedOptions);
           } else {
-            // Directly add the ticket field if no optionsType is present
             updatedTicketFields.add(ticketField);
           }
         }
 
-        // Replace the fields inside the ticket
         updatedFields.add({
           FormHelper.metaType: field[FormHelper.metaType],
           FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
           FormHelper.metaFields: updatedTicketFields,
         });
       } else {
-        // Directly add the field if it's not a ticket
         updatedFields.add(field);
       }
     }
+    Map<String, dynamic> json = {FormHelper.metaFields: updatedFields};
 
-
-    form?.data![FormHelper.metaFields] = updatedFields;
+    formHolder = FormHolder.fromJson(json);
+    formHolder!.controller = FormHolderController(
+      secret: form!.secret,
+      blueprintId: form!.blueprint,
+      globalKey: _formKey,
+      formKey: form!.formKey!,
+      updateTotalPrice: _updateTotalPrice,
+      showSeatReservation: _showSeatReservation,
+      onCloseSeatReservation: _hideSeatReservation
+    );
+    form!.data![FormHelper.metaFields] = updatedFields;
 
     setState(() {
       _isLoading = false;
     });
   }
 }
-
-
-
-

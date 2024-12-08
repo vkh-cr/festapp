@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -26,8 +26,9 @@ class _SignupPageState extends State<SignupPage> {
   bool _isLoading = false;
   bool _isRegistrationSuccess = false;
   Map<String, dynamic>? fieldsData;
+  FormHolder? formHolder;
 
-  final FormModel form = FormModel(data: {FormHelper.metaFields:
+  Map<String, dynamic> entryJson = {FormHelper.metaFields:
   [
     { FormHelper.metaType : FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
@@ -35,7 +36,8 @@ class _SignupPageState extends State<SignupPage> {
     { FormHelper.metaType : FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
     { FormHelper.metaType : FormHelper.fieldTypeBirthYear},
-  ]});
+  ]};
+
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -45,6 +47,8 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    formHolder = FormHolder.fromJson(entryJson);
+    formHolder!.controller = FormHolderController(globalKey: _formKey);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -84,7 +88,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getAllFormFields(context, _formKey, form.data![FormHelper.metaFields]),
+                    ...FormHelper.getAllFormFields(context, formHolder!.controller!.globalKey!, formHolder!),
                       const SizedBox(
                         height: 16,
                       ),
@@ -96,7 +100,7 @@ class _SignupPageState extends State<SignupPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(_formKey, form.data![FormHelper.metaFields]);
+                            var data = FormHelper.getDataFromForm(formHolder!);
                             fieldsData = data;
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {

@@ -1,11 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 
 import '../components/seatReservation/model/SeatLayoutStateModel.dart';
 import '../components/seatReservation/model/SeatModel.dart';
@@ -18,9 +17,19 @@ class SeatReservationWidget extends StatefulWidget {
   final int blueprintId;
   final String secret;
   final String formDataKey;
-  SeatModel? selectedSeat;
+  final void Function(List<SeatModel>)? onSelectionChanged;
+  final void Function(List<SeatModel>?)? onCloseSeatReservation;
+  List<SeatModel> selectedSeats;
 
-  SeatReservationWidget({Key? key, required this.blueprintId, required this.secret, required this.formDataKey, this.selectedSeat}) : super(key: key);
+  SeatReservationWidget({
+    Key? key,
+    required this.blueprintId,
+    required this.secret,
+    required this.formDataKey,
+    required this.selectedSeats,
+    this.onSelectionChanged,
+    this.onCloseSeatReservation,
+  }) : super(key: key);
 
   @override
   State<SeatReservationWidget> createState() => _SeatReservationWidgetState();
@@ -28,10 +37,7 @@ class SeatReservationWidget extends StatefulWidget {
 
 class _SeatReservationWidgetState extends State<SeatReservationWidget> {
   List<SeatModel> allObjects = [];
-
-
   BlueprintModel? blueprint;
-  _SeatReservationWidgetState();
 
   @override
   void didChangeDependencies() {
@@ -39,151 +45,110 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     loadData();
   }
 
-  BlueprintGroupModel? currentBoxGroup;
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 16),
-                Text(blueprint?.title ?? "", style: StylesConfig.textStyleBig),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SeatWidgetHelper.buildSeat(
-                            state: SeatState.ordered,
-                            size: 15.0,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("obsazené"),
-                        ],
+    return SafeArea(
+      child: Center(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+          child: Stack(
+            children: [
+              // Main Content
+              Column(
+                children: [
+                  Flexible(
+                    child: blueprint == null
+                        ? const Center(child: CircularProgressIndicator())
+                        : Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 24, 12, 0),
+                      child: SeatLayoutWidget(
+                        onSeatTap: (model) async {
+                          await _handleSeatTap(model);
+                        },
+                        stateModel: SeatLayoutStateModel(
+                          rows: blueprint!.configuration!.height!,
+                          cols: blueprint!.configuration!.width!,
+                          seatSize: SeatReservationWidget.boxSize,
+                          currentObjects: blueprint!.objects!,
+                          allBoxes: allObjects,
+                          backgroundSvg: blueprint!.backgroundSvg,
+                        ),
                       ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SeatWidgetHelper.buildSeat(
-                            state: SeatState.available,
-                            size: SeatReservationWidget.boxSize.toDouble(),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("dostupné"),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SeatWidgetHelper.buildSeat(
-                            state: SeatState.selected_by_me,
-                            size: SeatReservationWidget.boxSize.toDouble(),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("vybrané"),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SeatWidgetHelper.buildSeat(
-                            state: SeatState.black,
-                            size: 15.0,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text("stůl"),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Flexible(
-                  child:
-                  blueprint == null
-                      ? const Center(child: CircularProgressIndicator()) :
-                  SeatLayoutWidget(
-                    onSeatTap: (model) async {
-                      if (model.seatState == SeatState.selected_by_me_focused) {
-                        if(await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, false)){
-                          model.seatState = SeatState.available;
-                          widget.selectedSeat = null;
-                        }
-                      } else if (model.seatState == SeatState.available) {
-                        if (widget.selectedSeat != null) {
-                          if(await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, false)){
-                            widget.selectedSeat!.seatState = SeatState.available;
-                          }
-                        }
-                        model.seatState = SeatState.selected_by_me_focused;
-                        widget.selectedSeat = model;
-                        if(!await DbEshop.selectSpot(context, widget.formDataKey, widget.secret, widget.selectedSeat!.objectModel!.id!, true)){
-                          widget.selectedSeat = null;
-                          model.seatState = SeatState.available;
-                        }
-                      }
-                      setState(() {});
-                    },
-                    stateModel: SeatLayoutStateModel(
-                      rows: blueprint!.configuration!.height!,
-                      cols: blueprint!.configuration!.width!,
-                      seatSize: SeatReservationWidget.boxSize,
-                      currentObjects: blueprint!.objects!,
-                      allBoxes: allObjects,
-                      backgroundSvg: blueprint!.backgroundSvg
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Storno").tr(),
+                  // Bottom Buttons
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: ButtonsHelper.primaryButton(
+                        context: context,
+                        onPressed: () {
+                          widget.onCloseSeatReservation?.call(widget.selectedSeats);
+                        },
+                        label: "Continue",
+                        width: 250
+                      ),
                     ),
-                    const SizedBox(width: 24),
-                    ElevatedButton(
-                      onPressed: () {
-                        // Save changes logic
-                        Navigator.pop(context, widget.selectedSeat);
-                      },
-                      child: const Text("Save").tr(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  /// Handles Seat Tap Logic
+  Future<void> _handleSeatTap(SeatModel model) async {
+    if (model.seatState == SeatState.selected_by_me) {
+      model.seatState = SeatState.available;
+      setState(() {});
+      if (await DbEshop.selectSpot(
+        context,
+        widget.formDataKey,
+        widget.secret,
+        model.objectModel!.id!,
+        false,
+      )) {
+        model.seatState = SeatState.available;
+        model.objectModel!.stateEnum = SeatState.available;
+        widget.selectedSeats.remove(model);
+      } else {
+        model.seatState = SeatState.selected_by_me;
+      }
+    } else if (model.seatState == SeatState.available) {
+      model.seatState = SeatState.selected_by_me;
+      setState(() {});
+      if (await DbEshop.selectSpot(
+        context,
+        widget.formDataKey,
+        widget.secret,
+        model.objectModel!.id!,
+        true,
+      )) {
+        widget.selectedSeats.add(model);
+        model.seatState = SeatState.selected_by_me;
+        model.objectModel!.stateEnum = SeatState.selected_by_me;
+      } else {
+        model.seatState = SeatState.available;
+      }
+    }
+    widget.onSelectionChanged?.call(widget.selectedSeats);
+  }
+
+  /// Loads Blueprint Data
   void loadData() async {
-    blueprint = await DbEshop.getBlueprint(widget.secret, widget.formDataKey, widget.blueprintId);
-    if (blueprint == null) {
-      return;
-    }
+    blueprint = await DbEshop.getBlueprint(
+      widget.secret,
+      widget.formDataKey,
+      widget.blueprintId,
+    );
+    if (blueprint == null) return;
 
-    if (widget.selectedSeat != null) {
-      blueprint?.objects
-          ?.firstWhereOrNull((object) => object.id == widget.selectedSeat?.objectModel?.id)
-          ?.stateEnum = SeatState.selected_by_me_focused;
-    }
-
+    blueprint?.objects
+        ?.firstWhereOrNull((object) => widget.selectedSeats.any((s) => s.objectModel!.id! == object.id))
+        ?.stateEnum = SeatState.selected_by_me;
 
     setState(() {});
   }
