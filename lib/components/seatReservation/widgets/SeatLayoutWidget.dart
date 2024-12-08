@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_svg/flutter_svg.dart'; // Add flutter_svg package
-import 'package:fstapp/services/Utilities.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
@@ -27,7 +26,9 @@ class SeatLayoutWidget extends StatefulWidget {
 class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   final TransformationController _controller = TransformationController();
   late List<SeatModel> _seats;
+  double _minScale = 1.0; // Dynamic minimum scale
 
+  @override
   @override
   void initState() {
     super.initState();
@@ -36,9 +37,17 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
 
     _seats = _generateSeatModels();
 
+    _controller.addListener(_onTransformationChanged); // Add listener
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitLayout();
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_onTransformationChanged); // Remove listener
+    super.dispose();
   }
 
   List<SeatModel> _generateSeatModels() {
@@ -64,18 +73,22 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   void _fitLayout() {
     if (!mounted) return;
 
+    // Get the size of the widget (visible area)
     final RenderBox renderBox = context.findRenderObject() as RenderBox;
     double widgetWidth = renderBox.size.width;
     double widgetHeight = renderBox.size.height;
 
+    // Calculate the size of the content
     int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
     int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
 
+    // Determine the scale needed to fit the content fully within the widget
     double scaleX = widgetWidth / layoutWidth;
     double scaleY = widgetHeight / layoutHeight;
     double scaleFactor = scaleX < scaleY ? scaleX : scaleY;
 
     setState(() {
+      _minScale = scaleFactor; // Ensure the minScale allows the content to fit fully
       _controller.value = Matrix4.identity()
         ..scale(scaleFactor)
         ..setTranslationRaw(
@@ -92,7 +105,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
     int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
 
     return InteractiveViewer(
-      minScale: 0.5,
+      minScale: _minScale,
       maxScale: 5,
       boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
@@ -174,6 +187,47 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
       });
     }
   }
+
+  void _onTransformationChanged() {
+    final Matrix4 matrix = _controller.value;
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+
+    double widgetWidth = renderBox.size.width;
+    double widgetHeight = renderBox.size.height;
+
+    int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
+    int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
+
+    double scale = matrix.getMaxScaleOnAxis();
+    double translateX = matrix.getTranslation().x;
+    double translateY = matrix.getTranslation().y;
+
+    // Calculate the scaled content size
+    double scaledWidth = layoutWidth * scale;
+    double scaledHeight = layoutHeight * scale;
+
+    // Calculate the center offsets for zoomed-out state
+    double centerOffsetX = (widgetWidth - scaledWidth).clamp(0, double.infinity) / 2;
+    double centerOffsetY = (widgetHeight - scaledHeight).clamp(0, double.infinity) / 2;
+
+    // Clamping ranges for each side
+    double minX = widgetWidth < scaledWidth ? widgetWidth - scaledWidth : centerOffsetX;
+    double maxX = widgetWidth < scaledWidth ? 0 : centerOffsetX;
+    double minY = widgetHeight < scaledHeight ? widgetHeight - scaledHeight : centerOffsetY;
+    double maxY = widgetHeight < scaledHeight ? 0 : centerOffsetY;
+
+    // Clamp translation to prevent empty spaces
+    double clampedX = translateX.clamp(minX, maxX);
+    double clampedY = translateY.clamp(minY, maxY);
+
+    // Apply only if there is a change
+    if (clampedX != translateX || clampedY != translateY) {
+      _controller.value = matrix
+        ..setTranslationRaw(clampedX, clampedY, 0);
+    }
+  }
+
+
 }
 
 class SeatLayoutWidgetController {
