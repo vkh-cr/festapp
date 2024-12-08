@@ -6,6 +6,7 @@ import 'package:fstapp/pages/BlueprintEditorPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/FormEditPage.dart';
 import 'package:fstapp/pages/FormPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
@@ -46,6 +47,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:id"),
+    AutoRoute(page: FormEditRoute.page, path: "/${FormEditPage.ROUTE}", children: [
+      AutoRoute(path: ':formKey', page: FormEditRoute.page,),
+    ]),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),

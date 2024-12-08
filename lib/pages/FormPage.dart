@@ -5,6 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
@@ -12,7 +13,9 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/OrderFinishScreen.dart';
+import 'package:fstapp/pages/FormEditPage.dart';
 import 'package:fstapp/pages/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -314,6 +317,18 @@ class _FormPageState extends State<FormPage> {
           _buildSeatReservationOverlay(),
           _buildPriceAndTicketInfo(),
         ],
+      ),
+      floatingActionButton: Visibility(
+        visible: RightsService.isEditor(),
+        child: FloatingActionButton(
+          onPressed: () {
+            RouterService.navigate(
+                context,
+                "${FormEditPage.ROUTE}/${form!.formKey}")
+                .then((value) => loadData());
+          },
+          child: const Icon(Icons.edit),
+        ),
       ),
     );
   }
