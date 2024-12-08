@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +9,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/SeatReservationWidget.dart';
+import 'package:fstapp/widgets/ButtonsHelper.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -55,21 +55,18 @@ class FormHelper {
 
   static double fontSizeFactor = 1.2;
 
-  static List<Map<String, dynamic>> ticketValues = [];
-  static List<GlobalKey<FormBuilderState>> ticketKeys = [];
-
-  static List<Widget> getAllFormFields(BuildContext context,  GlobalKey<FormBuilderState> formKey, FormModel formData, [void Function()? updateTotalPrice]) {
-    return formData.data?[FormHelper.metaFields].map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
+  static List<Widget> getAllFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder) {
+    return formHolder.fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
   }
 
-  static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel formData, dynamic fields, [void Function()? updateTotalPrice]) {
-    return fields.map<Widget>((field) => createFormField(context, formKey, formData, field, updateTotalPrice)).toList();
+  static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, List<FieldHolder> fields) {
+    return fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
   }
 
-  static bool saveAndValidate(GlobalKey<FormBuilderState> key){
-    bool toReturn = key.currentState?.saveAndValidate() ?? false;
-    for(var k in ticketKeys){
-      if(!(k.currentState?.saveAndValidate() ?? false)){
+  static bool saveAndValidate(FormHolder formHolder){
+    bool toReturn = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
+    for(var k in formHolder.getTicket()!.tickets){
+      if(!(k.ticketKey.currentState?.saveAndValidate() ?? false)){
         toReturn = false;
       }
     }
@@ -77,47 +74,53 @@ class FormHelper {
   }
 
   // Retrieve form data by iterating over defined fields
-  static Map<String, dynamic> getDataFromForm(GlobalKey<FormBuilderState> key, dynamic fields) {
+  static Map<String, dynamic> getDataFromForm(FormHolder formHolder) {
     Map<String, dynamic> toReturn = {};
-    for (var k in fields) {
-      toReturn[k[metaType]] = getFieldData(key, k[metaType], ticketKeys: ticketKeys);
+    for (var k in formHolder.fields) {
+      toReturn[k.getFieldTypeValue()] = getFieldData(formHolder.controller!.globalKey, k);
     }
     return toReturn;
   }
 
-  // Determine the correct data from the form based on type
-  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, String fieldType, {List<GlobalKey<FormBuilderState>>? ticketKeys}) {
-    var fieldValue = formKey.currentState?.fields[fieldType]?.value;
+  static String getFieldTypeValue(FieldHolder fieldHolder){
+    if(fieldHolder is OptionsFieldHolder){
+      return fieldHolder.optionsType;
+    }
+    return fieldHolder.fieldType;
+  }
 
-    if (fieldType == fieldTypeSex) {
+  // Determine the correct data from the form based on type
+  static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, FieldHolder fieldHolder) {
+    var fieldValue = formKey.currentState?.fields[fieldHolder.getFieldTypeValue()]?.value;
+
+    if (fieldHolder.fieldType == fieldTypeSex) {
       if (fieldValue == null) {
         return null;
       }
       return (fieldValue as FormOptionModel).id;
-    } else if (fieldType == fieldTypeBirthYear) {
+    } else if (fieldHolder.fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
-    } else if (fieldType == fieldTypeSpot) {
+    } else if (fieldHolder.fieldType == fieldTypeSpot) {
       if (fieldValue is SeatModel) {
         return fieldValue.objectModel;
       }
       return null;
-    } else if (fieldType == fieldTypeTicket) {
+    } else if (fieldHolder.fieldType == fieldTypeTicket) {
       // Collect ticket data from multiple ticket forms
       List<Map<String, dynamic>> tickets = [];
 
-      if (ticketKeys != null) {
-        for (int i = 0; i < ticketKeys.length; i++) {
-          final ticketKey = ticketKeys[i];
-          if (ticketKey.currentState == null) continue;
+      var ticket = fieldHolder as TicketHolder;
+      for (int i = 0; i < ticket.tickets.length; i++) {
+        final ticketKey = ticket.tickets[i].ticketKey;
+        if (ticketKey.currentState == null) continue;
 
-          Map<String, dynamic> ticketData = {};
+        Map<String, dynamic> ticketData = {};
 
-          for (MapEntry<String, FormBuilderFieldState<FormBuilderField<dynamic>, dynamic>> ticketSubField in ticketKey.currentState?.fields.entries ?? []) {
-            var subFieldType = ticketSubField.key;
-            ticketData[subFieldType] = getFieldData(ticketKey, subFieldType, ticketKeys: ticketKeys);
-          }
-          tickets.add(ticketData);
+        for(var subFieldHolder in ticket.fields){
+          ticketData[subFieldHolder.getFieldTypeValue()] = getFieldData(ticketKey, subFieldHolder);
         }
+        ticketData[fieldTypeSpot] = ticket.tickets[i].seat.objectModel;
+        tickets.add(ticketData);
       }
 
       return tickets;
@@ -131,75 +134,88 @@ class FormHelper {
 
 
   // Create individual form field widget based on configuration
-  static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormModel form, Map<String, dynamic> field, [void Function()? updateTotalPrice]) {
-    final bool isRequiredField = field[IS_REQUIRED] ?? false;
-    switch (field[metaType]) {
+  static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder field) {
+    final bool isRequiredField = field.isRequired;
+    switch (field.fieldType) {
       case fieldTypeNote:
-        return buildTextField(fieldTypeNote, noteLabel(), isRequiredField, []);
+        field.label = noteLabel();
+        return buildTextField(field, []);
       case fieldTypeName:
-        return buildTextField(fieldTypeName, nameLabel(), isRequiredField, [AutofillHints.givenName]);
+        field.label = nameLabel();
+        return buildTextField(field, [AutofillHints.givenName]);
       case fieldTypeSurname:
-        return buildTextField(fieldTypeSurname, surnameLabel(), isRequiredField, [AutofillHints.familyName]);
+        field.label = surnameLabel();
+        return buildTextField(field, [AutofillHints.familyName]);
       case fieldTypeCity:
-        return buildTextField(fieldTypeCity, cityLabel(), isRequiredField, [AutofillHints.addressCity]);
+        field.label = cityLabel();
+        return buildTextField(field, [AutofillHints.addressCity]);
       case fieldTypeSpot:
-        return buildSpotField(context, formKey, form, fieldTypeSpot, spotLabel(), updateTotalPrice);
+        field.label = spotLabel();
+        return buildSpotField(context, formKey, formHolder, field);
       case fieldTypeEmail:
-        return buildEmailField(isRequiredField);
+        field.label = emailLabel();
+        return buildEmailField(field);
       case fieldTypeSex:
-        return buildRadioField(fieldTypeSex, sexLabel(), isRequiredField);
+        field.label = sexLabel();
+        var sexOptions = [
+          FormOptionModel(UserInfoModel.sexes[0], maleLabel()),
+          FormOptionModel(UserInfoModel.sexes[1], femaleLabel()),
+        ];
+        if (!isRequiredField) {
+          sexOptions.insert(0, FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel()));
+        }
+        return buildRadioField(field, sexOptions);
       case fieldTypeOptions:
-        return buildGenericOptions(field[metaOptionsType], field[metaLabel], field[metaOptions]);
+        var optionsField = field as OptionsFieldHolder;
+        return buildRadioField(optionsField, optionsField.options);
       case fieldTypeBirthYear:
-        return buildBirthYearField(fieldTypeBirthYear, birthYearLabel(), isRequiredField);
+        field.label = birthYearLabel();
+        return buildBirthYearField(field);
       case fieldTypeTicket:
-        return buildTicketField(formKey, form, field, ticketValues, ticketKeys, updateTotalPrice);
+        var ticketHolder = field as TicketHolder;
+        return buildTicketField(formHolder, ticketHolder);
       default:
         return const SizedBox.shrink();
     }
   }
 
   static Widget buildTicketField(
-      GlobalKey<FormBuilderState> formKey,
-      FormModel formData,
-      Map<String, dynamic> field,
-      List<Map<String, dynamic>> ticketValues,
-      List<GlobalKey<FormBuilderState>> ticketKeys,
-      [void Function()? updateTotalPrice] // Pass the updateTotalPrice function
+      FormHolder formHolder,
+      TicketHolder ticket
       ) {
-    final maxTickets = field[FormHelper.metaMaxTickets] ?? 1;
-
-    if (ticketValues.isEmpty) {
-      ticketValues.add({...field});
-      ticketKeys.add(GlobalKey<FormBuilderState>());
-    }
+    final maxTickets = ticket.maxTickets;
 
     return StatefulBuilder(
       builder: (context, setState) {
-        void addTicket() {
-          if (ticketValues.length < maxTickets) {
-            setState(() {
-              ticketValues.add({...field});
-              ticketKeys.add(GlobalKey<FormBuilderState>());
-            });
-          }
-          updateTotalPrice?.call(); // Update the total price when adding a ticket
-        }
-
         void removeTicket(int index) {
-          if (ticketValues.length > 1) {
-            setState(() {
-              ticketValues.removeAt(index);
-              ticketKeys.removeAt(index);
-            });
-          }
-          updateTotalPrice?.call(); // Update the total price when removing a ticket
+          setState(() {
+            ticket.tickets.removeAt(index);
+          });
+          formHolder.controller!.updateTotalPrice?.call();
         }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int i = 0; i < ticketValues.length; i++)
+            const SizedBox(height: 12),
+            Center(
+              child: ButtonsHelper.primaryButton(
+                context: context,
+                onPressed: () async {
+                  var seats = await formHolder.controller!.showSeatReservation!(ticket.tickets.map((t)=>t.seat).toList());
+                  if(seats != null){
+                    ticket.updateTickets(seats);
+                  }
+                  formHolder.controller!.updateTotalPrice?.call();
+                },
+                label: "Výběr místa",
+                height: 50.0,
+                width: 250.0,
+                suffixIcon: Icon(Icons.event_seat)
+              ),
+            ),
+            const SizedBox(height: 12),
+            for (int i = 0; i < ticket.tickets.length; i++)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Align(
@@ -219,7 +235,7 @@ class FormHelper {
                             Padding(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: Align(
-                                alignment: Alignment.center, // Center the title across the entire row
+                                alignment: Alignment.center,
                                 child: Text(
                                   "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
                                   style: TextStyle(
@@ -229,36 +245,33 @@ class FormHelper {
                                 ),
                               ),
                             ),
-                            if (i > 0)
-                              Align(
-                                alignment: Alignment.centerRight, // Align the delete button to the right
-                                child: IconButton(
-                                  onPressed: () => removeTicket(i),
-                                  icon: Icon(Icons.delete),
-                                  tooltip: "Delete".tr(),
-                                ),
+                            Align(
+                              alignment: Alignment.centerRight, // Align the delete button to the right
+                              child: IconButton(
+                                onPressed: () => removeTicket(i),
+                                icon: Icon(Icons.delete),
+                                tooltip: "Delete".tr(),
                               ),
+                            ),
                           ],
                         ),
+                        Text("${ticket.tickets[i].seat.objectModel}",
+                          style: TextStyle(
+                          fontSize: 14 * fontSizeFactor,
+                        ),),
+                        Divider(
+                            color: Colors.black
+                        ),
                         FormBuilder(
-                          key: ticketKeys[i], // Assign the corresponding key
-                          onChanged: updateTotalPrice, // Trigger price update on change
+                          key: ticket.tickets[i].ticketKey, // Assign the corresponding key
+                          onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, ticketKeys[i], formData, ticketValues[i][FormHelper.metaFields]),
+                            children: getFormFields(context, ticket.tickets[i].ticketKey, formHolder, ticket.tickets[i].ticketValues),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ),
-            if (ticketValues.length < maxTickets)
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton.icon(
-                  onPressed: addTicket,
-                  icon: Icon(Icons.add, color: ThemeConfig.whiteColor(context)),
-                  label: const Text("Add another ticket").tr(),
                 ),
               ),
           ],
@@ -269,66 +282,30 @@ class FormHelper {
 
 
   // Build a simple text field with optional validation
-  static Widget buildSpotField(
-      BuildContext context,
-      GlobalKey<FormBuilderState> formKey,
-      FormModel form,
-      String name,
-      String label,
-      void Function()? updateTotalPrice) {
-    // Create a TextEditingController to control the displayed text
+  static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder fieldHolder) {
     TextEditingController textController = TextEditingController();
 
     return FormBuilderField<SeatModel>(
-      name: name,
+      name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
-        FormBuilderValidators.required(),
-            (value) {
-          if (value == null) {
-            return "Please select a seat.".tr();
-          }
-          return null;
-        },
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
+            (value) => value == null ? "Please select a seat.".tr() : null,
       ]),
       builder: (FormFieldState<SeatModel?> field) {
         SeatModel? seat = field.value;
-        textController.text = seat?.objectModel?.title ?? metaEmpty;
+        textController.text = seat?.objectModel?.toString() ?? metaEmpty;
         return TextField(
           controller: textController,
           readOnly: true,
           canRequestFocus: false,
           decoration: InputDecoration(
-            labelText: label,
+            labelText: fieldHolder.label,
             suffixIcon: const Icon(Icons.event_seat),
             labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
-            errorText: field.errorText, // Display validation error
+            errorText: field.errorText,
           ),
           onTap: () async {
-            // Show the seat reservation dialog and await the result
-            SeatModel? selectedSeat = await showGeneralDialog<SeatModel>(
-              context: context,
-              barrierColor: Colors.black12.withOpacity(0.6),
-              barrierDismissible: false,
-              barrierLabel: 'Dialog',
-              transitionDuration: const Duration(milliseconds: 300),
-              pageBuilder: (context, __, ___) {
-                return SeatReservationWidget(
-                  secret: form.secret!,
-                  formDataKey: form.formKey!,
-                  blueprintId: form.blueprint!,
-                  selectedSeat: field.value,
-                );
-              },
-            );
-
-            if (selectedSeat != null) {
-              // Update the form field and display value
-              updateTotalPrice?.call();
-              field.didChange(selectedSeat);
-              textController.text =
-                  selectedSeat.objectModel?.title ?? metaEmpty;
-              field.validate();
-            }
+            await formHolder.controller!.showSeatReservation!(seat == null ? []:[seat]);
           },
         );
       },
@@ -336,61 +313,72 @@ class FormHelper {
   }
 
   // Build a simple text field with optional validation
-  static FormBuilderTextField buildTextField(String name, String label, bool isRequired, [List<String>? autofillHints]) {
+  static FormBuilderTextField buildTextField(FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return FormBuilderTextField(
-      name: name,
+      name: fieldHolder.fieldType,
       autofillHints: autofillHints,
-      decoration: InputDecoration(labelText: label,
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
-      validator: isRequired ? FormBuilderValidators.required() : null,
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+      ),
+      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
     );
   }
 
-  // Build an email field with validation for format and required status
-  static FormBuilderTextField buildEmailField(bool isRequired) {
+  static FormBuilderTextField buildEmailField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: fieldTypeEmail,
+      name: fieldHolder.fieldType,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(labelText: emailLabel(),
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+      ),
       validator: FormBuilderValidators.compose([
-        if (isRequired) FormBuilderValidators.required(),
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: emailInvalidMessage()),
       ]),
     );
   }
 
-  // Build a radio group for selecting sex
-  static FormBuilderRadioGroup buildRadioField(String name, String label, bool isRequired) {
-    var options = [
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[0], maleLabel())),
-      FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[1], femaleLabel()))
-    ];
-    if(!isRequired){
-      options.insert(0, FormBuilderFieldOption(value: FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel())));
-    }
-    return FormBuilderRadioGroup(
-      name: name,
-      decoration: InputDecoration(labelText: label,
-        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
-      validator: isRequired ? FormBuilderValidators.required() : null,
+  // Build a radio group field using the FieldHolder as parameter
+  static FormBuilderRadioGroup buildRadioField(FieldHolder fieldHolder, List<FormOptionModel> optionsIn) {
+    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn.map(
+          (o) => FormBuilderFieldOption(
+        value: FormOptionModel(o.id, o.name, price: o.price),
+        child: Text(
+          o.name,
+          style: TextStyle(fontSize: 14.0 * fontSizeFactor),
+        ),
+      ),
+    ).toList();
+
+    return FormBuilderRadioGroup<FormOptionModel>(
+      name: fieldHolder.getFieldTypeValue(),
+      decoration: InputDecoration(
+        labelText: fieldHolder.label,
+        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
+      ),
+      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
       options: options,
+      initialValue: options.isNotEmpty ? options.first.value : null,
+      orientation: OptionsOrientation.vertical,
+      wrapDirection: Axis.vertical,
     );
   }
 
   static FormBuilderRadioGroup buildGenericOptions(
-      String name, String label, List<dynamic> optionsIn) {
+      String name, String label, List<FormOptionModel> optionsIn) {
     List<FormBuilderFieldOption<FormOptionModel>> options = [];
 
     for (var o in optionsIn) {
       options.add(FormBuilderFieldOption(
           value: FormOptionModel(
-            o[FormOptionModel.metaOptionsId],
-            o[FormOptionModel.metaOptionsName],
-            price: o[FormOptionModel.metaOptionsPrice] ?? 0.0, // Use price from the option or default to 0.0
+            o.id,
+            o.name,
+            price: o.price,
           ),
         child: Text(
-          o[FormOptionModel.metaOptionsName],
+          o.name,
           style: TextStyle(fontSize: 14.0 * fontSizeFactor), // Adjust font size dynamically
         ),
       ));
@@ -399,7 +387,7 @@ class FormHelper {
     // Use the first option as the default initial value
     final initialValue = options.isNotEmpty ? options.first.value : null;
 
-    return FormBuilderRadioGroup<FormOptionModel>(
+      return FormBuilderRadioGroup<FormOptionModel>(
       name: name,
       decoration: InputDecoration(labelText: label,
         labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),),
@@ -411,13 +399,13 @@ class FormHelper {
     );
   }
 
-  static FormBuilderTextField buildBirthYearField(String name, String label, bool isRequired) {
+  static FormBuilderTextField buildBirthYearField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: name,
-      decoration: InputDecoration(labelText: label,
+      name: fieldHolder.fieldType,
+      decoration: InputDecoration(labelText: fieldHolder.label,
         labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([
-        if (isRequired) FormBuilderValidators.required(),
+        if (fieldHolder.isRequired) FormBuilderValidators.required(),
         // Allow empty for optional field; validate only if non-empty
             (value) {
           if (value == null || value.isEmpty || value == "") {

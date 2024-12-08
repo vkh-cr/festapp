@@ -3,11 +3,19 @@ class FormOptionModel {
   static const String metaOptionsName = "name";
   static const String metaOptionsPrice = "price";
 
-  FormOptionModel(this.id, this.name, {this.price = 0.0});
-
   final String name;
   final String id;
   final double price;
+
+  FormOptionModel(this.id, this.name, {this.price = 0.0});
+
+  factory FormOptionModel.fromJson(Map<String, dynamic> json) {
+    return FormOptionModel(
+      json[metaOptionsId],
+      json[metaOptionsName],
+      price: (json[metaOptionsPrice] as num?)?.toDouble() ?? 0.0,
+    );
+  }
 
   @override
   String toString() => name;

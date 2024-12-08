@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/themeConfig.dart';
 
 import '../utils/SeatState.dart';
 
 class SeatWidgetHelper {
-  static const double padding = 2.0;
-  static const double focusedPadding = 1.0;
+  static const double padding = 2.5;
+  static const double focusedPadding = 0.8;
 
   /// Static method to create a seat widget with a given seat state and size.
   /// This allows external calls to render a seat without relying on the `SeatModel`.
@@ -15,42 +16,48 @@ class SeatWidgetHelper {
     final bool hasPadding = state == SeatState.ordered ||
         state == SeatState.selected ||
         state == SeatState.selected_by_me ||
-        state == SeatState.selected_by_me_focused ||
         state == SeatState.available;
 
     return Container(
-      color: hasPadding ? Colors.black.withOpacity(0.2) : _getSeatColor(SeatState.empty),
+      color: hasPadding ? Colors.black.withOpacity(0) : getSeatColor(SeatState.empty),
       height: size,
       width: size,
       child: Container(
-        margin: hasPadding ? EdgeInsets.all(state == SeatState.selected_by_me_focused ? focusedPadding : padding) : EdgeInsets.zero,
+        margin: EdgeInsets.all(state == SeatState.selected_by_me ? focusedPadding : (hasPadding ? padding : 0.0)),
         decoration: BoxDecoration(
-          color: _getSeatColor(state),
+          color: getSeatColor(state),
           borderRadius: BorderRadius.circular(hasPadding ? padding : 0.0),
         ),
+        child: state == SeatState.selected_by_me
+            ? Center(
+          child: Icon(
+            Icons.check,
+            size: size * 0.7,
+            color: Colors.white,
+          ),
+        )
+            : null,
       ),
     );
   }
 
   /// Helper method to get seat color based on its state.
-  static Color _getSeatColor(SeatState state) {
+  static Color getSeatColor(SeatState state) {
     switch (state) {
       case SeatState.available:
-        return Colors.blueAccent;
+        return ThemeConfig.greenColor();
       case SeatState.selected_by_me:
-        return Colors.purple;
-      case SeatState.selected_by_me_focused:
-        return Colors.purple;
+        return ThemeConfig.greenColor();
       case SeatState.selected:
-        return Colors.black38;
+        return Colors.black26;
       case SeatState.black:
         return Colors.black87;
       case SeatState.ordered:
-        return Colors.black38;
+        return Colors.black26;
       case SeatState.empty:
-        return Colors.black.withOpacity(0.1);
+        return Colors.black.withOpacity(0);
       default:
-        return Colors.black.withOpacity(0.1);
+        return Colors.black.withOpacity(0);
     }
   }
 }

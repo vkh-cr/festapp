@@ -34,7 +34,7 @@ class BlueprintObjectModel {
 
   @override
   toString() {
-    return "stůl ${group?.title}, sedadlo $title";
+    return "Stůl ${group?.title}, Sedadlo $title";
   }
 
   toShortString() {
