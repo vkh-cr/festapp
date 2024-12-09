@@ -1,4 +1,7 @@
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'BlueprintObjectModel.dart';
+import 'ProductModel.dart';
+import 'OrderModel.dart';
 
 class TicketModel {
   int? id;
@@ -9,6 +12,13 @@ class TicketModel {
   int? occasion;
   String? note;
 
+  // Relating spots and products directly to the ticket
+  List<BlueprintObjectModel>? relatedSpots;
+  List<ProductModel>? relatedProducts;
+
+  // Relating order directly to the ticket
+  OrderModel? relatedOrder;
+
   static const String orderedState = "ordered";
   static const String activeState = "active";
   static const String usedState = "used";
@@ -17,8 +27,12 @@ class TicketModel {
   factory TicketModel.fromJson(Map<String, dynamic> json) {
     return TicketModel(
       id: json[TbEshop.tickets.id],
-      createdAt: json[TbEshop.tickets.created_at] != null ? DateTime.parse(json[TbEshop.tickets.created_at]) : null,
-      updatedAt: json[TbEshop.tickets.updated_at] != null ? DateTime.parse(json[TbEshop.tickets.updated_at]) : null,
+      createdAt: json[TbEshop.tickets.created_at] != null
+          ? DateTime.parse(json[TbEshop.tickets.created_at])
+          : null,
+      updatedAt: json[TbEshop.tickets.updated_at] != null
+          ? DateTime.parse(json[TbEshop.tickets.updated_at])
+          : null,
       ticketSymbol: json[TbEshop.tickets.ticket_symbol],
       state: json[TbEshop.tickets.state],
       occasion: json[TbEshop.tickets.occasion],
@@ -46,5 +60,8 @@ class TicketModel {
     this.state,
     this.occasion,
     this.note,
+    this.relatedSpots,
+    this.relatedProducts,
+    this.relatedOrder,
   });
 }

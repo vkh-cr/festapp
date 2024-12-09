@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
@@ -92,7 +93,7 @@ class InformationModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     return PlutoRow(cells: {
       Tb.information.id: PlutoCell(value: id),
       Tb.information.title: PlutoCell(value: title),

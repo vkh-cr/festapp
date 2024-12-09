@@ -118,7 +118,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
   Future<void> reloadData() async {
     var defaultRow =  { firstColumnTypeId: PlutoCell(value: "delete")};
     final dataList = await loadData();
-    var rowList = dataList.map((i) => i.toPlutoRow()!).toList();
+    var rowList = dataList.map((i) => i.toPlutoRow(context)!).toList();
     for (var element in rowList) {element.cells.addAll(defaultRow);}
     stateManager.removeAllRows();
     stateManager.appendRows(rowList);

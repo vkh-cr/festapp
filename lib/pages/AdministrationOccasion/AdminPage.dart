@@ -20,7 +20,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
   final List<String> activeTabNames = [
     AdminTabDefinition.service,
     AdminTabDefinition.users,
-    AdminTabDefinition.form
   ];
 
   @override

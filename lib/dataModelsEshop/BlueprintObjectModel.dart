@@ -122,7 +122,7 @@ class BlueprintObjectModel {
         // Get the order details
         var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
         var orderString = order != null
-            ? "\n${order.data?["name"]} ${order.data?["surname"]} (${order.data?["email"]})\n${order.data?["note"] ?? ""}"
+            ? "\n${order.toCustomerData()}\n${order.toCustomerNote()}"
             : "";
 
         // Add ticket note if available
