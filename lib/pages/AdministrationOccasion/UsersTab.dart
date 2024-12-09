@@ -9,7 +9,7 @@ import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ColumnHelper.dart';
+import 'package:fstapp/pages/AdministrationOccasion/UserColumns.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/UserManagementHelper.dart';

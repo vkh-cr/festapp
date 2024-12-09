@@ -9,7 +9,7 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ColumnHelper.dart';
+import 'package:fstapp/pages/AdministrationOccasion/UserColumns.dart';
 import 'package:fstapp/widgets/ServiceDialog.dart';
 
 class ServiceTab extends StatefulWidget {
