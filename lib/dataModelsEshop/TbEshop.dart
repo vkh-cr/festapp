@@ -6,6 +6,7 @@ class TbEshop {
   static TicketsTb tickets = const TicketsTb();
   static BlueprintTb blueprints = const BlueprintTb();
   static SpotsTb spots = const SpotsTb();
+  static PaymentInfoTb payment_info = const PaymentInfoTb();
 }
 
 class ProductTypesTb {
@@ -101,4 +102,17 @@ class SpotsTb {
   String get secret_expiration_time => "secret_expiration_time";
   String get title => "title";
   String get order_product_ticket => "order_product_ticket";
+}
+
+class PaymentInfoTb {
+  const PaymentInfoTb();
+  String get table => "payment_info";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get bank_account => "bank_account";
+  String get variable_symbol => "variable_symbol";
+  String get amount => "amount";
+  String get paid => "paid";
+  String get deadline => "deadline";
+  String get currency_code => "currency_code";
 }

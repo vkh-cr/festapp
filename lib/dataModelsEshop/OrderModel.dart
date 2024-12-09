@@ -1,4 +1,8 @@
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataModelsEshop/TicketModel.dart';
+import 'package:fstapp/dataModelsEshop/ProductModel.dart';
+import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 
 class OrderModel {
   int? id;
@@ -12,6 +16,12 @@ class OrderModel {
   int? form;
   String? currencyCode;
 
+  // Relating tickets, spots, products, and payment info to the order
+  List<TicketModel>? relatedTickets;
+  List<BlueprintObjectModel>? relatedSpots;
+  List<ProductModel>? relatedProducts;
+  PaymentInfoModel? paymentInfoModel;
+
   static const String pendingState = "pending";
   static const String completedState = "completed";
   static const String canceledState = "canceled";
@@ -19,9 +29,15 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
       id: json[TbEshop.orders.id],
-      createdAt: json[TbEshop.orders.created_at] != null ? DateTime.parse(json[TbEshop.orders.created_at]) : null,
-      updatedAt: json[TbEshop.orders.updated_at] != null ? DateTime.parse(json[TbEshop.orders.updated_at]) : null,
-      price: json[TbEshop.orders.price] != null ? double.tryParse(json[TbEshop.orders.price].toString()) : null,
+      createdAt: json[TbEshop.orders.created_at] != null
+          ? DateTime.parse(json[TbEshop.orders.created_at])
+          : null,
+      updatedAt: json[TbEshop.orders.updated_at] != null
+          ? DateTime.parse(json[TbEshop.orders.updated_at])
+          : null,
+      price: json[TbEshop.orders.price] != null
+          ? double.tryParse(json[TbEshop.orders.price].toString())
+          : null,
       state: json[TbEshop.orders.state],
       data: json[TbEshop.orders.data],
       occasion: json[TbEshop.orders.occasion],
@@ -57,5 +73,9 @@ class OrderModel {
     this.paymentInfo,
     this.form,
     this.currencyCode,
+    this.relatedTickets,
+    this.relatedSpots,
+    this.relatedProducts,
+    this.paymentInfoModel,
   });
 }
