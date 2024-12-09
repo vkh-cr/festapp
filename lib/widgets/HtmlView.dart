@@ -7,7 +7,7 @@ import 'package:fstapp/themeConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html,
-      {required ColumnMode renderMode,
+      {super.key, required ColumnMode renderMode,
         super.textStyle,
         super.customStylesBuilder});
 
