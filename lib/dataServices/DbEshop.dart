@@ -163,7 +163,7 @@ class DbEshop {
     return true;
   }
 
-  static Future<List<OrderModel>?> getOrders(String formKey) async {
+  static Future<List<OrderModel>> getAllOrders(String formKey) async {
 
     final response = await _supabase.rpc(
       'get_orders',
@@ -173,7 +173,7 @@ class DbEshop {
     );
 
     if (response["code"] != 200) {
-      return null;
+      return [];
     }
     var json = response["data"];
 
@@ -189,8 +189,9 @@ class DbEshop {
       final List<TicketModel> relatedTickets = tickets!.where((ticket) {
         return orderProductTickets!.any((opt) => opt.orderId == order.id && opt.ticketId == ticket.id);
       }).toList();
+      order.relatedTickets = relatedTickets;
 
-      for (var ticket in tickets!) {
+      for (var ticket in order.relatedTickets!) {
         // Relate spots to the ticket via orderProductTickets
         ticket.relatedSpots = spots!.where((spot) {
           return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.id == spot.orderProductTicket);
@@ -223,13 +224,16 @@ class DbEshop {
       payments!.firstWhereOrNull((payment) => payment.id == order.paymentInfo);
 
       // Update the order object
-      order.relatedTickets = relatedTickets;
       order.relatedSpots = relatedSpots;
       order.relatedProducts = relatedProducts;
       order.paymentInfoModel = relatedPaymentInfo;
     }
 
     return orders;
+  }
+
+  static Future<void> deleteOrder(OrderModel model) async {
+
   }
 
 }
