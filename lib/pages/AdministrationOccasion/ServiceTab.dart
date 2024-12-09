@@ -21,16 +21,16 @@ class ServiceTab extends StatefulWidget {
 
 class _ServiceTabState extends State<ServiceTab> {
   static const List<String> columnIdentifiers = [
-    ColumnHelper.ID,
-    ColumnHelper.EMAIL,
-    ColumnHelper.NAME,
-    ColumnHelper.SURNAME,
-    ColumnHelper.TEXT1,
-    ColumnHelper.TEXT2,
-    ColumnHelper.ACCOMMODATION,
-    ColumnHelper.FOOD,
-    ColumnHelper.DIET,
-    ColumnHelper.NOTE,
+    UserColumns.ID,
+    UserColumns.EMAIL,
+    UserColumns.NAME,
+    UserColumns.SURNAME,
+    UserColumns.TEXT1,
+    UserColumns.TEXT2,
+    UserColumns.ACCOMMODATION,
+    UserColumns.FOOD,
+    UserColumns.DIET,
+    UserColumns.NOTE,
   ];
 
   List<ServiceItemModel>? allFood;
@@ -81,9 +81,9 @@ class _ServiceTabState extends State<ServiceTab> {
                   _foodDefinition(p0),
               isEnabled: RightsService.isManager),
         ],
-        columns: ColumnHelper.generateColumns(columnIdentifiers, data: {
-          ColumnHelper.FOOD: allFood,
-          ColumnHelper.ACCOMMODATION: allAccommodation
+        columns: UserColumns.generateColumns(columnIdentifiers, data: {
+          UserColumns.FOOD: allFood,
+          UserColumns.ACCOMMODATION: allAccommodation
         }),
       ).DataGrid(),
     );

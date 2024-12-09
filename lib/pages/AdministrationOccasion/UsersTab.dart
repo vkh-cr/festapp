@@ -23,20 +23,20 @@ class UsersTab extends StatefulWidget {
 
 class _UsersTabState extends State<UsersTab> {
   static const List<String> columnIdentifiers = [
-    ColumnHelper.ID,
-    ColumnHelper.EMAIL,
-    ColumnHelper.NAME,
-    ColumnHelper.SURNAME,
-    ColumnHelper.SEX,
-    ColumnHelper.ACCOMMODATION,
-    ColumnHelper.PHONE,
-    ColumnHelper.BIRTHDAY,
-    ColumnHelper.ROLE,
-    ColumnHelper.ADMINISTRATOR,
-    ColumnHelper.EDITOR,
-    ColumnHelper.APPROVER,
-    ColumnHelper.APPROVED,
-    ColumnHelper.INVITED
+    UserColumns.ID,
+    UserColumns.EMAIL,
+    UserColumns.NAME,
+    UserColumns.SURNAME,
+    UserColumns.SEX,
+    UserColumns.ACCOMMODATION,
+    UserColumns.PHONE,
+    UserColumns.BIRTHDAY,
+    UserColumns.ROLE,
+    UserColumns.ADMINISTRATOR,
+    UserColumns.EDITOR,
+    UserColumns.APPROVER,
+    UserColumns.APPROVED,
+    UserColumns.INVITED
   ];
 
   List<UserInfoModel>? _allUsers; // Initialize as null to indicate loading state
@@ -78,7 +78,7 @@ class _UsersTabState extends State<UsersTab> {
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
         ],
-        columns: ColumnHelper.generateColumns(columnIdentifiers),
+        columns: UserColumns.generateColumns(columnIdentifiers),
       ).DataGrid(),
     );
   }
