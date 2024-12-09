@@ -13,6 +13,7 @@ DECLARE
     ticketsData JSONB;
     ordersData JSONB;
     orderProductTicketsData JSONB;
+    paymentInfoData JSONB;
 BEGIN
     -- Resolve blueprint_id using form_key
     SELECT blueprint
@@ -85,7 +86,8 @@ BEGIN
         'price', o.price,
         'state', o.state,
         'currency_code', o.currency_code,
-        'data', o.data
+        'data', o.data,
+        'payment_info', o.payment_info
     ))
     INTO ordersData
     FROM eshop.orders o
@@ -108,6 +110,24 @@ BEGIN
     FROM eshop.order_product_ticket opt
     WHERE opt."order" IN (SELECT id FROM order_ids);
 
+    -- Fetch payment information linked to the orders
+    SELECT jsonb_agg(jsonb_build_object(
+        'id', pi.id,
+        'created_at', pi.created_at,
+        'bank_account', pi.bank_account,
+        'variable_symbol', pi.variable_symbol,
+        'amount', pi.amount,
+        'paid', pi.paid,
+        'deadline', pi.deadline,
+        'currency_code', pi.currency_code
+    ))
+    INTO paymentInfoData
+    FROM eshop.payment_info pi
+    WHERE pi.id IN (
+        SELECT DISTINCT (order_obj->>'payment_info')::BIGINT
+        FROM jsonb_array_elements(ordersData) order_obj
+    );
+
     -- Return combined data
     RETURN jsonb_build_object(
         'code', 200,
@@ -116,7 +136,8 @@ BEGIN
             'products', COALESCE(productsData, '[]'::jsonb),
             'tickets', COALESCE(ticketsData, '[]'::jsonb),
             'orders', COALESCE(ordersData, '[]'::jsonb),
-            'order_product_ticket', COALESCE(orderProductTicketsData, '[]'::jsonb)
+            'order_product_ticket', COALESCE(orderProductTicketsData, '[]'::jsonb),
+            'payment_info', COALESCE(paymentInfoData, '[]'::jsonb)
         )
     );
 END;
