@@ -43,7 +43,7 @@ class OrderPreviewScreen extends StatelessWidget {
                         // Header
                         Center(
                           child: Text(
-                            "Rekapitulace Vaší objednávky:".tr(),
+                            "Summary".tr(),
                             style: StylesConfig.textStyleBig.copyWith(
                               fontSize: 18 * fontSizeFactor,
                               fontWeight: FontWeight.bold,
@@ -73,7 +73,7 @@ class OrderPreviewScreen extends StatelessWidget {
                           child: ButtonsHelper.primaryButton(
                               context: context,
                               onPressed: onSendPressed,
-                              label: "Odeslat objednávku",
+                              label: "Submit order".tr(),
                               height: 50.0,
                               width: 250.0
                           )),
@@ -166,7 +166,7 @@ class OrderPreviewScreen extends StatelessWidget {
           children: [
             // Display ticket index at the top of the container
             Text(
-              "Ticket {number}".tr(namedArgs: {"number": (index).toString()}),
+              "${"Ticket".tr()} $index",
               style: StylesConfig.textStyleBig.copyWith(
                 fontSize: 16 * fontSizeFactor,
                 fontWeight: FontWeight.bold,

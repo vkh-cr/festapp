@@ -88,7 +88,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
                         onPressed: () {
                           widget.onCloseSeatReservation?.call(widget.selectedSeats);
                         },
-                        label: "Continue",
+                        label: "Continue".tr(),
                         width: 250
                       ),
                     ),
@@ -122,7 +122,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       }
     } else if (model.seatState == SeatState.available) {
       if(widget.maxTickets != null && widget.selectedSeats.length >= widget.maxTickets!){
-        ToastHelper.Show(context, "Více vstupenek není možné vybrat.".tr());
+        ToastHelper.Show(context, "It is not possible to select more tickets.".tr());
         return;
       }
       model.seatState = SeatState.selected_by_me;

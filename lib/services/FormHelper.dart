@@ -209,7 +209,7 @@ class FormHelper {
                   }
                   formHolder.controller!.updateTotalPrice?.call();
                 },
-                label: "Výběr místa",
+                label: "Seat selection".tr(),
                 height: 50.0,
                 width: 250.0,
                 suffixIcon: Icon(Icons.event_seat)
@@ -238,7 +238,7 @@ class FormHelper {
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Text(
-                                  "Ticket {number}".tr(namedArgs: {"number": (i + 1).toString()}), // Use translated string
+                                  "${"Ticket".tr()} ${i+1}", // Use translated string
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16 * fontSizeFactor,
