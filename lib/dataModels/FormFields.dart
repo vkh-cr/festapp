@@ -13,19 +13,19 @@ class FieldHolder {
   final bool isRequired;
   final String fieldType;
   dynamic defaultValue;
+
   dynamic getValue(GlobalKey<FormBuilderState> formKey) =>
-     FormHelper.getFieldData(formKey, this);
+      FormHelper.getFieldData(formKey, this);
 
   String getFieldTypeValue() => FormHelper.getFieldTypeValue(this);
 
   String? label;
 
-  FieldHolder({
-    required this.fieldType,
-    required this.isRequired,
-    this.defaultValue,
-    this.label
-  });
+  FieldHolder(
+      {required this.fieldType,
+      required this.isRequired,
+      this.defaultValue,
+      this.label});
 
   factory FieldHolder.fromJson(Map<String, dynamic> json) {
     return FieldHolder(
@@ -61,14 +61,19 @@ class OptionsFieldHolder extends FieldHolder {
     required this.options,
     required this.optionsType,
     required label,
-  }) : super(fieldType: fieldType, defaultValue: value, isRequired: true, label: label);
+  }) : super(
+            fieldType: fieldType,
+            defaultValue: value,
+            isRequired: true,
+            label: label);
 
   factory OptionsFieldHolder.fromJson(Map<String, dynamic> json) {
     return OptionsFieldHolder(
       fieldType: json[FieldHolder.metaType],
       value: json[FieldHolder.metaValue],
       label: json[metaLabel],
-      options: List<FormOptionModel>.from(json[metaOptions].map((o) => FormOptionModel.fromJson(o))),
+      options: List<FormOptionModel>.from(
+          json[metaOptions].map((o) => FormOptionModel.fromJson(o))),
       optionsType: json[metaOptionsType],
     );
   }
@@ -109,8 +114,9 @@ class TicketHolder extends FieldHolder {
       maxTickets: json[metaMaxTickets] ?? 1,
       fieldType: json[FieldHolder.metaType],
       fields: (json[metaFields] as List<Map<String, dynamic>>?)
-          ?.map((e) => FormHolder.determineFieldType(e))
-          .toList() ?? [],
+              ?.map((e) => FormHolder.determineFieldType(e))
+              .toList() ??
+          [],
     );
   }
 
@@ -123,8 +129,7 @@ class TicketHolder extends FieldHolder {
   }
 
   @override
-  String toString() =>
-      'TicketHolder(fields: $fields)';
+  String toString() => 'TicketHolder(fields: $fields)';
 
   /// Updates the tickets based on the provided list of [seats].
   void updateTickets(List<SeatModel> seats) {
@@ -157,7 +162,7 @@ class TicketHolder extends FieldHolder {
   }
 }
 
-class FormHolderController{
+class FormHolderController {
   final String? secret;
   final int? blueprintId;
   final GlobalKey<FormBuilderState> globalKey;
@@ -166,7 +171,14 @@ class FormHolderController{
   Future<List<SeatModel>?> Function(List<SeatModel>)? showSeatReservation;
   void Function(List<SeatModel>?)? onCloseSeatReservation;
 
-  FormHolderController({this.secret, this.blueprintId, required this.globalKey, this.formKey, this.updateTotalPrice, this.showSeatReservation, this.onCloseSeatReservation});
+  FormHolderController(
+      {this.secret,
+      this.blueprintId,
+      required this.globalKey,
+      this.formKey,
+      this.updateTotalPrice,
+      this.showSeatReservation,
+      this.onCloseSeatReservation});
 }
 
 class FormHolder {
@@ -175,15 +187,16 @@ class FormHolder {
   FormHolderController? controller;
   final List<FieldHolder> fields;
 
-  TicketHolder? getTicket() => fields.firstWhereOrNull((f)=>f is TicketHolder) as TicketHolder;
+  TicketHolder? getTicket() =>
+      fields.firstWhereOrNull((f) => f is TicketHolder) as TicketHolder;
 
   FormHolder({required this.fields});
 
   factory FormHolder.fromJson(Map<String, dynamic> json) {
     return FormHolder(
       fields: (json[metaFields] as List<Map<String, dynamic>>?)
-          ?.map((e) => determineFieldType(e))
-          .toList() ??
+              ?.map((e) => determineFieldType(e))
+              .toList() ??
           [],
     );
   }
@@ -210,7 +223,6 @@ class FormHolder {
 }
 
 class FormTicketModel {
-
   final SeatModel seat;
   final List<FieldHolder> ticketValues;
   final GlobalKey<FormBuilderState> ticketKey;
@@ -220,9 +232,9 @@ class FormTicketModel {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-          other is FormTicketModel &&
-              runtimeType == other.runtimeType &&
-              seat.objectModel!.id! == other.seat.objectModel!.id!;
+      other is FormTicketModel &&
+          runtimeType == other.runtimeType &&
+          seat.objectModel!.id! == other.seat.objectModel!.id!;
 
   @override
   int get hashCode => seat.objectModel!.id!.hashCode;
