@@ -22,7 +22,7 @@ class OrderModel {
   List<ProductModel>? relatedProducts;
   PaymentInfoModel? paymentInfoModel;
 
-  static const String pendingState = "pending";
+  static const String orderedState = "ordered";
   static const String completedState = "completed";
   static const String canceledState = "canceled";
 

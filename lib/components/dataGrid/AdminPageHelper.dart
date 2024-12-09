@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/FormEditorTab.dart';
+import 'package:fstapp/pages/Eshop/FormEditorTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
@@ -9,7 +9,7 @@ import 'package:fstapp/pages/AdministrationOccasion/ScheduleTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
-import 'package:fstapp/pages/AdminDashboard/BlueprintEditorTab.dart';
+import 'package:fstapp/pages/Eshop/BlueprintEditorTab.dart';
 
 class AdminPageHelper {
   static PreferredSizeWidget buildAdminAppBar(
