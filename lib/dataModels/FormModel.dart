@@ -15,6 +15,7 @@ class FormModel {
   String? secret;
   String? header;
   String? footer;
+  String? link;
 
   FormModel({
     this.id,
@@ -31,6 +32,7 @@ class FormModel {
     this.secret,
     this.header,
     this.footer,
+    this.link,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +53,7 @@ class FormModel {
       secret: json['secret'],
       header: json[Tb.forms.header],
       footer: json[Tb.forms.footer],
+      link: json[Tb.forms.link],
     );
   }
 
@@ -69,5 +72,22 @@ class FormModel {
     'secret': secret,
     Tb.forms.header: header,
     Tb.forms.footer: footer,
+    Tb.forms.link: link,
+  };
+
+  Map<String, dynamic> toEditedJson() => {
+    Tb.forms.id: id,
+    Tb.forms.created_at: createdAt?.toIso8601String(),
+    Tb.forms.data: data,
+    Tb.forms.key: formKey,
+    Tb.forms.occasion: occasion,
+    Tb.forms.blueprint: blueprint,
+    Tb.forms.type: type,
+    Tb.forms.bank_account: bankAccount,
+    Tb.forms.deadline_duration_seconds: deadlineDuration,
+    Tb.forms.is_open: isOpen,
+    Tb.forms.header: header,
+    Tb.forms.footer: footer,
+    Tb.forms.link: link,
   };
 }

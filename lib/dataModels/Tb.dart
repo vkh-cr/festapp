@@ -328,4 +328,5 @@ class FormsTb {
   String get is_open => "is_open";
   String get header => "header";
   String get footer => "footer";
+  String get link => "link";
 }

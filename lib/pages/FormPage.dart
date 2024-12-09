@@ -5,6 +5,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
@@ -12,7 +13,9 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/OrderFinishScreen.dart';
+import 'package:fstapp/pages/FormEditPage.dart';
 import 'package:fstapp/pages/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -29,7 +32,7 @@ import 'package:fstapp/widgets/SeatReservationWidget.dart';
 class FormPage extends StatefulWidget {
   static const ROUTE = "form";
 
-  String? id;
+  String? formKey;
   FormPage({super.key});
 
   @override
@@ -50,8 +53,8 @@ class _FormPageState extends State<FormPage> {
 
   @override
   Future<void> didChangeDependencies() async {
-    if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id = context.routeData.pendingChildren[0].pathParams.getString("id");
+    if (widget.formKey == null && context.routeData.hasPendingChildren) {
+      widget.formKey = context.routeData.pendingChildren[0].pathParams.getString("formKey");
     }
 
     await loadData();
@@ -91,10 +94,12 @@ class _FormPageState extends State<FormPage> {
         color: ThemeConfig.dddBackground, // Dim background
         child: Center(
           child: SeatReservationWidget(
+
             secret: formHolder!.controller!.secret!,
             formDataKey: formHolder!.controller!.formKey!,
             blueprintId: formHolder!.controller!.blueprintId!,
             selectedSeats: selectedSeats,
+            maxTickets: formHolder!.getTicket()?.maxTickets,
             onSelectionChanged: (sts) {
               _totalTickets = sts.length;
               _totalPrice = 0;
@@ -145,8 +150,6 @@ class _FormPageState extends State<FormPage> {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
-            } else if (ticketValue is BlueprintObjectModel) {
-              //_totalPrice += ticketValue.product?.price ?? 0;
             }
           }
         }
@@ -312,6 +315,18 @@ class _FormPageState extends State<FormPage> {
           _buildSeatReservationOverlay(),
           _buildPriceAndTicketInfo(),
         ],
+      ),
+      floatingActionButton: Visibility(
+        visible: RightsService.isEditor(),
+        child: FloatingActionButton(
+          onPressed: () {
+            RouterService.navigate(
+                context,
+                "${FormPage.ROUTE}/${form!.formKey}/edit")
+                .then((value) => loadData());
+          },
+          child: const Icon(Icons.edit),
+        ),
       ),
     );
   }

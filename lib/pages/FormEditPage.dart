@@ -1,25 +1,24 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 
 @RoutePage()
-class AdminPage extends StatefulWidget {
-  static const ROUTE = "admin";
-  const AdminPage({super.key});
+class FormEditPage extends StatefulWidget {
+  static const ROUTE = "formEdit";
+  String? formKey;
+
+  FormEditPage({super.key, @pathParam this.formKey});
 
   @override
-  _AdminPageState createState() => _AdminPageState();
+  _FormEditPageState createState() => _FormEditPageState();
 }
 
-class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMixin {
+class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   // List of active tabs by name
   final List<String> activeTabNames = [
-    AdminTabDefinition.service,
-    AdminTabDefinition.users,
     AdminTabDefinition.form
   ];
 
@@ -45,10 +44,5 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
       ),
     );
   }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 }
+

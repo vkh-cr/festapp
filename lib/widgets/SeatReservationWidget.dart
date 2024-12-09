@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 
@@ -20,6 +21,7 @@ class SeatReservationWidget extends StatefulWidget {
   final void Function(List<SeatModel>)? onSelectionChanged;
   final void Function(List<SeatModel>?)? onCloseSeatReservation;
   List<SeatModel> selectedSeats;
+  final int? maxTickets;
 
   SeatReservationWidget({
     Key? key,
@@ -27,6 +29,7 @@ class SeatReservationWidget extends StatefulWidget {
     required this.secret,
     required this.formDataKey,
     required this.selectedSeats,
+    this.maxTickets,
     this.onSelectionChanged,
     this.onCloseSeatReservation,
   }) : super(key: key);
@@ -118,6 +121,10 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
         model.seatState = SeatState.selected_by_me;
       }
     } else if (model.seatState == SeatState.available) {
+      if(widget.maxTickets != null && widget.selectedSeats.length >= widget.maxTickets!){
+        ToastHelper.Show(context, "Více vstupenek není možné vybrat.".tr());
+        return;
+      }
       model.seatState = SeatState.selected_by_me;
       setState(() {});
       if (await DbEshop.selectSpot(

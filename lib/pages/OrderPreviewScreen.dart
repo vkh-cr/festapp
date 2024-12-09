@@ -12,7 +12,7 @@ class OrderPreviewScreen extends StatelessWidget {
   final double totalPrice;
   final VoidCallback onSendPressed;
 
-  static const double fontSizeFactor = 1.2; // Reused font size factor
+  static const double fontSizeFactor = 1.2;
 
   const OrderPreviewScreen({
     super.key,
@@ -119,10 +119,14 @@ class OrderPreviewScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: personalInfoFields.map((field) {
-        return _buildInfoRow(
-          field.label!,
-          field.getValue(formHolder.controller!.globalKey).toString(),
-        );
+        var value = field.getValue(formHolder.controller!.globalKey);
+        if(value != null){
+          return _buildInfoRow(
+            field.label!,
+            value.toString(),
+          );
+        }
+        return SizedBox.shrink();
       }).toList(),
     );
   }
