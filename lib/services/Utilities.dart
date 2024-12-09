@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Utilities {
-  static formatPrice(BuildContext context, double price) {
+  static String formatPrice(BuildContext context, double price) {
     // Get locale from context or fallback to Czech locale
     //final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
     final locale = 'cs_CZ';

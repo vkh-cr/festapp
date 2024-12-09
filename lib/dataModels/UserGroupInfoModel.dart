@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
@@ -92,7 +93,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     var checkpoints = (data?["game"] ?? [])
         .where((item) => checkpointTitlesDict.containsKey(item["check_point"])) // Filter out non-existent checkpoints
         .map((item) => checkpointTitlesDict[item["check_point"]])

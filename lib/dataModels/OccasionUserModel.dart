@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -142,7 +143,7 @@ class OccasionUserModel extends IPlutoRowModel {
   String toBasicString() => data?[Tb.occasion_users.data_email]??"";
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     Map<String, PlutoCell> json = {};
     Map<String, PlutoCell> foodServices = servicesToPlutoRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);

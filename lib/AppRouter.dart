@@ -5,7 +5,7 @@ import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/FormPage.dart';
+import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/InstallPage.dart';

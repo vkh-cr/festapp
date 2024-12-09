@@ -8,7 +8,7 @@ import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class ColumnHelper {
+class UserColumns {
   // Column identifier constants
   static const String ID = "id";
   static const String EMAIL = "email";

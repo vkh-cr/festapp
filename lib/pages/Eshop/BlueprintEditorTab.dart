@@ -54,6 +54,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(blueprint?.title??"Edit".tr()),
         actions: [
           IconButton(
