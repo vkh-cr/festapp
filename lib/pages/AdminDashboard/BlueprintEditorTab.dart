@@ -16,26 +16,23 @@ import 'package:fstapp/widgets/SeatReservationWidget.dart';
 import 'package:collection/collection.dart';
 
 
-import '../components/seatReservation/model/SeatLayoutStateModel.dart';
-import '../components/seatReservation/model/SeatModel.dart';
-import '../components/seatReservation/utils/SeatState.dart';
-import '../components/seatReservation/widgets/SeatLayoutWidget.dart';
+import '../../components/seatReservation/model/SeatLayoutStateModel.dart';
+import '../../components/seatReservation/model/SeatModel.dart';
+import '../../components/seatReservation/utils/SeatState.dart';
+import '../../components/seatReservation/widgets/SeatLayoutWidget.dart';
 
-@RoutePage()
-class BlueprintEditorPage extends StatefulWidget {
-  static const ROUTE = "blueprintEdit";
+class BlueprintTab extends StatefulWidget {
 
-  int? id;
-
-  BlueprintEditorPage({super.key, @pathParam this.id});
+  const BlueprintTab({super.key});
 
   @override
-  State<BlueprintEditorPage> createState() => _BlueprintEditorPageState();
+  State<BlueprintTab> createState() => _BlueprintTabState();
 }
 
-class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
+class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintModel? blueprint;
   BlueprintGroupModel? currentGroup;
+  String? formKey;
 
   List<SeatModel> allBoxes = [];
 
@@ -47,9 +44,8 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id =
-          context.routeData.pendingChildren[0].pathParams.getInt("id");
+    if (formKey == null && context.routeData.pathParams.isNotEmpty) {
+      formKey = context.routeData.pathParams.getString("formKey");
     }
     loadData();
   }
@@ -634,7 +630,8 @@ class _BlueprintEditorPageState extends State<BlueprintEditorPage> {
   }
 
   Future<void> loadData() async {
-    blueprint = await DbEshop.getBlueprintForEdit(widget.id!);
+    blueprint = await DbEshop.getBlueprintForEdit(formKey!);
+    setState(() {});
   }
 }
 

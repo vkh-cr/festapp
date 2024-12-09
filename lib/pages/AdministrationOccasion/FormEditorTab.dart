@@ -13,20 +13,19 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 @RoutePage()
-class FormTab extends StatefulWidget {
-  const FormTab({super.key});
+class FormEditorTab extends StatefulWidget {
+  const FormEditorTab({super.key});
 
   @override
-  _FormTabState createState() => _FormTabState();
+  _FormEditorTabState createState() => _FormEditorTabState();
 }
 
-class _FormTabState extends State<FormTab> {
+class _FormEditorTabState extends State<FormEditorTab> {
   FormModel? form;
   String? formKey;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    ToastHelper.Show(context, context.routeData.pathParams.getString("formKey"));
     if (formKey == null && context.routeData.pathParams.isNotEmpty) {
       formKey = context.routeData.pathParams.getString("formKey");
     }
