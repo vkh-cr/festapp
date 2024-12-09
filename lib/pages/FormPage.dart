@@ -150,8 +150,6 @@ class _FormPageState extends State<FormPage> {
           for (var ticketValue in ticketData.values) {
             if (ticketValue is FormOptionModel) {
               _totalPrice += ticketValue.price;
-            } else if (ticketValue is BlueprintObjectModel) {
-              //_totalPrice += ticketValue.product?.price ?? 0;
             }
           }
         }
