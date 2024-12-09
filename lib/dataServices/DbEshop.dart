@@ -100,12 +100,12 @@ class DbEshop {
     return b;
   }
 
-  static Future<BlueprintModel?> getBlueprintForEdit(int blueprintId) async {
+  static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
 
     final response = await _supabase.rpc(
       'get_blueprint_editor',
       params: {
-        'blueprint_id': blueprintId,
+        'form_key': formKey,
       },
     );
 

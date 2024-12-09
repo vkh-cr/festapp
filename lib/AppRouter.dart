@@ -2,11 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdminDashboardPage.dart';
-import 'package:fstapp/pages/BlueprintEditorPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/FormEditPage.dart';
 import 'package:fstapp/pages/FormPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
@@ -18,7 +16,6 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
-import 'package:fstapp/pages/SchedulePage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
@@ -58,9 +55,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SongbookRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
     AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
-    ]),
-    AutoRoute(page: BlueprintEditorRoute.page, path: "/:{$LINK}/${BlueprintEditorPage.ROUTE}", children: [
-      AutoRoute(path: ':id', page: BlueprintEditorRoute.page,),
     ]),
     AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
       AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),

@@ -19,7 +19,8 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
 
   // List of active tabs by name
   final List<String> activeTabNames = [
-    AdminTabDefinition.form
+    AdminTabDefinition.form,
+    AdminTabDefinition.blueprint
   ];
 
   @override

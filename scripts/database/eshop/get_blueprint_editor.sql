@@ -1,11 +1,12 @@
 CREATE OR REPLACE FUNCTION get_blueprint_editor(
-    blueprint_id BIGINT
+    form_key UUID
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
+    blueprint_id BIGINT;
     blueprintData JSONB;
     spotsData JSONB;
     productsData JSONB;
@@ -15,6 +16,17 @@ DECLARE
     valid_spots JSONB;
     occasion_id BIGINT;
 BEGIN
+    -- Resolve blueprint_id using form_key
+    SELECT blueprint
+    INTO blueprint_id
+    FROM public.forms
+    WHERE key = form_key;
+
+    -- Check if form_key is valid
+    IF blueprint_id IS NULL THEN
+        RETURN jsonb_build_object('code', 404, 'message', 'Form key does not exist or is not linked to a blueprint');
+    END IF;
+
     -- Fetch occasion_id for the blueprint
     SELECT occasion
     INTO occasion_id
