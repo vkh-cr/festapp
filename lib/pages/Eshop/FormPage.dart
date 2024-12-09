@@ -296,7 +296,7 @@ class _FormPageState extends State<FormPage> {
                           ButtonsHelper.primaryButton(
                             context: context,
                             onPressed: _isLoading ? null : _showOrderPreview,
-                            label: "Continue",
+                            label: "Continue".tr(),
                             isLoading: _isLoading,
                             height: 50.0,
                             width: 250.0,
