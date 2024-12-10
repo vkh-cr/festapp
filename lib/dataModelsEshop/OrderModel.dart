@@ -95,6 +95,7 @@ class OrderModel extends IPlutoRowModel {
   PlutoRow toPlutoRow(BuildContext context) {
     return PlutoRow(cells: {
       TbEshop.orders.id: PlutoCell(value: id ?? 0),
+      TbEshop.orders.order_symbol: PlutoCell(value: id ?? 0),
       TbEshop.orders.price: PlutoCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
       TbEshop.orders.state: PlutoCell(value: state ?? orderedState),
       TbEshop.payment_info.amount: PlutoCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),

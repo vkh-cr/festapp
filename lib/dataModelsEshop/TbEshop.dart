@@ -58,6 +58,7 @@ class OrdersTb {
   String get data => "data";
   String get occasion => "occasion";
   String get form => "form";
+  String get order_symbol => "order_symbol";
   String get payment_info => "payment_info";
   String get currency_code => "currency_code";
   String get data_note => "note";
@@ -74,6 +75,7 @@ class TicketsTb {
   String get state => "state";
   String get occasion => "occasion";
   String get note => "note";
+  String get note_hidden => "hidden_note";
 }
 
 class BlueprintTb {

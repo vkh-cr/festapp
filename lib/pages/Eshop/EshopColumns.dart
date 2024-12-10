@@ -11,6 +11,9 @@ class EshopColumns {
   static const String TICKET_SYMBOL = "ticketSymbol";
   static const String TICKET_STATE = "ticketState";
   static const String TICKET_NOTE = "ticketNote";
+  static const String TICKET_NOTE_HIDDEN = "ticketNoteHidden";
+  static const String TICKET_PRODUCTS = "ticketProducts";
+  static const String TICKET_CREATED_AT = "ticketCreatedAt";
 
   static const String ORDER_ID = "orderId";
   static const String ORDER_PRICE = "orderPrice";
@@ -25,6 +28,7 @@ class EshopColumns {
   static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
 
+  static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_DATA_NOTE_HIDDEN = "orderDataNoteHidden";
@@ -50,7 +54,7 @@ class EshopColumns {
         title: "Ticket Symbol".tr(),
         field: TbEshop.tickets.ticket_symbol,
         type: PlutoColumnType.text(),
-        width: 150,
+        width: 120,
       ),
     ],
     TICKET_STATE: [
@@ -65,12 +69,45 @@ class EshopColumns {
         width: 120,
       ),
     ],
+    TICKET_CREATED_AT: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Created".tr(),
+        field: TbEshop.tickets.created_at,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 100,
+      ),
+    ],
+    TICKET_PRODUCTS: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Products".tr(),
+        field: TicketModel.metaTicketsProducts,
+        type: PlutoColumnType.select(
+          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
+        ),
+        width: 300,
+      ),
+    ],
     TICKET_NOTE: [
       PlutoColumn(
         readOnly: true,
         enableEditingMode: false,
         title: "Note".tr(),
         field: TbEshop.tickets.note,
+        type: PlutoColumnType.text(),
+        width: 200,
+      ),
+    ],
+    TICKET_NOTE_HIDDEN: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Hidden note".tr(),
+        field: TbEshop.tickets.note_hidden,
         type: PlutoColumnType.text(),
         width: 200,
       ),
@@ -85,6 +122,16 @@ class EshopColumns {
         enableEditingMode: false,
         width: 50,
         renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+      ),
+    ],
+    ORDER_SYMBOL: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Order Symbol".tr(),
+        field: TbEshop.orders.order_symbol,
+        type: PlutoColumnType.text(),
+        width: 120,
       ),
     ],
     ORDER_PRICE: [
