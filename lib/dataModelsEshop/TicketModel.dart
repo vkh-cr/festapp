@@ -20,7 +20,7 @@ class TicketModel {
   OrderModel? relatedOrder;
 
   static const String orderedState = "ordered";
-  static const String activeState = "active";
+  static const String paidState = "paid";
   static const String usedState = "used";
   static const String stornoState = "storno";
 

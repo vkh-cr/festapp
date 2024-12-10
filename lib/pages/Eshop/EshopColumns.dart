@@ -56,7 +56,7 @@ class EshopColumns {
         title: "State".tr(),
         field: TbEshop.tickets.state,
         type: PlutoColumnType.select(
-          [TicketModel.orderedState, TicketModel.activeState, TicketModel.usedState, TicketModel.stornoState],
+          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
         ),
         width: 120,
       ),
@@ -101,7 +101,7 @@ class EshopColumns {
         title: "State".tr(),
         field: TbEshop.orders.state,
         type: PlutoColumnType.select(
-          [OrderModel.orderedState, OrderModel.completedState, OrderModel.canceledState],
+          [OrderModel.orderedState, OrderModel.paidState, OrderModel.canceledState],
         ),
         width: 120,
       ),
@@ -150,7 +150,7 @@ class EshopColumns {
       PlutoColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Paid".tr(),
+        title: "Paid amount".tr(),
         field: TbEshop.payment_info.paid,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
