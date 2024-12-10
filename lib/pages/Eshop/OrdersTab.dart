@@ -26,10 +26,14 @@ class _OrdersTabState extends State<OrdersTab> {
 
   static const List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
-    EshopColumns.CUSTOMER_DATA,
+    EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
+    EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
+    EshopColumns.ORDER_DATA_NOTE,
+    EshopColumns.ORDER_DATA_NOTE_HIDDEN,
+    EshopColumns.PAYMENT_INFO_DEADLINE,
   ];
 
   @override

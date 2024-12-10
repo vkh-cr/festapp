@@ -60,7 +60,8 @@ class OrdersTb {
   String get form => "form";
   String get payment_info => "payment_info";
   String get currency_code => "currency_code";
-
+  String get data_note => "note";
+  String get data_note_hidden => "note_hidden";
 }
 
 class TicketsTb {

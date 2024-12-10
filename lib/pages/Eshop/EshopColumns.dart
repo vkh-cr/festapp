@@ -22,8 +22,12 @@ class EshopColumns {
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
+  static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
+  static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
 
-  static const String CUSTOMER_DATA = "customerData";
+  static const String ORDER_DATA = "orderData";
+  static const String ORDER_DATA_NOTE = "orderDataNote";
+  static const String ORDER_DATA_NOTE_HIDDEN = "orderDataNoteHidden";
 
   // Define columns
   static Map<String, dynamic> get columnBuilders => {
@@ -103,7 +107,38 @@ class EshopColumns {
         type: PlutoColumnType.select(
           [OrderModel.orderedState, OrderModel.paidState, OrderModel.canceledState],
         ),
+        textAlign: PlutoColumnTextAlign.end,
         width: 120,
+      ),
+    ],
+    ORDER_DATA: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Customer".tr(),
+        field: TbEshop.orders.data,
+        type: PlutoColumnType.text(),
+        width: 250,
+      ),
+    ],
+    ORDER_DATA_NOTE: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Note".tr(),
+        field: TbEshop.orders.data_note,
+        type: PlutoColumnType.text(),
+        width: 200,
+      ),
+    ],
+    ORDER_DATA_NOTE_HIDDEN: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Hidden note".tr(),
+        field: TbEshop.orders.data_note_hidden,
+        type: PlutoColumnType.text(),
+        width: 200,
       ),
     ],
     PRODUCT_ID: [
@@ -132,7 +167,7 @@ class EshopColumns {
         field: TbEshop.products.price,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
-        width: 100,
+        width: 80,
       ),
     ],
     PAYMENT_INFO_AMOUNT: [
@@ -143,7 +178,7 @@ class EshopColumns {
         field: TbEshop.payment_info.amount,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
-        width: 120,
+        width: 80,
       ),
     ],
     PAYMENT_INFO_PAID: [
@@ -157,14 +192,26 @@ class EshopColumns {
         width: 120,
       ),
     ],
-    CUSTOMER_DATA: [
+    PAYMENT_INFO_VARIABLE_SYMBOL: [
       PlutoColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Customer".tr(),
-        field: TbEshop.orders.data,
+        title: "Variable symbol".tr(),
+        field: TbEshop.payment_info.variable_symbol,
         type: PlutoColumnType.text(),
-        width: 300,
+        textAlign: PlutoColumnTextAlign.end,
+        width: 80,
+      ),
+    ],
+    PAYMENT_INFO_DEADLINE: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Deadline".tr(),
+        field: TbEshop.payment_info.deadline,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 100,
       ),
     ],
   };

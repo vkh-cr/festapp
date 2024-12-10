@@ -9,6 +9,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class OrderModel extends IPlutoRowModel {
@@ -98,7 +99,16 @@ class OrderModel extends IPlutoRowModel {
       TbEshop.orders.state: PlutoCell(value: state ?? orderedState),
       TbEshop.payment_info.amount: PlutoCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
       TbEshop.payment_info.paid: PlutoCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
+      TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? 0),
+      TbEshop.payment_info.deadline: PlutoCell(
+        value: paymentInfoModel?.deadline != null
+            ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
+            : "",
+      ),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
+      TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
+      TbEshop.orders.data_note_hidden: PlutoCell(value: toCustomerNoteHidden()),
+      TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? ""),
     });
   }
 
@@ -118,4 +128,5 @@ class OrderModel extends IPlutoRowModel {
   String toCustomerData() => "${data?["name"]} ${data?["surname"]} (${data?["email"]})";
 
   String toCustomerNote() => "${data?["note"] ?? ""}";
+  String toCustomerNoteHidden() => "${data?["note_hidden"] ?? ""}";
 }
