@@ -11,6 +11,7 @@ import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
 import 'package:fstapp/pages/Eshop/BlueprintEditorTab.dart';
 import 'package:fstapp/pages/Eshop/OrdersTab.dart';
+import 'package:fstapp/pages/Eshop/TicketsTab.dart';
 
 class AdminPageHelper {
   static PreferredSizeWidget buildAdminAppBar(
@@ -83,7 +84,7 @@ class AdminTabDefinition {
 
     form: AdminTabDefinition(label: "Form".tr(), icon: Icons.list, widget: FormEditorTab()),
     blueprint: AdminTabDefinition(label: "Blueprint".tr(), icon: Icons.grid_on, widget: BlueprintTab()),
-    tickets: AdminTabDefinition(label: "Tickets".tr(), icon: Icons.local_activity, widget: GameTab()),
+    tickets: AdminTabDefinition(label: "Tickets".tr(), icon: Icons.local_activity, widget: TicketsTab()),
     orders: AdminTabDefinition(label: "Orders".tr(), icon: Icons.shopping_cart, widget: OrdersTab()),
 
   };

@@ -228,10 +228,18 @@ class DbEshop {
       order.relatedProducts = relatedProducts;
       order.paymentInfoModel = relatedPaymentInfo;
     }
-
-    return orders;
+    return orders.sortedBy((ou)=>ou.createdAt!).reversed.toList();
   }
 
+  static Future<List<TicketModel>> getAllTickets(String formKey) async {
+    var orders = await getAllOrders(formKey);
+    List<TicketModel> toReturn = [];
+    for(var o in orders){
+      toReturn.addAll(o.relatedTickets??[]);
+    }
+    toReturn = toReturn.sortedBy((ou)=>ou.createdAt!).reversed.toList();
+    return toReturn;
+  }
   static Future<void> deleteOrder(OrderModel model) async {
 
   }

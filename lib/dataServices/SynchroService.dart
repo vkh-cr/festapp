@@ -65,10 +65,11 @@ class SynchroService {
     await DbEvents.synchronizeMySchedule();
   }
 
-  static Future<OccasionLinkModel> getAppConfig(String link) async {
+  static Future<OccasionLinkModel> getAppConfig({String? occasionLink, String? formLink}) async {
     var data = await _supabase.rpc("get_app_config",
         params: {"data_in": {
-          "link": link,
+          "link": occasionLink,
+          "form_link": formLink,
           "organization": AppConfig.organization,
           "platform": await PlatformHelper.getPlatform()
         }});
