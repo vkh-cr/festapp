@@ -121,12 +121,16 @@ class BlueprintObjectModel {
 
         // Get the order details
         var order = blueprint?.orders?.firstWhere((p) => p.id == opt.orderId);
+        var orderNote = order?.toCustomerNote() ?? "";
+        if(orderNote.isNotEmpty){
+          orderNote = "\n$orderNote";
+        }
         var orderString = order != null
-            ? "\n${order.toCustomerData()}\n${order.toCustomerNote()}"
+            ? "\n${order.toCustomerData()}$orderNote"
             : "";
 
         // Add ticket note if available
-        var ticketNoteString = ticket.note != null ? "\n${ticket.note}" : "";
+        var ticketNoteString = ticket.note != null && ticket.note!.isNotEmpty ? "\n${ticket.note}" : "";
 
         return "${product?.title} ${title ?? ""}\n${"Ticket".tr()} ${ticket.ticketSymbol}$ticketNoteString\n$productsString$orderString";
       }
