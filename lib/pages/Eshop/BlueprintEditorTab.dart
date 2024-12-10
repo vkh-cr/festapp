@@ -58,7 +58,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            tooltip: "Změnit název".tr(),
+            tooltip: "Change title".tr(),
             onPressed: editBlueprintTitle,
           ),
         ],
@@ -77,10 +77,10 @@ class _BlueprintTabState extends State<BlueprintTab> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Text(
-                        "Pro přidávání sedadel a stolů klikněte na čtvereček v legendě.",
+                        "Click an option in the legend to add seats.",
                         style: Theme.of(context).textTheme.bodySmall,
                         textAlign: TextAlign.left,
-                      ),
+                      ).tr(),
                     ),
                     buildLegend(),
                   ],
@@ -163,24 +163,24 @@ class _BlueprintTabState extends State<BlueprintTab> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Skupiny (Stoly):",
+              "Groups (Tables):",
               style: Theme.of(context).textTheme.titleMedium,
-            ),
+            ).tr(),
             Row(
               children: [
                 IconButton(
                   icon: const Icon(Icons.add),
-                  tooltip: "Přidat nový stůl",
+                  tooltip: "Add new".tr(),
                   onPressed: addGroup,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  tooltip: "Smazat vybraný stůl",
+                  tooltip: "Delete".tr(),
                   onPressed: deleteGroup,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  tooltip: "Přejmenovat vybraný stůl",
+                  tooltip: "Rename".tr(),
                   onPressed: renameGroup,
                 ),
               ],
@@ -260,8 +260,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Přidat nový stůl",
-      labelText: "Číslo stolu",
+      dialogTitle: "Add new".tr(),
+      labelText: "Group number".tr(),
       initialValue: defaultName,
     );
 
@@ -287,8 +287,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Přejmenovat stůl",
-      labelText: "Nový název",
+      dialogTitle: "Rename".tr(),
+      labelText: "Title".tr(),
       initialValue: currentGroup!.title,
     );
 
@@ -305,7 +305,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildLegendItem(
-          "Stůl",
+          "Black area".tr(),
           SeatState.black,
           isActive: currentSelectionMode == selectionMode.addBlack,
           onTap: () {
@@ -316,7 +316,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Dostupné",
+          "Available".tr(),
           SeatState.available,
           isActive: currentSelectionMode == selectionMode.addAvailable,
           onTap: () {
@@ -327,7 +327,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Prázdné",
+          "Empty".tr(),
           SeatState.empty,
           isActive: currentSelectionMode == selectionMode.emptyArea,
           onTap: () {
@@ -338,14 +338,14 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Obsazené",
+          "Occupied".tr(),
           SeatState.ordered,
           isActive: false, // Not clickable
           grayedOut: true,
         ),
         const SizedBox(height: 8),
         buildLegendItem(
-          "Vybrané",
+          "Selected".tr(),
           SeatState.selected_by_me,
           isActive: false, // Not clickable
           grayedOut: true,
@@ -400,7 +400,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         buildDimensionEditor(
-          "Šířka",
+          "Width".tr(),
           blueprint!.configuration!.width!,
               (value) {
             setState(() {
@@ -411,7 +411,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(width: 12), // Reduced spacing between editors
         buildDimensionEditor(
-          "Výška",
+          "Height",
           blueprint!.configuration!.height!,
               (value) {
             setState(() {
@@ -425,7 +425,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
           onPressed: () async {
             var file = await DialogHelper.dropFilesHere(
               context,
-              "Import SVG pozadí".tr(),
+              "Import SVG background".tr(),
               "Ok".tr(),
               "Storno".tr(),
             );
@@ -434,7 +434,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
               setState(() {
                 blueprint!.backgroundSvg = content;
               });
-              ToastHelper.Show(context, "SVG pozadí bylo úspěšně nahráno.");
+              ToastHelper.Show(context, "File uploaded successfully.".tr());
             }
           },
           child: Row(
@@ -514,8 +514,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void editBlueprintTitle() async {
     final newTitle = await DialogHelper.showInputDialog(
       context: context,
-      dialogTitle: "Změnit název",
-      labelText: "Název blueprintu",
+      dialogTitle: "Rename".tr(),
+      labelText: "Title".tr(),
       initialValue: blueprint?.title ?? "",
     );
 
@@ -528,7 +528,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   void handleSeatTap(SeatModel model) {
     if (model.objectModel?.isOrdered() ?? false) {
-      ToastHelper.Show(context, "Místa, která byla objednána není možné měnit.", severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, "Places that are occupied cannot be changed.".tr(), severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -570,7 +570,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   /// Handle adding an available (spot) seat.
   void _handleAddAvailable(SeatModel model) {
     if(currentGroup == null){
-      ToastHelper.Show(context, "Nejdřív vyberte/vytvořte skupinu pro přidání místa (vpravo).", severity: ToastSeverity.NotOk);
+      ToastHelper.Show(context, "First, select or create a group to add a spot (on the right).".tr(), severity: ToastSeverity.NotOk);
       return;
     }
 
@@ -596,7 +596,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
     blueprint!.objects!.add(model.objectModel!);
 
     // Notify the user
-    ToastHelper.Show(context, "Přidáno sedadlo ${model.objectModel!.title}.");
+    ToastHelper.Show(context, "${"Spot added:".tr()} ${model.objectModel!.title}");
   }
 
   /// Handle clearing an area (emptying a seat).
@@ -604,9 +604,9 @@ class _BlueprintTabState extends State<BlueprintTab> {
     if (model.objectModel != null) {
       // Determine the type of area being removed and notify the user
       if (model.seatState == SeatState.black) {
-        ToastHelper.Show(context, "Odstraněna plocha.");
+        ToastHelper.Show(context, "Area removed.".tr());
       } else {
-        ToastHelper.Show(context, "Odstraněno místo.");
+        ToastHelper.Show(context, "Spot removed.".tr());
       }
 
       // Remove the object from blueprint and all groups
@@ -624,7 +624,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   void saveChanges() async {
     var success = await DbEshop.updateBlueprint(context, blueprint!);
     if(success){
-      ToastHelper.Show(context, "Změny byly uloženy.");
+      ToastHelper.Show(context, "Saved".tr());
       await loadData();
     }
   }
