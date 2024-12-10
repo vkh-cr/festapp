@@ -1,13 +1,15 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
-import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 
 class TicketsTab extends StatefulWidget {
   const TicketsTab({super.key});
@@ -43,14 +45,65 @@ class _TicketsTabState extends State<TicketsTab> {
   Widget build(BuildContext context) {
     return SingleTableDataGrid<TicketModel>(
       context,
-      () => DbEshop.getAllTickets(formKey!),
+          () => DbEshop.getAllTickets(formKey!),
       TicketModel.fromPlutoJson,
       DataGridFirstColumn.check,
       TbEshop.tickets.id,
       actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
-          isAddActionPossible: () => false),
+        areAllActionsEnabled: RightsService.canUpdateUsers,
+        isAddActionPossible: () => false,
+      ),
+      headerChildren: [
+        DataGridAction(
+          name: "Storno".tr(),
+          action: (SingleTableDataGrid dataGrid, [_]) => _stornoTickets(dataGrid),
+          isEnabled: RightsService.isEditor,
+        ),
+      ],
       columns: EshopColumns.generateColumns(columnIdentifiers),
     ).DataGrid();
+  }
+
+  Future<void> _stornoTickets(SingleTableDataGrid dataGrid) async {
+    var selectedTickets = _getCheckedTickets(dataGrid);
+
+    if (selectedTickets.isEmpty) {
+      return;
+    }
+
+    var confirm = await DialogHelper.showConfirmationDialogAsync(
+      context,
+      "Storno".tr(),
+      "Are you sure you want to storno the selected tickets?".tr(),
+    );
+
+    if (confirm) {
+      var stornoFutures = selectedTickets.map((ticket) {
+        return () async {
+        if(await DbEshop.stornoTicket(ticket.id!)) {
+          ToastHelper.Show(context, "Storno completed for {ticket}.".tr(namedArgs: {
+          "ticket": ticket.ticketSymbol ?? ticket.id.toString()
+        }));
+        } else{
+          throw Exception("Ticket storno has failed.");
+        }
+      };
+      }).toList();
+
+      await DialogHelper.showProgressDialogAsync(
+        context,
+        "Processing".tr(),
+        stornoFutures.length,
+        futures: stornoFutures,
+      );
+    }
+  }
+
+  List<TicketModel> _getCheckedTickets(SingleTableDataGrid dataGrid) {
+    return List<TicketModel>.from(
+      dataGrid.stateManager.refRows.originalList
+          .where((row) => row.checked == true)
+          .map((row) => TicketModel.fromPlutoJson(row.toJson())),
+    );
   }
 }

@@ -9,8 +9,9 @@ DECLARE
     ticket_price NUMERIC(10, 2) := 0;
     updated_tickets JSONB := '[]'::JSONB;
     original_data JSONB;
-    ticket JSONB; -- Declare ticket as JSONB
-    product JSONB; -- Declare product as JSONB
+    ticket_data JSONB; -- Renamed variable
+    product JSONB;
+    remaining_opt_id BIGINT; -- Variable to store the remaining order_product_ticket ID
 BEGIN
     -- Check if the ticket exists and fetch its associated data
     SELECT t.*, o.id AS order_id, o.data AS order_data, t.occasion
@@ -41,21 +42,33 @@ BEGIN
         SELECT id FROM eshop.order_product_ticket WHERE ticket = ticket_id
     );
 
-    -- Remove all order_product_ticket records associated with the ticket
-    DELETE FROM eshop.order_product_ticket
-    WHERE ticket = ticket_id;
+    -- Find and keep one order_product_ticket and update its product to NULL
+    SELECT id INTO remaining_opt_id
+    FROM eshop.order_product_ticket
+    WHERE ticket = ticket_id
+    LIMIT 1;
+
+    IF remaining_opt_id IS NOT NULL THEN
+        UPDATE eshop.order_product_ticket
+        SET product = NULL
+        WHERE id = remaining_opt_id;
+
+        -- Delete all other order_product_ticket records for the ticket
+        DELETE FROM eshop.order_product_ticket
+        WHERE ticket = ticket_id AND id != remaining_opt_id;
+    END IF;
 
     -- Remove the ticket from orders.data and calculate the price reduction
     original_data := ticket_record.order_data;
-    FOR ticket IN SELECT JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
-        IF (ticket->>'ticket_id')::BIGINT = ticket_id THEN
+    FOR ticket_data IN SELECT JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
+        IF (ticket_data->>'ticket_id')::BIGINT = ticket_id THEN
             -- Calculate the price of all products in the ticket
-            FOR product IN SELECT JSONB_ARRAY_ELEMENTS(ticket->'products') LOOP
+            FOR product IN SELECT JSONB_ARRAY_ELEMENTS(ticket_data->'products') LOOP
                 ticket_price := ticket_price + COALESCE((product->>'price')::NUMERIC, 0);
             END LOOP;
         ELSE
             -- Keep all other tickets
-            updated_tickets := updated_tickets || ticket;
+            updated_tickets := updated_tickets || ticket_data;
         END IF;
     END LOOP;
 
@@ -73,7 +86,8 @@ BEGIN
         'message', 'Ticket successfully cancelled',
         'ticket_id', ticket_id,
         'order_id', ticket_record.order_id,
-        'price_reduction', ticket_price
+        'price_reduction', ticket_price,
+        'remaining_order_product_ticket', remaining_opt_id
     );
 EXCEPTION
     WHEN OTHERS THEN
