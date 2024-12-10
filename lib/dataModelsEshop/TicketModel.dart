@@ -59,17 +59,13 @@ class TicketModel extends IPlutoRowModel {
       state: json[TbEshop.tickets.state],
       occasion: json[TbEshop.tickets.occasion],
       note: json[TbEshop.tickets.note],
+      noteHidden: json[TbEshop.tickets.note_hidden],
     );
   }
 
   Map<String, dynamic> toJson() => {
-    TbEshop.tickets.id: id,
-    TbEshop.tickets.created_at: createdAt?.toIso8601String(),
-    TbEshop.tickets.updated_at: updatedAt?.toIso8601String(),
-    TbEshop.tickets.ticket_symbol: ticketSymbol,
     TbEshop.tickets.state: state,
-    TbEshop.tickets.occasion: occasion,
-    TbEshop.tickets.note: note,
+    TbEshop.tickets.note_hidden: noteHidden,
   };
 
   @override

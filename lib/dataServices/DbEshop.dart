@@ -107,6 +107,20 @@ class DbEshop {
     return b;
   }
 
+  static Future<bool> stornoTicket(int ticketId) async {
+    final response = await _supabase.rpc(
+      'storno_ticket',
+      params: {
+        'ticket_id': ticketId,
+      },
+    );
+
+    if (response["code"] != 200) {
+      return false;
+    }
+    return true;
+  }
+
   static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
 
     final response = await _supabase.rpc(

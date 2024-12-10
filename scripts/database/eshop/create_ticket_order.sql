@@ -83,10 +83,10 @@ BEGIN
     END IF;
 
     -- Create the order before processing tickets
-    INSERT INTO eshop.orders (created_at, updated_at, price, state, data, occasion)
+    INSERT INTO eshop.orders (created_at, updated_at, occasion)
     VALUES (
-        now, now, 0, 'pending',
-        input_data, -- Store all input_data directly
+        now,
+        now,
         occasion_id
     ) RETURNING id INTO order_id;
 
@@ -223,10 +223,15 @@ BEGIN
     VALUES (bank_account_id, generated_variable_symbol, calculated_price, now, deadline)
     RETURNING id INTO payment_info_id;
 
-    -- Update the order with the calculated price and payment info
+    -- Update the order with the calculated price, payment info, and tickets
     UPDATE eshop.orders
-    SET price = calculated_price, state = 'ordered', payment_info = payment_info_id
+    SET
+        price = calculated_price,
+        state = 'ordered',
+        payment_info = payment_info_id,
+        data = input_data - 'ticket' || JSONB_BUILD_OBJECT('tickets', ticket_details)
     WHERE id = order_id;
+
 
     -- Log order to orders_history with price and tickets
     INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
