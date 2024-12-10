@@ -210,7 +210,7 @@ class EshopColumns {
     ],
     PRODUCT_PRICE: [
       PlutoColumn(
-        title: "Product Price".tr(),
+        title: "Price".tr(),
         field: TbEshop.products.price,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
