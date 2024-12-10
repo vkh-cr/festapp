@@ -347,5 +347,6 @@
   "Blueprint": "Blueprint",
   "Tickets": "Tickets",
   "Orders": "Orders",
+  "State": "State",
   "_":"_"
 }
