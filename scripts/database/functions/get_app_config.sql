@@ -5,6 +5,7 @@ AS $$
 DECLARE
     org_id bigint := (data_in->>'organization')::bigint;
     link_txt text := data_in->>'link';
+    form_link text := data_in->>'form_link';
     platform_info jsonb := data_in->'platform';
     platform_name text := platform_info->>'platform';
     occasionId bigint;
@@ -23,8 +24,37 @@ BEGIN
         platform_name := 'web';
     END IF;
 
-    -- If no link is provided, get the default occasion from the organization
-    IF link_txt IS NULL OR link_txt = '' THEN
+    -- If form_link is provided, fetch the occasion from forms
+    IF form_link IS NOT NULL AND form_link <> '' THEN
+        SELECT forms.occasion, occasions.link INTO occasionId, occasion_link
+        FROM forms
+        JOIN occasions ON forms.occasion = occasions.id
+        WHERE forms.link = form_link
+          AND occasions.organization = org_id
+          AND occasions.is_hidden = false;
+
+        -- If no occasion is found, return a 404 response
+        IF occasionId IS NULL THEN
+            RETURN json_build_object('code', 404, 'message', 'No occasion found for the provided form link');
+        END IF;
+
+    -- If no form_link but link_txt is provided
+    ELSIF link_txt IS NOT NULL AND link_txt <> '' THEN
+        -- Get the occasion ID and link for the provided link within the specified organization
+        SELECT id, link INTO occasionId, occasion_link
+        FROM occasions
+        WHERE link = link_txt
+          AND is_hidden = false
+          AND organization = org_id;
+
+        -- If the occasion ID is not found, return a 404 response
+        IF occasionId IS NULL THEN
+            RETURN json_build_object('code', 404, 'message', 'Occasion not found');
+        END IF;
+
+    -- If no link or form_link is provided
+    ELSE
+        -- Get the default occasion from the organization
         SELECT data->>'DEFAULT_OCCASION' INTO occasionId
         FROM organizations
         WHERE id = org_id;
@@ -47,18 +77,6 @@ BEGIN
             SELECT link INTO occasion_link
             FROM occasions
             WHERE id = occasionId AND organization = org_id;
-        END IF;
-    ELSE
-        -- Get the occasion ID and link for the provided link within the specified organization
-        SELECT id, link INTO occasionId, occasion_link
-        FROM occasions
-        WHERE link = link_txt
-          AND is_hidden = false
-          AND organization = org_id;
-
-        -- If the occasion ID is not found, return a 404 response
-        IF occasionId IS NULL THEN
-            RETURN json_build_object('code', 404, 'message', 'Occasion not found');
         END IF;
     END IF;
 

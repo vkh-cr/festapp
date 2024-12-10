@@ -22,6 +22,7 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
     AdminTabDefinition.form,
     AdminTabDefinition.blueprint,
     AdminTabDefinition.orders,
+    AdminTabDefinition.tickets,
   ];
 
   @override

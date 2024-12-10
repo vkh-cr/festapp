@@ -4,6 +4,7 @@ import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
+import 'package:fstapp/services/LinkModel.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -141,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      RouterService.updateOccasionFromLink(RouterService.currentOccasionLink);
+      RouterService.updateOccasionFromLink(LinkModel(occasionLink: RouterService.currentOccasionLink));
       RouterService.popOrHome(context);
     }
   }

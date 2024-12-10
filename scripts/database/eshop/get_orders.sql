@@ -70,6 +70,7 @@ BEGIN
     -- Fetch tickets linked to the occasion
     SELECT jsonb_agg(jsonb_build_object(
         'id', t.id,
+        'created_at', t.created_at,
         'ticket_symbol', t.ticket_symbol,
         'state', t.state,
         'note', t.note

@@ -3,6 +3,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/LinkModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
@@ -14,17 +15,13 @@ class RightsService{
 
   static Future<bool> updateOccasionData([String? link]) async {
     if (currentOccasion == null || link != currentLink) {
-      var toUpdate = link ?? RouterService.currentOccasionLink;
-      if (toUpdate.isEmpty) {
-        toUpdate = extractOccasionLink(Uri.base.toString());
-
-        var rootLinks = AppRouter.getRootLinks();
-        if (rootLinks.any((rootLink) => toUpdate == rootLink)) {
-          toUpdate = "";
-        }
+      LinkModel model = LinkModel(occasionLink: link);
+      var occasionLink = link ?? RouterService.currentOccasionLink;
+      if (occasionLink.isEmpty) {
+        model = LinkModel.extractOccasionLink(Uri.base.toString());
       }
 
-      if (!await RouterService.updateOccasionFromLink(toUpdate)) {
+      if (!await RouterService.updateOccasionFromLink(model)) {
         throw Exception("Cannot continue.");
       }
 
@@ -37,17 +34,7 @@ class RightsService{
     return true;
   }
 
-  static String extractOccasionLink(String url) {
-    // Use a regular expression to match the pattern after the hash sign (#)
-    final regex = RegExp(r'#\/([^\/]+)');
-    final match = regex.firstMatch(url);
 
-    if (match != null && match.groupCount > 0) {
-      return match.group(1)!;
-    }
-
-    return '';
-  }
 
   static Future<bool> getIsAdmin() async {
     var data = await _supabase.rpc("get_is_admin_on_occasion",

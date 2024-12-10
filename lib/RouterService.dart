@@ -5,6 +5,7 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/LinkModel.dart';
 
 class RouterService {
   static const LINK = "link";
@@ -101,9 +102,9 @@ class RouterService {
 
   static final router = AppRouter();
 
-  static Future<bool> updateOccasionFromLink(String newLink) async {
+  static Future<bool> updateOccasionFromLink(LinkModel link) async {
     bool canContinue = true;
-    var checkedObject = await SynchroService.getAppConfig(newLink);
+    var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
     RightsService.currentUserOccasion = checkedObject.user;
     RightsService.currentOccasion = checkedObject.occasionId;
     RightsService.currentLink = checkedObject.link;
