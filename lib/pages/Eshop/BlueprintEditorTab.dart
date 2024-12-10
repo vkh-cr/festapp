@@ -411,7 +411,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ),
         const SizedBox(width: 12), // Reduced spacing between editors
         buildDimensionEditor(
-          "Height",
+          "Height".tr(),
           blueprint!.configuration!.height!,
               (value) {
             setState(() {
