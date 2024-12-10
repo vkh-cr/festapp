@@ -45,7 +45,7 @@ class _TicketsTabState extends State<TicketsTab> {
       context,
       () => DbEshop.getAllTickets(formKey!),
       TicketModel.fromPlutoJson,
-      DataGridFirstColumn.none,
+      DataGridFirstColumn.check,
       TbEshop.tickets.id,
       actionsExtended: DataGridActionsController(
           areAllActionsEnabled: RightsService.canUpdateUsers,
