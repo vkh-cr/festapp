@@ -440,7 +440,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Import background"),
+              Text("Import background").tr(),
               const SizedBox(width: 8), // Optional spacing between text and icon
               const Icon(Icons.grid_on),
             ],

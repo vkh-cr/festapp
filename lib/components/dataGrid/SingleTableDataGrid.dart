@@ -9,7 +9,7 @@ import 'PlutoAbstract.dart';
 import 'AdministrationHeader.dart';
 
 enum DataGridFirstColumn{
-  none, delete, deleteAndDuplicate, deleteAndCheck
+  none, delete, deleteAndDuplicate, deleteAndCheck, check
 }
 
 class SingleTableDataGrid<T extends IPlutoRowModel> {
@@ -138,30 +138,32 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
           enableDropToResize: false,
           enableColumnDrag: false,
           enableContextMenu: false,
-          enableRowChecked: firstColumnType == DataGridFirstColumn.deleteAndCheck,
+          enableRowChecked: firstColumnType == DataGridFirstColumn.deleteAndCheck || firstColumnType == DataGridFirstColumn.check,
           cellPadding: EdgeInsets.zero,
-          width: firstColumnType == DataGridFirstColumn.delete ? 50 : 100,
+          width: firstColumnType == DataGridFirstColumn.delete || firstColumnType == DataGridFirstColumn.check ? 50 : 100,
           renderer: (rendererContext) {
             List<Widget> rowChildren = [];
-            rowChildren.add(IconButton(
-                onPressed: () async{
-                  var row = rendererContext.row;
-                  if(deletedRows.contains(row))
-                  {
-                    deletedRows.remove(row);
-                  }
-                  else if (newRows.contains(row))
-                  {
-                    newRows.remove(row);
-                    rendererContext.stateManager.removeRows([rendererContext.row]);
-                  }
-                  else{
-                    deletedRows.add(row);
-                  }
-                  row.setState(PlutoRowState.updated);
-                  rendererContext.stateManager.notifyListeners();
-                },
-                icon: const Icon(Icons.delete_forever)));
+            if(firstColumnType != DataGridFirstColumn.check){
+              rowChildren.add(IconButton(
+                  onPressed: () async{
+                    var row = rendererContext.row;
+                    if(deletedRows.contains(row))
+                    {
+                      deletedRows.remove(row);
+                    }
+                    else if (newRows.contains(row))
+                    {
+                      newRows.remove(row);
+                      rendererContext.stateManager.removeRows([rendererContext.row]);
+                    }
+                    else{
+                      deletedRows.add(row);
+                    }
+                    row.setState(PlutoRowState.updated);
+                    rendererContext.stateManager.notifyListeners();
+                  },
+                  icon: const Icon(Icons.delete_forever)));
+            }
             if(firstColumnType == DataGridFirstColumn.deleteAndDuplicate)
             {
               rowChildren.add(IconButton(

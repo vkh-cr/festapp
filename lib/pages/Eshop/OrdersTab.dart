@@ -45,7 +45,7 @@ class _OrdersTabState extends State<OrdersTab> {
       context,
       () => DbEshop.getAllOrders(formKey!),
       OrderModel.fromPlutoJson,
-      DataGridFirstColumn.none,
+      DataGridFirstColumn.check,
       TbEshop.orders.id,
       actionsExtended: DataGridActionsController(
           areAllActionsEnabled: RightsService.canUpdateUsers,
