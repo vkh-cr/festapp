@@ -1,6 +1,7 @@
 CREATE OR REPLACE FUNCTION storno_ticket(ticket_id BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
     ticket_record RECORD;
@@ -8,9 +9,11 @@ DECLARE
     ticket_price NUMERIC(10, 2) := 0;
     updated_tickets JSONB := '[]'::JSONB;
     original_data JSONB;
+    ticket JSONB; -- Declare ticket as JSONB
+    product JSONB; -- Declare product as JSONB
 BEGIN
     -- Check if the ticket exists and fetch its associated data
-    SELECT t.*, o.id AS order_id, o.data AS order_data
+    SELECT t.*, o.id AS order_id, o.data AS order_data, t.occasion
     INTO ticket_record
     FROM eshop.tickets t
     JOIN eshop.order_product_ticket opt ON opt.ticket = t.id
@@ -21,8 +24,8 @@ BEGIN
         RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Ticket not found');
     END IF;
 
-    -- Check permissions (replace `isEditor` logic with your implementation)
-    IF NOT is_editor_function() THEN
+    -- Check permissions using get_is_editor_on_occasion
+    IF NOT get_is_editor_on_occasion(ticket_record.occasion) THEN
         RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Permission denied');
     END IF;
 
@@ -38,12 +41,16 @@ BEGIN
         SELECT id FROM eshop.order_product_ticket WHERE ticket = ticket_id
     );
 
+    -- Remove all order_product_ticket records associated with the ticket
+    DELETE FROM eshop.order_product_ticket
+    WHERE ticket = ticket_id;
+
     -- Remove the ticket from orders.data and calculate the price reduction
     original_data := ticket_record.order_data;
-    FOR ticket IN SELECT * FROM JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
+    FOR ticket IN SELECT JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
         IF (ticket->>'ticket_id')::BIGINT = ticket_id THEN
             -- Calculate the price of all products in the ticket
-            FOR product IN SELECT * FROM JSONB_ARRAY_ELEMENTS(ticket->'products') LOOP
+            FOR product IN SELECT JSONB_ARRAY_ELEMENTS(ticket->'products') LOOP
                 ticket_price := ticket_price + COALESCE((product->>'price')::NUMERIC, 0);
             END LOOP;
         ELSE
