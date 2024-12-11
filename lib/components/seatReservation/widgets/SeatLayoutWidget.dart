@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/themeConfig.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
@@ -161,8 +162,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       )
                       : Tooltip(
                     showDuration: const Duration(seconds: 0),
-                    message:
-                    "${seatModel.objectModel?.blueprintTooltip(context)}",
+                    message: "${seatModel.objectModel?.blueprintTooltip(context)}",
                     child: GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {
@@ -174,6 +174,16 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         size: seatModel.seatSize.toDouble(),
                       ),
                     ),
+                    decoration: BoxDecoration(
+                      color: ThemeConfig.whiteColor(context), // Tooltip background color
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(width: 2, color: ThemeConfig.blackColor(context))
+                    ),
+                    textStyle: TextStyle(
+                      fontSize: 16.0, // Adjust the font size
+                      color: ThemeConfig.blackColor(context), // Tooltip text color
+                    ),
+                    verticalOffset: 20.0, // Adjust the vertical offset
                   ),
                 );
               }).toList(),
