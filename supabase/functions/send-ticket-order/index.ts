@@ -1,6 +1,8 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
+import { encode } from "https://deno.land/std/encoding/base64.ts";
+import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -15,19 +17,55 @@ const supabaseAdmin = createClient(
 );
 
 // Function to generate QR code as base64
-async function generateQrCode(paymentInfo: any, orderDetails: any): Promise<Uint8Array> {
+async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle: string): Promise<Uint8Array> {
+  console.log("Starting QR code generation with text...");
+  console.log("Payment Info:", paymentInfo);
+  console.log("Order Details:", orderDetails);
+  console.log("Occasion Title:", occasionTitle);
+
+  // Create canvas
+  const canvas = createCanvas(500, 700); // Adjust height to fit QR code and text
+  const ctx = canvas.getContext("2d");
+
+  console.log("Canvas initialized.");
+
+  // Fill the background with white
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, 500, 700);
+
+  // Generate QR code
   const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
     2
   )}*CC:${paymentInfo.currency_code}*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  console.log("Generated QR data string:", qrData);
+
   const base64QrCode = await qrcode(qrData, { size: 500 });
-  console.log("QR Code Output:", base64QrCode);
+  console.log("QR Code Base64 Output:", base64QrCode);
 
-  if (typeof base64QrCode !== "string") {
-    throw new Error("Unexpected QR code format returned by qrcode function.");
-  }
+  // Convert base64 QR code into image
+  const qrImage = await loadImage(`data:image/png;base64,${base64QrCode.split(",")[1]}`);
+  console.log("QR Image loaded successfully.");
 
-  const base64String = base64QrCode.split(",")[1]; // Remove the `data:image/...` prefix
-  return Uint8Array.from(atob(base64String), (c) => c.charCodeAt(0)); // Convert Base64 to binary
+  // Draw QR code on canvas
+  ctx.drawImage(qrImage, 0, 0, 500, 500);
+  console.log("QR Code drawn on canvas.");
+
+  // Add text below the QR code
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "black";
+  ctx.textAlign = "left";
+  ctx.fillText(`Objednávka: ${occasionTitle}`, 32, 550);
+  ctx.fillText(`Bankovní účet: ${paymentInfo.account_number_human_readable}`, 32, 580);
+  ctx.fillText(`VS: ${paymentInfo.variable_symbol}`, 32, 610);
+  ctx.fillText(`Poznámka: ${orderDetails.name} ${orderDetails.surname}`, 32, 640);
+  ctx.fillText(`Celková cena: ${formatCurrency(paymentInfo.amount, paymentInfo.currency_code)}`, 32, 670);
+  console.log("Text added below QR code.");
+
+  // Convert canvas to binary data
+  const buffer = canvas.toBuffer();
+  console.log("Canvas converted to buffer. Buffer size:", buffer.length);
+
+  return buffer;
 }
 
 function formatDatetime(datetime: string): string {
@@ -115,7 +153,7 @@ Deno.serve(async (req) => {
 
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
-      .select("organization")
+      .select("organization, link")
       .eq("id", occasion.id)
       .single();
 
@@ -138,7 +176,7 @@ Deno.serve(async (req) => {
     }
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
-    const qrCode = await generateQrCode(paymentInfo, orderDetails);
+    const qrCode = await generateQrCode(paymentInfo, orderDetails, occasion.occasion_title);
     const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
 
     const subs = {
@@ -160,9 +198,9 @@ Deno.serve(async (req) => {
       from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments: [
         {
-            filename: "payment-qr-code.gif", // Name of the file
+            filename: `qr-payment.${occasionData.link}.png`, // Name of the file
             content: qrCode, // Ensure qrCode is a Uint8Array
-            contentType: "image/gif", // MIME type for GIF
+            contentType: "image/png", // MIME type for GIF
             encoding: "binary", // Specify binary encoding
         },
       ],

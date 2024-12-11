@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
@@ -9,16 +11,16 @@ import 'SeatWidget.dart';
 
 class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
-  final SeatLayoutWidgetController? controller;
+  final AutoResizeInteractiveViewerController? controller;
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
   const SeatLayoutWidget({
-    Key? key,
+    super.key,
     required this.stateModel,
     this.controller,
     this.onSeatTap,
     this.isEditorMode,
-  }) : super(key: key);
+  });
 
   @override
   _SeatLayoutWidgetState createState() => _SeatLayoutWidgetState();
@@ -30,11 +32,10 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   double _minScale = 1.0; // Dynamic minimum scale
 
   @override
-  @override
   void initState() {
     super.initState();
 
-    widget.controller?.attachFitLayout(_fitLayout);
+    widget.controller?.attachFitContent(_fitLayout);
 
     _seats = _generateSeatModels();
 
@@ -102,8 +103,8 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
 
   @override
   Widget build(BuildContext context) {
-    int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
-    int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
+    double layoutWidth = (widget.stateModel.cols * widget.stateModel.seatSize).toDouble();
+    double layoutHeight = (widget.stateModel.rows * widget.stateModel.seatSize).toDouble();
 
     return InteractiveViewer(
       minScale: _minScale,
@@ -116,27 +117,26 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
           if (widget.stateModel.backgroundSvg != null)
             Positioned.fill(
               child: Container(
-                width: layoutWidth.toDouble(),
-                height: layoutHeight.toDouble(),
+                width: layoutWidth,
+                height: layoutHeight,
                 decoration: BoxDecoration(
-                  color: Colors.transparent, // No background color
-                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0), // Match the rounded corners
+                  borderRadius: BorderRadius.circular(12.0),
                   child: SvgPicture.string(
                     widget.stateModel.backgroundSvg!,
-                    width: layoutWidth.toDouble(),
-                    height: layoutHeight.toDouble(),
+                    width: layoutWidth,
+                    height: layoutHeight,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
-          // Seat Layout with Positioned widgets
           SizedBox(
-            width: layoutWidth.toDouble(),
-            height: layoutHeight.toDouble(),
+            width: layoutWidth,
+            height: layoutHeight,
             child: Stack(
               children: _seats
                   .where((seatModel) =>
@@ -161,8 +161,7 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       )
                       : Tooltip(
                     showDuration: const Duration(seconds: 0),
-                    message:
-                    "${seatModel.objectModel?.blueprintTooltip(context)}",
+                    message: "${seatModel.objectModel?.blueprintTooltip(context)}",
                     child: GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {
@@ -174,6 +173,16 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                         size: seatModel.seatSize.toDouble(),
                       ),
                     ),
+                    decoration: BoxDecoration(
+                      color: ThemeConfig.whiteColor(context), // Tooltip background color
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(width: 2, color: ThemeConfig.blackColor(context))
+                    ),
+                    textStyle: TextStyle(
+                      fontSize: 16.0, // Adjust the font size
+                      color: ThemeConfig.blackColor(context), // Tooltip text color
+                    ),
+                    verticalOffset: 20.0, // Adjust the vertical offset
                   ),
                 );
               }).toList(),
@@ -241,20 +250,5 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
         ..setTranslationRaw(clampedX, clampedY, 0);
     }
   }
-
-
 }
 
-class SeatLayoutWidgetController {
-  Function()? _fitLayout;
-
-  /// Attach a fit layout method
-  void attachFitLayout(Function()? fitLayout) {
-    _fitLayout = fitLayout;
-  }
-
-  /// Call the fit layout method
-  void fitLayout() {
-    _fitLayout?.call();
-  }
-}
