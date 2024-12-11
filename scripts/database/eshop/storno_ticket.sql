@@ -61,7 +61,7 @@ BEGIN
     -- Remove the ticket from orders.data and calculate the price reduction
     original_data := ticket_record.order_data;
     FOR ticket_data IN SELECT JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
-        IF (ticket_data->>'ticket_id')::BIGINT = ticket_id THEN
+        IF (ticket_data->>'id')::BIGINT = ticket_id THEN
             -- Calculate the price of all products in the ticket
             FOR product IN SELECT JSONB_ARRAY_ELEMENTS(ticket_data->'products') LOOP
                 ticket_price := ticket_price + COALESCE((product->>'price')::NUMERIC, 0);
