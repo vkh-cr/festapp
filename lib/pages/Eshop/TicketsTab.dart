@@ -20,6 +20,8 @@ class TicketsTab extends StatefulWidget {
 
 class _TicketsTabState extends State<TicketsTab> {
   String? formKey;
+  Key refreshKey = UniqueKey();
+
 
   @override
   void didChangeDependencies() {
@@ -27,6 +29,12 @@ class _TicketsTabState extends State<TicketsTab> {
     if (formKey == null && context.routeData.pathParams.isNotEmpty) {
       formKey = context.routeData.pathParams.getString("formKey");
     }
+  }
+
+  Future<void> refreshData() async {
+    setState(() {
+      refreshKey = UniqueKey();
+    });
   }
 
   static const List<String> columnIdentifiers = [
@@ -43,7 +51,10 @@ class _TicketsTabState extends State<TicketsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleTableDataGrid<TicketModel>(
+    return KeyedSubtree(
+        key: refreshKey,
+      child:
+        SingleTableDataGrid<TicketModel>(
       context,
           () => DbEshop.getAllTickets(formKey!),
       TicketModel.fromPlutoJson,
@@ -61,7 +72,7 @@ class _TicketsTabState extends State<TicketsTab> {
         ),
       ],
       columns: EshopColumns.generateColumns(columnIdentifiers),
-    ).DataGrid();
+    ).DataGrid());
   }
 
   Future<void> _stornoTickets(SingleTableDataGrid dataGrid) async {
@@ -74,7 +85,7 @@ class _TicketsTabState extends State<TicketsTab> {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
       context,
       "Storno".tr(),
-      "Are you sure you want to storno the selected tickets?".tr(),
+      "${"Are you sure you want to storno the selected tickets?".tr()} (${selectedTickets.length})",
     );
 
     if (confirm) {
@@ -96,6 +107,7 @@ class _TicketsTabState extends State<TicketsTab> {
         stornoFutures.length,
         futures: stornoFutures,
       );
+      refreshData();
     }
   }
 
