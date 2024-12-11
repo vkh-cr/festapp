@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
 
 import '../model/SeatLayoutStateModel.dart';
 import '../model/SeatModel.dart';
@@ -10,7 +11,7 @@ import 'SeatWidget.dart';
 
 class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
-  final SeatLayoutWidgetController? controller;
+  final AutoResizeInteractiveViewerController? controller;
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
   const SeatLayoutWidget({
@@ -31,11 +32,10 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
   double _minScale = 1.0; // Dynamic minimum scale
 
   @override
-  @override
   void initState() {
     super.initState();
 
-    widget.controller?.attachFitLayout(_fitLayout);
+    widget.controller?.attachFitContent(_fitLayout);
 
     _seats = _generateSeatModels();
 
@@ -120,11 +120,11 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 width: layoutWidth.toDouble(),
                 height: layoutHeight.toDouble(),
                 decoration: BoxDecoration(
-                  color: Colors.transparent, // No background color
-                  borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0), // Match the rounded corners
+                  borderRadius: BorderRadius.circular(12.0),
                   child: SvgPicture.string(
                     widget.stateModel.backgroundSvg!,
                     width: layoutWidth.toDouble(),
@@ -134,7 +134,6 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 ),
               ),
             ),
-          // Seat Layout with Positioned widgets
           SizedBox(
             width: layoutWidth.toDouble(),
             height: layoutHeight.toDouble(),
@@ -251,20 +250,5 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
         ..setTranslationRaw(clampedX, clampedY, 0);
     }
   }
-
-
 }
 
-class SeatLayoutWidgetController {
-  Function()? _fitLayout;
-
-  /// Attach a fit layout method
-  void attachFitLayout(Function()? fitLayout) {
-    _fitLayout = fitLayout;
-  }
-
-  /// Call the fit layout method
-  void fitLayout() {
-    _fitLayout?.call();
-  }
-}

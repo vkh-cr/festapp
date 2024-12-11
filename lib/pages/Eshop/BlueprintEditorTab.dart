@@ -11,6 +11,7 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
 import 'package:collection/collection.dart';
 
@@ -37,8 +38,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
 
   selectionMode currentSelectionMode = selectionMode.none;
 
-  final SeatLayoutWidgetController seatLayoutController =
-  SeatLayoutWidgetController();
+  final AutoResizeInteractiveViewerController seatLayoutController =
+  AutoResizeInteractiveViewerController();
 
   @override
   void didChangeDependencies() {
@@ -406,7 +407,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             setState(() {
               blueprint!.configuration!.width = value;
             });
-            seatLayoutController.fitLayout(); // Fit layout after width change
+            seatLayoutController.fitContent();
           },
         ),
         const SizedBox(width: 12), // Reduced spacing between editors
@@ -417,7 +418,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             setState(() {
               blueprint!.configuration!.height = value;
             });
-            seatLayoutController.fitLayout(); // Fit layout after height change
+            seatLayoutController.fitContent();
           },
         ),
         const SizedBox(width: 12),
