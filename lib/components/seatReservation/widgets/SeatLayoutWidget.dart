@@ -15,12 +15,12 @@ class SeatLayoutWidget extends StatefulWidget {
   final void Function(SeatModel model)? onSeatTap;
   final bool? isEditorMode;
   const SeatLayoutWidget({
-    Key? key,
+    super.key,
     required this.stateModel,
     this.controller,
     this.onSeatTap,
     this.isEditorMode,
-  }) : super(key: key);
+  });
 
   @override
   _SeatLayoutWidgetState createState() => _SeatLayoutWidgetState();
@@ -103,8 +103,8 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
 
   @override
   Widget build(BuildContext context) {
-    int layoutWidth = widget.stateModel.cols * widget.stateModel.seatSize;
-    int layoutHeight = widget.stateModel.rows * widget.stateModel.seatSize;
+    double layoutWidth = (widget.stateModel.cols * widget.stateModel.seatSize).toDouble();
+    double layoutHeight = (widget.stateModel.rows * widget.stateModel.seatSize).toDouble();
 
     return InteractiveViewer(
       minScale: _minScale,
@@ -117,8 +117,8 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
           if (widget.stateModel.backgroundSvg != null)
             Positioned.fill(
               child: Container(
-                width: layoutWidth.toDouble(),
-                height: layoutHeight.toDouble(),
+                width: layoutWidth,
+                height: layoutHeight,
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(12.0),
@@ -127,16 +127,16 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                   borderRadius: BorderRadius.circular(12.0),
                   child: SvgPicture.string(
                     widget.stateModel.backgroundSvg!,
-                    width: layoutWidth.toDouble(),
-                    height: layoutHeight.toDouble(),
+                    width: layoutWidth,
+                    height: layoutHeight,
                     fit: BoxFit.cover,
                   ),
                 ),
               ),
             ),
           SizedBox(
-            width: layoutWidth.toDouble(),
-            height: layoutHeight.toDouble(),
+            width: layoutWidth,
+            height: layoutHeight,
             child: Stack(
               children: _seats
                   .where((seatModel) =>
