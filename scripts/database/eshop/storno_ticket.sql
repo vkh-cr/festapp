@@ -9,9 +9,9 @@ DECLARE
     ticket_price NUMERIC(10, 2) := 0;
     updated_tickets JSONB := '[]'::JSONB;
     original_data JSONB;
-    ticket_data JSONB; -- Renamed variable
+    ticket_data JSONB;
     product JSONB;
-    remaining_opt_id BIGINT; -- Variable to store the remaining order_product_ticket ID
+    remaining_opt_id BIGINT;
 BEGIN
     -- Check if the ticket exists and fetch its associated data
     SELECT t.*, o.id AS order_id, o.data AS order_data, t.occasion
@@ -79,6 +79,22 @@ BEGIN
         price = COALESCE(price, 0) - ticket_price,
         updated_at = NOW()
     WHERE id = ticket_record.order_id;
+
+    -- Save the change to orders_history
+    INSERT INTO eshop.orders_history (
+        "order",
+        data,
+        state,
+        price,
+        created_at
+    )
+    VALUES (
+        ticket_record.order_id,
+        original_data || JSONB_BUILD_OBJECT('tickets', updated_tickets),
+        'ordered',
+        COALESCE((SELECT price FROM eshop.orders WHERE id = ticket_record.order_id), 0),
+        NOW()
+    );
 
     -- Return success response
     RETURN JSONB_BUILD_OBJECT(
