@@ -237,7 +237,7 @@ BEGIN
     INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
     VALUES (
         now,
-        JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details, 'price', calculated_price, 'currency_code', first_currency_code),
+        JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details),
         order_id,
         'ordered',
         calculated_price
