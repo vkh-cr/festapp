@@ -159,7 +159,7 @@ BEGIN
                     RETURN JSONB_BUILD_OBJECT(
                         'code', 1012,
                         'message', 'Selected product is hidden and cannot be ordered',
-                        'product_id', product_id
+                        'id', product_id
                     );
                 END IF;
 
@@ -171,7 +171,7 @@ BEGIN
                         RETURN JSONB_BUILD_OBJECT(
                             'code', 1014,
                             'message', 'Products in the order must have the same currency',
-                            'product_id', product_id,
+                            'id', product_id,
                             'expected_currency', first_currency_code,
                             'actual_currency', product_data.currency_code
                         );
@@ -180,7 +180,7 @@ BEGIN
 
                 -- Add product details to ticket products
                 ticket_products := ticket_products || JSONB_BUILD_OBJECT(
-                    'product_id', product_id,
+                    'id', product_id,
                     'title', product_data.title,
                     'type', product_data.type,
                     'price', product_data.price,
@@ -208,7 +208,7 @@ BEGIN
 
         -- Add ticket with its products and note to ticket details
         ticket_details := ticket_details || JSONB_BUILD_OBJECT(
-            'ticket_id', ticket_id,
+            'id', ticket_id,
             'ticket_symbol', ticket_symbol,
             'note', ticket_data->>'note',
             'products', ticket_products
@@ -246,10 +246,10 @@ BEGIN
     -- Return success response with order ID, tickets, and payment info
     RETURN JSONB_BUILD_OBJECT(
         'code', 200,
-        'order_id', order_id,
+        'id', order_id,
         'tickets', ticket_details,
         'payment_info', JSONB_BUILD_OBJECT(
-            'payment_info_id', payment_info_id,
+            'id', payment_info_id,
             'variable_symbol', generated_variable_symbol,
             'amount', calculated_price,
             'deadline', deadline,
