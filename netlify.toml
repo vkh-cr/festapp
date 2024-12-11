@@ -6,6 +6,5 @@ package = "netlify-plugin-flutter"
 channel = "stable"
 
 [build]
-
-command = "flutter build web --web-renderer canvaskit --release"
+command = "flutter --version || (curl -L https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz | tar -xJf - -C \$HOME && export PATH=\$HOME/flutter/bin:\$PATH && flutter precache) && flutter build web --web-renderer canvaskit --release"
 publish = "build/web"
