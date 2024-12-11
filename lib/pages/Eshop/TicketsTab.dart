@@ -44,6 +44,7 @@ class _TicketsTabState extends State<TicketsTab> {
     EshopColumns.TICKET_SYMBOL,
     EshopColumns.TICKET_CREATED_AT,
     EshopColumns.TICKET_STATE,
+    EshopColumns.TICKET_TOTAL_PRICE,
     EshopColumns.TICKET_PRODUCTS,
     EshopColumns.TICKET_NOTE,
     EshopColumns.TICKET_NOTE_HIDDEN,

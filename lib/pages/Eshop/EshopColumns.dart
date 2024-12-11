@@ -12,6 +12,7 @@ class EshopColumns {
   static const String TICKET_STATE = "ticketState";
   static const String TICKET_NOTE = "ticketNote";
   static const String TICKET_NOTE_HIDDEN = "ticketNoteHidden";
+  static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
   static const String TICKET_PRODUCTS = "ticketProducts";
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
 
@@ -67,6 +68,17 @@ class EshopColumns {
           [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
         ),
         width: 120,
+      ),
+    ],
+    TICKET_TOTAL_PRICE: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Price".tr(),
+        field: TicketModel.metaPrice,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 100,
       ),
     ],
     TICKET_CREATED_AT: [

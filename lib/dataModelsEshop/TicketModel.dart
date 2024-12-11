@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
 import 'BlueprintObjectModel.dart';
@@ -16,6 +17,7 @@ class TicketModel extends IPlutoRowModel {
   int? occasion;
   String? note;
   String? noteHidden;
+  double? totalPrice;
 
   // Relating spots and products directly to the ticket
   List<BlueprintObjectModel>? relatedSpots;
@@ -31,6 +33,7 @@ class TicketModel extends IPlutoRowModel {
 
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
+  static const String metaPrice = "price";
 
   TicketModel({
     this.id,
@@ -92,6 +95,7 @@ class TicketModel extends IPlutoRowModel {
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
+      metaPrice: PlutoCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
     });
   }
 
