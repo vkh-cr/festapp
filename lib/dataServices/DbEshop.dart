@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
@@ -249,6 +248,19 @@ class DbEshop {
     var orders = await getAllOrders(formKey);
     List<TicketModel> toReturn = [];
     for(var o in orders){
+
+      for(TicketModel t in o.relatedTickets??[]){
+        var tckst = o.data?[TbEshop.tickets.table];
+        t.totalPrice = tckst.isNotEmpty ? 0 : null;
+        for(var tt in tckst){
+          if(tt[TbEshop.tickets.ticket_symbol] != t.ticketSymbol){
+            continue;
+          }
+          for(var p in tt[TbEshop.products.table]){
+            t.totalPrice = t.totalPrice! + (p[TbEshop.products.price] ?? 0);
+          }
+        }
+      }
       toReturn.addAll(o.relatedTickets??[]);
     }
     toReturn = toReturn.sortedBy((ou)=>ou.createdAt!).reversed.toList();

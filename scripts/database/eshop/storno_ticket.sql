@@ -9,9 +9,9 @@ DECLARE
     ticket_price NUMERIC(10, 2) := 0;
     updated_tickets JSONB := '[]'::JSONB;
     original_data JSONB;
-    ticket_data JSONB; -- Renamed variable
+    ticket_data JSONB;
     product JSONB;
-    remaining_opt_id BIGINT; -- Variable to store the remaining order_product_ticket ID
+    remaining_opt_id BIGINT;
 BEGIN
     -- Check if the ticket exists and fetch its associated data
     SELECT t.*, o.id AS order_id, o.data AS order_data, t.occasion
@@ -61,7 +61,7 @@ BEGIN
     -- Remove the ticket from orders.data and calculate the price reduction
     original_data := ticket_record.order_data;
     FOR ticket_data IN SELECT JSONB_ARRAY_ELEMENTS(original_data->'tickets') LOOP
-        IF (ticket_data->>'ticket_id')::BIGINT = ticket_id THEN
+        IF (ticket_data->>'id')::BIGINT = ticket_id THEN
             -- Calculate the price of all products in the ticket
             FOR product IN SELECT JSONB_ARRAY_ELEMENTS(ticket_data->'products') LOOP
                 ticket_price := ticket_price + COALESCE((product->>'price')::NUMERIC, 0);
@@ -79,6 +79,22 @@ BEGIN
         price = COALESCE(price, 0) - ticket_price,
         updated_at = NOW()
     WHERE id = ticket_record.order_id;
+
+    -- Save the change to orders_history
+    INSERT INTO eshop.orders_history (
+        "order",
+        data,
+        state,
+        price,
+        created_at
+    )
+    VALUES (
+        ticket_record.order_id,
+        original_data || JSONB_BUILD_OBJECT('tickets', updated_tickets),
+        'ordered',
+        COALESCE((SELECT price FROM eshop.orders WHERE id = ticket_record.order_id), 0),
+        NOW()
+    );
 
     -- Return success response
     RETURN JSONB_BUILD_OBJECT(
