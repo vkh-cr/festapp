@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
@@ -53,7 +54,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
+  Future<void> _sendPressed({bool isTest = AppConfig.forceSendingNotificationAsTest, bool process = false}) async {
     var htmlContent = await _controller.getText();
     htmlContent = HtmlHelper.removeColor(htmlContent);
     if (process == true) {
@@ -75,7 +76,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
     }
   }
 
-  Future<void> _processAndSendPressed() async {
+  Future<void> _processAndSendTest() async {
     _sendPressed(isTest: true, process: true);
   }
 
@@ -141,7 +142,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
                     text: "Storno".tr(),
                   ),
                   ButtonsHelper.bottomBarButton(
-                    onPressed: _processAndSendPressed,
+                    onPressed: _processAndSendTest,
                     text: "Test",
                   ),
                   ButtonsHelper.bottomBarButton(
