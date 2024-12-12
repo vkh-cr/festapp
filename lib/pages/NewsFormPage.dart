@@ -54,7 +54,7 @@ class _NewsFormPageState extends State<NewsFormPage> {
     Navigator.pop(context);
   }
 
-  Future<void> _sendPressed({bool isTest = AppConfig.forceSendingNotificationAsTest, bool process = false}) async {
+  Future<void> _sendPressed({bool isTest = false, bool process = false}) async {
     var htmlContent = await _controller.getText();
     htmlContent = HtmlHelper.removeColor(htmlContent);
     if (process == true) {
@@ -65,8 +65,8 @@ class _NewsFormPageState extends State<NewsFormPage> {
         "content": htmlContent,
         "heading": _formKey.currentState?.fields["heading"]!.value,
         "heading_default": _currentUser!.name,
-        "with_notification":
-            _formKey.currentState?.fields["with_notification"]!.value,
+        "with_notification": AppConfig.isNotificationSendingDisabled == false ?
+            _formKey.currentState?.fields["with_notification"]!.value : false,
         if (isTest) "to": [AuthService.currentUserId()],
         if (isTest) "add_to_news": false,
       };
