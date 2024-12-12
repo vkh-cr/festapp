@@ -18,6 +18,7 @@ class AppConfig {
   static const int organization = 1;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
+  static const bool forceSendingNotificationAsTest = false;
 
   static const String webLink = "https://live.festapp.net";
   static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
