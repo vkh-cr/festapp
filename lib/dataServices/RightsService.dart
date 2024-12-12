@@ -1,5 +1,6 @@
 import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
@@ -19,6 +20,11 @@ class RightsService{
       var occasionLink = link ?? RouterService.currentOccasionLink;
       if (occasionLink.isEmpty) {
         model = LinkModel.extractOccasionLink(Uri.base.toString());
+        print(Uri.base.toString());
+      }
+
+      if(AppConfig.forceOccasionLink != null) {
+        model.occasionLink = AppConfig.forceOccasionLink;
       }
 
       if (!await RouterService.updateOccasionFromLink(model)) {

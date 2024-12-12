@@ -67,7 +67,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
                 Icons.add_circle_outline,
                 size: 24,
               ),
-              label: const Text("Add New Event").tr(),
+              label: const Text("Add To Schedule").tr(),
               style: TextButton.styleFrom(
                 foregroundColor: ThemeConfig.timelineAddNewEventColor(context),
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),

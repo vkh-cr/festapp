@@ -17,8 +17,10 @@ class AppConfig {
   static const String oneSignalAppId = '';
 
   static const int organization = 3;
+  //setup occasion id to force occasion
+  static const String? forceOccasionLink = null;
 
-  static const String webLink = "";
+  static const String webLink = "https://vstupenka.online";
   static const String appStoreLink = "";
   static const String playStoreLink = "";
   static const String playStoreLaunchLink = "";

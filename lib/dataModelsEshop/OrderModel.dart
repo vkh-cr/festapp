@@ -1,5 +1,3 @@
-import 'dart:js_interop';
-
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
