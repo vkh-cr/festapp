@@ -3,7 +3,6 @@
   "short_name": "Levandulový Festival",
   "description": "Mobile app for festivals, conferences or events.",
   "start_url": ".",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +14,7 @@
       "src": "/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     }
   ],
   "theme_color": "#ffffff",
