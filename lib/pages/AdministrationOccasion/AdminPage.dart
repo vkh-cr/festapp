@@ -23,7 +23,6 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.places,
     AdminTabDefinition.groups,
     AdminTabDefinition.game,
-    AdminTabDefinition.service,
     AdminTabDefinition.users,
   ];
 

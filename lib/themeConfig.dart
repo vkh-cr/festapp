@@ -4,7 +4,7 @@ class ThemeConfig {
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura";
+  static final fontFamily = "Cerebri";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
