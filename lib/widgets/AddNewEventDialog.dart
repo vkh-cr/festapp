@@ -29,7 +29,8 @@ class AddNewEventDialog {
     final eventDayRangeTolerance = 7;
     DateTime? minDate;
     DateTime? maxDate;
-    bool isFormValid = true;
+    bool isFormValid = false;
+    bool hasTitleBeenEdited = false;
 
     minDate = SynchroService.globalSettingsModel!.eventStartTime!.add(Duration(days: -eventDayRangeTolerance));
     maxDate = SynchroService.globalSettingsModel!.eventEndTime!.add(Duration(days: eventDayRangeTolerance));
@@ -80,7 +81,7 @@ class AddNewEventDialog {
                           decoration: InputDecoration(
                             labelText: "Title".tr(),
                             labelStyle: TextStyle(
-                              color: (title == null || title!.trim().isEmpty)
+                              color: (hasTitleBeenEdited && (title == null || title!.trim().isEmpty))
                                   ? ThemeConfig.redColor(context)
                                   : null,
                             ),
@@ -88,6 +89,9 @@ class AddNewEventDialog {
                           onChanged: (value) {
                             setState(() {
                               title = value;
+                              if (!hasTitleBeenEdited) {
+                                hasTitleBeenEdited = true;
+                              }
                               validateForm();
                             });
                           },
