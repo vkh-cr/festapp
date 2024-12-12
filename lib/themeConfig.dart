@@ -53,7 +53,7 @@ class ThemeConfig {
   static Color lllPrimary = seed3;
 
   static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
-  static Color lllBackground = seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
+  static Color lllBackground = seed3.changeColorSaturation(0.3).changeColorLightness(0.92);
   static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
