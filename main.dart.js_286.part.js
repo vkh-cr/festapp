@@ -54,7 +54,7 @@ r=A.a([],y.t)
 for(p=J.al(s),o=J.a1(t),u=y.N,q=y.z;p.q();)r.push(A.z(["user",J.t(p.gK(p),"user"),"news_id",o.i(t,"id")],u,q))
 p=$.za()
 x=7
-return A.c(p.bW("user_news").Zt(r).hQ(0),$async$EK)
+return A.c(p.bW("user_news").Zs(r).hQ(0),$async$EK)
 case 7:x=4
 break
 case 5:x=8
@@ -366,8 +366,8 @@ D.aeS=new B.rB(1,"edit")
 D.ah3=new A.as(12,6,12,6)
 D.aha=new A.as(16,8,16,0)
 D.ajD=new A.aQ(58652,"MaterialIcons",null,!1)
-D.akH=new A.el(W.ajr,null,null,null,null)
+D.akH=new A.em(W.ajr,null,null,null,null)
 D.b1c=new A.c5("News",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b1o=new A.c5("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_286",e:"endPart",h:b})})($__dart_deferred_initializers__,"halbJuNmjvjBUw7on3jzMXWQ8Ww=");
+a.eventLog.push({p:"main.dart.js_286",e:"endPart",h:b})})($__dart_deferred_initializers__,"C4c4hZPcRNHVGlhMS0nNO+V8xiQ=");
