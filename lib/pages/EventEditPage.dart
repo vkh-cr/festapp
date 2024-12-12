@@ -12,12 +12,12 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
+import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 
 @RoutePage()
 class EventEditPage extends StatefulWidget {
@@ -40,22 +40,21 @@ class _EventEditPageState extends State<EventEditPage> {
   bool? isHidden;
   String? title, type, content, showInsideEvent;
   DateTime? startDate, endDate;
-  TimeOfDay? startTime, endTime;
   int? maxParticipants, placeId;
   bool? splitForMenWomen, isGroupEvent;
+  bool isFormValid = true;
+
+  DateTime? minDate;
+  DateTime? maxDate;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id =
-          context.routeData.pendingChildren[0].pathParams.getInt("id");
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
     }
     loadEventData();
   }
-
-  DateTime? minDate;
-  DateTime? maxDate;
 
   Future<void> loadEventData() async {
     minDate = SynchroService.globalSettingsModel!.eventStartTime!.add(Duration(days: -eventDayRangeTolerance));
@@ -71,18 +70,27 @@ class _EventEditPageState extends State<EventEditPage> {
       isHidden = originalEvent!.isHidden;
       title = originalEvent!.title;
       startDate = originalEvent!.startTime;
-      startTime = TimeOfDay.fromDateTime(originalEvent!.startTime);
       endDate = originalEvent!.endTime;
-      endTime = TimeOfDay.fromDateTime(originalEvent!.endTime);
       maxParticipants = originalEvent!.maxParticipants;
       splitForMenWomen = originalEvent!.splitForMenWomen;
       isGroupEvent = originalEvent!.isGroupEvent;
       placeId = originalEvent!.place?.id;
       type = originalEvent!.type;
       content = originalEvent!.description;
-      showInsideEvent = originalEvent!.parentEventIds?.map((e) => e.toString()).join(",")??"";
+      showInsideEvent = originalEvent!.parentEventIds?.map((e) => e.toString()).join(",") ?? "";
     }
+    validateForm();
     setState(() {});
+  }
+
+  void validateForm() {
+    setState(() {
+      isFormValid = title != null &&
+          title!.trim().isNotEmpty &&
+          startDate != null &&
+          endDate != null &&
+          !endDate!.isBefore(startDate!);
+    });
   }
 
   Future<void> deleteEvent() async {
@@ -99,32 +107,19 @@ class _EventEditPageState extends State<EventEditPage> {
   }
 
   Future<void> saveChanges() async {
-    if (_formKey.currentState!.validate()) {
+    if (isFormValid && _formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
       if (originalEvent != null) {
-        // Ensure startTime and endTime are constructed directly
         originalEvent!
           ..isHidden = isHidden!
           ..title = title!
-          ..startTime = DateTime(
-            startDate!.year,
-            startDate!.month,
-            startDate!.day,
-            startTime!.hour,
-            startTime!.minute,
-          )
-          ..endTime = DateTime(
-            endDate!.year,
-            endDate!.month,
-            endDate!.day,
-            endTime!.hour,
-            endTime!.minute,
-          )
+          ..startTime = startDate!
+          ..endTime = endDate!
           ..maxParticipants = maxParticipants == 0 ? null : maxParticipants
           ..splitForMenWomen = splitForMenWomen!
           ..isGroupEvent = isGroupEvent!
-          ..place = places!.firstWhereOrNull((p)=>p.id == placeId)
+          ..place = places!.firstWhereOrNull((p) => p.id == placeId)
           ..type = type
           ..description = content
           ..parentEventIds = showInsideEvent != null && showInsideEvent!.isNotEmpty
@@ -146,13 +141,6 @@ class _EventEditPageState extends State<EventEditPage> {
   Widget build(BuildContext context) {
     return MouseDetector(
       builder: (context, mouseIsConnected) {
-        final timePickerMode = mouseIsConnected
-            ? TimePickerEntryMode.input
-            : TimePickerEntryMode.dial;
-        final datePickerMode = mouseIsConnected
-            ? DatePickerEntryMode.input
-            : DatePickerEntryMode.calendar;
-
         return Scaffold(
           appBar: AppBar(
             title: Text("Edit").tr(),
@@ -180,146 +168,63 @@ class _EventEditPageState extends State<EventEditPage> {
                       SwitchListTile(
                         title: Text("Hide").tr(),
                         value: isHidden ?? false,
-                        onChanged: (value) =>
-                            setState(() => isHidden = value),
+                        onChanged: (value) => setState(() => isHidden = value),
                       ),
                       TextFormField(
                         initialValue: title,
-                        decoration:
-                        InputDecoration(labelText: "Title".tr()),
-                        validator: FormBuilderValidators.required(
-                          errorText: FormBuilderLocalizations.of(context)
-                              .requiredErrorText,
+                        decoration: InputDecoration(
+                          labelText: "Title".tr(),
+                          labelStyle: TextStyle(
+                            color: (title == null || title!.trim().isEmpty)
+                                ? ThemeConfig.redColor(context)
+                                : null,
+                          ),
                         ),
+                        validator: FormBuilderValidators.required(
+                          errorText: FormBuilderLocalizations.of(context).requiredErrorText,
+                        ),
+                        onChanged: (value) {
+                          title = value;
+                          validateForm();
+                        },
                         onSaved: (value) => title = value,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                labelText: "Start".tr(),
-                              ),
-                              controller: TextEditingController(
-                                text: startTime?.format(context),
-                              ),
-                              onTap: () async {
-                                final pickedTime = await TimeHelper.showUniversalTimePicker(
-                                  context: context,
-                                  initialTime: startTime ?? TimeOfDay.now(),
-                                  initialEntryMode: timePickerMode,
-                                );
-                                if (pickedTime != null) {
-                                  setState(() => startTime = pickedTime);
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                labelText: "Start date".tr(),
-                              ),
-                              controller: TextEditingController(
-                                text: startDate != null ? DateFormat.yMd().format(startDate!) : "",
-                              ),
-                              onTap: () async {
-                                final pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: startDate ?? DateTime.now(),
-                                  firstDate: minDate!,
-                                  lastDate: maxDate!,
-                                  initialEntryMode: datePickerMode,
-                                );
-                                if (pickedDate != null) {
-                                  setState(() => startDate = pickedDate);
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                labelText: "End".tr(),
-                              ),
-                              controller: TextEditingController(
-                                text: endTime?.format(context),
-                              ),
-                              onTap: () async {
-                                final pickedTime = await TimeHelper.showUniversalTimePicker(
-                                  context: context,
-                                  initialTime: endTime ?? TimeOfDay.now(),
-                                  initialEntryMode: timePickerMode,
-                                );
-                                if (pickedTime != null) {
-                                  setState(() => endTime = pickedTime);
-                                }
-                              },
-                              validator: (value) {
-                                if (startDate != null && endDate != null && startTime != null && endTime != null) {
-                                  final startDateTime = DateTime(
-                                    startDate!.year,
-                                    startDate!.month,
-                                    startDate!.day,
-                                    startTime!.hour,
-                                    startTime!.minute,
-                                  );
-                                  final endDateTime = DateTime(
-                                    endDate!.year,
-                                    endDate!.month,
-                                    endDate!.day,
-                                    endTime!.hour,
-                                    endTime!.minute,
-                                  );
-                                  if (endDateTime.isBefore(startDateTime)) {
-                                    return FormBuilderLocalizations.of(context).minErrorText(DateFormat.yMd(Localizations.localeOf(context).toString()).add_jm().format(startDateTime));
-                                  }
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: TextFormField(
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                labelText: "End date".tr(),
-                              ),
-                              controller: TextEditingController(
-                                text: endDate != null ? DateFormat.yMd().format(endDate!) : "",
-                              ),
-                              onTap: () async {
-                                final pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: endDate ?? DateTime.now(),
-                                  firstDate: minDate!,
-                                  lastDate: maxDate!,
-                                  initialEntryMode: datePickerMode,
-                                );
-                                if (pickedDate != null) {
-                                  setState(() => endDate = pickedDate);
-                                }
-                              },
-                              validator: (value) {
-                                if (startDate != null && endDate != null) {
-                                  if (endDate!.isBefore(startDate!)) {
-                                    return FormBuilderLocalizations.of(context).minErrorText(DateFormat.yMd(Localizations.localeOf(context).toString()).format(startDate!));
-                                  }
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 16),
+                      TimeDateRangePicker(
+                        start: startDate,
+                        end: endDate,
+                        onStartChanged: (newStart) {
+                          setState(() {
+                            startDate = newStart;
+                            if (newStart != null && endDate != null && newStart.isAfter(endDate!)) {
+                              endDate = DateTime(
+                                newStart.year,
+                                newStart.month,
+                                newStart.day,
+                                endDate!.hour,
+                                endDate!.minute,
+                              );
+                            }
+                            validateForm();
+                          });
+                        },
+                        onEndChanged: (newEnd) {
+                          setState(() {
+                            endDate = newEnd;
+                            if (newEnd != null && startDate != null && newEnd.isBefore(startDate!)) {
+                              startDate = DateTime(
+                                newEnd.year,
+                                newEnd.month,
+                                newEnd.day,
+                                startDate!.hour,
+                                startDate!.minute,
+                              );
+                            }
+                            validateForm();
+                          });
+                        },
+                        minDate: minDate!,
+                        maxDate: maxDate!,
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<PlaceModel?>(
@@ -348,7 +253,9 @@ class _EventEditPageState extends State<EventEditPage> {
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        initialValue: maxParticipants != null && maxParticipants! > 0 ? maxParticipants.toString() : "",
+                        initialValue: maxParticipants != null && maxParticipants! > 0
+                            ? maxParticipants.toString()
+                            : "",
                         decoration: InputDecoration(
                           labelText: "Maximum of participants".tr(),
                         ),
@@ -369,32 +276,29 @@ class _EventEditPageState extends State<EventEditPage> {
                       const SizedBox(height: 16),
                       Text(
                         "Content".tr(),
-                        style:
-                        Theme.of(context).textTheme.labelMedium,
+                        style: Theme.of(context).textTheme.labelMedium,
                       ),
                       Center(
                         child: ElevatedButton(
                           onPressed: () async {
                             RouterService.navigatePageInfo(
-                                  context,
-                                  HtmlEditorRoute(content: {HtmlEditorPage.parContent:
-                                  content}))
-                              .then((value) async {
-                                if(value != null){
-                                  setState(() {
-                                    content = value as String;
-                                  });
-                                }
+                              context,
+                              HtmlEditorRoute(content: {HtmlEditorPage.parContent: content}),
+                            ).then((value) {
+                              if (value != null) {
+                                setState(() {
+                                  content = value as String;
+                                });
+                              }
                             });
                           },
-                          child: Text("Edit content".tr()),
+                          child: Text("Edit content").tr(),
                         ),
                       ),
                       const SizedBox(height: 16),
                       ClipRect(
                         child: ConstrainedBox(
-                          constraints:
-                          BoxConstraints(maxHeight: 400),
+                          constraints: BoxConstraints(maxHeight: 400),
                           child: ShaderMask(
                             shaderCallback: (bounds) {
                               return LinearGradient(
@@ -419,10 +323,7 @@ class _EventEditPageState extends State<EventEditPage> {
                       ExpansionTile(
                         title: Text(
                           "Advanced Settings".tr(),
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         children: [
                           SwitchListTile(
@@ -468,8 +369,19 @@ class _EventEditPageState extends State<EventEditPage> {
                 ),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: saveChanges,
-                  child: Text("Save".tr()),
+                  onPressed: isFormValid ? saveChanges : null,
+                  style: ElevatedButton.styleFrom(
+                    // Use the default colors for the enabled state
+                    backgroundColor: isFormValid
+                        ? null // Default background for enabled state
+                        : ThemeConfig.appBarColor().withOpacity(0.5), // Semi-transparent appBarColor for disabled state
+                    foregroundColor: isFormValid
+                        ? null // Default text color for enabled state
+                        : ThemeConfig.grey600(context), // Subtle gray text for disabled state
+                    disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5), // Ensure visible disabled background
+                    disabledForegroundColor: ThemeConfig.grey600(context), // Ensure visible disabled text
+                  ),
+                  child: Text("Save").tr(),
                 ),
               ],
             ),
