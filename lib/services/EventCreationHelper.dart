@@ -4,39 +4,51 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/MouseDetector.dart';
+import 'package:fstapp/services/TimeHelper.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 
 class EventCreationHelper {
   static Future<void> createNewOccasion(
       BuildContext context, int organizationId, List<OccasionModel> existingOccasions, Function onEventCreated) async {
+    final _formKey = GlobalKey<FormState>();
     String? title = "myfestival".tr();
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
-    DateTime startDate = DateTime.now().add(Duration(days: 30));
-    DateTime endDate = startDate.add(Duration(days: 3));
+    DateTime? startDate = DateTime.now().add(Duration(days: 30));
+    DateTime? endDate = startDate.add(Duration(days: 3));
     bool isLinkManuallyChanged = false;
     String? linkError;
+    bool isFormValid = true;
 
     final TextEditingController titleController = TextEditingController(text: title);
     final TextEditingController linkController = TextEditingController(text: link);
-    final TextEditingController startDateController = TextEditingController(text: DateFormat.yMMMd().format(startDate));
-    final TextEditingController endDateController = TextEditingController(text: DateFormat.yMMMd().format(endDate));
 
     ValueNotifier<String> htmlNotifier = ValueNotifier<String>(_generateHtml(link));
 
-    void validateLink() {
-      linkError = _validateLink(linkController.text, existingOccasions);
+    void validateForm() {
+      linkError = _validateLink(link ?? "", existingOccasions);
+      isFormValid = title != null &&
+          title!.trim().isNotEmpty &&
+          linkError == null &&
+          startDate != null &&
+          endDate != null &&
+          !endDate!.isBefore(startDate!);
     }
 
     void updateLinkAndHtml() {
       var processedTitle = Utilities.removeDiacritics(titleController.text);
-      link = "${processedTitle.split(' ').first.toLowerCase()}${endDate.year}";
+      link = "${processedTitle.split(' ').first.toLowerCase()}${endDate!.year}";
       linkController.text = link!;
       htmlNotifier.value = _generateHtml(link);
-      validateLink();
+      validateForm();
     }
 
     titleController.addListener(() {
       if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
+        title = titleController.text;
         updateLinkAndHtml();
       }
     });
@@ -44,130 +56,146 @@ class EventCreationHelper {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Add New Event').tr(),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(labelText: 'Title'.tr()),
-                    onChanged: (value) {
-                      title = value;
-                      setState(() {});
-                    },
-                  ),
-                  TextField(
-                    controller: linkController,
-                    decoration: InputDecoration(
-                      labelText: 'Link'.tr(),
-                      errorText: linkError,
-                    ),
-                    onChanged: (value) {
-                      link = value;
-                      isLinkManuallyChanged = true;
-                      validateLink();
-                      htmlNotifier.value = _generateHtml(link);
-                      setState(() {});
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: 'Start Date'.tr()),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTime? selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: startDate,
-                        firstDate: DateTime(2000),
-                        lastDate: DateTime(2101),
-                      );
-                      if (selectedDate != null) {
-                        setState(() {
-                          startDate = selectedDate;
-                          startDateController.text = DateFormat.yMMMd().format(startDate);
-                          if (endDate.isBefore(startDate)) {
-                            endDate = startDate.add(Duration(days: 3));
-                            endDateController.text = DateFormat.yMMMd().format(endDate);
-                          }
-                          if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
-                            updateLinkAndHtml();
-                          }
-                        });
-                      }
-                    },
-                    controller: startDateController,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: 'End Date'.tr()),
-                    readOnly: true,
-                    onTap: () async {
-                      DateTime? selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: endDate,
-                        firstDate: startDate,
-                        lastDate: DateTime(2101),
-                      );
-                      if (selectedDate != null && selectedDate.isAfter(startDate)) {
-                        setState(() {
-                          endDate = selectedDate;
-                          endDateController.text = DateFormat.yMMMd().format(endDate);
-                          if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
-                            updateLinkAndHtml();
-                          }
-                        });
-                      }
-                    },
-                    controller: endDateController,
-                  ),
-                  SizedBox(height: 16),
-                  ValueListenableBuilder<String>(
-                    valueListenable: htmlNotifier,
-                    builder: (context, htmlContent, child) {
-                      return HtmlView(
-                        isSelectable: true,
-                        fontSize: 12,
-                        html: htmlContent,
-                      );
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              child: Text('Cancel').tr(),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text('Create').tr(),
-              onPressed: () async {
-                if (title!.isNotEmpty && startDate.isBefore(endDate) && linkError == null) {
-                  OccasionModel newOccasion = OccasionModel(
-                    title: title,
-                    startTime: startDate,
-                    endTime: endDate,
-                    link: link,
-                    isOpen: true,
-                    isHidden: false,
-                    organization: organizationId,
-                  );
-
-                  await DbUsers.updateOccasion(newOccasion);
-                  onEventCreated();
-                  Navigator.of(context).pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Please fix the errors before proceeding.').tr()),
-                  );
+        return MouseDetector(
+          builder: (context, mouseIsConnected) {
+            return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                void handleTitleChange(String value) {
+                  setState(() {
+                    title = value;
+                    validateForm();
+                  });
                 }
+
+                void handleLinkChange(String value) {
+                  setState(() {
+                    link = value;
+                    isLinkManuallyChanged = true;
+                    validateForm();
+                    htmlNotifier.value = _generateHtml(link);
+                  });
+                }
+
+                return AlertDialog(
+                  title: Text('Add New Event').tr(),
+                  content: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Title field with validation
+                        TextFormField(
+                          controller: titleController,
+                          decoration: InputDecoration(
+                            labelText: 'Title'.tr(),
+                            labelStyle: TextStyle(
+                              color: (title == null || title!.trim().isEmpty)
+                                  ? ThemeConfig.redColor(context)
+                                  : null,
+                            ),
+                          ),
+                          onChanged: handleTitleChange,
+                        ),
+                        // Link field with validation
+                        TextFormField(
+                          controller: linkController,
+                          decoration: InputDecoration(
+                            labelText: 'Link'.tr(),
+                            labelStyle: TextStyle(
+                              color: linkError != null ? ThemeConfig.redColor(context) : null,
+                            ),
+                            errorText: linkError,
+                          ),
+                          onChanged: handleLinkChange,
+                        ),
+                        const SizedBox(height: 16),
+                        TimeDateRangePicker(
+                          start: startDate,
+                          end: endDate,
+                          onStartChanged: (pickedStart) {
+                            setState(() {
+                              startDate = pickedStart;
+                              if (pickedStart != null && endDate != null && pickedStart.isAfter(endDate!)) {
+                                endDate = DateTime(
+                                  pickedStart.year,
+                                  pickedStart.month,
+                                  pickedStart.day,
+                                  endDate!.hour,
+                                  endDate!.minute,
+                                );
+                              }
+                              validateForm();
+                            });
+                          },
+                          onEndChanged: (pickedEnd) {
+                            setState(() {
+                              endDate = pickedEnd;
+                              if (pickedEnd != null && startDate != null && pickedEnd.isBefore(startDate!)) {
+                                startDate = DateTime(
+                                  pickedEnd.year,
+                                  pickedEnd.month,
+                                  pickedEnd.day,
+                                  startDate!.hour,
+                                  startDate!.minute,
+                                );
+                              }
+                              validateForm();
+                            });
+                          },
+                          minDate: DateTime(2000),
+                          maxDate: DateTime(2101),
+                        ),
+                        const SizedBox(height: 16),
+                        ValueListenableBuilder<String>(
+                          valueListenable: htmlNotifier,
+                          builder: (context, htmlContent, child) {
+                            return HtmlView(
+                              isSelectable: true,
+                              fontSize: 12,
+                              html: htmlContent,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      child: Text('Cancel').tr(),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    ElevatedButton(
+                      child: Text('Create').tr(),
+                      onPressed: isFormValid
+                          ? () async {
+                        if (_formKey.currentState!.validate()) {
+                          final startDateTime = startDate!;
+                          final endDateTime = endDate!;
+
+                          OccasionModel newOccasion = OccasionModel(
+                            title: title,
+                            startTime: startDateTime,
+                            endTime: endDateTime,
+                            link: link,
+                            isOpen: true,
+                            isHidden: false,
+                            organization: organizationId,
+                          );
+
+                          await DbUsers.updateOccasion(newOccasion);
+                          onEventCreated();
+                          Navigator.of(context).pop();
+                        }
+                      }
+                          : null,
+                    ),
+                  ],
+                );
               },
-            ),
-          ],
+            );
+          },
         );
       },
     );
