@@ -3,10 +3,11 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 
 class EventCreationHelper {
-  static Future<void> createNewEvent(
+  static Future<void> createNewOccasion(
       BuildContext context, int organizationId, List<OccasionModel> existingOccasions, Function onEventCreated) async {
     String? title = "myfestival".tr();
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
@@ -26,12 +27,17 @@ class EventCreationHelper {
       linkError = _validateLink(linkController.text, existingOccasions);
     }
 
+    void updateLinkAndHtml() {
+      var processedTitle = Utilities.removeDiacritics(titleController.text);
+      link = "${processedTitle.split(' ').first.toLowerCase()}${endDate.year}";
+      linkController.text = link!;
+      htmlNotifier.value = _generateHtml(link);
+      validateLink();
+    }
+
     titleController.addListener(() {
       if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
-        link = "${titleController.text.split(' ').first.toLowerCase()}${endDate.year}";
-        linkController.text = link!;
-        htmlNotifier.value = _generateHtml(link); // Update HTML with new link
-        validateLink();
+        updateLinkAndHtml();
       }
     });
 
@@ -86,11 +92,7 @@ class EventCreationHelper {
                             endDateController.text = DateFormat.yMMMd().format(endDate);
                           }
                           if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
-                            link = "${titleController.text.split(' ').first.toLowerCase()}${endDate.year}";
-                            linkController.text = link!;
-                            htmlNotifier.value = _generateHtml(link); // Update HTML with new link
-                            validateLink();
-                            setState(() {}); // Trigger UI update
+                            updateLinkAndHtml();
                           }
                         });
                       }
@@ -112,11 +114,7 @@ class EventCreationHelper {
                           endDate = selectedDate;
                           endDateController.text = DateFormat.yMMMd().format(endDate);
                           if (!isLinkManuallyChanged && titleController.text.isNotEmpty) {
-                            link = "${titleController.text.split(' ').first.toLowerCase()}${endDate.year}";
-                            linkController.text = link!;
-                            htmlNotifier.value = _generateHtml(link); // Update HTML with new link
-                            validateLink();
-                            setState(() {}); // Trigger UI update
+                            updateLinkAndHtml();
                           }
                         });
                       }
@@ -129,7 +127,7 @@ class EventCreationHelper {
                     builder: (context, htmlContent, child) {
                       return HtmlView(
                         isSelectable: true,
-                        fontSize: 12, // Smaller font size
+                        fontSize: 12,
                         html: htmlContent,
                       );
                     },
@@ -156,11 +154,11 @@ class EventCreationHelper {
                     link: link,
                     isOpen: true,
                     isHidden: false,
-                    organization: organizationId, // Add organization ID
+                    organization: organizationId,
                   );
 
                   await DbUsers.updateOccasion(newOccasion);
-                  onEventCreated(); // Callback to refresh or reload the events
+                  onEventCreated();
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +184,6 @@ class EventCreationHelper {
     if (link.isEmpty) {
       return 'Link is required'.tr();
     }
-    // Ensure link is web URL compatible and unique
     final urlPattern = r'^[a-zA-Z0-9-_]+$';
     final isValidFormat = RegExp(urlPattern).hasMatch(link);
     if (!isValidFormat) {
