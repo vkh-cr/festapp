@@ -60,7 +60,7 @@ class AddNewEventDialog {
                 : DatePickerEntryMode.calendar;
 
             return AlertDialog(
-              title: Text("Add New Event").tr(),
+              title: Text("Add To Schedule").tr(),
               content: Form(
                 key: _formKey,
                 child: Column(
