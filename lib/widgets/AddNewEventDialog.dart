@@ -55,123 +55,143 @@ class AddNewEventDialog {
             final timePickerMode = mouseIsConnected
                 ? TimePickerEntryMode.input
                 : TimePickerEntryMode.dial;
-            final datePickerMode = mouseIsConnected
-                ? DatePickerEntryMode.input
-                : DatePickerEntryMode.calendar;
+            final datePickerMode = DatePickerEntryMode.calendar;
 
-            return AlertDialog(
-              title: Text("Add To Schedule").tr(),
-              content: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Title field with validation
-                    TextFormField(
-                      autofocus: true,
-                      decoration: InputDecoration(labelText: "Title".tr()),
-                      validator: FormBuilderValidators.required(),
-                      onSaved: (value) => eventTitle = value,
-                    ),
-                    const SizedBox(height: 16),
-                    // Start Time and Date
-                    buildRow(
-                      context: context,
-                      time: startTime,
-                      onTimePicked: (pickedTime) => startTime = pickedTime,
-                      date: startDate,
-                      onDatePicked: (pickedDate) => startDate = pickedDate,
-                      timePickerMode: timePickerMode,
-                      datePickerMode: datePickerMode,
-                      timeLabel: "Start".tr(),
-                      dateLabel: "Start date".tr(),
-                    ),
-                    const SizedBox(height: 16),
-                    // End Time and Date
-                    buildRow(
-                      context: context,
-                      time: endTime,
-                      onTimePicked: (pickedTime) => endTime = pickedTime,
-                      date: endDate,
-                      onDatePicked: (pickedDate) => endDate = pickedDate,
-                      timePickerMode: timePickerMode,
-                      datePickerMode: datePickerMode,
-                      timeLabel: "End".tr(),
-                      dateLabel: "End date".tr(),
-                    ),
-                    const SizedBox(height: 16),
-                    // Place selection
-                    DropdownButtonFormField<PlaceModel?>(
-                      value: places?.firstWhereOrNull((p) => p.id == placeId),
-                      items: [
-                        DropdownMenuItem<PlaceModel?>(
-                          value: null,
-                          child: Text("---"),
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return AlertDialog(
+                  title: Text("Add To Schedule").tr(),
+                  content: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Title field with validation
+                        TextFormField(
+                          autofocus: true,
+                          decoration: InputDecoration(labelText: "Title".tr()),
+                          validator: FormBuilderValidators.required(),
+                          onSaved: (value) => eventTitle = value,
                         ),
-                        if (places != null)
-                          ...places.map((place) {
-                            return DropdownMenuItem<PlaceModel?>(
-                              value: place,
-                              child: Text(place.title ?? "???"),
-                            );
-                          }),
+                        const SizedBox(height: 16),
+                        // Start Time and Date
+                        buildRow(
+                          context: context,
+                          time: startTime,
+                          onTimePicked: (pickedTime) {
+                            setState(() {
+                              startTime = pickedTime;
+                            });
+                          },
+                          date: startDate,
+                          onDatePicked: (pickedDate) {
+                            setState(() {
+                              if (pickedDate!.isAfter(endDate!)) {
+                                endDate = pickedDate;
+                              }
+                              startDate = pickedDate;
+                            });
+                          },
+                          timePickerMode: timePickerMode,
+                          datePickerMode: datePickerMode,
+                          timeLabel: "Start".tr(),
+                          dateLabel: "Start date".tr(),
+                        ),
+                        const SizedBox(height: 16),
+                        // End Time and Date
+                        buildRow(
+                          context: context,
+                          time: endTime,
+                          onTimePicked: (pickedTime) {
+                            setState(() {
+                              endTime = pickedTime;
+                            });
+                          },
+                          date: endDate,
+                          onDatePicked: (pickedDate) {
+                            setState(() {
+                              if (pickedDate!.isBefore(startDate!)) {
+                                startDate = pickedDate;
+                              }
+                              endDate = pickedDate;
+                            });
+                          },
+                          timePickerMode: timePickerMode,
+                          datePickerMode: datePickerMode,
+                          timeLabel: "End".tr(),
+                          dateLabel: "End date".tr(),
+                        ),
+                        const SizedBox(height: 16),
+                        // Place selection
+                        DropdownButtonFormField<PlaceModel?>(
+                          value: places?.firstWhereOrNull((p) => p.id == placeId),
+                          items: [
+                            DropdownMenuItem<PlaceModel?>(
+                              value: null,
+                              child: Text("---"),
+                            ),
+                            if (places != null)
+                              ...places.map((place) {
+                                return DropdownMenuItem<PlaceModel?>(
+                                  value: place,
+                                  child: Text(place.title ?? "???"),
+                                );
+                              }),
+                          ],
+                          onChanged: (selectedPlace) {
+                            setState(() {
+                              placeId = selectedPlace?.id;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            labelText: "Place".tr(),
+                          ),
+                        ),
                       ],
-                      onChanged: (selectedPlace) {
-                        placeId = selectedPlace?.id;
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text("Storno").tr(),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          final newEvent = EventModel(
+                            title: eventTitle,
+                            place: places?.firstWhereOrNull(
+                                    (place) => place.id == placeId),
+                            startTime: DateTime(
+                              startDate!.year,
+                              startDate!.month,
+                              startDate!.day,
+                              startTime!.hour,
+                              startTime!.minute,
+                            ),
+                            endTime: DateTime(
+                              endDate!.year,
+                              endDate!.month,
+                              endDate!.day,
+                              endTime!.hour,
+                              endTime!.minute,
+                            ),
+                            isHidden: false,
+                            splitForMenWomen: false,
+                            isSignedIn: false,
+                            isGroupEvent: false,
+                            parentEventIds: parentEvent != null ? [parentEvent.id] : null,
+                          );
+                          await DbEvents.updateEvent(newEvent);
+                          Navigator.of(context).pop();
+                        }
                       },
-                      decoration: InputDecoration(
-                        labelText: "Place".tr(),
-                      ),
+                      child: Text("Add").tr(),
                     ),
                   ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text("Storno").tr(),
-                ),
-                // TextButton(
-                //   onPressed: () {
-                //     // Handle "More settings" logic here
-                //   },
-                //   child: Text("More settings").tr(),
-                // ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      _formKey.currentState!.save();
-                      final newEvent = EventModel(
-                        title: eventTitle,
-                        place: places?.firstWhereOrNull(
-                                (place) => place.id == placeId),
-                        startTime: DateTime(
-                          startDate!.year,
-                          startDate!.month,
-                          startDate!.day,
-                          startTime!.hour,
-                          startTime!.minute,
-                        ),
-                        endTime: DateTime(
-                          endDate!.year,
-                          endDate!.month,
-                          endDate!.day,
-                          endTime!.hour,
-                          endTime!.minute,
-                        ),
-                        isHidden: false,
-                        splitForMenWomen: false,
-                        isSignedIn: false,
-                        isGroupEvent: false,
-                        parentEventIds: parentEvent != null ? [parentEvent.id] : null
-                      );
-                      await DbEvents.updateEvent(newEvent);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text("Add").tr(),
-                ),
-              ],
+                );
+              },
             );
           },
         );
@@ -190,22 +210,30 @@ class AddNewEventDialog {
     required String timeLabel,
     required String dateLabel,
   }) {
+    final timeController = TextEditingController(
+      text: time != null ? time.format(context) : "",
+    );
+    final dateController = TextEditingController(
+      text: date != null ? DateFormat.yMd().format(date) : "",
+    );
+
     return Row(
       children: [
         Expanded(
           child: TextFormField(
             readOnly: true,
             decoration: InputDecoration(labelText: timeLabel),
-            controller: TextEditingController(
-              text: time != null ? time.format(context) : "",
-            ),
+            controller: timeController,
             onTap: () async {
               final pickedTime = await TimeHelper.showUniversalTimePicker(
                 context: context,
                 initialTime: time ?? TimeOfDay.now(),
                 initialEntryMode: timePickerMode,
               );
-              onTimePicked(pickedTime);
+              if (pickedTime != null) {
+                onTimePicked(pickedTime);
+                timeController.text = pickedTime.format(context);
+              }
             },
           ),
         ),
@@ -214,9 +242,7 @@ class AddNewEventDialog {
           child: TextFormField(
             readOnly: true,
             decoration: InputDecoration(labelText: dateLabel),
-            controller: TextEditingController(
-              text: date != null ? DateFormat.yMd().format(date) : "",
-            ),
+            controller: dateController,
             onTap: () async {
               final pickedDate = await showDatePicker(
                 context: context,
@@ -225,7 +251,10 @@ class AddNewEventDialog {
                 lastDate: DateTime(2100),
                 initialEntryMode: datePickerMode,
               );
-              onDatePicked(pickedDate);
+              if (pickedDate != null) {
+                onDatePicked(pickedDate);
+                dateController.text = DateFormat.yMd().format(pickedDate);
+              }
             },
           ),
         ),
