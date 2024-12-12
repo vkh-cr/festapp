@@ -310,40 +310,6 @@ class _UserPageState extends State<UserPage> {
                 buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
                 buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
                 buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text("Accommodation").tr(),
-                      SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        child: TextButton(
-                            onPressed: userData?.accommodationPlace == null
-                                ? null
-                                : () => RouterService.navigateOccasion(context,
-                                    "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}"),
-                            child: userData?.accommodationPlace == null ?
-                            Text(
-                                userData?.accommodationPlace?.title ??
-                                    "Without accommodation".tr(),
-                                style: const TextStyle(fontSize: 20)) :
-                            IntrinsicWidth(
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.place),
-                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                  Text(userData!.accommodationPlace!.title!, style: const TextStyle(fontSize: 20)),
-                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                ],
-                              ),
-                            )
-                        ),
-                      )
-                    ],
-                  ),
-                ),
                 const SizedBox(
                   height: 16,
                 ),

@@ -15,7 +15,7 @@ import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/TimetablePage.dart';
+import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -130,8 +130,8 @@ class _SchedulePageState extends State<SchedulePage>
     }
   }
 
-  void _schedulePressed() {
-    RouterService.navigateOccasion(context, TimetablePage.ROUTE)
+  void _mySchedulePressed() {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
         .then((value) => loadData());
   }
 
@@ -178,9 +178,9 @@ class _SchedulePageState extends State<SchedulePage>
                   const Spacer(),
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
-                      onPressed: _schedulePressed,
+                      onPressed: _mySchedulePressed,
                       backgroundColor: ThemeConfig.profileButtonColor(context),
-                      child: Icon(Icons.calendar_month,
+                      child: Icon(Icons.favorite,
                           color: ThemeConfig.profileButtonTextColor(context)),
                     ),
                     Text("My schedule".tr()),

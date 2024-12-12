@@ -67,7 +67,7 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
               for (var e in datedEvents)
                 Tab(
                   child: Text(
-                    e.dateTime!.weekdayToString(context),
+                    e.dateTime!.weekdayToString(context).toUpperCase(),
                     style: StylesConfig.timeLineTabNameTextStyle,
                     maxLines: 1,
                   ),

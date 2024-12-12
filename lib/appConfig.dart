@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/LanguageModel.dart';
 class AppConfig {
   static const String supabaseUrl = 'https://kjdpmixlnhntmxjedpxh.supabase.co';
   static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqZHBtaXhsbmhudG14amVkcHhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDE5NDI5NzEsImV4cCI6MjAxNzUxODk3MX0.06nTXCL-i1GxLckfEyCNlVVwt62QTzKUezqmsYSR_MI';
-  static const String appName = 'Festapp';
+  static const String appName = 'Levandulový festival';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
@@ -17,7 +17,7 @@ class AppConfig {
 
   static const int organization = 1;
   //setup occasion id to force occasion
-  static const String? forceOccasionLink = null;
+  static const String? forceOccasionLink = "levandulovy2025";
   static const bool forceSendingNotificationAsTest = false;
 
   static const String webLink = "https://live.festapp.net";
@@ -25,7 +25,7 @@ class AppConfig {
   static const String playStoreLink = "";
   static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
-  static bool isProLicense = true;
+  static bool isProLicense = false;
 
   static const bool isEventTimeUtc = true;
 
