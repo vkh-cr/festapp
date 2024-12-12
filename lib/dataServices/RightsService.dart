@@ -22,8 +22,8 @@ class RightsService{
         model = LinkModel.extractOccasionLink(Uri.base.toString());
       }
 
-      if(AppConfig.occasionLink != null) {
-        model.occasionLink = AppConfig.occasionLink;
+      if(AppConfig.forceOccasionLink != null) {
+        model.occasionLink = AppConfig.forceOccasionLink;
       }
 
       if (!await RouterService.updateOccasionFromLink(model)) {
