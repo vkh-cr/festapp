@@ -19,7 +19,6 @@ class LinkModel {
     if (match != null) {
       // Extract named groups
       firstPart = match.namedGroup('firstPart');
-      secondPart = match.namedGroup('secondPart');
 
       if (firstPart == FormPage.ROUTE) {
         secondPart = match.namedGroup('secondPart');

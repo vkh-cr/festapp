@@ -34,7 +34,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   void _addNewEvent() {
-    EventCreationHelper.createNewEvent(context, widget.organizationId, _occasions, _loadOccasions);
+    EventCreationHelper.createNewOccasion(context, widget.organizationId, _occasions, _loadOccasions);
   }
 
   @override
