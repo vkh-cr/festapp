@@ -20,6 +20,7 @@ class RightsService{
       var occasionLink = link ?? RouterService.currentOccasionLink;
       if (occasionLink.isEmpty) {
         model = LinkModel.extractOccasionLink(Uri.base.toString());
+        print(Uri.base.toString());
       }
 
       if(AppConfig.forceOccasionLink != null) {

@@ -66,6 +66,9 @@ class SynchroService {
   }
 
   static Future<OccasionLinkModel> getAppConfig({String? occasionLink, String? formLink}) async {
+    print(occasionLink);
+    print(formLink);
+
     var data = await _supabase.rpc("get_app_config",
         params: {"data_in": {
           "link": occasionLink,
@@ -73,6 +76,8 @@ class SynchroService {
           "organization": AppConfig.organization,
           "platform": await PlatformHelper.getPlatform()
         }});
+    print(data);
+
     return OccasionLinkModel.fromJson(data);
   }
 
