@@ -8,7 +8,9 @@ import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
+import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 
@@ -22,15 +24,12 @@ class AddNewEventDialog {
     String? title;
     DateTime? startDate;
     DateTime? endDate;
-    TimeOfDay? startTime;
-    TimeOfDay? endTime;
     int? placeId;
     List<PlaceModel>? places;
     final eventDayRangeTolerance = 7;
     DateTime? minDate;
     DateTime? maxDate;
     bool isFormValid = true;
-    bool isEndTimeInvalid = false; // Tracks if the end time is invalid compared to the start time
 
     minDate = SynchroService.globalSettingsModel!.eventStartTime!.add(Duration(days: -eventDayRangeTolerance));
     maxDate = SynchroService.globalSettingsModel!.eventEndTime!.add(Duration(days: eventDayRangeTolerance));
@@ -48,8 +47,6 @@ class AddNewEventDialog {
     // Initialize defaults
     startDate = defaultStartTime;
     endDate = defaultEndTime;
-    startTime = TimeOfDay.fromDateTime(defaultStartTime);
-    endTime = TimeOfDay.fromDateTime(defaultEndTime);
     placeId = defaultPlaceId;
 
     // Load places
@@ -60,39 +57,14 @@ class AddNewEventDialog {
       builder: (BuildContext context) {
         return MouseDetector(
           builder: (context, mouseIsConnected) {
-            final timePickerMode = mouseIsConnected
-                ? TimePickerEntryMode.input
-                : TimePickerEntryMode.dial;
-            final datePickerMode = DatePickerEntryMode.calendar;
-
             return StatefulBuilder(
               builder: (context, setState) {
                 void validateForm() {
-                  final startDateTime = DateTime(
-                    startDate?.year ?? 0,
-                    startDate?.month ?? 0,
-                    startDate?.day ?? 0,
-                    startTime?.hour ?? 0,
-                    startTime?.minute ?? 0,
-                  );
-                  final endDateTime = DateTime(
-                    endDate?.year ?? 0,
-                    endDate?.month ?? 0,
-                    endDate?.day ?? 0,
-                    endTime?.hour ?? 0,
-                    endTime?.minute ?? 0,
-                  );
-
-                  setState(() {
-                    isEndTimeInvalid = endDateTime.isBefore(startDateTime);
-                    isFormValid = title != null &&
-                        title!.trim().isNotEmpty &&
-                        startDate != null &&
-                        endDate != null &&
-                        startTime != null &&
-                        endTime != null &&
-                        !isEndTimeInvalid;
-                  });
+                  isFormValid = title != null &&
+                      title!.trim().isNotEmpty &&
+                      startDate != null &&
+                      endDate != null &&
+                      !endDate!.isBefore(startDate!);
                 }
 
                 return AlertDialog(
@@ -109,7 +81,7 @@ class AddNewEventDialog {
                             labelText: "Title".tr(),
                             labelStyle: TextStyle(
                               color: (title == null || title!.trim().isEmpty)
-                                  ? Colors.red
+                                  ? ThemeConfig.redColor(context)
                                   : null,
                             ),
                           ),
@@ -121,130 +93,23 @@ class AddNewEventDialog {
                           },
                         ),
                         const SizedBox(height: 16),
-                        // Start Time and Date
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "Start".tr(),
-                                  labelStyle: TextStyle(
-                                    color: (startTime == null) ? Colors.red : null,
-                                  ),
-                                ),
-                                controller: TextEditingController(
-                                  text: startTime?.format(context),
-                                ),
-                                onTap: () async {
-                                  final pickedTime = await TimeHelper.showUniversalTimePicker(
-                                    context: context,
-                                    initialTime: startTime ?? TimeOfDay.now(),
-                                    initialEntryMode: timePickerMode,
-                                  );
-                                  if (pickedTime != null) {
-                                    setState(() {
-                                      startTime = pickedTime;
-                                      validateForm();
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "Start date".tr(),
-                                  labelStyle: TextStyle(
-                                    color: (startDate == null) ? Colors.red : null,
-                                  ),
-                                ),
-                                controller: TextEditingController(
-                                  text: startDate != null ? DateFormat.yMd().format(startDate!) : "",
-                                ),
-                                onTap: () async {
-                                  final pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: startDate ?? DateTime.now(),
-                                    firstDate: minDate!,
-                                    lastDate: maxDate!,
-                                    initialEntryMode: datePickerMode,
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      startDate = pickedDate;
-                                      validateForm();
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // End Time and Date
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "End".tr(),
-                                  labelStyle: TextStyle(
-                                    color: (endTime == null || isEndTimeInvalid) ? Colors.red : null,
-                                  ),
-                                ),
-                                controller: TextEditingController(
-                                  text: endTime?.format(context),
-                                ),
-                                onTap: () async {
-                                  final pickedTime = await TimeHelper.showUniversalTimePicker(
-                                    context: context,
-                                    initialTime: endTime ?? TimeOfDay.now(),
-                                    initialEntryMode: timePickerMode,
-                                  );
-                                  if (pickedTime != null) {
-                                    setState(() {
-                                      endTime = pickedTime;
-                                      validateForm();
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextFormField(
-                                readOnly: true,
-                                decoration: InputDecoration(
-                                  labelText: "End date".tr(),
-                                  labelStyle: TextStyle(
-                                    color: (endDate == null || isEndTimeInvalid) ? Colors.red : null,
-                                  ),
-                                ),
-                                controller: TextEditingController(
-                                  text: endDate != null ? DateFormat.yMd().format(endDate!) : "",
-                                ),
-                                onTap: () async {
-                                  final pickedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: endDate ?? DateTime.now(),
-                                    firstDate: minDate!,
-                                    lastDate: maxDate!,
-                                    initialEntryMode: datePickerMode,
-                                  );
-                                  if (pickedDate != null) {
-                                    setState(() {
-                                      endDate = pickedDate;
-                                      validateForm();
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
+                        TimeDateRangePicker(
+                          start: startDate,
+                          end: endDate,
+                          onStartChanged: (dateTime) {
+                            setState(() {
+                              startDate = dateTime;
+                              validateForm();
+                            });
+                          },
+                          onEndChanged: (dateTime) {
+                            setState(() {
+                              endDate = dateTime;
+                              validateForm();
+                            });
+                          },
+                          minDate: minDate!,
+                          maxDate: maxDate!,
                         ),
                         const SizedBox(height: 16),
                         // Place selection
@@ -289,20 +154,8 @@ class AddNewEventDialog {
                             title: title,
                             place: places?.firstWhereOrNull(
                                     (place) => place.id == placeId),
-                            startTime: DateTime(
-                              startDate!.year,
-                              startDate!.month,
-                              startDate!.day,
-                              startTime!.hour,
-                              startTime!.minute,
-                            ),
-                            endTime: DateTime(
-                              endDate!.year,
-                              endDate!.month,
-                              endDate!.day,
-                              endTime!.hour,
-                              endTime!.minute,
-                            ),
+                            startTime: startDate!,
+                            endTime: endDate!,
                             isHidden: false,
                             splitForMenWomen: false,
                             isSignedIn: false,
