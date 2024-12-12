@@ -154,7 +154,7 @@ class _SchedulePageState extends State<SchedulePage>
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -171,7 +171,7 @@ class _SchedulePageState extends State<SchedulePage>
                     },
                     child: Image.asset(
                       'assets/icons/fstapplogo.png',
-                      width: 100,
+                      width: 200,
                       semanticLabel: 'Festapp',
                     ),
                   ),

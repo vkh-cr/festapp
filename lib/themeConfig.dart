@@ -12,7 +12,7 @@ class ThemeConfig {
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       ).copyWith(
-        surface: seed4.changeColorSaturation(0.2).changeColorLightness(0.86),
+        surface: seed4.changeColorSaturation(0).changeColorLightness(0.86),
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
@@ -43,19 +43,19 @@ class ThemeConfig {
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
   //static Color seed1 = const Color(0xFFF2BC1B);
-  static Color seed1 = const Color(0xFFF2A81D);
-  static Color seed4 = const Color(0xFF7756A6);
-  static Color seed3 = const Color(0xFF261A40);
-  static Color seed2 = const Color(0xFFF2A81D);
+  static Color seed1 = const Color(0xFF000000);
+  static Color seed2 = const Color(0xFFFFFFFF);
+  static Color seed3 = const Color(0xFF808080);
+  static Color seed4 = const Color(0xFFFF0000);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
   static Color dddPrimary = seed2;
   static Color lllPrimary = seed3;
 
-  static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
-  static Color lllBackground = seed3.changeColorSaturation(0.3).changeColorLightness(0.92);
-  static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
+  static Color dddBackground = seed3.changeColorSaturation(0).changeColorLightness(0.14);
+  static Color lllBackground = seed2.changeColorSaturation(0.1).changeColorLightness(0.92);
+  static Color dddText = seed3.changeColorSaturation(0).changeColorLightness(0.86);
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
 
@@ -68,7 +68,7 @@ class ThemeConfig {
 
   static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
 
-  static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
+  static Color timelineAll(BuildContext context) => isDarkMode(context) ? dddText: seed1.changeColorSaturation(1).changeColorLightness(0);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabLabelColor(BuildContext context) => timelineAll(context);
   static Color timelineTabIndicatorColor(BuildContext context) => timelineAll(context);
