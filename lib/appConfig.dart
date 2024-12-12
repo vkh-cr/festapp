@@ -44,12 +44,7 @@ class AppConfig {
   }
 
   static List<LanguageModel> availableLanguages() => [
-    LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
-    LanguageModel(const Locale("sk"), "Slovenčina"),
-    LanguageModel(const Locale("pl"), "Polski"),
-    LanguageModel(const Locale("de"), "Deutsch"),
-    LanguageModel(const Locale("uk"), "українська"),
   ];
 
   static String getUserPrefix(String email){
