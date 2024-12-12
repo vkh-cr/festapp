@@ -18,7 +18,7 @@ class AppConfig {
   static const int organization = 1;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = "vstanachod";
-  static const bool forceSendingNotificationAsTest = true;
+  static const bool isPublicNotificationSendingDisabled = false;
 
   static const String webLink = "https://vstanachod.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
