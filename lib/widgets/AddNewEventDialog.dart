@@ -19,13 +19,21 @@ class AddNewEventDialog {
       [TimeBlockItem? parentEvent]
       ) async {
     final _formKey = GlobalKey<FormState>();
-    String? eventTitle;
+    String? title;
     DateTime? startDate;
     DateTime? endDate;
     TimeOfDay? startTime;
     TimeOfDay? endTime;
     int? placeId;
     List<PlaceModel>? places;
+    final eventDayRangeTolerance = 7;
+    DateTime? minDate;
+    DateTime? maxDate;
+    bool isFormValid = true;
+    bool isEndTimeInvalid = false; // Tracks if the end time is invalid compared to the start time
+
+    minDate = SynchroService.globalSettingsModel!.eventStartTime!.add(Duration(days: -eventDayRangeTolerance));
+    maxDate = SynchroService.globalSettingsModel!.eventEndTime!.add(Duration(days: eventDayRangeTolerance));
 
     // Determine default values
     final lastEventGroup = timelineItems.isNotEmpty ? timelineItems.last : null;
@@ -59,6 +67,34 @@ class AddNewEventDialog {
 
             return StatefulBuilder(
               builder: (context, setState) {
+                void validateForm() {
+                  final startDateTime = DateTime(
+                    startDate?.year ?? 0,
+                    startDate?.month ?? 0,
+                    startDate?.day ?? 0,
+                    startTime?.hour ?? 0,
+                    startTime?.minute ?? 0,
+                  );
+                  final endDateTime = DateTime(
+                    endDate?.year ?? 0,
+                    endDate?.month ?? 0,
+                    endDate?.day ?? 0,
+                    endTime?.hour ?? 0,
+                    endTime?.minute ?? 0,
+                  );
+
+                  setState(() {
+                    isEndTimeInvalid = endDateTime.isBefore(startDateTime);
+                    isFormValid = title != null &&
+                        title!.trim().isNotEmpty &&
+                        startDate != null &&
+                        endDate != null &&
+                        startTime != null &&
+                        endTime != null &&
+                        !isEndTimeInvalid;
+                  });
+                }
+
                 return AlertDialog(
                   title: Text("Add To Schedule").tr(),
                   content: Form(
@@ -68,58 +104,147 @@ class AddNewEventDialog {
                       children: [
                         // Title field with validation
                         TextFormField(
-                          autofocus: true,
-                          decoration: InputDecoration(labelText: "Title".tr()),
-                          validator: FormBuilderValidators.required(),
-                          onSaved: (value) => eventTitle = value,
+                          initialValue: title,
+                          decoration: InputDecoration(
+                            labelText: "Title".tr(),
+                            labelStyle: TextStyle(
+                              color: (title == null || title!.trim().isEmpty)
+                                  ? Colors.red
+                                  : null,
+                            ),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              title = value;
+                              validateForm();
+                            });
+                          },
                         ),
                         const SizedBox(height: 16),
                         // Start Time and Date
-                        buildRow(
-                          context: context,
-                          time: startTime,
-                          onTimePicked: (pickedTime) {
-                            setState(() {
-                              startTime = pickedTime;
-                            });
-                          },
-                          date: startDate,
-                          onDatePicked: (pickedDate) {
-                            setState(() {
-                              if (pickedDate!.isAfter(endDate!)) {
-                                endDate = pickedDate;
-                              }
-                              startDate = pickedDate;
-                            });
-                          },
-                          timePickerMode: timePickerMode,
-                          datePickerMode: datePickerMode,
-                          timeLabel: "Start".tr(),
-                          dateLabel: "Start date".tr(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: "Start".tr(),
+                                  labelStyle: TextStyle(
+                                    color: (startTime == null) ? Colors.red : null,
+                                  ),
+                                ),
+                                controller: TextEditingController(
+                                  text: startTime?.format(context),
+                                ),
+                                onTap: () async {
+                                  final pickedTime = await TimeHelper.showUniversalTimePicker(
+                                    context: context,
+                                    initialTime: startTime ?? TimeOfDay.now(),
+                                    initialEntryMode: timePickerMode,
+                                  );
+                                  if (pickedTime != null) {
+                                    setState(() {
+                                      startTime = pickedTime;
+                                      validateForm();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: "Start date".tr(),
+                                  labelStyle: TextStyle(
+                                    color: (startDate == null) ? Colors.red : null,
+                                  ),
+                                ),
+                                controller: TextEditingController(
+                                  text: startDate != null ? DateFormat.yMd().format(startDate!) : "",
+                                ),
+                                onTap: () async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: startDate ?? DateTime.now(),
+                                    firstDate: minDate!,
+                                    lastDate: maxDate!,
+                                    initialEntryMode: datePickerMode,
+                                  );
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      startDate = pickedDate;
+                                      validateForm();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         // End Time and Date
-                        buildRow(
-                          context: context,
-                          time: endTime,
-                          onTimePicked: (pickedTime) {
-                            setState(() {
-                              endTime = pickedTime;
-                            });
-                          },
-                          date: endDate,
-                          onDatePicked: (pickedDate) {
-                            setState(() {
-                              if (pickedDate!.isBefore(startDate!)) {
-                                startDate = pickedDate;
-                              }
-                              endDate = pickedDate;
-                            });
-                          },
-                          timePickerMode: timePickerMode,
-                          datePickerMode: datePickerMode,
-                          timeLabel: "End".tr(),
-                          dateLabel: "End date".tr(),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: "End".tr(),
+                                  labelStyle: TextStyle(
+                                    color: (endTime == null || isEndTimeInvalid) ? Colors.red : null,
+                                  ),
+                                ),
+                                controller: TextEditingController(
+                                  text: endTime?.format(context),
+                                ),
+                                onTap: () async {
+                                  final pickedTime = await TimeHelper.showUniversalTimePicker(
+                                    context: context,
+                                    initialTime: endTime ?? TimeOfDay.now(),
+                                    initialEntryMode: timePickerMode,
+                                  );
+                                  if (pickedTime != null) {
+                                    setState(() {
+                                      endTime = pickedTime;
+                                      validateForm();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextFormField(
+                                readOnly: true,
+                                decoration: InputDecoration(
+                                  labelText: "End date".tr(),
+                                  labelStyle: TextStyle(
+                                    color: (endDate == null || isEndTimeInvalid) ? Colors.red : null,
+                                  ),
+                                ),
+                                controller: TextEditingController(
+                                  text: endDate != null ? DateFormat.yMd().format(endDate!) : "",
+                                ),
+                                onTap: () async {
+                                  final pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: endDate ?? DateTime.now(),
+                                    firstDate: minDate!,
+                                    lastDate: maxDate!,
+                                    initialEntryMode: datePickerMode,
+                                  );
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      endDate = pickedDate;
+                                      validateForm();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 16),
                         // Place selection
@@ -156,11 +281,12 @@ class AddNewEventDialog {
                       child: Text("Storno").tr(),
                     ),
                     ElevatedButton(
-                      onPressed: () async {
+                      onPressed: isFormValid
+                          ? () async {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
                           final newEvent = EventModel(
-                            title: eventTitle,
+                            title: title,
                             place: places?.firstWhereOrNull(
                                     (place) => place.id == placeId),
                             startTime: DateTime(
@@ -181,12 +307,14 @@ class AddNewEventDialog {
                             splitForMenWomen: false,
                             isSignedIn: false,
                             isGroupEvent: false,
-                            parentEventIds: parentEvent != null ? [parentEvent.id] : null,
+                            parentEventIds:
+                            parentEvent != null ? [parentEvent.id] : null,
                           );
                           await DbEvents.updateEvent(newEvent);
                           Navigator.of(context).pop();
                         }
-                      },
+                      }
+                          : null,
                       child: Text("Add").tr(),
                     ),
                   ],
@@ -196,69 +324,6 @@ class AddNewEventDialog {
           },
         );
       },
-    );
-  }
-
-  static Widget buildRow({
-    required BuildContext context,
-    required TimeOfDay? time,
-    required void Function(TimeOfDay?) onTimePicked,
-    required DateTime? date,
-    required void Function(DateTime?) onDatePicked,
-    required TimePickerEntryMode timePickerMode,
-    required DatePickerEntryMode datePickerMode,
-    required String timeLabel,
-    required String dateLabel,
-  }) {
-    final timeController = TextEditingController(
-      text: time != null ? time.format(context) : "",
-    );
-    final dateController = TextEditingController(
-      text: date != null ? DateFormat.yMd().format(date) : "",
-    );
-
-    return Row(
-      children: [
-        Expanded(
-          child: TextFormField(
-            readOnly: true,
-            decoration: InputDecoration(labelText: timeLabel),
-            controller: timeController,
-            onTap: () async {
-              final pickedTime = await TimeHelper.showUniversalTimePicker(
-                context: context,
-                initialTime: time ?? TimeOfDay.now(),
-                initialEntryMode: timePickerMode,
-              );
-              if (pickedTime != null) {
-                onTimePicked(pickedTime);
-                timeController.text = pickedTime.format(context);
-              }
-            },
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: TextFormField(
-            readOnly: true,
-            decoration: InputDecoration(labelText: dateLabel),
-            controller: dateController,
-            onTap: () async {
-              final pickedDate = await showDatePicker(
-                context: context,
-                initialDate: date ?? DateTime.now(),
-                firstDate: DateTime(2000),
-                lastDate: DateTime(2100),
-                initialEntryMode: datePickerMode,
-              );
-              if (pickedDate != null) {
-                onDatePicked(pickedDate);
-                dateController.text = DateFormat.yMd().format(pickedDate);
-              }
-            },
-          ),
-        ),
-      ],
     );
   }
 }
