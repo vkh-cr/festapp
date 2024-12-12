@@ -179,7 +179,7 @@ x=4
 return A.c(F.zY("game"),$async$Ck)
 case 4:v.E(new r.bOt(v,e))
 x=5
-return A.c(v.Np(),$async$Ck)
+return A.c(v.No(),$async$Ck)
 case 5:if(v.r!=null){t=Date.now()
 s=v.r.b
 s.toString
@@ -192,15 +192,15 @@ if(new A.b4(t,0,!1).kK(s)){t=v.r.b
 t.toString
 v.aIh(t)}}return A.j(null,w)}})
 return A.k($async$Ck,w)},
-Np(){var x=0,w=A.l(y.v),v,u=this,t
-var $async$Np=A.h(function(d,e){if(d===1)return A.i(e,w)
+No(){var x=0,w=A.l(y.v),v,u=this,t
+var $async$No=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:if(!u.z){x=1
 break}t=B
 x=3
-return A.c(B.aj_(),$async$Np)
+return A.c(B.aj_(),$async$No)
 case 3:u.E(new t.bOp(u,e))
 case 1:return A.j(v,w)}})
-return A.k($async$Np,w)},
+return A.k($async$No,w)},
 aIh(d){this.y=d.jM(new A.b4(Date.now(),0,!1))
 this.w=A.IC(A.ce(0,0,0,0,0,1),new B.bOw(this,d))},
 A(d){var x,w,v,u,t,s,r=this,q=null,p=new A.b4(Date.now(),0,!1),o=r.r
@@ -214,26 +214,26 @@ w=p.kK(o)}else w=!1
 o=A.a6(r.f,q,q,q,q,q,q,q,q,q,q,q,q,q)
 o=H.jL(q,!0,q,q,q,q,q,L.q2(new B.bOk(d)),q,o)
 v=A.a([new A.cX(C.aN,q,q,new A.dj(new A.aa(0,820,0,1/0),I.Xv(q,C.w,D.aW5,new B.bOl(r),r.d.length,q,C.aC,q,C.H,!1),q),q)],y.u)
-if(!r.z)v.push(r.QC(A.G("For playing the game, you must be assigned to a game group",q)))
-if(r.z&&x)v.push(r.QC(A.G("Game has not started yet",q)))
+if(!r.z)v.push(r.QB(A.G("For playing the game, you must be assigned to a game group",q)))
+if(r.z&&x)v.push(r.QB(A.G("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.dR(8)
 t=r.y.a
 s=y.w
-v.push(A.hz(q,A.aE(q,A.a6(A.G("Time left: {time}",A.z(["time",""+C.c.aW(t,36e8)+":"+C.e.fA(C.c.k(C.c.al(C.c.aW(t,6e7),60)),2,"0")+":"+C.e.fA(C.c.k(C.c.al(C.c.aW(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,M.a2C,q,q,q,q,q),C.f,q,q,new A.bF(C.aB,q,q,u,q,q,q,C.S),q,q,q,C.aC,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.QC(A.G("Game has ended",q)))
-if(r.Q)v.push(r.QC(A.G("You are offline. Please check your internet connection.",q)))
+v.push(A.hz(q,A.aE(q,A.a6(A.G("Time left: {time}",A.z(["time",""+C.c.aW(t,36e8)+":"+C.e.fA(C.c.k(C.c.al(C.c.aW(t,6e7),60)),2,"0")+":"+C.e.fA(C.c.k(C.c.al(C.c.aW(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,M.a2C,q,q,q,q,q),C.f,q,q,new A.bF(C.aB,q,q,u,q,q,q,C.S),q,q,q,C.aC,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.QB(A.G("Game has ended",q)))
+if(r.Q)v.push(r.QB(A.G("You are offline. Please check your internet connection.",q)))
 return S.fK(o,q,A.db(C.ag,v,C.B,C.aa,q),q,q,q,q)},
-QC(d){var x=null
+QB(d){var x=null
 return A.aE(C.F,A.cp(new A.ag(P.ca,A.a6(d,x,x,x,x,x,x,x,D.b_w,C.br,x,x,x,x),x),x,x),C.f,C.am,x,x,x,x,x,x,x,x,x)},
-Tz(d,e){return this.bfG(d,e)},
+Ty(d,e){return this.bfG(d,e)},
 bfG(d,e){var x=0,w=A.l(y.v),v=this,u,t
-var $async$Tz=A.h(function(f,g){if(f===1)return A.i(g,w)
+var $async$Ty=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:t={}
 t.a=null
 u=v.d[e].d
 x=2
-return A.c(T.iy(null,null,!0,null,new B.bOi(t,v,u==null?"Game":u,d,e),d,null,!0,!0,y.b),$async$Tz)
+return A.c(T.iy(null,null,!0,null,new B.bOi(t,v,u==null?"Game":u,d,e),d,null,!0,!0,y.b),$async$Ty)
 case 2:return A.j(null,w)}})
-return A.k($async$Tz,w)}}
+return A.k($async$Ty,w)}}
 var z=a.updateTypes(["fP(N)"])
 B.aXO.prototype={
 $2(d,e){return B.cHI(d,e)},
@@ -242,7 +242,7 @@ B.b_m.prototype={
 $1(d){return J.t(d,"check_point")},
 $S:51}
 B.bOn.prototype={
-$1(d){this.a.Np()},
+$1(d){this.a.No()},
 $S:88}
 B.bOo.prototype={
 $1(d){var x=this.a
@@ -278,7 +278,7 @@ if(w!=null)w.V(0)
 x.y=null
 x=x.c
 x.toString
-A.cn(x,!0).NW(new B.bOu())}},
+A.cn(x,!0).NV(new B.bOu())}},
 $S:0}
 B.bOu.prototype={
 $1(d){return d.gX3()},
@@ -295,7 +295,7 @@ v=t.d[e].d
 return A.d8(u,A.aE(C.F,A.a6(v==null?"-":v,u,u,u,u,u,u,u,D.b_x,C.br,u,u,u,u),C.f,u,u,new A.bF(x,u,u,w,u,u,u,C.S),u,u,u,u,u,u,u),C.w,!1,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new B.bOj(t,d,e),u,u,u,u,u,u,!1,C.ad)},
 $S:272}
 B.bOj.prototype={
-$0(){return this.a.Tz(this.b,this.c)},
+$0(){return this.a.Ty(this.b,this.c)},
 $S:0}
 B.bOi.prototype={
 $1(d){var x,w,v,u=this,t=null,s=y.w
@@ -343,4 +343,4 @@ D.b_x=new A.Y(!0,C.p,null,null,null,null,16,C.ar,null,null,null,null,null,null,n
 D.b_w=new A.Y(!0,C.p,null,null,null,null,24,C.ar,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b18=new A.c5("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.ciL=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_276",e:"endPart",h:b})})($__dart_deferred_initializers__,"D3jAy6PyqYRtxUAUNb4ZGztS1f8=");
+a.eventLog.push({p:"main.dart.js_276",e:"endPart",h:b})})($__dart_deferred_initializers__,"m4+pQ//uY1e75v2wxIOXTI2KJik=");

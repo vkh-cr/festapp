@@ -127,8 +127,8 @@ this.b=e},
 bPS:function bPS(d,e){this.a=d
 this.b=e},
 co9(){var x,w,v="/offlineOccasion/"
-if(A.tG().giA()==="http"||A.tG().giA()==="https"){x=A.tG()
-x=x.gHe(x)
+if(A.tG().gij()==="http"||A.tG().gij()==="https"){x=A.tG()
+x=x.gHf(x)
 w=$.P0
 w=w.length!==0?"/"+w+"/":v
 return x+"/#"+w}x=A.tG().k(0)
@@ -336,7 +336,7 @@ t.a.eZ(t.gmN())}}this.aNS()},
 b3o(){this.E(new B.bTd())},
 Ez(d,e){var x,w,v=this.d
 v===$&&A.b()
-x=C.b.ix(v,e)
+x=C.b.iy(v,e)
 if(x instanceof B.hg){v=this.e
 w=x.a
 v.i(0,w).m()
@@ -549,7 +549,7 @@ r=s.a+w
 s=s.b+v
 q=m.id
 if(q==null)q=A.Z(A.a0("RenderBox was not laid out: "+A.T(m).k(0)+"#"+A.c9(m)))
-if((u&1)===0){if(d.e==null)d.KK()
+if((u&1)===0){if(d.e==null)d.KL()
 p=d.e
 p.toString
 if(n.bm!==0){o=$.ap().d0()
@@ -574,14 +574,14 @@ w.ao()
 x=A.bP(null,w.a.f,null,1,null,w)
 w.d=x
 if(w.a.e===D.y6)x.sj(0,1)
-w.e=w.Sa(w.a.w,!0)
-w.f=w.Sa(w.a.x,!1)
+w.e=w.S9(w.a.w,!0)
+w.f=w.S9(w.a.x,!1)
 x=w.d
 x.d1()
 x=x.eS$
 x.b=!0
 x.a.push(new B.bEA(w))},
-Sa(d,e){var x,w,v=this.d
+S9(d,e){var x,w,v=this.d
 v===$&&A.b()
 x=y.m
 w=new A.b7(x.a(v),new A.hv(d),y.t.h("b7<aW.T>"))
@@ -598,9 +598,9 @@ w=x.f
 if(w.a!==d.f.a){v=u.d
 v===$&&A.b()
 v.e=w}x=x.w
-if(x!==d.w)u.e=u.Sa(x,!0)
+if(x!==d.w)u.e=u.S9(x,!0)
 x=u.a.x
-if(x!==d.x)u.f=u.Sa(x,!1)
+if(x!==d.x)u.f=u.S9(x,!1)
 x=u.a.e
 if(x!==d.e)switch(x.a){case 0:x=u.d
 x===$&&A.b()
@@ -651,7 +651,7 @@ b1(){var x,w=this
 w.cJ()
 if(w.a.c==null&&w.c.jv(y.u).f.f.length!==0){x=w.a
 x.toString
-x.c=w.c.jv(y.u).f.f[0].a.Pe("id")}w.bu()},
+x.c=w.c.jv(y.u).f.f[0].a.Pd("id")}w.bu()},
 A(d){var x,w,v,u=this,t=null,s="songbook",r=A.I(d).ax.a===C.x?$.kA():$.DS(),q=A.a6(u.w,t,t,t,t,t,t,t,t,t,t,t,t,t)
 q=P.jL(t,!0,t,t,t,t,t,Y.bnw(),t,q)
 x=y.p
@@ -886,4 +886,4 @@ D.a3F=new A.cW(D.FH,y.b)
 D.a3G=new A.cW(D.y6,y.b)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"d61","cxy",()=>A.mr(0,0.5,A.w("J")).p6(A.l5(C.ai)))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_299",e:"endPart",h:b})})($__dart_deferred_initializers__,"FrkWOAYUXt3nDZepUAHvTpnPzrg=");
+a.eventLog.push({p:"main.dart.js_299",e:"endPart",h:b})})($__dart_deferred_initializers__,"Pcf1X4Q5rnxoFOI0pcBHu3Nw19Y=");

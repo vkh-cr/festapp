@@ -49,7 +49,7 @@ while(true)switch(x){case 0:r=$.T_().bW("occasions").h8(0,"data")
 q=$.dK
 q.toString
 x=3
-return A.c(r.cn("id",q).GY(),$async$aj5)
+return A.c(r.cn("id",q).GZ(),$async$aj5)
 case 3:u=e
 if(u!=null){t=J.t(u,"data")
 if(t!=null&&J.t(t,"game")!=null){r=J.t(t,"game")
@@ -105,4 +105,4 @@ x(B.b_x,A.dd)})()
 var y={c:A.w("fg"),l:A.w("y<fg>"),g:A.w("f"),b:A.w("@"),i:A.w("Xk?")};(function lazyInitializers(){var x=a.lazyFinal
 x($,"d1I","T_",()=>$.j0().gqe(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"Djm8LnrQxJ6UaT30pt4oIEhZXxs=");
+a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"ayrcsvFuu7eOoo4N/48OxvJlUZI=");
