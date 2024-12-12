@@ -25565,7 +25565,7 @@ bTC:function bTC(a,b){this.a=a
 this.b=b},
 cHC(a){var s,r,q,p,o={}
 o.a=null
-s=A.bx("#\\/(?<firstPart>[^\\/]+)\\/(?<secondPart>[^\\/]+)",!0,!1,!1).qB(a)
+s=A.bx("#\\/(?<firstPart>[^\\/]+)(?:\\/(?<secondPart>[^\\/]+))?",!0,!1,!1).qB(a)
 r=A.a(["resetPassword","forgotPassword","login","signup","settings","install","adminDashboard","form"],t.s)
 if(s!=null){q=s.a9S("firstPart")
 o.a=q
