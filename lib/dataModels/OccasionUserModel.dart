@@ -104,7 +104,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> serviceToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -128,7 +128,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> servicesToPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
