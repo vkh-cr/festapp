@@ -233,21 +233,29 @@ class DialogHelper{
     return result;
   }
 
-  static Future<XFile?>  dropFilesHere(
+  static Future<XFile?> dropFilesHere(
       BuildContext context,
       String titleMessage,
       String confirmButtonMessage,
       String cancelButtonMessage,
       ) async {
     XFile? filePath;
-    Widget dropFile = DropFile(onFilePathChanged: (f) => filePath = f);
+    final dropFileWidget = DropFile(
+      onFilePathChanged: (file) => filePath = file,
+    );
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(titleMessage),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            titleMessage,
+          ),
           content: SingleChildScrollView(
-            child: dropFile,
+            child: dropFileWidget,
           ),
           actions: [
             TextButton(
@@ -257,8 +265,8 @@ class DialogHelper{
               },
               child: Text(cancelButtonMessage),
             ),
-            TextButton(
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context);
               },
               child: Text(confirmButtonMessage),
@@ -267,8 +275,10 @@ class DialogHelper{
         );
       },
     );
+
     return filePath;
   }
+
 
 
   static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
@@ -464,6 +474,40 @@ class DialogHelper{
     }
 
     return completer.future;
+  }
+
+  static Future<String?> showInputDialog({
+    required BuildContext context,
+    String? initialValue,
+    required String dialogTitle,
+    required String labelText,
+  }) async {
+    final TextEditingController controller = TextEditingController(text: initialValue);
+
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(dialogTitle),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(labelText: labelText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Cancel button
+              child: const Text("Storno").tr(),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, controller.text.trim()); // Return the input
+              },
+              child: const Text("Save").tr(),
+            ),
+          ],
+        );
+      },
+    );
   }
 
 }

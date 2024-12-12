@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -103,7 +104,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> serviceToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -127,7 +128,7 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, PlutoCell> servicesToPlutoRow(Map<String, dynamic>? services, String serviceType) {
     Map<String, PlutoCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.formKey] = PlutoCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -142,7 +143,7 @@ class OccasionUserModel extends IPlutoRowModel {
   String toBasicString() => data?[Tb.occasion_users.data_email]??"";
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     Map<String, PlutoCell> json = {};
     Map<String, PlutoCell> foodServices = servicesToPlutoRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);
@@ -254,9 +255,6 @@ class OccasionUserModel extends IPlutoRowModel {
   }
 
   bool compareField(Map<String, dynamic> u, dynamic dataField, dynamic uField) {
-    if(!compareStrings(u[uField], data?[dataField])){
-      var x= 1;
-    }
     return compareStrings(u[uField], data?[dataField]);
   }
 

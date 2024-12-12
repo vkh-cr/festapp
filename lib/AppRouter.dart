@@ -5,6 +5,7 @@ import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
+import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/InstallPage.dart';
@@ -15,7 +16,6 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
-import 'package:fstapp/pages/SchedulePage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
@@ -42,6 +42,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
+    AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
+    AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:id"),
+    AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formKey/edit"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
@@ -54,7 +57,7 @@ class AppRouter extends RootStackRouter {
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
     AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
-      AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
+      AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
                   AutoRoute(page: EventRoute.page, path: ":id")
@@ -89,6 +92,7 @@ class AppRouter extends RootStackRouter {
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
       AdminDashboardPage.ROUTE,
+      FormPage.ROUTE,
     ];
   }
 }

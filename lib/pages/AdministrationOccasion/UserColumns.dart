@@ -8,7 +8,7 @@ import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class ColumnHelper {
+class UserColumns {
   // Column identifier constants
   static const String ID = "id";
   static const String EMAIL = "email";
@@ -166,7 +166,7 @@ class ColumnHelper {
       return columns;
     },
     ACCOMMODATION: (Map<String, dynamic> data) {
-      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.code).toList();
+      var select = data[DbOccasions.serviceTypeAccommodation]?.map((a)=>a.id).toList();
       select ??= [];
       select.add("");
       return [

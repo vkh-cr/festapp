@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -10,7 +11,6 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
 @RoutePage()
@@ -26,17 +26,18 @@ class _SignupPageState extends State<SignupPage> {
   bool _isLoading = false;
   bool _isRegistrationSuccess = false;
   Map<String, dynamic>? fieldsData;
+  FormHolder? formHolder;
 
-  final dynamic fields =
-  {"fields":
+  Map<String, dynamic> entryJson = {FormHelper.metaFields:
   [
-    {"type":FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeSex},
-    {"type":FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
-    {"type":FormHelper.fieldTypeBirthYear},
+    { FormHelper.metaType : FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeSex},
+    { FormHelper.metaType : FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
+    { FormHelper.metaType : FormHelper.fieldTypeBirthYear},
   ]};
+
   final _formKey = GlobalKey<FormBuilderState>();
 
   @override
@@ -46,6 +47,8 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
+    formHolder = FormHolder.fromJson(entryJson);
+    formHolder!.controller = FormHolderController(globalKey: _formKey);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -85,7 +88,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getFormFields(fields["fields"]),
+                    ...FormHelper.getAllFormFields(context, formHolder!.controller!.globalKey!, formHolder!),
                       const SizedBox(
                         height: 16,
                       ),
@@ -97,7 +100,7 @@ class _SignupPageState extends State<SignupPage> {
                             setState(() {
                               _isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(_formKey, fields["fields"]);
+                            var data = FormHelper.getDataFromForm(formHolder!);
                             fieldsData = data;
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {
