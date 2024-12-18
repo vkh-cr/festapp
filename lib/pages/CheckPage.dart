@@ -166,7 +166,6 @@ class _CheckPageState extends State<CheckPage> {
           detectionSpeed: DetectionSpeed.noDuplicates);
 
   @override
-  @override
   Widget build(BuildContext context) {
     const minChildSize = 0.25;
     const maxChildSize = 0.88;
