@@ -169,10 +169,13 @@ class _SchedulePageState extends State<SchedulePage>
                         });
                       }
                     },
-                    child: Image.asset(
-                      'assets/icons/fstapplogo.png',
-                      width: 100,
-                      semanticLabel: 'Festapp',
+                    child: Padding(
+                      padding: EdgeInsets.all(6),
+                      child: Image.asset(
+                        'assets/icons/fstapplogo.png',
+                        width: 200,
+                        semanticLabel: 'Festapp',
+                      ),
                     ),
                   ),
                   const Spacer(),
