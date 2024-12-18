@@ -182,16 +182,13 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         contentsBuilder: (_, index) {
           final event = events[index];
           //return Text(event.maxParticipants == null ? event.title : "${event.title} (${event.currentParticipants}/${event.maxParticipants})");
-          return SizedBox(
-            height: 100,
-            child: TextButton(
-                onPressed: () => widget.onEventPressed!(event.id),
-                style: TextButton.styleFrom(
+          return TextButton(
+              onPressed: () => widget.onEventPressed!(event.id),
+              style: TextButton.styleFrom(
                   foregroundColor: Colors.black,
                   alignment: Alignment.centerLeft
-                ),
-                child: Text(event.rightText+"lool", style: StylesConfig.timeLineSmallTextStyle,)),
-          );
+              ),
+              child: Text(event.rightText, style: StylesConfig.timeLineSmallTextStyle,));
         },
         indicatorBuilder: (_, index) {
           final event = events[index];
