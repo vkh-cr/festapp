@@ -35,7 +35,7 @@ class StylesConfig {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
 
-  static String formatDateTimeForTab(BuildContext context, DateTime time){
-    return time.weekdayToString(context);
+  static String formatDateTimeForTab(BuildContext context, DateTime time) {
+    return "${time.weekdayToString(context).toUpperCase().substring(0, 2)} ${DateFormat('dd.MM.').format(time)}";
   }
 }
