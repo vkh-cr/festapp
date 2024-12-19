@@ -22,8 +22,8 @@ class AppConfig {
 
   static const String webLink = "https://hvezdamorska.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/festapp/id6474078383";
-  static const String playStoreLink = "";
-  static const String playStoreLaunchLink = "";
+  static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
+  static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
   static const String desktopAppLink = "";
   static bool isProLicense = false;
 
