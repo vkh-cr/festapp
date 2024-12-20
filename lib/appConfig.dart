@@ -25,7 +25,7 @@ class AppConfig {
   static const String playStoreLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
   static const String playStoreLaunchLink = "https://play.google.com/store/apps/details?id=fstapp.hvezdamorska";
   static const String desktopAppLink = "";
-  static bool isProLicense = false;
+  static bool isProLicense = true;
 
   static const bool isEventTimeUtc = true;
 
