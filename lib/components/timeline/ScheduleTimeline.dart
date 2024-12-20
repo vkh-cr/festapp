@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'package:timelines/timelines.dart';
+import 'package:timelines_plus/timelines_plus.dart';
 
 class ScheduleTimeline extends StatefulWidget {
   final Function(int)? onEventPressed;

@@ -12,7 +12,7 @@ class LinkModel {
     String? secondPart;
 
     // Use a regular expression with named groups to match the pattern after the hash sign (#)
-    final regex = RegExp(r'#\/(?<firstPart>[^\/]+)\/(?<secondPart>[^\/]+)');
+    final regex = RegExp(r'#\/(?<firstPart>[^\/]+)(?:\/(?<secondPart>[^\/]+))?');
     final match = regex.firstMatch(url);
 
     var rootLinks = AppRouter.getRootLinks();
