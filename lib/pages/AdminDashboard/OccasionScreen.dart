@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
-import 'package:fstapp/services/EventCreationHelper.dart';
+import 'package:fstapp/services/OccasionCreationHelper.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 
 class OccasionsScreen extends StatefulWidget {
@@ -34,7 +34,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   void _addNewEvent() {
-    EventCreationHelper.createNewOccasion(context, widget.organizationId, _occasions, _loadOccasions);
+    OccasionCreationHelper.createNewOccasion(context, widget.organizationId, _occasions, _loadOccasions);
   }
 
   @override
