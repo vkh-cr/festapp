@@ -7,18 +7,19 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
-import 'package:fstapp/services/TimeHelper.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 
-class EventCreationHelper {
+class OccasionCreationHelper {
   static Future<void> createNewOccasion(
       BuildContext context, int organizationId, List<OccasionModel> existingOccasions, Function onEventCreated) async {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     String? title = "myfestival".tr();
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
-    DateTime? startDate = DateTime.now().add(Duration(days: 30));
-    DateTime? endDate = startDate.add(Duration(days: 3));
+    DateTime? startDate = DateTime.now()
+        .add(Duration(days: 30))
+        .copyWith(minute: 0, second: 0, millisecond: 0, microsecond: 0);
+    DateTime? endDate = startDate.add(Duration(days: 3))
+        .copyWith(minute: 0, second: 0, millisecond: 0, microsecond: 0);
     bool isLinkManuallyChanged = false;
     String? linkError;
     bool isFormValid = true;
@@ -79,7 +80,7 @@ class EventCreationHelper {
                 return AlertDialog(
                   title: Text('Add New Event').tr(),
                   content: Form(
-                    key: _formKey,
+                    key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -161,16 +162,15 @@ class EventCreationHelper {
                   ),
                   actions: [
                     TextButton(
-                      child: Text('Cancel').tr(),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
+                      child: Text('Cancel').tr(),
                     ),
                     ElevatedButton(
-                      child: Text('Create').tr(),
                       onPressed: isFormValid
                           ? () async {
-                        if (_formKey.currentState!.validate()) {
+                        if (formKey.currentState!.validate()) {
                           final startDateTime = startDate!;
                           final endDateTime = endDate!;
 
@@ -190,6 +190,7 @@ class EventCreationHelper {
                         }
                       }
                           : null,
+                      child: Text('Create').tr(),
                     ),
                   ],
                 );
