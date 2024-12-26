@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_272",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,F,B={
-cil(d,e,f,g,h){var x=null,w=A.h4(new A.ag(E.eS,D.cU(x,x,x,x,x,D.c1(F.H3,h,x,x),x,x,new B.aVh(e),x,x,x,x,x),x),d===!0)
+cin(d,e,f,g,h){var x=null,w=A.h4(new A.ag(E.eS,D.cU(x,x,x,x,x,D.c1(F.H3,h,x,x),x,x,new B.aVh(e),x,x,x,x,x),x),d===!0)
 return A.a([w,A.h4(new A.ag(E.eS,D.cU(x,x,x,x,x,D.c1(H.m5,g,x,x),x,x,new B.aVi(f),x,x,x,x,x),x),d===!1)],y.p)},
 aVh:function aVh(d){this.a=d},
 aVi:function aVi(d){this.a=d},
@@ -12,7 +12,7 @@ while(true)switch(x){case 0:v=$.dQ()
 x=v.gdw().d!=null?2:3
 break
 case 2:x=4
-return A.c($.fN().bW("event_users_saved").kg(0).cn("event",e).cn("user",v.gdw().c.a),$async$Vq)
+return A.c($.fN().bU("event_users_saved").kg(0).ci("event",e).ci("user",v.gdw().c.a),$async$Vq)
 case 4:case 3:x=5
 return A.c(B.arl(e),$async$Vq)
 case 5:A.c_(d,A.G("Removed from My schedule.",null),C.af)
@@ -24,7 +24,7 @@ while(true)switch(x){case 0:u=$.dQ()
 x=u.gdw().d!=null?3:4
 break
 case 3:x=5
-return A.c($.fN().bW("event_users_saved").jx(0,A.z(["event",e,"user",u.gdw().c.a],y.g,y.o)),$async$Vo)
+return A.c($.fN().bU("event_users_saved").jx(0,A.y(["event",e,"user",u.gdw().c.a],y.g,y.o)),$async$Vo)
 case 5:case 4:x=6
 return A.c(B.ari(e),$async$Vo)
 case 6:A.c_(d,A.G("Added to My schedule.",null),C.af)
@@ -54,7 +54,7 @@ return A.c(A.a_i(v),$async$arl)
 case 3:return A.j(null,w)}})
 return A.k($async$arl,w)},
 axB(d){return A.I(d).ax.a===C.x?A.I(d).ax.k3:A.I(d).ax.k2},
-cdn(d,e){var x
+cdp(d,e){var x
 switch(e){case"music":return C.cA
 case"talk":return C.aL
 case"other":return G.F1}x=A.bQ(C.aL)
@@ -87,6 +87,6 @@ case 2:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2};(function inheritance(){var x=a.inheritMany
 x(A.cl,[B.aVh,B.aVi])})()
-var y={p:A.w("p<yr>"),o:A.w("A"),g:A.w("f"),e:A.w("v"),f:A.w("~")}};
+var y={p:A.z("p<yt>"),o:A.z("A"),g:A.z("f"),e:A.z("v"),f:A.z("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_272",e:"endPart",h:b})})($__dart_deferred_initializers__,"OlMe4jOn7reLAbMMUy/iIrJQh/s=");
+a.eventLog.push({p:"main.dart.js_272",e:"endPart",h:b})})($__dart_deferred_initializers__,"faHfnwRmt0QDxaKw5TH1mWqUCgM=");
