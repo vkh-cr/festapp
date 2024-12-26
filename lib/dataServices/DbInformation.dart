@@ -13,19 +13,28 @@ class DbInformation {
   static final _supabase = Supabase.instance.client;
 
   static Future<List<InformationModel>> getAllInformationForDataGrid([String? informationType]) async {
-    var data = await _supabase.from(Tb.information.table).select(
-        "${Tb.information.id},"
-            "${Tb.information.occasion},"
-            "${Tb.information.created_at},"
-            "${Tb.information.updated_at},"
-            "${Tb.information.is_hidden},"
-            "${Tb.information.title},"
-            "${Tb.information.order},"
-            "${Tb.information.type},"
-            "${Tb.information.data},"
-            "${Tb.information_hidden.table}(*)")
-        .eq(Tb.information.occasion, RightsService.currentOccasion!)
-        .filter(Tb.information.type, "eq", informationType ?? "");
+    var select = "${Tb.information.id},"
+        "${Tb.information.occasion},"
+        "${Tb.information.created_at},"
+        "${Tb.information.updated_at},"
+        "${Tb.information.is_hidden},"
+        "${Tb.information.title},"
+        "${Tb.information.order},"
+        "${Tb.information.type},"
+        "${Tb.information.data},"
+        "${Tb.information_hidden.table}(*)";
+
+    List<Map<String, dynamic>> data = [];
+    if(informationType != null) {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .eq(Tb.information.occasion, RightsService.currentOccasion!)
+          .filter(Tb.information.type, "eq", informationType);
+    } else {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .eq(Tb.information.occasion, RightsService.currentOccasion!)
+          .or("${Tb.information.type}.eq.,${Tb.information.type}.is.null");
+    }
+
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
