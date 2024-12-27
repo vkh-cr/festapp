@@ -28,6 +28,7 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.NAME,
     UserColumns.SURNAME,
     UserColumns.SEX,
+    UserColumns.ROLE,
     UserColumns.ADMINISTRATOR,
     UserColumns.EDITOR,
     UserColumns.APPROVER,
