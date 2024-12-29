@@ -86,7 +86,15 @@ class _NewsPageState extends State<NewsPage> {
     });
   }
 
+  Future<void> loadOfflineData() async {
+    var loadedMessages = await OfflineDataService.getAllMessages();
+    setState(() {
+      newsMessages = loadedMessages;
+    });
+  }
+
   Future<void> loadData() async {
+    await loadOfflineData();
     await loadNewsMessages();
     await OfflineDataService.saveAllMessages(newsMessages);
     _checkAsRead();

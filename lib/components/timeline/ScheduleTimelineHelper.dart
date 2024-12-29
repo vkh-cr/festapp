@@ -93,7 +93,7 @@ class TimeBlockHelper {
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDate(
-      Iterable<TimeBlockItem> events, BuildContext context, int splitHour) {
+      List<TimeBlockItem> events, BuildContext context, int splitHour) {
     List<TimeBlockGroup> toReturn = [];
     if (events.isEmpty) {
       return toReturn;

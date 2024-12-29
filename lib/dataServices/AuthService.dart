@@ -21,6 +21,8 @@ class AuthService {
   static final _supabase = Supabase.instance.client;
   static const _secureStorage = FlutterSecureStorage();
   static const REFRESH_TOKEN_KEY = 'refresh';
+  static const metaLang = 'lang';
+
 
   static Future<void> login(String email, String password) async {
     var data = await _supabase.auth

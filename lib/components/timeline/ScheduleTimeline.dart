@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/StylesHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:timelines_plus/timelines_plus.dart';
@@ -45,7 +46,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
             child: Text(
-              group.title,
+              StylesConfig.formatTimelineSplit(group.title),
               style: StylesConfig.timeLineSplitTextStyle(context),
             ),
           ),
@@ -124,7 +125,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               alignment: Alignment.centerLeft,
             ),
             child: Text(
-              event.data["rightText"],
+              StylesConfig.formatTimelineRightText(event.data["rightText"]),
               style: StylesConfig.timeLineSmallTextStyle,
             ),
           );
