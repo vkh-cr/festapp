@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';
@@ -37,5 +38,13 @@ class StylesConfig {
 
   static String formatDateTimeForTab(BuildContext context, DateTime time){
     return time.weekdayToString(context);
+  }
+
+  static String formatTimelineSplit(String string){
+    return string;
+  }
+
+  static String formatTimelineRightText(String string){
+    return string;
   }
 }

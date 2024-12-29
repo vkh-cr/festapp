@@ -1,4 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -29,14 +30,12 @@ Deno.serve(async (req) => {
     const userId = reqData.usr;  // ID of the user to invite
     const occasionId = reqData.oc;  // ID of the occasion
 
-
     const code = Math.floor(100000 + Math.random() * 900000).toString();
-    // this function will also check if requester is manager on the occasion or if requester is admin
-    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password",
-    {
-        usr: userId,
-        oc: occasionId,
-        password: code
+
+    const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password", {
+      usr: userId,
+      oc: occasionId,
+      password: code
     });
 
     if (passwordSetError || !answer) {
@@ -79,16 +78,18 @@ Deno.serve(async (req) => {
     const organizationId = occasionData.organization;
 
     const orgData = await supabaseAdmin
-        .from("organizations")
-        .select("data")
-        .eq("id", organizationId)
-        .single();
+      .from("organizations")
+      .select("data")
+      .eq("id", organizationId)
+      .single();
 
     const orgConfig = orgData.data.data;
     const appName = orgConfig.APP_NAME || "DefaultAppName";
-    const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
+    const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
+    const platforms = orgConfig.PLATFORMS || [];
 
-    // Fetch email template based on the organization
+    const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
+
     const template = await supabaseAdmin
       .from("email_templates")
       .select()
@@ -107,24 +108,26 @@ Deno.serve(async (req) => {
     const subs = {
       code: code,
       email: occasionUser.data.data.email, // Access the user's email from the data field
+      appName: appName,
+      platformLinks: platformLinksHtml,
     };
 
     await sendEmailWithSubs({
-      to: occasionUser.data.data.email,  // Use the user’s email from the data field
+      to: occasionUser.data.data.email, // Use the user’s email from the data field
       subject: template.data.subject,
       content: template.data.html,
       subs,
       from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
     });
 
-  await supabaseAdmin
-    .from("log_emails")
-    .insert({
-      "from": _DEFAULT_EMAIL,
-      "to": occasionUser.data.data.email,
-      "template": template.data.id,
-      "organization": organizationId
-    });
+    await supabaseAdmin
+      .from("log_emails")
+      .insert({
+        "from": _DEFAULT_EMAIL,
+        "to": occasionUser.data.data.email,
+        "template": template.data.id,
+        "organization": organizationId
+      });
 
     occasionUser.data.data.is_invited = true;
     const { error: updateError } = await supabaseAdmin

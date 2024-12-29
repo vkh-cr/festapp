@@ -1,4 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -81,9 +82,17 @@ Deno.serve(async (req) => {
     .eq("organization", organizationId)
     .single();
 
+  const platforms = orgConfig.PLATFORMS || [];
+  const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
+
+  const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
+
+  // Prepare substitutions
   const subs = {
     code: code,
     email: userEmail,
+    platformLinks: platformLinksHtml,
+    appName: appName,
   };
 
   await sendEmailWithSubs({

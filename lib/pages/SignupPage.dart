@@ -102,6 +102,7 @@ class _SignupPageState extends State<SignupPage> {
                             });
                             var data = FormHelper.getDataFromForm(formHolder!);
                             fieldsData = data;
+                            fieldsData![AuthService.metaLang] = EasyLocalization.of(context)?.locale.toString();
                             var resp = await AuthService.register(data);
                             if (resp["code"] == 200) {
                               ToastHelper.Show(context, "Registration is almost complete!".tr());

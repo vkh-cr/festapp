@@ -1,4 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -38,6 +39,11 @@ Deno.serve(async (req) => {
   const orgConfig = orgData.data.data;
   const appName = orgConfig.APP_NAME || "DefaultAppName";
   const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
+  const platforms = orgConfig.PLATFORMS || [];
+  const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
+
+  // Generate platform links HTML
+  const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
   const userData = await supabaseAdmin
     .from("user_info")
@@ -84,8 +90,12 @@ Deno.serve(async (req) => {
   }
 
   const resetPasswordLink = `${defaultUrl}/#/resetPassword?token=${token}`;
+
+  // Prepare substitutions
   const subs = {
     resetPasswordLink: resetPasswordLink,
+    platformLinks: platformLinksHtml,
+    appName: appName,
   };
 
   await sendEmailWithSubs({
