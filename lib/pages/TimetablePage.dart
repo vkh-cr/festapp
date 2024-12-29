@@ -50,35 +50,35 @@ class _TimetablePageState extends State<TimetablePage>
   Future<void> loadData() async {
     await loadDataOffline();
 
-    await DbEvents.updateEvents(_events).whenComplete(() async {
-      var placeIds = _events
-          .map((e) => e.place?.id)
-          .where((id) => id != null)
-          .cast<int>()
-          .toSet()
-          .toList();
+    await DbEvents.updateEvents(_events);
 
-      var places = await DbPlaces.getPlacesIn(placeIds);
+    var placeIds = _events
+        .map((e) => e.place?.id)
+        .where((id) => id != null)
+        .cast<int>()
+        .toSet()
+        .toList();
 
-      var timetablePlaces = List<TimeBlockPlace>.from(places
-          .where((element) => !element.isHidden)
-          .map((x) => TimeBlockPlace.fromPlaceModel(x)));
-      _timetablePlaces.clear();
-      _timetablePlaces.addAll(timetablePlaces);
+    var places = await DbPlaces.getPlacesIn(placeIds);
 
-      _items.clear();
-      _items.addAll(_events
-          .timetableEventsFilter(Timetable.minimalDurationMinutes)
-          .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
+    var timetablePlaces = List<TimeBlockPlace>.from(places
+        .where((element) => !element.isHidden)
+        .map((x) => TimeBlockPlace.fromPlaceModel(x)));
+    _timetablePlaces.clear();
+    _timetablePlaces.addAll(timetablePlaces);
 
-      timetableController.rebuild?.call();
+    _items.clear();
+    _items.addAll(_events
+        .timetableEventsFilter(Timetable.minimalDurationMinutes)
+        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
 
-      _days.clear();
-      _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
-      setupTabController(_days);
-      await loadEventParticipants();
-      await DbEvents.synchronizeMySchedule();
-    });
+    timetableController.rebuild?.call();
+
+    _days.clear();
+    _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
+    setupTabController(_days);
+    await loadEventParticipants();
+    await DbEvents.synchronizeMySchedule();
   }
 
   String TimetableDateFormat(DateTime e) =>
@@ -145,13 +145,14 @@ class _TimetablePageState extends State<TimetablePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ThemeConfig.timetableBackgroundOutside(context),
         appBar: AppBar(
           title: Text("Schedule".tr()),
           leading: PopButton(),
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(40),
             child: Builder(builder: (context) {
-              if (_days.isEmpty) {
+              if (_days.isEmpty || _events.isEmpty) {
                 return const SizedBox.shrink();
               }
               return Align(
@@ -195,7 +196,7 @@ class _TimetablePageState extends State<TimetablePage>
             ),
           ],
         ),
-        body: Timetable(
+        body: _days.isEmpty || _events.isEmpty ? SizedBox.shrink() : Timetable(
             controller: timetableController,
             items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces));
