@@ -68,7 +68,7 @@ dependencies:
   easy_localization: ^3.0.7
   flutter_map_cancellable_tile_provider: ^3.0.2
   simple_shadow: ^0.3.1
-  pwa_install: ^0.0.5
+  pwa_install: ^0.0.6
   flutter_form_builder: ^9.5.0
   form_builder_validators: ^11.0.0
   qr_flutter: ^4.1.0

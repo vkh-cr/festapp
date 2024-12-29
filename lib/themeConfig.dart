@@ -99,6 +99,7 @@ class ThemeConfig {
   static Color timetableTimeSplitColor(BuildContext context) => Colors.red;
   static Color timetableBackground1(BuildContext context) => whiteColor(context);
   static Color timetableBackground2(BuildContext context) => whiteColorDarker(context);
+  static Color timetableBackgroundOutside(BuildContext context) => backgroundColor(context);
   static double get timetableTimeSplitOpacity => 0.15;
 
   static Color bigButtonColor(BuildContext context) => isDarkMode(context) ? Color(0xFF5A5F6B) : Color(0xFFDCE2ED);
@@ -126,6 +127,10 @@ class ThemeConfig {
         return seed4;
     }
     return appBarColor();
+  }
+
+  static Color eventTypeToColorTimetable(BuildContext context, String? type) {
+    return eventTypeToColorTimetable(context, type);
   }
 
   static Color getShade(Color color, {bool darker = false, double value = .1}) {
