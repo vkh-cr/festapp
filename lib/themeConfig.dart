@@ -129,6 +129,10 @@ class ThemeConfig {
     return appBarColor();
   }
 
+  static Color eventTypeToColorTimetable(BuildContext context, String? type) {
+    return eventTypeToColorTimetable(context, type);
+  }
+
   static Color getShade(Color color, {bool darker = false, double value = .1}) {
     assert(value >= 0 && value <= 1, 'shade values must be between 0 and 1');
 
