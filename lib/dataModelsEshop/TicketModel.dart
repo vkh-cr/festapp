@@ -20,7 +20,7 @@ class TicketModel extends IPlutoRowModel {
   double? totalPrice;
 
   // Relating spots and products directly to the ticket
-  List<BlueprintObjectModel>? relatedSpots;
+  BlueprintObjectModel? relatedSpot;
   List<ProductModel>? relatedProducts;
 
   // Relating order directly to the ticket
@@ -34,6 +34,7 @@ class TicketModel extends IPlutoRowModel {
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
   static const String metaPrice = "price";
+  static const String metaSpot = "spot";
 
   TicketModel({
     this.id,
@@ -44,7 +45,7 @@ class TicketModel extends IPlutoRowModel {
     this.occasion,
     this.note,
     this.noteHidden,
-    this.relatedSpots,
+    this.relatedSpot,
     this.relatedProducts,
     this.relatedOrder,
   });
@@ -94,6 +95,10 @@ class TicketModel extends IPlutoRowModel {
       metaTicketsProducts: PlutoCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              : ""),
+      metaSpot: PlutoCell(
+          value: relatedSpot != null
+              ? relatedSpot?.toShortString()
               : ""),
       metaPrice: PlutoCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
     });
