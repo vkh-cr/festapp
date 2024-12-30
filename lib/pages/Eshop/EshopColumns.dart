@@ -15,6 +15,7 @@ class EshopColumns {
   static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
   static const String TICKET_PRODUCTS = "ticketProducts";
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
+  static const String TICKET_SPOT = "ticketSpot";
 
   static const String ORDER_ID = "orderId";
   static const String ORDER_PRICE = "orderPrice";
@@ -122,6 +123,16 @@ class EshopColumns {
         field: TbEshop.tickets.note_hidden,
         type: PlutoColumnType.text(),
         width: 200,
+      ),
+    ],
+    TICKET_SPOT: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Spot".tr(),
+        field: TicketModel.metaSpot,
+        type: PlutoColumnType.text(),
+        width: 60,
       ),
     ],
     ORDER_ID: [

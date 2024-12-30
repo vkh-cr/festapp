@@ -206,9 +206,9 @@ class DbEshop {
 
       for (var ticket in order.relatedTickets!) {
         // Relate spots to the ticket via orderProductTickets
-        ticket.relatedSpots = spots!.where((spot) {
+        ticket.relatedSpot = spots!.firstWhereOrNull((spot) {
           return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.id == spot.orderProductTicket);
-        }).toList();
+        });
 
         // Relate products to the ticket via orderProductTickets
         ticket.relatedProducts = products!.where((product) {
