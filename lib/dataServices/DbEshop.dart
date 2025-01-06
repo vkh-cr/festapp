@@ -62,6 +62,17 @@ class DbEshop {
     return null;
   }
 
+  static Future<FormModel?> getFormFromLink(String link) async {
+    final response = await _supabase
+        .rpc('get_form_from_link', params: {'form_link': link});
+
+    if(response["code"] == 200){
+      var form = FormModel.fromJson(response["data"]);
+      return form;
+    }
+    return null;
+  }
+
   static Future<FormModel?> getFormForEdit(String formKey) async {
     var data = await _supabase
         .from(Tb.forms.table)
@@ -266,6 +277,31 @@ class DbEshop {
     toReturn = toReturn.sortedBy((ou)=>ou.createdAt!).reversed.toList();
     return toReturn;
   }
+
+  static Future<FunctionResponse> sendTicketsToEmail({
+    required List<int> ticketIds,
+    required String email,
+    required int oc, // Occasion ID
+  }) async {
+    final body = {
+      "ticketIds": ticketIds,
+      "email": email,
+      "oc": oc,
+    };
+
+    try {
+      final response = await _supabase.functions.invoke(
+        "send-tickets",
+        body: body,
+      );
+
+      return response;
+    } catch (e) {
+      print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
   static Future<void> deleteOrder(OrderModel model) async {
 
   }
