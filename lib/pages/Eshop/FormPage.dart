@@ -31,8 +31,8 @@ import 'package:fstapp/widgets/SeatReservationWidget.dart';
 class FormPage extends StatefulWidget {
   static const ROUTE = "form";
 
-  String? formKey;
-  FormPage({super.key});
+  String? formLink;
+  FormPage({super.key,  @pathParam this.formLink});
 
   @override
   _FormPageState createState() => _FormPageState();
@@ -52,8 +52,8 @@ class _FormPageState extends State<FormPage> {
 
   @override
   Future<void> didChangeDependencies() async {
-    if (widget.formKey == null && context.routeData.hasPendingChildren) {
-      widget.formKey = context.routeData.pendingChildren[0].pathParams.getString("formKey");
+    if (widget.formLink == null && context.routeData.hasPendingChildren) {
+      widget.formLink = context.routeData.pendingChildren[0].pathParams.getString("formLink");
     }
 
     await loadData();
@@ -364,12 +364,12 @@ class _FormPageState extends State<FormPage> {
       _isLoading = true;
     });
 
-    // if(widget.id == null) {
-    //   return;
-    // }
+    if(widget.formLink == null) {
+      return;
+    }
     //var key = UuidConverter.base62ToUuid(widget.id!);
 
-    form = await DbEshop.getForm("7f4e3892-a544-4385-b933-61117e9755c3");
+    form = await DbEshop.getFormFromLink(widget.formLink!);
     if (form == null) {
       return;
     }
