@@ -211,8 +211,8 @@ Deno.serve(async (req) => {
       .insert({
         "from": _DEFAULT_EMAIL,
         "to": orderDetails.email,
-        "template": "TICKET_ORDER_CONFIRMATION",
-        "organization": occasion.id,
+        "template": template.data.id,
+        "organization": organizationId,
         "occasion": occasion.id,
       });
 
