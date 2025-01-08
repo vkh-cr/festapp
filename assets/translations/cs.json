@@ -349,5 +349,7 @@
   "Tickets": "Vstupenky",
   "Orders": "Objednávky",
   "State": "Stav",
+  "Do you want to send the tickets to orders?": "Chcete poslat vstupenky pro objednávky?",
+  "Send tickets": "Poslat vstupenky",
   "_": "_"
 }

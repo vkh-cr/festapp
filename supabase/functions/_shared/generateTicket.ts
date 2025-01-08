@@ -31,13 +31,12 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
     // 2. Extract background URL and color from occasion.data.features array
     let backgroundUrl: string | undefined;
-    let fontColor: string = '#FFFFFF'; // Default to white if not specified
+    let fontColor: string = '#000000';
 
     if (occasion.data && Array.isArray(occasion.data.features)) {
       const ticketFeature = occasion.data.features.find(
         (feature: any) => feature.code === 'ticket'
       );
-
       if (ticketFeature) {
         if (typeof ticketFeature.background === 'string') {
           backgroundUrl = ticketFeature.background;
@@ -45,11 +44,11 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
         if (typeof ticketFeature.color === 'string') {
           // Validate hex color code
-          const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+          const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
           if (hexColorRegex.test(ticketFeature.color)) {
-            fontColor = ticketFeature.color;
+            fontColor = `#${ticketFeature.color}`;
           } else {
-            console.warn(`Invalid color format: ${ticketFeature.color}. Using default color #FFFFFF.`);
+            console.log(`Invalid color format: ${ticketFeature.color}`);
           }
         }
       }
@@ -117,7 +116,7 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
     ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width(), backgroundImage.height());
 
     // 8. Define positions and styles for QR code and text
-    const padding = 200;
+    const padding = 175;
     const qrSize = 200; // Increased size for better visibility
     const lineHeight = 40;
 
@@ -149,11 +148,11 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
     const texts: string[] = [];
 
     // Add Spot Title
-    if (spotProduct) {
-      const spotTitle = spotProduct.title_short || spotProduct.title || 'N/A';
-      texts.push(`Místo: ${spotTitle}`);
+    const spotOrder = ticket.order_product_ticket.find((opt: any) => opt.product === spotProduct.id);
+    if (spotOrder && spotOrder.spot_group_title) {
+      texts.push(`Stůl: ${spotOrder.spot_group_title}`);
     } else {
-      texts.push(`Místo: N/A`);
+      texts.push(`Stůl: N/A`);
     }
 
     // Add Food Title
@@ -188,7 +187,6 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
     ctx.drawImage(groupCanvas, groupX, groupY, groupCanvasWidth, groupCanvasHeight);
 
-    // 11. Optional: Add any additional information or styling as needed
 
     // 12. Convert the canvas to a buffer
     const buffer = canvas.toBuffer('image/png');

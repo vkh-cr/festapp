@@ -192,11 +192,6 @@ Deno.serve(async (req) => {
             "occasion": occasionId,
           });
 
-    if (logError) {
-      console.error("Error logging email dispatch:", logError);
-      // Decide whether to fail the request or proceed
-    }
-
     return new Response(JSON.stringify({ message: "Tickets sent successfully", code: 200 }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
