@@ -94,7 +94,7 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
     // 7. Load background image
     const backgroundImage = await loadImage(backgroundUrl);
-console.log(backgroundImage);
+
     // 8. Create canvas with background dimensions
     const canvas = createCanvas(backgroundImage.width(), backgroundImage.height());
     const ctx = canvas.getContext('2d');
@@ -117,7 +117,6 @@ console.log(backgroundImage);
     const qrBase64 = await qrcode(qrData, { size: qrSize });
     const qrImage = await loadImage(`data:image/png;base64,${qrBase64.split(',')[1]}`);
     ctx.drawImage(qrImage, backgroundImage.width() - qrSize - padding, padding, qrSize, qrSize);
-console.log("12");
 
     // 13. Add Spot Title
     if (spotProduct) {
@@ -129,26 +128,23 @@ console.log("12");
       ctx.fillText(`Místo: N/A`, padding, textStartY);
     }
 
-console.log("13");
-
     // 14. Add Food Title
     if (foodProduct) {
       const foodTitle = foodProduct.title_short || foodProduct.title || 'N/A';
       ctx.font = subFont;
       ctx.fillText(`Večeře: ${foodTitle}`, padding, textStartY + lineHeight);
     }
-console.log("14");
+
     // 15. Add Taxi Title
     if (taxiProduct) {
       const taxiTitle = taxiProduct.title_short || taxiProduct.title || 'N/A';
       ctx.font = subFont;
       ctx.fillText(`Odvoz: ${taxiTitle}`, padding, textStartY + 2 * lineHeight);
     }
-console.log("15");
+
     // 16. Add Ticket Symbol
     ctx.font = font;
     ctx.fillText(`Symbol: ${ticket.ticket_symbol}`, padding, textStartY + 3 * lineHeight);
-console.log("16");
 
     // 18. Convert canvas to buffer
     const buffer = canvas.toBuffer('image/png');
