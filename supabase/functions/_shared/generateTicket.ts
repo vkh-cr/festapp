@@ -9,7 +9,8 @@ const supabaseAdmin = createClient(
 );
 
 /**
- * Generates a ticket image based on the provided ticket ID.
+ * Generates a ticket image based on the provided ticket data.
+ * @param ticket - The ticket object containing necessary details.
  * @returns A Promise that resolves to a Uint8Array containing the image data.
  */
 export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
@@ -28,16 +29,29 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
       throw new Error(`Occasion not found or error fetching occasion: ${occasionError?.message}`);
     }
 
-    // 2. Extract background URL from occasion.data.features array
+    // 2. Extract background URL and color from occasion.data.features array
     let backgroundUrl: string | undefined;
+    let fontColor: string = '#FFFFFF'; // Default to white if not specified
 
     if (occasion.data && Array.isArray(occasion.data.features)) {
       const ticketFeature = occasion.data.features.find(
         (feature: any) => feature.code === 'ticket'
       );
 
-      if (ticketFeature && typeof ticketFeature.background === 'string') {
-        backgroundUrl = ticketFeature.background;
+      if (ticketFeature) {
+        if (typeof ticketFeature.background === 'string') {
+          backgroundUrl = ticketFeature.background;
+        }
+
+        if (typeof ticketFeature.color === 'string') {
+          // Validate hex color code
+          const hexColorRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
+          if (hexColorRegex.test(ticketFeature.color)) {
+            fontColor = ticketFeature.color;
+          } else {
+            console.warn(`Invalid color format: ${ticketFeature.color}. Using default color #FFFFFF.`);
+          }
+        }
       }
     }
 
@@ -45,7 +59,7 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
       throw new Error('Background image URL not found in occasion.data.features.');
     }
 
-    // 5. Fetch all product types to map product_type IDs to their string types
+    // 3. Fetch all product types to map product_type IDs to their string types
     const { data: productTypes, error: productTypesError } = await supabaseAdmin.schema('eshop')
       .from('product_types')
       .select('id, type')
@@ -57,11 +71,11 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
     // Create a map of product_type ID to type string
     const productTypeMap: Record<number, string> = {};
-    productTypes.forEach((pt) => {
+    productTypes.forEach((pt: any) => {
       productTypeMap[pt.id] = pt.type;
     });
 
-    // 6. Fetch related products (spot, food, taxi)
+    // 4. Fetch related products (spot, food, taxi)
     const productIds = ticket.order_product_ticket.map((opt: any) => opt.product);
     const { data: products, error: productsError } = await supabaseAdmin.schema('eshop')
       .from('products')
@@ -81,7 +95,7 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
 
     // Map products by their type string
     const productMap: Record<string, any> = {};
-    products.forEach((product) => {
+    products.forEach((product: any) => {
       const type = productTypeMap[product.product_type];
       if (type) {
         productMap[type] = product;
@@ -92,61 +106,91 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
     const foodProduct = productMap['food'];
     const taxiProduct = productMap['taxi'];
 
-    // 7. Load background image
+    // 5. Load background image
     const backgroundImage = await loadImage(backgroundUrl);
 
-    // 8. Create canvas with background dimensions
+    // 6. Create canvas with background dimensions
     const canvas = createCanvas(backgroundImage.width(), backgroundImage.height());
     const ctx = canvas.getContext('2d');
 
-    // 9. Draw background
+    // 7. Draw background
     ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width(), backgroundImage.height());
 
-    // 11. Define positions and styles for QR code and text
+    // 8. Define positions and styles for QR code and text
     const padding = 50;
-    const qrSize = 150;
-    const textStartY = backgroundImage.height() - padding - 200;
+    const qrSize = 200; // Increased size for better visibility
     const lineHeight = 40;
-    const font = 'bold 30px Arial';
-    const subFont = '24px Arial';
-    ctx.fillStyle = 'black';
-    ctx.textAlign = 'left';
 
-    // 12. Draw Ticket Symbol as QR Code
+    // Calculate center positions
+    const centerX = backgroundImage.width() / 2;
+    const lowerHalfStartY = backgroundImage.height() / 2;
+
+    // Set font color and alignment
+    ctx.fillStyle = fontColor;
+    ctx.textAlign = 'center';
+
+    // 9. Generate QR Code based on ticket.ticket_symbol
     const qrData = ticket.ticket_symbol;
     const qrBase64 = await qrcode(qrData, { size: qrSize });
     const qrImage = await loadImage(`data:image/png;base64,${qrBase64.split(',')[1]}`);
-    ctx.drawImage(qrImage, backgroundImage.width() - qrSize - padding, padding, qrSize, qrSize);
 
-    // 13. Add Spot Title
+    // 10. Create a separate canvas for the grouped object (texts + QR code)
+    const groupCanvasWidth = backgroundImage.width();
+    const groupCanvasHeight = qrSize; // Height based on QR code size
+    const groupCanvas = createCanvas(groupCanvasWidth, groupCanvasHeight);
+    const groupCtx = groupCanvas.getContext('2d');
+
+    // Draw QR code on the group canvas (right side)
+    const groupQrX = groupCanvasWidth - qrSize - padding;
+    const groupQrY = 0;
+    groupCtx.drawImage(qrImage, groupQrX, groupQrY, qrSize, qrSize);
+
+    // Prepare text content
+    const texts: string[] = [];
+
+    // Add Spot Title
     if (spotProduct) {
       const spotTitle = spotProduct.title_short || spotProduct.title || 'N/A';
-      ctx.font = font;
-      ctx.fillText(`Místo: ${spotTitle}`, padding, textStartY);
+      texts.push(`Místo: ${spotTitle}`);
     } else {
-      ctx.font = font;
-      ctx.fillText(`Místo: N/A`, padding, textStartY);
+      texts.push(`Místo: N/A`);
     }
 
-    // 14. Add Food Title
+    // Add Food Title
     if (foodProduct) {
       const foodTitle = foodProduct.title_short || foodProduct.title || 'N/A';
-      ctx.font = subFont;
-      ctx.fillText(`Večeře: ${foodTitle}`, padding, textStartY + lineHeight);
+      texts.push(`Večeře: ${foodTitle}`);
     }
 
-    // 15. Add Taxi Title
+    // Add Taxi Title
     if (taxiProduct) {
       const taxiTitle = taxiProduct.title_short || taxiProduct.title || 'N/A';
-      ctx.font = subFont;
-      ctx.fillText(`Odvoz: ${taxiTitle}`, padding, textStartY + 2 * lineHeight);
+      texts.push(`Odvoz: ${taxiTitle}`);
     }
 
-    // 16. Add Ticket Symbol
-    ctx.font = font;
-    ctx.fillText(`Symbol: ${ticket.ticket_symbol}`, padding, textStartY + 3 * lineHeight);
+    // Set common font for all texts
+    ctx.font = 'bold 36px Arial'; // Larger font size
 
-    // 18. Convert canvas to buffer
+    // Add texts to the group canvas (left side)
+    const textStartX = padding;
+    let currentTextY = (groupCanvasHeight - (texts.length * lineHeight)) / 2 + lineHeight;
+
+    texts.forEach((text) => {
+      groupCtx.font = 'bold 36px Arial';
+      groupCtx.fillStyle = fontColor;
+      groupCtx.fillText(text, textStartX, currentTextY);
+      currentTextY += lineHeight;
+    });
+
+    // Draw the group canvas onto the main canvas, centered in the lower half
+    const groupX = 0; // Since groupCanvasWidth == backgroundImage.width()
+    const groupY = lowerHalfStartY + padding; // Positioned in the lower half with padding
+
+    ctx.drawImage(groupCanvas, groupX, groupY, groupCanvasWidth, groupCanvasHeight);
+
+    // 11. Optional: Add any additional information or styling as needed
+
+    // 12. Convert the canvas to a buffer
     const buffer = canvas.toBuffer('image/png');
     return buffer;
 
