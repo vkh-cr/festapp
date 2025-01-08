@@ -117,7 +117,7 @@ export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
     ctx.drawImage(backgroundImage, 0, 0, backgroundImage.width(), backgroundImage.height());
 
     // 8. Define positions and styles for QR code and text
-    const padding = 50;
+    const padding = 200;
     const qrSize = 200; // Increased size for better visibility
     const lineHeight = 40;
 
