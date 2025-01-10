@@ -35,6 +35,7 @@ class ProductsTb {
   String get data => "data";
   String get product_type => "product_type";
   String get occasion => "occasion";
+  String get order => "order";
 }
 
 class OrderProductTicketTb {
