@@ -268,15 +268,15 @@ class ForgotPasswordRoute extends _i28.PageRouteInfo<void> {
 class FormEditRoute extends _i28.PageRouteInfo<FormEditRouteArgs> {
   FormEditRoute({
     _i29.Key? key,
-    String? formKey,
+    String? formLink,
     List<_i28.PageRouteInfo>? children,
   }) : super(
           FormEditRoute.name,
           args: FormEditRouteArgs(
             key: key,
-            formKey: formKey,
+            formLink: formLink,
           ),
-          rawPathParams: {'formKey': formKey},
+          rawPathParams: {'formLink': formLink},
           initialChildren: children,
         );
 
@@ -288,12 +288,12 @@ class FormEditRoute extends _i28.PageRouteInfo<FormEditRouteArgs> {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<FormEditRouteArgs>(
           orElse: () =>
-              FormEditRouteArgs(formKey: pathParams.optString('formKey')));
+              FormEditRouteArgs(formLink: pathParams.optString('formLink')));
       return _i28.DeferredWidget(
         _i7.loadLibrary,
         () => _i7.FormEditPage(
           key: args.key,
-          formKey: args.formKey,
+          formLink: args.formLink,
         ),
       );
     },
@@ -303,16 +303,16 @@ class FormEditRoute extends _i28.PageRouteInfo<FormEditRouteArgs> {
 class FormEditRouteArgs {
   const FormEditRouteArgs({
     this.key,
-    this.formKey,
+    this.formLink,
   });
 
   final _i29.Key? key;
 
-  final String? formKey;
+  final String? formLink;
 
   @override
   String toString() {
-    return 'FormEditRouteArgs{key: $key, formKey: $formKey}';
+    return 'FormEditRouteArgs{key: $key, formLink: $formLink}';
   }
 }
 

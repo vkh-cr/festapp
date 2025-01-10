@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/pages/LoginPage.dart';
 
 @RoutePage()
 class FormEditPage extends StatefulWidget {
   static const ROUTE = "formEdit";
-  String? formKey;
+  String? formLink;
 
-  FormEditPage({super.key, @pathParam this.formKey});
+  FormEditPage({super.key, @pathParam this.formLink});
 
   @override
   _FormEditPageState createState() => _FormEditPageState();
@@ -24,6 +28,15 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
     AdminTabDefinition.orders,
     AdminTabDefinition.tickets,
   ];
+
+  @override
+  Future<void> didChangeDependencies() async {
+    if (!AuthService.isLoggedIn()) {
+      await RouterService.navigate(context, LoginPage.ROUTE);
+    }
+
+    super.didChangeDependencies();
+  }
 
   @override
   void initState() {

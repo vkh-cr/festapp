@@ -19,15 +19,15 @@ class TicketsTab extends StatefulWidget {
 }
 
 class _TicketsTabState extends State<TicketsTab> {
-  String? formKey;
+  String? formLink;
   Key refreshKey = UniqueKey();
 
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formKey == null && context.routeData.pathParams.isNotEmpty) {
-      formKey = context.routeData.pathParams.getString("formKey");
+    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
+      formLink = context.routeData.pathParams.getString("formLink");
     }
   }
 
@@ -58,7 +58,7 @@ class _TicketsTabState extends State<TicketsTab> {
       child:
         SingleTableDataGrid<TicketModel>(
       context,
-          () => DbEshop.getAllTickets(formKey!),
+          () => DbEshop.getAllTickets(formLink!),
       TicketModel.fromPlutoJson,
       DataGridFirstColumn.check,
       TbEshop.tickets.id,

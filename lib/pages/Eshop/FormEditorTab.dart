@@ -22,18 +22,18 @@ class FormEditorTab extends StatefulWidget {
 
 class _FormEditorTabState extends State<FormEditorTab> {
   FormModel? form;
-  String? formKey;
+  String? formLink;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formKey == null && context.routeData.pathParams.isNotEmpty) {
-      formKey = context.routeData.pathParams.getString("formKey");
+    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
+      formLink = context.routeData.pathParams.getString("formLink");
     }
     loadData();
   }
 
   Future<void> loadData() async {
-    form = await DbEshop.getFormForEdit(formKey!);
+    form = await DbEshop.getFormForEdit(formLink!);
     setState(() {});
   }
 
