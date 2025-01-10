@@ -320,7 +320,7 @@ class _FormPageState extends State<FormPage> {
           onPressed: () {
             RouterService.navigate(
                 context,
-                "${FormPage.ROUTE}/${form!.formKey}/edit")
+                "${FormPage.ROUTE}/${widget.formLink}/edit")
                 .then((value) => loadData());
           },
           child: const Icon(Icons.edit),

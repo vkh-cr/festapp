@@ -32,7 +32,7 @@ class BlueprintTab extends StatefulWidget {
 class _BlueprintTabState extends State<BlueprintTab> {
   BlueprintModel? blueprint;
   BlueprintGroupModel? currentGroup;
-  String? formKey;
+  String? formLink;
 
   List<SeatModel> allBoxes = [];
 
@@ -44,8 +44,8 @@ class _BlueprintTabState extends State<BlueprintTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formKey == null && context.routeData.pathParams.isNotEmpty) {
-      formKey = context.routeData.pathParams.getString("formKey");
+    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
+      formLink = context.routeData.pathParams.getString("formLink");
     }
     loadData();
   }
@@ -631,7 +631,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   Future<void> loadData() async {
-    blueprint = await DbEshop.getBlueprintForEdit(formKey!);
+    blueprint = await DbEshop.getBlueprintForEdit(formLink!);
     setState(() {});
   }
 }
