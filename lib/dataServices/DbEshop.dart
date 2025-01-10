@@ -28,7 +28,7 @@ class DbEshop {
         "${TbEshop.product_types.id},"
         "${TbEshop.product_types.type},"
         "${TbEshop.product_types.title},"
-        "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price})"
+        "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price},${TbEshop.products.order})"
         )
         .eq(TbEshop.product_types.occasion, currentOccasion)
         .eq("${TbEshop.products.table}.${TbEshop.products.is_hidden}", false);
@@ -37,7 +37,7 @@ class DbEshop {
         data.map((x) {
           var toReturn = ProductTypeModel.fromJson(x);
           toReturn.products = toReturn.products?.sortedBy((i) => i.title ?? "");
-          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.price ?? 0);
+          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.order ?? 0);
           for (ProductModel v in toReturn.products??[]){
             v.title = v.price != null && v.price! > 0 ? "${v.title} (${Utilities.formatPrice(context, v.price!)})" : v.title;
           }
