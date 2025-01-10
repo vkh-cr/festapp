@@ -51,17 +51,6 @@ class DbEshop {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
-  static Future<FormModel?> getForm(String formKey) async {
-    final response = await _supabase
-        .rpc('get_form', params: {'form_key': formKey});
-
-    if(response["code"] == 200){
-      var form = FormModel.fromJson(response["data"]);
-      return form;
-    }
-    return null;
-  }
-
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
         .rpc('get_form_from_link', params: {'form_link': link});
@@ -73,11 +62,11 @@ class DbEshop {
     return null;
   }
 
-  static Future<FormModel?> getFormForEdit(String formKey) async {
+  static Future<FormModel?> getFormForEdit(String formLink) async {
     var data = await _supabase
         .from(Tb.forms.table)
         .select()
-        .eq(Tb.forms.key, formKey)
+        .eq(Tb.forms.link, formLink)
         .maybeSingle();
     if(data==null)
     {
@@ -136,7 +125,7 @@ class DbEshop {
     final response = await _supabase.rpc(
       'get_blueprint_editor',
       params: {
-        'form_key': formKey,
+        'form_link': formKey,
       },
     );
 
@@ -187,12 +176,12 @@ class DbEshop {
     return true;
   }
 
-  static Future<List<OrderModel>> getAllOrders(String formKey) async {
+  static Future<List<OrderModel>> getAllOrders(String formLink) async {
 
     final response = await _supabase.rpc(
       'get_orders',
       params: {
-        'form_key': formKey,
+        'form_link': formLink,
       },
     );
 
@@ -255,8 +244,8 @@ class DbEshop {
     return orders.sortedBy((ou)=>ou.createdAt!).reversed.toList();
   }
 
-  static Future<List<TicketModel>> getAllTickets(String formKey) async {
-    var orders = await getAllOrders(formKey);
+  static Future<List<TicketModel>> getAllTickets(String formLink) async {
+    var orders = await getAllOrders(formLink);
     List<TicketModel> toReturn = [];
     for(var o in orders){
 
