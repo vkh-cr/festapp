@@ -73,42 +73,73 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> sendTickets(SingleTableDataGrid dataGrid) async {
-    var selectedTickets = _getChecked(dataGrid);
-
-    if (selectedTickets.isEmpty) {
+    var selected = _getChecked(dataGrid);
+    if (selected.isEmpty) {
       return;
+    }
+
+    List<OrderModel> selectedFull = [];
+
+    var allOrders = await DbEshop.getAllOrders(formLink!);
+    for(var s in selected){
+      var o = allOrders.firstWhere((o)=>o.id == s.id);
+      selectedFull.add(o);
+    }
+    var stateChange = selectedFull.where((s)=>s.state == OrderModel.orderedState);
+    if(stateChange.isNotEmpty){
+      var confirm = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Change state to paid".tr(),
+        "${"Do you want to change orders to paid?".tr()} (${stateChange.length})",
+      );
+
+      if(confirm){
+        var futures = stateChange.map((s) {
+          return () async {
+            await DbEshop.updateOrderAndTicketsToPaid(s.id!);
+          };
+        }).toList();
+
+        await DialogHelper.showProgressDialogAsync(
+          context,
+          "Processing".tr(),
+          futures.length,
+          futures: futures,
+        );
+        refreshData();
+      }
     }
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
       context,
       "Storno".tr(),
-      "${"Do you want to send the tickets to orders?".tr()} (${selectedTickets.length})",
+      "${"Do you want to send the tickets to orders?".tr()} (${selected.length})",
     );
 
     if (confirm) {
-      var allOrders = await DbEshop.getAllOrders(formLink!);
-      var stornoFutures = selectedTickets.map((order) {
+
+      var futures = selectedFull.map((s) {
         return () async {
-          var o = allOrders.firstWhere((o)=>o.id == order.id);
-          await sendTicketsToEmail(o);
+          await sendTicketsToEmail(s);
         };
       }).toList();
 
       await DialogHelper.showProgressDialogAsync(
         context,
         "Processing".tr(),
-        stornoFutures.length,
-        futures: stornoFutures,
+        futures.length,
+        futures: futures,
       );
       refreshData();
     }
+
+
   }
 
   Future<void> sendTicketsToEmail(OrderModel order) async {
     await DbEshop.sendTicketsToEmail(
-      ticketIds: order.relatedTickets!.map((t)=>t.id!).toList(),
+      orderId: order.id!,
       email: order.data!["email"],
-      oc: RightsService.currentOccasion!,
     );
   }
 

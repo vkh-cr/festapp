@@ -268,14 +268,12 @@ class DbEshop {
   }
 
   static Future<FunctionResponse> sendTicketsToEmail({
-    required List<int> ticketIds,
+    required int orderId,
     required String email,
-    required int oc, // Occasion ID
   }) async {
     final body = {
-      "ticketIds": ticketIds,
+      "orderId": orderId,
       "email": email,
-      "oc": oc,
     };
 
     try {
@@ -318,6 +316,19 @@ class DbEshop {
     );
     if (response["code"] != 200) {
       throw Exception("Saving of note has failed.");
+    }
+  }
+
+  static Future<void> updateOrderAndTicketsToPaid(int orderId) async {
+    var response = await _supabase.rpc(
+      "update_order_and_tickets_to_paid",
+      params: {
+        "order_id": orderId,
+      },
+    );
+
+    if (response["code"] != 200) {
+      throw Exception("Failed to update order and tickets to 'paid'. Error: ${response['message']}");
     }
 
   }
