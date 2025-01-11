@@ -351,5 +351,7 @@
   "State": "State",
   "Do you want to send the tickets to orders?": "Do you want to send the tickets to orders?",
   "Send tickets": "Send tickets",
+  "Change state to paid": "Change state to paid",
+  "Do you want to change orders to paid?": "Do you want to change orders to paid?",
   "_":"_"
 }

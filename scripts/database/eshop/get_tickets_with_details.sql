@@ -1,11 +1,11 @@
-CREATE OR REPLACE FUNCTION get_tickets_with_details(ticket_ids BIGINT[])
+CREATE OR REPLACE FUNCTION get_tickets_with_details(order_id BIGINT)
 RETURNS JSONB
 LANGUAGE plpgsql
 AS $$
 DECLARE
     tickets JSONB;
 BEGIN
-    SELECT jsonb_agg(t)
+    SELECT jsonb_agg(DISTINCT t)
     INTO tickets
     FROM (
         SELECT
@@ -14,7 +14,7 @@ BEGIN
             t.occasion,
             t.note,
             (
-                SELECT jsonb_agg(opt)
+                SELECT jsonb_agg(DISTINCT opt)
                 FROM (
                     SELECT
                         opt.id,
@@ -24,7 +24,9 @@ BEGIN
                 ) opt
             ) AS order_product_ticket
         FROM eshop.tickets t
-        WHERE t.id = ANY(ticket_ids)
+        INNER JOIN eshop.order_product_ticket opt ON t.id = opt.ticket
+        WHERE opt."order" = order_id
+        GROUP BY t.id, t.ticket_symbol, t.occasion, t.note
     ) t;
 
     RETURN tickets;
