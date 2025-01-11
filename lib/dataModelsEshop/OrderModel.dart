@@ -21,6 +21,7 @@ class OrderModel extends IPlutoRowModel {
   int? paymentInfo;
   int? form;
   String? currencyCode;
+  String? noteHidden;
 
   // Relating tickets, spots, products, and payment info to the order
   List<TicketModel>? relatedTickets;
@@ -31,7 +32,6 @@ class OrderModel extends IPlutoRowModel {
   static const String orderedState = "ordered";
   static const String paidState = "paid";
   static const String canceledState = "storno";
-
 
   OrderModel({
     this.id,
@@ -48,6 +48,7 @@ class OrderModel extends IPlutoRowModel {
     this.relatedSpots,
     this.relatedProducts,
     this.paymentInfoModel,
+    this.noteHidden,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -66,14 +67,15 @@ class OrderModel extends IPlutoRowModel {
       data: json[TbEshop.orders.data],
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
-      form: json[TbEshop.orders.form],
       currencyCode: json[TbEshop.orders.currency_code],
+      noteHidden: json[TbEshop.orders.note_hidden],
     );
   }
 
   static OrderModel fromPlutoJson(Map<String, dynamic> json) {
     return OrderModel(
-        id: json[TbEshop.orders.id] == -1 ? null : json[TbEshop.orders.id]);
+        id: json[TbEshop.orders.id] == -1 ? null : json[TbEshop.orders.id],
+        noteHidden: json[TbEshop.orders.note_hidden]);
   }
 
   Map<String, dynamic> toJson() => {
@@ -85,8 +87,8 @@ class OrderModel extends IPlutoRowModel {
     TbEshop.orders.data: data,
     TbEshop.orders.occasion: occasion,
     TbEshop.orders.payment_info: paymentInfo,
-    TbEshop.orders.form: form,
     TbEshop.orders.currency_code: currencyCode,
+    TbEshop.orders.note_hidden: noteHidden,
   };
 
   @override
@@ -106,8 +108,7 @@ class OrderModel extends IPlutoRowModel {
       ),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
       TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
-      TbEshop.orders.data_note_hidden: PlutoCell(value: toCustomerNoteHidden()),
-      TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? ""),
+      TbEshop.orders.note_hidden: PlutoCell(value: noteHidden ?? ""),
     });
   }
 
@@ -118,7 +119,7 @@ class OrderModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-
+    await DbEshop.updateOrderNoteHidden(id!, noteHidden!);
   }
 
   @override

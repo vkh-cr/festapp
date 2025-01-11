@@ -295,4 +295,30 @@ class DbEshop {
 
   }
 
+  static Future<void> updateTicketNoteHidden(int ticketId, String newNoteHidden) async {
+    var response = await _supabase.rpc(
+      "update_ticket_note_hidden",
+      params: {
+        "ticket_id": ticketId,
+        "new_note_hidden": newNoteHidden,
+      },
+    );
+    if (response["code"] != 200) {
+      throw Exception("Saving of note has failed.");
+    }
+  }
+
+  static Future<void> updateOrderNoteHidden(int orderId, String newNoteHidden) async {
+    var response = await _supabase.rpc(
+      "update_order_note_hidden",
+      params: {
+        "order_id": orderId,
+        "new_note_hidden": newNoteHidden,
+      },
+    );
+    if (response["code"] != 200) {
+      throw Exception("Saving of note has failed.");
+    }
+
+  }
 }
