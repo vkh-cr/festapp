@@ -349,5 +349,7 @@
   "Tickets": "Tickets",
   "Orders": "Orders",
   "State": "State",
+  "Do you want to send the tickets to orders?": "Do you want to send the tickets to orders?",
+  "Send tickets": "Send tickets",
   "_":"_"
 }
