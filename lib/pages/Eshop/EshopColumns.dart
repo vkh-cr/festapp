@@ -33,7 +33,7 @@ class EshopColumns {
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
   static const String ORDER_DATA_NOTE = "orderDataNote";
-  static const String ORDER_DATA_NOTE_HIDDEN = "orderDataNoteHidden";
+  static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
 
   // Define columns
   static Map<String, dynamic> get columnBuilders => {
@@ -117,8 +117,7 @@ class EshopColumns {
     ],
     TICKET_NOTE_HIDDEN: [
       PlutoColumn(
-        readOnly: true,
-        enableEditingMode: false,
+        enableAutoEditing: true,
         title: "Hidden note".tr(),
         field: TbEshop.tickets.note_hidden,
         type: PlutoColumnType.text(),
@@ -201,12 +200,11 @@ class EshopColumns {
         width: 200,
       ),
     ],
-    ORDER_DATA_NOTE_HIDDEN: [
+    ORDER_NOTE_HIDDEN: [
       PlutoColumn(
-        readOnly: true,
-        enableEditingMode: false,
+        enableAutoEditing: true,
         title: "Hidden note".tr(),
-        field: TbEshop.orders.data_note_hidden,
+        field: TbEshop.orders.note_hidden,
         type: PlutoColumnType.text(),
         width: 200,
       ),
