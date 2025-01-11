@@ -1,4 +1,3 @@
-
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage } from "../_shared/generateTicket.ts"; // Ensure this path is correct
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
@@ -71,17 +70,31 @@ Deno.serve(async (req) => {
     console.log(userId);
     // Parse request body
     const reqData = await req.json();
-    const { ticketIds, email, oc } = reqData;
+    const { orderId, email } = reqData;
 
-    // Validate input
-    if (!Array.isArray(ticketIds) || typeof email !== 'string' || !oc) {
+    if (typeof orderId !== 'number' || typeof email !== 'string') {
       return new Response(JSON.stringify({ error: "Invalid input parameters" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
     }
 
-    const occasionId = oc;
+    // Fetch order details including the occasion ID
+    const { data: orderData, error: orderError } = await supabaseAdmin.schema("eshop")
+      .from("orders")
+      .select("occasion")
+      .eq("id", orderId)
+      .single();
+
+    if (orderError || !orderData) {
+      console.error("Order not found:", orderError);
+      return new Response(JSON.stringify({ error: "Order not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404,
+      });
+    }
+
+    const occasionId = orderData.occasion;
 
     // Check if user is editor for the occasion
     const userIsEditor = await isUserEditor(userId, occasionId);
@@ -93,7 +106,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch occasion details for email template
+   // Fetch occasion details for email template
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
       .select("organization, title")
@@ -111,29 +124,12 @@ Deno.serve(async (req) => {
     const organizationId = occasionData.organization;
     const occasionTitle = occasionData.title;
 
-    // Fetch email template
-    const { data: template, error: templateError } = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("organization", organizationId)
-      .eq("occasion", occasionId)
-      .eq("code", "TICKET_ORDER_PAYMENT_DONE")
-      .single();
+    // Fetch tickets related to the order
+    const { data: tickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", {
+        order_id: orderId
+    });
 
-    if (templateError || !template) {
-      console.error("Email template not found for the occasion:", templateError);
-      return new Response(JSON.stringify({ error: "Email template not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
-    }
-
-    console.log(ticketIds);
-    const { data: tickets } = await supabaseAdmin.rpc("get_tickets_with_details", {
-        ticket_ids: ticketIds
-      });
-
-    if (!tickets) {
+    if (ticketsError || !tickets) {
       console.error("Error fetching tickets:", ticketsError);
       return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -141,22 +137,37 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Fetch email template
+    const { data: template, error: templateError } = await supabaseAdmin
+      .from("email_templates")
+      .select()
+      .eq("occasion", occasionId)
+      .eq("code", "TICKET_ORDER_PAYMENT_DONE")
+      .single();
+
+    if (templateError || !template) {
+      console.error("Email template not found:", templateError);
+      return new Response(JSON.stringify({ error: "Email template not found" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404,
+      });
+    }
+
     // Generate ticket images
     const attachments = [];
     for (const ticket of tickets) {
       try {
-          console.log("generating...");
+        console.log("generating...");
         const ticketImage = await generateTicketImage(ticket);
-
         attachments.push({
           filename: `ticket_${ticket.ticket_symbol}.png`,
           content: ticketImage, // Uint8Array
           contentType: "image/png",
           encoding: "binary",
         });
+        console.log("image added to attachments");
       } catch (imageError) {
         console.error(`Error generating image for ticket ${ticket.id}:`, imageError);
-        // Continue with other tickets or handle accordingly
       }
     }
 
@@ -167,36 +178,44 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Prepare email substitutions
-    const subs = {
-      occasionTitle: occasionTitle,
-    };
-
     // Send email
     await sendEmailWithSubs({
       to: email,
       subject: template.subject,
       content: template.html,
-      subs,
+      subs: { occasionTitle: occasionTitle },
       from: `${occasionTitle} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments: attachments,
     });
 
+    // Log email sending in the database
     await supabaseAdmin
-          .from("log_emails")
-          .insert({
-            "from": _DEFAULT_EMAIL,
-            "to": email,
-            "template": template.id,
-            "organization": organizationId,
-            "occasion": occasionId,
-          });
+      .from("log_emails")
+      .insert({
+        "from": _DEFAULT_EMAIL,
+        "to": email,
+        "template": template.id,
+        "organization": template.organization,
+        "occasion": occasionId,
+      });
 
-    return new Response(JSON.stringify({ message: "Tickets sent successfully", code: 200 }), {
+    // Update the state of the order and tickets to 'sent'
+    const { error: updateError } = await supabaseAdmin.rpc("update_order_and_tickets_to_sent", {
+        order_id: orderId
+    });
+
+    if (updateError) {
+      console.error("Failed to update order and tickets to sent:", updateError);
+      return new Response(JSON.stringify({ error: "Failed to update order and tickets to sent" }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500,
+      });
+    }
+
+    return new Response(JSON.stringify({ "message": "Tickets sent successfully", "code": 200 }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
-
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
