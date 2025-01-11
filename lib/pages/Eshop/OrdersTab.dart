@@ -22,7 +22,6 @@ class _OrdersTabState extends State<OrdersTab> {
   String? formLink;
   Key refreshKey = UniqueKey();
 
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -32,44 +31,36 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> refreshData() async {
-    setState(() {
-      refreshKey = UniqueKey();
-    });
+    if (mounted) {
+      setState(() {
+        refreshKey = UniqueKey(); // Properly trigger a rebuild
+      });
+    }
   }
-
-  static const List<String> columnIdentifiers = [
-    EshopColumns.ORDER_ID,
-    EshopColumns.ORDER_SYMBOL,
-    EshopColumns.ORDER_DATA,
-    EshopColumns.ORDER_STATE,
-    EshopColumns.ORDER_PRICE,
-    EshopColumns.PAYMENT_INFO_PAID,
-    EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
-    EshopColumns.ORDER_DATA_NOTE,
-    EshopColumns.ORDER_NOTE_HIDDEN,
-    EshopColumns.PAYMENT_INFO_DEADLINE,
-  ];
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(child: SingleTableDataGrid<OrderModel>(
-      context,
-          () => DbEshop.getAllOrders(formLink!),
-      OrderModel.fromPlutoJson,
-      DataGridFirstColumn.check,
-      TbEshop.orders.id,
-      actionsExtended: DataGridActionsController(
-          areAllActionsEnabled: RightsService.canUpdateUsers,
-          isAddActionPossible: () => false),
-      headerChildren: [
-        DataGridAction(
-          name: "Send tickets".tr(),
-          action: (SingleTableDataGrid dataGrid, [_]) => sendTickets(dataGrid),
-          isEnabled: RightsService.isEditor,
-        ),
-      ],
-      columns: EshopColumns.generateColumns(columnIdentifiers),
-    ).DataGrid());
+    return KeyedSubtree(
+        key: refreshKey,
+        child: SingleTableDataGrid<OrderModel>(
+          context,
+              () => DbEshop.getAllOrders(formLink!),
+          OrderModel.fromPlutoJson,
+          DataGridFirstColumn.check,
+          TbEshop.orders.id,
+          actionsExtended: DataGridActionsController(
+              areAllActionsEnabled: RightsService.canUpdateUsers,
+              isAddActionPossible: () => false),
+          headerChildren: [
+            DataGridAction(
+              name: "Send tickets".tr(),
+              action: (SingleTableDataGrid dataGrid, [_]) => sendTickets(dataGrid),
+              isEnabled: RightsService.isEditor,
+            ),
+          ],
+          columns: EshopColumns.generateColumns(columnIdentifiers),
+        ).DataGrid()
+    );
   }
 
   Future<void> sendTickets(SingleTableDataGrid dataGrid) async {
@@ -81,19 +72,19 @@ class _OrdersTabState extends State<OrdersTab> {
     List<OrderModel> selectedFull = [];
 
     var allOrders = await DbEshop.getAllOrders(formLink!);
-    for(var s in selected){
-      var o = allOrders.firstWhere((o)=>o.id == s.id);
+    for (var s in selected) {
+      var o = allOrders.firstWhere((o) => o.id == s.id);
       selectedFull.add(o);
     }
-    var stateChange = selectedFull.where((s)=>s.state == OrderModel.orderedState);
-    if(stateChange.isNotEmpty){
+    var stateChange = selectedFull.where((s) => s.state == OrderModel.orderedState);
+    if (stateChange.isNotEmpty) {
       var confirm = await DialogHelper.showConfirmationDialogAsync(
-        context,
-        "Change state to paid".tr(),
-        "${"Do you want to change orders to paid?".tr()} (${stateChange.length})",
+          context,
+          "Change state to paid".tr(),
+          "${"Do you want to change orders to paid?".tr()} (${stateChange.length})"
       );
 
-      if(confirm){
+      if (confirm && mounted) {
         var futures = stateChange.map((s) {
           return () async {
             await DbEshop.updateOrderAndTicketsToPaid(s.id!);
@@ -101,23 +92,22 @@ class _OrdersTabState extends State<OrdersTab> {
         }).toList();
 
         await DialogHelper.showProgressDialogAsync(
-          context,
-          "Processing".tr(),
-          futures.length,
-          futures: futures,
+            context,
+            "Processing".tr(),
+            futures.length,
+            futures: futures
         );
         refreshData();
       }
     }
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
-      context,
-      "Storno".tr(),
-      "${"Do you want to send the tickets to orders?".tr()} (${selected.length})",
+        context,
+        "Storno".tr(),
+        "${"Do you want to send the tickets to orders?".tr()} (${selected.length})"
     );
 
-    if (confirm) {
-
+    if (confirm && mounted) {
       var futures = selectedFull.map((s) {
         return () async {
           await sendTicketsToEmail(s);
@@ -125,15 +115,13 @@ class _OrdersTabState extends State<OrdersTab> {
       }).toList();
 
       await DialogHelper.showProgressDialogAsync(
-        context,
-        "Processing".tr(),
-        futures.length,
-        futures: futures,
+          context,
+          "Processing".tr(),
+          futures.length,
+          futures: futures
       );
       refreshData();
     }
-
-
   }
 
   Future<void> sendTicketsToEmail(OrderModel order) async {
@@ -150,4 +138,17 @@ class _OrdersTabState extends State<OrdersTab> {
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );
   }
+
+  static const List<String> columnIdentifiers = [
+    EshopColumns.ORDER_ID,
+    EshopColumns.ORDER_SYMBOL,
+    EshopColumns.ORDER_DATA,
+    EshopColumns.ORDER_STATE,
+    EshopColumns.ORDER_PRICE,
+    EshopColumns.PAYMENT_INFO_PAID,
+    EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
+    EshopColumns.ORDER_DATA_NOTE,
+    EshopColumns.ORDER_NOTE_HIDDEN,
+    EshopColumns.PAYMENT_INFO_DEADLINE,
+  ];
 }
