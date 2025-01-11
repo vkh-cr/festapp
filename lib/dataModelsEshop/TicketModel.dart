@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
@@ -106,7 +107,9 @@ class TicketModel extends IPlutoRowModel {
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id]);
+        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id],
+        noteHidden: json[TbEshop.tickets.note_hidden]
+    );
   }
 
   @override
@@ -116,7 +119,7 @@ class TicketModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    // Implement your update logic here
+    await DbEshop.updateTicketNoteHidden(id!, noteHidden!);
   }
 
   @override

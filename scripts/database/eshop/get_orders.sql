@@ -73,7 +73,8 @@ BEGIN
         'created_at', t.created_at,
         'ticket_symbol', t.ticket_symbol,
         'state', t.state,
-        'note', t.note
+        'note', t.note,
+        'note_hidden', t.note_hidden
     ))
     INTO ticketsData
     FROM eshop.tickets t
@@ -88,7 +89,8 @@ BEGIN
         'state', o.state,
         'currency_code', o.currency_code,
         'data', o.data,
-        'payment_info', o.payment_info
+        'payment_info', o.payment_info,
+        'note_hidden', o.note_hidden
     ))
     INTO ordersData
     FROM eshop.orders o
