@@ -1,5 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
-import { generateTicketImage } from "../_shared/generateTicket.ts"; // Ensure this path is correct
+import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts"; // Ensure this path is correct
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 import { decode } from "https://deno.land/std@0.140.0/encoding/base64.ts";
 
@@ -155,10 +155,11 @@ Deno.serve(async (req) => {
 
     // Generate ticket images
     const attachments = [];
+    const resources = await fetchTicketResources(tickets[0]);
     for (const ticket of tickets) {
       try {
         console.log("generating...");
-        const ticketImage = await generateTicketImage(ticket);
+        const ticketImage = await generateTicketImage(ticket, resources);
         attachments.push({
           filename: `ticket_${ticket.ticket_symbol}.png`,
           content: ticketImage, // Uint8Array

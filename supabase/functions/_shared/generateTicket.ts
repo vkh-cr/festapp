@@ -8,105 +8,126 @@ const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 );
 
+export async function fetchTicketResources(ticket: any) {
+    console.log(ticket);
+  // 1. Fetch the occasion (includes data for background & color)
+  const { data: occasion, error: occasionError } = await supabaseAdmin
+    .from('occasions')
+    .select('id, data')
+    .eq('id', ticket.occasion)
+    .single();
+
+  if (occasionError || !occasion) {
+    throw new Error(`Occasion not found or error fetching occasion: ${occasionError?.message}`);
+  }
+
+  // 2. Extract background URL and color from occasion.data.features
+  let backgroundUrl: string | undefined;
+  let fontColor: string = '#000000';
+
+  if (Array.isArray(occasion.data?.features)) {
+    const ticketFeature = occasion.data.features.find(
+      (feature: any) => feature.code === 'ticket'
+    );
+    if (ticketFeature) {
+      if (typeof ticketFeature.background === 'string') {
+        backgroundUrl = ticketFeature.background;
+      }
+
+      if (typeof ticketFeature.color === 'string') {
+        // Validate 6-digit hex color
+        const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
+        if (hexColorRegex.test(ticketFeature.color)) {
+          fontColor = `#${ticketFeature.color}`;
+        } else {
+          console.log(`Invalid color format: ${ticketFeature.color}`);
+        }
+      }
+    }
+  }
+
+  if (!backgroundUrl) {
+    throw new Error('Background image URL not found in occasion.data.features.');
+  }
+
+  // 3. Fetch all product types to map product_type IDs to their string types
+  const { data: productTypes, error: productTypesError } = await supabaseAdmin
+    .schema('eshop')
+    .from('product_types')
+    .select('id, type')
+    .throwOnError();
+
+  if (productTypesError || !productTypes) {
+    throw new Error(`Error fetching product types: ${productTypesError?.message}`);
+  }
+
+  // Create a map of product_type ID to type string
+  const productTypeMap: Record<number, string> = {};
+  productTypes.forEach((pt: any) => {
+    productTypeMap[pt.id] = pt.type;
+  });
+
+  // 4. Fetch related products (spot, food, taxi)
+  const productIds = ticket.order_product_ticket.map((opt: any) => opt.product);
+  const { data: products, error: productsError } = await supabaseAdmin
+    .schema('eshop')
+    .from('products')
+    .select(`
+      id,
+      title,
+      title_short,
+      product_type,
+      data
+    `)
+    .in('id', productIds)
+    .throwOnError();
+
+  if (productsError || !products) {
+    throw new Error(`Error fetching products: ${productsError?.message}`);
+  }
+
+  // Map products by their type string
+  const productMap: Record<string, any> = {};
+  products.forEach((product: any) => {
+    const type = productTypeMap[product.product_type];
+    if (type) {
+      productMap[type] = product;
+    }
+  });
+
+  // 5. Load the background image here
+  const backgroundImage = await loadImage(backgroundUrl);
+
+  // Return all needed resources
+  return {
+    occasion,
+    fontColor,
+    productMap,
+    backgroundImage,
+  };
+}
+
 /**
  * Generates a ticket image based on the provided ticket data.
  * @param ticket - The ticket object containing necessary details.
  * @returns A Promise that resolves to a Uint8Array containing the image data.
  */
-export async function generateTicketImage(ticket: any): Promise<Uint8Array> {
+export async function generateTicketImage(
+    ticket: any,
+      resources: {
+        occasion: any;
+        fontColor: string;
+        productMap: Record<string, any>;
+        backgroundImage: any; // The type of image objects returned by loadImage
+      }
+    ): Promise<Uint8Array> {
   try {
-    // 1. Fetch occasion details to get the background image and other data
-    const { data: occasion, error: occasionError } = await supabaseAdmin
-      .from('occasions')
-      .select(`
-        id,
-        data
-      `)
-      .eq('id', ticket.occasion)
-      .single();
+   const { fontColor, productMap, backgroundImage } = resources;
 
-    if (occasionError || !occasion) {
-      throw new Error(`Occasion not found or error fetching occasion: ${occasionError?.message}`);
-    }
-
-    // 2. Extract background URL and color from occasion.data.features array
-    let backgroundUrl: string | undefined;
-    let fontColor: string = '#000000';
-
-    if (occasion.data && Array.isArray(occasion.data.features)) {
-      const ticketFeature = occasion.data.features.find(
-        (feature: any) => feature.code === 'ticket'
-      );
-      if (ticketFeature) {
-        if (typeof ticketFeature.background === 'string') {
-          backgroundUrl = ticketFeature.background;
-        }
-
-        if (typeof ticketFeature.color === 'string') {
-          // Validate hex color code
-          const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
-          if (hexColorRegex.test(ticketFeature.color)) {
-            fontColor = `#${ticketFeature.color}`;
-          } else {
-            console.log(`Invalid color format: ${ticketFeature.color}`);
-          }
-        }
-      }
-    }
-
-    if (!backgroundUrl) {
-      throw new Error('Background image URL not found in occasion.data.features.');
-    }
-
-    // 3. Fetch all product types to map product_type IDs to their string types
-    const { data: productTypes, error: productTypesError } = await supabaseAdmin.schema('eshop')
-      .from('product_types')
-      .select('id, type')
-      .throwOnError();
-
-    if (productTypesError || !productTypes) {
-      throw new Error(`Error fetching product types: ${productTypesError?.message}`);
-    }
-
-    // Create a map of product_type ID to type string
-    const productTypeMap: Record<number, string> = {};
-    productTypes.forEach((pt: any) => {
-      productTypeMap[pt.id] = pt.type;
-    });
-
-    // 4. Fetch related products (spot, food, taxi)
-    const productIds = ticket.order_product_ticket.map((opt: any) => opt.product);
-    const { data: products, error: productsError } = await supabaseAdmin.schema('eshop')
-      .from('products')
-      .select(`
-        id,
-        title,
-        title_short,
-        product_type,
-        data
-      `)
-      .in('id', productIds)
-      .throwOnError();
-
-    if (productsError || !products) {
-      throw new Error(`Error fetching products: ${productsError?.message}`);
-    }
-
-    // Map products by their type string
-    const productMap: Record<string, any> = {};
-    products.forEach((product: any) => {
-      const type = productTypeMap[product.product_type];
-      if (type) {
-        productMap[type] = product;
-      }
-    });
-
-    const spotProduct = productMap['spot'];
-    const foodProduct = productMap['food'];
-    const taxiProduct = productMap['taxi'];
-
-    // 5. Load background image
-    const backgroundImage = await loadImage(backgroundUrl);
+   // Identify spot, food, taxi
+   const spotProduct = productMap['spot'];
+   const foodProduct = productMap['food'];
+   const taxiProduct = productMap['taxi'];
 
     // 6. Create canvas with background dimensions
     const canvas = createCanvas(backgroundImage.width(), backgroundImage.height());
