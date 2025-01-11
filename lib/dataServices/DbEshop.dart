@@ -28,7 +28,7 @@ class DbEshop {
         "${TbEshop.product_types.id},"
         "${TbEshop.product_types.type},"
         "${TbEshop.product_types.title},"
-        "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price})"
+        "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price},${TbEshop.products.order})"
         )
         .eq(TbEshop.product_types.occasion, currentOccasion)
         .eq("${TbEshop.products.table}.${TbEshop.products.is_hidden}", false);
@@ -37,7 +37,7 @@ class DbEshop {
         data.map((x) {
           var toReturn = ProductTypeModel.fromJson(x);
           toReturn.products = toReturn.products?.sortedBy((i) => i.title ?? "");
-          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.price ?? 0);
+          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.order ?? 0);
           for (ProductModel v in toReturn.products??[]){
             v.title = v.price != null && v.price! > 0 ? "${v.title} (${Utilities.formatPrice(context, v.price!)})" : v.title;
           }
@@ -51,9 +51,9 @@ class DbEshop {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
-  static Future<FormModel?> getForm(String formKey) async {
+  static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
-        .rpc('get_form', params: {'form_key': formKey});
+        .rpc('get_form_from_link', params: {'form_link': link});
 
     if(response["code"] == 200){
       var form = FormModel.fromJson(response["data"]);
@@ -62,11 +62,11 @@ class DbEshop {
     return null;
   }
 
-  static Future<FormModel?> getFormForEdit(String formKey) async {
+  static Future<FormModel?> getFormForEdit(String formLink) async {
     var data = await _supabase
         .from(Tb.forms.table)
         .select()
-        .eq(Tb.forms.key, formKey)
+        .eq(Tb.forms.link, formLink)
         .maybeSingle();
     if(data==null)
     {
@@ -125,7 +125,7 @@ class DbEshop {
     final response = await _supabase.rpc(
       'get_blueprint_editor',
       params: {
-        'form_key': formKey,
+        'form_link': formKey,
       },
     );
 
@@ -176,12 +176,12 @@ class DbEshop {
     return true;
   }
 
-  static Future<List<OrderModel>> getAllOrders(String formKey) async {
+  static Future<List<OrderModel>> getAllOrders(String formLink) async {
 
     final response = await _supabase.rpc(
       'get_orders',
       params: {
-        'form_key': formKey,
+        'form_link': formLink,
       },
     );
 
@@ -206,9 +206,9 @@ class DbEshop {
 
       for (var ticket in order.relatedTickets!) {
         // Relate spots to the ticket via orderProductTickets
-        ticket.relatedSpots = spots!.where((spot) {
+        ticket.relatedSpot = spots!.firstWhereOrNull((spot) {
           return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.id == spot.orderProductTicket);
-        }).toList();
+        });
 
         // Relate products to the ticket via orderProductTickets
         ticket.relatedProducts = products!.where((product) {
@@ -244,8 +244,8 @@ class DbEshop {
     return orders.sortedBy((ou)=>ou.createdAt!).reversed.toList();
   }
 
-  static Future<List<TicketModel>> getAllTickets(String formKey) async {
-    var orders = await getAllOrders(formKey);
+  static Future<List<TicketModel>> getAllTickets(String formLink) async {
+    var orders = await getAllOrders(formLink);
     List<TicketModel> toReturn = [];
     for(var o in orders){
 
@@ -266,6 +266,31 @@ class DbEshop {
     toReturn = toReturn.sortedBy((ou)=>ou.createdAt!).reversed.toList();
     return toReturn;
   }
+
+  static Future<FunctionResponse> sendTicketsToEmail({
+    required List<int> ticketIds,
+    required String email,
+    required int oc, // Occasion ID
+  }) async {
+    final body = {
+      "ticketIds": ticketIds,
+      "email": email,
+      "oc": oc,
+    };
+
+    try {
+      final response = await _supabase.functions.invoke(
+        "send-tickets",
+        body: body,
+      );
+
+      return response;
+    } catch (e) {
+      print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
   static Future<void> deleteOrder(OrderModel model) async {
 
   }
