@@ -69,8 +69,8 @@ dependencies:
   flutter_map_cancellable_tile_provider: ^3.0.2
   simple_shadow: ^0.3.1
   pwa_install: ^0.0.5
-  flutter_form_builder: ^9.5.0
-  form_builder_validators: ^11.0.0
+  flutter_form_builder: ^9.7.0
+  form_builder_validators: ^11.1.1
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
   image_downloader_web: ^2.0.4
@@ -78,7 +78,7 @@ dependencies:
   flutter_map_pmtiles: ^1.0.4
   flutter_map_animations: ^0.8.0
   auto_route: ^9.2.2
-  adaptive_theme: ^3.6.0
+  adaptive_theme: ^3.7.0
   connectivity_plus: ^6.1.1
 
 dev_dependencies:
