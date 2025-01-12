@@ -1,7 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts"; // Ensure this path is correct
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
-import { decode } from "https://deno.land/std@0.140.0/encoding/base64.ts";
+import { PDFDocument, rgb } from "npm:pdf-lib";
 
 // Initialize Supabase client
 const supabaseAdmin: SupabaseClient = createClient(
@@ -153,28 +153,56 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Generate ticket images
-    const attachments = [];
+    // Generate individual PDFs for each ticket
     tickets = tickets.filter(ticket => ticket.state !== 'storno');
     const resources = await fetchTicketResources(tickets[0]);
+
+    const attachments = [];
+
     for (const ticket of tickets) {
       try {
-        console.log("generating...");
+
+        console.log("Generating...");
         const ticketImage = await generateTicketImage(ticket, resources);
+
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([595.28, 841.89]); // A4 size in points
+
+        const margin = 20;
+        const pngImage = await pdfDoc.embedPng(ticketImage);
+        const pngDims = pngImage.scale(1);
+        const imageWidth = Math.min(page.getWidth() - margin * 2, pngDims.width);
+        const imageHeight = (imageWidth / pngDims.width) * pngDims.height;
+        const yPosition = page.getHeight() - margin;
+        if (yPosition - imageHeight < margin) {
+          yPosition = page.getHeight() - margin;
+          pdfDoc.addPage([595.28, 841.89]);
+        }
+
+        page.drawImage(pngImage, {
+          x: (page.getWidth() - imageWidth) / 2,
+          y: yPosition - imageHeight,
+          width: imageWidth,
+          height: imageHeight,
+        });
+
+        const pdfBytes = await pdfDoc.save();
+
         attachments.push({
-          filename: `ticket_${ticket.ticket_symbol}.png`,
-          content: ticketImage, // Uint8Array
-          contentType: "image/png",
+          filename: `ticket_${ticket.ticket_symbol}.pdf`,
+          content: pdfBytes,
+          contentType: "application/pdf",
           encoding: "binary",
         });
-        console.log("image added to attachments");
+
+        console.log("PDF added to attachments");
       } catch (imageError) {
-        console.error(`Error generating image for ticket ${ticket.id}:`, imageError);
+        console.error(`Error generating PDF for ticket ${ticket.id}:`, imageError);
       }
     }
 
     if (attachments.length === 0) {
-      return new Response(JSON.stringify({ error: "No valid ticket images generated" }), {
+      return new Response(JSON.stringify({ error: "No valid ticket PDFs generated" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
       });
