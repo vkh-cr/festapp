@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
     const occasionTitle = occasionData.title;
 
     // Fetch tickets related to the order
-    const { data: tickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", {
+    var { data: tickets, error: ticketsError } = await supabaseAdmin.rpc("get_tickets_with_details", {
         order_id: orderId
     });
 
@@ -155,6 +155,7 @@ Deno.serve(async (req) => {
 
     // Generate ticket images
     const attachments = [];
+    tickets = tickets.filter(ticket => ticket.state !== 'storno');
     const resources = await fetchTicketResources(tickets[0]);
     for (const ticket of tickets) {
       try {

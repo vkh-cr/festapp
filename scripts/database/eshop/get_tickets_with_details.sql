@@ -13,6 +13,7 @@ BEGIN
             t.ticket_symbol,
             t.occasion,
             t.note,
+            t.state,
             b.title AS table_title,
             (
                 SELECT jsonb_agg(ticket_prod)
