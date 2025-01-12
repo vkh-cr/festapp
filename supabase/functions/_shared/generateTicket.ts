@@ -1,7 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
 import QRCode from "npm:qrcode";
-import { PDFDocument, StandardFonts, rgb } from "npm:pdf-lib";
+import { PDFDocument, rgb } from "npm:pdf-lib";
+// Import all exports from fontkit (do not try to import a default)
+import * as fontkit from "npm:fontkit";
 import * as path from "https://deno.land/std/path/mod.ts";
+
+// Set constant for custom font URL.
+const CUSTOM_FONT_URL = "https://github.com/google/fonts/raw/refs/heads/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -9,6 +14,7 @@ const supabaseAdmin = createClient(
 );
 
 export async function fetchTicketResources(ticket: any) {
+  // Fetch the occasion data.
   const { data: occasion, error: occasionError } = await supabaseAdmin
     .from("occasions")
     .select("id, data")
@@ -16,11 +22,14 @@ export async function fetchTicketResources(ticket: any) {
     .single();
 
   if (occasionError || !occasion) {
-    throw new Error(`Occasion not found or error fetching occasion: ${occasionError?.message}`);
+    throw new Error(
+      `Occasion not found or error fetching occasion: ${occasionError?.message}`
+    );
   }
 
   let backgroundUrl: string | undefined;
-  let fontColor = "000000"; // Placeholder: "#000000"
+  let darkColor = "000000";
+  let lightColor = "FFFFFF";
 
   if (Array.isArray(occasion.data?.features)) {
     const ticketFeature = occasion.data.features.find(
@@ -30,28 +39,37 @@ export async function fetchTicketResources(ticket: any) {
       if (typeof ticketFeature.background === "string") {
         backgroundUrl = ticketFeature.background;
       }
-      if (typeof ticketFeature.color === "string") {
+      if (typeof ticketFeature.darkColor === "string") {
         const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
-        if (hexColorRegex.test(ticketFeature.color)) {
-          fontColor = ticketFeature.color;
-        } else {
-          console.log(`Invalid color format: ${ticketFeature.color}`);
+        if (hexColorRegex.test(ticketFeature.darkColor)) {
+          darkColor = ticketFeature.darkColor;
+        }
+      }
+      if (typeof ticketFeature.lightColor === "string") {
+        const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
+        if (hexColorRegex.test(ticketFeature.lightColor)) {
+          lightColor = ticketFeature.lightColor;
         }
       }
     }
   }
 
   if (!backgroundUrl) {
-    throw new Error("Background image URL not found in occasion.data.features.");
+    throw new Error(
+      "Background image URL not found in occasion.data.features."
+    );
   }
 
+  // Fetch product types.
   const { data: productTypes, error: productTypesError } = await supabaseAdmin
     .schema("eshop")
     .from("product_types")
     .select("id, type");
 
   if (productTypesError || !productTypes) {
-    throw new Error(`Error fetching product types: ${productTypesError?.message}`);
+    throw new Error(
+      `Error fetching product types: ${productTypesError?.message}`
+    );
   }
 
   const productTypeMap: Record<number, string> = {};
@@ -59,6 +77,7 @@ export async function fetchTicketResources(ticket: any) {
     productTypeMap[pt.id] = pt.type;
   });
 
+  // Fetch products.
   const productIds = ticket.order_product_ticket.map((opt: any) => opt.product);
   const { data: products, error: productsError } = await supabaseAdmin
     .schema("eshop")
@@ -67,7 +86,9 @@ export async function fetchTicketResources(ticket: any) {
     .in("id", productIds);
 
   if (productsError || !products) {
-    throw new Error(`Error fetching products: ${productsError?.message}`);
+    throw new Error(
+      `Error fetching products: ${productsError?.message}`
+    );
   }
 
   const productMap: Record<string, any> = {};
@@ -78,42 +99,64 @@ export async function fetchTicketResources(ticket: any) {
     }
   });
 
+  // Download the background image.
   const bgResponse = await fetch(backgroundUrl);
   if (!bgResponse.ok) {
     throw new Error(`Failed to download background: ${backgroundUrl}`);
   }
   const backgroundBytes = new Uint8Array(await bgResponse.arrayBuffer());
 
+  // Download the custom font.
+  const fontResponse = await fetch(CUSTOM_FONT_URL);
+  if (!fontResponse.ok) {
+    throw new Error(`Failed to download custom font: ${CUSTOM_FONT_URL}`);
+  }
+  const customFontBytes = new Uint8Array(await fontResponse.arrayBuffer());
+
   return {
-    fontColor,
+    darkColor,
+    lightColor,
     productMap,
     backgroundBytes,
+    customFontBytes,
   };
 }
 
 export async function generateTicketImage(
   ticket: any,
   resources: {
-    fontColor: string;
+    darkColor: string;
+    lightColor: string;
     productMap: Record<string, any>;
     backgroundBytes: Uint8Array;
+    customFontBytes: Uint8Array;
   }
 ): Promise<Uint8Array> {
   try {
-    const { fontColor, productMap, backgroundBytes } = resources;
+    const { darkColor, lightColor, productMap, backgroundBytes, customFontBytes } = resources;
 
+    // (For demonstration: using product types if needed)
     const spotProduct = productMap["spot"];
     const foodProduct = productMap["food"];
     const taxiProduct = productMap["taxi"];
 
+    // Create the PDF document.
     const pdfDoc = await PDFDocument.create();
+
+    // Register fontkit to enable embedding custom fonts.
+    pdfDoc.registerFontkit(fontkit);
+
     const pageWidth = 595.28;
     const pageHeight = 841.89;
     const page = pdfDoc.addPage([pageWidth, pageHeight]);
 
-    const bgImage = await pdfDoc.embedJpg(backgroundBytes).catch(async () => {
-      return await pdfDoc.embedPng(backgroundBytes);
-    });
+    // Embed and draw the background image.
+    let bgImage;
+    try {
+      bgImage = await pdfDoc.embedJpg(backgroundBytes);
+    } catch (e) {
+      bgImage = await pdfDoc.embedPng(backgroundBytes);
+    }
 
     const bgWidth = bgImage.width;
     const bgHeight = bgImage.height;
@@ -130,20 +173,22 @@ export async function generateTicketImage(
       height: bgHeight * scale,
     });
 
+    // Generate QR Code and embed it.
     const qrSize = 256 * scale;
-    const qrX = bgX + (bgWidth * scale) - qrSize - (110 * scale); // Inside background, right side
-    const qrY = bgY + (110 * scale); // Inside background, top side
+    const qrX = bgX + (bgWidth * scale) - qrSize - (110 * scale);
+    const qrY = bgY + (110 * scale);
 
     const qrData = await QRCode.toDataURL(ticket.ticket_symbol, {
       width: qrSize,
       margin: 2,
       color: {
-        dark: "#FFFFFFFF",
-        light: "#00000080"
+        dark: `#${darkColor}`,
+        light: `#${lightColor}C0`,
       },
     });
 
     const rawQR = qrData.split(",")[1];
+    // Convert base64 string to Uint8Array.
     const qrBytes = Uint8Array.from(atob(rawQR), (c) => c.charCodeAt(0));
     const qrImage = await pdfDoc.embedPng(qrBytes);
 
@@ -154,27 +199,45 @@ export async function generateTicketImage(
       height: qrSize,
     });
 
-    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    // Embed the custom font using the downloaded bytes.
+    const customFont = await pdfDoc.embedFont(customFontBytes);
 
-    const textColor = hexToRgb(fontColor);
-    let textX = bgX + (150 * scale);
-    let textY = bgY + (180 * scale);
+    // Convert hex color to PDF-lib rgb.
+    const textColor = hexToRgb(darkColor);
+    let textX = bgX + 150 * scale;
+    let textY = bgY + 280 * scale;
 
-    const texts = [
-      "Placeholder: Table info", // Placeholder: Table info
-      "Placeholder: Dinner info", // Placeholder: Dinner info
-      "Placeholder: Taxi info" // Placeholder: Taxi info
-    ];
+    const texts = [];
+
+// Add Spot Title
+    const spotOrder = ticket.order_product_ticket.find((opt: any) => opt.product === spotProduct.id);
+    if (spotOrder && spotOrder.spot_group_title) {
+      texts.push(`Stůl: ${spotOrder.spot_group_title}`);
+    } else {
+      texts.push(`Stůl: N/A`);
+    }
+
+    // Add Food Title
+    if (foodProduct) {
+      const foodTitle = foodProduct.title_short || foodProduct.title || 'N/A';
+      texts.push(`Večeře: ${foodTitle}`);
+    }
+
+    // Add Taxi Title
+    if (taxiProduct) {
+      const taxiTitle = taxiProduct.title_short || taxiProduct.title || 'N/A';
+      texts.push(`Odvoz: ${taxiTitle}`);
+    }
 
     texts.forEach((text) => {
       page.drawText(text, {
         x: textX,
         y: textY,
-        size: 40 * scale, // Scaled text size
-        font,
+        size: 40 * scale,
+        font: customFont,
         color: textColor,
       });
-      textY += 50 * scale; // Scaled line height, moving upward
+      textY -= 50 * scale;
     });
 
     const pdfBytes = await pdfDoc.save();
@@ -184,6 +247,7 @@ export async function generateTicketImage(
     throw error;
   }
 
+  // Helper function to convert a hex color string to PDF-lib rgb color.
   function hexToRgb(hex: string) {
     const r = parseInt(hex.substring(0, 2), 16) / 255;
     const g = parseInt(hex.substring(2, 4), 16) / 255;
