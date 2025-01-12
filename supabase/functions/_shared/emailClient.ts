@@ -1,58 +1,56 @@
-import { SMTPClient } from "https://deno.land/x/denomailer/mod.ts";
+import nodemailer from "npm:nodemailer@6.9.16";
 
-const _SMTP_HOSTNAME = Deno.env.get("SMTP_HOSTNAME")!;
-const _SMTP_USER_NAME = Deno.env.get("SMTP_USER_NAME")!;
-const _SMTP_USER_PASSWORD = Deno.env.get("SMTP_USER_PASSWORD")!;
-const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
+const _SMTP_HOSTNAME = Deno.env.get("SMTP_HOSTNAME") || "";
+const _SMTP_USER_NAME = Deno.env.get("SMTP_USER_NAME") || "";
+const _SMTP_USER_PASSWORD = Deno.env.get("SMTP_USER_PASSWORD") || "";
+const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL") || "";
 
-const smtpClient = new SMTPClient({
-  connection: {
-    hostname: _SMTP_HOSTNAME,
-    port: 465,
-    tls: true,
-    auth: {
-      username: _SMTP_USER_NAME,
-      password: _SMTP_USER_PASSWORD,
-    },
-  },
-});
-
-// Sanitize HTML to avoid Gmail-specific issues
-export function sanitizeHtml(html: string): string {
+/**
+ * Sanitize HTML to avoid Gmail-specific issues
+ */
+export function sanitizeHtml(html) {
   return html.replace(/(\r\n|\n|\r)/gm, "").replace(/ {2,}/g, " ").trim();
 }
+
+/**
+ * Create a reusable transporter object using SMTP transport.
+ *
+ * Note: This may fail at runtime in Deno Edge Functions because
+ * Nodemailer depends on Node APIs. See the note above.
+ */
+const transporter = nodemailer.createTransport({
+  host: _SMTP_HOSTNAME,
+  port: 465,
+  secure: true,
+  auth: {
+    user: _SMTP_USER_NAME,
+    pass: _SMTP_USER_PASSWORD,
+  },
+});
 
 export async function sendEmail({
   to,
   subject,
   html,
   attachments = [],
-  from = `${_DEFAULT_EMAIL}`,
-}: {
-  to: string;
-  subject: string;
-  html: string;
-  attachments?: Array<{
-    contentType: string;
-    filename: string;
-    content: string | Uint8Array | ArrayBufferLike;
-    encoding: "binary" | "text" | "base64";
-  }>;
-  from?: string;
+  from = _DEFAULT_EMAIL,
 }) {
   try {
-    await smtpClient.send({
+    await transporter.sendMail({
       from,
       to,
       subject,
       html,
-      attachments
+      attachments: attachments.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType,
+        encoding: attachment.encoding,
+      })),
     });
     console.log("Email sent successfully to:", to);
   } catch (error) {
     console.error("Failed to send email:", error);
-  } finally {
-    await smtpClient.close();
   }
 }
 
@@ -62,23 +60,12 @@ export async function sendEmailWithSubs({
   content,
   subs,
   attachments = [],
-  from = `${_DEFAULT_EMAIL}`,
-}: {
-  to: string;
-  subject: string;
-  content: string;
-  subs: Record<string, string>;
-  attachments?: Array<{
-    contentType: string;
-    filename: string;
-    content: string | Uint8Array | ArrayBufferLike;
-    encoding: "binary" | "text" | "base64";
-  }>;
-  from?: string;
+  from = _DEFAULT_EMAIL,
 }) {
   // Replace placeholders in content with values from subs
   let processedSubject = subject;
   let processedHtml = content;
+
   for (const [key, value] of Object.entries(subs)) {
     const placeholder = `{{${key}}}`;
     processedHtml = processedHtml.replaceAll(placeholder, value);
@@ -88,6 +75,12 @@ export async function sendEmailWithSubs({
   // Sanitize the processed HTML content
   const sanitizedHtml = sanitizeHtml(processedHtml);
 
-  // Use the sendEmail function to send the processed and sanitized email with attachments
-  await sendEmail({ to, subject: processedSubject, html: sanitizedHtml, attachments, from });
+  // Use the sendEmail function to send the processed and sanitized email
+  await sendEmail({
+    to,
+    subject: processedSubject,
+    html: sanitizedHtml,
+    attachments,
+    from,
+  });
 }
