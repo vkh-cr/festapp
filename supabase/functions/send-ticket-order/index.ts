@@ -138,12 +138,21 @@ Deno.serve(async (req) => {
       input_data: orderDetails,
     });
 
-    if (ticketError || ticketOrder.code !== 200) {
-      console.error("Error creating ticket order:", ticketError);
-      return new Response(JSON.stringify({ "code": ticketOrder.code + ": " + ticketOrder.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+    // Create a string combining the code and message from the ticketOrder
+    const errorString = `${ticketOrder.code}: ${ticketOrder.message}`;
+
+    if (ticketOrder.code !== 200) {
+      console.error("Error creating ticket order:", errorString);
+      return new Response(
+        JSON.stringify({
+          code: ticketOrder.code,
+          message: ticketOrder.message,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
     console.log(ticketOrder);
