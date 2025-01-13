@@ -8,6 +8,7 @@ import * as path from "https://deno.land/std/path/mod.ts";
 // Set constant for custom font URL.
 const CUSTOM_FONT_URL =
   "https://github.com/google/fonts/raw/refs/heads/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf";
+const MAX_TEXT_ON_TICKET = 45;
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -256,7 +257,7 @@ export async function generateTicketImage(
       (opt: any) => spotProduct && opt.product === spotProduct.id
     );
     if (spotOrder && spotOrder.spot_group_title) {
-      texts.push(`Stůl: ${spotOrder.spot_group_title}`);
+      texts.push(`Stůl: ${truncateText(spotOrder.spot_group_title)}`);
     } else {
       texts.push(`Stůl: N/A`);
     }
@@ -264,12 +265,13 @@ export async function generateTicketImage(
     // Add Food Title.
     if (foodProduct) {
       const foodTitle = foodProduct.title_short || foodProduct.title || "N/A";
-      texts.push(`Večeře: ${foodTitle}`);
+      texts.push(`Večeře: ${truncateText(foodTitle)}`);
     }
 
+    // Add Ticket Note if available.
     if (ticket.note && ticket.note.trim() !== "") {
-      texts.push(`Poznámka: ${ticket.note}`);
-   }
+      texts.push(`Poznámka: ${truncateText(ticket.note)}`);
+    }
 
     texts.forEach((text) => {
       page.drawText(text, {
@@ -295,5 +297,10 @@ export async function generateTicketImage(
     const g = parseInt(hex.substring(2, 4), 16) / 255;
     const b = parseInt(hex.substring(4, 6), 16) / 255;
     return rgb(r, g, b);
+  }
+
+  function truncateText(text: string, maxLength: number = MAX_TEXT_ON_TICKET): string {
+    const trimmed = text.trim();
+    return trimmed.length > maxLength ? trimmed.slice(0, maxLength) + "..." : trimmed;
   }
 }
