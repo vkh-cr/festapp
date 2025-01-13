@@ -41,10 +41,25 @@ BEGIN
                         ON bp.id = s.blueprint
                     WHERE opt2.ticket = t.id
                 ) ticket_prod
-            ) AS order_product_ticket
+            ) AS order_product_ticket,
+            (
+              SELECT COALESCE(SUM((prod->>'price')::numeric), 0)
+              FROM jsonb_array_elements(ord.data->'tickets') ticket_json,
+                   jsonb_array_elements(ticket_json->'products') prod
+              WHERE (ticket_json->>'id')::bigint = t.id
+            ) AS price,
+            (
+              SELECT (prod->>'currency_code')
+              FROM jsonb_array_elements(ord.data->'tickets') ticket_json,
+                   jsonb_array_elements(ticket_json->'products') prod
+              WHERE (ticket_json->>'id')::bigint = t.id
+              LIMIT 1
+            ) AS currency
         FROM eshop.order_product_ticket opt
         JOIN eshop.tickets t
             ON t.id = opt.ticket
+        JOIN eshop.orders ord
+            ON ord.id = order_id
         LEFT JOIN public.occasions o
             ON o.id = t.occasion
         LEFT JOIN eshop.blueprints b
