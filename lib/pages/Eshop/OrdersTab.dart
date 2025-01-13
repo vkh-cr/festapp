@@ -53,6 +53,11 @@ class _OrdersTabState extends State<OrdersTab> {
               isAddActionPossible: () => false),
           headerChildren: [
             DataGridAction(
+              name: "Synchronize payments".tr(),
+              action: (SingleTableDataGrid dataGrid, [_]) => synchronizePayments(),
+              isEnabled: RightsService.isEditor,
+            ),
+            DataGridAction(
               name: "Send tickets".tr(),
               action: (SingleTableDataGrid dataGrid, [_]) => sendTickets(dataGrid),
               isEnabled: RightsService.isEditor,
@@ -61,6 +66,11 @@ class _OrdersTabState extends State<OrdersTab> {
           columns: EshopColumns.generateColumns(columnIdentifiers),
         ).DataGrid()
     );
+  }
+
+  Future<void> synchronizePayments() async {
+    await DbEshop.fetchTransactions();
+    refreshData();
   }
 
   Future<void> sendTickets(SingleTableDataGrid dataGrid) async {

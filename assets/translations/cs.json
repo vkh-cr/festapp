@@ -353,5 +353,6 @@
   "Send tickets": "Poslat vstupenky",
   "Change state to paid": "Změnit stav na zaplaceno",
   "Do you want to change orders to paid?": "Chcete změnit objednávky na zaplaceno?",
+  "Synchronize payments": "Synchronizovat platby",
   "_": "_"
 }
