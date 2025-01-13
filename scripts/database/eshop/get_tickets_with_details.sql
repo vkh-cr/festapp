@@ -54,7 +54,7 @@ BEGIN
                    jsonb_array_elements(ticket_json->'products') prod
               WHERE (ticket_json->>'id')::bigint = t.id
               LIMIT 1
-            ) AS currency
+            ) AS currency_code
         FROM eshop.order_product_ticket opt
         JOIN eshop.tickets t
             ON t.id = opt.ticket
