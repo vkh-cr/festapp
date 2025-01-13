@@ -6,7 +6,8 @@ import * as fontkit from "npm:fontkit";
 import * as path from "https://deno.land/std/path/mod.ts";
 
 // Set constant for custom font URL.
-const CUSTOM_FONT_URL = "https://github.com/google/fonts/raw/refs/heads/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf";
+const CUSTOM_FONT_URL =
+  "https://github.com/google/fonts/raw/refs/heads/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf";
 
 const supabaseAdmin = createClient(
   Deno.env.get("SUPABASE_URL")!,
@@ -78,7 +79,9 @@ export async function fetchTicketResources(ticket: any) {
   });
 
   // Fetch products.
-  const productIds = ticket.order_product_ticket.map((opt: any) => opt.product);
+  const productIds = ticket.order_product_ticket.map(
+    (opt: any) => opt.product
+  );
   const { data: products, error: productsError } = await supabaseAdmin
     .schema("eshop")
     .from("products")
@@ -86,9 +89,7 @@ export async function fetchTicketResources(ticket: any) {
     .in("id", productIds);
 
   if (productsError || !products) {
-    throw new Error(
-      `Error fetching products: ${productsError?.message}`
-    );
+    throw new Error(`Error fetching products: ${productsError?.message}`);
   }
 
   const productMap: Record<string, any> = {};
@@ -133,7 +134,13 @@ export async function generateTicketImage(
   }
 ): Promise<Uint8Array> {
   try {
-    const { darkColor, lightColor, productMap, backgroundBytes, customFontBytes } = resources;
+    const {
+      darkColor,
+      lightColor,
+      productMap,
+      backgroundBytes,
+      customFontBytes,
+    } = resources;
 
     // (For demonstration: using product types if needed)
     const spotProduct = productMap["spot"];
@@ -174,13 +181,13 @@ export async function generateTicketImage(
     });
 
     // Generate QR Code and embed it.
-    const qrSize = 256 * scale;
-    const qrX = bgX + (bgWidth * scale) - qrSize - (110 * scale);
-    const qrY = bgY + (110 * scale);
+    const qrSize = 240 * scale;
+    const qrX = bgX + (bgWidth * scale) - qrSize - 150 * scale;
+    const qrY = bgY + 140 * scale;
 
     const qrData = await QRCode.toDataURL(ticket.ticket_symbol, {
       width: qrSize,
-      margin: 2,
+      margin: 1.6,
       color: {
         dark: `#${darkColor}`,
         light: `#${lightColor}C0`,
@@ -199,33 +206,58 @@ export async function generateTicketImage(
       height: qrSize,
     });
 
-    // Embed the custom font using the downloaded bytes.
+    // Draw the ticket symbol text directly below the QR Code.
+    // Set some padding and choose a font size for the QR text.
+    const qrTextPadding = 10 * scale;
+    const qrFontSize = 28 * scale;
+    const ticketSymbol = ticket.ticket_symbol;
+    // Embed the custom font.
     const customFont = await pdfDoc.embedFont(customFontBytes);
+    // Measure text width so that it can be centered under QR code.
+    const ticketSymbolTextWidth = customFont.widthOfTextAtSize(
+      ticketSymbol,
+      qrFontSize
+    );
+    const ticketSymbolX = qrX + qrSize / 2 - ticketSymbolTextWidth / 2;
+    const ticketSymbolY = qrY - qrTextPadding - qrFontSize;
+    // Reuse the same text color as for other texts.
+    const textColor = hexToRgb(darkColor);
+
+    page.drawText(ticketSymbol, {
+      x: ticketSymbolX,
+      y: ticketSymbolY,
+      size: qrFontSize,
+      font: customFont,
+      color: textColor,
+    });
 
     // Convert hex color to PDF-lib rgb.
-    const textColor = hexToRgb(darkColor);
+    // (Reusing darkColor for main text; textColor was already defined above.)
     let textX = bgX + 150 * scale;
     let textY = bgY + 280 * scale;
 
     const texts = [];
 
-// Add Spot Title
-    const spotOrder = ticket.order_product_ticket.find((opt: any) => opt.product === spotProduct.id);
+    // Add Spot Title.
+    const spotOrder = ticket.order_product_ticket.find(
+      (opt: any) => opt.product === spotProduct.id
+    );
     if (spotOrder && spotOrder.spot_group_title) {
       texts.push(`Stůl: ${spotOrder.spot_group_title}`);
     } else {
       texts.push(`Stůl: N/A`);
     }
 
-    // Add Food Title
+    // Add Food Title.
     if (foodProduct) {
-      const foodTitle = foodProduct.title_short || foodProduct.title || 'N/A';
+      const foodTitle = foodProduct.title_short || foodProduct.title || "N/A";
       texts.push(`Večeře: ${foodTitle}`);
     }
 
-    // Add Taxi Title
+    // Add Taxi Title.
     if (taxiProduct) {
-      const taxiTitle = taxiProduct.title_short || taxiProduct.title || 'N/A';
+      const taxiTitle =
+        taxiProduct.title_short || taxiProduct.title || "N/A";
       texts.push(`Odvoz: ${taxiTitle}`);
     }
 
