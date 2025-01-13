@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION update_order_and_tickets_to_paid(order_id bigint)
-RETURNS jsonb SECURITY DEFINER AS $$
+RETURNS jsonb AS $$
 DECLARE
     occasion_id bigint;
 BEGIN
@@ -9,11 +9,6 @@ BEGIN
     -- Check if the order exists and has an associated occasion
     IF occasion_id IS NULL THEN
         RAISE EXCEPTION 'Order not found or no associated occasion.';
-    END IF;
-
-    -- Verify if the user is an editor on the occasion
-    IF NOT get_is_editor_on_occasion(occasion_id) THEN
-        RAISE EXCEPTION 'User is not authorized to edit this occasion.';
     END IF;
 
     -- Update the state of the order to 'paid'
