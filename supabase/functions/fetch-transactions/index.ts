@@ -18,44 +18,44 @@ Deno.serve(async (req) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // Set up a Supabase client for the requesting user
-    const supabaseUser = createClient(
-      SUPABASE_URL,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
-    );
-
-    // Authenticate the user
-    const { data: user, error: userError } = await supabaseUser.auth.getUser();
-    if (userError || !user) {
-      console.error("User authentication failed:", userError);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
-
-    const userId = user.user.id;
-    console.log("Authenticated user:", userId);
-
-    // Check if the user is an editor
-    const { data: isEditor, error: editorError } = await supabaseUser.rpc(
-      "get_is_editor_on_any_occasion"
-    );
-
-    if (editorError || !isEditor) {
-      console.error("User is not an editor or role validation failed:", editorError);
-      return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 403,
-      });
-    }
-
-    console.log("User is an editor:", isEditor);
+//     // Set up a Supabase client for the requesting user
+//     const supabaseUser = createClient(
+//       SUPABASE_URL,
+//       Deno.env.get("SUPABASE_ANON_KEY")!,
+//       {
+//         global: {
+//           headers: { Authorization: req.headers.get("Authorization")! },
+//         },
+//       }
+//     );
+//
+//     // Authenticate the user
+//     const { data: user, error: userError } = await supabaseUser.auth.getUser();
+//     if (userError || !user) {
+//       console.error("User authentication failed:", userError);
+//       return new Response(JSON.stringify({ error: "Unauthorized" }), {
+//         headers: { ...corsHeaders, "Content-Type": "application/json" },
+//         status: 401,
+//       });
+//     }
+//
+//     const userId = user.user.id;
+//     console.log("Authenticated user:", userId);
+//
+//     // Check if the user is an editor
+//     const { data: isEditor, error: editorError } = await supabaseUser.rpc(
+//       "get_is_editor_on_any_occasion"
+//     );
+//
+//     if (editorError || !isEditor) {
+//       console.error("User is not an editor or role validation failed:", editorError);
+//       return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
+//         headers: { ...corsHeaders, "Content-Type": "application/json" },
+//         status: 403,
+//       });
+//     }
+//
+//     console.log("User is an editor:", isEditor);
 
     console.log("Proceeding");
 
@@ -103,10 +103,10 @@ Deno.serve(async (req) => {
 
     const secret = secretDetails.secret;
 
-    const startDate = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1)
+    const startDate = new Date(2024, 12, 1)
       .toISOString()
       .split("T")[0];
-    const endDate = new Date(new Date().getFullYear(), new Date().getMonth(), 0)
+    const endDate = new Date(2024, 12, 2)
       .toISOString()
       .split("T")[0];
     const apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${startDate}/${endDate}/transactions.json`;
