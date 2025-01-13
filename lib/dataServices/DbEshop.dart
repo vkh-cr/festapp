@@ -334,7 +334,7 @@ class DbEshop {
 
   static Future<void> updateOrderAndTicketsToPaid(int orderId) async {
     var response = await _supabase.rpc(
-      "update_order_and_tickets_to_paid",
+      "update_order_and_tickets_to_paid_with_security",
       params: {
         "order_id": orderId,
       },

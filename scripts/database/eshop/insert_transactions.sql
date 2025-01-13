@@ -69,23 +69,29 @@ BEGIN
                 UPDATE eshop.payment_info
                 SET paid = COALESCE(paid, 0) + (transaction->'column1'->>'value')::NUMERIC
                 WHERE id = payment_info_data.id;
-
-                -- If paid >= amount, set the order to paid
-                IF payment_info_data.paid >= payment_info_data.amount THEN
-                    -- Find the order by payment_info ID
-                    SELECT id INTO order_id
-                    FROM eshop.orders
-                    WHERE payment_info = payment_info_data.id
-                    LIMIT 1;
-
-                    -- Call the existing function to mark the order as paid
-                    PERFORM update_order_and_tickets_to_paid(order_id);
-                END IF;
             ELSE
                 -- Add to returned column
                 UPDATE eshop.payment_info
                 SET returned = COALESCE(returned, 0) + (transaction->'column1'->>'value')::NUMERIC
                 WHERE id = payment_info_data.id;
+            END IF;
+
+            -- Re-fetch payment_info_data to get the updated paid value
+            SELECT * INTO payment_info_data
+            FROM eshop.payment_info
+            WHERE id = payment_info_data.id
+            LIMIT 1;
+
+            -- If paid >= amount, set the order to paid
+            IF payment_info_data.paid >= payment_info_data.amount THEN
+                -- Find the order by payment_info ID
+                SELECT id INTO order_id
+                FROM eshop.orders
+                WHERE payment_info = payment_info_data.id
+                LIMIT 1;
+
+                -- Call the existing function to mark the order as paid
+                PERFORM update_order_and_tickets_to_paid(order_id);
             END IF;
 
             -- Update the transaction with payment_info reference
@@ -102,4 +108,5 @@ BEGIN
     );
 END;
 $$ LANGUAGE plpgsql;
+
 CREATE INDEX idx_transaction_id ON eshop.transactions (transaction_id);
