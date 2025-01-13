@@ -193,7 +193,7 @@ class DbEshop {
     final List<BlueprintObjectModel>? spots = BlueprintHelper.parseSpots(json);
     final List<ProductModel>? products = BlueprintHelper.parseProducts(json);
     final List<TicketModel>? tickets = BlueprintHelper.parseTickets(json);
-    final List<OrderModel> orders = BlueprintHelper.parseOrders(json)!.where((o)=>o.state != null).toList();
+    final List<OrderModel> orders = BlueprintHelper.parseOrders(json)!;
     final List<PaymentInfoModel>? payments = BlueprintHelper.parsePaymentInfo(json);
     final List<OrderProductTicketModel>? orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
 
@@ -290,7 +290,16 @@ class DbEshop {
   }
 
   static Future<void> deleteOrder(OrderModel model) async {
+    final response = await _supabase.rpc(
+      'delete_order',
+      params: {
+        'order_id': model.id,
+      },
+    );
 
+    if (response["code"] != 200) {
+      throw Exception("Deleting order failed: ${response['code']}: ${response['message']}");
+    }
   }
 
   static Future<void> updateTicketNoteHidden(int ticketId, String newNoteHidden) async {
