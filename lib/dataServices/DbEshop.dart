@@ -193,11 +193,11 @@ class DbEshop {
     final List<BlueprintObjectModel>? spots = BlueprintHelper.parseSpots(json);
     final List<ProductModel>? products = BlueprintHelper.parseProducts(json);
     final List<TicketModel>? tickets = BlueprintHelper.parseTickets(json);
-    final List<OrderModel>? orders = BlueprintHelper.parseOrders(json);
+    final List<OrderModel> orders = BlueprintHelper.parseOrders(json)!.where((o)=>o.state != null).toList();
     final List<PaymentInfoModel>? payments = BlueprintHelper.parsePaymentInfo(json);
     final List<OrderProductTicketModel>? orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
 
-    for (var order in orders!) {
+    for (var order in orders) {
       // Attach tickets related to the order via orderProductTickets
       final List<TicketModel> relatedTickets = tickets!.where((ticket) {
         return orderProductTickets!.any((opt) => opt.orderId == order.id && opt.ticketId == ticket.id);
