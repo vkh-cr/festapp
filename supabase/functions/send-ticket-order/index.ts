@@ -1,4 +1,5 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 import { encode } from "https://deno.land/std/encoding/base64.ts";
@@ -77,15 +78,6 @@ function formatDatetime(datetime: string): string {
   }).format(date);
 }
 
-function formatCurrency(amount, currencyCode) {
-  return new Intl.NumberFormat("cs-CZ", {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
 function generateFullOrder(orderDetails: any, tickets: any[]): string {
   const { name, surname, email, note } = orderDetails;
 
@@ -108,6 +100,13 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
       const taxi = ticket.products.find((p: any) => p.type === "taxi")?.title;
       const note = ticket.note || "";
 
+      const accumulatedPrice = ticket.products.reduce(
+        (total: number, product: any) => total + Number(product.price || 0),
+        0
+      );
+
+      const price = formatCurrency(accumulatedPrice, ticket.products[0].currency_code);
+
       return `
         <p style="text-align:left;">
           <span style="display:block; margin-left:20px;"><strong>Vstupenka ${ticketSymbol}</strong></span>
@@ -115,6 +114,7 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
           ${food ? `<span style="display:block; margin-left:20px;">Večeře: ${food}</span>` : ""}
           ${taxi ? `<span style="display:block; margin-left:20px;">Odvoz: ${taxi}</span>` : ""}
           ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
+          <span style="display:block; margin-left:20px;">Cena: ${price}</span>
         </p>
       `;
     })
