@@ -32,6 +32,9 @@ export async function fetchTicketResources(ticket: any) {
   let darkColor = "000000";
   let lightColor = "FFFFFF";
 
+  // Define a reusable regex for 6-character hex colors.
+  const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
+
   if (Array.isArray(occasion.data?.features)) {
     const ticketFeature = occasion.data.features.find(
       (feature: any) => feature.code === "ticket"
@@ -40,17 +43,17 @@ export async function fetchTicketResources(ticket: any) {
       if (typeof ticketFeature.background === "string") {
         backgroundUrl = ticketFeature.background;
       }
-      if (typeof ticketFeature.darkColor === "string") {
-        const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
-        if (hexColorRegex.test(ticketFeature.darkColor)) {
-          darkColor = ticketFeature.darkColor;
-        }
+      if (
+        typeof ticketFeature.darkColor === "string" &&
+        hexColorRegex.test(ticketFeature.darkColor)
+      ) {
+        darkColor = ticketFeature.darkColor;
       }
-      if (typeof ticketFeature.lightColor === "string") {
-        const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
-        if (hexColorRegex.test(ticketFeature.lightColor)) {
-          lightColor = ticketFeature.lightColor;
-        }
+      if (
+        typeof ticketFeature.lightColor === "string" &&
+        hexColorRegex.test(ticketFeature.lightColor)
+      ) {
+        lightColor = ticketFeature.lightColor;
       }
     }
   }
@@ -73,12 +76,13 @@ export async function fetchTicketResources(ticket: any) {
     );
   }
 
-  const productTypeMap: Record<number, string> = {};
+  // Build a map for product type lookup: product_type_id -> type string.
+  const productTypeLookup: Record<number, string> = {};
   productTypes.forEach((pt: any) => {
-    productTypeMap[pt.id] = pt.type;
+    productTypeLookup[pt.id] = pt.type;
   });
 
-  // Fetch products.
+  // Fetch products related to the ticket.
   const productIds = ticket.order_product_ticket.map(
     (opt: any) => opt.product
   );
@@ -86,17 +90,21 @@ export async function fetchTicketResources(ticket: any) {
     .schema("eshop")
     .from("products")
     .select(`id, title, title_short, product_type, data`)
-    .in("id", productIds);
+    .eq("occasion", ticket.occasion);
 
   if (productsError || !products) {
     throw new Error(`Error fetching products: ${productsError?.message}`);
   }
 
-  const productMap: Record<string, any> = {};
+  // Group products into a map of maps: { [productType: string]: { [productId: number]: product } }
+  const productTypeMap: Record<string, Record<number, any>> = {};
   products.forEach((product: any) => {
-    const typeStr = productTypeMap[product.product_type];
+    const typeStr = productTypeLookup[product.product_type];
     if (typeStr) {
-      productMap[typeStr] = product;
+      if (!productTypeMap[typeStr]) {
+        productTypeMap[typeStr] = {};
+      }
+      productTypeMap[typeStr][product.id] = product;
     }
   });
 
@@ -117,7 +125,7 @@ export async function fetchTicketResources(ticket: any) {
   return {
     darkColor,
     lightColor,
-    productMap,
+    productTypeMap,
     backgroundBytes,
     customFontBytes,
   };
@@ -128,7 +136,7 @@ export async function generateTicketImage(
   resources: {
     darkColor: string;
     lightColor: string;
-    productMap: Record<string, any>;
+    productTypeMap: Record<string, Record<number, any>>;
     backgroundBytes: Uint8Array;
     customFontBytes: Uint8Array;
   }
@@ -137,15 +145,28 @@ export async function generateTicketImage(
     const {
       darkColor,
       lightColor,
-      productMap,
+      productTypeMap,
       backgroundBytes,
       customFontBytes,
     } = resources;
 
-    // (For demonstration: using product types if needed)
-    const spotProduct = productMap["spot"];
-    const foodProduct = productMap["food"];
-    const taxiProduct = productMap["taxi"];
+    // Retrieve the products from the productTypeMap for each product type.
+    // Since productTypeMap is now a map of maps keyed by product id,
+    // we use the ticket.order_product_ticket to find the corresponding product.
+    const spotTicketOpt = ticket.order_product_ticket.find(
+      (opt: any) => productTypeMap["spot"] && productTypeMap["spot"][opt.product]
+    );
+    const spotProduct = spotTicketOpt ? productTypeMap["spot"][spotTicketOpt.product] : undefined;
+
+    const foodTicketOpt = ticket.order_product_ticket.find(
+      (opt: any) => productTypeMap["food"] && productTypeMap["food"][opt.product]
+    );
+    const foodProduct = foodTicketOpt ? productTypeMap["food"][foodTicketOpt.product] : undefined;
+
+    const taxiTicketOpt = ticket.order_product_ticket.find(
+      (opt: any) => productTypeMap["taxi"] && productTypeMap["taxi"][opt.product]
+    );
+    const taxiProduct = taxiTicketOpt ? productTypeMap["taxi"][taxiTicketOpt.product] : undefined;
 
     // Create the PDF document.
     const pdfDoc = await PDFDocument.create();
@@ -207,20 +228,13 @@ export async function generateTicketImage(
     });
 
     // Draw the ticket symbol text directly below the QR Code.
-    // Set some padding and choose a font size for the QR text.
     const qrTextPadding = 10 * scale;
     const qrFontSize = 28 * scale;
     const ticketSymbol = ticket.ticket_symbol;
-    // Embed the custom font.
     const customFont = await pdfDoc.embedFont(customFontBytes);
-    // Measure text width so that it can be centered under QR code.
-    const ticketSymbolTextWidth = customFont.widthOfTextAtSize(
-      ticketSymbol,
-      qrFontSize
-    );
+    const ticketSymbolTextWidth = customFont.widthOfTextAtSize(ticketSymbol, qrFontSize);
     const ticketSymbolX = qrX + qrSize / 2 - ticketSymbolTextWidth / 2;
     const ticketSymbolY = qrY - qrTextPadding - qrFontSize;
-    // Reuse the same text color as for other texts.
     const textColor = hexToRgb(darkColor);
 
     page.drawText(ticketSymbol, {
@@ -231,8 +245,7 @@ export async function generateTicketImage(
       color: textColor,
     });
 
-    // Convert hex color to PDF-lib rgb.
-    // (Reusing darkColor for main text; textColor was already defined above.)
+    // Prepare the starting positions for additional text.
     let textX = bgX + 150 * scale;
     let textY = bgY + 280 * scale;
 
@@ -240,7 +253,7 @@ export async function generateTicketImage(
 
     // Add Spot Title.
     const spotOrder = ticket.order_product_ticket.find(
-      (opt: any) => opt.product === spotProduct.id
+      (opt: any) => spotProduct && opt.product === spotProduct.id
     );
     if (spotOrder && spotOrder.spot_group_title) {
       texts.push(`Stůl: ${spotOrder.spot_group_title}`);
@@ -256,8 +269,7 @@ export async function generateTicketImage(
 
     // Add Taxi Title.
     if (taxiProduct) {
-      const taxiTitle =
-        taxiProduct.title_short || taxiProduct.title || "N/A";
+      const taxiTitle = taxiProduct.title_short || taxiProduct.title || "N/A";
       texts.push(`Odvoz: ${taxiTitle}`);
     }
 
@@ -279,7 +291,7 @@ export async function generateTicketImage(
     throw error;
   }
 
-  // Helper function to convert a hex color string to PDF-lib rgb color.
+  // Helper function to convert a hex color string to a PDF-lib rgb color.
   function hexToRgb(hex: string) {
     const r = parseInt(hex.substring(0, 2), 16) / 255;
     const g = parseInt(hex.substring(2, 4), 16) / 255;
