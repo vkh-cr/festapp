@@ -353,5 +353,6 @@
   "Send tickets": "Send tickets",
   "Change state to paid": "Change state to paid",
   "Do you want to change orders to paid?": "Do you want to change orders to paid?",
+  "Synchronize payments": "Synchronize payments",
   "_":"_"
 }
