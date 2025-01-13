@@ -29,7 +29,7 @@ BEGIN
         END IF;
 
         -- Fail entirely if the system cannot generate a unique symbol after too many attempts
-        IF digit_count > 15 THEN -- Arbitrary upper limit for digit count
+        IF digit_count > 10 THEN -- Arbitrary upper limit for digit count
             RAISE EXCEPTION 'Failed to generate unique variable symbol after too many attempts.';
         END IF;
     END LOOP;
