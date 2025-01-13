@@ -267,11 +267,9 @@ export async function generateTicketImage(
       texts.push(`Večeře: ${foodTitle}`);
     }
 
-    // Add Taxi Title.
-    if (taxiProduct) {
-      const taxiTitle = taxiProduct.title_short || taxiProduct.title || "N/A";
-      texts.push(`Odvoz: ${taxiTitle}`);
-    }
+    if (ticket.note && ticket.note.trim() !== "") {
+      texts.push(`Poznámka: ${ticket.note}`);
+   }
 
     texts.forEach((text) => {
       page.drawText(text, {
