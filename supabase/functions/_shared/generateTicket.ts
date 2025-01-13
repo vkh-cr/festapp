@@ -1,3 +1,4 @@
+import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
 import QRCode from "npm:qrcode";
 import { PDFDocument, rgb } from "npm:pdf-lib";
@@ -271,6 +272,11 @@ export async function generateTicketImage(
     // Add Ticket Note if available.
     if (ticket.note && ticket.note.trim() !== "") {
       texts.push(`Poznámka: ${truncateText(ticket.note)}`);
+    }
+
+    // Add Ticket Price not null.
+    if (ticket.price) {
+      texts.push(`Cena: ${formatCurrency(ticket.price, ticket.currency)}`);
     }
 
     texts.forEach((text) => {
