@@ -113,7 +113,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
         context,
-        "Storno".tr(),
+        "Send tickets".tr(),
         "${"Do you want to send the tickets to orders?".tr()} (${selected.length})"
     );
 
