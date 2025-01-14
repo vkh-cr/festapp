@@ -77,7 +77,7 @@ class _UsersTabState extends State<UsersTab> {
           DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
           DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0), isEnabled: RightsService.canUpdateUsers),
-          DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
+          //DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => _addToGroup(p0)),
         ],
         columns: UserColumns.generateColumns(columnIdentifiers),
       ).DataGrid(),
