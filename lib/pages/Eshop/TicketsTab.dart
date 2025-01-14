@@ -68,7 +68,7 @@ class _TicketsTabState extends State<TicketsTab> {
       ),
       headerChildren: [
         DataGridAction(
-          name: "Storno".tr(),
+          name: "Cancel".tr(),
           action: (SingleTableDataGrid dataGrid, [_]) => _stornoTickets(dataGrid),
           isEnabled: RightsService.isEditor,
         ),
@@ -86,7 +86,7 @@ class _TicketsTabState extends State<TicketsTab> {
 
     var confirm = await DialogHelper.showConfirmationDialogAsync(
       context,
-      "Storno".tr(),
+      "Cancel".tr(),
       "${"Are you sure you want to storno the selected tickets?".tr()} (${selectedTickets.length})",
     );
 
@@ -98,7 +98,7 @@ class _TicketsTabState extends State<TicketsTab> {
           "ticket": ticket.ticketSymbol ?? ticket.id.toString()
         }));
         } else{
-          throw Exception("Ticket storno has failed.");
+          throw Exception("Ticket cancel has failed.");
         }
       };
       }).toList();
