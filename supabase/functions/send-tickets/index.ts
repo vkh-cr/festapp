@@ -27,10 +27,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Constants (still here in case you need them for sizing, etc.)
-const A4_PAGE_SIZE = [595.28, 841.89];
-const TEMP_DIR = "/tmp/tickets"; // Not used for final attachments, but left if you want to do local debugging, etc.
-
 /**
  * Checks if the user is an editor for the given occasion.
  * @param userId - The UUID of the user.
@@ -248,11 +244,15 @@ Deno.serve(async (req) => {
       occasion: occasionId,
     });
 
+    // Assuming 'tickets' is an array of ticket IDs
+    const ticketIds = tickets.map(ticket => ticket.id);
+
     // Update the state of the order and tickets to 'sent'
     const { error: updateError } = await supabaseAdmin.rpc(
       "update_order_and_tickets_to_sent",
-      { order_id: orderId }
+      { order_id: orderId, ticket_ids: ticketIds }
     );
+
     if (updateError) {
       console.error("Failed to update order and tickets to sent:", updateError);
       return new Response(

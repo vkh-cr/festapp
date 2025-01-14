@@ -16,12 +16,13 @@ BEGIN
     SET state = 'paid', updated_at = now()
     WHERE id = order_id;
 
-    -- Update the state of all tickets linked to the order to 'paid'
+    -- Update the state of all tickets linked to the order to 'paid', except those with state 'storno'
     UPDATE eshop.tickets
     SET state = 'paid', updated_at = now()
     FROM eshop.order_product_ticket
     WHERE eshop.order_product_ticket.ticket = eshop.tickets.id
-    AND eshop.order_product_ticket."order" = order_id;
+    AND eshop.order_product_ticket."order" = order_id
+    AND eshop.tickets.state != 'storno';
 
     -- Return a success message with a status code 200
     RETURN jsonb_build_object('code', 200, 'message', 'Update successful');
