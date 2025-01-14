@@ -77,7 +77,7 @@ class TicketModel extends IPlutoRowModel {
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
       TbEshop.tickets.ticket_symbol: PlutoCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: PlutoCell(value: state ?? OrderModel.orderedState),
+      TbEshop.tickets.state: PlutoCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       TbEshop.tickets.note: PlutoCell(value: note ?? ""),
       TbEshop.tickets.note_hidden: PlutoCell(value: noteHidden ?? ""),
       TbEshop.orders.order_symbol: PlutoCell(
