@@ -124,6 +124,19 @@ class DbEshop {
     return true;
   }
 
+  static Future<void> stornoOrder(int id) async {
+    final response = await _supabase.rpc(
+      'update_order_and_tickets_to_storno_with_security',
+      params: {
+        'order_id': id,
+      },
+    );
+
+    if (response["code"] != 200) {
+      throw Exception("Storno order failed: ${response['code']}: ${response['message']}");
+    }
+  }
+
   static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
 
     final response = await _supabase.rpc(

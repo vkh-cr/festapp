@@ -53,6 +53,11 @@ class _OrdersTabState extends State<OrdersTab> {
               isAddActionPossible: () => false),
           headerChildren: [
             DataGridAction(
+              name: "Storno".tr(),
+              action: (SingleTableDataGrid dataGrid, [_]) => stornoOrders(dataGrid),
+              isEnabled: RightsService.isEditor,
+            ),
+            DataGridAction(
               name: "Synchronize payments".tr(),
               action: (SingleTableDataGrid dataGrid, [_]) => synchronizePayments(),
               isEnabled: RightsService.isEditor,
@@ -71,6 +76,37 @@ class _OrdersTabState extends State<OrdersTab> {
   Future<void> synchronizePayments() async {
     await DbEshop.fetchTransactions();
     refreshData();
+  }
+
+  Future<void> stornoOrders(SingleTableDataGrid dataGrid) async {
+    var selected = _getChecked(dataGrid);
+    if (selected.isEmpty) {
+      return;
+    }
+
+    if (selected.isNotEmpty) {
+      var confirm = await DialogHelper.showConfirmationDialogAsync(
+          context,
+          "Storno".tr(),
+          "${"Do you want to storno orders and all included tickets?".tr()} (${selected.length})"
+      );
+
+      if (confirm && mounted) {
+        var futures = selected.map((s) {
+          return () async {
+            await DbEshop.stornoOrder(s.id!);
+          };
+        }).toList();
+
+        await DialogHelper.showProgressDialogAsync(
+            context,
+            "Processing".tr(),
+            futures.length,
+            futures: futures
+        );
+        refreshData();
+      }
+    }
   }
 
   Future<void> sendTickets(SingleTableDataGrid dataGrid) async {
