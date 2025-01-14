@@ -122,6 +122,14 @@ class DataGridHelper
     );
   }
 
+  static Widget backgroundFromText(rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+    String value = rendererContext.cell.value;
+    String textValue = processText?.call(value);
+    return Container(
+      color: getBackground(value),
+      child: Center(child: Text(textValue)));
+  }
+
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
     return iconToRow(context, value, icons);
