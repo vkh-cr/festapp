@@ -141,7 +141,8 @@ class _OrdersTabState extends State<OrdersTab> {
             context,
             "Processing".tr(),
             futures.length,
-            futures: futures
+            futures: futures,
+            isBasic: true
         );
         refreshData();
       }

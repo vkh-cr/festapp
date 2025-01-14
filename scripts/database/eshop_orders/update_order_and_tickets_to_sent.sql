@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_order_and_tickets_to_sent(order_id bigint)
+CREATE OR REPLACE FUNCTION update_order_and_tickets_to_sent(order_id bigint, ticket_ids bigint[])
 RETURNS jsonb AS $$
 BEGIN
     -- Update the state of the order to 'sent'
@@ -6,12 +6,11 @@ BEGIN
     SET state = 'sent', updated_at = now()
     WHERE id = order_id;
 
-    -- Update the state of all tickets linked to the order to 'sent'
+    -- Update the state of the tickets linked to the order and matching ticket_ids
     UPDATE eshop.tickets
     SET state = 'sent', updated_at = now()
-    FROM eshop.order_product_ticket
-    WHERE eshop.order_product_ticket.ticket = eshop.tickets.id
-    AND eshop.order_product_ticket."order" = order_id;
+    WHERE id = ANY(ticket_ids)
+    AND id IN (SELECT ticket FROM eshop.order_product_ticket WHERE "order" = order_id);
 
     -- Check if any rows were updated in the orders table
     IF NOT FOUND THEN
