@@ -27,12 +27,6 @@ class TicketModel extends IPlutoRowModel {
   // Relating order directly to the ticket
   OrderModel? relatedOrder;
 
-  static const String orderedState = "ordered";
-  static const String paidState = "paid";
-  static const String sentState = "sent";
-  static const String usedState = "used";
-  static const String stornoState = "storno";
-
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
   static const String metaPrice = "price";
@@ -83,7 +77,7 @@ class TicketModel extends IPlutoRowModel {
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
       TbEshop.tickets.ticket_symbol: PlutoCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: PlutoCell(value: state ?? orderedState),
+      TbEshop.tickets.state: PlutoCell(value: state ?? OrderModel.orderedState),
       TbEshop.tickets.note: PlutoCell(value: note ?? ""),
       TbEshop.tickets.note_hidden: PlutoCell(value: noteHidden ?? ""),
       TbEshop.orders.order_symbol: PlutoCell(

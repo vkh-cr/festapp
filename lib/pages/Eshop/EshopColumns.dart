@@ -66,9 +66,11 @@ class EshopColumns {
         title: "State".tr(),
         field: TbEshop.tickets.state,
         type: PlutoColumnType.select(
-          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
+          OrderModel.orderStates,
         ),
+        formatter: (value) => DataGridHelper.textTransform(value, OrderModel.orderStates, OrderModel.statesToUpper),
         width: 120,
+        textAlign: PlutoColumnTextAlign.center,
       ),
     ],
     TICKET_TOTAL_PRICE: [
@@ -99,9 +101,7 @@ class EshopColumns {
         enableEditingMode: false,
         title: "Products".tr(),
         field: TicketModel.metaTicketsProducts,
-        type: PlutoColumnType.select(
-          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
-        ),
+        type: PlutoColumnType.text(),
         width: 300,
       ),
     ],
@@ -174,9 +174,10 @@ class EshopColumns {
         title: "State".tr(),
         field: TbEshop.orders.state,
         type: PlutoColumnType.select(
-          [OrderModel.orderedState, OrderModel.paidState, OrderModel.canceledState],
+          OrderModel.orderStates,
         ),
-        textAlign: PlutoColumnTextAlign.end,
+        formatter: (value) => DataGridHelper.textTransform(value, OrderModel.orderStates, OrderModel.statesToUpper),
+        textAlign: PlutoColumnTextAlign.center,
         width: 120,
       ),
     ],

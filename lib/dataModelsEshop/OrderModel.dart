@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -32,7 +33,30 @@ class OrderModel extends IPlutoRowModel {
   static const String orderedState = "ordered";
   static const String paidState = "paid";
   static const String sentState = "sent";
-  static const String canceledState = "storno";
+  static const String usedState = "used";
+  static const String stornoState = "storno";
+  static const orderStates = [orderedState, paidState, sentState, usedState, stornoState];
+
+  static String statesToLocale(String? state) {
+    switch (state) {
+      case orderedState:
+        return 'Ordered'.tr();
+      case paidState:
+        return 'Paid'.tr();
+      case sentState:
+        return 'Sent'.tr();
+      case usedState:
+        return 'Used'.tr();
+      case stornoState:
+        return 'Storno'.tr();
+      default:
+        return '???';
+    }
+  }
+
+  static String statesToUpper(String? state) {
+    return statesToLocale(state).toUpperCase();
+  }
 
   OrderModel({
     this.id,
