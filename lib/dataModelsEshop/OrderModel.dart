@@ -39,7 +39,7 @@ class OrderModel extends IPlutoRowModel {
   static const String stornoState = "storno";
   static const orderStates = [orderedState, paidState, sentState, usedState, stornoState];
 
-  static String statesToLocale(String? state) {
+  static String stateToLocale(String state) {
     switch (state) {
       case orderedState:
         return 'Ordered'.tr();
@@ -56,14 +56,23 @@ class OrderModel extends IPlutoRowModel {
     }
   }
 
-  static String statesToUpper(String? state) {
-    return statesToLocale(state).toUpperCase();
+  static String statesDataGridToUpper(String state) {
+    String firstPart = state.split(";")[0];
+    return stateToLocale(firstPart).toUpperCase();
   }
 
-  static Color stateToColor(String? state) {
-    Color color;
+  static List<String> statesToDataGridFormat() {
+    return OrderModel.orderStates.map(formatState).toList();
+  }
 
-    switch (state) {
+  static String formatState(String state) {
+    return "$state;${OrderModel.stateToLocale(state)}";
+  }
+
+  static Color dataGridStateToColor(String state) {
+    Color color;
+    String firstPart = state.split(";")[0];
+    switch (firstPart) {
       case orderedState:
         color = Colors.green[100]!; // Blue for ordered
         break;
@@ -151,7 +160,7 @@ class OrderModel extends IPlutoRowModel {
       TbEshop.orders.id: PlutoCell(value: id ?? 0),
       TbEshop.orders.order_symbol: PlutoCell(value: id ?? 0),
       TbEshop.orders.price: PlutoCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
-      TbEshop.orders.state: PlutoCell(value: state ?? orderedState),
+      TbEshop.orders.state: PlutoCell(value: OrderModel.formatState(state ?? orderedState)),
       TbEshop.payment_info.amount: PlutoCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
       TbEshop.payment_info.paid: PlutoCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
       TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? 0),
