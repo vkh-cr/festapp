@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
@@ -61,6 +62,7 @@ class EshopColumns {
     ],
     TICKET_STATE: [
       PlutoColumn(
+        cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
@@ -69,6 +71,7 @@ class EshopColumns {
           OrderModel.orderStates,
         ),
         formatter: (value) => DataGridHelper.textTransform(value, OrderModel.orderStates, OrderModel.statesToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.stateToColor, OrderModel.statesToUpper),
         width: 120,
         textAlign: PlutoColumnTextAlign.center,
       ),
@@ -169,6 +172,7 @@ class EshopColumns {
     ],
     ORDER_STATE: [
       PlutoColumn(
+        cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
@@ -177,6 +181,7 @@ class EshopColumns {
           OrderModel.orderStates,
         ),
         formatter: (value) => DataGridHelper.textTransform(value, OrderModel.orderStates, OrderModel.statesToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.stateToColor, OrderModel.statesToUpper),
         textAlign: PlutoColumnTextAlign.center,
         width: 120,
       ),

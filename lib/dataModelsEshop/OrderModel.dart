@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
@@ -8,6 +9,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -56,6 +58,33 @@ class OrderModel extends IPlutoRowModel {
 
   static String statesToUpper(String? state) {
     return statesToLocale(state).toUpperCase();
+  }
+
+  static Color stateToColor(String? state) {
+    Color color;
+
+    switch (state) {
+      case orderedState:
+        color = Colors.green[100]!; // Blue for ordered
+        break;
+      case paidState:
+        color = Colors.green[300]!; // A darker shade of green for paid
+        break;
+      case sentState:
+        color = Colors.green[800]!; // Orange for sent
+        break;
+      case usedState:
+        color = Colors.blue[600]!; // A darker shade of grey for used
+        break;
+      case stornoState:
+        color = Colors.grey[700]!; // A lighter shade of green for canceled (storno)
+        break;
+      default:
+        color = Colors.black; // Black for unknown states
+    }
+
+    // Apply global opacity to all colors
+    return color.withValues(alpha: 0.6);
   }
 
   OrderModel({
