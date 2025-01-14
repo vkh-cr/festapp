@@ -29,6 +29,7 @@ class TicketModel extends IPlutoRowModel {
 
   static const String orderedState = "ordered";
   static const String paidState = "paid";
+  static const String sentState = "sent";
   static const String usedState = "used";
   static const String stornoState = "storno";
 

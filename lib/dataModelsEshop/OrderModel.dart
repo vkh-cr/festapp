@@ -31,6 +31,7 @@ class OrderModel extends IPlutoRowModel {
 
   static const String orderedState = "ordered";
   static const String paidState = "paid";
+  static const String sentState = "sent";
   static const String canceledState = "storno";
 
   OrderModel({
