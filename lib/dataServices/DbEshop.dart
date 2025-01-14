@@ -124,7 +124,7 @@ class DbEshop {
     return true;
   }
 
-  static Future<void> stornoOrder(int id) async {
+  static Future<void> cancelOrder(int id) async {
     final response = await _supabase.rpc(
       'update_order_and_tickets_to_storno_with_security',
       params: {

@@ -358,6 +358,8 @@
   "Paid": "Paid",
   "Sent": "Sent",
   "Used": "Used",
-  "Do you want to storno orders and all included tickets?": "Do you want to storno orders and all included tickets?",
+  "Do you want to cancel orders and all included tickets?": "Do you want to cancel orders and all included tickets?",
+  "Do you want to cancel the selected tickets?": "Do you want to cancel the selected tickets?",
+  "Cancel": "Cancel",
   "_":"_"
 }
