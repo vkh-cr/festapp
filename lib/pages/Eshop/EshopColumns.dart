@@ -28,6 +28,7 @@ class EshopColumns {
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
+  static const String PAYMENT_INFO_RETURNED = "paymentInfoReturned";
   static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
 
@@ -257,11 +258,22 @@ class EshopColumns {
       PlutoColumn(
         readOnly: true,
         enableEditingMode: false,
-        title: "Paid amount".tr(),
+        title: "Paid".tr(),
         field: TbEshop.payment_info.paid,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
-        width: 120,
+        width: 80,
+      ),
+    ],
+    PAYMENT_INFO_RETURNED: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Returned".tr(),
+        field: TbEshop.payment_info.returned,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 80,
       ),
     ],
     PAYMENT_INFO_VARIABLE_SYMBOL: [

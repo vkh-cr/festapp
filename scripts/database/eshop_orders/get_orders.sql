@@ -121,6 +121,7 @@ BEGIN
         'variable_symbol', pi.variable_symbol,
         'amount', pi.amount,
         'paid', pi.paid,
+        'returned', pi.returned,
         'deadline', pi.deadline,
         'currency_code', pi.currency_code
     ))

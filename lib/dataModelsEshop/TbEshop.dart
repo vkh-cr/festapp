@@ -116,6 +116,7 @@ class PaymentInfoTb {
   String get variable_symbol => "variable_symbol";
   String get amount => "amount";
   String get paid => "paid";
+  String get returned => "returned";
   String get deadline => "deadline";
   String get currency_code => "currency_code";
 }

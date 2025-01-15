@@ -341,7 +341,6 @@
   "Order Symbol": "Symbol objednávky",
   "Customer": "Zákazník",
   "Amount": "Částka",
-  "Paid amount": "Zaplacená částka",
   "Variable symbol": "Variabilní symbol",
   "Deadline": "Termín",
   "Form": "Formulář",
@@ -363,5 +362,6 @@
   "Cancel": "Stornovat",
   "Occupied": "Obsazené",
   "Report": "Report",
+  "Returned": "Vráceno",
   "_": "_"
 }

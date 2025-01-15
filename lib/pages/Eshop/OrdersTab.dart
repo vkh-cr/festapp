@@ -193,6 +193,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
+    EshopColumns.PAYMENT_INFO_RETURNED,
     EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
     EshopColumns.ORDER_DATA_NOTE,
     EshopColumns.ORDER_NOTE_HIDDEN,

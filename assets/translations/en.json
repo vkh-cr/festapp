@@ -341,7 +341,6 @@
   "Order Symbol": "Order Symbol",
   "Customer": "Customer",
   "Amount": "Amount",
-  "Paid amount": "Paid amount",
   "Variable symbol": "Variable symbol",
   "Deadline": "Deadline",
   "Form": "Form",
@@ -363,5 +362,6 @@
   "Cancel": "Cancel",
   "Occupied": "Occupied",
   "Report": "Report",
+  "Returned": "Returned",
   "_":"_"
 }
