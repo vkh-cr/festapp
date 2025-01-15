@@ -1,0 +1,50 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
+
+/**
+ * Gets the authenticated Supabase user.
+ * @param authorizationHeader - The authorization header from the request.
+ * @returns A promise that resolves to the authenticated user.
+ */
+export async function getSupabaseUser(authorizationHeader: string) {
+  const supabaseUser = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    {
+      global: {
+        headers: { Authorization: authorizationHeader },
+      },
+    }
+  );
+
+  const { data: user, error: userError } = await supabaseUser.auth.getUser();
+  if (userError || !user) {
+    throw new Error("Unauthorized");
+  }
+  return user;
+}
+
+/**
+ * Checks if the user is an editor for the given occasion.
+ * @param userId - The UUID of the user.
+ * @param occasionId - The ID of the occasion.
+ * @returns A Promise that resolves to a boolean indicating editor status.
+ */
+export async function isUserEditor(userId: string, occasionId: bigint): Promise<boolean> {
+  const { data, error } = await supabaseAdmin
+    .from("occasion_users")
+    .select("is_editor")
+    .eq("user", userId)
+    .eq("occasion", occasionId)
+    .single();
+
+  if (error || !data) {
+    console.error("Error fetching user role:", error);
+    return false;
+  }
+  return data.is_editor;
+}
+
+export const supabaseAdmin = createClient(
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+);
