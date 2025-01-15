@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION get_report_for_occasion(occasion_id bigint)
-RETURNS TEXT SECURITY DEFINER AS $$
+RETURNS TEXT AS $$
 DECLARE
     total_spots INT;
     booked_spots INT;
@@ -18,11 +18,6 @@ DECLARE
     paid_revenue NUMERIC;
     remaining_balance NUMERIC;
 BEGIN
-    -- Check if the user is an editor for the given occasion
-    IF NOT get_is_editor_on_occasion(occasion_id) THEN
-        RAISE EXCEPTION 'User is not authorized to access this occasion report.';
-    END IF;
-
     -- Calculate the total number of spots
     SELECT COUNT(*) INTO total_spots FROM eshop.spots WHERE occasion = occasion_id;
 
