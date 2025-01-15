@@ -16,6 +16,7 @@ DECLARE
     canceled_orders INT;
     total_revenue NUMERIC;
     paid_revenue NUMERIC;
+    returned_revenue NUMERIC;
     remaining_balance NUMERIC;
 BEGIN
     -- Calculate the total number of spots
@@ -97,6 +98,12 @@ BEGIN
     JOIN eshop.orders o ON pi.id = o.payment_info
     WHERE o.occasion = occasion_id;
 
+    -- Calculate the total paid revenue
+    SELECT SUM(ABS(pi.returned)) INTO returned_revenue
+    FROM eshop.payment_info pi
+    JOIN eshop.orders o ON pi.id = o.payment_info
+    WHERE o.occasion = occasion_id;
+
     -- Format and return the report in the specified format
     RETURN E'===========\n' ||
            E'Počet míst celkem: ' || to_char(total_spots, '9999') || E'\n' ||
@@ -115,6 +122,7 @@ BEGIN
            E'===========\n' ||
            E'Suma všech objednávek: ' || to_char(total_revenue, '99999999.99') || E'\n' ||
            E'Suma zaplacených částek: ' || to_char(paid_revenue, '99999999.99') || E'\n' ||
+           E'Suma vrácených částek: ' || to_char(returned_revenue, '99999999.99') || E'\n' ||
            E'Zbývající částka: ' || to_char(remaining_balance, '99999999.99') || E'\n' ||
            E'===========';
 EXCEPTION WHEN OTHERS THEN
