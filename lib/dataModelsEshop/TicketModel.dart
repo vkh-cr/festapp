@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
@@ -25,11 +26,6 @@ class TicketModel extends IPlutoRowModel {
 
   // Relating order directly to the ticket
   OrderModel? relatedOrder;
-
-  static const String orderedState = "ordered";
-  static const String paidState = "paid";
-  static const String usedState = "used";
-  static const String stornoState = "storno";
 
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
@@ -81,7 +77,7 @@ class TicketModel extends IPlutoRowModel {
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
       TbEshop.tickets.ticket_symbol: PlutoCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: PlutoCell(value: state ?? orderedState),
+      TbEshop.tickets.state: PlutoCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       TbEshop.tickets.note: PlutoCell(value: note ?? ""),
       TbEshop.tickets.note_hidden: PlutoCell(value: noteHidden ?? ""),
       TbEshop.orders.order_symbol: PlutoCell(
@@ -106,7 +102,9 @@ class TicketModel extends IPlutoRowModel {
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id]);
+        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id],
+        noteHidden: json[TbEshop.tickets.note_hidden]
+    );
   }
 
   @override
@@ -116,7 +114,7 @@ class TicketModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    // Implement your update logic here
+    await DbEshop.updateTicketNoteHidden(id!, noteHidden!);
   }
 
   @override

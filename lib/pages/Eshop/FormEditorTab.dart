@@ -12,7 +12,6 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-@RoutePage()
 class FormEditorTab extends StatefulWidget {
   const FormEditorTab({super.key});
 

@@ -51,6 +51,10 @@ class DbEshop {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
+  static Future<FunctionResponse> fetchTransactions() async {
+    return await _supabase.functions.invoke("fetch-transactions");
+  }
+
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
         .rpc('get_form_from_link', params: {'form_link': link});
@@ -60,6 +64,13 @@ class DbEshop {
       return form;
     }
     return null;
+  }
+
+  static Future<String> getReportForOccasion(int id) async {
+    final response = await _supabase
+        .rpc('get_report_for_occasion', params: {'occasion_id': id});
+
+    return response;
   }
 
   static Future<FormModel?> getFormForEdit(String formLink) async {
@@ -118,6 +129,19 @@ class DbEshop {
       return false;
     }
     return true;
+  }
+
+  static Future<void> cancelOrder(int id) async {
+    final response = await _supabase.rpc(
+      'update_order_and_tickets_to_storno_with_security',
+      params: {
+        'order_id': id,
+      },
+    );
+
+    if (response["code"] != 200) {
+      throw Exception("Storno order failed: ${response['code']}: ${response['message']}");
+    }
   }
 
   static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
@@ -193,11 +217,11 @@ class DbEshop {
     final List<BlueprintObjectModel>? spots = BlueprintHelper.parseSpots(json);
     final List<ProductModel>? products = BlueprintHelper.parseProducts(json);
     final List<TicketModel>? tickets = BlueprintHelper.parseTickets(json);
-    final List<OrderModel>? orders = BlueprintHelper.parseOrders(json);
+    final List<OrderModel> orders = BlueprintHelper.parseOrders(json)!;
     final List<PaymentInfoModel>? payments = BlueprintHelper.parsePaymentInfo(json);
     final List<OrderProductTicketModel>? orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
 
-    for (var order in orders!) {
+    for (var order in orders) {
       // Attach tickets related to the order via orderProductTickets
       final List<TicketModel> relatedTickets = tickets!.where((ticket) {
         return orderProductTickets!.any((opt) => opt.orderId == order.id && opt.ticketId == ticket.id);
@@ -268,14 +292,12 @@ class DbEshop {
   }
 
   static Future<FunctionResponse> sendTicketsToEmail({
-    required List<int> ticketIds,
+    required int orderId,
     required String email,
-    required int oc, // Occasion ID
   }) async {
     final body = {
-      "ticketIds": ticketIds,
+      "orderId": orderId,
       "email": email,
-      "oc": oc,
     };
 
     try {
@@ -292,7 +314,55 @@ class DbEshop {
   }
 
   static Future<void> deleteOrder(OrderModel model) async {
+    final response = await _supabase.rpc(
+      'delete_order',
+      params: {
+        'order_id': model.id,
+      },
+    );
 
+    if (response["code"] != 200) {
+      throw Exception("Deleting order failed: ${response['code']}: ${response['message']}");
+    }
   }
 
+  static Future<void> updateTicketNoteHidden(int ticketId, String newNoteHidden) async {
+    var response = await _supabase.rpc(
+      "update_ticket_note_hidden",
+      params: {
+        "ticket_id": ticketId,
+        "new_note_hidden": newNoteHidden,
+      },
+    );
+    if (response["code"] != 200) {
+      throw Exception("Saving of note has failed.");
+    }
+  }
+
+  static Future<void> updateOrderNoteHidden(int orderId, String newNoteHidden) async {
+    var response = await _supabase.rpc(
+      "update_order_note_hidden",
+      params: {
+        "order_id": orderId,
+        "new_note_hidden": newNoteHidden,
+      },
+    );
+    if (response["code"] != 200) {
+      throw Exception("Saving of note has failed.");
+    }
+  }
+
+  static Future<void> updateOrderAndTicketsToPaid(int orderId) async {
+    var response = await _supabase.rpc(
+      "update_order_and_tickets_to_paid_with_security",
+      params: {
+        "order_id": orderId,
+      },
+    );
+
+    if (response["code"] != 200) {
+      throw Exception("Failed to update order and tickets to 'paid'. Error: ${response['message']}");
+    }
+
+  }
 }

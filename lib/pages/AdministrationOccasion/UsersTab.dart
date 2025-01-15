@@ -73,6 +73,7 @@ class _UsersTabState extends State<UsersTab> {
             areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
           DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0), isEnabled: RightsService.canUpdateUsers),
+          if(RightsService.isAdmin())
           DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
           DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0), isEnabled: RightsService.canUpdateUsers),

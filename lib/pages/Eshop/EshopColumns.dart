@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
@@ -33,7 +34,7 @@ class EshopColumns {
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
   static const String ORDER_DATA_NOTE = "orderDataNote";
-  static const String ORDER_DATA_NOTE_HIDDEN = "orderDataNoteHidden";
+  static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
 
   // Define columns
   static Map<String, dynamic> get columnBuilders => {
@@ -61,14 +62,17 @@ class EshopColumns {
     ],
     TICKET_STATE: [
       PlutoColumn(
+        cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
         field: TbEshop.tickets.state,
         type: PlutoColumnType.select(
-          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
+          OrderModel.statesToDataGridFormat(),
         ),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
         width: 120,
+        textAlign: PlutoColumnTextAlign.center,
       ),
     ],
     TICKET_TOTAL_PRICE: [
@@ -99,9 +103,7 @@ class EshopColumns {
         enableEditingMode: false,
         title: "Products".tr(),
         field: TicketModel.metaTicketsProducts,
-        type: PlutoColumnType.select(
-          [TicketModel.orderedState, TicketModel.paidState, TicketModel.usedState, TicketModel.stornoState],
-        ),
+        type: PlutoColumnType.text(),
         width: 300,
       ),
     ],
@@ -117,8 +119,7 @@ class EshopColumns {
     ],
     TICKET_NOTE_HIDDEN: [
       PlutoColumn(
-        readOnly: true,
-        enableEditingMode: false,
+        enableAutoEditing: true,
         title: "Hidden note".tr(),
         field: TbEshop.tickets.note_hidden,
         type: PlutoColumnType.text(),
@@ -170,14 +171,16 @@ class EshopColumns {
     ],
     ORDER_STATE: [
       PlutoColumn(
+        cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
         field: TbEshop.orders.state,
         type: PlutoColumnType.select(
-          [OrderModel.orderedState, OrderModel.paidState, OrderModel.canceledState],
+          OrderModel.statesToDataGridFormat(),
         ),
-        textAlign: PlutoColumnTextAlign.end,
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
+        textAlign: PlutoColumnTextAlign.center,
         width: 120,
       ),
     ],
@@ -201,12 +204,11 @@ class EshopColumns {
         width: 200,
       ),
     ],
-    ORDER_DATA_NOTE_HIDDEN: [
+    ORDER_NOTE_HIDDEN: [
       PlutoColumn(
-        readOnly: true,
-        enableEditingMode: false,
+        enableAutoEditing: true,
         title: "Hidden note".tr(),
-        field: TbEshop.orders.data_note_hidden,
+        field: TbEshop.orders.note_hidden,
         type: PlutoColumnType.text(),
         width: 200,
       ),
