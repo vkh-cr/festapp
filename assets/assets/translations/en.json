@@ -351,5 +351,17 @@
   "State": "State",
   "Do you want to send the tickets to orders?": "Do you want to send the tickets to orders?",
   "Send tickets": "Send tickets",
+  "Change state to paid": "Change state to paid",
+  "Do you want to change orders to paid?": "Do you want to change orders to paid?",
+  "Synchronize payments": "Synchronize payments",
+  "Ordered": "Ordered",
+  "Paid": "Paid",
+  "Sent": "Sent",
+  "Used": "Used",
+  "Do you want to cancel orders and all included tickets?": "Do you want to cancel orders and all included tickets?",
+  "Do you want to cancel the selected tickets?": "Do you want to cancel the selected tickets?",
+  "Cancel": "Cancel",
+  "Occupied": "Occupied",
+  "Report": "Report",
   "_":"_"
 }

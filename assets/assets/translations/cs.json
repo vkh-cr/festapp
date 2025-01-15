@@ -351,5 +351,17 @@
   "State": "Stav",
   "Do you want to send the tickets to orders?": "Chcete poslat vstupenky pro objednávky?",
   "Send tickets": "Poslat vstupenky",
+  "Change state to paid": "Změnit stav na zaplaceno",
+  "Do you want to change orders to paid?": "Chcete změnit objednávky na zaplaceno?",
+  "Synchronize payments": "Synchronizovat platby",
+  "Ordered": "Objednáno",
+  "Paid": "Zaplaceno",
+  "Sent": "Odesláno",
+  "Used": "Využito",
+  "Do you want to cancel orders and all included tickets?": "Chcete stornovat objednávky a všechny zahrnuté lístky?",
+  "Do you want to cancel the selected tickets?": "Chcete stornovat vybrané lístky?",
+  "Cancel": "Stornovat",
+  "Occupied": "Obsazené",
+  "Report": "Report",
   "_": "_"
 }
