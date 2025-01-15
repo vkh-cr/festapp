@@ -134,7 +134,7 @@ class DbEshop {
     return true;
   }
 
-  static Future<void> cancelOrder(int id) async {
+  static Future<void> stornoOrder(int id) async {
     final response = await _supabase.rpc(
       'update_order_and_tickets_to_storno_with_security',
       params: {
@@ -145,6 +145,8 @@ class DbEshop {
     if (response["code"] != 200) {
       throw Exception("Storno order failed: ${response['code']}: ${response['message']}");
     }
+
+    await sendStornoTicketOrderEmail(orderId: id);
   }
 
   static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
@@ -306,6 +308,27 @@ class DbEshop {
     try {
       final response = await _supabase.functions.invoke(
         "send-tickets",
+        body: body,
+      );
+
+      return response;
+    } catch (e) {
+      print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
+  static Future<FunctionResponse> sendStornoTicketOrderEmail({
+    required int orderId,
+  }) async {
+    final body = {
+      "templateCode": "TICKET_ORDER_STORNO",
+      "data": { "orderId": orderId },
+    };
+
+    try {
+      final response = await _supabase.functions.invoke(
+        "send-email",
         body: body,
       );
 

@@ -94,7 +94,7 @@ class _OrdersTabState extends State<OrdersTab> {
       if (confirm && mounted) {
         var futures = selected.map((s) {
           return () async {
-            await DbEshop.cancelOrder(s.id!);
+            await DbEshop.stornoOrder(s.id!);
           };
         }).toList();
 
