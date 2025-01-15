@@ -99,7 +99,7 @@ BEGIN
     WHERE o.occasion = occasion_id;
 
     -- Calculate the total paid revenue
-    SELECT SUM(ABS(pi.returned)) INTO returned_revenue
+    SELECT SUM(pi.returned) INTO returned_revenue
     FROM eshop.payment_info pi
     JOIN eshop.orders o ON pi.id = o.payment_info
     WHERE o.occasion = occasion_id;
