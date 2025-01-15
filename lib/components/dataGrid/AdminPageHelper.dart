@@ -11,6 +11,7 @@ import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
 import 'package:fstapp/pages/Eshop/BlueprintEditorTab.dart';
 import 'package:fstapp/pages/Eshop/OrdersTab.dart';
+import 'package:fstapp/pages/Eshop/ReportTab.dart';
 import 'package:fstapp/pages/Eshop/TicketsTab.dart';
 
 class AdminPageHelper {
@@ -70,6 +71,7 @@ class AdminTabDefinition {
   static const String blueprint = "Blueprint";
   static const String tickets = "Tickets";
   static const String orders = "Orders";
+  static const String report = "Report";
 
 
   // Available tabs defined in a dictionary
@@ -86,6 +88,7 @@ class AdminTabDefinition {
     blueprint: AdminTabDefinition(label: "Blueprint".tr(), icon: Icons.grid_on, widget: BlueprintTab()),
     tickets: AdminTabDefinition(label: "Tickets".tr(), icon: Icons.local_activity, widget: TicketsTab()),
     orders: AdminTabDefinition(label: "Orders".tr(), icon: Icons.shopping_cart, widget: OrdersTab()),
+    report: AdminTabDefinition(label: "Report".tr(), icon: Icons.stacked_bar_chart, widget: ReportTab()),
 
   };
 }

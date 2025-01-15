@@ -66,6 +66,13 @@ class DbEshop {
     return null;
   }
 
+  static Future<String> getReportForOccasion(int id) async {
+    final response = await _supabase
+        .rpc('get_report_for_occasion', params: {'occasion_id': id});
+
+    return response;
+  }
+
   static Future<FormModel?> getFormForEdit(String formLink) async {
     var data = await _supabase
         .from(Tb.forms.table)
