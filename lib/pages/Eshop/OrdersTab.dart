@@ -88,7 +88,7 @@ class _OrdersTabState extends State<OrdersTab> {
       var confirm = await DialogHelper.showConfirmationDialogAsync(
           context,
           "Cancel".tr(),
-          "${"Do you want to cancel orders and all included tickets?".tr()} (${selected.length})"
+          "${"Do you want to cancel orders and all included tickets? The customer will receive an email about this cancellation.".tr()} (${selected.length})"
       );
 
       if (confirm && mounted) {
