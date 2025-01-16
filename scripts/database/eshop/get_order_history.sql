@@ -17,16 +17,19 @@ BEGIN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to view this order history');
     END IF;
 
-    -- Fetch history items for the order
-    SELECT jsonb_agg(jsonb_build_object(
-        'id', oh.id,
-        'created_at', oh.created_at,
-        'data', oh.data,
-        'order', oh."order",
-        'state', oh.state,
-        'price', oh.price,
-        'currency_code', oh.currency_code
-    ))
+    -- Fetch history items for the order and order them by created_at
+    SELECT jsonb_agg(
+        jsonb_build_object(
+            'id', oh.id,
+            'created_at', oh.created_at,
+            'data', oh.data,
+            'order', oh."order",
+            'state', oh.state,
+            'price', oh.price,
+            'currency_code', oh.currency_code
+        )
+        ORDER BY oh.created_at -- Order inside the aggregation
+    )
     INTO orderHistoryData
     FROM eshop.orders_history oh
     WHERE oh."order" = order_id;
