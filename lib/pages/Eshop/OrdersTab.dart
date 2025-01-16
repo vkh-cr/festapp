@@ -198,7 +198,6 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_DATA_NOTE,
     EshopColumns.ORDER_NOTE_HIDDEN,
     EshopColumns.PAYMENT_INFO_DEADLINE,
-    if(RightsService.isAdmin())
     EshopColumns.ORDER_HISTORY,
   ];
 }
