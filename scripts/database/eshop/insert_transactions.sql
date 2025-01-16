@@ -30,7 +30,7 @@ BEGIN
             INSERT INTO eshop.transactions (
                 transaction_id, date, amount, currency, counter_account, bank_code,
                 bank_name, ks, vs, ss, user_identification, transaction_type,
-                performed_by, comment, command_id, bank_account_id
+                performed_by, comment, command_id, bank_account_id, message_for_recipient, counter_account_name
             ) VALUES (
                 (transaction->'column22'->>'value')::BIGINT, -- ID pohybu
                 parsed_date, -- Parsed Datum
@@ -47,7 +47,9 @@ BEGIN
                 transaction->'column9'->>'value', -- Provedl
                 transaction->'column25'->>'value', -- Komentář
                 (transaction->'column17'->>'value')::BIGINT, -- ID pokynu
-                bank_account_id -- Bank Account ID (provided by the function parameter)
+                bank_account_id, -- Bank Account ID (provided by the function parameter)
+                transaction->'column16'->>'value', -- Zpráva pro příjemce
+                transaction->'column10'->>'value'  -- Název protiúčtu
             );
             inserted_count := inserted_count + 1;
         ELSE
