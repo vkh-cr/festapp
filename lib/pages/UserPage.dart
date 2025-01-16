@@ -395,7 +395,7 @@ class _UserPageState extends State<UserPage> {
                             ToastHelper.Show(
                                 context,
                                 "Password reset email has been sent.".tr());
-                            DialogHelper.showInformationDialogAsync(
+                            DialogHelper.showInformationDialog(
                                 context,
                                 "Change Password Instructions".tr(),
                                 "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
@@ -416,7 +416,7 @@ class _UserPageState extends State<UserPage> {
                 Container(
                     alignment: Alignment.topCenter,
                     child: TextButton(
-                        onPressed: () => DialogHelper.showInformationDialogAsync(
+                        onPressed: () => DialogHelper.showInformationDialog(
                             context,
                             "Delete account".tr(),
                             "Request account deletion by sending email with your credentials to info@festapp.net."

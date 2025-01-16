@@ -68,7 +68,7 @@ class _OrdersTabState extends State<OrdersTab> {
               isEnabled: RightsService.isEditor,
             ),
           ],
-          columns: EshopColumns.generateColumns(columnIdentifiers),
+          columns: EshopColumns.generateColumns(context, columnIdentifiers),
         ).DataGrid()
     );
   }
@@ -186,7 +186,7 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  static const List<String> columnIdentifiers = [
+  static List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
@@ -198,5 +198,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_DATA_NOTE,
     EshopColumns.ORDER_NOTE_HIDDEN,
     EshopColumns.PAYMENT_INFO_DEADLINE,
+    if(RightsService.isAdmin())
+    EshopColumns.ORDER_HISTORY,
   ];
 }
