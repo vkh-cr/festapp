@@ -54,7 +54,7 @@ class EshopColumns {
     TICKET_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Ticket Symbol".tr(),
         field: TbEshop.tickets.ticket_symbol,
         type: PlutoColumnType.text(),
@@ -79,7 +79,7 @@ class EshopColumns {
     TICKET_TOTAL_PRICE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TicketModel.metaPrice,
         type: PlutoColumnType.text(),
@@ -101,7 +101,7 @@ class EshopColumns {
     TICKET_PRODUCTS: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Products".tr(),
         field: TicketModel.metaTicketsProducts,
         type: PlutoColumnType.text(),
@@ -111,7 +111,7 @@ class EshopColumns {
     TICKET_NOTE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.tickets.note,
         type: PlutoColumnType.text(),
@@ -130,7 +130,7 @@ class EshopColumns {
     TICKET_SPOT: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Spot".tr(),
         field: TicketModel.metaSpot,
         type: PlutoColumnType.text(),
@@ -152,7 +152,7 @@ class EshopColumns {
     ORDER_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Order Symbol".tr(),
         field: TbEshop.orders.order_symbol,
         type: PlutoColumnType.text(),
@@ -162,7 +162,7 @@ class EshopColumns {
     ORDER_PRICE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.orders.price,
         type: PlutoColumnType.text(),
@@ -188,7 +188,7 @@ class EshopColumns {
     ORDER_DATA: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Customer".tr(),
         field: TbEshop.orders.data,
         type: PlutoColumnType.text(),
@@ -198,7 +198,7 @@ class EshopColumns {
     ORDER_DATA_NOTE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.orders.data_note,
         type: PlutoColumnType.text(),
@@ -228,6 +228,8 @@ class EshopColumns {
     ],
     PRODUCT_TITLE: [
       PlutoColumn(
+        readOnly: true,
+        enableEditingMode: true,
         title: "Title".tr(),
         field: TbEshop.products.title,
         type: PlutoColumnType.text(),
@@ -236,6 +238,8 @@ class EshopColumns {
     ],
     PRODUCT_PRICE: [
       PlutoColumn(
+        readOnly: true,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.products.price,
         type: PlutoColumnType.text(),
@@ -246,7 +250,7 @@ class EshopColumns {
     PAYMENT_INFO_AMOUNT: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Amount".tr(),
         field: TbEshop.payment_info.amount,
         type: PlutoColumnType.text(),
@@ -257,7 +261,7 @@ class EshopColumns {
     PAYMENT_INFO_PAID: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Paid".tr(),
         field: TbEshop.payment_info.paid,
         type: PlutoColumnType.text(),
@@ -268,7 +272,7 @@ class EshopColumns {
     PAYMENT_INFO_RETURNED: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Returned".tr(),
         field: TbEshop.payment_info.returned,
         type: PlutoColumnType.text(),
@@ -279,7 +283,7 @@ class EshopColumns {
     PAYMENT_INFO_VARIABLE_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Variable symbol".tr(),
         field: TbEshop.payment_info.variable_symbol,
         type: PlutoColumnType.text(),
