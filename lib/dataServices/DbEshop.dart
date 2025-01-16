@@ -391,4 +391,20 @@ class DbEshop {
     }
 
   }
+
+  static Future<List<Map<String, dynamic>>> getOrderHistory(int orderId) async {
+    final response = await _supabase.rpc('get_order_history', params: {
+      'order_id': orderId,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Failed to fetch order history: ${response['message']}");
+    }
+
+    var data = response["data"];
+
+    // Directly return the list of items without grouping by date
+    return List<Map<String, dynamic>>.from(data);
+  }
+
 }

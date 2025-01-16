@@ -173,6 +173,8 @@ class OrderModel extends IPlutoRowModel {
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
       TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
       TbEshop.orders.note_hidden: PlutoCell(value: noteHidden ?? ""),
+      TbEshop.orders_history.table: PlutoCell(value: ""),
+
     });
   }
 

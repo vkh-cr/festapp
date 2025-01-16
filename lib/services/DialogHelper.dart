@@ -56,7 +56,7 @@ class DialogHelper{
   }
 
 
-  static Future<void> showInformationDialogAsync(
+  static Future<void> showInformationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage,
@@ -66,7 +66,7 @@ class DialogHelper{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(titleMessage),
-            content: Text(textMessage),
+            content: SelectableText(textMessage),
             actions: [
               ElevatedButton(
                 child: Text(buttonMessage),

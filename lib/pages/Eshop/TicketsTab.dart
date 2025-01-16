@@ -73,7 +73,7 @@ class _TicketsTabState extends State<TicketsTab> {
           isEnabled: RightsService.isEditor,
         ),
       ],
-      columns: EshopColumns.generateColumns(columnIdentifiers),
+      columns: EshopColumns.generateColumns(context, columnIdentifiers),
     ).DataGrid());
   }
 
