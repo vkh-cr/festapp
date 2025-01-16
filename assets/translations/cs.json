@@ -357,7 +357,7 @@
   "Paid": "Zaplaceno",
   "Sent": "Odesláno",
   "Used": "Využito",
-  "Do you want to cancel orders and all included tickets?": "Chcete stornovat objednávky a všechny zahrnuté lístky?",
+  "Do you want to cancel orders and all included tickets? The customer will receive an email about this cancellation.": "Chcete zrušit objednávky a všechny přiložené lístky? Zákazník obdrží e-mail o tomto stornu.",
   "Do you want to cancel the selected tickets?": "Chcete stornovat vybrané lístky?",
   "Cancel": "Stornovat",
   "Occupied": "Obsazené",
