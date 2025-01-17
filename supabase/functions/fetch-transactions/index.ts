@@ -1,8 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
-
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+import { getSupabaseUser, isUserEditor, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,67 +14,67 @@ Deno.serve(async (req) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // Set up a Supabase client for the requesting user
-    const supabaseUser = createClient(
-      SUPABASE_URL,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
-    );
+    const requestData = await req.json();
+    const { formLink } = requestData;
 
-    // Authenticate the user
-    const { data: user, error: userError } = await supabaseUser.auth.getUser();
-    if (userError || !user) {
-      console.error("User authentication failed:", userError);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+    if (!formLink) {
+      return new Response(JSON.stringify({ error: "Missing form link" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
+        status: 400,
       });
     }
 
+    // Fetch the form data from the link
+    const { data: formData, error: formError } = await supabaseAdmin
+      .from("forms")
+      .select("occasion, bank_account")
+      .eq("link", formLink)
+      .single();
+
+    if (formError || !formData) {
+      console.error("Form not found:", formError);
+      return new Response(JSON.stringify({ error: "Form not found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
+      });
+    }
+
+    const occasionId = formData.occasion;
+    const bankAccountId = formData.bank_account;
+
+    // Get the authenticated user from the authorization header
+    const user = await getSupabaseUser(req.headers.get("Authorization")!);
     const userId = user.user.id;
-    console.log("Authenticated user:", userId);
 
-    // Check if the user is an editor
-    const { data: isEditor, error: editorError } = await supabaseUser.rpc(
-      "get_is_editor_on_any_occasion"
-    );
-
-    if (editorError || !isEditor) {
-      console.error("User is not an editor or role validation failed:", editorError);
+    // Check if the user is an editor for the occasion
+    const isEditor = await isUserEditor(userId, occasionId);
+    if (!isEditor) {
+      console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
       return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 403,
       });
     }
 
-    console.log("User is an editor:", isEditor);
-
-    console.log("Proceeding");
-
-    // Hardcoded bankAccountId
-    const bankAccountId = 1;
-
-    // Fetch the secret for the specified bank account
-    const { data: bankAccount, error: bankAccountError } = await supabaseAdmin.schema("eshop")
+    // Fetch the secret associated with the bank account
+    const { data: bankAccount, error: bankAccountError } = await supabaseAdmin
+      .schema("eshop")
       .from("bank_accounts")
       .select("secret")
       .eq("id", bankAccountId)
       .single();
 
     if (bankAccountError || !bankAccount || !bankAccount.secret) {
-      console.error("Bank account or associated secret ID not found:", bankAccountError);
+      console.error("Bank account or associated secret not found:", bankAccountError);
       return new Response(JSON.stringify({ error: "Bank account not found or missing secret" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
 
-    // Fetch the secret details from the secrets table
-    const { data: secretDetails, error: secretError } = await supabaseAdmin.schema("eshop")
+    // Fetch the secret details
+    const { data: secretDetails, error: secretError } = await supabaseAdmin
+      .schema("eshop")
       .from("secrets")
       .select("secret, expiry_date")
       .eq("id", bankAccount.secret)
