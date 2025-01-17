@@ -51,8 +51,8 @@ class DbEshop {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
-  static Future<FunctionResponse> fetchTransactions() async {
-    return await _supabase.functions.invoke("fetch-transactions");
+  static Future<FunctionResponse> fetchTransactions(String formLink) async {
+    return await _supabase.functions.invoke("fetch-transactions", body: {"formLink": formLink});
   }
 
   static Future<FormModel?> getFormFromLink(String link) async {

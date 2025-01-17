@@ -74,7 +74,7 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> synchronizePayments() async {
-    await DbEshop.fetchTransactions();
+    await DbEshop.fetchTransactions(formLink!);
     refreshData();
   }
 
