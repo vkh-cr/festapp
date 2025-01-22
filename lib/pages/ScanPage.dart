@@ -77,18 +77,21 @@ class _ScanPageState extends State<ScanPage> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
             children: [
               Text(
-      _scannedObject!.relatedOrder!.toCustomerData() + "   " + _scannedObject!.ticketSymbol.toString() + "   "+ _scannedObject!.state!,
+      ((_scannedObject!.relatedProducts != null ? _scannedObject!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ") : "") + "\n" +
+      _scannedObject!.relatedOrder!.toCustomerData() + "   " + _scannedObject!.ticketSymbol.toString() + "   "+ _scannedObject!.state!),
                 style: const TextStyle(
                   color: Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
+                maxLines: 2,
               ),
+              SizedBox.fromSize(size: Size(30,5)),
               const SizedBox(width: 5),
               Icon(icon, color: Colors.black),
             ],
@@ -177,7 +180,7 @@ class _ScanPageState extends State<ScanPage> {
     // }
 
     _scannedObject ??= await DbEshop.getTicket(scannedId);
-    if (_scannedObject != null && _scannedObject!.state == "sent") {
+    if (_scannedObject != null && (_scannedObject!.state == "sent" || _scannedObject!.state == "paid")) {
       _scanState = ScanState.signedIn;
       setState(() {});
       VibrateService.vibrateOk();
