@@ -186,7 +186,7 @@ BEGIN
 
             -- Process each product from the accumulated products_array
             FOREACH product_id IN ARRAY products_array LOOP
-                SELECT i.*, it.type, it.title as type_title
+                SELECT i.*, it.type, it.title as type_title, '' as spot_title
                 INTO product_data
                 FROM eshop.products i
                 LEFT JOIN eshop.product_types it ON i.product_type = it.id
@@ -230,7 +230,7 @@ BEGIN
                 END IF;
 
                 -- Build the product details for the ticket
-                ticket_products := ticket_products || JSONB_BUILD_OBJECT(
+                ticket_products := ticket_products || jsonb_strip_nulls(JSONB_BUILD_OBJECT(
                     'id', product_id,
                     'title', product_data.title,
                     'type', product_data.type,
@@ -239,7 +239,7 @@ BEGIN
                     'currency_code', product_data.currency_code,
                     'spot_title', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.spot_title ELSE NULL END,
                     'description', CASE WHEN spot_id IS NOT NULL AND product_id = spot_product.id THEN spot_product.description ELSE NULL END
-                );
+                ));
 
                 -- Accumulate the product price into the order total
                 calculated_price := calculated_price + COALESCE(product_data.price, 0)::NUMERIC(10,2);
