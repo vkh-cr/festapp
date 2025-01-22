@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
+import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/services/DialogHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
@@ -28,6 +33,7 @@ class EshopColumns {
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
+  static const String PAYMENT_INFO_RETURNED = "paymentInfoReturned";
   static const String PAYMENT_INFO_VARIABLE_SYMBOL = "paymentInfoVariableSymbol";
   static const String PAYMENT_INFO_DEADLINE = "orderDataDeadline";
 
@@ -35,9 +41,10 @@ class EshopColumns {
   static const String ORDER_DATA = "orderData";
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
+  static const String ORDER_HISTORY = "orderHistory";
 
   // Define columns
-  static Map<String, dynamic> get columnBuilders => {
+  static Map<String, dynamic> columnBuilders(BuildContext context) => {
     TICKET_ID: [
       PlutoColumn(
         hide: true,
@@ -53,7 +60,7 @@ class EshopColumns {
     TICKET_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Ticket Symbol".tr(),
         field: TbEshop.tickets.ticket_symbol,
         type: PlutoColumnType.text(),
@@ -78,7 +85,7 @@ class EshopColumns {
     TICKET_TOTAL_PRICE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TicketModel.metaPrice,
         type: PlutoColumnType.text(),
@@ -100,7 +107,7 @@ class EshopColumns {
     TICKET_PRODUCTS: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Products".tr(),
         field: TicketModel.metaTicketsProducts,
         type: PlutoColumnType.text(),
@@ -110,7 +117,7 @@ class EshopColumns {
     TICKET_NOTE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.tickets.note,
         type: PlutoColumnType.text(),
@@ -129,7 +136,7 @@ class EshopColumns {
     TICKET_SPOT: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Spot".tr(),
         field: TicketModel.metaSpot,
         type: PlutoColumnType.text(),
@@ -151,7 +158,7 @@ class EshopColumns {
     ORDER_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Order Symbol".tr(),
         field: TbEshop.orders.order_symbol,
         type: PlutoColumnType.text(),
@@ -161,7 +168,7 @@ class EshopColumns {
     ORDER_PRICE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.orders.price,
         type: PlutoColumnType.text(),
@@ -187,7 +194,7 @@ class EshopColumns {
     ORDER_DATA: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Customer".tr(),
         field: TbEshop.orders.data,
         type: PlutoColumnType.text(),
@@ -197,7 +204,7 @@ class EshopColumns {
     ORDER_DATA_NOTE: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.orders.data_note,
         type: PlutoColumnType.text(),
@@ -211,6 +218,54 @@ class EshopColumns {
         field: TbEshop.orders.note_hidden,
         type: PlutoColumnType.text(),
         width: 200,
+      ),
+    ],
+    ORDER_HISTORY: [
+      PlutoColumn(
+        enableAutoEditing: true,
+        title: "History".tr(),
+        field: TbEshop.orders_history.table,
+        type: PlutoColumnType.text(),
+        width: 150,
+        renderer: (rendererContext) {
+          return ElevatedButton(
+            onPressed: () async {
+              var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
+              var history = await DbEshop.getOrderHistory(id);
+              String prettyFormattedHistory = "";
+
+              // Create a DateFormat object to format the datetime
+              DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+              for (var item in history) {
+                // Format the 'created_at' datetime to a more readable format
+                String createdAt = item['created_at'];
+                DateTime parsedDate = DateTime.parse(createdAt).toLocal(); // Parse the string into a DateTime object
+                String formattedDate = dateFormat.format(parsedDate); // Format the DateTime object
+
+                prettyFormattedHistory += "$formattedDate\n";
+                prettyFormattedHistory += '-' * 50 + "\n"; // Separator line
+
+                // Pretty print each history item with indentation for better readability
+                String formattedItem = const JsonEncoder.withIndent('  ').convert(item);
+                prettyFormattedHistory += "$formattedItem\n";
+
+                // Add a separator line between items to make them more distinct
+                prettyFormattedHistory += '-' * 50 + "\n";
+              }
+              await DialogHelper.showInformationDialog(context, "History".tr(), prettyFormattedHistory);
+            },
+            child: Row(
+              children: [
+                const Icon(Icons.history),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text("History".tr()),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     ],
     PRODUCT_ID: [
@@ -227,6 +282,8 @@ class EshopColumns {
     ],
     PRODUCT_TITLE: [
       PlutoColumn(
+        readOnly: true,
+        enableEditingMode: true,
         title: "Title".tr(),
         field: TbEshop.products.title,
         type: PlutoColumnType.text(),
@@ -235,6 +292,8 @@ class EshopColumns {
     ],
     PRODUCT_PRICE: [
       PlutoColumn(
+        readOnly: true,
+        enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.products.price,
         type: PlutoColumnType.text(),
@@ -245,7 +304,7 @@ class EshopColumns {
     PAYMENT_INFO_AMOUNT: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Amount".tr(),
         field: TbEshop.payment_info.amount,
         type: PlutoColumnType.text(),
@@ -256,18 +315,29 @@ class EshopColumns {
     PAYMENT_INFO_PAID: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
-        title: "Paid amount".tr(),
+        enableEditingMode: true,
+        title: "Paid".tr(),
         field: TbEshop.payment_info.paid,
         type: PlutoColumnType.text(),
         textAlign: PlutoColumnTextAlign.end,
-        width: 120,
+        width: 80,
+      ),
+    ],
+    PAYMENT_INFO_RETURNED: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Returned".tr(),
+        field: TbEshop.payment_info.returned,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 80,
       ),
     ],
     PAYMENT_INFO_VARIABLE_SYMBOL: [
       PlutoColumn(
         readOnly: true,
-        enableEditingMode: false,
+        enableEditingMode: true,
         title: "Variable symbol".tr(),
         field: TbEshop.payment_info.variable_symbol,
         type: PlutoColumnType.text(),
@@ -290,11 +360,12 @@ class EshopColumns {
 
   /// Generates columns based on a list of column identifiers.
   /// Optional `data` map is used for columns that require extra configuration.
-  static List<PlutoColumn> generateColumns(List<String> identifiers, {Map<String, dynamic>? data}) {
+  static List<PlutoColumn> generateColumns(BuildContext context, List<String> identifiers, {Map<String, dynamic>? data}) {
+    var columns = columnBuilders(context);
     return identifiers
-        .where((id) => columnBuilders.containsKey(id))
+        .where((id) => columns.containsKey(id))
         .expand((id) {
-      var columnEntry = columnBuilders[id];
+      var columnEntry = columns[id];
       if (columnEntry is List<PlutoColumn>) {
         return columnEntry; // Static columns
       } else if (columnEntry is Function) {

@@ -163,6 +163,7 @@ class OrderModel extends IPlutoRowModel {
       TbEshop.orders.state: PlutoCell(value: OrderModel.formatState(state ?? orderedState)),
       TbEshop.payment_info.amount: PlutoCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
       TbEshop.payment_info.paid: PlutoCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
+      TbEshop.payment_info.returned: PlutoCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!) : ""),
       TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? 0),
       TbEshop.payment_info.deadline: PlutoCell(
         value: paymentInfoModel?.deadline != null
@@ -172,6 +173,8 @@ class OrderModel extends IPlutoRowModel {
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
       TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
       TbEshop.orders.note_hidden: PlutoCell(value: noteHidden ?? ""),
+      TbEshop.orders_history.table: PlutoCell(value: ""),
+
     });
   }
 

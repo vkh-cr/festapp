@@ -51,8 +51,8 @@ class DbEshop {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
-  static Future<FunctionResponse> fetchTransactions() async {
-    return await _supabase.functions.invoke("fetch-transactions");
+  static Future<FunctionResponse> fetchTransactions(String formLink) async {
+    return await _supabase.functions.invoke("fetch-transactions", body: {"formLink": formLink});
   }
 
   static Future<FormModel?> getFormFromLink(String link) async {
@@ -66,11 +66,14 @@ class DbEshop {
     return null;
   }
 
-  static Future<String> getReportForOccasion(int id) async {
+  static Future<String> getReportForOccasion(String link) async {
     final response = await _supabase
-        .rpc('get_report_for_occasion', params: {'occasion_id': id});
+        .rpc('get_report_for_occasion_with_security', params: {'form_link': link});
 
-    return response;
+    if(response["code"] == 200){
+      return response["data"];
+    }
+    return "";
   }
 
   static Future<FormModel?> getFormForEdit(String formLink) async {
@@ -131,7 +134,7 @@ class DbEshop {
     return true;
   }
 
-  static Future<void> cancelOrder(int id) async {
+  static Future<void> stornoOrder(int id) async {
     final response = await _supabase.rpc(
       'update_order_and_tickets_to_storno_with_security',
       params: {
@@ -142,6 +145,8 @@ class DbEshop {
     if (response["code"] != 200) {
       throw Exception("Storno order failed: ${response['code']}: ${response['message']}");
     }
+
+    await sendStornoTicketOrderEmail(orderId: id);
   }
 
   static Future<BlueprintModel?> getBlueprintForEdit(String formKey) async {
@@ -313,6 +318,27 @@ class DbEshop {
     }
   }
 
+  static Future<FunctionResponse> sendStornoTicketOrderEmail({
+    required int orderId,
+  }) async {
+    final body = {
+      "templateCode": "TICKET_ORDER_STORNO",
+      "data": { "orderId": orderId },
+    };
+
+    try {
+      final response = await _supabase.functions.invoke(
+        "send-email",
+        body: body,
+      );
+
+      return response;
+    } catch (e) {
+      print("Unexpected error in sendTicketsToEmail: $e");
+      rethrow;
+    }
+  }
+
   static Future<void> deleteOrder(OrderModel model) async {
     final response = await _supabase.rpc(
       'delete_order',
@@ -365,4 +391,52 @@ class DbEshop {
     }
 
   }
+
+  static Future<List<Map<String, dynamic>>> getOrderHistory(int orderId) async {
+    final response = await _supabase.rpc('get_order_history', params: {
+      'order_id': orderId,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Failed to fetch order history: ${response['message']}");
+    }
+
+    var data = response["data"];
+
+    // Directly return the list of items without grouping by date
+    return List<Map<String, dynamic>>.from(data);
+  }
+
+  static Future<TicketModel> getTicket(String scannedId) async {
+    final response = await _supabase.rpc('get_ticket', params: {
+      'scanned_id': scannedId,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Error retrieving ticket: ${response["message"]}");
+    }
+
+    // Parse the returned ticket JSON data.
+    final ticketJson = response["ticket"] as Map<String, dynamic>;
+    TicketModel ticket = TicketModel.fromJson(ticketJson);
+
+    // Optionally, attach related order, products, and spot using the response data.
+    if (response.containsKey("order") && response["order"] != null) {
+      ticket.relatedOrder = OrderModel.fromJson(response["order"]);
+    }
+
+    if (response.containsKey("products") && response["products"] != null) {
+      ticket.relatedProducts = (response["products"] as List)
+          .map((p) => ProductModel.fromJson(p))
+          .toList();
+    }
+
+    if (response.containsKey("spot") && response["spot"] != null) {
+      ticket.relatedSpot = BlueprintObjectModel.fromJson(response["spot"]);
+    }
+
+    return ticket;
+  }
+
+
 }

@@ -68,13 +68,13 @@ class _OrdersTabState extends State<OrdersTab> {
               isEnabled: RightsService.isEditor,
             ),
           ],
-          columns: EshopColumns.generateColumns(columnIdentifiers),
+          columns: EshopColumns.generateColumns(context, columnIdentifiers),
         ).DataGrid()
     );
   }
 
   Future<void> synchronizePayments() async {
-    await DbEshop.fetchTransactions();
+    await DbEshop.fetchTransactions(formLink!);
     refreshData();
   }
 
@@ -88,13 +88,13 @@ class _OrdersTabState extends State<OrdersTab> {
       var confirm = await DialogHelper.showConfirmationDialogAsync(
           context,
           "Cancel".tr(),
-          "${"Do you want to cancel orders and all included tickets?".tr()} (${selected.length})"
+          "${"Do you want to cancel orders and all included tickets? The customer will receive an email about this cancellation.".tr()} (${selected.length})"
       );
 
       if (confirm && mounted) {
         var futures = selected.map((s) {
           return () async {
-            await DbEshop.cancelOrder(s.id!);
+            await DbEshop.stornoOrder(s.id!);
           };
         }).toList();
 
@@ -186,16 +186,18 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  static const List<String> columnIdentifiers = [
+  static List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
+    EshopColumns.PAYMENT_INFO_RETURNED,
     EshopColumns.PAYMENT_INFO_VARIABLE_SYMBOL,
     EshopColumns.ORDER_DATA_NOTE,
     EshopColumns.ORDER_NOTE_HIDDEN,
     EshopColumns.PAYMENT_INFO_DEADLINE,
+    EshopColumns.ORDER_HISTORY,
   ];
 }

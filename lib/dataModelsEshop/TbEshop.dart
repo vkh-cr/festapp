@@ -3,10 +3,12 @@ class TbEshop {
   static ProductsTb products = const ProductsTb();
   static OrderProductTicketTb order_product_ticket = const OrderProductTicketTb();
   static OrdersTb orders = const OrdersTb();
+  static OrdersHistoryTb orders_history = const OrdersHistoryTb();
   static TicketsTb tickets = const TicketsTb();
   static BlueprintTb blueprints = const BlueprintTb();
   static SpotsTb spots = const SpotsTb();
   static PaymentInfoTb payment_info = const PaymentInfoTb();
+  static FormFieldsTb form_fields = const FormFieldsTb();  // New addition
 }
 
 class ProductTypesTb {
@@ -116,6 +118,34 @@ class PaymentInfoTb {
   String get variable_symbol => "variable_symbol";
   String get amount => "amount";
   String get paid => "paid";
+  String get returned => "returned";
   String get deadline => "deadline";
   String get currency_code => "currency_code";
+}
+
+class OrdersHistoryTb {
+  const OrdersHistoryTb();
+  String get table => "orders_history";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get data => "data";
+  String get order => "order";
+  String get state => "state";
+  String get price => "price";
+  String get currency_code => "currency_code";
+}
+
+class FormFieldsTb {
+  const FormFieldsTb();
+  String get table => "form_fields";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get title => "title";
+  String get description => "description";
+  String get data => "data";
+  String get type => "type";
+  String get is_required => "is_required";
+  String get form => "form";
+  String get is_hidden => "is_hidden";
+  String get order => "order";
 }

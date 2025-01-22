@@ -2,13 +2,19 @@ CREATE OR REPLACE FUNCTION update_order_and_tickets_to_paid(order_id bigint)
 RETURNS jsonb AS $$
 DECLARE
     occasion_id bigint;
+    current_state text;
 BEGIN
     -- Retrieve the occasion associated with the order
-    SELECT occasion INTO occasion_id FROM eshop.orders WHERE id = order_id;
+    SELECT occasion, state INTO occasion_id, current_state FROM eshop.orders WHERE id = order_id;
 
     -- Check if the order exists and has an associated occasion
     IF occasion_id IS NULL THEN
         RAISE EXCEPTION 'Order not found or no associated occasion.';
+    END IF;
+
+    -- Check if the order is in 'ordered' state before proceeding
+    IF current_state != 'ordered' THEN
+        RETURN jsonb_build_object('code', 400, 'message', 'Order is not in "ordered" state.');
     END IF;
 
     -- Update the state of the order to 'paid'

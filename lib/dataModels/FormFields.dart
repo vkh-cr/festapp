@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
+import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/services/FormHelper.dart';
 
@@ -20,12 +21,15 @@ class FieldHolder {
   String getFieldTypeValue() => FormHelper.getFieldTypeValue(this);
 
   String? label;
+  String? description;
 
   FieldHolder(
       {required this.fieldType,
       required this.isRequired,
       this.defaultValue,
-      this.label});
+      this.label,
+      this.description
+      });
 
   factory FieldHolder.fromJson(Map<String, dynamic> json) {
     return FieldHolder(
@@ -209,6 +213,36 @@ class FormHolder {
       return OptionsFieldHolder.fromJson(json);
     } else {
       return FieldHolder.fromJson(json);
+    }
+  }
+
+  factory FormHolder.fromFormFieldModel(List<FormFieldModel> list) {
+    return FormHolder(
+      fields: list.map((f) => createFieldHolder(f))
+          .toList(),
+    );
+  }
+
+  static FieldHolder createFieldHolder(FormFieldModel ffm) {
+    final fieldType = ffm.type;
+    if (fieldType == TicketHolder.metaTicket) {
+      return TicketHolder(
+          fieldType: ffm.type!,
+          maxTickets: 1,
+          fields: [],
+          isRequired: true);
+    } else if (fieldType == OptionsFieldHolder.metaOptions) {
+      return OptionsFieldHolder(
+          fieldType: ffm.type!,
+          options: [],
+          optionsType: ffm.data[OptionsFieldHolder.metaOptionsType],
+          label: ffm.title);
+    } else {
+      return FieldHolder(
+          fieldType: ffm.type!,
+          isRequired: ffm.isRequired!,
+          label: ffm.title,
+          description: ffm.description);
     }
   }
 

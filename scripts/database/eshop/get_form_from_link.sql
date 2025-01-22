@@ -3,8 +3,24 @@ RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
     generated_secret UUID := gen_random_uuid();
+    form_exists BOOLEAN;
 BEGIN
-    -- Check if the form is open based on the provided link
+    -- Check if the form exists
+    SELECT EXISTS (
+        SELECT 1
+        FROM public.forms
+        WHERE link = form_link
+    ) INTO form_exists;
+
+    IF NOT form_exists THEN
+        -- Return an error if the form does not exist
+        RETURN jsonb_build_object(
+            'code', 404,
+            'message', 'Form does not exist.'
+        );
+    END IF;
+
+    -- Check if the form is open
     IF NOT EXISTS (
         SELECT 1
         FROM public.forms
@@ -32,7 +48,23 @@ BEGIN
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number,
-            'secret', generated_secret
+            'secret', generated_secret,
+            'fields', (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'id', ff.id,
+                        'title', ff.title,
+                        'description', ff.description,
+                        'data', ff.data,
+                        'type', ff.type,
+                        'is_required', ff.is_required,
+                        'is_hidden', ff.is_hidden,
+                        'order', ff."order"
+                    )
+                )
+                FROM public.form_fields ff
+                WHERE ff.form = f.id AND ff.is_hidden = false
+            )
         )
     )
     INTO allData
