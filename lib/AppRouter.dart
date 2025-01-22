@@ -16,6 +16,7 @@ import 'package:fstapp/pages/NewsPage.dart';
 import 'package:fstapp/pages/MySchedulePage.dart';
 import 'package:fstapp/pages/ResetPasswordPage.dart';
 import 'package:fstapp/pages/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/ScanPage.dart';
 import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
@@ -43,6 +44,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
+    AutoRoute(page: ScanRoute.page, path: sl(ScanPage.ROUTE)),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
     AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
@@ -93,6 +95,7 @@ class AppRouter extends RootStackRouter {
       InstallPage.ROUTE,
       AdminDashboardPage.ROUTE,
       FormPage.ROUTE,
+      ScanPage.ROUTE,
     ];
   }
 }
