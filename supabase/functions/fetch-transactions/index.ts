@@ -99,10 +99,10 @@ Deno.serve(async (req) => {
 
     const secret = secretDetails.secret;
 
-//     const startDate = new Date(2024, 12, 1)
+//     const startDate = new Date(2024, 11, 1)
 //       .toISOString()
 //       .split("T")[0];
-//     const endDate = new Date(2024, 12, 2)
+//     const endDate = new Date(2025, 1, 20)
 //       .toISOString()
 //       .split("T")[0];
 //     const apiUrl = `https://fioapi.fio.cz/v1/rest/periods/${secret}/${startDate}/${endDate}/transactions.json`;
@@ -110,6 +110,8 @@ Deno.serve(async (req) => {
     const apiUrl = `https://fioapi.fio.cz/v1/rest/last/${secret}/transactions.json`;
 
     const apiResponse = await fetch(apiUrl);
+    console.log(apiResponse.status);
+
     const transactionData = await apiResponse.json();
 
     const transactions = transactionData?.accountStatement?.transactionList?.transaction || [];
