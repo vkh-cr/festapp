@@ -15,7 +15,7 @@ jobs:
       - name: Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.2'
+          flutter-version: '3.27.3'
           channel: 'stable'
 
       - run: flutter build web --web-renderer canvaskit --release --base-href /
