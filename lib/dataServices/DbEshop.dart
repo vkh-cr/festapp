@@ -407,4 +407,36 @@ class DbEshop {
     return List<Map<String, dynamic>>.from(data);
   }
 
+  static Future<TicketModel> getTicket(String scannedId) async {
+    final response = await _supabase.rpc('get_ticket', params: {
+      'scanned_id': scannedId,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Error retrieving ticket: ${response["message"]}");
+    }
+
+    // Parse the returned ticket JSON data.
+    final ticketJson = response["ticket"] as Map<String, dynamic>;
+    TicketModel ticket = TicketModel.fromJson(ticketJson);
+
+    // Optionally, attach related order, products, and spot using the response data.
+    if (response.containsKey("order") && response["order"] != null) {
+      ticket.relatedOrder = OrderModel.fromJson(response["order"]);
+    }
+
+    if (response.containsKey("products") && response["products"] != null) {
+      ticket.relatedProducts = (response["products"] as List)
+          .map((p) => ProductModel.fromJson(p))
+          .toList();
+    }
+
+    if (response.containsKey("spot") && response["spot"] != null) {
+      ticket.relatedSpot = BlueprintObjectModel.fromJson(response["spot"]);
+    }
+
+    return ticket;
+  }
+
+
 }
