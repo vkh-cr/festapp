@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
@@ -47,6 +48,10 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+
+    if (kIsWeb) {
+      MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl("https://unpkg.com/@zxing/library@0.21.3");
+    }
     //await loadData(widget.id);
   }
 
