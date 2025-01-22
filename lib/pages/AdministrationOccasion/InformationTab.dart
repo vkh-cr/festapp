@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/SongbookContent.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -39,8 +40,8 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                buildTab(Icons.info, "Information".tr()),
-                buildTab(Icons.library_music, "Songbook".tr()),
+                DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
+                DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
               ],
             ),
           ),
@@ -56,20 +57,6 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
           ),
         ],
       ),
-    );
-  }
-  Widget buildTab(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: ThemeConfig.blackColor(context)),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            text,
-            style: TextStyle(color: ThemeConfig.blackColor(context)),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -57,6 +57,21 @@ class DataGridHelper
     );
   }
 
+  static Widget buildTab(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: ThemeConfig.blackColor(context)),
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            text,
+            style: TextStyle(color: ThemeConfig.blackColor(context)),
+          ),
+        ),
+      ],
+    );
+  }
+
   static T? getValueOrNull<T>(dynamic value, {T? emptyValue}) {
     if (value == emptyValue || value == "") return null;
     if (value is String) return value.trim() as T;
