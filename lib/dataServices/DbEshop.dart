@@ -48,7 +48,7 @@ class DbEshop {
   }
 
   static Future<FunctionResponse> sendTicketOrder(Map<String, dynamic> data) async {
-    return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
+    return await _supabase.functions.invoke("send-ticket-ordert", body: {"orderDetails": data});
   }
 
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
@@ -57,7 +57,7 @@ class DbEshop {
 
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
-        .rpc('get_form_from_link', params: {'form_link': link});
+        .rpc('get_form_from_linkt', params: {'form_link': link});
 
     if(response["code"] == 200){
       var form = FormModel.fromJson(response["data"]);

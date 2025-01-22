@@ -118,7 +118,7 @@ class _FormPageState extends State<FormPage> {
     _totalTickets = 0;
 
     for (var field in formHolder!.fields) {
-      if (field.fieldType == FormHelper.fieldTypeOptions) {
+      if (field.fieldType == FormHelper.fieldTypeProductType) {
         var selectedOption = field.getValue(formHolder!.controller!.globalKey);
         if (selectedOption is FormOptionModel) {
           _totalPrice += selectedOption.price;
@@ -138,16 +138,20 @@ class _FormPageState extends State<FormPage> {
           }
         } else {
           for (var s in field.tickets) {
-            _totalPrice += s.seat.objectModel!.product!.price!;
+            if(s.seat != null){
+              _totalPrice += s.seat!.objectModel!.product!.price!;
+            }
           }
         }
 
-        var ticketDataList = FormHelper.getFieldData(_formKey, field) ?? [];
+        var tickets = FormHelper.getFieldData(_formKey, field) ?? [];
 
-        for (var ticketData in ticketDataList) {
-          for (var ticketValue in ticketData.values) {
-            if (ticketValue is FormOptionModel) {
-              _totalPrice += ticketValue.price;
+        for (var ticketData in tickets) {
+          for (var ticketField in ticketData[FormHelper.metaFields]) {
+            for (var fValue in ticketField.values) {
+              if (fValue is FormOptionModel) {
+              _totalPrice += fValue.price;
+              }
             }
           }
         }
@@ -372,39 +376,8 @@ class _FormPageState extends State<FormPage> {
     if (form == null) {
       return;
     }
-    var allItems = await DbEshop.getProducts(context, form!.occasion!);
 
-    if(form!.relatedFields == null){
-      List<Map<String, dynamic>> updatedFields = [];
-
-      for (var field in form?.data![FormHelper.metaFields]) {
-        if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-          List<Map<String, dynamic>> updatedTicketFields = [];
-          for (var ticketField in field[FormHelper.metaFields]) {
-            if (ticketField.containsKey(FormHelper.metaOptionsType)) {
-              var optionsType = ticketField[FormHelper.metaOptionsType];
-              var generatedOptions = generateOptionsForItemType(allItems, optionsType);
-              updatedTicketFields.add(generatedOptions);
-            } else {
-              updatedTicketFields.add(ticketField);
-            }
-          }
-
-          updatedFields.add({
-            FormHelper.metaType: field[FormHelper.metaType],
-            FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
-            FormHelper.metaFields: updatedTicketFields,
-          });
-        } else {
-          updatedFields.add(field);
-        }
-      }
-      Map<String, dynamic> json = {FormHelper.metaFields: updatedFields};
-
-      formHolder = FormHolder.fromJson(json);
-    } else{
-      formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
-    }
+    formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
 
     formHolder!.controller = FormHolderController(
       secret: form!.secret,

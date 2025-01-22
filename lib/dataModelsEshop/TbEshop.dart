@@ -148,4 +148,5 @@ class FormFieldsTb {
   String get form => "form";
   String get is_hidden => "is_hidden";
   String get order => "order";
+  String get is_ticket_field => "is_ticket_field";
 }

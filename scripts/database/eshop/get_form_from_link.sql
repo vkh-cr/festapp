@@ -1,39 +1,31 @@
-CREATE OR REPLACE FUNCTION get_form_from_link(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_form_from_linkt(form_link TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
     generated_secret UUID := gen_random_uuid();
     form_exists BOOLEAN;
 BEGIN
-    -- Check if the form exists
     SELECT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link
     ) INTO form_exists;
-
     IF NOT form_exists THEN
-        -- Return an error if the form does not exist
         RETURN jsonb_build_object(
             'code', 404,
             'message', 'Form does not exist.'
         );
     END IF;
-
-    -- Check if the form is open
     IF NOT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link AND is_open = true
     ) THEN
-        -- Return an error if the form is not open
         RETURN jsonb_build_object(
             'code', 400,
             'message', 'Form is not open.'
         );
     END IF;
-
-    -- Build the JSON response with form data if the form is open
     SELECT jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
@@ -59,10 +51,40 @@ BEGIN
                         'type', ff.type,
                         'is_required', ff.is_required,
                         'is_hidden', ff.is_hidden,
-                        'order', ff."order"
-                    )
+                        'is_ticket_field', ff.is_ticket_field,
+                        'order', ff."order",
+                        'product_type', (
+                            CASE
+                                WHEN ff.product_type IS NOT NULL THEN
+                                    jsonb_build_object(
+                                        'id', pt.id,
+                                        'title', pt.title,
+                                        'description', pt.description,
+                                        'type', pt.type,
+                                        'data', pt.data,
+                                        'occasion', pt.occasion,
+                                        'products', (
+                                            SELECT jsonb_agg(
+                                                jsonb_build_object(
+                                                    'id', p.id,
+                                                    'title', p.title,
+                                                    'description', p.description,
+                                                    'price', p.price,
+                                                    'order', p."order"
+                                                ) ORDER BY COALESCE(p."order", 0)
+                                            )
+                                            FROM eshop.products p
+                                            WHERE p.product_type = pt.id
+                                            AND p.is_hidden = FALSE
+                                        )
+                                    )
+                                ELSE NULL
+                            END
+                        )
+                    ) ORDER BY COALESCE(ff."order", 0)
                 )
                 FROM public.form_fields ff
+                LEFT JOIN eshop.product_types pt ON ff.product_type = pt.id
                 WHERE ff.form = f.id AND ff.is_hidden = false
             )
         )
@@ -71,8 +93,6 @@ BEGIN
     FROM public.forms f
     LEFT JOIN eshop.bank_accounts ba ON f.bank_account = ba.id
     WHERE f.link = form_link;
-
-    -- Return the constructed JSON data
     RETURN allData;
 END;
 $$;
