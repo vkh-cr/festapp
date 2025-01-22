@@ -373,39 +373,33 @@ class _FormPageState extends State<FormPage> {
       return;
     }
     var allItems = await DbEshop.getProducts(context, form!.occasion!);
+    List<Map<String, dynamic>> updatedFields = [];
 
-    if(form!.relatedFields == null){
-      List<Map<String, dynamic>> updatedFields = [];
-
-      for (var field in form?.data![FormHelper.metaFields]) {
-        if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
-          List<Map<String, dynamic>> updatedTicketFields = [];
-          for (var ticketField in field[FormHelper.metaFields]) {
-            if (ticketField.containsKey(FormHelper.metaOptionsType)) {
-              var optionsType = ticketField[FormHelper.metaOptionsType];
-              var generatedOptions = generateOptionsForItemType(allItems, optionsType);
-              updatedTicketFields.add(generatedOptions);
-            } else {
-              updatedTicketFields.add(ticketField);
-            }
+    for (var field in form?.data![FormHelper.metaFields]) {
+      if (field[FormHelper.metaType] == FormHelper.fieldTypeTicket) {
+        List<Map<String, dynamic>> updatedTicketFields = [];
+        for (var ticketField in field[FormHelper.metaFields]) {
+          if (ticketField.containsKey(FormHelper.metaOptionsType)) {
+            var optionsType = ticketField[FormHelper.metaOptionsType];
+            var generatedOptions = generateOptionsForItemType(allItems, optionsType);
+            updatedTicketFields.add(generatedOptions);
+          } else {
+            updatedTicketFields.add(ticketField);
           }
-
-          updatedFields.add({
-            FormHelper.metaType: field[FormHelper.metaType],
-            FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
-            FormHelper.metaFields: updatedTicketFields,
-          });
-        } else {
-          updatedFields.add(field);
         }
+
+        updatedFields.add({
+          FormHelper.metaType: field[FormHelper.metaType],
+          FormHelper.metaMaxTickets: field[FormHelper.metaMaxTickets],
+          FormHelper.metaFields: updatedTicketFields,
+        });
+      } else {
+        updatedFields.add(field);
       }
-      Map<String, dynamic> json = {FormHelper.metaFields: updatedFields};
-
-      formHolder = FormHolder.fromJson(json);
-    } else{
-      formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
     }
+    Map<String, dynamic> json = {FormHelper.metaFields: updatedFields};
 
+    formHolder = FormHolder.fromJson(json);
     formHolder!.controller = FormHolderController(
       secret: form!.secret,
       blueprintId: form!.blueprint,
@@ -415,6 +409,7 @@ class _FormPageState extends State<FormPage> {
       showSeatReservation: _showSeatReservation,
       onCloseSeatReservation: _hideSeatReservation
     );
+    form!.data![FormHelper.metaFields] = updatedFields;
 
     setState(() {
       _isLoading = false;

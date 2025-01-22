@@ -1,4 +1,3 @@
-import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 
 class FormModel {
@@ -17,7 +16,6 @@ class FormModel {
   String? header;
   String? footer;
   String? link;
-  List<FormFieldModel>? relatedFields;
 
   FormModel({
     this.id,
@@ -35,7 +33,6 @@ class FormModel {
     this.header,
     this.footer,
     this.link,
-    this.relatedFields,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -57,11 +54,6 @@ class FormModel {
       header: json[Tb.forms.header],
       footer: json[Tb.forms.footer],
       link: json[Tb.forms.link],
-      relatedFields: json['fields'] != null
-          ? (json['fields'] as List)
-          .map((field) => FormFieldModel.fromJson(field))
-          .toList()
-          : null, // Parsing related fields from JSON
     );
   }
 
@@ -81,7 +73,6 @@ class FormModel {
     Tb.forms.header: header,
     Tb.forms.footer: footer,
     Tb.forms.link: link,
-    'fields': relatedFields,
   };
 
   Map<String, dynamic> toEditedJson() => {
