@@ -85,13 +85,13 @@ class FormHelper {
     for (var k in formHolder.fields) {
       var value = getFieldData(formHolder.controller!.globalKey, k);
 
-      if(k.fieldType == fieldTypeText){
+      if(k.fieldType == fieldTypeTicket){
+        toReturn[fieldTypeTicket] = value;
+      } else {
         if(toReturn[metaFields] == null) {
           toReturn[metaFields] = [];
         }
         toReturn[metaFields].add({ k.id.toString(): value });
-      } else {
-        toReturn[k.id.toString()] = value;
       }
     }
     return toReturn;
@@ -300,7 +300,7 @@ class FormHelper {
                           key: ticket.tickets[i].ticketKey, // Assign the corresponding key
                           onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, ticket.tickets[i].ticketKey, formHolder, ticket.tickets[i].ticketValues),
+                            children: getFormFields(context, ticket.tickets[i].ticketKey, formHolder, ticket.tickets[i].ticketValues.where((f)=>f.fieldType != fieldTypeSpot).toList()),
                           ),
                         ),
                       ],
@@ -376,7 +376,7 @@ class FormHelper {
 
   static FormBuilderTextField buildEmailField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: fieldHolder.fieldType,
+      name: fieldHolder.id.toString(),
       autofillHints: [AutofillHints.email],
       decoration: InputDecoration(
         labelText: fieldHolder.title,
@@ -418,7 +418,7 @@ class FormHelper {
 
   static FormBuilderTextField buildBirthYearField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
-      name: fieldHolder.fieldType,
+      name: fieldHolder.id.toString(),
       decoration: InputDecoration(labelText: fieldHolder.title,
         labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
       validator: FormBuilderValidators.compose([

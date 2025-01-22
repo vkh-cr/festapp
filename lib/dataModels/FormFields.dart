@@ -186,7 +186,7 @@ class FormHolder {
       return TicketHolder(
           id: ffm.id!,
           fieldType: ffm.type!,
-          maxTickets: 1,
+          maxTickets: ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
           fields: [],
           isRequired: true);
     } else if (fieldType == FormHelper.metaOptions) {
