@@ -366,7 +366,8 @@ class EshopColumns {
       }
       var columns = <PlutoColumn>[];
       for(FormFieldModel f in (data[RESPONSES]) as List<FormFieldModel>){
-        var cc = genericTextColumn((f.title ?? FormHelper.fieldTypeToLocale(f.type!)), f.id.toString());
+        var title = f.title?.trim();
+        var cc = genericTextColumn((title == null || title.isEmpty ? FormHelper.fieldTypeToLocale(f.type!) : title), f.id.toString());
         columns.add(cc);
       }
       return columns;
