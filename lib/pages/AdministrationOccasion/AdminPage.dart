@@ -18,6 +18,11 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
 
   // List of active tabs by name
   final List<String> activeTabNames = [
+    AdminTabDefinition.info,
+    AdminTabDefinition.events,
+    AdminTabDefinition.places,
+    AdminTabDefinition.groups,
+    AdminTabDefinition.game,
     AdminTabDefinition.service,
     AdminTabDefinition.users,
   ];
