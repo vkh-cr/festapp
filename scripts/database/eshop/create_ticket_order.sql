@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_ticket_ordert(input_data JSONB)
+CREATE OR REPLACE FUNCTION create_ticket_order(input_data JSONB)
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
