@@ -51,7 +51,7 @@ class DbEshop {
   }
 
   static Future<FunctionResponse> sendTicketOrder(Map<String, dynamic> data) async {
-    return await _supabase.functions.invoke("send-ticket-ordert", body: {"orderDetails": data});
+    return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
   }
 
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
