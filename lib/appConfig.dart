@@ -26,7 +26,7 @@ class AppConfig {
   static const String playStoreLink = "";
   static const String playStoreLaunchLink = "";
   static const String desktopAppLink = "";
-  static bool isProLicense = true;
+  static bool isProLicense = false;
 
   static const bool isEventTimeUtc = true;
 
