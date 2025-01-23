@@ -50,14 +50,12 @@ class OptionsFieldHolder extends FieldHolder {
   static const String metaOptionsType = "optionsType";
   static const String metaOptions = "options";
 
-  final String optionsType;
   final List<FormOptionModel> options;
 
   OptionsFieldHolder({
     required super.fieldType,
     dynamic value,
     required this.options,
-    required this.optionsType,
     required id,
     required title,
   }) : super(
@@ -67,17 +65,8 @@ class OptionsFieldHolder extends FieldHolder {
             id: id);
 
   @override
-  Map<String, dynamic> toJson() {
-    return super.toJson()
-      ..addAll({
-        metaLabel: title,
-        metaOptionsType: optionsType,
-      });
-  }
-
-  @override
   String toString() =>
-      'OptionsFieldHolder(fieldType: $fieldType, title: $title, optionsType: $optionsType)';
+      'OptionsFieldHolder(fieldType: $fieldType, title: $title)';
 }
 
 class TicketHolder extends FieldHolder {
@@ -189,21 +178,34 @@ class FormHolder {
           maxTickets: ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
           fields: [],
           isRequired: true);
-    } else if (fieldType == FormHelper.metaOptions) {
+    } else if (fieldType == FormHelper.fieldTypeSelectOne) {
+      // Safely extract the options list from ffm.data
+      List<dynamic> optionsData = ffm.data[FormHelper.metaOptions] ?? [];
+
+      // Ensure that optionsData is a List of Maps with 'value' keys
+      List<FormOptionModel> formOptions = optionsData
+          .mapIndexed((index, o) {
+        // Safely access the 'value' key
+        String value = '';
+        if (o is Map<String, dynamic> && o.containsKey('value')) {
+          value = o['value']?.toString() ?? '';
+        }
+        return FormOptionModel(index.toString(), value);
+      })
+          .toList();
+
       return OptionsFieldHolder(
-          id: ffm.id,
-          fieldType: ffm.type!,
-          options: [],
-          optionsType: ffm.data[FormHelper.metaOptionsType],
-          title: ffm.title,
+        id: ffm.id,
+        fieldType: ffm.type!,
+        options: formOptions,
+        title: ffm.title,
       );
     } else if (fieldType == FormHelper.fieldTypeProductType) {
       return OptionsFieldHolder(
           id: ffm.id,
           fieldType: ffm.type!,
-          options: ffm.productType!.products!.map((p) => FormOptionModel(p.id.toString(), p.title!, price: p.price ?? 0)).toList(),
+          options: ffm.productType!.products!.map((p) => FormOptionModel(p.id.toString(), p.title!, price: p.price ?? 0, type: ffm.type!)).toList(),
           title: ffm.productType!.title,
-          optionsType: ffm.productType!.id.toString(),
       );
     } else {
       return FieldHolder(
