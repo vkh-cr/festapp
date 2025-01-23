@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -28,15 +29,14 @@ class _SignupPageState extends State<SignupPage> {
   Map<String, dynamic>? fieldsData;
   FormHolder? formHolder;
 
-  Map<String, dynamic> entryJson = {FormHelper.metaFields:
-  [
-    { FormHelper.metaType : FormHelper.fieldTypeName, FormHelper.IS_REQUIRED: true},
-    { FormHelper.metaType : FormHelper.fieldTypeSurname, FormHelper.IS_REQUIRED: true},
-    { FormHelper.metaType : FormHelper.fieldTypeSex},
-    { FormHelper.metaType : FormHelper.fieldTypeEmail, FormHelper.IS_REQUIRED: true},
-    { FormHelper.metaType : FormHelper.fieldTypeCity, FormHelper.IS_REQUIRED: true},
-    { FormHelper.metaType : FormHelper.fieldTypeBirthYear},
-  ]};
+  List<FormFieldModel> entryForm = [
+    FormFieldModel(type: FormHelper.fieldTypeName, isRequired: true),
+    FormFieldModel(type: FormHelper.fieldTypeSurname, isRequired: true),
+    FormFieldModel(type: FormHelper.fieldTypeSex),
+    FormFieldModel(type: FormHelper.fieldTypeEmail, isRequired: true),
+    FormFieldModel(type: FormHelper.fieldTypeCity, isRequired: true),
+    FormFieldModel(type: FormHelper.fieldTypeBirthYear),
+  ];
 
   final _formKey = GlobalKey<FormBuilderState>();
 
@@ -47,7 +47,7 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
-    formHolder = FormHolder.fromJson(entryJson);
+    formHolder = FormHolder.fromFormFieldModel(entryForm);
     formHolder!.controller = FormHolderController(globalKey: _formKey);
     return Scaffold(
       appBar: AppBar(

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ScheduleContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/ExclusivityContent.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -39,8 +40,8 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                buildTab(Icons.calendar_month, "Schedule".tr()),
-                buildTab(Icons.punch_clock_rounded, "Exclusivity".tr()),
+                DataGridHelper.buildTab(context, Icons.calendar_month, "Schedule".tr()),
+                DataGridHelper.buildTab(context, Icons.punch_clock_rounded, "Exclusivity".tr()),
               ],
             ),
           ),
@@ -56,21 +57,6 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
           ),
         ],
       ),
-    );
-  }
-
-  Widget buildTab(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: ThemeConfig.blackColor(context)),
-        Padding(
-          padding: const EdgeInsets.all(8),
-          child: Text(
-            text,
-            style: TextStyle(color: ThemeConfig.blackColor(context)),
-          ),
-        ),
-      ],
     );
   }
 }

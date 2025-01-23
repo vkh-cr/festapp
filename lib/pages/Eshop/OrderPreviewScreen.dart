@@ -122,7 +122,7 @@ class OrderPreviewScreen extends StatelessWidget {
         var value = field.getValue(formHolder.controller!.globalKey);
         if(value != null){
           return _buildInfoRow(
-            field.label!,
+            field.title!,
             value.toString(),
           );
         }
@@ -135,59 +135,54 @@ class OrderPreviewScreen extends StatelessWidget {
     final ticketHolder = formHolder.fields
         .firstWhere((field) => field.fieldType == FormHelper.fieldTypeTicket) as TicketHolder;
 
-    final ticketWidgets = ticketHolder.tickets.asMap().entries.map((entry) {
-      final ticketIndex = entry.key;
-      final ticket = entry.value;
-
-      // Build a card for the ticket with the index (1-based)
-      return _buildTicketCard(context, ticket, ticketIndex + 1);
-    }).toList();
-
     return Column(
-      children: ticketWidgets,
-    );
-  }
+      children: ticketHolder.tickets.asMap().entries.map((entry) {
+        final ticketIndex = entry.key + 1;
+        final ticket = entry.value;
 
-  Widget _buildTicketCard(BuildContext context, FormTicketModel ticket, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          color: ThemeConfig.whiteColor(context),
-          border: Border.all(
-            color: Theme.of(context).primaryColor, // Use the primary color for the border
-            width: 2.0,
-          ),
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Display ticket index at the top of the container
-            Text(
-              "${"Ticket".tr()} $index",
-              style: StylesConfig.textStyleBig.copyWith(
-                fontSize: 16 * fontSizeFactor,
-                fontWeight: FontWeight.bold,
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: ThemeConfig.whiteColor(context),
+              border: Border.all(
+                color: Theme.of(context).primaryColor, // Use the primary color for the border
+                width: 2.0,
               ),
+              borderRadius: BorderRadius.circular(8.0),
             ),
-            const SizedBox(height: 8),
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  ticketHolder.tickets.length > 1 ? "${"Ticket".tr()} $ticketIndex" : "Ticket".tr(),
+                  style: StylesConfig.textStyleBig.copyWith(
+                    fontSize: 16 * fontSizeFactor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
 
-            _buildInfoRow("Spot".tr(), ticket.seat.objectModel.toString()),
-            // Display ticket details
-            ...ticket.ticketValues.where((entry) {
-              // Filter out rows with null values
-              final value = entry.getValue(ticket.ticketKey);
-              return value != null && value.toString().isNotEmpty;
-            }).map((entry) {
-              return _buildInfoRow(entry.label!, entry.getValue(ticket.ticketKey).toString());
-            }),
-          ],
-        ),
-      ),
+                if (ticket.seat != null)
+                  _buildInfoRow("Spot".tr(), ticket.seat!.objectModel.toString()),
+
+                // Display ticket details
+                ...ticket.ticketValues.where((entry) {
+                  // Filter out rows with null values
+                  final value = entry.getValue(ticket.ticketKey);
+                  return value != null && value.toString().isNotEmpty;
+                }).map((entry) {
+                  return _buildInfoRow(entry.title!, entry.getValue(ticket.ticketKey).toString());
+                }),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
+
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(

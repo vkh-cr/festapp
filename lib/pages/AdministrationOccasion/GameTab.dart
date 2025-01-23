@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameCheckPointsContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameSettingsContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameUserGroupsContent.dart';
@@ -40,9 +41,9 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                buildTab(Icons.gamepad, "Check points".tr()),
-                buildTab(Icons.groups, "Groups".tr()),
-                buildTab(Icons.settings, "Settings".tr()),
+                DataGridHelper.buildTab(context, Icons.gamepad, "Check points".tr()),
+                DataGridHelper.buildTab(context, Icons.groups, "Groups".tr()),
+                DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
               ],
             ),
           ),
@@ -59,21 +60,6 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
           ),
         ],
       ),
-    );
-  }
-
-  Widget buildTab(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: ThemeConfig.blackColor(context)),
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: Text(
-            text,
-            style: TextStyle(color: ThemeConfig.blackColor(context)),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -175,7 +175,7 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         Text(
           _isSuccess
               ? "Payment information has been sent to your email.".tr()
-              : "${code!}: ${"An error occurred while processing your order.".tr()}",
+              : "${code??0}: ${"An error occurred while processing your order.".tr()}",
           style: TextStyle(
             fontSize: 14,
             color: ThemeConfig.blackColor(context).withOpacity(0.7),

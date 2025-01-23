@@ -4,10 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/FormHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
@@ -42,6 +44,8 @@ class EshopColumns {
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
+
+  static const String RESPONSES = "responses";
 
   // Define columns
   static Map<String, dynamic> columnBuilders(BuildContext context) => {
@@ -356,7 +360,30 @@ class EshopColumns {
         width: 100,
       ),
     ],
+    RESPONSES: (Map<String, dynamic> data) {
+      if(data[RESPONSES] == null){
+        return <PlutoColumn>[];
+      }
+      var columns = <PlutoColumn>[];
+      for(FormFieldModel f in (data[RESPONSES]) as List<FormFieldModel>){
+        var cc = genericTextColumn((f.title ?? FormHelper.fieldTypeToLocale(f.type!)), f.id.toString());
+        columns.add(cc);
+      }
+      return columns;
+    },
   };
+
+  static PlutoColumn genericTextColumn(String title, String field) {
+    return PlutoColumn(
+      readOnly: true,
+      enableEditingMode: true,
+      title: title,
+      field: field,
+      type: PlutoColumnType.text(),
+      textAlign: PlutoColumnTextAlign.end,
+      width: 100,
+    );
+  }
 
   /// Generates columns based on a list of column identifiers.
   /// Optional `data` map is used for columns that require extra configuration.

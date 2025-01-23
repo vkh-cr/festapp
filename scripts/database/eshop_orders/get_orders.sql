@@ -6,7 +6,6 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-    blueprint_id BIGINT;
     occasion_id BIGINT;
     spotsData JSONB;
     productsData JSONB;
@@ -15,22 +14,15 @@ DECLARE
     orderProductTicketsData JSONB;
     paymentInfoData JSONB;
 BEGIN
-    -- Resolve blueprint_id using form_link
-    SELECT blueprint
-    INTO blueprint_id
+    SELECT occasion
+    INTO occasion_id
     FROM public.forms
     WHERE link = form_link;
 
     -- Check if form_link is valid
-    IF blueprint_id IS NULL THEN
-        RETURN jsonb_build_object('code', 404, 'message', 'Form key does not exist or is not linked to a blueprint');
+    IF occasion_id IS NULL THEN
+        RETURN jsonb_build_object('code', 404, 'message', 'Form key does not exist or is not linked to an occasion');
     END IF;
-
-    -- Fetch occasion_id for the blueprint
-    SELECT occasion
-    INTO occasion_id
-    FROM eshop.blueprints
-    WHERE id = blueprint_id;
 
     -- Authorization check
     IF (SELECT get_is_editor_on_occasion(occasion_id)) <> TRUE THEN

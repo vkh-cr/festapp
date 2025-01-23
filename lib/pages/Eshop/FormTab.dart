@@ -1,18 +1,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/pages/AdministrationOccasion/InformationContent.dart';
-import 'package:fstapp/pages/AdministrationOccasion/SongbookContent.dart';
+import 'package:fstapp/pages/Eshop/FormEditorContent.dart';
+import 'package:fstapp/pages/Eshop/FormResponsesContent.dart';
 import 'package:fstapp/themeConfig.dart';
 
-class InformationTab extends StatefulWidget {
-  const InformationTab({Key? key}) : super(key: key);
+class FormTab extends StatefulWidget {
+  const FormTab({Key? key}) : super(key: key);
 
   @override
-  _InformationTabState createState() => _InformationTabState();
+  _FormTabState createState() => _FormTabState();
 }
 
-class _InformationTabState extends State<InformationTab> with SingleTickerProviderStateMixin {
+class _FormTabState extends State<FormTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -40,8 +40,8 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
-                DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
+                DataGridHelper.buildTab(context, Icons.data_object, "Form".tr()),
+                DataGridHelper.buildTab(context, Icons.list, "Responses".tr()),
               ],
             ),
           ),
@@ -50,8 +50,8 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                InformationContent(),  // Information grid
-                SongbookContent(),     // Songbook grid
+                FormEditorContent(),
+                FormResponsesContent(),
               ],
             ),
           ),
@@ -60,3 +60,6 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
     );
   }
 }
+
+
+
