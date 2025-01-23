@@ -13,6 +13,7 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -24,6 +25,7 @@ class FormHelper {
   static const String fieldTypeBirthYear = "birth_year";
   static const String fieldTypeNote = "note";
   static const String fieldTypeSpot = "spot";
+  static const String fieldTypeText = "text";
 
   static const String fieldTypeTicket = "ticket";
 
@@ -180,6 +182,8 @@ class FormHelper {
   static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder field) {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
+      case fieldTypeText:
+        return buildTextFieldWithDescription(field, []);
       case fieldTypeNote:
         field.title = noteLabel();
         return buildTextField(field, []);
@@ -387,6 +391,20 @@ class FormHelper {
     );
   }
 
+  static Widget buildTextFieldWithDescription(FieldHolder fieldHolder, Iterable<String> autofillHints) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // if (fieldHolder.description != null)
+        //   HtmlView(
+        //     html: fieldHolder.description!,
+        //     isSelectable: true,
+        //   ),
+        buildTextField(fieldHolder, []),
+      ],
+    );
+  }
+
   static FormBuilderTextField buildEmailField(FieldHolder fieldHolder) {
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
@@ -473,5 +491,4 @@ class FormHelper {
     }
     return inputData;
   }
-
 }
