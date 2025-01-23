@@ -1,6 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
@@ -13,6 +15,7 @@ import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -48,7 +51,7 @@ class DbEshop {
   }
 
   static Future<FunctionResponse> sendTicketOrder(Map<String, dynamic> data) async {
-    return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
+    return await _supabase.functions.invoke("send-ticket-ordert", body: {"orderDetails": data});
   }
 
   static Future<FunctionResponse> fetchTransactions(String formLink) async {
@@ -57,7 +60,7 @@ class DbEshop {
 
   static Future<FormModel?> getFormFromLink(String link) async {
     final response = await _supabase
-        .rpc('get_form_from_link', params: {'form_link': link});
+        .rpc('get_form_from_linkt', params: {'form_link': link});
 
     if(response["code"] == 200){
       var form = FormModel.fromJson(response["data"]);
@@ -318,6 +321,14 @@ class DbEshop {
     }
   }
 
+  static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
+    var allFields = await getAllFormFields(formLink);
+    var orders = await getAllOrders(formLink);
+    return List<FormResponseModel>.from(
+      orders.map((x) => FormResponseModel.fromOrder(x, allFields)),
+    );
+  }
+
   static Future<FunctionResponse> sendStornoTicketOrderEmail({
     required int orderId,
   }) async {
@@ -436,6 +447,44 @@ class DbEshop {
     }
 
     return ticket;
+  }
+
+  static Future<List<FormFieldModel>> getAllFormFields(String formLink) async {
+    final formResponse = await _supabase
+        .from(Tb.forms.table)
+        .select(Tb.forms.id)
+        .eq(Tb.forms.link, formLink)
+        .single();
+
+    final int formId = formResponse[Tb.forms.id] as int;
+
+    final fieldsData = await _supabase
+        .from(TbEshop.form_fields.table)
+        .select(
+          "${TbEshop.form_fields.id},"
+          "${TbEshop.form_fields.created_at},"
+          "${TbEshop.form_fields.title},"
+          "${TbEshop.form_fields.description},"
+          "${TbEshop.form_fields.data},"
+          "${TbEshop.form_fields.type},"
+          "${TbEshop.form_fields.is_required},"
+          "${TbEshop.form_fields.form},"
+          "${TbEshop.form_fields.is_hidden},"
+          "${TbEshop.form_fields.order},"
+          "${TbEshop.form_fields.product_type},"
+          "${TbEshop.form_fields.is_ticket_field}"
+        )
+        .eq(TbEshop.form_fields.form, formId)
+        .eq(TbEshop.form_fields.is_ticket_field, false)
+        .neq(TbEshop.form_fields.type, FormHelper.fieldTypeTicket)
+        .order(TbEshop.form_fields.order, ascending: true);
+
+    // Step 3: Map the retrieved data to a list of FormFieldModel instances
+    List<FormFieldModel> formFields = [];
+    formFields = List<FormFieldModel>.from(
+      fieldsData.map((x) => FormFieldModel.fromJson(x)),
+    );
+    return formFields;
   }
 
 
