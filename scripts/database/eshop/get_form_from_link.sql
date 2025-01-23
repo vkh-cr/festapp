@@ -53,7 +53,7 @@ BEGIN
                         'is_hidden', ff.is_hidden,
                         'is_ticket_field', ff.is_ticket_field,
                         'order', ff."order",
-                        'product_type', (
+                        'product_type_data', (
                             CASE
                                 WHEN ff.product_type IS NOT NULL THEN
                                     jsonb_build_object(

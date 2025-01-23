@@ -17,6 +17,7 @@ class FormFieldModel extends IPlutoRowModel {
   bool? isTicketField;
   int? form;
   int? order;
+  int? productTypeId;
   dynamic data;
 
   ProductTypeModel? productType;
@@ -39,6 +40,7 @@ class FormFieldModel extends IPlutoRowModel {
     this.form,
     this.order,
     this.data,
+    this.productTypeId,
     this.productType,
   });
 
@@ -57,8 +59,9 @@ class FormFieldModel extends IPlutoRowModel {
         form: json[TbEshop.form_fields.form],
         order: json[TbEshop.form_fields.order],
         data: json[TbEshop.form_fields.data],
-        productType: json['product_type'] != null
-            ? ProductTypeModel.fromJson(json['product_type'])
+        productTypeId: json[TbEshop.form_fields.product_type],
+        productType: json[TbEshop.form_fields.product_type_data] != null
+            ? ProductTypeModel.fromJson(json[TbEshop.form_fields.product_type_data])
             : null
     );
   }

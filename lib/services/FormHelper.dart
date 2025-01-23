@@ -59,6 +59,37 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
+  static String fieldTypeToLocale(String fieldType) {
+    switch (fieldType) {
+      case fieldTypeName:
+        return nameLabel();
+      case fieldTypeSurname:
+        return surnameLabel();
+      case fieldTypeCity:
+        return cityLabel();
+      case fieldTypeEmail:
+        return emailLabel();
+      case fieldTypeSex:
+        return sexLabel();
+      case fieldTypeBirthYear:
+        return birthYearLabel();
+      case fieldTypeNote:
+        return noteLabel();
+      case fieldTypeSpot:
+        return spotLabel();
+      case fieldTypeTicket:
+        return "Ticket".tr();
+      case fieldTypeText:
+        return "Text".tr();
+      case fieldTypeOptions:
+        return "Options".tr();
+      case fieldTypeProductType:
+        return "Product Type".tr();
+      default:
+        return fieldType;
+    }
+  }
+
   static double fontSizeFactor = 1.2;
 
   static List<Widget> getAllFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder) {
