@@ -355,7 +355,7 @@ class _FormPageState extends State<FormPage> {
     }
 
     return {
-      FormHelper.metaType: FormHelper.fieldTypeOptions,
+      FormHelper.metaType: FormHelper.fieldTypeSelectOne,
       FormHelper.metaOptions: options,
       FormHelper.metaLabel: itemTypeModel.title,
       FormHelper.metaOptionsType: itemType,

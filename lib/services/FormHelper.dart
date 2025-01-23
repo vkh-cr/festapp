@@ -26,6 +26,8 @@ class FormHelper {
   static const String fieldTypeNote = "note";
   static const String fieldTypeSpot = "spot";
   static const String fieldTypeText = "text";
+  static const String fieldTypeSelectOne = "select_one";
+  static const String fieldTypeProductType = "product_type";
 
   static const String fieldTypeTicket = "ticket";
 
@@ -40,8 +42,6 @@ class FormHelper {
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
 
-  static const String fieldTypeOptions = "options";
-  static const String fieldTypeProductType = "product_type";
   // Field Attribute Constants
   static const String IS_REQUIRED = "is_required";
 
@@ -81,7 +81,7 @@ class FormHelper {
         return "Ticket".tr();
       case fieldTypeText:
         return "Text".tr();
-      case fieldTypeOptions:
+      case fieldTypeSelectOne:
         return "Options".tr();
       case fieldTypeProductType:
         return "Product Type".tr();
@@ -212,7 +212,7 @@ class FormHelper {
           sexOptions.insert(0, FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel()));
         }
         return buildRadioField(context, field, sexOptions, formHolder);
-      case fieldTypeOptions:
+      case fieldTypeSelectOne:
         var optionsField = field as OptionsFieldHolder;
         return buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeProductType:
@@ -424,7 +424,7 @@ class FormHelper {
   static FormBuilderRadioGroup buildRadioField(BuildContext context, FieldHolder fieldHolder, List<FormOptionModel> optionsIn, FormHolder formHolder) {
     List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn.map(
           (o) => FormBuilderFieldOption(
-        value: FormOptionModel(o.id, o.title, price: o.price),
+        value: o,
         child: Text(
           o.title + (o.price > 0 ? " (${Utilities.formatPrice(context, o.price)})":""),
           style: TextStyle(fontSize: 14.0 * fontSizeFactor),
