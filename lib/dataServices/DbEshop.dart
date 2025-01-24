@@ -461,15 +461,13 @@ class DbEshop {
     }
   }
 
-  static Future<void> updateTicketToUsed(int ticketId, String scannedCode) async {
+  static Future<bool> updateTicketToUsed(int ticketId, String scannedCode) async {
     final response = await _supabase.rpc('update_ticket_to_used', params: {
       'ticket_id': ticketId,
       'scan_code': scannedCode,
     });
 
-    if (response["code"] != 200) {
-      throw Exception("Error retrieving ticket: ${response["message"]}");
-    }
+    return response["code"] == 200;
   }
 
   static Future<String?> getScanCode(String formLink) async {
