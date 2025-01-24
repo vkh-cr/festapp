@@ -37,7 +37,7 @@ BEGIN
     -- 3. Retrieve Expected Scan Code from Occasion's Features
     SELECT feature->>'scan_code'
     INTO expected_scan_code
-    FROM jsonb_array_elements((SELECT data FROM public.occasions WHERE id = occasion_id)) AS feature
+    FROM jsonb_array_elements((SELECT data->'features' FROM public.occasions WHERE id = occasion_id)) AS feature
     WHERE feature->>'code' = 'scan'
     LIMIT 1;
 

@@ -371,5 +371,8 @@
   "Generate New Code": "Generate New Code",
   "Provide the following link or code to the people who will be checking the tickets.": "Provide the following link or code to the people who will be checking the tickets.",
   "By generating a new code, the old one will be replaced and will no longer work.": "By generating a new code, the old one will be replaced and will no longer work.",
+  "Confirm Ticket": "Confirm Ticket",
+  "Scan Code": "Scan Code",
+  "Enter Scan Code": "Enter Scan Code",
   "_":"_"
 }
