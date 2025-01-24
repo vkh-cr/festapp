@@ -43,8 +43,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
-    AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
-    AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}/:scanCode"),
+    AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
+    AutoRoute(path: ':scanCode', page: ScanRoute.page,),
+  ]),
+  //   AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}"),
+  //   AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}/:scanCode"),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
     AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
