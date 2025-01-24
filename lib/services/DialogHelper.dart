@@ -55,7 +55,6 @@ class DialogHelper{
         ));
   }
 
-
   static Future<void> showInformationDialog(
       BuildContext context,
       String titleMessage,
@@ -77,6 +76,37 @@ class DialogHelper{
             ],
           );
         });
+  }
+
+  static Future<bool> showScanTicketCode(
+      BuildContext context,
+      String titleMessage,
+      String textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: Container(
+
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
   }
 
   static Future<bool> showConfirmationDialogAsync(
@@ -114,7 +144,6 @@ class DialogHelper{
     );
     return result;
   }
-
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
       BuildContext context,
@@ -275,11 +304,8 @@ class DialogHelper{
         );
       },
     );
-
     return filePath;
   }
-
-
 
   static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
     bool result = false;
@@ -509,5 +535,4 @@ class DialogHelper{
       },
     );
   }
-
 }

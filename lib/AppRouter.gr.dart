@@ -625,13 +625,16 @@ class ResetPasswordRoute extends _i28.PageRouteInfo<void> {
 /// generated route for
 /// [_i20.ScanPage]
 class ScanRoute extends _i28.PageRouteInfo<ScanRouteArgs> {
-  ScanRoute({int? id, _i29.Key? key, List<_i28.PageRouteInfo>? children})
-    : super(
-        ScanRoute.name,
-        args: ScanRouteArgs(id: id, key: key),
-        rawPathParams: {'id': id},
-        initialChildren: children,
-      );
+  ScanRoute({
+    String? scanCode,
+    _i30.Key? key,
+    List<_i28.PageRouteInfo>? children,
+  }) : super(
+         ScanRoute.name,
+         args: ScanRouteArgs(scanCode: scanCode, key: key),
+         rawPathParams: {'scanCode': scanCode},
+         initialChildren: children,
+       );
 
   static const String name = 'ScanRoute';
 
@@ -640,26 +643,26 @@ class ScanRoute extends _i28.PageRouteInfo<ScanRouteArgs> {
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<ScanRouteArgs>(
-        orElse: () => ScanRouteArgs(id: pathParams.optInt('id')),
+        orElse: () => ScanRouteArgs(scanCode: pathParams.optString('scanCode')),
       );
       return _i28.DeferredWidget(
         _i20.loadLibrary,
-        () => _i20.ScanPage(id: args.id, key: args.key),
+        () => _i20.ScanPage(scanCode: args.scanCode, key: args.key),
       );
     },
   );
 }
 
 class ScanRouteArgs {
-  const ScanRouteArgs({this.id, this.key});
+  const ScanRouteArgs({this.scanCode, this.key});
 
-  final int? id;
+  final String? scanCode;
 
-  final _i29.Key? key;
+  final _i30.Key? key;
 
   @override
   String toString() {
-    return 'ScanRouteArgs{id: $id, key: $key}';
+    return 'ScanRouteArgs{scanCode: $scanCode, key: $key}';
   }
 }
 

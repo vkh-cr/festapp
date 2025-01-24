@@ -9,6 +9,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/TicketCodeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 
 class TicketsTab extends StatefulWidget {
@@ -72,9 +73,22 @@ class _TicketsTabState extends State<TicketsTab> {
           action: (SingleTableDataGrid dataGrid, [_]) => _stornoTickets(dataGrid),
           isEnabled: RightsService.isEditor,
         ),
+        DataGridAction(
+          name: "Scan tickets".tr(),
+          action: (SingleTableDataGrid dataGrid, [_]) => _scanTickets(dataGrid),
+          isEnabled: RightsService.isEditor,
+        ),
       ],
       columns: EshopColumns.generateColumns(context, columnIdentifiers),
     ).DataGrid());
+  }
+
+  Future<void> _scanTickets(SingleTableDataGrid dataGrid) async {
+    await TicketCodeHelper.showScanTicketCode(
+      context,
+      "Scan tickets".tr(),
+      formLink!
+    );
   }
 
   Future<void> _stornoTickets(SingleTableDataGrid dataGrid) async {

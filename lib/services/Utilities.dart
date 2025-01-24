@@ -18,6 +18,29 @@ class Utilities {
     return currencyFormatter.format(price); // Format the price as currency
   }
 
+  static bool isValidUrl(String link) {
+    // 1. Check if the link is empty
+    if (link.isEmpty) {
+      return false;
+    }
+
+    // 2. Define the regex pattern for validation
+    final String urlPattern = r'^[a-zA-Z0-9-_]+$';
+
+    // 3. Create a RegExp object and check for a match
+    final RegExp regex = RegExp(urlPattern);
+    return regex.hasMatch(link);
+  }
+
+  static String sanitizeUrl(String link) {
+    // Define the regex pattern for invalid characters
+    final RegExp invalidChars = RegExp(r'[^a-zA-Z0-9-_]');
+
+    // Replace all invalid characters with '_'
+    return link.replaceAll(invalidChars, '_');
+  }
+
+
 
 
   static int naturalCompare(String a, String b) {

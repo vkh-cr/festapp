@@ -365,5 +365,11 @@
   "Returned": "Vráceno",
   "History": "Historie",
   "Responses": "Odpovědi",
+  "Scan tickets": "Skenovat lístky",
+  "Copy": "Kopírovat",
+  "Link for tickets scan:": "Odkaz pro skenování lístků:",
+  "Generate New Code": "Generovat nový kód",
+  "Provide the following link or code to the people who will be checking the tickets.": "Předejte následující odkaz nebo kód lidem, kteří budou kontrolovat vstupenky.",
+  "By generating a new code, the old one will be replaced and will no longer work.": "Vygenerováním nového kódu bude starý nahrazen a již nebude fungovat.",
   "_": "_"
 }
