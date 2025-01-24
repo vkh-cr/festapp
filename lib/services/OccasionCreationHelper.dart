@@ -213,8 +213,7 @@ class OccasionCreationHelper {
     if (link.isEmpty) {
       return 'Link is required'.tr();
     }
-    final urlPattern = r'^[a-zA-Z0-9-_]+$';
-    final isValidFormat = RegExp(urlPattern).hasMatch(link);
+    final isValidFormat = Utilities.isValidUrl(link);
     if (!isValidFormat) {
       return 'Invalid characters'.tr();
     }

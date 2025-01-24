@@ -2,31 +2,24 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
-import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/VibrateService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-enum ScanState { signedIn, notSignedIn, nothing }
+enum ScanState { valid, invalid, used, nothing }
 
 @RoutePage()
 class ScanPage extends StatefulWidget {
   static const ROUTE = "scan";
-   int? id;
 
-   ScanPage({@pathParam this.id, Key? key}) : super(key: key);
+  String? scanCode;
+   ScanPage({@pathParam this.scanCode, super.key});
 
   @override
   _ScanPageState createState() => _ScanPageState();
@@ -48,6 +41,9 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+    if (widget.scanCode == null && context.routeData.pathParams.isNotEmpty) {
+      widget.scanCode = context.routeData.pathParams.getString("scanCode");
+    }
 
     if (kIsWeb) {
       MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl("https://unpkg.com/@zxing/library@0.21.3");
@@ -71,9 +67,9 @@ class _ScanPageState extends State<ScanPage> {
     }
 
     IconData icon;
-    if (_scanState == ScanState.signedIn) {
+    if (_scanState == ScanState.valid) {
       icon = Icons.check_circle;
-    } else if (_scanState == ScanState.notSignedIn) {
+    } else if (_scanState == ScanState.invalid) {
       icon = Icons.cancel;
     } else {
       return const SizedBox.shrink();
@@ -171,43 +167,46 @@ class _ScanPageState extends State<ScanPage> {
     );
   }
 
+  String? rightNowScanned;
   Future<void> setupNewId(String scannedId) async {
-    // if (scannedId == _scannedObject?.id) {
-    //   return;
-    // }
-
-    // _scannedUser = _participants?.singleWhereOrNull((p) => p.id == newUserId);
-    // if (_scannedUser != null) {
-    //   _scanState = ScanState.signedIn;
-    //   setState(() {});
-    //   VibrateService.vibrateOk();
-    //   return;
-    // }
-
-    _scannedObject ??= await DbEshop.getTicket(scannedId);
-    if (_scannedObject != null && (_scannedObject!.state == "sent" || _scannedObject!.state == "paid")) {
-      _scanState = ScanState.signedIn;
-      setState(() {});
-      VibrateService.vibrateOk();
+    if (scannedId == rightNowScanned) {
       return;
     }
-    else if (_scannedObject != null) {
-      _scanState = ScanState.notSignedIn;
+    rightNowScanned = scannedId;
+
+    _scannedObject = await DbEshop.scanTicket(scannedId, widget.scanCode!);
+    if (_scannedObject != null && (_scannedObject!.state == OrderModel.sentState || _scannedObject!.state == OrderModel.paidState)) {
+      _scanState = ScanState.valid;
+      VibrateService.vibrateOk();
+      setState(() {});
+      return;
+    }
+    else if (_scannedObject != null && (_scannedObject!.state == OrderModel.stornoState || _scannedObject!.state == OrderModel.orderedState)) {
+      _scanState = ScanState.invalid;
+      VibrateService.vibrateNotOk();
+      setState(() {});
+      return;
+    }
+    else if (_scannedObject != null && (_scannedObject!.state == OrderModel.usedState)) {
+      _scanState = ScanState.used;
       VibrateService.vibrateNotOk();
       setState(() {});
       return;
     }
     _scanState = ScanState.nothing;
+    setState(() {});
   }
 
   Color getResultColor(ScanState scannedState) {
     switch (scannedState) {
-      case ScanState.signedIn:
+      case ScanState.valid:
         return Colors.greenAccent;
-      case ScanState.nothing:
+      case ScanState.used:
         return Colors.blueAccent;
-      case ScanState.notSignedIn:
+      case ScanState.invalid:
         break;
+      case ScanState.nothing:
+        return ThemeConfig.backgroundColor(context);
     }
     return Colors.redAccent;
   }

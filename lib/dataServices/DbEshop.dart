@@ -418,13 +418,14 @@ class DbEshop {
     return List<Map<String, dynamic>>.from(data);
   }
 
-  static Future<TicketModel> getTicket(String scannedId) async {
-    final response = await _supabase.rpc('get_ticket', params: {
+  static Future<TicketModel?> scanTicket(String scannedId, String scannedCode) async {
+    final response = await _supabase.rpc('scan_ticket', params: {
       'scanned_id': scannedId,
+      'scanned_code': scannedCode,
     });
 
     if (response["code"] != 200) {
-      throw Exception("Error retrieving ticket: ${response["message"]}");
+      return null;
     }
 
     // Parse the returned ticket JSON data.
@@ -447,6 +448,39 @@ class DbEshop {
     }
 
     return ticket;
+  }
+
+  static Future<void> updateScanCode(String formLink, String scannedCode) async {
+    final response = await _supabase.rpc('update_scan_code', params: {
+      'form_link': formLink,
+      'new_scan_code': scannedCode,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Error retrieving ticket: ${response["message"]}");
+    }
+  }
+
+  static Future<void> updateTicketToUsed(int ticketId, String scannedCode) async {
+    final response = await _supabase.rpc('update_ticket_to_used', params: {
+      'ticket_id': ticketId,
+      'scan_code': scannedCode,
+    });
+
+    if (response["code"] != 200) {
+      throw Exception("Error retrieving ticket: ${response["message"]}");
+    }
+  }
+
+  static Future<String?> getScanCode(String formLink) async {
+    final response = await _supabase.rpc('get_scan_code', params: {
+      'form_link': formLink,
+    });
+
+    if (response["code"] != 200) {
+      return null;
+    }
+    return response["scan_code"];
   }
 
   static Future<List<FormFieldModel>> getAllFormFields(String formLink) async {
