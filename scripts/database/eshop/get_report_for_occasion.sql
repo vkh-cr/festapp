@@ -130,6 +130,7 @@ BEGIN
            E'Počet objednaných: ' || to_char(total_tickets_ordered, 'FM9999') || E'\n' ||
            E'Počet zaplacených: ' || to_char(total_tickets_paid, 'FM9999') || E'\n' ||
            E'Počet odeslaných: ' || to_char(total_tickets_sent, 'FM9999') || E'\n' ||
+           E'Počet využitých: ' || to_char(total_tickets_used, 'FM9999') || E'\n' ||
            E'Počet storno: ' || to_char(total_tickets_canceled, 'FM9999') || E'\n' ||
            E'===========\n' ||
            E'Počet objednávek celkem: ' || to_char(total_orders, 'FM9999') || E'\n' ||
