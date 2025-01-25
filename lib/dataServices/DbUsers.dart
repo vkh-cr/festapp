@@ -45,6 +45,17 @@ class DbUsers {
     return [];
   }
 
+  static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
+    var oc = RightsService.currentOccasion!;
+    var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
+        params: {"oc": RightsService.currentOccasion!});
+    if(result["code"] == 200) {
+      var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+      return t;
+    }
+    return [];
+  }
+
   static Future<void> updateUserInfo(OccasionUserModel data) async {
     await _supabase.rpc("update_user",
         params:

@@ -11,9 +11,11 @@ DECLARE
     occasionId bigint;
     is_open_bool BOOLEAN;
     occasion_user occasion_users%rowtype;
+    unit_user unit_users%rowtype;
     is_admin_bool BOOLEAN;
     occasion_link text;
     version_recommended text;
+    occasion_unit bigint;
 BEGIN
     -- Log the request details in log_app_config table
     INSERT INTO public.log_app_config (organization, platform)
@@ -55,7 +57,7 @@ BEGIN
     -- If no link or form_link is provided
     ELSE
         -- Get the default occasion from the organization
-        SELECT data->>'DEFAULT_OCCASION' INTO occasionId
+        SELECT (data->>'DEFAULT_OCCASION')::bigint INTO occasionId
         FROM organizations
         WHERE id = org_id;
 
@@ -98,13 +100,29 @@ BEGIN
     WHERE occasion = occasionId
       AND "user" = auth.uid();
 
+    -- Retrieve the unit ID from the occasions table
+    SELECT unit INTO occasion_unit
+    FROM occasions
+    WHERE id = occasionId;
+
+    -- Get the unit user record if it exists
+    SELECT * INTO unit_user
+    FROM unit_users
+    WHERE unit = occasion_unit
+      AND "user" = auth.uid();
+
     -- Check if the current user is an admin on the occasion
     is_admin_bool := get_is_admin_on_occasion(occasionId);
 
     -- If the occasion is not open, enforce access restrictions
     IF is_open_bool = FALSE THEN
         IF auth.uid() IS NULL OR (occasion_user IS NULL AND NOT is_admin_bool) THEN
-            RETURN json_build_object('code', 403, 'message', 'Access forbidden', 'link', occasion_link, 'version_recommended', version_recommended);
+            RETURN json_build_object(
+                'code', 403,
+                'message', 'Access forbidden',
+                'link', occasion_link,
+                'version_recommended', version_recommended
+            );
         END IF;
     END IF;
 
@@ -120,11 +138,20 @@ BEGIN
           AND "user" = auth.uid();
     END IF;
 
+    -- Retrieve unit_user again in case the user was added to the occasion and now belongs to a unit
+    IF unit_user IS NULL AND occasion_unit IS NOT NULL AND auth.uid() IS NOT NULL THEN
+        SELECT * INTO unit_user
+        FROM unit_users
+        WHERE unit = occasion_unit
+          AND "user" = auth.uid();
+    END IF;
+
     -- Return final response with all data and status code 200 at the end
     RETURN json_build_object(
         'code', 200,
         'is_admin', is_admin_bool,
         'occasion_user', COALESCE(row_to_json(occasion_user)::jsonb, NULL),
+        'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL),
         'link', occasion_link,
         'occasion', occasionId,
         'version_recommended', version_recommended

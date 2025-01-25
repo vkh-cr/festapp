@@ -9,7 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
   static final _supabase = Supabase.instance.client;
-  static OccasionUserModel? currentUserOccasion;
+  static OccasionUserModel? currentOccasionUser;
+  static OccasionUserModel? currentUnitUser;
   static int? currentOccasion;
   static String? currentLink;
   static bool? isAdminField;
@@ -57,7 +58,7 @@ class RightsService{
   }
 
   static bool canSignInOutUsersFromEvents() {
-    return currentUserOccasion?.isEditor??false;
+    return currentOccasionUser?.isEditor??false;
   }
 
   static bool isAdmin() {
@@ -65,14 +66,22 @@ class RightsService{
   }
 
   static bool isEditor() {
-    return currentUserOccasion?.isEditor??false;
+    return currentOccasionUser?.isEditor??false;
+  }
+
+  static bool isUnitEditor() {
+    return currentUnitUser?.isEditor??false;
   }
 
   static bool isManager() {
-    return currentUserOccasion?.isManager??false;
+    return currentOccasionUser?.isManager??false;
+  }
+
+  static bool isUnitManager() {
+    return currentUnitUser?.isManager??false;
   }
 
   static bool isApprover() {
-    return currentUserOccasion?.isApprover??false;
+    return currentOccasionUser?.isApprover??false;
   }
 }
