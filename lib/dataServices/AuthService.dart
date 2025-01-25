@@ -80,8 +80,8 @@ class AuthService {
   static Future<UserInfoModel> getFullUserInfo() async {
     var user = UserInfoModel();
     user.occasionUser = await DbUsers.getOccasionUser(AuthService.currentUserId());
-    if(RightsService.currentUserOccasion?.role != null) {
-      user.roleString = await getRoleInfo(RightsService.currentUserOccasion!.role!);
+    if(RightsService.currentOccasionUser?.role != null) {
+      user.roleString = await getRoleInfo(RightsService.currentOccasionUser!.role!);
     }
     user.userGroups = await DbGroups.getUserGroups();
     var eUserGroup = user.userGroups!.firstWhereOrNull((g)=>g.type == null);

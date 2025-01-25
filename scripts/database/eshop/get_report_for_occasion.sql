@@ -16,6 +16,7 @@ DECLARE
     canceled_orders INT;
     total_revenue NUMERIC;
     paid_revenue NUMERIC;
+    result_revenue NUMERIC;
     returned_revenue NUMERIC;
     remaining_balance NUMERIC;
 
@@ -82,6 +83,7 @@ BEGIN
 
     -- Calculate the remaining balance
     remaining_balance := total_revenue - paid_revenue;
+    result_revenue := paid_revenue + returned_revenue;
 
     -- Calculate the count of ordered products grouped by product type and product title,
     -- excluding orders with state 'storno' and 'ordered'
@@ -141,8 +143,9 @@ BEGIN
            product_type_section ||
            E'===========\n' ||
            E'Suma všech objednávek: ' || to_char(total_revenue, 'FM99999990.00') || E'\n' ||
-           E'Suma zaplacených částek: ' || to_char(paid_revenue, 'FM99999990.00') || E'\n' ||
+           E'Suma přijatých částek: ' || to_char(paid_revenue, 'FM99999990.00') || E'\n' ||
            E'Suma vrácených částek: ' || to_char(returned_revenue, 'FM99999990.00') || E'\n' ||
+           E'Výsledná částka: ' || to_char(result_revenue, 'FM99999990.00') || E'\n' ||
            E'Zbývající částka: ' || to_char(remaining_balance, 'FM99999990.00') || E'\n' ||
            E'===========';
 EXCEPTION
