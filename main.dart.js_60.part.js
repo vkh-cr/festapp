@@ -15,7 +15,7 @@ _.x=k
 _.z=l
 _.as=m
 _.at=n},
-ciQ(d){var x=C.e.dg(d),w=A.iA(x,null)
+ciS(d){var x=C.e.dg(d),w=A.iB(x,null)
 return w==null?A.ov(x):w}},D
 J=c[1]
 A=c[0]
@@ -40,7 +40,7 @@ t=A.bi(J.as(p.r))
 s=A.bi(J.as(p.w))
 r=A.bi(J.as(p.x))
 q=p.z
-return A.mn(A.y(["id",o,"created_at",x,"title",w,"description",v,"type",u,"required",t,"hidden",s,"is_ticket_field",r,"order",A.bi(q==null?0:q)],y.g,y.e),!1,y.b)},
+return A.mo(A.y(["id",o,"created_at",x,"title",w,"description",v,"type",u,"required",t,"hidden",s,"is_ticket_field",r,"order",A.bi(q==null?0:q)],y.g,y.e),!1,y.b)},
 fg(){var x=0,w=A.l(y.f)
 var $async$fg=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:return A.j(null,w)}})
@@ -54,8 +54,8 @@ return x==null?J.as(this.a):x},
 gbT(d){return this.a},
 gdK(d){return this.d}}
 var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.k4,A.iw)})()
-A.br(b.typeUniverse,JSON.parse('{"k4":{"iw":[]}}'))
+x(B.k4,A.ix)})()
+A.br(b.typeUniverse,JSON.parse('{"k4":{"ix":[]}}'))
 var y={e:A.w("fO"),g:A.w("e"),b:A.w("@"),f:A.w("~")};(function constants(){D.w9=new A.aD(null,12,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_60",e:"endPart",h:b})})($__dart_deferred_initializers__,"J1jC8iSNB2DQO8tMSn6FL3WqxuY=");
+a.eventLog.push({p:"main.dart.js_60",e:"endPart",h:b})})($__dart_deferred_initializers__,"NgVrCHB7SGs2kafNVOfTetWbHQ8=");
