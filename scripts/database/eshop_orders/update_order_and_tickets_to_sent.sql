@@ -6,11 +6,13 @@ BEGIN
     SET state = 'sent', updated_at = now()
     WHERE id = order_id;
 
-    -- Update the state of the tickets linked to the order and matching ticket_ids
+    -- Update the state of the tickets linked to the order and matching ticket_ids,
+    -- only if their current state is not 'used'
     UPDATE eshop.tickets
     SET state = 'sent', updated_at = now()
     WHERE id = ANY(ticket_ids)
-    AND id IN (SELECT ticket FROM eshop.order_product_ticket WHERE "order" = order_id);
+      AND id IN (SELECT ticket FROM eshop.order_product_ticket WHERE "order" = order_id)
+      AND state != 'used';
 
     -- Check if any rows were updated in the orders table
     IF NOT FOUND THEN

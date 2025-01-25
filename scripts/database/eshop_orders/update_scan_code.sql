@@ -8,6 +8,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
     occasion_id BIGINT;
+    occasions_hidden_id BIGINT;
 BEGIN
     -- 1. Retrieve occasion_id using form_link
     SELECT occasion
@@ -31,54 +32,28 @@ BEGIN
         );
     END IF;
 
-    -- 4. Update or create the scan_code within the features
-    UPDATE public.occasions
-    SET data =
-        CASE
-            -- Case 1: 'features' key exists
-            WHEN data ? 'features' THEN
-                CASE
-                    -- Subcase 1.1: 'scan' feature exists, update 'scan_code'
-                    WHEN EXISTS (
-                        SELECT 1
-                        FROM jsonb_array_elements(data->'features') AS feature
-                        WHERE feature->>'code' = 'scan'
-                    ) THEN
-                        jsonb_set(
-                            data,
-                            '{features}',
-                            (
-                                SELECT jsonb_agg(
-                                    CASE
-                                        WHEN feature->>'code' = 'scan' THEN
-                                            feature || jsonb_build_object('scan_code', new_scan_code)
-                                        ELSE
-                                            feature
-                                    END
-                                )
-                                FROM jsonb_array_elements(data->'features') AS feature
-                            ),
-                            false
-                        )
-                    -- Subcase 1.2: 'scan' feature does not exist, append it
-                    ELSE
-                        jsonb_set(
-                            data,
-                            '{features}',
-                            (data->'features') || jsonb_build_object('code', 'scan', 'scan_code', new_scan_code),
-                            false
-                        )
-                END
-            -- Case 2: 'features' key does not exist, create it with the 'scan' feature
-            ELSE
-                data || jsonb_build_object(
-                    'features',
-                    jsonb_build_array(
-                        jsonb_build_object('code', 'scan', 'scan_code', new_scan_code)
-                    )
-                )
-        END
-    WHERE id = occasion_id;
+    -- 4. Check if occasions_hidden exists for the occasion
+    SELECT o.occasion_hidden
+    INTO occasions_hidden_id
+    FROM public.occasions o
+    WHERE o.id = occasion_id;
+
+    IF occasions_hidden_id IS NOT NULL THEN
+        -- Update existing scan_code
+        UPDATE public.occasions_hidden
+        SET secret = new_scan_code
+        WHERE id = occasions_hidden_id;
+    ELSE
+        -- Insert new occasions_hidden record
+        INSERT INTO public.occasions_hidden (secret)
+        VALUES (new_scan_code)
+        RETURNING id INTO occasions_hidden_id;
+
+        -- Update the occasion to link to the new occasions_hidden
+        UPDATE public.occasions
+        SET occasion_hidden = occasions_hidden_id
+        WHERE id = occasion_id;
+    END IF;
 
     -- 5. Return a success message
     RETURN jsonb_build_object(

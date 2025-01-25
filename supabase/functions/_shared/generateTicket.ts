@@ -20,7 +20,7 @@ export async function fetchTicketResources(ticket: any) {
   // Fetch the occasion data.
   const { data: occasion, error: occasionError } = await supabaseAdmin
     .from("occasions")
-    .select("id, data")
+    .select("id, features")
     .eq("id", ticket.occasion)
     .single();
 
@@ -37,8 +37,8 @@ export async function fetchTicketResources(ticket: any) {
   // Define a reusable regex for 6-character hex colors.
   const hexColorRegex = /^[A-Fa-f0-9]{6}$/;
 
-  if (Array.isArray(occasion.data?.features)) {
-    const ticketFeature = occasion.data.features.find(
+  if (Array.isArray(occasion.features)) {
+    const ticketFeature = occasion.features.find(
       (feature: any) => feature.code === "ticket"
     );
     if (ticketFeature) {

@@ -10,7 +10,6 @@ DECLARE
     spot_json JSONB;
     order_id BIGINT;
     occasion_id BIGINT;
-    occasion_data JSONB;
     expected_scan_code TEXT;
 BEGIN
     -- 1. Check if the ticket exists
@@ -44,33 +43,31 @@ BEGIN
         RETURN jsonb_build_object('code', 404, 'message', 'Occasion for order not found');
     END IF;
 
-    -- 4. Retrieve the occasion data
-    SELECT data INTO occasion_data
-    FROM public.occasions
-    WHERE id = occasion_id
-    LIMIT 1;
-
-    IF occasion_data IS NULL THEN
-        RETURN jsonb_build_object('code', 404, 'message', 'Occasion data not found');
-    END IF;
-
-    -- 5. Extract the expected scan_code from the occasion's features
-    SELECT feature->>'scan_code'
+    -- 4. Retrieve the expected scan_code from the occasions_hidden table via the foreign key
+    SELECT oh.secret
       INTO expected_scan_code
-    FROM jsonb_array_elements(occasion_data->'features') AS feature
-    WHERE feature->>'code' = 'scan'
+    FROM public.occasions_hidden oh
+    JOIN public.occasions o ON o.occasion_hidden = oh.id
+    WHERE o.id = occasion_id
     LIMIT 1;
 
+    -- 4.a. Handle case where scan_code is not found
     IF expected_scan_code IS NULL THEN
-        RETURN jsonb_build_object('code', 400, 'message', 'Scan code not defined for occasion');
+        RETURN jsonb_build_object(
+            'code', 400,
+            'message', 'Scan code not defined for this occasion'
+        );
     END IF;
 
-    -- 6. Validate the scanned_code
+    -- 5. Validate the scanned_code
     IF scanned_code != expected_scan_code THEN
-        RETURN jsonb_build_object('code', 401, 'message', 'Scan code is not correct');
+        RETURN jsonb_build_object(
+            'code', 401,
+            'message', 'Scan code is not correct'
+        );
     END IF;
 
-    -- 7. Proceed with fetching order, products, and spot details
+    -- 6. Proceed with fetching order, products, and spot details
 
     -- Fetch the order details as JSON
     SELECT row_to_json(o)
@@ -106,7 +103,7 @@ BEGIN
     )
     LIMIT 1;
 
-    -- 8. Return the compiled JSONB response
+    -- 7. Return the compiled JSONB response
     RETURN jsonb_build_object(
         'code', 200,
         'ticket', row_to_json(ticket_row),
@@ -118,6 +115,9 @@ BEGIN
 EXCEPTION
     WHEN OTHERS THEN
         -- Handle unexpected errors gracefully
-        RETURN jsonb_build_object('code', 500, 'message', 'An unexpected error occurred: ' || SQLERRM);
+        RETURN jsonb_build_object(
+            'code', 500,
+            'message', 'An unexpected error occurred: ' || SQLERRM
+        );
 END;
 $$;
