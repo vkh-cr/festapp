@@ -111,7 +111,7 @@ class FormHelper {
   }
 
   // Retrieve form data by iterating over defined fields
-  static Map<String, dynamic> getDataFromForm(FormHolder formHolder) {
+  static Map<String, dynamic> getDataFromForm(FormHolder formHolder, [bool? returnWithType]) {
     Map<String, dynamic> toReturn = {};
     for (var k in formHolder.fields) {
       var value = getFieldData(formHolder.controller!.globalKey, k);
@@ -119,10 +119,18 @@ class FormHelper {
       if(k.fieldType == fieldTypeTicket){
         toReturn[fieldTypeTicket] = value;
       } else {
-        if(toReturn[metaFields] == null) {
-          toReturn[metaFields] = [];
+
+        if(returnWithType == true){
+          if(toReturn[metaFields] == null) {
+            toReturn[metaFields] = {};
+          }
+          toReturn[metaFields][k.fieldType] = value;
+        } else {
+          if(toReturn[metaFields] == null) {
+            toReturn[metaFields] = [];
+          }
+          toReturn[metaFields].add({ k.id.toString(): value });
         }
-        toReturn[metaFields].add({ k.id.toString(): value });
       }
     }
     return toReturn;
