@@ -30,12 +30,12 @@ class _SignupPageState extends State<SignupPage> {
   FormHolder? formHolder;
 
   List<FormFieldModel> entryForm = [
-    FormFieldModel(type: FormHelper.fieldTypeName, isRequired: true),
-    FormFieldModel(type: FormHelper.fieldTypeSurname, isRequired: true),
-    FormFieldModel(type: FormHelper.fieldTypeSex),
-    FormFieldModel(type: FormHelper.fieldTypeEmail, isRequired: true),
-    FormFieldModel(type: FormHelper.fieldTypeCity, isRequired: true),
-    FormFieldModel(type: FormHelper.fieldTypeBirthYear),
+    FormFieldModel(id: 1, type: FormHelper.fieldTypeName, isRequired: true),
+    FormFieldModel(id: 2, type: FormHelper.fieldTypeSurname, isRequired: true),
+    FormFieldModel(id: 3, type: FormHelper.fieldTypeSex),
+    FormFieldModel(id: 4, type: FormHelper.fieldTypeEmail, isRequired: true),
+    FormFieldModel(id: 5, type: FormHelper.fieldTypeCity, isRequired: true),
+    FormFieldModel(id: 6, type: FormHelper.fieldTypeBirthYear),
   ];
 
   final _formKey = GlobalKey<FormBuilderState>();
@@ -98,12 +98,12 @@ class _SignupPageState extends State<SignupPage> {
                           TextInput.finishAutofillContext();
                           if (_formKey.currentState?.saveAndValidate() ?? false) {
                             setState(() {
-                              _isLoading = true;
+                              //_isLoading = true;
                             });
-                            var data = FormHelper.getDataFromForm(formHolder!);
-                            fieldsData = data;
+                            var data = FormHelper.getDataFromForm(formHolder!, true);
+                            fieldsData = Map<String, dynamic>.from(data[FormHelper.metaFields]);
                             fieldsData![AuthService.metaLang] = EasyLocalization.of(context)?.locale.toString();
-                            var resp = await AuthService.register(data);
+                            var resp = await AuthService.register(fieldsData!);
                             if (resp["code"] == 200) {
                               ToastHelper.Show(context, "Registration is almost complete!".tr());
                               setState(() {
