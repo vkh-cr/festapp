@@ -33,7 +33,7 @@ class DbCompanions {
     await _supabase.rpc("create_companion_in_organization", params: {
       'org': AppConfig.organization,
       'oc': RightsService.currentOccasion,
-      'usr': RightsService.currentUserOccasion!.user!,
+      'usr': RightsService.currentOccasionUser!.user!,
       'c_name': name,
     });
   }

@@ -73,7 +73,7 @@ class _UsersTabState extends State<UsersTab> {
             areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
           DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0), isEnabled: RightsService.canUpdateUsers),
-          if(RightsService.isAdmin())
+          if(RightsService.isManager())
           DataGridAction(name: "Add existing".tr(), action: (SingleTableDataGrid p0, [_]) => _addExisting(p0)),
           DataGridAction(name: "Invite".tr(), action: (SingleTableDataGrid p0, [_]) => _invite(p0), isEnabled: RightsService.canUpdateUsers),
           DataGridAction(name: "Change password".tr(), action: (SingleTableDataGrid p0, [_]) => _setPassword(p0), isEnabled: RightsService.canUpdateUsers),
@@ -108,8 +108,8 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   Future<void> _addExisting(SingleTableDataGrid dataGrid) async {
-    if (_allUsers == null) return;
-    var nonAdded = _allUsers!.where((u) => !_getCheckedUsers(dataGrid).any((cu) => cu.user == u.id)).toList();
+    var existing = await DbUsers.getAllUsersBasicsForUnit();
+    var nonAdded = existing.where((u) => !_allUsers!.any((cu) => cu.id == u.id)).toList();
     DialogHelper.chooseUser(context, (chosenUser) async {
       if (chosenUser != null) {
         await DbUsers.addUserToOccasion(chosenUser.id, RightsService.currentOccasion!);
