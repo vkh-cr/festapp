@@ -168,16 +168,7 @@ class DbNews {
     if (AuthService.isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
-    var data = await _supabase
-        .from(Tb.news.table)
-        .select(
-            "${Tb.news.id},"
-            "${Tb.news.created_at},"
-            "${Tb.news.message},"
-            "${Tb.user_info_public.table}(${Tb.user_info_public.name},${Tb.user_info_public.surname}),"
-            "${Tb.user_news_views.table}(count)")
-        .eq(Tb.news.occasion, RightsService.currentOccasion!)
-        .order(Tb.news.created_at);
+    var data = await _supabase.rpc("get_news_with_views", params: {"oc":RightsService.currentOccasion!});
 
     List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
 

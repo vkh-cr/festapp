@@ -29,18 +29,12 @@ class NewsModel {
   };
 
   factory NewsModel.fromJson(Map<String, dynamic> json) {
-    int views = (json.containsKey(Tb.user_info_public.table) && json[Tb.user_news_views.table].isNotEmpty) ? json[Tb.user_news_views.table][0]["count"] : 0;
-    views = json.containsKey(NewsModel.viewsColumn) ? json[NewsModel.viewsColumn] : views;
-    var name = json.containsKey(Tb.user_info_public.table) ?
-      json[Tb.user_info_public.table][Tb.user_info_public.name] : null;
-    name = json.containsKey(Tb.news.created_by) ? json[Tb.news.created_by] : name;
-
     return NewsModel(
       id: json[Tb.news.id],
       createdAt: json.containsKey(Tb.news.created_at) ? DateTime.parse(json[Tb.news.created_at]) : null,
-      message: json.containsKey(Tb.news.message) ? json[Tb.news.message] : null,
-      createdBy: name,
-      views: views
+      message: json[Tb.news.message],
+      createdBy: json[Tb.user_info_public.name],
+      views: json[NewsModel.viewsColumn]
     );
   }
 }
