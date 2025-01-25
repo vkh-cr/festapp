@@ -14,12 +14,12 @@ _.d=e
 _.e=f
 _.fr=g
 _.a=h},
-bCw:function bCw(d,e,f,g){var _=this
+bCv:function bCv(d,e,f,g){var _=this
 _.a=d
 _.b=e
 _.c=f
 _.d=g},
-bCv:function bCv(d,e){this.a=d
+bCu:function bCu(d,e){this.a=d
 this.b=e},
 aLx:function aLx(d){this.a=d},
 aFq:function aFq(d){this.a=d},
@@ -96,7 +96,7 @@ _.db=!1
 _.dx=null
 _.dy=!0
 _.fr=null},
-bYW:function bYW(d,e){this.a=d
+bYV:function bYV(d,e){this.a=d
 this.b=e},
 aPQ:function aPQ(){},
 aQw:function aQw(){},
@@ -107,22 +107,22 @@ _.f=_.e=_.d=!1
 _.r=!0
 _.w=!1
 _.c=_.a=_.y=_.x=null},
-c0Y:function c0Y(d){this.a=d},
-c0Z:function c0Z(d,e,f,g,h){var _=this
+c0X:function c0X(d){this.a=d},
+c0Y:function c0Y(d,e,f,g,h){var _=this
 _.a=d
 _.b=e
 _.c=f
 _.d=g
 _.e=h},
-c0X:function c0X(d){this.a=d},
-c0R:function c0R(d,e){this.a=d
-this.b=e},
-c0T:function c0T(d){this.a=d},
-c0U:function c0U(d,e){this.a=d
-this.b=e},
-c0V:function c0V(d){this.a=d},
-c0S:function c0S(d){this.a=d},
 c0W:function c0W(d){this.a=d},
+c0Q:function c0Q(d,e){this.a=d
+this.b=e},
+c0S:function c0S(d){this.a=d},
+c0T:function c0T(d,e){this.a=d
+this.b=e},
+c0U:function c0U(d){this.a=d},
+c0R:function c0R(d){this.a=d},
+c0V:function c0V(d){this.a=d},
 b2u(d){return B.cHt(d)},
 cHt(d){var x=0,w=A.l(y.P),v,u,t,s
 var $async$b2u=A.h(function(e,f){if(e===1)return A.i(f,w)
@@ -132,9 +132,9 @@ t.a=null
 x=3
 return A.c(W.crG(d,new B.b2v(),s,A.C("Choose language",null),new B.b2w(t),null,null,!1,y._),$async$b2u)
 case 3:u=t.a
-if(u!=null){B.cdk(d,u.a)
+if(u!=null){B.cdj(d,u.a)
 u=y.N
-A.bT(d,A.C("Language was set to {language}.",A.y(["language",t.a.b],u,u)),C.ah)}v=t.a
+A.bS(d,A.C("Language was set to {language}.",A.y(["language",t.a.b],u,u)),C.af)}v=t.a
 x=1
 break
 case 1:return A.j(v,w)}})
@@ -153,13 +153,13 @@ x=1
 break
 case 1:return A.j(v,w)}})
 return A.k($async$aST,w)},
-cdk(d,e){var x=0,w=A.l(y.H),v
-var $async$cdk=A.h(function(f,g){if(f===1)return A.i(g,w)
+cdj(d,e){var x=0,w=A.l(y.H),v
+var $async$cdj=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:v=d.ad(y.g).tX(e)
 x=1
 break
 case 1:return A.j(v,w)}})
-return A.k($async$cdk,w)},
+return A.k($async$cdj,w)},
 blj(){var x=0,w=A.l(y.y),v,u,t
 var $async$blj=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:$.ww()
@@ -290,7 +290,7 @@ return new A.bp(w==null?e.ax.k3.O(0.12):w,x,C.F,-1)}},
 A(d){var x,w,v=A.J(d)
 d.ad(y.a)
 x=A.J(d)
-w=A.xK(3,new B.bCw(this,d.ad(y.I).w,x.jY,v),!0,y.l)
+w=A.xK(3,new B.bCv(this,d.ad(y.I).w,x.jY,v),!0,y.l)
 return new A.NN(A.b5(w,C.c_,C.h,C.a8,null),null)}}
 B.aLx.prototype={
 a0(d){var x=this.a
@@ -677,7 +677,7 @@ switch(w.ae.a){case 0:x=new A.n(e.a,w.G$.gB(0).b/2)
 break
 case 1:x=new A.n(w.G$.gB(0).a/2,e.b)
 break
-default:x=null}return d.Mf(new B.bYW(w,x),x,A.biX(x))}}
+default:x=null}return d.Mf(new B.bYV(w,x),x,A.biX(x))}}
 B.aPQ.prototype={}
 B.aQw.prototype={}
 B.CV.prototype={
@@ -692,24 +692,24 @@ return A.c(B.blj(),$async$pG)
 case 2:s=e
 r=v.c.ad(y.g).r.a
 r===$&&A.b()
-u=C.b.kz(A.afQ(),new B.c0Y(r))
+u=C.b.kz(A.afQ(),new B.c0X(r))
 t=$.rC().b.e
 q=B
 x=3
 return A.c(B.aST(),$async$pG)
-case 3:v.E(new q.c0Z(v,e,s,u,t))
+case 3:v.E(new q.c0Y(v,e,s,u,t))
 return A.j(null,w)}})
 return A.k($async$pG,w)},
 wB(){var x=0,w=A.l(y.H),v=this,u
 var $async$wB=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:try{if($.rC().a)self.promptInstall()
-else A.a0("This platform or browser does not support the PWA install prompt")}catch(t){v.E(new B.c0X(v))}x=2
+else A.a0("This platform or browser does not support the PWA install prompt")}catch(t){v.E(new B.c0W(v))}x=2
 return A.c(v.pG(),$async$wB)
 case 2:return A.j(null,w)}})
 return A.k($async$wB,w)},
-a5w(d){this.E(new B.c0R(this,d))},
+a5w(d){this.E(new B.c0Q(this,d))},
 A(d){var x,w,v,u,t,s=this,r=null,q=E.bj(D.b2z,r)
-q=P.jZ(r,!0,r,r,r,r,r,Q.ql(new B.c0T(d)),r,q)
+q=P.jZ(r,!0,r,r,r,r,r,Q.ql(new B.c0S(d)),r,q)
 x=y.p
 w=A.a([],x)
 if(A.afQ().length>1){v=E.bj(D.b37,r)
@@ -717,17 +717,17 @@ u=s.x
 u=u==null?r:u.b
 if(u==null)u="---"
 t=y.N
-C.b.F(w,A.a([v,I.aR,A.b5(A.a([A.a4(A.C("Current Language: {language}",A.y(["language",u],t,t)),r,r,r,r,r,r,r,D.a3u,r,r,r,r,r),K.cH(r,r,r,r,r,D.alu,r,r,r,new B.c0U(s,d),r,r,r,r,r)],x),C.j,C.cB,C.l,r),H.lb],x))}A.aTR()
-v=A.a([E.bj(D.b2T,r),I.aR,A.b5(A.a([E.bj(D.b2O,r),M.cgo(r,r,r,!1,C.w,r,r,r,r,r,r,new B.c0V(s),r,r,r,r,r,r,r,r,s.d)],x),C.j,C.cB,C.l,r)],x)
-if(s.w)v.push(new A.ab(F.mk,E.bj(D.b2V,r),r))
+C.b.F(w,A.a([v,I.aR,A.b5(A.a([A.a4(A.C("Current Language: {language}",A.y(["language",u],t,t)),r,r,r,r,r,r,r,D.a3u,r,r,r,r,r),K.cH(r,r,r,r,r,D.alu,r,r,r,new B.c0T(s,d),r,r,r,r,r)],x),C.j,C.cB,C.l,r),H.lb],x))}A.aTR()
+v=A.a([E.bj(D.b2T,r),I.aR,A.b5(A.a([E.bj(D.b2O,r),M.cgo(r,r,r,!1,C.w,r,r,r,r,r,r,new B.c0U(s),r,r,r,r,r,r,r,r,s.d)],x),C.j,C.cB,C.l,r)],x)
+if(s.w)v.push(new A.ab(F.mj,E.bj(D.b2V,r),r))
 C.b.F(w,v)
 w.push(H.lb)
 w.push(E.bj(D.b3e,r))
 w.push(I.aR)
 v=s.y
-v=A.a([v===C.nM,v===C.jy,v===C.lA],y.u)
+v=A.a([v===C.nM,v===C.jy,v===C.lz],y.u)
 u=A.dG(8)
-w.push(new B.azz(A.a([new A.ab(new A.ap(12,0,12,0),E.bj(D.b2p,r),r),new A.ab(new A.ap(12,0,12,0),E.bj(A.a4("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.ab(new A.ap(12,0,12,0),E.bj(A.a4("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),v,new B.c0W(s),u,r))
+w.push(new B.azz(A.a([new A.ab(new A.ap(12,0,12,0),E.bj(D.b2p,r),r),new A.ab(new A.ap(12,0,12,0),E.bj(A.a4("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.ab(new A.ap(12,0,12,0),E.bj(A.a4("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),v,new B.c0V(s),u,r))
 w.push(H.lb)
 u=A.C("Install App",r)
 v=!s.e
@@ -735,12 +735,12 @@ t=v&&s.r&&s.f?s.ga9S():r
 if(v&&s.r&&s.f)v=A.J(d).ax.a===C.y?$.fy():C.r
 else v=C.cp
 x=A.a([T.EN(v,d,50,!0,u,t,A.J(d).ax.a===C.y?$.jw():C.m,250)],x)
-if(!s.r)x.push(new A.ab(F.mk,E.bj(D.b2Y,r),r))
-if(s.e||!s.f)x.push(new A.ab(F.mk,E.bj(A.a4("The app is already installed.",r,r,r,r,r,r,r,A.b9(r,r,A.J(d).ax.a===C.y?$.fy():C.r,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.bp,r,r,r,r),r),r))
+if(!s.r)x.push(new A.ab(F.mj,E.bj(D.b2Y,r),r))
+if(s.e||!s.f)x.push(new A.ab(F.mj,E.bj(A.a4("The app is already installed.",r,r,r,r,r,r,r,A.ba(r,r,A.J(d).ax.a===C.y?$.fy():C.r,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.bp,r,r,r,r),r),r))
 w.push(A.cg(A.aR(x,C.j,C.h,C.l,r,C.u),r,r))
 return K.fx(q,r,new A.cx(C.aN,r,r,new A.ab(O.bW,new A.d2(new A.aa(0,820,0,1/0),A.aR(w,C.ak,C.h,C.l,r,C.u),r),r),r),r,r,r,r)}}
 var z=a.updateTypes(["I(I)","Q<~>()"])
-B.bCw.prototype={
+B.bCv.prototype={
 $1(a2){var x,w,v,u,t,s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=h.a,e=h.b,d=h.c,a0=f.b_y(a2,3,e,d),a1=f.b_j(a2,3,e,d)
 e=h.d
 x=f.b_S(a2,e,d)
@@ -770,22 +770,22 @@ break
 default:l=g}s=y.q
 k=t[a2]
 j=y.s
-d=A.A_(C.I,C.M,g,new A.bF(r,s),C.ln,!0,g,g,new A.bF(q,s),new A.bF(q,s),X.nE,new A.bF(m,j),new A.bF(n,j),new A.bF(g,y.Q),new B.aOj(k,!k,e.ax,d.r,d.w,d.y,d.x),D.b6l,g,D.b6i,g,C.o_,g,C.vq,new A.bF(p.d4(q),y.e),C.jr)
-i=new B.aMc(x,w,v,a0,a2===0,a2===2,C.a9,C.u,N.EX(a1,A.dD(!1,f.c[a2],g,g,C.E,g,g,g,g,new B.bCv(f,a2),g,d),C.bV),g)
+d=A.A_(C.I,C.M,g,new A.bF(r,s),C.lm,!0,g,g,new A.bF(q,s),new A.bF(q,s),X.nE,new A.bF(m,j),new A.bF(n,j),new A.bF(g,y.Q),new B.aOj(k,!k,e.ax,d.r,d.w,d.y,d.x),D.b6l,g,D.b6i,g,C.o_,g,C.vq,new A.bF(p.d4(q),y.e),C.jr)
+i=new B.aMc(x,w,v,a0,a2===0,a2===2,C.a9,C.u,N.EX(a1,A.dD(!1,f.c[a2],g,g,C.E,g,g,g,g,new B.bCu(f,a2),g,d),C.bV),g)
 if(!u)i=A.cg(i,g,g)
 f=t[a2]
 return new A.tq(new A.bV(A.ca(g,g,g,g,g,g,f,g,g,g,!0,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g),!0,!1,!1,!1,new B.aHF(l,C.a9,i,g),g),g)},
 $S:884}
-B.bCv.prototype={
+B.bCu.prototype={
 $0(){this.a.e.$1(this.b)},
 $S:0}
-B.bYW.prototype={
+B.bYV.prototype={
 $2(d,e){return this.a.G$.f4(d,this.b)},
 $S:23}
-B.c0Y.prototype={
+B.c0X.prototype={
 $1(d){return d.a.gfI(0)===this.a.gfI(0)},
 $S:885}
-B.c0Z.prototype={
+B.c0Y.prototype={
 $0(){var x=this,w=x.a
 w.y=x.b
 w.d=x.c
@@ -793,10 +793,10 @@ w.x=x.d
 w.e=x.e
 w.f=!0},
 $S:0}
-B.c0X.prototype={
+B.c0W.prototype={
 $0(){this.a.r=!1},
 $S:0}
-B.c0R.prototype={
+B.c0Q.prototype={
 $0(){var x=this.a,w=this.b
 x.y=w
 x=x.c
@@ -805,10 +805,10 @@ x=x.qR(y.t)
 x.toString
 y.L.a(x).aJ6(w)},
 $S:0}
-B.c0T.prototype={
+B.c0S.prototype={
 $0(){return U.awq(this.a)},
 $S:0}
-B.c0U.prototype={
+B.c0T.prototype={
 $0(){var x=0,w=A.l(y.H),v=this
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
@@ -818,7 +818,7 @@ return A.c(v.a.pG(),$async$$0)
 case 3:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
-B.c0V.prototype={
+B.c0U.prototype={
 $1(d){return this.aF0(d)},
 aF0(d){var x=0,w=A.l(y.H),v=this,u,t
 var $async$$1=A.h(function(e,f){if(e===1)return A.i(f,w)
@@ -833,18 +833,18 @@ case 4:x=6
 return A.c(B.asA(),$async$$1)
 case 6:u=!0
 case 3:if(!u){t=v.a
-t.E(new B.c0S(t))}x=7
+t.E(new B.c0R(t))}x=7
 return A.c(v.a.pG(),$async$$1)
 case 7:return A.j(null,w)}})
 return A.k($async$$1,w)},
 $S:886}
-B.c0S.prototype={
+B.c0R.prototype={
 $0(){this.a.w=!0},
 $S:0}
-B.c0W.prototype={
+B.c0V.prototype={
 $1(d){if(d===0)this.a.a5w(C.nM)
 else if(d===1)this.a.a5w(C.jy)
-else if(d===2)this.a.a5w(C.lA)},
+else if(d===2)this.a.a5w(C.lz)},
 $S:18}
 B.b2v.prototype={
 $3(d,e,f){var x,w=null
@@ -868,14 +868,14 @@ x(v,"gcM","c1",0)
 x(v,"gd_","c9",0)
 w(B.abk.prototype,"ga9S","wB",1)})();(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
 w(B.azz,A.a5)
-v(A.bH,[B.bCw,B.c0Y,B.c0V,B.c0W,B.b2v,B.b2w])
-v(A.cf,[B.bCv,B.c0Z,B.c0X,B.c0R,B.c0T,B.c0U,B.c0S])
+v(A.bH,[B.bCv,B.c0X,B.c0U,B.c0V,B.b2v,B.b2w])
+v(A.cf,[B.bCu,B.c0Y,B.c0W,B.c0Q,B.c0S,B.c0T,B.c0R])
 v(L.df,[B.aQw,B.aPQ,B.aOj])
 w(B.aLx,B.aQw)
 w(B.aFq,B.aPQ)
 v(A.bb,[B.aMc,B.aHF])
 v(A.pQ,[B.ab6,B.aau])
-w(B.bYW,A.dg)
+w(B.bYV,A.dg)
 w(B.CV,A.G)
 w(B.abk,A.K)
 x(B.aPQ,A.bl)
@@ -889,12 +889,12 @@ D.a3u=new A.Y(!0,null,null,null,null,null,16,null,null,null,null,null,null,null,
 D.b2p=new A.c6("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2z=new A.c6("Settings",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2O=new A.c6("Enable Notifications",null,D.a3u,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b2T=new A.c6("Notification Settings",null,G.lj,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b2T=new A.c6("Notification Settings",null,G.li,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2V=new A.c6("Failed to enable notifications.",null,F.CV,null,C.bp,null,null,null,null,null,null,null,null,null,null)
 D.b2Y=new A.c6("This platform or browser does not support the PWA install prompt or the app is already installed.",null,F.CV,null,C.bp,null,null,null,null,null,null,null,null,null,null)
-D.b37=new A.c6("Language Settings",null,G.lj,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b3e=new A.c6("Appearance",null,G.lj,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b37=new A.c6("Language Settings",null,G.li,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b3e=new A.c6("Appearance",null,G.li,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b6i=new A.bF(C.i5,A.w("bF<fZ>"))
 D.b6l=new A.bF(C.W,A.w("bF<f6>"))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_93",e:"endPart",h:b})})($__dart_deferred_initializers__,"F5rcM9PMWKIMfX3wXC2UPXyUXKc=");
+a.eventLog.push({p:"main.dart.js_93",e:"endPart",h:b})})($__dart_deferred_initializers__,"SQBs3STy+V9WzSAVwDIEI4XMggM=");

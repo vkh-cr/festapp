@@ -70,7 +70,7 @@ l=J
 x=7
 return A.c(u.cl("occasion",r).rd(0,"start_time",!0).rd(0,"max_participants",!1),$async$Fd)
 case 7:o.F(n,m.b4(l.cd(f,new B.b0B(),q),!0,p))
-x=E.cd8()?8:9
+x=E.cd7()?8:9
 break
 case 8:u=s.bW("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cl("is_group_event",!0).cl("is_hidden",!1)
 s=$.dA
@@ -198,4 +198,4 @@ x(A.bH,[B.b0K,B.b0L,B.b0M,B.b0Q,B.b0B,B.b0C,B.b0D,B.b0U,B.b0V,B.b0T])
 w(B.b0W,A.dg)})()
 var y={u:A.w("ds"),F:A.w("p<ds>"),c:A.w("A<ds>"),p:A.w("e4"),b:A.w("@"),v:A.w("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"LNVT7Nou2qWDanGzVtzSHkbuPZc=");
+a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"3HI6xAzC6ZtdekRtrgA5e0Ifa6s=");

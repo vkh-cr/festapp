@@ -14,8 +14,8 @@ _.a=g},
 aIv:function aIv(){var _=this
 _.d=$
 _.c=_.a=_.f=_.e=null},
-bVR:function bVR(d){this.a=d},
-bVQ:function bVQ(d,e){this.a=d
+bVQ:function bVQ(d){this.a=d},
+bVP:function bVP(d,e){this.a=d
 this.b=e},
 aQ9:function aQ9(){},
 cpL(d,e){var x=null,w=d===C.agx?250:0
@@ -44,7 +44,7 @@ _.e=h
 _.f=i
 _.r=j
 _.w=k},
-bxX:function bxX(d,e,f,g,h,i,j,k){var _=this
+bxW:function bxW(d,e,f,g,h,i,j,k){var _=this
 _.a=d
 _.b=e
 _.c=f
@@ -53,7 +53,7 @@ _.e=h
 _.f=i
 _.r=j
 _.w=k},
-bxY:function bxY(){},
+bxX:function bxX(){},
 coW(d){var x,w=A.V(d),v=new J.dN(d,d.length,w.h("dN<1>"))
 if(v.q()){x=v.d
 return x==null?w.c.a(x):x}return null},
@@ -85,7 +85,7 @@ this.d=x
 w=x}return w},
 b99(d,e){this.a.toString
 return},
-A(d){return new E.j3(this.gtc(0),new B.bVR(this),null,null,y.i)},
+A(d){return new E.j3(this.gtc(0),new B.bVQ(this),null,null,y.i)},
 Z(){var x,w=this
 w.a.toString
 $.aq.ea$.push(w)
@@ -127,7 +127,7 @@ var $async$kb=A.h(function(e,f){if(e===1){t=f
 x=u}while(true)switch(x){case 0:if(s.db)throw A.f(C.aLK)
 if(s.a.e){x=1
 break}r=D.xV
-q=new B.bxX(r,null,s.y,s.z,s.as,!1,!1,!1)
+q=new B.bxW(r,null,s.y,s.z,s.as,!1,!1,!1)
 u=4
 s.bi2()
 x=7
@@ -187,24 +187,24 @@ brI(d){var x=null
 return this.MY(x,x,x,x,x,x,d,x)},
 brY(d,e){var x=null
 return this.MY(x,x,x,x,d,x,e,x)}}
-B.bxX.prototype={
+B.bxW.prototype={
 fc(){var x,w,v=this,u=A.F(y.g,y.a)
 u.m(0,"facing",v.a.c)
 x=v.e
 if(x.length!==0){w=A.V(x).h("O<1,r>")
-u.m(0,"formats",A.H(new A.O(x,new B.bxY(),w),!0,w.h("a9.E")))}u.m(0,"returnImage",!1)
+u.m(0,"formats",A.H(new A.O(x,new B.bxX(),w),!0,w.h("a9.E")))}u.m(0,"returnImage",!1)
 u.m(0,"speed",v.c.c)
 u.m(0,"timeout",v.d)
 u.m(0,"torch",!1)
 u.m(0,"useNewCameraSelector",!1)
 return u}}
 var z=a.updateTypes(["d(M,BD,d?)","Q<~>()","~(B,dB)"])
-B.bVR.prototype={
+B.bVQ.prototype={
 $3(d,e,f){if(!e.d){this.a.a.toString
 return C.afr}if(e.c!=null){this.a.a.toString
-return C.afs}return new A.iz(new B.bVQ(this.a,e),null)},
+return C.afs}return new A.iz(new B.bVP(this.a,e),null)},
 $S:z+0}
-B.bVQ.prototype={
+B.bVP.prototype={
 $2(d,e){var x,w,v,u=this.a,t=this.b
 u.b99(t,e)
 u=u.a
@@ -235,7 +235,7 @@ $1(d){var x=this.a
 if(x.db)return
 x.sn(0,x.a.brK(d))},
 $S:121}
-B.bxY.prototype={
+B.bxX.prototype={
 $1(d){return d.c},
 $S:942};(function installTearOffs(){var x=a._static_2,w=a._instance_0u
 x(B,"d2p","cLZ",2)
@@ -244,17 +244,17 @@ w(B.akS,A.e5)
 w(B.a_I,A.G)
 w(B.aQ9,A.K)
 w(B.aIv,B.aQ9)
-v(A.bH,[B.bVR,B.bjV,B.bjW,B.bjX,B.bjY,B.bxY])
-w(B.bVQ,A.dg)
+v(A.bH,[B.bVQ,B.bjV,B.bjW,B.bjX,B.bjY,B.bxX])
+w(B.bVP,A.dg)
 w(B.a_L,A.bQ)
-v(A.B,[B.BD,B.bxX])
+v(A.B,[B.BD,B.bxW])
 x(B.aQ9,A.ex)})()
 A.br(b.typeUniverse,JSON.parse('{"a_I":{"G":[],"d":[]},"aIv":{"K":["a_I"],"ex":[]},"a_L":{"bQ":["BD"],"am":[]}}'))
 var y={g:A.w("e"),i:A.w("j3<BD>"),n:A.w("ey<lf>"),a:A.w("B?"),f:A.w("~")};(function constants(){var x=a.makeConstList
-C.afr=new A.mU(D.r,null,null)
+C.afr=new A.mV(D.r,null,null)
 C.alo=new A.em(F.zc,null,D.m,null,null)
 C.abv=new A.lj(D.I,null,null,C.alo,null)
-C.afs=new A.mU(D.r,C.abv,null)
+C.afs=new A.mV(D.r,C.abv,null)
 C.GF=new B.akS(0,0,"noDuplicates")
 C.agx=new B.akS(1,1,"normal")
 C.H2=new A.ap(0,24,0,12)
@@ -271,4 +271,4 @@ C.aLD=new A.vr(null,"The MobileScannerController was used after it has been disp
 C.aLK=new A.pz(C.aLx,C.aLD)
 C.a3p=new A.Y(!0,D.r,null,null,null,null,16,D.aq,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_200",e:"endPart",h:b})})($__dart_deferred_initializers__,"RCHDB09imU9v40vbjDFVbQmReaY=");
+a.eventLog.push({p:"main.dart.js_200",e:"endPart",h:b})})($__dart_deferred_initializers__,"SlePyXd4XU9iwvk0T4XLH+3AaFs=");
