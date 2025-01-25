@@ -34,11 +34,12 @@ BEGIN
         );
     END IF;
 
-    -- 3. Retrieve Expected Scan Code from Occasion's Features
-    SELECT feature->>'scan_code'
+    -- 3. Retrieve Expected Scan Code from occasions_hidden via foreign key
+    SELECT oh.secret
     INTO expected_scan_code
-    FROM jsonb_array_elements((SELECT data->'features' FROM public.occasions WHERE id = occasion_id)) AS feature
-    WHERE feature->>'code' = 'scan'
+    FROM public.occasions_hidden oh
+    JOIN public.occasions o ON o.occasion_hidden = oh.id
+    WHERE o.id = occasion_id
     LIMIT 1;
 
     -- Check if scan_code is defined

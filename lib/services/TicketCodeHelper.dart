@@ -5,6 +5,7 @@ import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
 import 'package:fstapp/pages/ScanPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'dart:math';
 import 'package:fstapp/widgets/HtmlView.dart';
 
@@ -35,29 +36,39 @@ class TicketCodeHelper {
     String linkBase = "${AppConfig.webLink}/#/${ScanPage.ROUTE}/";
     String fullLink = linkBase + generatedCode;
 
+    // Add the htmlLink field here
+    String htmlLink = '<a href="$fullLink">$fullLink</a>';
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             Future<void> handleGenerateCode() async {
-              bool confirm = await DialogHelper.showConfirmationDialogAsync(context, titleMessage, "By generating a new code, the old one will be replaced and will no longer work.".tr());
+              bool confirm = await DialogHelper.showConfirmationDialogAsync(
+                  context,
+                  titleMessage,
+                  "By generating a new code, the old one will be replaced and will no longer work.".tr()
+              );
               if (confirm) {
                 String newCode = generateRandomCode(5);
                 await DbEshop.updateScanCode(formLink, newCode);
                 setState(() {
                   generatedCode = newCode;
                   fullLink = "$linkBase$newCode";
+                  htmlLink = '<a href="$fullLink">$fullLink</a>'; // Update htmlLink
                 });
               }
             }
 
             void handleCopyCode() {
               Clipboard.setData(ClipboardData(text: generatedCode));
+              ToastHelper.Show(context, "Copied to clipboard".tr());
             }
 
             void handleCopyLink() {
               Clipboard.setData(ClipboardData(text: fullLink));
+              ToastHelper.Show(context, "Copied to clipboard".tr());
             }
 
             return AlertDialog(
@@ -88,15 +99,10 @@ class TicketCodeHelper {
                       Row(
                         children: [
                           Expanded(
-                            child: SelectableText(
-                              fullLink.isNotEmpty
-                                  ? fullLink
-                                  : '',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.blue,
-                                decoration: TextDecoration.underline,
-                              ),
+                            child: HtmlView(
+                              html: htmlLink, // Use htmlLink instead of fullLink
+                              fontSize: 14,
+                              isSelectable: true,
                             ),
                           ),
                           IconButton(

@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
     // Fetch occasion data for the email template
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
-      .select("organization, title")
+      .select("organization, title, features")
       .eq("id", occasionId)
       .single();
 
@@ -140,21 +140,39 @@ Deno.serve(async (req) => {
     }
 
     const occasionTitle = occasionData.title;
+    const features = occasionData.features;
 
-    // Fetch the tickets
-    let { data: tickets, error: ticketsError } = await supabaseAdmin.rpc(
-      "get_tickets_with_details",
-      {
-        order_id: orderId,
+    // Determine if ticket feature is enabled
+    const ticketFeature = features.find((feature: any) => feature.code === "ticket");
+    const isTicketEnabled = ticketFeature?.is_enabled ?? false;
+
+    // Fetch the tickets only if ticket feature is enabled
+    let tickets: any[] = [];
+    if (isTicketEnabled) {
+      // Fetch the tickets
+      let { data: fetchedTickets, error: ticketsError } = await supabaseAdmin.rpc(
+        "get_tickets_with_details",
+        {
+          order_id: orderId,
+        }
+      );
+
+      if (ticketsError || !fetchedTickets) {
+        console.error("Error fetching tickets:", ticketsError);
+        return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
       }
-    );
 
-    if (ticketsError || !tickets) {
-      console.error("Error fetching tickets:", ticketsError);
-      return new Response(JSON.stringify({ error: "Error fetching tickets" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      });
+      // Filter out canceled tickets
+      tickets = fetchedTickets.filter((t: any) => t.state !== "storno");
+      if (!tickets.length) {
+        return new Response(JSON.stringify({ error: "No valid tickets" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        });
+      }
     }
 
     // Fetch email template
@@ -176,56 +194,48 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Filter out canceled tickets
-    tickets = tickets.filter((t: any) => t.state !== "storno");
-    if (!tickets.length) {
-      return new Response(JSON.stringify({ error: "No valid tickets" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
-    }
-
-    // Prepare resources once (if needed)
-    const resources = await fetchTicketResources(tickets[0]);
-
-    // We'll store attachments as in-memory PDFs
-    const attachments: Array<{
+    let attachments: Array<{
       filename: string;
       content: Uint8Array;
       contentType: string;
       encoding: "binary" | "base64";
     }> = [];
 
-    // Generate each ticket PDF in memory
-    for (const ticket of tickets) {
-      try {
-        console.log("Generating PDF for ticket:", ticket.ticket_symbol);
+    if (isTicketEnabled) {
+      // Prepare resources once (if needed)
+      const resources = await fetchTicketResources(tickets[0]);
 
-        // "generateTicketImage" now returns a PDF (Uint8Array), renamed to reflect it.
-        const pdfBytes = await generateTicketImage(ticket, resources);
+      // Generate each ticket PDF in memory
+      for (const ticket of tickets) {
+        try {
+          console.log("Generating PDF for ticket:", ticket.ticket_symbol);
 
-        attachments.push({
-          filename: `ticket_${ticket.ticket_symbol}.pdf`,
-          content: pdfBytes,
-          contentType: "application/pdf",
-          encoding: "binary", // or "base64" if your mailer requires it
-        });
-      } catch (error) {
-        console.error(`Error generating PDF for ticket ${ticket.id}:`, error);
+          // "generateTicketImage" now returns a PDF (Uint8Array), renamed to reflect it.
+          const pdfBytes = await generateTicketImage(ticket, resources);
+
+          attachments.push({
+            filename: `ticket_${ticket.ticket_symbol}.pdf`,
+            content: pdfBytes,
+            contentType: "application/pdf",
+            encoding: "binary", // or "base64" if your mailer requires it
+          });
+        } catch (error) {
+          console.error(`Error generating PDF for ticket ${ticket.id}:`, error);
+        }
+      }
+
+      if (!attachments.length) {
+        return new Response(
+          JSON.stringify({ error: "Failed to generate any ticket PDFs" }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          }
+        );
       }
     }
 
-    if (!attachments.length) {
-      return new Response(
-        JSON.stringify({ error: "Failed to generate any ticket PDFs" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        }
-      );
-    }
-
-    console.log("Sending email with PDF attachments...");
+    console.log("Sending email...");
     await sendEmailWithSubs({
       to: email,
       subject: template.subject,
