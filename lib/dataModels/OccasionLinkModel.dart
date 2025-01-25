@@ -5,6 +5,7 @@ class OccasionLinkModel {
   int? occasionId;
   String? link;
   OccasionUserModel? user;
+  OccasionUserModel? unitUser;
   bool? isAdmin = false;
   String? versionRecommended; // New field for version_recommended
 
@@ -13,9 +14,12 @@ class OccasionLinkModel {
   bool isNotFound() => code == 404;
 
   factory OccasionLinkModel.fromJson(Map<String, dynamic> json) {
+    var unitUser = json["unit_user"] != null ? OccasionUserModel.fromJson(json["unit_user"]) : null;
+    var occasionUser = json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null;
     return OccasionLinkModel(
       code: json["code"],
-      user: json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null,
+      unitUser: unitUser,
+      user: occasionUser,
       link: json["link"],
       occasionId: json["occasion"],
       isAdmin: json["is_admin"],
@@ -26,6 +30,7 @@ class OccasionLinkModel {
   OccasionLinkModel({
     this.code,
     this.user,
+    this.unitUser,
     this.link,
     this.occasionId,
     this.isAdmin,
