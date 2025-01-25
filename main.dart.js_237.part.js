@@ -12,7 +12,7 @@ while(true)switch(x){case 0:s=e?"event_groups!event_groups_event_child_fkey(even
 r=$.fT()
 m=A
 x=3
-return A.c(r.bV("events").h1(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).cf("id",d).kL(0),$async$pe)
+return A.c(r.bW("events").h8(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).cl("id",d).kL(0),$async$pe)
 case 3:q=m.qz(g)
 p=y.u
 x=4
@@ -59,7 +59,7 @@ return A.c(B.asP(u),$async$pe)
 case 14:m.cx=g
 case 10:x=q.y!=null?15:16
 break
-case 15:r=r.bV("events").h1(0,"id,title,start_time,end_time,max_participants,event_users(count)")
+case 15:r=r.bW("events").h8(0,"id,title,start_time,end_time,max_participants,event_users(count)")
 u=q.y
 u.toString
 m=q
@@ -67,7 +67,7 @@ l=B
 k=A
 j=J
 x=17
-return A.c(r.CM("id",u).cf("is_hidden",!1),$async$pe)
+return A.c(r.CM("id",u).cl("is_hidden",!1),$async$pe)
 case 17:m.r=l.cmk(k.b4(j.cd(g,new B.b0z(),y.b),!0,p))
 x=n.gdu().d!=null?18:19
 break
@@ -82,7 +82,7 @@ return A.k($async$pe,w)},
 b0G(d){var x=0,w=A.l(y.e),v
 var $async$b0G=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fT().bV("event_users").hW(0).cf("event",d).cf("user",$.dT().gdu().c.a).a8r(0),$async$b0G)
+return A.c($.fT().bW("event_users").hW(0).cl("event",d).cl("user",$.dT().gdu().c.a).a8r(0),$async$b0G)
 case 3:v=f.b>0
 x=1
 break
@@ -91,7 +91,7 @@ return A.k($async$b0G,w)},
 b0H(d){var x=0,w=A.l(y.e),v
 var $async$b0H=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.fT().bV("event_users_saved").hW(0).cf("event",d).cf("user",$.dT().gdu().c.a).HL(),$async$b0H)
+return A.c($.fT().bW("event_users_saved").hW(0).cl("event",d).cl("user",$.dT().gdu().c.a).HL(),$async$b0H)
 case 3:v=f!=null
 x=1
 break
@@ -129,4 +129,4 @@ $S:56};(function inheritance(){var x=a.inheritMany
 x(A.bH,[B.b_b,B.b_c,B.b0z])})()
 var y={f:A.w("b7"),u:A.w("ds"),r:A.w("p<r>"),w:A.w("e"),e:A.w("u"),b:A.w("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_237",e:"endPart",h:b})})($__dart_deferred_initializers__,"6FuEBfQpt/torl0QDAGwTFF2tUo=");
+a.eventLog.push({p:"main.dart.js_237",e:"endPart",h:b})})($__dart_deferred_initializers__,"6/jYdBV9NRt98BfAcYxhO1ck3c8=");

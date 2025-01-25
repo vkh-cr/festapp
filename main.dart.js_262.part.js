@@ -8,7 +8,7 @@ while(true)switch(x){case 0:s=$.dT()
 if(s.gdu().d==null)A.a0(A.cW("User must be logged in."))
 r=A
 x=3
-return A.c(s.bV("user_info").hW(0).cf("id",s.gdu().c.a).kL(0),$async$Ux)
+return A.c(s.bW("user_info").hW(0).cl("id",s.gdu().c.a).kL(0),$async$Ux)
 case 3:s=r.yN(e)
 $.m3=s
 r=s
@@ -60,4 +60,4 @@ $S:148};(function inheritance(){var x=a.inherit
 x(B.aUX,A.bH)})()
 var y={d:A.w("e4")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"W9DYmrVIsLnhENPaYW2M1aEYq+w=");
+a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"BREmwanUBY0XrQun9v8Gtj3m6c8=");

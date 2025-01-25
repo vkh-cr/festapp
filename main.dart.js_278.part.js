@@ -8,7 +8,7 @@ while(true)switch(x){case 0:s=A.V(d).h("O<1,r?>")
 q=A
 p=J
 x=2
-return A.c($.fT().bV("events").h1(0,"id, event_users(count)").CM("id",A.H(new A.O(d,new B.b0K(),s),!0,s.h("a9.E"))),$async$Fe)
+return A.c($.fT().bW("events").h8(0,"id, event_users(count)").CM("id",A.H(new A.O(d,new B.b0K(),s),!0,s.h("a9.E"))),$async$Fe)
 case 2:r=q.b4(p.cd(f,new B.b0L(),y.b),!0,y.u)
 x=$.dT().gdu().d!=null?3:4
 break
@@ -58,7 +58,7 @@ x=6
 return A.c(A.Wj(),$async$Fd)
 case 6:o.F(n,f)
 s=$.fT()
-u=s.bV("events").h1(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cf("event_users.user",u.gdu().c.a).cf("is_hidden",!1)
+u=s.bW("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cl("event_users.user",u.gdu().c.a).cl("is_hidden",!1)
 r=$.dA
 r.toString
 q=y.b
@@ -68,11 +68,11 @@ n=t
 m=A
 l=J
 x=7
-return A.c(u.cf("occasion",r).rd(0,"start_time",!0).rd(0,"max_participants",!1),$async$Fd)
+return A.c(u.cl("occasion",r).rd(0,"start_time",!0).rd(0,"max_participants",!1),$async$Fd)
 case 7:o.F(n,m.b4(l.cd(f,new B.b0B(),q),!0,p))
 x=E.cd8()?8:9
 break
-case 8:u=s.bV("events").h1(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cf("is_group_event",!0).cf("is_hidden",!1)
+case 8:u=s.bW("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cl("is_group_event",!0).cl("is_hidden",!1)
 s=$.dA
 s.toString
 o=C.b
@@ -80,19 +80,19 @@ n=t
 m=A
 l=J
 x=10
-return A.c(u.cf("occasion",s).rd(0,"start_time",!0),$async$Fd)
+return A.c(u.cl("occasion",s).rd(0,"start_time",!0),$async$Fd)
 case 10:o.F(n,m.b4(l.cd(f,new B.b0C(),q),!0,p))
 case 9:u=A.a(t.slice(0),A.V(t))
 v=u
 x=1
 break
-case 4:u=$.fT().bV("events").h1(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cf("is_hidden",!1)
+case 4:u=$.fT().bW("events").h8(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cl("is_hidden",!1)
 s=$.dA
 s.toString
 o=A
 n=J
 x=11
-return A.c(u.cf("occasion",s).rd(0,"start_time",!0).rd(0,"max_participants",!1),$async$Fd)
+return A.c(u.cl("occasion",s).rd(0,"start_time",!0).rd(0,"max_participants",!1),$async$Fd)
 case 11:v=o.b4(n.cd(f,new B.b0D(),y.b),!0,y.u)
 x=1
 break
@@ -198,4 +198,4 @@ x(A.bH,[B.b0K,B.b0L,B.b0M,B.b0Q,B.b0B,B.b0C,B.b0D,B.b0U,B.b0V,B.b0T])
 w(B.b0W,A.dg)})()
 var y={u:A.w("ds"),F:A.w("p<ds>"),c:A.w("A<ds>"),p:A.w("e4"),b:A.w("@"),v:A.w("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"DvguSCExlDX0jFJHTxhub+LzN0U=");
+a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"LNVT7Nou2qWDanGzVtzSHkbuPZc=");

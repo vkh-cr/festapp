@@ -6,14 +6,14 @@ akl(){var x=0,w=A.l(y.x),v,u,t,s
 var $async$akl=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.zy().fq("game_get_correctly_guessed_checkpoints",A.y(["oc",$.dA],y.w,u),u),$async$akl)
+return A.c($.zy().fj("game_get_correctly_guessed_checkpoints",A.y(["oc",$.dA],y.w,u),u),$async$akl)
 case 3:t=e
 x=4
 return A.c(y.i.b(t)?t:A.cu(t,u),$async$akl)
 case 4:s=e
 if(s==null||!J.m(J.t(s,"code"),200)){v=A.a([],y.r)
 x=1
-break}v=A.b4(J.iq(J.t(s,"data"),new B.b10()),!0,y.e)
+break}v=A.b4(J.i6(J.t(s,"data"),new B.b10()),!0,y.e)
 x=1
 break
 case 1:return A.j(v,w)}})
@@ -75,7 +75,7 @@ var $async$b1d=A.h(function(g,h){if(g===1)return A.i(h,w)
 while(true)switch(x){case 0:u=y.b
 case 3:t=J
 x=13
-return A.c($.uz().fq("game_guess",A.y(["check_point_id",e,"guess",f],y.w,u),u),$async$b1d)
+return A.c($.uz().fj("game_guess",A.y(["check_point_id",e,"guess",f],y.w,u),u),$async$b1d)
 case 13:switch(t.t(h,"code")){case 200:x=5
 break
 case 4031:x=6
@@ -190,7 +190,7 @@ s=v.r.a
 s.toString
 if(new A.b7(t,0,!1).l_(s)){t=v.r.b
 t.toString
-v.aKi(t)}}return A.j(null,w)}})
+v.aKh(t)}}return A.j(null,w)}})
 return A.k($async$D1,w)},
 Op(){var x=0,w=A.l(y.v),v,u=this,t
 var $async$Op=A.h(function(d,e){if(d===1)return A.i(e,w)
@@ -201,7 +201,7 @@ return A.c(B.akl(),$async$Op)
 case 3:u.E(new t.bQW(u,e))
 case 1:return A.j(v,w)}})
 return A.k($async$Op,w)},
-aKi(d){this.y=d.jX(new A.b7(Date.now(),0,!1))
+aKh(d){this.y=d.jX(new A.b7(Date.now(),0,!1))
 this.w=A.J8(A.cl(0,0,0,0,1),new B.bR2(this,d))},
 A(d){var x,w,v,u,t,s,r=this,q=null,p=new A.b7(Date.now(),0,!1),o=r.r
 if(o!=null){o=o.a
@@ -224,14 +224,14 @@ if(r.Q)v.push(r.RE(A.C("You are offline. Please check your internet connection."
 return S.fx(o,q,A.dd(C.af,v,C.D,C.ac,q),q,q,q,q)},
 RE(d){var x=null
 return A.aM(C.I,A.cg(new A.ab(H.bW,A.a4(d,x,x,x,x,x,x,x,D.b_2,C.bp,x,x,x,x),x),x,x),C.k,C.ap,x,x,x,x,x,x,x,x,x)},
-UE(d,e){return this.bip(d,e)},
-bip(d,e){var x=0,w=A.l(y.v),v=this,u,t
+UE(d,e){return this.bio(d,e)},
+bio(d,e){var x=0,w=A.l(y.v),v=this,u,t
 var $async$UE=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:t={}
 t.a=null
 u=v.d[e].d
 x=2
-return A.c(T.io(null,null,!0,null,new B.bQP(t,v,u==null?"Game":u,d,e),d,null,!0,!0,y.b),$async$UE)
+return A.c(T.ip(null,null,!0,null,new B.bQP(t,v,u==null?"Game":u,d,e),d,null,!0,!0,y.b),$async$UE)
 case 2:return A.j(null,w)}})
 return A.k($async$UE,w)}}
 var z=a.updateTypes(["fc(M)"])
@@ -343,4 +343,4 @@ D.b_3=new A.Y(!0,C.m,null,null,null,null,16,C.aq,null,null,null,null,null,null,n
 D.b_2=new A.Y(!0,C.m,null,null,null,null,24,C.aq,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2D=new A.c6("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cm1=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_296",e:"endPart",h:b})})($__dart_deferred_initializers__,"a9z04FjbnjZHkOcc7onsZMFjGVg=");
+a.eventLog.push({p:"main.dart.js_296",e:"endPart",h:b})})($__dart_deferred_initializers__,"JfsTlH5qSNueRn7K4ytwJrdle5w=");

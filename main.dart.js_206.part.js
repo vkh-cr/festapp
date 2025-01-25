@@ -65,10 +65,10 @@ _.x=l
 _.y=m
 _.z=n
 _.Q=o},
-csO(d,e,f,g,h,i,j,k){return new B.ih(e,d,j,i,f,g)},
+csO(d,e,f,g,h,i,j,k){return new B.ii(e,d,j,i,f,g)},
 csP(d){var x="created_at",w="updated_at",v=J.a1(d),u=v.i(d,"id"),t=v.i(d,x)!=null?A.ft(v.i(d,x)):null,s=v.i(d,w)!=null?A.ft(v.i(d,w)):null,r=v.i(d,"ticket_symbol"),q=v.i(d,"state"),p=v.i(d,"occasion")
 return B.csO(t,u,v.i(d,"note"),v.i(d,"note_hidden"),p,q,r,s)},
-ih:function ih(d,e,f,g,h,i){var _=this
+ii:function ii(d,e,f,g,h,i){var _=this
 _.a=d
 _.b=e
 _.d=f
@@ -81,7 +81,7 @@ b_R(d){var x=0,w=A.l(y.f),v,u
 var $async$b_R=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:v=y.b
 x=2
-return A.c($.i5().fq("delete_order",A.y(["order_id",d.a],y.g,v),v),$async$b_R)
+return A.c($.i5().fj("delete_order",A.y(["order_id",d.a],y.g,v),v),$async$b_R)
 case 2:u=f
 v=J.a1(u)
 if(!J.m(v.i(u,"code"),200))throw A.f(A.cW("Deleting order failed: "+A.o(v.i(u,"code"))+": "+A.o(v.i(u,"message"))))
@@ -93,7 +93,7 @@ while(true)switch(x){case 0:v=y.b
 u=J
 t=J
 x=2
-return A.c($.i5().fq("update_ticket_note_hidden",A.y(["ticket_id",d,"new_note_hidden",e],y.g,v),v),$async$b0q)
+return A.c($.i5().fj("update_ticket_note_hidden",A.y(["ticket_id",d,"new_note_hidden",e],y.g,v),v),$async$b0q)
 case 2:if(!u.m(t.t(g,"code"),200))throw A.f(A.cW("Saving of note has failed."))
 return A.j(null,w)}})
 return A.k($async$b0q,w)},
@@ -103,7 +103,7 @@ while(true)switch(x){case 0:v=y.b
 u=J
 t=J
 x=2
-return A.c($.i5().fq("update_order_note_hidden",A.y(["order_id",d,"new_note_hidden",e],y.g,v),v),$async$b0p)
+return A.c($.i5().fj("update_order_note_hidden",A.y(["order_id",d,"new_note_hidden",e],y.g,v),v),$async$b0p)
 case 2:if(!u.m(t.t(g,"code"),200))throw A.f(A.cW("Saving of note has failed."))
 return A.j(null,w)}})
 return A.k($async$b0p,w)}},C
@@ -116,7 +116,7 @@ B.ir.prototype={
 j(d){var x=this.z
 x=x==null?null:x.b
 return"St\u016fl "+A.o(x)+", Sedadlo "+A.o(this.w)},
-boY(d){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=null,k=m.as
+boX(d){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=null,k=m.as
 if(k==null)x=l
 else{k=k.ax
 x=k==null?l:A.du(k,new B.aWa(m))}if(x!=null){k=m.as
@@ -137,7 +137,7 @@ k=m.as
 if(k==null)r=l
 else{k=k.at
 r=k==null?l:D.b.kz(k,new B.aWh(x))}k=r==null
-q=k?l:r.aD1()
+q=k?l:r.aD0()
 if(q==null)q=""
 if(q.length!==0)q="\n"+q
 p=!k?"\n"+r.a_2()+q:""
@@ -160,9 +160,9 @@ gdK(d){return this.w},
 sVZ(d){return this.as=d}}
 B.h8.prototype={
 c5(){var x,w=this,v=w.b
-v=v==null?null:v.h8()
+v=v==null?null:v.h7()
 x=w.c
-x=x==null?null:x.h8()
+x=x==null?null:x.h7()
 return A.y(["id",w.a,"created_at",v,"updated_at",x,"price",w.d,"state",w.e,"data",w.f,"occasion",w.r,"payment_info",w.w,"currency_code",w.y,"note_hidden",w.z],y.g,y.b)},
 vh(d){var x,w,v,u,t,s,r,q,p,o=this,n=null,m=o.a,l=m==null,k=A.bi(l?0:m)
 m=A.bi(l?0:m)
@@ -197,7 +197,7 @@ s=t.eu(s)
 t=s}else t=""
 t=A.bi(t)
 s=A.bi(o.a_2())
-q=A.bi(o.aD1())
+q=A.bi(o.aD0())
 p=o.z
 return A.mo(A.y(["id",k,"order_symbol",m,"price",l,"state",x,"amount",w,"paid",v,"returned",u,"variable_symbol",r,"deadline",t,"data",s,"note",q,"note_hidden",A.bi(p==null?"":p),"orders_history",A.bi("")],y.g,y.e),!1,y.b)},
 fg(){var x=0,w=A.l(y.f),v=this
@@ -219,21 +219,21 @@ return A.k($async$fT,w)},
 lH(){return"Order #"+A.o(this.a)},
 a_2(){var x=this.f,w=x==null,v=A.o(w?null:J.t(x,"name")),u=A.o(w?null:J.t(x,"surname"))
 return v+" "+u+" ("+A.o(w?null:J.t(x,"email"))+")"},
-aD1(){var x=this.f
+aD0(){var x=this.f
 x=x==null?null:J.t(x,"note")
 return A.o(x==null?"":x)},
 gbT(d){return this.a}}
 B.iX.prototype={
 c5(){var x,w=this,v=w.b
-v=v==null?null:v.h8()
+v=v==null?null:v.h7()
 x=w.c
-x=x==null?null:x.h8()
+x=x==null?null:x.h7()
 return A.y(["id",w.a,"created_at",v,"updated_at",x,"title",w.d,"is_hidden",w.e,"description",w.f,"price",w.r,"data",w.w,"product_type",w.x,"occasion",w.y,"order",w.Q],y.g,y.b)},
 lH(){var x=this.d
 return x==null?J.as(this.a):x},
 gbT(d){return this.a},
 gdK(d){return this.d}}
-B.ih.prototype={
+B.ii.prototype={
 c5(){return A.y(["state",this.e,"note_hidden",this.w],y.g,y.b)},
 vh(d){var x,w,v,u,t,s,r,q,p,o,n=this,m=n.a
 m=A.bi(m==null?0:m)
@@ -280,7 +280,7 @@ return A.k($async$fT,w)},
 lH(){var x=this.d
 return x==null?J.as(this.a):x},
 gbT(d){return this.a}}
-var z=a.updateTypes(["u(qT)","u(ih)","r?(qT)","u(iX)","u(h8)","e(iX)","e(e)"])
+var z=a.updateTypes(["u(qT)","u(ii)","r?(qT)","u(iX)","u(h8)","e(iX)","e(e)"])
 B.aWa.prototype={
 $1(d){return d.a==this.a.e},
 $S:z+0}
@@ -319,8 +319,8 @@ $S:z+5};(function installTearOffs(){var x=a._static_1
 x(B,"cq9","cMN",6)})();(function inheritance(){var x=a.inheritMany
 x(A.B,[B.ir,B.iX])
 x(A.bH,[B.aWa,B.aWb,B.aWc,B.aWd,B.aWe,B.aWf,B.aW9,B.aWg,B.aWh,B.bBh])
-x(A.ix,[B.h8,B.ih])})()
-A.br(b.typeUniverse,JSON.parse('{"h8":{"ix":[]},"ih":{"ix":[]}}'))
+x(A.ix,[B.h8,B.ii])})()
+A.br(b.typeUniverse,JSON.parse('{"h8":{"ix":[]},"ii":{"ix":[]}}'))
 var y={e:A.w("fO"),g:A.w("e"),b:A.w("@"),f:A.w("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"qVP4f1WV+edO2pWM5cg/LFBgHxE=");
+a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"DRPMARhFL3wkuHsmFlUbssVixTI=");

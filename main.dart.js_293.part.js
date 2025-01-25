@@ -12,7 +12,7 @@ while(true)switch(x){case 0:v=$.dT()
 x=v.gdu().d!=null?2:3
 break
 case 2:x=4
-return A.c($.fT().bV("event_users_saved").ks(0).cf("event",e).cf("user",v.gdu().c.a),$async$Wk)
+return A.c($.fT().bW("event_users_saved").ks(0).cl("event",e).cl("user",v.gdu().c.a),$async$Wk)
 case 4:case 3:x=5
 return A.c(B.asQ(e),$async$Wk)
 case 5:A.bT(d,A.C("Removed from My schedule.",null),D.ah)
@@ -24,7 +24,7 @@ while(true)switch(x){case 0:u=$.dT()
 x=u.gdu().d!=null?3:4
 break
 case 3:x=5
-return A.c($.fT().bV("event_users_saved").jH(0,A.y(["event",e,"user",u.gdu().c.a],y.g,y.o)),$async$Wi)
+return A.c($.fT().bW("event_users_saved").jH(0,A.y(["event",e,"user",u.gdu().c.a],y.g,y.o)),$async$Wi)
 case 5:case 4:x=6
 return A.c(B.asN(e),$async$Wi)
 case 6:A.bT(d,A.C("Added to My schedule.",null),D.ah)
@@ -82,4 +82,4 @@ $S:2};(function inheritance(){var x=a.inheritMany
 x(A.cf,[B.aWS,B.aWT])})()
 var y={p:A.w("p<yR>"),o:A.w("B"),g:A.w("e"),e:A.w("u"),f:A.w("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_293",e:"endPart",h:b})})($__dart_deferred_initializers__,"BQ78uxDUiHW6trcALyWlQEOFx1U=");
+a.eventLog.push({p:"main.dart.js_293",e:"endPart",h:b})})($__dart_deferred_initializers__,"o17cvb903GaKK6HyDycXHu0c6Po=");

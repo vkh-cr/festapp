@@ -18,7 +18,7 @@ aUU(d,e){var x=0,w=A.l(y.b),v,u
 var $async$aUU=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.dT().fq("set_user_password_token",A.y(["token",d,"password",e],y.w,u),u),$async$aUU)
+return A.c($.dT().fj("set_user_password_token",A.y(["token",d,"password",e],y.w,u),u),$async$aUU)
 case 3:v=g
 x=1
 break
@@ -123,4 +123,4 @@ D.b_K=new A.Y(!0,C.m,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b30=new A.c6("Change Password",null,D.b_K,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3c=new A.c6("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"0hNh0/U7ZY6K8cUl6qokyjXU7Wc=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"hKJJYLfbDbAmwocEzFiyR2wzOhw=");
