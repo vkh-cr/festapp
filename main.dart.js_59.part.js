@@ -13,7 +13,7 @@ _.c=_.a=null},
 c17:function c17(d){this.a=d},
 c18:function c18(d,e){this.a=d
 this.b=e},
-c14:function c14(d){this.a=d},
+c14:function c14(){},
 c15:function c15(d){this.a=d},
 c16:function c16(d){this.a=d},
 aUY(d){var x=0,w=A.l(y.y),v,u
@@ -51,27 +51,25 @@ T=c[283]
 U=c[236]
 B.CZ.prototype={
 M(){var x=null
-return new B.aMB(A.a([E.MZ(x,x,x,x,x,x,!0,x,x,x,x,x,"name"),E.MZ(x,x,x,x,x,x,!0,x,x,x,x,x,"surname"),E.MZ(x,x,x,x,x,x,x,x,x,x,x,x,"sex"),E.MZ(x,x,x,x,x,x,!0,x,x,x,x,x,"email"),E.MZ(x,x,x,x,x,x,!0,x,x,x,x,x,"city"),E.MZ(x,x,x,x,x,x,x,x,x,x,x,x,"birth_year")],y.a),new A.aF(x,y.c))}}
+return new B.aMB(A.a([E.MZ(x,x,x,x,1,x,!0,x,x,x,x,x,"name"),E.MZ(x,x,x,x,2,x,!0,x,x,x,x,x,"surname"),E.MZ(x,x,x,x,3,x,x,x,x,x,x,x,"sex"),E.MZ(x,x,x,x,4,x,!0,x,x,x,x,x,"email"),E.MZ(x,x,x,x,5,x,!0,x,x,x,x,x,"city"),E.MZ(x,x,x,x,6,x,x,x,x,x,x,x,"birth_year")],y.a),new A.aF(x,y.c))}}
 B.aMB.prototype={
 l(){this.ah()},
-A(d){var x,w,v,u,t=this,s=null,r=F.co_(t.w)
-t.r=r
-x=t.x
-r.a=new F.an5(s,s,x,s,s,s,s)
-r=R.bj(D.b2m,s)
-r=H.jZ(s,!0,s,s,!0,s,s,I.ql(new B.c17(d)),s,r)
-if(t.e){x=A.ba(s,s,A.J(d).ax.a===C.y?$.fy():C.r,s,s,s,s,s,s,s,s,18,s,s,s,s,s,!0,s,s,s,s,s,s,s,s)
-w=t.f
-w=w==null?s:w.i(0,"email")
+A(d){var x,w,v,u=this,t=null,s=F.co_(u.w)
+u.r=s
+x=u.x
+s.a=new F.an5(t,t,x,t,t,t,t)
+s=R.bj(D.b2m,t)
+s=H.k_(t,!0,t,t,!0,t,t,I.ql(new B.c17(d)),t,s)
+if(u.e){x=A.ba(t,t,A.J(d).ax.a===C.y?$.fy():C.r,t,t,t,t,t,t,t,t,18,t,t,t,t,t,!0,t,t,t,t,t,t,t,t)
+w=u.f
+w=w==null?t:w.i(0,"email")
 v=y.w
-v=new A.ab(D.ahZ,A.a2P(s,s,s,C.cr,s,s,!0,s,A.eg(A.a([A.eg(s,s,s,x,A.C("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",A.y(["email",w],v,v))),D.b6g],y.F),s,s,s,s),C.bp,s,s,C.a_,C.aM),s)
-x=v}else{w=t.r
+v=new A.ab(D.ahZ,A.a2P(t,t,t,C.cr,t,t,!0,t,A.eg(A.a([A.eg(t,t,t,x,A.C("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",A.y(["email",w],v,v))),D.b6g],y.F),t,t,t,t),C.bp,t,t,C.a_,C.aM),t)
+x=v}else{w=u.r
 w=A.H(F.cnX(d,w.a.c,w),!0,y.u)
 w.push(M.aR)
-v=t.d?s:new B.c18(t,d)
-u=A.C("Sign up",s)
-w.push(N.EN(C.ch,d,50,!t.d,u,v,C.m,250))
-x=Q.amh(new G.wJ(A.aR(w,C.j,C.h,C.l,s,C.u),s),x,s)}return S.fx(r,s,new A.cx(C.aN,s,s,new A.d2(new A.aa(0,820,0,1/0),K.eu(new A.ab(P.dj,x,s),s,C.w,s,s,s,C.J),s),s),s,s,s,s)}}
+w.push(N.EN(C.ch,d,50,!0,A.C("Sign up",t),new B.c18(u,d),C.m,250))
+x=Q.amh(new G.wJ(A.aR(w,C.j,C.h,C.l,t,C.u),t),x,t)}return S.fx(s,t,new A.cx(C.aN,t,t,new A.d2(new A.aa(0,820,0,1/0),K.eu(new A.ab(P.dj,x,t),t,C.w,t,t,t,C.J),t),t),t,t,t,t)}}
 var z=a.updateTypes([])
 B.c17.prototype={
 $0(){return O.vJ(this.a)},
@@ -85,29 +83,33 @@ t=u.x.gV()
 t=t==null?null:t.adY()
 x=t===!0?2:3
 break
-case 2:u.E(new B.c14(u))
+case 2:u.E(new B.c14())
 t=u.r
 t.toString
-s=u.f=F.cnY(t)
-t=v.b
-r=t.ad(y.v)
-if(r==null)r=null
-else{r=r.r.a
-r===$&&A.b()
-r=r.yf("_")}s.m(0,"lang",r)
+s=y.w
+t=A.jG(F.cnY(t,!0).i(0,"fields"),s,y.b)
+u.f=t
+r=v.b
+q=r.ad(y.v)
+if(q==null)q=null
+else{q=q.r.a
+q===$&&A.b()
+q=q.yf("_")}t.m(0,"lang",q)
+q=u.f
+q.toString
 x=4
-return A.c(B.aUY(s),$async$$0)
-case 4:q=e
-r=J.a1(q)
-if(J.m(r.i(q,"code"),200)){A.bS(t,A.C("Registration is almost complete!",null),C.af)
-u.E(new B.c15(u))}else if(J.m(r.i(q,"code"),409)){p=y.w
-A.bS(t,A.C("Registration failed: Email {email} is already in use.",A.y(["email",r.i(q,"email")],p,p)),C.aY)}else A.bS(t,A.C("Registration has failed.",null),C.aY)
+return A.c(B.aUY(q),$async$$0)
+case 4:p=e
+t=J.a1(p)
+if(J.m(t.i(p,"code"),200)){A.bS(r,A.C("Registration is almost complete!",null),C.af)
+u.E(new B.c15(u))}else if(J.m(t.i(p,"code"),409))A.bS(r,A.C("Registration failed: Email {email} is already in use.",A.y(["email",t.i(p,"email")],s,s)),C.aY)
+else A.bS(r,A.C("Registration has failed.",null),C.aY)
 u.E(new B.c16(u))
 case 3:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
 B.c14.prototype={
-$0(){this.a.d=!0},
+$0(){},
 $S:0}
 B.c15.prototype={
 $0(){this.a.e=!0},
@@ -119,9 +121,9 @@ x(B.CZ,A.G)
 x(B.aMB,A.K)
 w(A.cf,[B.c17,B.c18,B.c14,B.c15,B.c16])})()
 A.br(b.typeUniverse,JSON.parse('{"CZ":{"G":[],"d":[]},"aMB":{"K":["CZ"]}}'))
-var y={a:A.w("p<k4>"),F:A.w("p<iP>"),c:A.w("aF<xo>"),y:A.w("a8<e,@>"),w:A.w("e"),u:A.w("d"),v:A.w("q7"),q:A.w("~")};(function constants(){D.ahZ=new A.ap(12,88,12,12)
+var y={a:A.w("p<k5>"),F:A.w("p<iP>"),c:A.w("aF<xo>"),y:A.w("a8<e,@>"),w:A.w("e"),u:A.w("d"),v:A.w("q7"),b:A.w("@"),q:A.w("~")};(function constants(){D.ahZ=new A.ap(12,88,12,12)
 D.b2m=new A.c6("Sign up",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.aQW=new A.ab(T.Hb,U.Ie,null)
 D.b6g=new L.lW(D.aQW,C.dY,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_59",e:"endPart",h:b})})($__dart_deferred_initializers__,"pRqdktcNG6/Ll4wAN18pmRu5W5E=");
+a.eventLog.push({p:"main.dart.js_59",e:"endPart",h:b})})($__dart_deferred_initializers__,"9TSPycTUFTbhcKUUKOPNlSZ7ctU=");

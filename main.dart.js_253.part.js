@@ -676,7 +676,7 @@ p=p.c<=p.x.a}else p=!1
 if(!p)if(x.a<0){p=u.$0()
 p=p.b>=p.x.a}else p=!1
 else p=!0
-if(p){r=q.gme()+v.r.Dw(v).c*J.jW(q.gme())
+if(p){r=q.gme()+v.r.Dw(v).c*J.jX(q.gme())
 x.a=r
 v.a1l(r)
 q.dG(0)}else if(q.gcb(0)===C.ax)v.a1l(0)},
@@ -787,7 +787,7 @@ w(B.a34,A.e5)
 x(B.a7L,A.lV)})()
 A.br(b.typeUniverse,JSON.parse('{"a2n":{"R":[],"bw":["R"],"U":[],"aJ":[]},"an9":{"bb":[],"aK":[],"d":[]},"X3":{"G":[],"d":[]},"X2":{"am":[]},"Au":{"lV":[]},"aFV":{"K":["X3"]},"aFU":{"d5":[],"am":[]},"JB":{"lH":[],"kH":[],"am":[],"oA":[]},"A3":{"G":[],"d":[]},"a6X":{"K":["A3"]}}'))
 var y=(function rtii(){var x=A.w
-return{e:x("nX"),k:x("aa"),v:x("dr"),g:x("p<iJ>"),F:x("p<m5>"),t:x("p<ds>"),d:x("p<lH>"),s:x("p<e>"),Z:x("p<dl>"),p:x("p<d>"),n:x("p<I>"),X:x("p<r>"),o:x("n"),z:x("jH"),O:x("j3<I>"),f:x("bQ<u>"),G:x("bQ<I>"),l:x("d"),J:x("JB"),A:x("cTV"),W:x("e4?"),H:x("~")}})();(function constants(){D.ahU=new A.ap(10,5,10,5)
+return{e:x("nX"),k:x("aa"),v:x("dr"),g:x("p<iJ>"),F:x("p<m5>"),t:x("p<ds>"),d:x("p<lH>"),s:x("p<e>"),Z:x("p<dl>"),p:x("p<d>"),n:x("p<I>"),X:x("p<r>"),o:x("n"),z:x("jI"),O:x("j3<I>"),f:x("bQ<u>"),G:x("bQ<I>"),l:x("d"),J:x("JB"),A:x("cTV"),W:x("e4?"),H:x("~")}})();(function constants(){D.ahU=new A.ap(10,5,10,5)
 D.als=new A.em(M.k9,null,C.r,null,null)
 D.a1s=new B.a34(0,"signedIn")
 D.a1t=new B.a34(1,"notSignedIn")
@@ -795,4 +795,4 @@ D.a1v=new B.a34(2,"nothing")
 D.b0v=new A.Y(!0,null,null,null,null,null,14,C.aq,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2B=new A.c6("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_253",e:"endPart",h:b})})($__dart_deferred_initializers__,"FyZCtMD/Xu4bonCRBjWnY5CcFik=");
+a.eventLog.push({p:"main.dart.js_253",e:"endPart",h:b})})($__dart_deferred_initializers__,"2Ph1zI5s0kVPX3ZZrxb/Ku3v1p0=");

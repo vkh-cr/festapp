@@ -72,7 +72,7 @@ case 2:return A.j(null,w)}})
 return A.k($async$wB,w)},
 b1Q(d){this.E(new C.bTm(this,d))},
 A(d){var x,w,v,u=null,t=E.bj(D.b2R,u)
-t=O.jZ(u,!0,u,u,u,u,u,U.ql(new C.bTq(d)),u,t)
+t=O.k_(u,!0,u,u,u,u,u,U.ql(new C.bTq(d)),u,t)
 x=A.dG(12)
 x=A.aM(u,u,B.k,u,u,new A.bG(u,L.cmv(B.I,N.xF,new P.EC("assets/icons/fstappicon.png",u,u),u,M.eD),u,x,u,u,u,B.T),u,64,u,u,u,u,64)
 w=y.g
@@ -156,4 +156,4 @@ D.b2H=new A.c6("Installation failed. Please open this link in your device's defa
 D.b2R=new A.c6("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"d6I","cju",()=>new A.NQ())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_131",e:"endPart",h:b})})($__dart_deferred_initializers__,"4WzcMnoNZdb3qetWMhXznbcDoUQ=");
+a.eventLog.push({p:"main.dart.js_131",e:"endPart",h:b})})($__dart_deferred_initializers__,"/SczzJjACsA3TtTKcil7Tk3zDYA=");

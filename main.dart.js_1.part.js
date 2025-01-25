@@ -62,7 +62,7 @@ r.toString
 A.bS(r,J.as(t),C.af)}else throw p}return A.j(null,w)}})
 return A.k($async$aW,w)},
 A(d){var x,w,v,u,t=null,s=G.bj(D.b3c,t)
-s=K.jZ(t,!0,t,t,!0,t,t,L.ql(new B.bZo(d)),t,s)
+s=K.k_(t,!0,t,t,!0,t,t,L.ql(new B.bZo(d)),t,s)
 x=y.w
 x=A.a4(A.C("Welcome in {name}!",A.y(["name","Festapp"],x,x)),t,t,t,t,t,t,t,D.b0w,t,t,t,t,t)
 w=A.a4(A.C("Create a new password to continue.",t),t,t,t,t,t,t,t,Q.fr,t,t,t,t,t)
@@ -123,4 +123,4 @@ D.b_K=new A.Y(!0,C.m,null,null,null,null,25,null,null,null,null,null,null,null,n
 D.b30=new A.c6("Change Password",null,D.b_K,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3c=new A.c6("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"qeO3tIh0//LaqIfWHu6nA7V5HU8=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"vkruyVI6R6/4DtXoi8NtMf3uEn4=");
