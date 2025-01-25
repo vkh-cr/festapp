@@ -61,9 +61,7 @@ export async function fetchTicketResources(ticket: any) {
   }
 
   if (!backgroundUrl) {
-    throw new Error(
-      "Background image URL not found in occasion.data.features."
-    );
+    backgroundUrl = "https://kjdpmixlnhntmxjedpxh.supabase.co/storage/v1/object/sign/editor-files/default.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJlZGl0b3ItZmlsZXMvZGVmYXVsdC5qcGciLCJpYXQiOjE3Mzc1NjY2NjcsImV4cCI6MTU5NDE3NTY2NjY3fQ.1WrwHhXQ59VQDentX8vGFyqQiUQFT2enjz-yTQxy854&t=2025-01-22T17%3A24%3A27.380Z";
   }
 
   // Fetch product types.

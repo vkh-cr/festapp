@@ -12,14 +12,14 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-class FormEditorTab extends StatefulWidget {
-  const FormEditorTab({super.key});
+class FormEditorContent extends StatefulWidget {
+  const FormEditorContent({super.key});
 
   @override
-  _FormEditorTabState createState() => _FormEditorTabState();
+  _FormEditorContentState createState() => _FormEditorContentState();
 }
 
-class _FormEditorTabState extends State<FormEditorTab> {
+class _FormEditorContentState extends State<FormEditorContent> {
   FormModel? form;
   String? formLink;
   @override

@@ -18,10 +18,10 @@ const supabaseAdmin = createClient(
 );
 
 // Function to generate QR code as base64
-async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle: string): Promise<Uint8Array> {
+async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: string): Promise<Uint8Array> {
   console.log("Starting QR code generation with text...");
   console.log("Payment Info:", paymentInfo);
-  console.log("Order Details:", orderDetails);
+  console.log("Order Details:", orderData);
   console.log("Occasion Title:", occasionTitle);
 
   // Create canvas
@@ -37,7 +37,7 @@ async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle
   // Generate QR code
   const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
     2
-  )}*CC:${paymentInfo.currency_code}*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  )}*CC:${paymentInfo.currency_code}*MSG:${orderData.name} ${orderData.surname}*X-VS:${paymentInfo.variable_symbol}`;
   console.log("Generated QR data string:", qrData);
 
   const base64QrCode = await qrcode(qrData, { size: 500 });
@@ -58,7 +58,7 @@ async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle
   ctx.fillText(`Objednávka: ${occasionTitle}`, 32, 550);
   ctx.fillText(`Bankovní účet: ${paymentInfo.account_number_human_readable}`, 32, 580);
   ctx.fillText(`VS: ${paymentInfo.variable_symbol}`, 32, 610);
-  ctx.fillText(`Poznámka: ${orderDetails.name} ${orderDetails.surname}`, 32, 640);
+  ctx.fillText(`Poznámka: ${orderData.name} ${orderData.surname}`, 32, 640);
   ctx.fillText(`Celková cena: ${formatCurrency(paymentInfo.amount, paymentInfo.currency_code)}`, 32, 670);
   console.log("Text added below QR code.");
 
@@ -78,8 +78,8 @@ function formatDatetime(datetime: string): string {
   }).format(date);
 }
 
-function generateFullOrder(orderDetails: any, tickets: any[]): string {
-  const { name, surname, email, note } = orderDetails;
+function generateFullOrder(orderData: any, tickets: any[]): string {
+  const { name, surname, email, note } = orderData;
 
   const orderHeader = `
     <div style="border-radius:10px;border:2px solid #122640;font-size:16px;margin:20px 0;padding:20px;text-align:center;">
@@ -95,7 +95,9 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
   const ticketsDetails = tickets
     .map((ticket) => {
       const ticketSymbol = ticket.ticket_symbol;
-      const seat = ticket.products.find((p: any) => p.type === "spot")?.spot_title || "N/A";
+      const spotProduct = ticket.products.find((p: any) => p.type === "spot");
+      const spot = spotProduct?.spot_title || spotProduct?.title;
+      const spot_type_title = spotProduct?.type_tile || "Místo";
       const food = ticket.products.find((p: any) => p.type === "food")?.title;
       const taxi = ticket.products.find((p: any) => p.type === "taxi")?.title;
       const note = ticket.note || "";
@@ -110,7 +112,7 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
       return `
         <p style="text-align:left;">
           <span style="display:block; margin-left:20px;"><strong>Vstupenka ${ticketSymbol}</strong></span>
-          <span style="display:block; margin-left:20px;">Místo: ${seat}</span>
+          <span style="display:block; margin-left:20px;">${spot_type_title}: ${spot}</span>
           ${food ? `<span style="display:block; margin-left:20px;">Večeře: ${food}</span>` : ""}
           ${taxi ? `<span style="display:block; margin-left:20px;">Odvoz: ${taxi}</span>` : ""}
           ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
@@ -157,8 +159,8 @@ Deno.serve(async (req) => {
 
     console.log(ticketOrder);
 
-    const occasion = ticketOrder.occasion;
-    const paymentInfo = ticketOrder.payment_info;
+    const occasion = ticketOrder.order.occasion;
+    const paymentInfo = ticketOrder.order.payment_info;
 
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
@@ -185,8 +187,8 @@ Deno.serve(async (req) => {
     }
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
-    const qrCode = await generateQrCode(paymentInfo, orderDetails, occasion.occasion_title);
-    const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
+    const qrCode = await generateQrCode(paymentInfo, ticketOrder.order.data, occasion.occasion_title);
+    const fullOrder = generateFullOrder(ticketOrder.order.data, ticketOrder.order.data.tickets);
 
     const subs = {
       occasionTitle: occasion.occasion_title,
@@ -200,7 +202,7 @@ Deno.serve(async (req) => {
     };
 
     await sendEmailWithSubs({
-      to: orderDetails.email,
+      to: ticketOrder.order.data.email,
       subject: template.data.subject,
       content: template.data.html,
       subs,
@@ -219,7 +221,7 @@ Deno.serve(async (req) => {
       .from("log_emails")
       .insert({
         "from": _DEFAULT_EMAIL,
-        "to": orderDetails.email,
+        "to": ticketOrder.order.data.email,
         "template": template.data.id,
         "organization": organizationId,
         "occasion": occasion.id,

@@ -2,31 +2,25 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbEshop.dart';
-import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/VibrateService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-enum ScanState { signedIn, notSignedIn, nothing }
+enum ScanState { valid, invalid, used, nothing }
 
 @RoutePage()
 class ScanPage extends StatefulWidget {
   static const ROUTE = "scan";
-   int? id;
 
-   ScanPage({@pathParam this.id, Key? key}) : super(key: key);
+  String? scanCode;
+  ScanPage({@pathParam this.scanCode, super.key});
 
   @override
   _ScanPageState createState() => _ScanPageState();
@@ -38,6 +32,14 @@ class _ScanPageState extends State<ScanPage> {
   ScanState _scanState = ScanState.nothing;
   final TextEditingController _searchController = TextEditingController();
 
+  // To prevent multiple scans
+  String? rightNowScanned;
+
+  final MobileScannerController _mobileScannerController = MobileScannerController(
+    formats: [BarcodeFormat.qrCode],
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+
   @override
   void dispose() {
     _mobileScannerController.dispose();
@@ -48,33 +50,52 @@ class _ScanPageState extends State<ScanPage> {
   @override
   Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
+    if (widget.scanCode == null && context.routeData.hasPendingChildren) {
+      widget.scanCode = context.routeData.pendingChildren[0].pathParams.getString("scanCode");
+    }
 
     if (kIsWeb) {
-      MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl("https://unpkg.com/@zxing/library@0.21.3");
+      MobileScannerPlatform.instance.setBarcodeLibraryScriptUrl(
+          "https://unpkg.com/@zxing/library@0.21.3");
     }
-    //await loadData(widget.id);
+    print(widget.scanCode);
+
+    checkForCode();
   }
 
-  Future<void> loadData(int eventId) async {
-    setState(() {});
+  Future<void> checkForCode() async {
+    await Future.delayed(Duration(milliseconds: 500));
+    if(widget.scanCode == null) {
+      String? inputScanCode = await DialogHelper.showInputDialog(
+        context: context,
+        dialogTitle: "Enter Scan Code".tr(),
+        labelText: "Scan Code".tr(),
+      );
+      if (inputScanCode != null && inputScanCode.isNotEmpty) {
+        widget.scanCode = inputScanCode;
+      }
+    }
   }
-
 
   Widget buildScannedUserDetails() {
     if (_scannedObject == null) {
       return Center(
         child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
-            child: const Text(
-                "Point the camera at the attendee's code for a entry verification.").tr()),
+          padding: const EdgeInsets.fromLTRB(0, 24, 0, 12),
+          child: const Text(
+              "Point the camera at the attendee's code for an entry verification.")
+              .tr(),
+        ),
       );
     }
 
     IconData icon;
-    if (_scanState == ScanState.signedIn) {
+    if (_scanState == ScanState.valid) {
       icon = Icons.check_circle;
-    } else if (_scanState == ScanState.notSignedIn) {
+    } else if (_scanState == ScanState.invalid) {
       icon = Icons.cancel;
+    } else if (_scanState == ScanState.used) {
+      icon = Icons.info; // You can choose an appropriate icon for 'used'
     } else {
       return const SizedBox.shrink();
     }
@@ -82,44 +103,71 @@ class _ScanPageState extends State<ScanPage> {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Text(
-      ((_scannedObject!.relatedProducts != null ? _scannedObject!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ") : "") + "\n" +
-      _scannedObject!.relatedOrder!.toCustomerData() + "   " + _scannedObject!.ticketSymbol.toString() + "   "+ _scannedObject!.state!),
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+          // Center the customer info
+          Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Display related products in separate rows
+                if (_scannedObject!.relatedProducts != null &&
+                    _scannedObject!.relatedProducts!.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _scannedObject!.relatedProducts!
+                        .map((product) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0),
+                      child: Text(
+                        product.toBasicString(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                const SizedBox(height: 8),
+                // Display customer data, ticket symbol, and state
+                Text(
+                  "${_scannedObject!.relatedOrder!.toCustomerData()}   ${_scannedObject!.ticketSymbol}   ${_scannedObject!.state!}",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                maxLines: 2,
-              ),
-              SizedBox.fromSize(size: Size(30,5)),
-              const SizedBox(width: 5),
-              Icon(icon, color: Colors.black),
-            ],
+              ],
+            ),
           ),
+          const SizedBox(height: 8),
+          // Display the icon indicating scan state
+          Icon(icon, color: Colors.black, size: 30),
+          const SizedBox(height: 16),
+          // If scan state is valid, show the "Confirm Ticket" button
+          if (_scanState == ScanState.valid)
+            ElevatedButton(
+              onPressed: _confirmTicket,
+              child: const Text("Confirm Ticket").tr(),
+            ),
         ],
       ),
     );
   }
 
-  final MobileScannerController _mobileScannerController =
-  MobileScannerController(
-      formats: [BarcodeFormat.qrCode],
-      detectionSpeed: DetectionSpeed.noDuplicates);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _scannedObject == null ? ThemeConfig.grey200(context) : getResultColor(_scanState),
+      backgroundColor: _scannedObject == null
+          ? ThemeConfig.grey200(context)
+          : getResultColor(_scanState),
       body: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
+                // Header with back button and event title
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
@@ -147,7 +195,9 @@ class _ScanPageState extends State<ScanPage> {
                     ],
                   ),
                 ),
-                buildScannedUserDetails(), // Add this line
+                // Display scanned user details
+                buildScannedUserDetails(),
+                // Scanner view
                 Expanded(
                   child: MobileScanner(
                     fit: BoxFit.fitWidth,
@@ -172,42 +222,70 @@ class _ScanPageState extends State<ScanPage> {
   }
 
   Future<void> setupNewId(String scannedId) async {
-    // if (scannedId == _scannedObject?.id) {
-    //   return;
-    // }
-
-    // _scannedUser = _participants?.singleWhereOrNull((p) => p.id == newUserId);
-    // if (_scannedUser != null) {
-    //   _scanState = ScanState.signedIn;
-    //   setState(() {});
-    //   VibrateService.vibrateOk();
-    //   return;
-    // }
-
-    _scannedObject ??= await DbEshop.getTicket(scannedId);
-    if (_scannedObject != null && (_scannedObject!.state == "sent" || _scannedObject!.state == "paid")) {
-      _scanState = ScanState.signedIn;
-      setState(() {});
-      VibrateService.vibrateOk();
+    if (scannedId == rightNowScanned) {
       return;
     }
-    else if (_scannedObject != null) {
-      _scanState = ScanState.notSignedIn;
+    rightNowScanned = scannedId;
+
+    _scannedObject = await DbEshop.scanTicket(scannedId, widget.scanCode!);
+    if (_scannedObject != null &&
+        (_scannedObject!.state == OrderModel.sentState ||
+            _scannedObject!.state == OrderModel.paidState)) {
+      _scanState = ScanState.valid;
+      VibrateService.vibrateOk();
+      setState(() {});
+      return;
+    } else if (_scannedObject != null &&
+        (_scannedObject!.state == OrderModel.stornoState ||
+            _scannedObject!.state == OrderModel.orderedState)) {
+      _scanState = ScanState.invalid;
+      VibrateService.vibrateNotOk();
+      setState(() {});
+      return;
+    } else if (_scannedObject != null &&
+        (_scannedObject!.state == OrderModel.usedState)) {
+      _scanState = ScanState.used;
       VibrateService.vibrateNotOk();
       setState(() {});
       return;
     }
     _scanState = ScanState.nothing;
+    setState(() {});
+  }
+
+  // Function to handle "Confirm Ticket" button press
+  Future<void> _confirmTicket() async {
+    if (_scannedObject == null) return;
+
+    bool success = await DbEshop.updateTicketToUsed(
+        _scannedObject!.id!, widget.scanCode!);
+
+    if (success) {
+      // Update the ticket state to 'used'
+      setState(() {
+        _scannedObject!.state = OrderModel.usedState;
+        _scanState = ScanState.used;
+      });
+      VibrateService.vibrateOk();
+    } else {
+      // Handle failure, possibly show an error message
+      VibrateService.vibrateNotOk();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to confirm ticket").tr()),
+      );
+    }
   }
 
   Color getResultColor(ScanState scannedState) {
     switch (scannedState) {
-      case ScanState.signedIn:
+      case ScanState.valid:
         return Colors.greenAccent;
-      case ScanState.nothing:
+      case ScanState.used:
         return Colors.blueAccent;
-      case ScanState.notSignedIn:
-        break;
+      case ScanState.invalid:
+        return Colors.redAccent; // Changed from break to return
+      case ScanState.nothing:
+        return ThemeConfig.backgroundColor(context);
     }
     return Colors.redAccent;
   }
