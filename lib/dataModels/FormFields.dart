@@ -211,7 +211,7 @@ class FormHolder {
       return FieldHolder(
           id: ffm.id!,
           fieldType: ffm.type!,
-          isRequired: ffm.isRequired!,
+          isRequired: ffm.isRequired ?? false,
           title: ffm.title,
           description: ffm.description);
     }
