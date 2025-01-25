@@ -129,7 +129,7 @@ s=$.a2P.c
 s.toString
 v=y.z
 x=2
-return A.c(u.fE("create_companion_in_organization",A.y(["org",3,"oc",t,"usr",s,"c_name",d],y.N,v),v),$async$b_M)
+return A.c(u.fE("create_companion_in_organization",A.y(["org",1,"oc",t,"usr",s,"c_name",d],y.N,v),v),$async$b_M)
 case 2:return A.j(null,w)}})
 return A.k($async$b_M,w)},
 b0D(d){var x=0,w=A.l(y.S),v
@@ -949,4 +949,4 @@ D.b2Z=new A.c6("Companions",null,null,null,null,null,null,null,null,null,null,nu
 D.b39=new A.c6("Sign in someone",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3f=new A.c6("Sign in other",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_315",e:"endPart",h:b})})($__dart_deferred_initializers__,"QX/cp2CrN39ElOKk4QXA32HM1k0=");
+a.eventLog.push({p:"main.dart.js_315",e:"endPart",h:b})})($__dart_deferred_initializers__,"lFERhBlbU1eHsIhtPm2RIOD53dM=");

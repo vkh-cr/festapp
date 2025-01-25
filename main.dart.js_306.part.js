@@ -93,7 +93,7 @@ t=$.zy().bV("log_notifications")
 s=$.dI
 s.toString
 x=8
-return A.c(t.jH(0,A.y(["occasion",s,"to",j,"content",r,"heading",e==null?f:e,"organization",3],y.N,y.X)),$async$akn)
+return A.c(t.jH(0,A.y(["occasion",s,"to",j,"content",r,"heading",e==null?f:e,"organization",1],y.N,y.X)),$async$akn)
 case 8:A.bT(d,A.C("Message has been sent.",null),C.ah)
 x=1
 break
@@ -386,4 +386,4 @@ D.alD=new A.em(Z.akk,null,null,null,null)
 D.b2G=new A.c6("News",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2S=new A.c6("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_306",e:"endPart",h:b})})($__dart_deferred_initializers__,"1GaPUHeyG49zjPgc6tUBFvHGWDA=");
+a.eventLog.push({p:"main.dart.js_306",e:"endPart",h:b})})($__dart_deferred_initializers__,"+mj6pc5axlJkci0bdfC2uNjXP+k=");
