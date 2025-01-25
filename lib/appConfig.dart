@@ -16,7 +16,7 @@ class AppConfig {
   static const bool isUsersImportSupported = true;
   static const String oneSignalAppId = '';
 
-  static const int organization = 3;
+  static const int organization = 1;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
