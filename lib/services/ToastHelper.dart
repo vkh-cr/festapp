@@ -6,7 +6,7 @@ enum ToastSeverity{
   Ok, NotOk
 }
 class ToastHelper {
-  static void Show(BuildContext context, String value, {ToastSeverity severity = ToastSeverity.Ok}) {
+  static Future<void> Show(BuildContext context, String value, {ToastSeverity severity = ToastSeverity.Ok}) async {
 
     Color color = ThemeConfig.seed1;
     var hexCode = '#${color.value.toRadixString(16).substring(2, 8)}';
@@ -16,6 +16,6 @@ class ToastHelper {
       color = Colors.red;
       webColor  = "#d8392b";
     }
-    Fluttertoast.showToast(msg: value, timeInSecForIosWeb: 3, webBgColor: webColor, backgroundColor: color, webPosition: "left");
+    await Fluttertoast.showToast(msg: value, timeInSecForIosWeb: 3, webBgColor: webColor, backgroundColor: color, webPosition: "left");
   }
 }
