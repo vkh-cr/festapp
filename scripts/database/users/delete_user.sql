@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION delete_user(usr uuid, oc bigint)
- RETURNS jsonb
- LANGUAGE plpgsql
- SECURITY DEFINER
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 
 BEGIN
@@ -15,7 +15,13 @@ BEGIN
         END IF;
     END IF;
 
-    UPDATE user_group_info SET leader = null where leader = usr;
+    -- Set created_by to null in news table for rows where created_by = usr
+    UPDATE public.news
+    SET created_by = null
+    WHERE created_by = usr;
+
+    -- Perform the deletion process for user
+    UPDATE user_group_info SET leader = null WHERE leader = usr;
     DELETE FROM user_groups WHERE "user" = usr;
     DELETE FROM event_users WHERE "user" = usr;
     DELETE FROM user_news WHERE "user" = usr;
@@ -27,6 +33,7 @@ BEGIN
     DELETE FROM user_info WHERE id = usr;
     DELETE FROM auth.identities WHERE id = usr;
     DELETE FROM auth.users WHERE id = usr;
+
     RETURN jsonb_build_object('code', 200);
 END;
 $$;
