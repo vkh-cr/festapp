@@ -3,19 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Utilities {
-  static String formatPrice(BuildContext context, double price) {
-    // Get locale from context or fallback to Czech locale
-    //final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
-    final locale = 'cs_CZ';
+  static String formatPrice(BuildContext context, double price, {String? currencyCode, int? decimalDigits = 0}) {
+    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    final currency = currencyCode ?? 'CZK';
 
-    // Configure the currency formatter
     final NumberFormat currencyFormatter = NumberFormat.currency(
       locale: locale,
-      symbol: 'KČ', // Use the CZK symbol
-      decimalDigits: 0
+      name: currency,
+      symbol: NumberFormat.simpleCurrency(name: currency).currencySymbol,
+      decimalDigits: decimalDigits,
     );
 
-    return currencyFormatter.format(price); // Format the price as currency
+    return currencyFormatter.format(price);
   }
 
   static bool isValidUrl(String link) {

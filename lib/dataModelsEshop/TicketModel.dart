@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
@@ -114,7 +115,7 @@ class TicketModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    await DbEshop.updateTicketNoteHidden(id!, noteHidden!);
+    await DbTickets.updateTicketNoteHidden(id!, noteHidden!);
   }
 
   @override

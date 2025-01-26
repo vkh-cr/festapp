@@ -2,7 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbForms.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -107,7 +109,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
     if (model.seatState == SeatState.selected_by_me) {
       model.seatState = SeatState.available;
       setState(() {});
-      if (await DbEshop.selectSpot(
+      if (await DbOrders.selectSpot(
         context,
         widget.formDataKey,
         widget.secret,
@@ -127,7 +129,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
       }
       model.seatState = SeatState.selected_by_me;
       setState(() {});
-      if (await DbEshop.selectSpot(
+      if (await DbOrders.selectSpot(
         context,
         widget.formDataKey,
         widget.secret,
@@ -146,7 +148,7 @@ class _SeatReservationWidgetState extends State<SeatReservationWidget> {
 
   /// Loads Blueprint Data
   void loadData() async {
-    blueprint = await DbEshop.getBlueprint(
+    blueprint = await DbForms.getBlueprint(
       widget.secret,
       widget.formDataKey,
       widget.blueprintId,
