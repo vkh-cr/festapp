@@ -110,6 +110,7 @@ class RouterService {
     RightsService.currentOccasion = checkedObject.occasionId;
     RightsService.currentLink = checkedObject.link;
     RightsService.isAdminField = checkedObject.isAdmin;
+    RightsService.bankAccountAdmin = checkedObject.bankAccountsAdmin;
     AppConfigService.versionRecommended = checkedObject.versionRecommended;
 
     if (checkedObject.link != RouterService.currentOccasionLink &&
