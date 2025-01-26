@@ -6,8 +6,9 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -44,7 +45,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
   }
 
   Future<void> loadData() async {
-    var ff = await DbEshop.getAllFormFields(formLink!);
+    var ff = await DbForms.getAllFormFields(formLink!);
 
     setState(() {
       formFieldModels = ff;
@@ -58,7 +59,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
         key: refreshKey,
         child: SingleTableDataGrid<FormResponseModel>(
           context,
-              () => DbEshop.getAllResponses(formLink!),
+              () => DbForms.getAllResponses(formLink!),
           FormResponseModel.fromPlutoJson,
           DataGridFirstColumn.none,
           TbEshop.orders.id,

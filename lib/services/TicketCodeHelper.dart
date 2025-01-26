@@ -2,7 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/pages/ScanPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -26,10 +27,10 @@ class TicketCodeHelper {
       String titleMessage,
       String formLink) async {
 
-    String? getCode = await DbEshop.getScanCode(formLink);
+    String? getCode = await DbTickets.getScanCode(formLink);
     if(getCode == null){
       getCode = generateRandomCode(5);
-      await DbEshop.updateScanCode(formLink, getCode);
+      await DbTickets.updateScanCode(formLink, getCode);
     }
     String generatedCode = getCode;
     bool result = false;
@@ -52,7 +53,7 @@ class TicketCodeHelper {
               );
               if (confirm) {
                 String newCode = generateRandomCode(5);
-                await DbEshop.updateScanCode(formLink, newCode);
+                await DbTickets.updateScanCode(formLink, newCode);
                 setState(() {
                   generatedCode = newCode;
                   fullLink = "$linkBase$newCode";
