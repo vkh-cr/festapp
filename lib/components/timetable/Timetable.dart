@@ -72,7 +72,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   List<TimeBlockPlace> usedPlaces = [];
 
   late TimetableItemsWidget allItems;
-  late IgnorePointer timeNow;
+  IgnorePointer? timeNow;
   late TimelineWidget timelineWidget;
 
   _TimetableState(TimetableController? timetableController) {
@@ -213,8 +213,6 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       onItemTap: widget.controller?.onItemTap,
     );
 
-    timeNow = IgnorePointer(child: buildTimeNow());
-
     timelineWidget = TimelineWidget(
       startTime: startTime!,
       endTime: endTime!,
@@ -222,6 +220,10 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       pixelsInHour: pixelsInHour,
       timelineHeight: timelineHeight,
     );
+
+    if(!initial){
+      timeNow = IgnorePointer(child: buildTimeNow());
+    }
   }
 
   @override
@@ -246,7 +248,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         transformHitTests: true,
         transform: matrixTimetable,
         child: Stack(
-          children: [allItems, timeNow],
+          children: [allItems, timeNow??SizedBox.shrink()],
         ),
       );
       List<Widget> stackChildren = [timetableItems];
@@ -345,13 +347,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       container = Container(
         width: getTimetableWidth(),
         height: getTimetableHeight(),
-        color: ThemeConfig.blackColor(context).withOpacity(0.2),
+        color: ThemeConfig.blackColor(context).withValues(alpha: 0.2),
       );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
       container = Container(
         width: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
         height: getTimetableHeight(),
-        color: ThemeConfig.blackColor(context).withOpacity(ThemeConfig.timetableTimeSplitOpacity),
+        color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else {
       container = const SizedBox.shrink();
