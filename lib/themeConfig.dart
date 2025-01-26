@@ -130,7 +130,7 @@ class ThemeConfig {
   }
 
   static Color eventTypeToColorTimetable(BuildContext context, String? type) {
-    return eventTypeToColorTimetable(context, type);
+    return eventTypeToColor(context, type);
   }
 
   static Color getShade(Color color, {bool darker = false, double value = .1}) {
