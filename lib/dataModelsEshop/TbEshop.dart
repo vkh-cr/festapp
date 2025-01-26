@@ -8,8 +8,10 @@ class TbEshop {
   static BlueprintTb blueprints = const BlueprintTb();
   static SpotsTb spots = const SpotsTb();
   static PaymentInfoTb payment_info = const PaymentInfoTb();
-  static FormFieldsTb form_fields = const FormFieldsTb();  // New addition
+  static FormFieldsTb form_fields = const FormFieldsTb();
+  static TransactionsTb transactions = const TransactionsTb();
 }
+
 
 class ProductTypesTb {
   const ProductTypesTb();
@@ -151,4 +153,31 @@ class FormFieldsTb {
   String get product_type => "product_type";
   String get product_type_data => "product_type_data";
   String get is_ticket_field => "is_ticket_field";
+}
+
+class TransactionsTb {
+  const TransactionsTb();
+
+  String get table => "transactions";
+  String get id => "id";
+  String get transaction_id => "transaction_id";
+  String get date => "date";
+  String get amount => "amount";
+  String get currency => "currency";
+  String get counter_account => "counter_account";
+  String get bank_code => "bank_code";
+  String get bank_name => "bank_name";
+  String get ks => "ks";
+  String get vs => "vs";
+  String get ss => "ss";
+  String get user_identification => "user_identification";
+  String get transaction_type => "transaction_type";
+  String get performed_by => "performed_by";
+  String get comment => "comment";
+  String get command_id => "command_id";
+  String get bank_account_id => "bank_account_id";
+  String get payment_info => "payment_info";
+  String get created_at => "created_at";
+  String get message_for_recipient => "message_for_recipient";
+  String get counter_account_name => "counter_account_name";
 }

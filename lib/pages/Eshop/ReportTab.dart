@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:auto_route/auto_route.dart';

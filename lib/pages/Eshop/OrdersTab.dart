@@ -4,8 +4,10 @@ import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -44,7 +46,7 @@ class _OrdersTabState extends State<OrdersTab> {
         key: refreshKey,
         child: SingleTableDataGrid<OrderModel>(
           context,
-              () => DbEshop.getAllOrders(formLink!),
+              () => DbOrders.getAllOrders(formLink!),
           OrderModel.fromPlutoJson,
           RightsService.isAdmin() ? DataGridFirstColumn.deleteAndCheck : DataGridFirstColumn.check,
           TbEshop.orders.id,
@@ -94,7 +96,7 @@ class _OrdersTabState extends State<OrdersTab> {
       if (confirm && mounted) {
         var futures = selected.map((s) {
           return () async {
-            await DbEshop.stornoOrder(s.id!);
+            await DbOrders.stornoOrder(s.id!);
           };
         }).toList();
 
@@ -117,7 +119,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
     List<OrderModel> selectedFull = [];
 
-    var allOrders = await DbEshop.getAllOrders(formLink!);
+    var allOrders = await DbOrders.getAllOrders(formLink!);
     for (var s in selected) {
       var o = allOrders.firstWhere((o) => o.id == s.id);
       selectedFull.add(o);
@@ -133,7 +135,7 @@ class _OrdersTabState extends State<OrdersTab> {
       if (confirm && mounted) {
         var futures = stateChange.map((s) {
           return () async {
-            await DbEshop.updateOrderAndTicketsToPaid(s.id!);
+            await DbOrders.updateOrderAndTicketsToPaid(s.id!);
           };
         }).toList();
 
@@ -172,7 +174,7 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> sendTicketsToEmail(OrderModel order) async {
-    await DbEshop.sendTicketsToEmail(
+    await DbTickets.sendTicketsToEmail(
       orderId: order.id!,
       email: order.data!["email"],
     );
@@ -198,6 +200,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_DATA_NOTE,
     EshopColumns.ORDER_NOTE_HIDDEN,
     EshopColumns.PAYMENT_INFO_DEADLINE,
+    EshopColumns.ORDER_TRANSACTIONS,
     EshopColumns.ORDER_HISTORY,
   ];
 }

@@ -6,7 +6,8 @@ import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -623,7 +624,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   void saveChanges() async {
-    var success = await DbEshop.updateBlueprint(context, blueprint!);
+    var success = await DbForms.updateBlueprint(context, blueprint!);
     if(success){
       ToastHelper.Show(context, "Saved".tr());
       await loadData();
@@ -631,7 +632,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   }
 
   Future<void> loadData() async {
-    blueprint = await DbEshop.getBlueprintForEdit(formLink!);
+    blueprint = await DbForms.getBlueprintForEdit(formLink!);
     setState(() {});
   }
 }

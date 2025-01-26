@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION insert_transactions(transactions JSONB, bank_account_id BIGINT)
+CREATE OR REPLACE FUNCTION public.insert_transactions(transactions JSONB, bank_account_id BIGINT)
 RETURNS JSONB AS $$
 DECLARE
     transaction JSONB;
@@ -6,7 +6,7 @@ DECLARE
     inserted_count INT := 0;
     skipped_count INT := 0;
     payment_info_data eshop.payment_info%ROWTYPE;  -- Variable for storing the payment_info
-    order_id BIGINT;
+    new_transaction_id BIGINT;
 BEGIN
     FOR transaction IN SELECT * FROM jsonb_array_elements(transactions) LOOP
         -- Parse the date correctly, including the timezone offset
@@ -26,7 +26,7 @@ BEGIN
             FROM eshop.transactions
             WHERE transaction_id = (transaction->'column22'->>'value')::BIGINT
         ) THEN
-            -- Insert the transaction if it does not exist
+            -- Insert the transaction if it does not exist and capture the generated id
             INSERT INTO eshop.transactions (
                 transaction_id, date, amount, currency, counter_account, bank_code,
                 bank_name, ks, vs, ss, user_identification, transaction_type,
@@ -50,56 +50,32 @@ BEGIN
                 bank_account_id, -- Bank Account ID (provided by the function parameter)
                 transaction->'column16'->>'value', -- Zpráva pro příjemce
                 transaction->'column10'->>'value'  -- Název protiúčtu
-            );
+            )
+            RETURNING id INTO new_transaction_id;
             inserted_count := inserted_count + 1;
         ELSE
             skipped_count := skipped_count + 1;
             CONTINUE;
         END IF;
 
-        -- Now, look for a payment_info using the variable symbol (vs)
+        -- Look for a payment_info using the variable symbol (vs)
         SELECT * INTO payment_info_data
         FROM eshop.payment_info
         WHERE variable_symbol = (transaction->'column5'->>'value')::BIGINT
         LIMIT 1;
 
-        -- If payment_info is found, update the payment_info and check the paid/returned amounts
+        -- If payment_info is found, update the payment_info and perform related actions
         IF FOUND THEN
-            -- Update the paid or returned column based on the transaction amount
-            IF (transaction->'column1'->>'value')::NUMERIC > 0 THEN
-                -- Add to paid column
-                UPDATE eshop.payment_info
-                SET paid = COALESCE(paid, 0) + (transaction->'column1'->>'value')::NUMERIC
-                WHERE id = payment_info_data.id;
-            ELSE
-                -- Add to returned column
-                UPDATE eshop.payment_info
-                SET returned = COALESCE(returned, 0) + (transaction->'column1'->>'value')::NUMERIC
-                WHERE id = payment_info_data.id;
-            END IF;
-
-            -- Re-fetch payment_info_data to get the updated paid value
-            SELECT * INTO payment_info_data
-            FROM eshop.payment_info
-            WHERE id = payment_info_data.id
-            LIMIT 1;
-
-            -- If paid >= amount, set the order to paid
-            IF payment_info_data.paid >= payment_info_data.amount THEN
-                -- Find the order by payment_info ID
-                SELECT id INTO order_id
-                FROM eshop.orders
-                WHERE payment_info = payment_info_data.id
-                LIMIT 1;
-
-                -- Call the existing function to mark the order as paid
-                PERFORM update_order_and_tickets_to_paid(order_id);
-            END IF;
-
-            -- Update the transaction with payment_info reference
-            UPDATE eshop.transactions
-            SET payment_info = payment_info_data.id
-            WHERE transaction_id = (transaction->'column22'->>'value')::BIGINT;
+            BEGIN
+                -- Call the new function to handle payment_info updates using the generated transaction id
+                PERFORM public.add_transaction_to_payment_info(
+                    new_transaction_id,      -- transactions.id
+                    payment_info_data.id     -- payment_info_id
+                );
+            EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE 'Error processing transaction_id %: %', new_transaction_id, SQLERRM;
+                CONTINUE;
+            END;
         END IF;
     END LOOP;
 

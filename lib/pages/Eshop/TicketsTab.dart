@@ -4,8 +4,9 @@ import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -59,7 +60,7 @@ class _TicketsTabState extends State<TicketsTab> {
       child:
         SingleTableDataGrid<TicketModel>(
       context,
-          () => DbEshop.getAllTickets(formLink!),
+          () => DbTickets.getAllTickets(formLink!),
       TicketModel.fromPlutoJson,
       DataGridFirstColumn.check,
       TbEshop.tickets.id,
@@ -107,7 +108,7 @@ class _TicketsTabState extends State<TicketsTab> {
     if (confirm) {
       var stornoFutures = selectedTickets.map((ticket) {
         return () async {
-        if(await DbEshop.stornoTicket(ticket.id!)) {
+        if(await DbTickets.stornoTicket(ticket.id!)) {
           ToastHelper.Show(context, "Storno completed for {ticket}.".tr(namedArgs: {
           "ticket": ticket.ticketSymbol ?? ticket.id.toString()
         }));

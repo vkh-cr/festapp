@@ -7,9 +7,10 @@ import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/widgets/TransactionsDialog.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
@@ -44,6 +45,7 @@ class EshopColumns {
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
+  static const String ORDER_TRANSACTIONS = "orderTransactions";
 
   static const String RESPONSES = "responses";
 
@@ -235,29 +237,7 @@ class EshopColumns {
           return ElevatedButton(
             onPressed: () async {
               var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
-              var history = await DbEshop.getOrderHistory(id);
-              String prettyFormattedHistory = "";
-
-              // Create a DateFormat object to format the datetime
-              DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
-
-              for (var item in history) {
-                // Format the 'created_at' datetime to a more readable format
-                String createdAt = item['created_at'];
-                DateTime parsedDate = DateTime.parse(createdAt).toLocal(); // Parse the string into a DateTime object
-                String formattedDate = dateFormat.format(parsedDate); // Format the DateTime object
-
-                prettyFormattedHistory += "$formattedDate\n";
-                prettyFormattedHistory += '-' * 50 + "\n"; // Separator line
-
-                // Pretty print each history item with indentation for better readability
-                String formattedItem = const JsonEncoder.withIndent('  ').convert(item);
-                prettyFormattedHistory += "$formattedItem\n";
-
-                // Add a separator line between items to make them more distinct
-                prettyFormattedHistory += '-' * 50 + "\n";
-              }
-              await DialogHelper.showInformationDialog(context, "History".tr(), prettyFormattedHistory);
+              await _showOrderHistory(context, id);
             },
             child: Row(
               children: [
@@ -265,6 +245,32 @@ class EshopColumns {
                 Padding(
                   padding: const EdgeInsets.all(6),
                   child: Text("History".tr()),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
+    ORDER_TRANSACTIONS: [
+      PlutoColumn(
+        enableAutoEditing: true,
+        title: "Transactions".tr(),
+        field: TbEshop.transactions.table,
+        type: PlutoColumnType.text(),
+        width: 150,
+        renderer: (rendererContext) {
+          return ElevatedButton(
+            onPressed: () async {
+              var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
+              await _showOrderTransactions(context, id);
+            },
+            child: Row(
+              children: [
+                const Icon(Icons.payment),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text("Transactions".tr()),
                 ),
               ],
             ),
@@ -401,5 +407,44 @@ class EshopColumns {
       }
       return <PlutoColumn>[];
     }).toList();
+  }
+
+  /// Shows the order history in a dialog.
+  static Future<void> _showOrderHistory(BuildContext context, int orderId) async {
+    var history = await DbOrders.getOrderHistory(orderId);
+    String prettyFormattedHistory = "";
+
+    // Create a DateFormat object to format the datetime
+    DateFormat dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
+
+    for (var item in history) {
+      // Format the 'created_at' datetime to a more readable format
+      String createdAt = item['created_at'];
+      DateTime parsedDate = DateTime.parse(createdAt).toLocal(); // Parse the string into a DateTime object
+      String formattedDate = dateFormat.format(parsedDate); // Format the DateTime object
+
+      prettyFormattedHistory += "$formattedDate\n";
+      prettyFormattedHistory += '-' * 50 + "\n"; // Separator line
+
+      // Pretty print each history item with indentation for better readability
+      String formattedItem = const JsonEncoder.withIndent('  ').convert(item);
+      prettyFormattedHistory += "$formattedItem\n";
+
+      // Add a separator line between items to make them more distinct
+      prettyFormattedHistory += '-' * 50 + "\n";
+    }
+    await DialogHelper.showInformationDialog(context, "History".tr(), prettyFormattedHistory);
+  }
+
+  /// Shows the order transactions in a dialog.
+  static Future<void> _showOrderTransactions(BuildContext context, int orderId) async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return TransactionsDialog(
+          orderId: orderId,
+        );
+      },
+    );
   }
 }

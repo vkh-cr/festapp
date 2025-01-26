@@ -11,8 +11,10 @@ import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServicesEshop/DbForms.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/pages/Eshop/OrderFinishScreen.dart';
 import 'package:fstapp/pages/Eshop/OrderPreviewScreen.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -245,7 +247,7 @@ class _FormPageState extends State<FormPage> {
       barrierLabel: "FinishOrderDialog",
       pageBuilder: (context, anim1, anim2) => FinishOrderScreen(
         orderFutureFunction: () async {
-          return await DbEshop.sendTicketOrder(data);
+          return await DbOrders.sendTicketOrder(data);
         },
         onResetForm: () async {
           Navigator.of(context).pop(); // Close the FinishOrderScreen
@@ -372,7 +374,7 @@ class _FormPageState extends State<FormPage> {
     }
     //var key = UuidConverter.base62ToUuid(widget.id!);
 
-    form = await DbEshop.getFormFromLink(widget.formLink!);
+    form = await DbForms.getFormFromLink(widget.formLink!);
     if (form == null) {
       return;
     }

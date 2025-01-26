@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -260,7 +261,7 @@ class FormHelper {
     return StatefulBuilder(
       builder: (context, setState) {
         Future<void> removeTicket(int index) async {
-          await DbEshop.selectSpot(context, formHolder.controller!.formKey!, formHolder.controller!.secret!, ticket.tickets[index].seat!.objectModel!.id!, false);
+          await DbOrders.selectSpot(context, formHolder.controller!.formKey!, formHolder.controller!.secret!, ticket.tickets[index].seat!.objectModel!.id!, false);
           setState(() {
             ticket.tickets.removeAt(index);
           });

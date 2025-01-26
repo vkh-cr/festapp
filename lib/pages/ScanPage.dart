@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/VibrateService.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -227,7 +228,7 @@ class _ScanPageState extends State<ScanPage> {
     }
     rightNowScanned = scannedId;
 
-    _scannedObject = await DbEshop.scanTicket(scannedId, widget.scanCode!);
+    _scannedObject = await DbTickets.scanTicket(scannedId, widget.scanCode!);
     if (_scannedObject != null &&
         (_scannedObject!.state == OrderModel.sentState ||
             _scannedObject!.state == OrderModel.paidState)) {
@@ -257,7 +258,7 @@ class _ScanPageState extends State<ScanPage> {
   Future<void> _confirmTicket() async {
     if (_scannedObject == null) return;
 
-    bool success = await DbEshop.updateTicketToUsed(
+    bool success = await DbTickets.updateTicketToUsed(
         _scannedObject!.id!, widget.scanCode!);
 
     if (success) {

@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
     const features = occasionData.features;
 
     // Determine if ticket feature is enabled
-    const ticketFeature = features.find((feature: any) => feature.code === "ticket");
+    const ticketFeature = features?.find((feature: any) => feature.code === "ticket");
     const isTicketEnabled = ticketFeature?.is_enabled ?? false;
 
     // Fetch the tickets only if ticket feature is enabled

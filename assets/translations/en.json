@@ -374,5 +374,13 @@
   "Confirm Ticket": "Confirm Ticket",
   "Scan Code": "Scan Code",
   "Enter Scan Code": "Enter Scan Code",
+  "Transactions": "Transactions",
+  "Account Name": "Account Name",
+  "Bank Account": "Bank Account",
+  "Date": "Date",
+  "N/A": "N/A",
+  "Message for Recipient": "Message for Recipient",
+  "No transactions found": "No transactions found",
+  "Transactions for order {order}.": "Transactions for order {order}.",
   "_":"_"
 }

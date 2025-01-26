@@ -3,7 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -32,12 +33,12 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   Future<void> loadData() async {
-    form = await DbEshop.getFormForEdit(formLink!);
+    form = await DbForms.getFormForEdit(formLink!);
     setState(() {});
   }
 
   Future<void> saveChanges() async {
-    await DbEshop.updateForm(form!);
+    await DbForms.updateForm(form!);
     ToastHelper.Show(context, "${"Saved".tr()}: ${form?.formKey}");
     Navigator.of(context).pop();
   }
@@ -91,7 +92,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                                   setState(() {
                                     form!.header = value as String;
                                   });
-                                  await DbEshop.updateForm(form!);
+                                  await DbForms.updateForm(form!);
                                 }
                               });
                             },
