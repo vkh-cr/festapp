@@ -1,11 +1,15 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 import 'package:fstapp/dataModelsEshop/TransactionModel.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/widgets/SearchTransactionsScreen.dart';
+import 'package:intl/intl.dart';
 
 class TransactionsDialog extends StatefulWidget {
   final int orderId;
@@ -21,6 +25,7 @@ class TransactionsDialog extends StatefulWidget {
 
 class _TransactionsDialogState extends State<TransactionsDialog> {
   List<TransactionModel> _transactions = [];
+  PaymentInfoModel? _payment;
   bool _isLoading = true;
 
   @override
@@ -29,25 +34,71 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
     _fetchTransactions();
   }
 
+  /// Fetches transactions associated with the current order.
   Future<void> _fetchTransactions() async {
-    final transactions = await DbEshop.getTransactionsForOrder(widget.orderId);
-    if (transactions != null) {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final transactionObject = await DbEshop.getTransactionsForOrder(widget.orderId);
+    if (transactionObject != null) {
       // Sort transactions by date in descending order
-      transactions.sort((a, b) => b.date!.compareTo(a.date!));
+      transactionObject.transactions.sort((a, b) => b.date!.compareTo(a.date!));
       setState(() {
-        _transactions = transactions;
+        _transactions = transactionObject.transactions;
+        _payment = transactionObject.paymentInfo;
         _isLoading = false;
       });
     } else {
       setState(() {
         _isLoading = false;
       });
+      ToastHelper.Show(context, "Failed to fetch transactions.".tr());
     }
   }
 
-  void _addTransaction() {
-    // Implementation for adding a transaction will follow
-    // You can navigate to another screen or show another dialog to add a transaction
+  /// Navigates to the search screen to add a new transaction.
+  void _addTransaction() async {
+
+    // Navigate to the SearchTransactionsScreen and wait for a result
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => SearchTransactionsScreen(
+          paymentInfoId: _payment!.id!,
+          bankAccount: _payment!.bankAccount!,
+        ),
+      ),
+    );
+
+    // If a transaction was added, refresh the transactions list
+    if (result == true) {
+      _fetchTransactions();
+    }
+  }
+
+  /// Removes a transaction after user confirmation.
+  void _removeTransaction(TransactionModel transaction) async {
+    // Show confirmation dialog
+    final confirm = await DialogHelper.showConfirmationDialogAsync(context, "Confirm Removal".tr(), "Are you sure you want to remove this transaction?".tr());
+
+    // If user confirmed, proceed to remove the transaction
+    if (confirm == true) {
+      try {
+        await DbEshop.removeTransactionFromPaymentInfoWithSecurity(context, transaction.id!, _payment!.id!);
+        ToastHelper.Show(context, "Transaction removed successfully.".tr());
+        _fetchTransactions();
+      } catch (e) {
+        ToastHelper.Show(context, "Failed to remove transaction.".tr());
+      }
+    }
+  }
+
+  /// Checks if the current user is a bank admin for the given bank account.
+  bool _isBankAdmin() {
+    if (_payment == null || _payment!.bankAccount == null) {
+      return false;
+    }
+    return RightsService.bankAccountAdmin?.any((i) => _payment!.bankAccount == i) ?? false;
   }
 
   @override
@@ -91,8 +142,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
               itemCount: _transactions.length,
               itemBuilder: (context, index) {
                 final transaction = _transactions[index];
-                final counterAccountName =
-                    transaction.counterAccountName ?? transaction.performedBy;
+                final counterAccountName = transaction.counterAccountName ?? transaction.performedBy;
 
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 5),
@@ -135,7 +185,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                         ),
                         SizedBox(height: 5),
 
-                        // Counter Account / Bank Code and Bank Name
+                        // Bank Account formatted as account/bankcode (bank name)
                         _buildInfoRow(
                           title: 'Bank Account'.tr(),
                           value:
@@ -159,6 +209,17 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
                             title: 'Message for Recipient'.tr(),
                             value: transaction.messageForRecipient!,
                           ),
+
+                        // Remove Button (conditionally shown)
+                        if (_isBankAdmin())
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              tooltip: "Remove Transaction".tr(),
+                              onPressed: () => _removeTransaction(transaction),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -167,10 +228,11 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
             ),
           ),
           SizedBox(height: 20),
-          // ElevatedButton(
-          //   onPressed: _addTransaction,
-          //   child: Text("Add Transaction".tr()),
-          // ),
+          if (_isBankAdmin())
+            ElevatedButton(
+              onPressed: _addTransaction,
+              child: Text("Vyhledat a přidat transakci".tr()),
+            ),
         ],
       ),
       // Removed the 'actions' section as the close button is now in the title

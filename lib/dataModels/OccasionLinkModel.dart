@@ -6,6 +6,7 @@ class OccasionLinkModel {
   String? link;
   OccasionUserModel? user;
   OccasionUserModel? unitUser;
+  List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
   String? versionRecommended; // New field for version_recommended
 
@@ -20,6 +21,7 @@ class OccasionLinkModel {
       code: json["code"],
       unitUser: unitUser,
       user: occasionUser,
+      bankAccountsAdmin: List<int>.from(json["bank_accounts_admin"]??[]),
       link: json["link"],
       occasionId: json["occasion"],
       isAdmin: json["is_admin"],
@@ -31,6 +33,7 @@ class OccasionLinkModel {
     this.code,
     this.user,
     this.unitUser,
+    this.bankAccountsAdmin,
     this.link,
     this.occasionId,
     this.isAdmin,

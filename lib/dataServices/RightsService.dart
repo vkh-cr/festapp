@@ -14,6 +14,8 @@ class RightsService{
   static int? currentOccasion;
   static String? currentLink;
   static bool? isAdminField;
+  static List<int>? bankAccountAdmin;
+
 
   static Future<bool> updateOccasionData([String? link]) async {
     if (currentOccasion == null || link != currentLink) {
