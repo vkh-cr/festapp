@@ -16,6 +16,7 @@ DECLARE
     occasion_link text;
     version_recommended text;
     occasion_unit bigint;
+    bank_account_ids bigint[];
 BEGIN
     -- Log the request details in log_app_config table
     INSERT INTO public.log_app_config (organization, platform)
@@ -146,6 +147,12 @@ BEGIN
           AND "user" = auth.uid();
     END IF;
 
+    -- Fetch list of bank account IDs where the user is an admin
+    SELECT array_agg(bank_account) INTO bank_account_ids
+    FROM eshop.bank_account_users
+    WHERE "user" = auth.uid()
+      AND is_admin = true;
+
     -- Return final response with all data and status code 200 at the end
     RETURN json_build_object(
         'code', 200,
@@ -154,7 +161,8 @@ BEGIN
         'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL),
         'link', occasion_link,
         'occasion', occasionId,
-        'version_recommended', version_recommended
+        'version_recommended', version_recommended,
+        'bank_accounts_admin', COALESCE(bank_account_ids, '{}')
     );
 END;
 $$;
