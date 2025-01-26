@@ -140,7 +140,7 @@ r=k==null?l:D.b.kz(k,new B.aWh(x))}k=r==null
 q=k?l:r.aD0()
 if(q==null)q=""
 if(q.length!==0)q="\n"+q
-p=!k?"\n"+r.a_2()+q:""
+p=!k?"\n"+r.a_3()+q:""
 k=w.r
 o=k!=null&&k.length!==0?"\n"+A.o(k):""
 k=m.x
@@ -157,7 +157,7 @@ n=n==null?l:n.r
 return A.o(k)+" "+u+"\n"+t+": "+C.Dv(d,n==null?0:n)},
 gbT(d){return this.c},
 gdK(d){return this.w},
-sVZ(d){return this.as=d}}
+sW_(d){return this.as=d}}
 B.h8.prototype={
 c5(){var x,w=this,v=w.b
 v=v==null?null:v.h7()
@@ -196,7 +196,7 @@ s.toString
 s=t.eu(s)
 t=s}else t=""
 t=A.bi(t)
-s=A.bi(o.a_2())
+s=A.bi(o.a_3())
 q=A.bi(o.aD0())
 p=o.z
 return A.mp(A.y(["id",k,"order_symbol",m,"price",l,"state",x,"amount",w,"paid",v,"returned",u,"variable_symbol",r,"deadline",t,"data",s,"note",q,"note_hidden",A.bi(p==null?"":p),"orders_history",A.bi("")],y.g,y.e),!1,y.b)},
@@ -217,7 +217,7 @@ return A.c(B.b0p(t,u),$async$fT)
 case 2:return A.j(null,w)}})
 return A.k($async$fT,w)},
 lH(){return"Order #"+A.o(this.a)},
-a_2(){var x=this.f,w=x==null,v=A.o(w?null:J.t(x,"name")),u=A.o(w?null:J.t(x,"surname"))
+a_3(){var x=this.f,w=x==null,v=A.o(w?null:J.t(x,"name")),u=A.o(w?null:J.t(x,"surname"))
 return v+" "+u+" ("+A.o(w?null:J.t(x,"email"))+")"},
 aD0(){var x=this.f
 x=x==null?null:J.t(x,"note")
@@ -251,7 +251,7 @@ t=A.bi(t==null?"":t)
 s=n.Q
 r=s!=null
 q=A.bi(r?"Order #"+A.o(s.a):"")
-s=A.bi(r?s.a_2():"")
+s=A.bi(r?s.a_3():"")
 r=n.z
 r=A.bi(r!=null?new A.O(r,new B.bBg(),A.V(r).h("O<1,e>")).bZ(0," | "):"")
 p=n.y
@@ -323,4 +323,4 @@ x(A.ix,[B.h8,B.ii])})()
 A.br(b.typeUniverse,JSON.parse('{"h8":{"ix":[]},"ii":{"ix":[]}}'))
 var y={e:A.w("fO"),g:A.w("e"),b:A.w("@"),f:A.w("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"7ObDL7/Z6O6xzDvtO+6qGESa1ao=");
+a.eventLog.push({p:"main.dart.js_206",e:"endPart",h:b})})($__dart_deferred_initializers__,"nHx8nyM3yI92bofBTdgCD6o0jx0=");

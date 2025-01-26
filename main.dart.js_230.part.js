@@ -12,14 +12,14 @@ case 3:t=$.uz().bW("information").h8(0,y.a)
 s=$.dA
 s.toString
 w=6
-return A.c(t.cl("occasion",s).axV(0,"type","eq",d),$async$x2)
+return A.c(t.cm("occasion",s).axV(0,"type","eq",d),$async$x2)
 case 6:r=f
 w=4
 break
 case 5:t=$.uz().bW("information").h8(0,y.a)
 s=$.dA
 s.toString
-s=t.cl("occasion",s)
+s=t.cm("occasion",s)
 w=7
 return A.c(A.pN(s.vP(s.wb("or","(type.eq.,type.is.null)")),s.$ti.c),$async$x2)
 case 7:r=f
@@ -52,13 +52,13 @@ else q=t<s?-1:1
 if(q!==0)return q}++u}return C.c.c_(o,v.length)},
 bEr:function bEr(){},
 bEs:function bEs(){},
-akr(){var w=0,v=A.l(x.i),u,t,s,r,q,p
-var $async$akr=A.h(function(d,e){if(d===1)return A.i(e,v)
+aks(){var w=0,v=A.l(x.i),u,t,s,r,q,p
+var $async$aks=A.h(function(d,e){if(d===1)return A.i(e,v)
 while(true)switch(w){case 0:q=$.TL().bW("occasions").h8(0,"data")
 p=$.dA
 p.toString
 w=3
-return A.c(q.cl("id",p).HL(),$async$akr)
+return A.c(q.cm("id",p).HL(),$async$aks)
 case 3:t=e
 if(t!=null){s=J.t(t,"data")
 if(s!=null&&J.t(s,"game")!=null){q=J.t(s,"game")
@@ -70,7 +70,7 @@ break}}u=null
 w=1
 break
 case 1:return A.j(u,v)}})
-return A.k($async$akr,v)}}
+return A.k($async$aks,v)}}
 J=c[1]
 A=c[0]
 C=c[2]
@@ -82,7 +82,7 @@ w=this.b
 return A.y(["start",v,"end",w==null?null:w.h7()],x.g,x.b)}}
 var z=a.updateTypes(["Q<A<fl>>([e?])"])
 B.b1a.prototype={
-$1(d){return A.aow(d)},
+$1(d){return A.aox(d)},
 $S:107}
 B.b1b.prototype={
 $2(d,e){var w,v,u=d.w
@@ -113,6 +113,6 @@ v(A.bH,[B.b1a,B.bEr,B.bEs])
 w(B.b1b,A.dg)})()
 var y={a:"id,occasion,created_at,updated_at,is_hidden,title,order,type,data,information_hidden(*)"}
 var x={c:A.w("fl"),l:A.w("A<fl>"),g:A.w("e"),b:A.w("@"),i:A.w("Yg?")};(function lazyInitializers(){var w=a.lazyFinal
-w($,"d5J","TL",()=>$.jv().gta(0))})()};
+w($,"d5I","TL",()=>$.jv().gta(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_230",e:"endPart",h:b})})($__dart_deferred_initializers__,"mOqfOGiVKT5yx8r7QJ72AE86cOI=");
+a.eventLog.push({p:"main.dart.js_230",e:"endPart",h:b})})($__dart_deferred_initializers__,"GkkBKcJJjnkGlvEICgJxLZSEy5U=");

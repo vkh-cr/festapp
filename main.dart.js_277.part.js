@@ -4,7 +4,7 @@ a[b][c].push({p:"main.dart.js_277",e:"beginPart"})})(self,"$__dart_deferred_init
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,H,I,K,L,M,B={
 cM8(){return new B.BG(null)},
 BG:function BG(d){this.a=d},
-a9w:function a9w(d,e){var _=this
+a9x:function a9x(d,e){var _=this
 _.d=d
 _.e=e
 _.c=_.a=null},
@@ -40,9 +40,9 @@ S=c[143]
 G=c[174]
 T=c[180]
 B.BG.prototype={
-M(){return new B.a9w(A.a([],y.F),A.a([],y.j))}}
-B.a9w.prototype={
-aW(){this.cw()
+M(){return new B.a9x(A.a([],y.F),A.a([],y.j))}}
+B.a9x.prototype={
+aW(){this.cz()
 this.bc()},
 bc(){var x=0,w=A.l(y.v),v=this
 var $async$bc=A.h(function(d,e){if(d===1)return A.i(e,w)
@@ -59,14 +59,14 @@ while(true)switch(x){case 0:x=2
 return A.c(O.nf("events",A.Az(),y.u),$async$jb)
 case 2:r=e
 x=3
-return A.c(P.asR(r),$async$jb)
+return A.c(P.asS(r),$async$jb)
 case 3:x=4
 return A.c(E.a0h(r),$async$jb)
 case 4:q=J
 p=r
 o=B
 x=5
-return A.c(A.or("user_info",A.a5A(),null,y.p),$async$jb)
+return A.c(A.or("user_info",A.a5B(),null,y.p),$async$jb)
 case 5:u=q.j9(p,new o.bWf(e))
 t=v.d
 C.b.R(t)
@@ -110,7 +110,7 @@ case 3:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:2}
 B.bWi.prototype={
-$1(d){return F.a58(d)},
+$1(d){return F.a59(d)},
 $S:57}
 B.bWk.prototype={
 $0(){},
@@ -124,7 +124,7 @@ x=x||d.ax}else x=!0
 return x},
 $S:39}
 B.bWg.prototype={
-$1(d){return F.a58(d)},
+$1(d){return F.a59(d)},
 $S:57}
 B.bWh.prototype={
 $0(){},
@@ -139,21 +139,21 @@ return d.e===x},
 $S:73}
 B.bWl.prototype={
 $0(){var x=this.a,w=this.b
-J.bU(x.d,"rightText",w.j(0))
-J.bU(x.d,"leftText",w.a96())
-x.c=N.a57(w)},
+J.bW(x.d,"rightText",w.j(0))
+J.bW(x.d,"leftText",w.a97())
+x.c=N.a58(w)},
 $S:0}
 B.bWd.prototype={
 $1(d){return this.a.bc()},
 $S:38};(function installTearOffs(){var x=a._instance_1u
-x(B.a9w.prototype,"gaRC","aRD",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.a9x.prototype,"gaRC","aRD",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.BG,A.G)
-x(B.a9w,A.K)
+x(B.a9x,A.K)
 w(A.cf,[B.bWj,B.bWk,B.bWh,B.bWe,B.bWl])
 w(A.bH,[B.bWi,B.bWf,B.bWg,B.bWm,B.bWd])})()
-A.br(b.typeUniverse,JSON.parse('{"BG":{"G":[],"d":[]},"a9w":{"K":["BG"]}}'))
+A.br(b.typeUniverse,JSON.parse('{"BG":{"G":[],"d":[]},"a9x":{"K":["BG"]}}'))
 var y={u:A.w("ds"),F:A.w("p<ds>"),j:A.w("p<dl>"),p:A.w("e4"),q:A.w("B?"),v:A.w("~")};(function constants(){D.ai9=new A.ap(24,88,24,24)
-D.b2n=new A.c6("My schedule",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b2r=new A.c6("There will appear your events.",null,I.li,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+D.b2n=new A.c7("My schedule",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b2r=new A.c7("There will appear your events.",null,I.li,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_277",e:"endPart",h:b})})($__dart_deferred_initializers__,"V8PqV8VyBrQWpyZuIFamp0Ron+Y=");
+a.eventLog.push({p:"main.dart.js_277",e:"endPart",h:b})})($__dart_deferred_initializers__,"ydftOd0JHIlIBANSi20OsLS22xM=");

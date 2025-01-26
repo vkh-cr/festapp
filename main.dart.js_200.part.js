@@ -1,7 +1,7 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_200",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,D,E,F,G,B={akS:function akS(d,e,f){this.c=d
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,D,E,F,G,B={akT:function akT(d,e,f){this.c=d
 this.a=e
 this.b=f},
 cpK(d,e,f){return new B.a_I(d,f,e,null)},
@@ -63,7 +63,7 @@ while(true)switch(x){case 0:x=2
 return A.c(D.c4.fA("HapticFeedback.vibrate","HapticFeedbackType.lightImpact",y.f),$async$pp)
 case 2:return A.j(null,w)}})
 return A.k($async$pp,w)},
-cgE(d){return A.J(d).ax.a===D.y?D.ew:D.iv}},C,H
+cgE(d){return A.I(d).ax.a===D.y?D.ew:D.iv}},C,H
 J=c[1]
 A=c[0]
 D=c[2]
@@ -73,7 +73,7 @@ G=c[161]
 B=a.updateHolder(c[33],B)
 C=c[197]
 H=c[176]
-B.akS.prototype={
+B.akT.prototype={
 H(){return"DetectionSpeed."+this.b}}
 B.a_I.prototype={
 M(){return new B.aIv()}}
@@ -90,7 +90,7 @@ Z(){var x,w=this
 w.a.toString
 $.aq.ea$.push(w)
 x=w.gtc(0).ch
-w.f=new A.ct(x,A.q(x).h("ct<1>")).On(w.a.d,!1,B.d2p())
+w.f=new A.ct(x,A.q(x).h("ct<1>")).On(w.a.d,!1,B.d2o())
 w.gtc(0)
 w.gtc(0).kb(0)
 w.ao()},
@@ -238,25 +238,25 @@ $S:121}
 B.bxX.prototype={
 $1(d){return d.c},
 $S:942};(function installTearOffs(){var x=a._static_2,w=a._instance_0u
-x(B,"d2p","cLZ",2)
+x(B,"d2o","cLZ",2)
 w(B.a_L.prototype,"geM","l",1)})();(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
-w(B.akS,A.e5)
+w(B.akT,A.e5)
 w(B.a_I,A.G)
 w(B.aQ9,A.K)
 w(B.aIv,B.aQ9)
 v(A.bH,[B.bVQ,B.bjV,B.bjW,B.bjX,B.bjY,B.bxX])
 w(B.bVP,A.dg)
-w(B.a_L,A.bQ)
+w(B.a_L,A.bR)
 v(A.B,[B.BD,B.bxW])
 x(B.aQ9,A.ex)})()
-A.br(b.typeUniverse,JSON.parse('{"a_I":{"G":[],"d":[]},"aIv":{"K":["a_I"],"ex":[]},"a_L":{"bQ":["BD"],"am":[]}}'))
+A.br(b.typeUniverse,JSON.parse('{"a_I":{"G":[],"d":[]},"aIv":{"K":["a_I"],"ex":[]},"a_L":{"bR":["BD"],"am":[]}}'))
 var y={g:A.w("e"),i:A.w("j3<BD>"),n:A.w("ey<lf>"),a:A.w("B?"),f:A.w("~")};(function constants(){var x=a.makeConstList
 C.afr=new A.mV(D.r,null,null)
 C.alo=new A.em(F.zc,null,D.m,null,null)
 C.abv=new A.lj(D.I,null,null,C.alo,null)
 C.afs=new A.mV(D.r,C.abv,null)
-C.GF=new B.akS(0,0,"noDuplicates")
-C.agx=new B.akS(1,1,"normal")
+C.GF=new B.akT(0,0,"noDuplicates")
+C.agx=new B.akT(1,1,"normal")
 C.H2=new A.ap(0,24,0,12)
 C.HU=new A.aP(57657,"MaterialIcons",null,!1)
 C.bbf=A.a(x([]),A.w("p<iJ>"))
@@ -271,4 +271,4 @@ C.aLD=new A.vr(null,"The MobileScannerController was used after it has been disp
 C.aLK=new A.pz(C.aLx,C.aLD)
 C.a3p=new A.Y(!0,D.r,null,null,null,null,16,D.aq,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_200",e:"endPart",h:b})})($__dart_deferred_initializers__,"SlePyXd4XU9iwvk0T4XLH+3AaFs=");
+a.eventLog.push({p:"main.dart.js_200",e:"endPart",h:b})})($__dart_deferred_initializers__,"i+U9m7gTRf1dgXR6DNYnMS7jIMI=");
