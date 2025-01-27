@@ -5,7 +5,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
     RETURN (
-        SELECT jsonb_agg(t.*)
+        SELECT jsonb_agg(t ORDER BY t.date DESC)
         FROM eshop.transactions t
         WHERE t.bank_account_id = (
             SELECT pi.bank_account

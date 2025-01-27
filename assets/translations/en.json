@@ -382,5 +382,13 @@
   "Message for Recipient": "Message for Recipient",
   "No transactions found": "No transactions found",
   "Transactions for order {order}.": "Transactions for order {order}.",
+  "Are you sure you want to unlink this transaction?": "Are you sure you want to unlink this transaction?",
+  "Remove": "Remove",
+  "Find and link a transaction": "Find and link a transaction",
+  "Transaction added successfully.": "Transaction added successfully.",
+  "Confirm Add": "Confirm Add",
+  "Are you sure you want to add this transaction?": "Are you sure you want to add this transaction?",
+  "Search Transactions": "Search Transactions",
+  "Search by message, account, symbol, name, or amount": "Search by message, account, symbol, name, or amount",
   "_":"_"
 }

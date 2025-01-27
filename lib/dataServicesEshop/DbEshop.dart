@@ -56,7 +56,7 @@ class DbEshop {
 
   /// Retrieves all transactions that have the same bank account as the order's payment_info
   /// and have a NULL payment_info field.
-  static Future<List<TransactionModel>?> getTransactionsWithSameBankAccountAndNullPaymentInfo(int paymentInfoId) async {
+  static Future<List<TransactionModel>?> getTransactionsForOrderAllAvailable(int paymentInfoId) async {
     final response = await _supabase.rpc(
       'get_transactions_for_order_all_available',
       params: {'payment_info_id': paymentInfoId},
