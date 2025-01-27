@@ -64,7 +64,7 @@ BEGIN
         LIMIT 1;
 
         -- Call the existing function to mark the order as paid
-        PERFORM eshop.update_order_and_tickets_to_paid(associated_order_id);
+        PERFORM public.update_order_and_tickets_to_paid(associated_order_id);
     END IF;
 
     -- Update the transaction's payment_info reference

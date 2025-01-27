@@ -108,6 +108,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     // Calculate dialog height based on screen size, but set a maximum height to ensure it fits on phone screens
     final dialogHeight = MediaQuery.of(context).size.height * 0.6;
@@ -139,7 +140,31 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
           : Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Overview Section
+          // **Variable Symbol Section**
+          if (_payment != null && _payment!.variableSymbol != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Row(
+                children: [
+                  Text(
+                    "${"Variable symbol".tr()}: ",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Expanded(
+                    child: SelectableText(
+                      _payment!.variableSymbol!.toString(),
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // **Overview Section**
           if (_payment != null)
             Card(
               margin: EdgeInsets.only(bottom: 10),
