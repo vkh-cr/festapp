@@ -390,5 +390,7 @@
   "Are you sure you want to add this transaction?": "Are you sure you want to add this transaction?",
   "Search Transactions": "Search Transactions",
   "Search by message, account, symbol, name, or amount": "Search by message, account, symbol, name, or amount",
+  "Reservation Unavailable": "Reservation Unavailable",
+  "Reservation for the selected event is currently unavailable.": "Reservation for the selected event is currently unavailable.",
   "_":"_"
 }
