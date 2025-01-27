@@ -390,5 +390,7 @@
   "Are you sure you want to add this transaction?": "Jste si jisti, že chcete přidat tuto transakci?",
   "Search Transactions": "Vyhledat transakce",
   "Search by message, account, symbol, name, or amount": "Vyhledat podle zprávy, účtu, symbolu, jména nebo částky",
+  "Reservation Unavailable": "Rezervace není k dispozici",
+  "Reservation for the selected event is currently unavailable.": "Rezervace na zvolenou událost momentálně není k dispozici.",
   "_": "_"
 }

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_form_from_linkt(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_form_from_link(form_link TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
@@ -10,12 +10,14 @@ BEGIN
         FROM public.forms
         WHERE link = form_link
     ) INTO form_exists;
+
     IF NOT form_exists THEN
         RETURN jsonb_build_object(
             'code', 404,
             'message', 'Form does not exist.'
         );
     END IF;
+
     IF NOT EXISTS (
         SELECT 1
         FROM public.forms
@@ -26,6 +28,7 @@ BEGIN
             'message', 'Form is not open.'
         );
     END IF;
+
     SELECT jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
@@ -75,7 +78,7 @@ BEGIN
                                             )
                                             FROM eshop.products p
                                             WHERE p.product_type = pt.id
-                                            AND p.is_hidden = FALSE
+                                              AND NOT p.is_hidden
                                         )
                                     )
                                 ELSE NULL
@@ -93,6 +96,7 @@ BEGIN
     FROM public.forms f
     LEFT JOIN eshop.bank_accounts ba ON f.bank_account = ba.id
     WHERE f.link = form_link;
+
     RETURN allData;
 END;
 $$;
