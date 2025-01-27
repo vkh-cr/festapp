@@ -60,7 +60,6 @@ class _SearchTransactionsScreenState extends State<SearchTransactionsScreen> {
         _filteredTransactions = [];
         _isLoading = false;
       });
-      ToastHelper.Show(context, "Failed to fetch transactions.".tr());
     }
   }
 
