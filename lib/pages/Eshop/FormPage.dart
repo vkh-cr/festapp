@@ -33,7 +33,7 @@ class FormPage extends StatefulWidget {
   static const ROUTE = "form";
 
   String? formLink;
-  FormPage({super.key,  @pathParam this.formLink});
+  FormPage({super.key, @pathParam this.formLink});
 
   @override
   _FormPageState createState() => _FormPageState();
@@ -41,6 +41,7 @@ class FormPage extends StatefulWidget {
 
 class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
+  bool _formNotAvailable = false;
   double _totalPrice = 0.0;
   int _totalTickets = 0;
   Map<String, dynamic>? formResult;
@@ -54,7 +55,8 @@ class _FormPageState extends State<FormPage> {
   @override
   Future<void> didChangeDependencies() async {
     if (widget.formLink == null && context.routeData.hasPendingChildren) {
-      widget.formLink = context.routeData.pendingChildren[0].pathParams.getString("formLink");
+      widget.formLink =
+          context.routeData.pendingChildren[0].pathParams.getString("formLink");
     }
 
     await loadData();
@@ -94,7 +96,6 @@ class _FormPageState extends State<FormPage> {
         color: ThemeConfig.dddBackground, // Dim background
         child: Center(
           child: SeatReservationWidget(
-
             secret: formHolder!.controller!.secret!,
             formDataKey: formHolder!.controller!.formKey!,
             blueprintId: formHolder!.controller!.blueprintId!,
@@ -103,12 +104,13 @@ class _FormPageState extends State<FormPage> {
             onSelectionChanged: (sts) {
               _totalTickets = sts.length;
               _totalPrice = 0;
-              for(var s in sts){
+              for (var s in sts) {
                 _totalPrice += s.objectModel?.product?.price ?? 0;
               }
               setState(() {});
             },
-            onCloseSeatReservation: formHolder!.controller!.onCloseSeatReservation!,
+            onCloseSeatReservation:
+            formHolder!.controller!.onCloseSeatReservation!,
           ),
         ),
       ),
@@ -128,19 +130,19 @@ class _FormPageState extends State<FormPage> {
       }
 
       if (field is TicketHolder) {
-        if(_isSeatReservationVisible){
+        if (_isSeatReservationVisible) {
           _totalTickets = selectedSeats.length;
         } else {
           _totalTickets = field.tickets.length;
         }
 
-        if(_isSeatReservationVisible){
+        if (_isSeatReservationVisible) {
           for (var s in selectedSeats) {
             _totalPrice += s.objectModel!.product!.price!;
           }
         } else {
           for (var s in field.tickets) {
-            if(s.seat != null){
+            if (s.seat != null) {
               _totalPrice += s.seat!.objectModel!.product!.price!;
             }
           }
@@ -152,7 +154,7 @@ class _FormPageState extends State<FormPage> {
           for (var ticketField in ticketData[FormHelper.metaFields]) {
             for (var fValue in ticketField.values) {
               if (fValue is FormOptionModel) {
-              _totalPrice += fValue.price;
+                _totalPrice += fValue.price;
               }
             }
           }
@@ -211,17 +213,17 @@ class _FormPageState extends State<FormPage> {
   void _showOrderPreview() {
     TextInput.finishAutofillContext();
     if (FormHelper.saveAndValidate(formHolder!))
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) {
-        return OrderPreviewScreen(
-          formHolder: formHolder!,
-          totalPrice: _totalPrice,
-          onSendPressed: _sendOrder,
-        );
-      },
-    );
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (_) {
+          return OrderPreviewScreen(
+            formHolder: formHolder!,
+            totalPrice: _totalPrice,
+            onSendPressed: _sendOrder,
+          );
+        },
+      );
   }
 
   void _scrollToTop() {
@@ -282,7 +284,11 @@ class _FormPageState extends State<FormPage> {
                 controller: _scrollController,
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
-                  child: formHolder == null
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _formNotAvailable
+                      ? _buildFormNotAvailableMessage()
+                      : (formHolder == null
                       ? const Center(child: CircularProgressIndicator())
                       : FormBuilder(
                     key: _formKey,
@@ -292,26 +298,31 @@ class _FormPageState extends State<FormPage> {
                           if (form!.header != null)
                             Column(
                               children: [
-                                HtmlView(html: form!.header!, isSelectable: true),
+                                HtmlView(
+                                    html: form!.header!,
+                                    isSelectable: true),
                                 const SizedBox(height: 16),
                               ],
                             ),
-                          ...FormHelper.getAllFormFields(context, _formKey, formHolder!),
+                          ...FormHelper.getAllFormFields(
+                              context, _formKey, formHolder!),
                           const SizedBox(height: 32),
                           ButtonsHelper.primaryButton(
                             context: context,
-                            onPressed: _isLoading ? null : _showOrderPreview,
+                            onPressed: _isLoading
+                                ? null
+                                : _showOrderPreview,
                             label: "Continue".tr(),
                             isLoading: _isLoading,
                             height: 50.0,
                             width: 250.0,
-                            isEnabled: _totalPrice > 0
+                            isEnabled: _totalPrice > 0,
                           ),
                           const SizedBox(height: 32),
                         ],
                       ),
                     ),
-                  ),
+                  )),
                 ),
               ),
             ),
@@ -325,8 +336,7 @@ class _FormPageState extends State<FormPage> {
         child: FloatingActionButton(
           onPressed: () {
             RouterService.navigate(
-                context,
-                "${FormPage.ROUTE}/${widget.formLink}/edit")
+                context, "${FormPage.ROUTE}/${widget.formLink}/edit")
                 .then((value) => loadData());
           },
           child: const Icon(Icons.edit),
@@ -335,12 +345,46 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
+  Widget _buildFormNotAvailableMessage() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.event_busy,
+              size: 60,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              "Reservation Unavailable",
+              style: TextStyle(
+                fontSize:  24,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ).tr(),
+            const SizedBox(height: 8),
+            const Text(
+              "Reservation for the selected event is currently unavailable.",
+              style: TextStyle(
+                fontSize:  16,
+              ),
+              textAlign: TextAlign.center,
+            ).tr(),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
   // Function to generate options for a specific item type and add them to the ticket fields
   Map<String, dynamic> generateOptionsForItemType(
-      List<ProductTypeModel> allItems,
-      String itemType
-      ) {
-    var itemTypeModel = allItems.firstWhereOrNull((item) => item.type == itemType);
+      List<ProductTypeModel> allItems, String itemType) {
+    var itemTypeModel =
+    allItems.firstWhereOrNull((item) => item.type == itemType);
 
     if (itemTypeModel == null || itemTypeModel.products == null) {
       return {};
@@ -367,32 +411,49 @@ class _FormPageState extends State<FormPage> {
   Future<void> loadData() async {
     setState(() {
       _isLoading = true;
+      _formNotAvailable = false; // Reset the message flag
     });
 
-    if(widget.formLink == null) {
+    if (widget.formLink == null) {
+      setState(() {
+        _isLoading = false;
+        _formNotAvailable = true; // Show message if formLink is null
+      });
       return;
     }
     //var key = UuidConverter.base62ToUuid(widget.id!);
 
-    form = await DbForms.getFormFromLink(widget.formLink!);
-    if (form == null) {
-      return;
+    try {
+      form = await DbForms.getFormFromLink(widget.formLink!);
+      if (form == null) {
+        setState(() {
+          _isLoading = false;
+          _formNotAvailable = true; // Show message if form is not found
+        });
+        return;
+      }
+
+      formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
+
+      formHolder!.controller = FormHolderController(
+          secret: form!.secret,
+          blueprintId: form!.blueprint,
+          globalKey: _formKey,
+          formKey: form!.formKey!,
+          updateTotalPrice: _updateTotalPrice,
+          showSeatReservation: _showSeatReservation,
+          onCloseSeatReservation: _hideSeatReservation);
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Handle any unexpected errors
+      print("Error loading form: $e");
+      setState(() {
+        _isLoading = false;
+        _formNotAvailable = true;
+      });
     }
-
-    formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
-
-    formHolder!.controller = FormHolderController(
-      secret: form!.secret,
-      blueprintId: form!.blueprint,
-      globalKey: _formKey,
-      formKey: form!.formKey!,
-      updateTotalPrice: _updateTotalPrice,
-      showSeatReservation: _showSeatReservation,
-      onCloseSeatReservation: _hideSeatReservation
-    );
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 }
