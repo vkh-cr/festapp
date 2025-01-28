@@ -69,6 +69,16 @@ class BlueprintObjectModel {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+    metaX: x,
+    metaY: y,
+    metaType: type,
+    metaTitle: title,
+    if (id != null) metaId: id,
+    if (group?.id != null) metaGroupId: group?.id,
+    if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
+  };
+
   BlueprintObjectModel({
     this.x,
     this.y,
