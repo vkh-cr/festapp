@@ -1,28 +1,16 @@
-import 'package:collection/collection.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
-import 'package:fstapp/dataModelsEshop/OrderModel.dart';
-import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
-import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbForms {
-  static final _supabaseEshop = Supabase.instance.client.schema("eshop");
   static final _supabase = Supabase.instance.client;
 
   static Future<FormModel?> getFormFromLink(String link) async {
@@ -36,17 +24,15 @@ class DbForms {
     return null;
   }
 
-  static Future<FormModel?> getFormForEdit(String formLink) async {
-    var data = await _supabase
-        .from(Tb.forms.table)
-        .select()
-        .eq(Tb.forms.link, formLink)
-        .maybeSingle();
-    if(data==null)
-    {
-      return null;
+  static Future<FormModel?> getFormForEdit(String link) async {
+    final response = await _supabase
+        .rpc('get_form_from_link_for_edit', params: {'form_link': link});
+
+    if(response["code"] == 200){
+      var form = FormModel.fromJson(response["data"]);
+      return form;
     }
-    return FormModel.fromJson(data);
+    return null;
   }
 
   static Future<void> updateForm(FormModel form) async {

@@ -65,7 +65,7 @@ class ThemeConfig {
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteTextColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.white;
 
-  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
+  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withValues(alpha: 0.9);
 
   static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed3.changeColorSaturation(0.4).changeColorLightness(0.4);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);

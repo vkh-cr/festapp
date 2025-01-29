@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
-import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -29,7 +28,6 @@ class FormHelper {
   static const String fieldTypeText = "text";
   static const String fieldTypeSelectOne = "select_one";
   static const String fieldTypeProductType = "product_type";
-
   static const String fieldTypeTicket = "ticket";
 
   static const String metaMaxTickets = "max_tickets";
