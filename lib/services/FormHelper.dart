@@ -58,6 +58,14 @@ class FormHelper {
   static String femaleLabel() => "Female".tr();
   static String notSpecifiedLabel() => "Not specified".tr();
 
+  static bool isAlwaysRequired(String? type) {
+    return const [
+      fieldTypeEmail,
+      fieldTypeTicket,
+      // add other always-required types here
+    ].contains(type);
+  }
+
   static String fieldTypeToLocale(String fieldType) {
     switch (fieldType) {
       case fieldTypeName:

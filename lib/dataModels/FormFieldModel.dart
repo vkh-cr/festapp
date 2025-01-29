@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/services/FormHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -19,7 +21,7 @@ class FormFieldModel extends IPlutoRowModel {
   int? order;
   int? productTypeId;
   dynamic data;
-
+  List<FormOptionModel> options;
   ProductTypeModel? productType;
 
   static const String metaRequired = "required";
@@ -42,9 +44,18 @@ class FormFieldModel extends IPlutoRowModel {
     this.data,
     this.productTypeId,
     this.productType,
-  });
+    List<FormOptionModel>? options,
+  }) : options = options ?? [];
 
   factory FormFieldModel.fromJson(Map<String, dynamic> json) {
+    var type = json[TbEshop.form_fields.type];
+    var data = json[TbEshop.form_fields.data];
+    List<FormOptionModel> options = [];
+    if (type == FormHelper.fieldTypeSelectOne && data is Map) {
+      options = data[FormHelper.metaOptions].map<FormOptionModel>((e) {
+        return FormOptionModel.fromJson(e);
+      }).toList();
+    }
     return FormFieldModel(
         id: json[TbEshop.form_fields.id],
         createdAt: json[TbEshop.form_fields.created_at] != null
@@ -52,17 +63,18 @@ class FormFieldModel extends IPlutoRowModel {
             : null,
         title: json[TbEshop.form_fields.title],
         description: json[TbEshop.form_fields.description],
-        type: json[TbEshop.form_fields.type],
+        type: type,
         isRequired: json[TbEshop.form_fields.is_required],
         isHidden: json[TbEshop.form_fields.is_hidden],
         isTicketField: json[TbEshop.form_fields.is_ticket_field],
         form: json[TbEshop.form_fields.form],
         order: json[TbEshop.form_fields.order],
-        data: json[TbEshop.form_fields.data],
+        data: data,
         productTypeId: json[TbEshop.form_fields.product_type],
         productType: json[TbEshop.form_fields.product_type_data] != null
             ? ProductTypeModel.fromJson(json[TbEshop.form_fields.product_type_data])
-            : null
+            : null,
+        options: options
     );
   }
 

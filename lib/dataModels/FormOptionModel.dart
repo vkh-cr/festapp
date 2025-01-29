@@ -1,6 +1,7 @@
 import 'package:fstapp/services/FormHelper.dart';
 
 class FormOptionModel {
+  static const String metaValue = "value";
   static const String metaOptionsId = "id";
   static const String metaOptionsName = "name";
   static const String metaOptionsPrice = "price";
@@ -24,6 +25,12 @@ class FormOptionModel {
 
   @override
   int get hashCode => id.hashCode;
+
+  factory FormOptionModel.fromJson(Map<String, dynamic> json) {
+    return FormOptionModel(
+      json[metaValue]!, json[metaValue]!
+    );
+  }
 
   dynamic toJson() {
     if(type == FormHelper.fieldTypeSelectOne){

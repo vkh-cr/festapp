@@ -4,6 +4,7 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -198,7 +199,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
       ),
       bottomNavigationBar: Container(
         color: ThemeConfig.appBarColor(),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: SafeArea(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -210,10 +211,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: saveChanges,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
                 child: Text("Save Changes".tr()),
               ),
             ],
@@ -224,6 +221,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   Widget _buildFieldItem(BuildContext context, int index, FormFieldModel field) {
+    final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
+
     final isSelected = selectedIndex == index;
     final defaultTitle = FormHelper.fieldTypeToLocale(field.type ?? '');
     final titleFocusNode = FocusNode(); // FocusNode for title field
@@ -289,24 +288,38 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 ),
 
                 // Answer Field
-                GestureDetector(
-                  onTap: () => setState(() => selectedIndex = index),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      border: const UnderlineInputBorder(),
-                      hintText: 'Answer text',
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    onChanged: (value) {
-                      // Handle answer changes
-                    },
+                if (field.type != FormHelper.fieldTypeSelectOne)
+                  GestureDetector(
                     onTap: () => setState(() => selectedIndex = index),
+                    child: TextFormField(
+                      decoration: InputDecoration(
+                        border: const UnderlineInputBorder(),
+                        hintText: 'Answer text',
+                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      onChanged: (value) {
+                        // Handle answer changes
+                      },
+                      onTap: () => setState(() => selectedIndex = index),
+                    ),
                   ),
-                ),
 
                 // Expanded Settings (only when selected)
                 if (isSelected) ...[
+                  // Options Editor for Select One type
+                  if (field.type == FormHelper.fieldTypeSelectOne)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Options'.tr(),
+                              style: Theme.of(context).textTheme.titleSmall),
+                          _buildOptionsEditor(field),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -315,8 +328,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                         width: 200,
                         child: PopupMenuButton<String>(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.grey),
                               borderRadius: BorderRadius.circular(8),
@@ -330,26 +342,38 @@ class _FormEditorContentState extends State<FormEditorContent> {
                             ),
                           ),
                           itemBuilder: (context) => fieldTypeIcons.entries
-                              .where((entry) =>
-                              _availableFieldTypes.contains(entry.key))
+                              .where((entry) => _availableFieldTypes.contains(entry.key))
                               .map((entry) => PopupMenuItem(
                             value: entry.key,
                             child: Row(
                               children: [
                                 Icon(entry.value),
                                 const SizedBox(width: 8),
-                                Text(FormHelper.fieldTypeToLocale(
-                                    entry.key)),
+                                Text(FormHelper.fieldTypeToLocale(entry.key)),
                               ],
                             ),
                           ))
                               .toList(),
                           onSelected: (newType) => setState(() {
+                            // Clear options when changing from select_one
+                            if (field.type == FormHelper.fieldTypeSelectOne &&
+                                newType != FormHelper.fieldTypeSelectOne) {
+                              field.data = null;
+                            }
+
+                            // Initialize options for select_one
+                            if (newType == FormHelper.fieldTypeSelectOne && field.data == null) {
+                              field.data = [];
+                            }
+
                             field.type = newType;
-                            if (field.title == defaultTitle ||
-                                field.title?.isEmpty == true) {
-                              field.title =
-                                  FormHelper.fieldTypeToLocale(newType);
+                            if (field.title == defaultTitle || field.title?.isEmpty == true) {
+                              field.title = FormHelper.fieldTypeToLocale(newType);
+                            }
+
+                            // Set required state for always-required fields
+                            if (FormHelper.isAlwaysRequired(newType)) {
+                              field.isRequired = true;
                             }
                           }),
                         ),
@@ -361,9 +385,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           Text('Required'.tr(),
                               style: Theme.of(context).textTheme.bodySmall),
                           Checkbox(
-                            value: field.isRequired ?? false,
-                            onChanged: (value) =>
-                                setState(() => field.isRequired = value),
+                            value: FormHelper.isAlwaysRequired(field.type!) ||
+                                (field.isRequired ?? false),
+                            onChanged: FormHelper.isAlwaysRequired(field.type!)
+                                ? null
+                                : (value) => setState(() => field.isRequired = value),
                           ),
                         ],
                       ),
@@ -375,31 +401,25 @@ class _FormEditorContentState extends State<FormEditorContent> {
                               style: Theme.of(context).textTheme.bodySmall),
                           Switch(
                             value: !(field.isHidden ?? false),
-                            onChanged: (value) =>
-                                setState(() => field.isHidden = !value),
+                            onChanged: (value) => setState(() => field.isHidden = !value),
                           ),
                         ],
                       ),
                       const SizedBox(width: 16),
+                      // Delete Button
                       if(field.id == null)
-                      IconButton(
-                        icon: Icon(
-                          field.id != null
-                              ? Icons.delete_forever_outlined
-                              : Icons.delete_outline,
-                          color: field.id != null
-                              ? Colors.grey
-                              : ThemeConfig.redColor(context),
+                        IconButton(
+                          icon: Icon(
+                            Icons.delete, // Changed from delete_outline to close
+                            color: Theme.of(context).iconTheme.color, // Default icon color
+                          ),
+                          onPressed: () => setState(() {
+                            form!.relatedFields!.removeAt(index);
+                            if (selectedIndex == index) {
+                              selectedIndex = null;
+                            }
+                          }),
                         ),
-                        onPressed: field.id == null
-                            ? () => setState(() {
-                          form!.relatedFields!.removeAt(index);
-                          if (selectedIndex == index) {
-                            selectedIndex = null;
-                          }
-                        })
-                            : null,
-                      ),
                     ],
                   ),
                 ],
@@ -408,6 +428,74 @@ class _FormEditorContentState extends State<FormEditorContent> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildOptionsEditor(FormFieldModel field) {
+    final optionsController = TextEditingController();
+
+    return Column(
+      children: [
+        // Options List
+        Column(
+          children: field.options!.map((option) => Row(
+            children: [
+              // Radio Button (Enabled Appearance, Non-Interactive)
+              Radio<String>(
+                value: option.title,
+                groupValue: null, // No selection in editor
+                onChanged: (_) {}, // Dummy function to keep it enabled
+                activeColor: Theme.of(context).colorScheme.primary,
+              ),
+              // Option Title
+              Expanded(
+                child: Text(option.title),
+              ),
+              // Delete Button
+              IconButton(
+                icon: const Icon(Icons.close), // Cross icon
+                color: Theme.of(context).iconTheme.color, // Default icon color
+                onPressed: () => setState(() {
+                  field.options = field.options!.where((o) => o != option).toList();
+                }),
+              ),
+            ],
+          )).toList(),
+        ),
+        const SizedBox(height: 12),
+        // Add Option Field at the Bottom (Simple TextField)
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: optionsController,
+                decoration: InputDecoration(
+                  hintText: 'Enter option value'.tr(),
+                  border: UnderlineInputBorder(), // Adds an underline
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary, // Optional: Customize underline color when focused
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                if (optionsController.text.isNotEmpty) {
+                  setState(() {
+                    final newOption = FormOptionModel(optionsController.text, optionsController.text);
+                    field.options = [...field.options!, newOption];
+                  });
+                  optionsController.clear();
+                }
+              },
+            ),
+          ],
+        ),
+      ],
     );
   }
 
