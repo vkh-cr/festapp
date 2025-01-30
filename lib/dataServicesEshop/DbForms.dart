@@ -36,14 +36,17 @@ class DbForms {
   }
 
   static Future<void> updateForm(FormModel form) async {
-    var upsertObj = form.toEditedJson();
-    if(form.id!=null) {
-      await _supabase.from(Tb.forms.table).update(upsertObj).eq(Tb.forms.id, form.id!);
-    }
-    else {
-      upsertObj.remove(Tb.forms.id);
-      upsertObj.addAll({Tb.forms.occasion: RightsService.currentOccasion!});
-      await _supabase.from(Tb.forms.table).insert(upsertObj);
+    var rjson = form.toEditedJson();
+    final response = await _supabase.rpc(
+      'update_form',
+      params: {
+        'input_data': form.toEditedJson(),
+      },
+    );
+
+    if (response["code"] != 200) {
+      var x = 4;
+      return;
     }
   }
 

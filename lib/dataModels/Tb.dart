@@ -24,6 +24,7 @@ class Tb {
   static OrganizationsTb organizations = const OrganizationsTb();
   static OrganizationUsersTb organization_users = const OrganizationUsersTb();
   static FormsTb forms = const FormsTb();
+  static FormFieldsTb form_fields = const FormFieldsTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -325,4 +326,21 @@ class FormsTb {
   String get header => "header";
   String get footer => "footer";
   String get link => "link";
+}
+
+class FormFieldsTb {
+  const FormFieldsTb();
+  String get table => "form_fields";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get title => "title";
+  String get description => "description";
+  String get data => "data";
+  String get type => "type";
+  String get is_required => "is_required";
+  String get form => "form";
+  String get is_hidden => "is_hidden";
+  String get order => "order";
+  String get product_type => "product_type";
+  String get is_ticket_field => "is_ticket_field";
 }

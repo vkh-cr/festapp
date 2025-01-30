@@ -18,6 +18,8 @@ BEGIN
             'footer', f.footer,
             'occasion', f.occasion,
             'blueprint', f.blueprint,
+            'link', f.link,
+            'bank_account', f.bank_account,
             'deadline_duration_seconds', f.deadline_duration_seconds,
             'account_number', ba.account_number,
             'fields', (
@@ -49,6 +51,7 @@ BEGIN
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,
+                                                    'is_hidden', p.is_hidden,
                                                     'order', p."order"
                                                 ) ORDER BY COALESCE(p."order", 0)
                                             )
@@ -63,7 +66,7 @@ BEGIN
                 )
                 FROM public.form_fields ff
                 LEFT JOIN eshop.product_types pt ON ff.product_type = pt.id
-                WHERE ff.form = f.id AND ff.is_hidden = false
+                WHERE ff.form = f.id
             )
         )
     )

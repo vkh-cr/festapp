@@ -1,5 +1,6 @@
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
 class FormModel {
   int? id;
@@ -98,5 +99,7 @@ class FormModel {
     Tb.forms.header: header,
     Tb.forms.footer: footer,
     Tb.forms.link: link,
+    Tb.form_fields.table: relatedFields,
+    TbEshop.product_types.table: relatedFields?.where((f)=>f.productType != null).map((f)=>f.productType).toList()
   };
 }
