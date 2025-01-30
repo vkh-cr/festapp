@@ -18,7 +18,7 @@ import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 /// Global constant for hidden item opacity
-const double kHiddenOpacity = 0.6;
+const double kHiddenOpacity = 0.5;
 
 class FormEditorContent extends StatefulWidget {
   const FormEditorContent({Key? key}) : super(key: key);
@@ -149,51 +149,55 @@ class _FormEditorContentState extends State<FormEditorContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                if (form?.header != null)
+            child: Padding(
+              padding: EdgeInsetsDirectional.all(6),
+              child: Column(
+                children: [
+                  if (form?.header != null)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        HtmlView(html: form!.header!, isSelectable: true),
+                        const SizedBox(height: 16),
+                        Center(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.edit),
+                            label: Text("Edit content".tr()),
+                            onPressed: () async {
+                              final result =
+                              await RouterService.navigatePageInfo(
+                                context,
+                                HtmlEditorRoute(
+                                  content: {
+                                    HtmlEditorPage.parContent: form!.header!
+                                  },
+                                ),
+                              );
+                              if (result != null) {
+                                setState(
+                                        () => form!.header = result as String);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HtmlView(html: form!.header!, isSelectable: true),
-                      const SizedBox(height: 16),
-                      Center(
-                        child: ElevatedButton.icon(
-                          icon: const Icon(Icons.edit),
-                          label: Text("Edit content".tr()),
-                          onPressed: () async {
-                            final result =
-                            await RouterService.navigatePageInfo(
-                              context,
-                              HtmlEditorRoute(
-                                content: {
-                                  HtmlEditorPage.parContent: form!.header!
-                                },
-                              ),
-                            );
-                            if (result != null) {
-                              setState(
-                                      () => form!.header = result as String);
-                            }
-                          },
-                        ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Drag to reorder fields".tr(),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                     ],
                   ),
-                const SizedBox(height: 24),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      "Drag to reorder fields".tr(),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                _buildFieldsList(),
-              ],
+                  const SizedBox(height: 16),
+                  _buildFieldsList(),
+                  const SizedBox(height: 52),
+                ],
+              ),
             ),
           ),
         ),
@@ -299,7 +303,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
               color: isSelected
                   ? Theme.of(context).colorScheme.primary
                   : Colors.grey.withOpacity(0.3),
-              width: 2,
+              width: isSelected ? 2 : 0,
             ),
           ),
           child: Padding(
@@ -483,7 +487,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
             // Type popup (disable if it's a ticket or email - can't change type)
             if (!isTicket && field.type != FormHelper.fieldTypeEmail)
               SizedBox(
-                width: 180,
+                width: 150,
                 child: PopupMenuButton<String>(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
