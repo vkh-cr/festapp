@@ -79,6 +79,7 @@ class FormFieldModel extends IPlutoRowModel {
   }
 
   Map<String, dynamic> toJson() => {
+    TbEshop.form_fields.id: id,
     TbEshop.form_fields.title: title,
     TbEshop.form_fields.description: description,
     TbEshop.form_fields.type: type,
@@ -87,7 +88,7 @@ class FormFieldModel extends IPlutoRowModel {
     TbEshop.form_fields.is_ticket_field: isTicketField,
     TbEshop.form_fields.order: order,
     TbEshop.form_fields.data: data,
-    'product_type': productType?.toJson(),
+    TbEshop.form_fields.product_type: productType?.id,
   };
 
   @override
