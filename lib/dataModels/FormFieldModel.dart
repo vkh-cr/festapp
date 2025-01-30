@@ -78,18 +78,28 @@ class FormFieldModel extends IPlutoRowModel {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    TbEshop.form_fields.id: id,
-    TbEshop.form_fields.title: title,
-    TbEshop.form_fields.description: description,
-    TbEshop.form_fields.type: type,
-    TbEshop.form_fields.is_required: isRequired,
-    TbEshop.form_fields.is_hidden: isHidden,
-    TbEshop.form_fields.is_ticket_field: isTicketField,
-    TbEshop.form_fields.order: order,
-    TbEshop.form_fields.data: data,
-    TbEshop.form_fields.product_type: productType?.id,
-  };
+  Map<String, dynamic> toJson() {
+    final jsonData = Map<String, dynamic>.from(data ?? {});
+
+    if (options.isNotEmpty) {
+      jsonData[FormHelper.metaOptions] = options.map((option) {
+        return {'value': option.title};
+      }).toList();
+    }
+
+    return {
+      TbEshop.form_fields.id: id,
+      TbEshop.form_fields.title: title,
+      TbEshop.form_fields.description: description,
+      TbEshop.form_fields.type: type,
+      TbEshop.form_fields.is_required: isRequired,
+      TbEshop.form_fields.is_hidden: isHidden,
+      TbEshop.form_fields.is_ticket_field: isTicketField,
+      TbEshop.form_fields.order: order,
+      TbEshop.form_fields.data: jsonData.isNotEmpty ? jsonData : null,
+      TbEshop.form_fields.product_type: productType,
+    };
+  }
 
   @override
   PlutoRow toPlutoRow(BuildContext context) {
