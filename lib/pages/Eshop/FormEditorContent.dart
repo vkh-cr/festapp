@@ -142,53 +142,52 @@ class _FormEditorContentState extends State<FormEditorContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (form?.header != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HtmlView(html: form!.header!, isSelectable: true),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.edit),
-                            label: Text("Edit content".tr()),
-                            onPressed: () async {
-                              final result =
-                              await RouterService.navigatePageInfo(
-                                context,
-                                HtmlEditorRoute(
-                                  content: {
-                                    HtmlEditorPage.parContent: form!.header!
-                                  },
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() => form!.header = result as String);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  const SizedBox(height: 24),
+            child: Column(
+              children: [
+                if (form?.header != null)
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 8),
-                      Text(
-                        "Drag to reorder fields".tr(),
-                        style: Theme.of(context).textTheme.bodySmall,
+                      HtmlView(html: form!.header!, isSelectable: true),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.edit),
+                          label: Text("Edit content".tr()),
+                          onPressed: () async {
+                            final result = await RouterService.navigatePageInfo(
+                              context,
+                              HtmlEditorRoute(
+                                content: {
+                                  HtmlEditorPage.parContent: form!.header!
+                                },
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() => form!.header = result as String);
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  _buildFieldsList(),
-                ],
-              )
+                const SizedBox(height: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      "Drag to reorder fields".tr(),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildFieldsList(),
+              ],
             ),
           ),
+        ),
       ),
       bottomNavigationBar: Container(
         color: ThemeConfig.appBarColor(),
@@ -275,6 +274,9 @@ class _FormEditorContentState extends State<FormEditorContent> {
     // Ticket field specifics
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
 
+    // Some fields are forced to remain visible (e.g. ticket, email)
+    final disableHideSwitch = (isTicket || field.type == FormHelper.fieldTypeEmail);
+
     // Wrap the entire card in an opacity if hidden
     final effectiveOpacity = (field.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
@@ -301,235 +303,315 @@ class _FormEditorContentState extends State<FormEditorContent> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isSelected)
-                  Center(
-                    child: ReorderableDragStartListener(
-                      index: index,
-                      child:
-                      const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
-                    ),
-                  ),
-
-                // Title:
-                // - If it's the ticket, show "Ticket" (non-editable).
-                // - Otherwise, show an editable field.
-                if (isTicket) ...[
-                  // Non-editable title with icon
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Row(
-                      children: [
-                        Icon(
-                          fieldTypeIcons[FormHelper.fieldTypeTicket],
-                          size: 24,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Ticket",
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ).tr(),
-                      ],
-                    ),
-                  ),
-                  if (!isSelected) const SizedBox(height: 12),
-                ] else ...[
-                  // Editable title for other fields
-                  TextFormField(
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    decoration: InputDecoration(
-                      border: isSelected
-                          ? const UnderlineInputBorder()
-                          : InputBorder.none,
-                      hintText: FormHelper.fieldTypeToLocale(field.type ?? ''),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                    ),
-                    initialValue: field.title,
-                    onChanged: (value) => field.title = value,
-                    onTap: () {
-                      if (!isSelected) {
-                        setState(() => selectedIndex = index);
-                      }
-                    },
-                  ),
-                ],
-
-                // If it's not selectOne or ticket, show a dummy "answer" field
-                if (!isTicket && field.type != FormHelper.fieldTypeSelectOne)
-                  GestureDetector(
-                    onTap: () => setState(() => selectedIndex = index),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        border: const UnderlineInputBorder(),
-                        hintText: 'Answer text'.tr(),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                      ),
-                      style: Theme.of(context).textTheme.bodyLarge,
-                      onChanged: (value) {
-                        // Possibly store or do something with this if needed
-                      },
-                    ),
-                  ),
-
-                // Expanded settings only when selected
-                if (isSelected) ...[
-                  // If the field is select_one, show the selectOne editor
-                  if (field.type == FormHelper.fieldTypeSelectOne)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: _buildSelectOneEditor(field),
-                    ),
-
-                  // If the field is a ticket, show ticket editor
-                  if (isTicket)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: _buildTicketEditor(field),
-                    ),
-
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      // If it's the ticket, do NOT show the type popup or "visible" toggle
-                      if (!isTicket) ...[
-                        SizedBox(
-                          width: 180,
-                          child: PopupMenuButton<String>(
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(fieldTypeIcons[field.type], size: 20),
-                                  const SizedBox(width: 8),
-                                  Text(FormHelper.fieldTypeToLocale(field.type!)),
-                                ],
-                              ),
-                            ),
-                            itemBuilder: (context) {
-                              return fieldTypeIcons.entries
-                                  .where((entry) =>
-                                  _availableFieldTypes.contains(entry.key))
-                                  .map((entry) => PopupMenuItem(
-                                value: entry.key,
-                                child: Row(
-                                  children: [
-                                    Icon(entry.value),
-                                    const SizedBox(width: 8),
-                                    Text(FormHelper.fieldTypeToLocale(
-                                        entry.key)),
-                                  ],
-                                ),
-                              ))
-                                  .toList();
-                            },
-                            onSelected: (newType) => setState(() {
-                              // If we change away from selectOne, remove data
-                              if (field.type == FormHelper.fieldTypeSelectOne &&
-                                  newType != FormHelper.fieldTypeSelectOne) {
-                                field.data = null;
-                                field.options.clear();
-                              }
-
-                              field.type = newType;
-                              // If user hasn't customized title, use default locale
-                              if ((field.title?.isEmpty ?? true)) {
-                                field.title = FormHelper.fieldTypeToLocale(newType);
-                              }
-
-                              // Force field.isRequired if always required
-                              if (FormHelper.isAlwaysRequired(newType)) {
-                                field.isRequired = true;
-                              }
-                            }),
-                          ),
-                        ),
-                        const Spacer(),
-                      ] else ...[
-                        const Spacer(),
-                      ],
-
-                      // "Note" checkbox ONLY if it's a ticket
-                      if (isTicket) ...[
-                        Text("Note".tr(), style: Theme.of(context).textTheme.bodySmall),
-                        const SizedBox(width: 4),
-                        _buildTicketNoteCheckbox(),
-                        const SizedBox(width: 16),
-                      ],
-
-                      // Required as a CHECKBOX
-                      Row(
-                        children: [
-                          Text('Required'.tr(),
-                              style: Theme.of(context).textTheme.bodySmall),
-                          Checkbox(
-                            value: isAlwaysRequired || (field.isRequired ?? false),
-                            onChanged: isAlwaysRequired
-                                ? null
-                                : (value) => setState(() => field.isRequired = value),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-
-                      // If it's not a ticket, show the "Visible" switch
-                      if (!isTicket) ...[
-                        Row(
-                          children: [
-                            Text('Visible'.tr(),
-                                style: Theme.of(context).textTheme.bodySmall),
-                            Switch(
-                              value: !(field.isHidden ?? false),
-                              onChanged: (value) =>
-                                  setState(() => field.isHidden = !value),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 16),
-                      ],
-
-                      // Delete Button for brand-new fields (id == null)
-                      if (field.id == null)
-                        IconButton(
-                          icon: Icon(Icons.delete,
-                              color: Theme.of(context).iconTheme.color),
-                          onPressed: () {
-                            setState(() {
-                              displayList.remove(field);
-                              form!.relatedFields!.remove(field);
-                              if (selectedIndex == index) {
-                                selectedIndex = null;
-                              }
-                            });
-                          },
-                        ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
+            child: isSelected
+                ? _buildFieldItemSelected(field, displayList, index)
+                : _buildFieldItemNonSelected(field),
           ),
         ),
       ),
     );
   }
 
-  /// Builds editor for "select_one" type fields
+  /// Non-selected (read-only) mode for a single field
+  Widget _buildFieldItemNonSelected(FormFieldModel field) {
+    final isTicket = (field.type == FormHelper.fieldTypeTicket);
+    final isSelectOne = (field.type == FormHelper.fieldTypeSelectOne);
+
+    // Show an icon only for ticket (as requested).
+    // If you want icons for all fields, you could check fieldTypeIcons[field.type].
+    final icon = isTicket ? fieldTypeIcons[FormHelper.fieldTypeTicket] : null;
+    final requiredStar = (field.isRequired ?? false)
+        ? TextSpan(text: ' *', style: TextStyle(color: Colors.red))
+        : null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title row
+        Row(
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 24,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              child: RichText(
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  text: field.title ?? FormHelper.fieldTypeToLocale(field.type!),
+                  children: [
+                    if (requiredStar != null) requiredStar,
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+
+        // If it's a ticket, show read-only product types
+        if (isTicket) _buildTicketEditorReadOnly(field),
+
+        // If it's select_one, show read-only options
+        if (isSelectOne) _buildSelectOneReadOnly(field),
+
+        // Otherwise, just show a hint for user input (read-only style)
+        if (!isTicket && !isSelectOne)
+          Text(
+            'Answer text'.tr(),
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: Colors.grey,
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Selected (editable) mode for a single field
+  Widget _buildFieldItemSelected(
+      FormFieldModel field,
+      List<FormFieldModel> displayList,
+      int index,
+      ) {
+    final isTicket = (field.type == FormHelper.fieldTypeTicket);
+    final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
+    final disableHideSwitch = (isTicket || field.type == FormHelper.fieldTypeEmail);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Drag handle
+        Center(
+          child: ReorderableDragStartListener(
+            index: index,
+            child: const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Title (ticket => non-editable label "Ticket", else => TextFormField)
+        if (isTicket) ...[
+          Row(
+            children: [
+              Icon(
+                fieldTypeIcons[FormHelper.fieldTypeTicket],
+                size: 24,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "Ticket",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ).tr(),
+            ],
+          ),
+        ] else ...[
+          TextFormField(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            decoration: InputDecoration(
+              border: const UnderlineInputBorder(),
+              hintText: FormHelper.fieldTypeToLocale(field.type ?? ''),
+              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+            ),
+            initialValue: field.title,
+            onChanged: (value) => field.title = value,
+          ),
+        ],
+
+        // If field is NOT ticket and NOT select_one, show a dummy user-input area
+        if (!isTicket && field.type != FormHelper.fieldTypeSelectOne)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: TextFormField(
+              decoration: InputDecoration(
+                border: const UnderlineInputBorder(),
+                hintText: 'Answer text'.tr(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              ),
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+          ),
+
+        // Additional editors based on type
+        if (field.type == FormHelper.fieldTypeSelectOne)
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: _buildSelectOneEditor(field),
+          ),
+
+        if (isTicket)
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: _buildTicketEditor(field),
+          ),
+
+        const SizedBox(height: 16),
+
+        // Bottom row of toggles & actions
+        Row(
+          children: [
+            // Type popup (disable if it's a ticket - can't change type)
+            if (!isTicket)
+              SizedBox(
+                width: 180,
+                child: PopupMenuButton<String>(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(fieldTypeIcons[field.type], size: 20),
+                        const SizedBox(width: 8),
+                        Text(FormHelper.fieldTypeToLocale(field.type!)),
+                      ],
+                    ),
+                  ),
+                  itemBuilder: (context) {
+                    return fieldTypeIcons.entries
+                        .where((entry) => _availableFieldTypes.contains(entry.key))
+                        .map((entry) => PopupMenuItem(
+                      value: entry.key,
+                      child: Row(
+                        children: [
+                          Icon(entry.value),
+                          const SizedBox(width: 8),
+                          Text(FormHelper.fieldTypeToLocale(entry.key)),
+                        ],
+                      ),
+                    ))
+                        .toList();
+                  },
+                  onSelected: (newType) => setState(() {
+                    // If we change away from selectOne, remove data
+                    if (field.type == FormHelper.fieldTypeSelectOne &&
+                        newType != FormHelper.fieldTypeSelectOne) {
+                      field.data = null;
+                      field.options.clear();
+                    }
+
+                    field.type = newType;
+                    // If user hasn't customized title, use default locale
+                    if ((field.title?.isEmpty ?? true)) {
+                      field.title = FormHelper.fieldTypeToLocale(newType);
+                    }
+
+                    // Force field.isRequired if always required
+                    if (FormHelper.isAlwaysRequired(newType)) {
+                      field.isRequired = true;
+                    }
+                  }),
+                ),
+              ),
+
+            const Spacer(),
+
+            // "Note" checkbox if it's ticket
+            if (isTicket) ...[
+              Text("Note".tr(), style: Theme.of(context).textTheme.bodySmall),
+              const SizedBox(width: 4),
+              _buildTicketNoteCheckbox(),
+              const SizedBox(width: 16),
+            ],
+
+            // Required checkbox
+            Row(
+              children: [
+                Text('Required'.tr(),
+                    style: Theme.of(context).textTheme.bodySmall),
+                Checkbox(
+                  value: isAlwaysRequired || (field.isRequired ?? false),
+                  onChanged: isAlwaysRequired
+                      ? null
+                      : (value) => setState(() => field.isRequired = value),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+
+            Row(
+              children: [
+                Text(
+                  'Visible'.tr(),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                Switch(
+                  value: !(field.isHidden ?? false),
+                  // Disable switch (onChanged = null) if disableHideSwitch == true
+                  onChanged: disableHideSwitch
+                      ? null
+                      : (value) => setState(() => field.isHidden = !value),
+                ),
+              ],
+            ),
+            const SizedBox(width: 16),
+
+            // Delete Button for brand-new fields (id == null)
+            if (field.id == null)
+              IconButton(
+                icon:
+                Icon(Icons.delete, color: Theme.of(context).iconTheme.color),
+                onPressed: () {
+                  setState(() {
+                    displayList.remove(field);
+                    form!.relatedFields!.remove(field);
+                    if (selectedIndex == index) {
+                      selectedIndex = null;
+                    }
+                  });
+                },
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Builds read-only view for "select_one" type fields
+  Widget _buildSelectOneReadOnly(FormFieldModel field) {
+    final options = field.options;
+    if (options.isEmpty) {
+      return Text(
+        'No options'.tr(),
+        style: Theme.of(context).textTheme.bodyMedium,
+      );
+    }
+
+    return Column(
+      children: options.map((option) {
+        return Row(
+          children: [
+            Radio<String>(
+              value: option.title,
+              groupValue: null,
+              onChanged: null, // disabled
+            ),
+            Text(option.title),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  /// Builds editor for "select_one" type fields (when selected)
   Widget _buildSelectOneEditor(FormFieldModel field) {
     final optionsController = TextEditingController();
 
@@ -603,7 +685,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
   /// If checked, ensures there's a subfield with isTicketField=true, type=note.
   /// If unchecked, removes that subfield.
   Widget _buildTicketNoteCheckbox() {
-    // Check if there's a note subfield
     final noteField = form!.relatedFields!.firstWhere(
           (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote,
       orElse: () => FormFieldModel(type: 'none'),
@@ -623,7 +704,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 isTicketField: true,
                 isRequired: false,
                 isHidden: false,
-                order: (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+                order: (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) +
+                    1,
               );
               form!.relatedFields!.add(newNoteField);
             }
@@ -638,16 +720,41 @@ class _FormEditorContentState extends State<FormEditorContent> {
     );
   }
 
-  /// Builds editor for "ticket" type fields.
-  /// We gather subfields (isTicketField == true) with type=productType (and possibly note)
-  /// but only show productTypes here. The note is toggled via the "Note" checkbox above.
-  Widget _buildTicketEditor(FormFieldModel ticketField) {
-    // Gather productType subfields that belong to the ticket
+  /// Read-only version of ticket editor (shows product types & products in read-only form)
+  Widget _buildTicketEditorReadOnly(FormFieldModel ticketField) {
+    // subfields with isTicketField == true and type=productType
     final productTypeFields = form!.relatedFields!
         .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
         .toList();
 
-    // Sort them by order
+    if (productTypeFields.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 8.0),
+        child: Text(
+          'No Product Types'.tr(),
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+    // sort by order
+    productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        for (var ptField in productTypeFields) ...[
+          _buildTicketGroupReadOnly(ptField),
+          const SizedBox(height: 16),
+        ],
+      ],
+    );
+  }
+
+  /// Selected (editable) version of ticket editor
+  Widget _buildTicketEditor(FormFieldModel ticketField) {
+    final productTypeFields = form!.relatedFields!
+        .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
+        .toList();
     productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
 
     return Column(
@@ -663,53 +770,102 @@ class _FormEditorContentState extends State<FormEditorContent> {
         ],
 
         // Add new product group
-        ElevatedButton.icon(
-          icon: const Icon(Icons.add),
-          label: Text("Add Product Type".tr()),
-          onPressed: () {
-            setState(() {
-              final newProductTypeField = FormFieldModel(
-                title: "New Product Type".tr(),
-                type: FormHelper.fieldTypeProductType,
-                isTicketField: true,
-                isRequired: false,
-                isHidden: false,
-                order:
-                (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
-                productType: ProductTypeModel(
+        Row(
+          children: [
+            Spacer(),
+            ElevatedButton.icon(
+            icon: const Icon(Icons.add),
+            label: Text("Add Product Type".tr()),
+            onPressed: () {
+              setState(() {
+                final newProductTypeField = FormFieldModel(
                   title: "New Product Type".tr(),
-                  products: [],
-                ),
-              );
-              form!.relatedFields!.add(newProductTypeField);
-            });
-          },
+                  type: FormHelper.fieldTypeProductType,
+                  isTicketField: true,
+                  isRequired: false,
+                  isHidden: false,
+                  order:
+                  (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+                  productType: ProductTypeModel(
+                    title: "New Product Type".tr(),
+                    products: [],
+                  ),
+                );
+                form!.relatedFields!.add(newProductTypeField);
+              });
+            },
+          )
+          ],
         ),
       ],
     );
   }
 
-  /// Builds the UI for an individual "productType" field (which is a subfield in a ticket)
+  /// Read-only product-type "group"
+  Widget _buildTicketGroupReadOnly(FormFieldModel ptField) {
+    ptField.productType ??= ProductTypeModel(title: ptField.title, products: []);
+    final group = ptField.productType!;
+    group.products ??= [];
+
+    // We do NOT show toggles or delete icons in read-only.
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Group title
+            Text(
+              ptField.title ?? group.title ?? '',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (group.products!.isEmpty)
+              Text('No Products'.tr())
+            else
+              Column(
+                children: group.products!.map((product) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 2.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Text(product.title ?? ''),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text('${product.price ?? 0}'),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Editable product-type "group"
   Widget _buildTicketGroupEditor(FormFieldModel ptField) {
-    // If productType is null, create a blank one
     ptField.productType ??= ProductTypeModel(
       title: ptField.title,
       products: [],
     );
-
     final group = ptField.productType!;
-
-    // Keep the FieldModel's isRequired/isHidden in sync with productType data
-    bool groupIsRequired = ptField.isRequired ?? false;
-    bool groupIsHidden = ptField.isHidden ?? false;
+    group.products ??= [];
 
     final groupTitleController =
     TextEditingController(text: ptField.title ?? group.title);
+    final groupIsRequired = ptField.isRequired ?? false;
+    final groupIsHidden = ptField.isHidden ?? false;
 
-    // Because the productType might exist in DB, ensure we have a products list
-    group.products ??= [];
-
-    // Opacity if groupIsHidden
+    // Opacity if hidden
     final effectiveOpacity = groupIsHidden ? kHiddenOpacity : 1.0;
 
     return Opacity(
@@ -724,10 +880,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
               // Header row: group title, toggles, delete
               Row(
                 children: [
-                  // Example: if group.type == "spot", you could show a seat icon, etc.
-                  // We'll skip that detail here.
-
-                  // Group name
                   Expanded(
                     child: TextField(
                       controller: groupTitleController,
@@ -738,14 +890,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       onChanged: (val) {
                         ptField.title = val;
                         group.title = val;
-                        // We do NOT call setState here just for text changes,
-                        // to avoid a large rebuild. The text stays in sync with the model.
                       },
                     ),
                   ),
                   const SizedBox(width: 12),
-
-                  // isRequired as CHECKBOX
+                  // isRequired
                   Column(
                     children: [
                       Text("Required".tr(),
@@ -761,8 +910,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     ],
                   ),
                   const SizedBox(width: 12),
-
-                  // isHidden as a SWITCH
+                  // isHidden
                   Column(
                     children: [
                       Text("Show".tr(),
@@ -778,14 +926,12 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     ],
                   ),
                   const SizedBox(width: 12),
-
                   // Delete group only if ptField.id == null
                   if (ptField.id == null)
                     IconButton(
                       icon: const Icon(Icons.delete),
                       onPressed: () {
                         setState(() {
-                          // Remove from form's related fields
                           form!.relatedFields!.remove(ptField);
                         });
                       },
@@ -832,11 +978,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 }
 
-///
 /// A separate stateful widget for editing a single ProductModel inside a ticket group.
-/// This approach keeps TextEditingController out of the parent's build method,
-/// so typing doesn't rebuild the entire screen.
-///
 class _TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
   final VoidCallback onDelete;
@@ -863,7 +1005,7 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
       text: (widget.product.price ?? 0).toString(),
     );
 
-    // Listen to changes so we can update the model without forcing parent rebuild
+    // Keep model updated without forcing entire screen rebuild
     _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
@@ -881,7 +1023,6 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
 
   @override
   Widget build(BuildContext context) {
-    // Opacity if product.isHidden is true
     final effectiveOpacity = (widget.product.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
     return Opacity(
@@ -931,7 +1072,7 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
               ],
             ),
             const SizedBox(width: 8),
-            // Delete product only if product.id == null (or decide your own logic)
+            // Delete (only if product.id == null)
             if (widget.product.id == null)
               IconButton(
                 icon: const Icon(Icons.close),
