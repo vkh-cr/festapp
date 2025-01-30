@@ -69,7 +69,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
   Future<void> saveChanges() async {
     await DbForms.updateForm(form!);
     ToastHelper.Show(context, "${"Saved".tr()}: ${form?.formKey}");
-    Navigator.of(context).pop();
   }
 
   void cancelEdit() {
@@ -78,7 +77,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   /// Filter available field types for brand-new fields
   List<String> get _availableFieldTypes {
-    final existingTypes = form?.relatedFields?.map((f) => f.type)?.toList() ?? [];
+    final existingTypes = form?.relatedFields?.map((f) => f.type).toList() ?? [];
     return fieldTypeIcons.keys.where((type) {
       // These types can appear multiple times
       if ([
@@ -677,10 +676,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 productType: ProductTypeModel(
                   title: "New Product Type".tr(),
                   products: [],
-                  data: {
-                    "isHidden": false,
-                    "isRequired": false,
-                  },
                 ),
               );
               form!.relatedFields!.add(newProductTypeField);
@@ -697,11 +692,9 @@ class _FormEditorContentState extends State<FormEditorContent> {
     ptField.productType ??= ProductTypeModel(
       title: ptField.title,
       products: [],
-      data: {"isHidden": ptField.isHidden ?? false, "isRequired": ptField.isRequired ?? false},
     );
 
     final group = ptField.productType!;
-    group.data ??= {"isHidden": false, "isRequired": false};
 
     // Keep the FieldModel's isRequired/isHidden in sync with productType data
     bool groupIsRequired = ptField.isRequired ?? false;
@@ -760,7 +753,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
                         onChanged: (val) {
                           setState(() {
                             ptField.isRequired = val;
-                            group.data!["isRequired"] = val;
                           });
                         },
                       ),
@@ -777,7 +769,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
                         onChanged: (val) {
                           setState(() {
                             ptField.isHidden = !val;
-                            group.data!["isHidden"] = ptField.isHidden;
                           });
                         },
                       ),
