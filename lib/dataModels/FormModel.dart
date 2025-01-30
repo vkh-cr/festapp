@@ -100,6 +100,5 @@ class FormModel {
     Tb.forms.footer: footer,
     Tb.forms.link: link,
     Tb.form_fields.table: relatedFields,
-    TbEshop.product_types.table: relatedFields?.where((f)=>f.productType != null).map((f)=>f.productType).toList()
   };
 }
