@@ -9,7 +9,6 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
-import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -68,7 +67,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   Future<void> saveChanges() async {
     await DbForms.updateForm(form!);
-    ToastHelper.Show(context, "${"Saved".tr()}: ${form?.formKey}");
+    ToastHelper.Show(context, "${"Saved".tr()}: ${form?.link}");
   }
 
   void cancelEdit() {
@@ -83,7 +82,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
       if ([
         FormHelper.fieldTypeText,
         FormHelper.fieldTypeSelectOne,
-        FormHelper.fieldTypeProductType,
       ].contains(type)) {
         return true;
       }
@@ -158,15 +156,17 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           icon: const Icon(Icons.edit),
                           label: Text("Edit content".tr()),
                           onPressed: () async {
-                            final result = await RouterService.navigatePageInfo(
+                            final result =
+                            await RouterService.navigatePageInfo(
                               context,
                               HtmlEditorRoute(
-                                content: {HtmlEditorPage.parContent: form!.header!},
+                                content: {
+                                  HtmlEditorPage.parContent: form!.header!
+                                },
                               ),
                             );
                             if (result != null) {
                               setState(() => form!.header = result as String);
-                              await DbForms.updateForm(form!);
                             }
                           },
                         ),
@@ -179,7 +179,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   children: [
                     Text(
                       "Form Fields".tr(),
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.primary,
                       ),
@@ -222,12 +225,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   /// Build the list of top-level fields (i.e. those that are NOT isTicketField).
-  /// Ticket subfields (isTicketField == true) will be handled in _buildTicketEditor.
+  /// Ticket subfields (isTicketField == true) will be handled in _buildTicketEditor().
   Widget _buildFieldsList() {
     // Filter out subfields that belong to the ticket
-    final topLevelFields = form!.relatedFields!
-        .where((f) => f.isTicketField != true)
-        .toList();
+    final topLevelFields =
+    form!.relatedFields!.where((f) => f.isTicketField != true).toList();
 
     return ReorderableListView.builder(
       shrinkWrap: true,
@@ -244,15 +246,13 @@ class _FormEditorContentState extends State<FormEditorContent> {
           final item = topLevelFields.removeAt(oldIndex);
           topLevelFields.insert(newIndex, item);
 
-          // Reapply changes back to form!.relatedFields!
-          // We'll reorder them in form!.relatedFields! accordingly
+          // Reapply changes back to form!.relatedFields! in new order
           final updatedList = <FormFieldModel>[];
-          // Gather all isTicketField == false fields in the updated order
+          // Add all non-ticket fields in updated order
           updatedList.addAll(topLevelFields);
-          // Then add the isTicketField == true fields (unchanged order)
+          // Then add the ticket fields (unchanged order)
           updatedList.addAll(
-            form!.relatedFields!.where((f) => f.isTicketField == true),
-          );
+              form!.relatedFields!.where((f) => f.isTicketField == true));
           form!.relatedFields = updatedList;
 
           // Update order values
@@ -274,11 +274,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   /// Builds a single item in the top-level list
-  Widget _buildFieldItem(BuildContext context, int index, FormFieldModel field,
-      List<FormFieldModel> displayList) {
+  Widget _buildFieldItem(
+      BuildContext context,
+      int index,
+      FormFieldModel field,
+      List<FormFieldModel> displayList,
+      ) {
     final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
     final isSelected = (selectedIndex == index);
-    final titleFocusNode = FocusNode();
 
     // Ticket field specifics
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
@@ -291,9 +294,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
       onTap: () {
         if (!isSelected) {
           setState(() => selectedIndex = index);
-        } else {
-          // If already selected, focus the title text field
-          titleFocusNode.requestFocus();
         }
       },
       child: Opacity(
@@ -319,7 +319,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   Center(
                     child: ReorderableDragStartListener(
                       index: index,
-                      child: const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
+                      child:
+                      const Icon(Icons.drag_handle, color: Colors.grey, size: 24),
                     ),
                   ),
 
@@ -332,7 +333,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Row(
                       children: [
-                        Icon(fieldTypeIcons[FormHelper.fieldTypeTicket], size: 24, color: Theme.of(context).colorScheme.primary,),
+                        Icon(
+                          fieldTypeIcons[FormHelper.fieldTypeTicket],
+                          size: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           "Ticket",
@@ -348,18 +353,18 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 ] else ...[
                   // Editable title for other fields
                   TextFormField(
-                    focusNode: titleFocusNode,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     decoration: InputDecoration(
-                      border:
-                      isSelected ? const UnderlineInputBorder() : InputBorder.none,
+                      border: isSelected
+                          ? const UnderlineInputBorder()
+                          : InputBorder.none,
                       hintText: FormHelper.fieldTypeToLocale(field.type ?? ''),
                       contentPadding: const EdgeInsets.symmetric(vertical: 8),
                     ),
-                    controller: TextEditingController(text: field.title),
+                    initialValue: field.title,
                     onChanged: (value) => field.title = value,
                     onTap: () {
                       if (!isSelected) {
@@ -381,7 +386,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       ),
                       style: Theme.of(context).textTheme.bodyLarge,
                       onChanged: (value) {
-                        // If you want to store or do something with this
+                        // Possibly store or do something with this if needed
                       },
                     ),
                   ),
@@ -429,14 +434,16 @@ class _FormEditorContentState extends State<FormEditorContent> {
                             ),
                             itemBuilder: (context) {
                               return fieldTypeIcons.entries
-                                  .where((entry) => _availableFieldTypes.contains(entry.key))
+                                  .where((entry) =>
+                                  _availableFieldTypes.contains(entry.key))
                                   .map((entry) => PopupMenuItem(
                                 value: entry.key,
                                 child: Row(
                                   children: [
                                     Icon(entry.value),
                                     const SizedBox(width: 8),
-                                    Text(FormHelper.fieldTypeToLocale(entry.key)),
+                                    Text(FormHelper.fieldTypeToLocale(
+                                        entry.key)),
                                   ],
                                 ),
                               ))
@@ -479,7 +486,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       // Required as a CHECKBOX
                       Row(
                         children: [
-                          Text('Required'.tr(), style: Theme.of(context).textTheme.bodySmall),
+                          Text('Required'.tr(),
+                              style: Theme.of(context).textTheme.bodySmall),
                           Checkbox(
                             value: isAlwaysRequired || (field.isRequired ?? false),
                             onChanged: isAlwaysRequired
@@ -494,10 +502,12 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       if (!isTicket) ...[
                         Row(
                           children: [
-                            Text('Visible'.tr(), style: Theme.of(context).textTheme.bodySmall),
+                            Text('Visible'.tr(),
+                                style: Theme.of(context).textTheme.bodySmall),
                             Switch(
                               value: !(field.isHidden ?? false),
-                              onChanged: (value) => setState(() => field.isHidden = !value),
+                              onChanged: (value) =>
+                                  setState(() => field.isHidden = !value),
                             ),
                           ],
                         ),
@@ -507,7 +517,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                       // Delete Button for brand-new fields (id == null)
                       if (field.id == null)
                         IconButton(
-                          icon: Icon(Icons.delete, color: Theme.of(context).iconTheme.color),
+                          icon: Icon(Icons.delete,
+                              color: Theme.of(context).iconTheme.color),
                           onPressed: () {
                             setState(() {
                               displayList.remove(field);
@@ -583,8 +594,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
               onPressed: () {
                 if (optionsController.text.isNotEmpty) {
                   setState(() {
-                    final newOption =
-                    FormOptionModel(optionsController.text, optionsController.text);
+                    final newOption = FormOptionModel(
+                      optionsController.text,
+                      optionsController.text,
+                    );
                     field.options.add(newOption);
                   });
                   optionsController.clear();
@@ -672,7 +685,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 isTicketField: true,
                 isRequired: false,
                 isHidden: false,
-                order: (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+                order:
+                (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
                 productType: ProductTypeModel(
                   title: "New Product Type".tr(),
                   products: [],
@@ -700,9 +714,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
     bool groupIsRequired = ptField.isRequired ?? false;
     bool groupIsHidden = ptField.isHidden ?? false;
 
-    final groupTitleController = TextEditingController(text: ptField.title ?? group.title);
+    final groupTitleController =
+    TextEditingController(text: ptField.title ?? group.title);
 
-    // Because the productType might exist in DB, if there's no list init it
+    // Because the productType might exist in DB, ensure we have a products list
     group.products ??= [];
 
     // Opacity if groupIsHidden
@@ -720,11 +735,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
               // Header row: group title, toggles, delete
               Row(
                 children: [
-                  // If group.type == "spot", show a small icon or text
-                  if (group.type == FormHelper.fieldTypeSpot) ...[
-                    const Icon(Icons.event_seat),
-                    const SizedBox(width: 8),
-                  ],
+                  // Example: if group.type == "spot", you could show a seat icon, etc.
+                  // We'll skip that detail here.
 
                   // Group name
                   Expanded(
@@ -735,10 +747,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
                         border: const UnderlineInputBorder(),
                       ),
                       onChanged: (val) {
-                        setState(() {
-                          ptField.title = val;
-                          group.title = val;
-                        });
+                        ptField.title = val;
+                        group.title = val;
+                        // We do NOT call setState here just for text changes,
+                        // to avoid a large rebuild. The text stays in sync with the model.
                       },
                     ),
                   ),
@@ -747,7 +759,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   // isRequired as CHECKBOX
                   Column(
                     children: [
-                      Text("Required".tr(), style: Theme.of(context).textTheme.bodySmall),
+                      Text("Required".tr(),
+                          style: Theme.of(context).textTheme.bodySmall),
                       Checkbox(
                         value: groupIsRequired,
                         onChanged: (val) {
@@ -763,7 +776,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   // isHidden as a SWITCH
                   Column(
                     children: [
-                      Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
+                      Text("Show".tr(),
+                          style: Theme.of(context).textTheme.bodySmall),
                       Switch(
                         value: !groupIsHidden,
                         onChanged: (val) {
@@ -792,15 +806,15 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
               const SizedBox(height: 16),
               // Product list
-              if (group.products != null) ...[
-                Column(
-                  children: group.products!.asMap().entries.map((entry) {
-                    final productIndex = entry.key;
-                    final product = entry.value;
-                    return _buildTicketProductEditor(ptField, product, productIndex);
-                  }).toList(),
+              for (int i = 0; i < group.products!.length; i++)
+                _TicketProductEditorRow(
+                  product: group.products![i],
+                  onDelete: () {
+                    setState(() {
+                      group.products!.removeAt(i);
+                    });
+                  },
                 ),
-              ],
 
               // Add product
               Align(
@@ -827,19 +841,59 @@ class _FormEditorContentState extends State<FormEditorContent> {
       ),
     );
   }
+}
 
-  /// Builds editor for individual ProductModel in a productType group
-  Widget _buildTicketProductEditor(
-      FormFieldModel ptField,
-      ProductModel product,
-      int productIndex,
-      ) {
-    final productTitleController = TextEditingController(text: product.title ?? "");
-    final productPriceController =
-    TextEditingController(text: (product.price ?? 0).toString());
+///
+/// A separate stateful widget for editing a single ProductModel inside a ticket group.
+/// This approach keeps TextEditingController out of the parent's build method,
+/// so typing doesn't rebuild the entire screen.
+///
+class _TicketProductEditorRow extends StatefulWidget {
+  final ProductModel product;
+  final VoidCallback onDelete;
 
+  const _TicketProductEditorRow({
+    Key? key,
+    required this.product,
+    required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  State<_TicketProductEditorRow> createState() => _TicketProductEditorRowState();
+}
+
+class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
+  late TextEditingController _titleController;
+  late TextEditingController _priceController;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.product.title ?? "");
+    _priceController = TextEditingController(
+      text: (widget.product.price ?? 0).toString(),
+    );
+
+    // Listen to changes so we can update the model without forcing parent rebuild
+    _titleController.addListener(() {
+      widget.product.title = _titleController.text;
+    });
+    _priceController.addListener(() {
+      widget.product.price = double.tryParse(_priceController.text) ?? 0.0;
+    });
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _priceController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Opacity if product.isHidden is true
-    final effectiveOpacity = (product.isHidden ?? false) ? kHiddenOpacity : 1.0;
+    final effectiveOpacity = (widget.product.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
     return Opacity(
       opacity: effectiveOpacity,
@@ -851,16 +905,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
             Expanded(
               flex: 4,
               child: TextField(
-                controller: productTitleController,
+                controller: _titleController,
                 decoration: InputDecoration(
                   labelText: "Title".tr(),
                   border: const UnderlineInputBorder(),
                 ),
-                onChanged: (val) {
-                  setState(() {
-                    product.title = val;
-                  });
-                },
               ),
             ),
             const SizedBox(width: 8),
@@ -868,17 +917,13 @@ class _FormEditorContentState extends State<FormEditorContent> {
             Expanded(
               flex: 2,
               child: TextField(
-                controller: productPriceController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                controller: _priceController,
+                keyboardType:
+                const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   labelText: "Price".tr(),
                   border: const UnderlineInputBorder(),
                 ),
-                onChanged: (val) {
-                  setState(() {
-                    product.price = double.tryParse(val) ?? 0.0;
-                  });
-                },
               ),
             ),
             const SizedBox(width: 8),
@@ -887,25 +932,21 @@ class _FormEditorContentState extends State<FormEditorContent> {
               children: [
                 Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
                 Switch(
-                  value: !(product.isHidden ?? false),
+                  value: !(widget.product.isHidden ?? false),
                   onChanged: (val) {
                     setState(() {
-                      product.isHidden = !val;
+                      widget.product.isHidden = !val;
                     });
                   },
                 ),
               ],
             ),
             const SizedBox(width: 8),
-            // Delete product only if product.id == null
-            if (product.id == null)
+            // Delete product only if product.id == null (or decide your own logic)
+            if (widget.product.id == null)
               IconButton(
                 icon: const Icon(Icons.close),
-                onPressed: () {
-                  setState(() {
-                    ptField.productType!.products!.removeAt(productIndex);
-                  });
-                },
+                onPressed: widget.onDelete,
               ),
           ],
         ),
