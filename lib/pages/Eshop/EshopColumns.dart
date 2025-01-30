@@ -228,7 +228,7 @@ class EshopColumns {
     ],
     ORDER_HISTORY: [
       PlutoColumn(
-        enableAutoEditing: true,
+        enableAutoEditing: false,
         title: "History".tr(),
         field: TbEshop.orders_history.table,
         type: PlutoColumnType.text(),
@@ -254,7 +254,7 @@ class EshopColumns {
     ],
     ORDER_TRANSACTIONS: [
       PlutoColumn(
-        enableAutoEditing: true,
+        enableAutoEditing: false,
         title: "Transactions".tr(),
         field: TbEshop.transactions.table,
         type: PlutoColumnType.text(),
