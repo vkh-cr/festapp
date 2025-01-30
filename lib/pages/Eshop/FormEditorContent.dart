@@ -66,7 +66,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   Future<void> saveChanges() async {
-    await DbForms.updateForm(form!);
+    // 1) Before saving, ensure the fields have consistent `order` from 0..N
+    form!.relatedFields!
+        .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+    for (int i = 0; i < form!.relatedFields!.length; i++) {
+      form!.relatedFields![i].order = i;
+    }
+
+    await DbForms.updateForm(context, form!);
     ToastHelper.Show(context, "${"Saved".tr()}: ${form?.link}");
   }
 
@@ -155,7 +162,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           icon: const Icon(Icons.edit),
                           label: Text("Edit content".tr()),
                           onPressed: () async {
-                            final result = await RouterService.navigatePageInfo(
+                            final result =
+                            await RouterService.navigatePageInfo(
                               context,
                               HtmlEditorRoute(
                                 content: {
@@ -164,7 +172,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                               ),
                             );
                             if (result != null) {
-                              setState(() => form!.header = result as String);
+                              setState(
+                                      () => form!.header = result as String);
                             }
                           },
                         ),
@@ -203,7 +212,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: saveChanges,
-                child: Text("Save Changes".tr()),
+                child: Text("Save changes".tr()),
               ),
             ],
           ),
@@ -213,7 +222,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   /// Build the list of top-level fields (i.e. those that are NOT isTicketField).
-  /// Ticket subfields (isTicketField == true) will be handled in _buildTicketEditor().
   Widget _buildFieldsList() {
     // Filter out subfields that belong to the ticket
     final topLevelFields =
@@ -268,14 +276,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
       FormFieldModel field,
       List<FormFieldModel> displayList,
       ) {
-    final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
     final isSelected = (selectedIndex == index);
-
-    // Ticket field specifics
-    final isTicket = (field.type == FormHelper.fieldTypeTicket);
-
-    // Some fields are forced to remain visible (e.g. ticket, email)
-    final disableHideSwitch = (isTicket || field.type == FormHelper.fieldTypeEmail);
 
     // Wrap the entire card in an opacity if hidden
     final effectiveOpacity = (field.isHidden ?? false) ? kHiddenOpacity : 1.0;
@@ -317,12 +318,30 @@ class _FormEditorContentState extends State<FormEditorContent> {
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
     final isSelectOne = (field.type == FormHelper.fieldTypeSelectOne);
 
-    // Show an icon only for ticket (as requested).
-    // If you want icons for all fields, you could check fieldTypeIcons[field.type].
-    final icon = isTicket ? fieldTypeIcons[FormHelper.fieldTypeTicket] : null;
+    // For normal fields, we use the local icon if available
+    final icon = fieldTypeIcons[field.type];
     final requiredStar = (field.isRequired ?? false)
-        ? TextSpan(text: ' *', style: TextStyle(color: Colors.red))
+        ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
         : null;
+
+    // Handle hidden => strikethrough
+    final hidden = (field.isHidden ?? false);
+    final titleStyle = hidden
+        ? TextStyle(
+      decoration: TextDecoration.lineThrough,
+      color: Theme.of(context).colorScheme.primary,
+      fontWeight: FontWeight.bold,
+    )
+        : TextStyle(
+      color: Theme.of(context).colorScheme.primary,
+      fontWeight: FontWeight.bold,
+    );
+
+    // If user never set a custom title, fallback to type-locale
+    var displayTitle = field.title;
+    if (displayTitle?.isEmpty ?? true) {
+      displayTitle = FormHelper.fieldTypeToLocale(field.type!);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,11 +360,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
             Flexible(
               child: RichText(
                 text: TextSpan(
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  text: field.title ?? FormHelper.fieldTypeToLocale(field.type!),
+                  style: titleStyle,
+                  text: displayTitle,
                   children: [
                     if (requiredStar != null) requiredStar,
                   ],
@@ -382,7 +398,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
       ) {
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
     final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
-    final disableHideSwitch = (isTicket || field.type == FormHelper.fieldTypeEmail);
+    final disableHideSwitch =
+    (isTicket || field.type == FormHelper.fieldTypeEmail);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,8 +480,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
         // Bottom row of toggles & actions
         Row(
           children: [
-            // Type popup (disable if it's a ticket - can't change type)
-            if (!isTicket)
+            // Type popup (disable if it's a ticket or email - can't change type)
+            if (!isTicket && field.type != FormHelper.fieldTypeEmail)
               SizedBox(
                 width: 180,
                 child: PopupMenuButton<String>(
@@ -487,7 +504,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   ),
                   itemBuilder: (context) {
                     return fieldTypeIcons.entries
-                        .where((entry) => _availableFieldTypes.contains(entry.key))
+                        .where((entry) =>
+                        _availableFieldTypes.contains(entry.key))
                         .map((entry) => PopupMenuItem(
                       value: entry.key,
                       child: Row(
@@ -547,10 +565,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
             ),
             const SizedBox(width: 16),
 
+            // Visible switch
             Row(
               children: [
                 Text(
-                  'Visible'.tr(),
+                  'Show'.tr(),
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 Switch(
@@ -567,8 +586,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
             // Delete Button for brand-new fields (id == null)
             if (field.id == null)
               IconButton(
-                icon:
-                Icon(Icons.delete, color: Theme.of(context).iconTheme.color),
+                icon: Icon(Icons.delete,
+                    color: Theme.of(context).iconTheme.color),
                 onPressed: () {
                   setState(() {
                     displayList.remove(field);
@@ -633,7 +652,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 ),
                 Expanded(child: Text(option.title)),
                 IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
                       field.options.remove(option);
@@ -681,42 +700,45 @@ class _FormEditorContentState extends State<FormEditorContent> {
     );
   }
 
-  /// Builds a checkbox for "Note" under the TICKET field's main row
-  /// If checked, ensures there's a subfield with isTicketField=true, type=note.
-  /// If unchecked, removes that subfield.
-  Widget _buildTicketNoteCheckbox() {
+  /// A checkbox that, if checked, ensures there's a subfield with type=note, isTicketField=true
+  void _toggleTicketNote(bool val) {
     final noteField = form!.relatedFields!.firstWhere(
           (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote,
       orElse: () => FormFieldModel(type: 'none'),
     );
     final noteExists = noteField.type == FormHelper.fieldTypeNote;
 
+    setState(() {
+      if (val) {
+        // Create if not existing
+        if (!noteExists) {
+          final newNoteField = FormFieldModel(
+            title: "Note".tr(),
+            type: FormHelper.fieldTypeNote,
+            isTicketField: true,
+            isRequired: false,
+            isHidden: false,
+            order:
+            (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
+          );
+          form!.relatedFields!.add(newNoteField);
+        }
+      } else {
+        // Remove existing note subfield(s)
+        form!.relatedFields!
+            .removeWhere((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
+      }
+    });
+  }
+
+  /// Build the small "Note" checkbox in the ticket field's row
+  Widget _buildTicketNoteCheckbox() {
+    final noteFieldIndex = form!.relatedFields!.indexWhere(
+            (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
+    final noteExists = noteFieldIndex != -1;
     return Checkbox(
       value: noteExists,
-      onChanged: (val) {
-        setState(() {
-          if (val == true) {
-            // Create if not existing
-            if (!noteExists) {
-              final newNoteField = FormFieldModel(
-                title: "Note".tr(),
-                type: FormHelper.fieldTypeNote,
-                isTicketField: true,
-                isRequired: false,
-                isHidden: false,
-                order: (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) +
-                    1,
-              );
-              form!.relatedFields!.add(newNoteField);
-            }
-          } else {
-            // Remove existing note subfield(s)
-            form!.relatedFields!.removeWhere(
-                  (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote,
-            );
-          }
-        });
-      },
+      onChanged: (val) => _toggleTicketNote(val ?? false),
     );
   }
 
@@ -724,7 +746,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
   Widget _buildTicketEditorReadOnly(FormFieldModel ticketField) {
     // subfields with isTicketField == true and type=productType
     final productTypeFields = form!.relatedFields!
-        .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
+        .where((f) =>
+    f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
         .toList();
 
     if (productTypeFields.isEmpty) {
@@ -753,7 +776,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
   /// Selected (editable) version of ticket editor
   Widget _buildTicketEditor(FormFieldModel ticketField) {
     final productTypeFields = form!.relatedFields!
-        .where((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
+        .where((f) =>
+    f.isTicketField == true && f.type == FormHelper.fieldTypeProductType)
         .toList();
     productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
 
@@ -772,29 +796,31 @@ class _FormEditorContentState extends State<FormEditorContent> {
         // Add new product group
         Row(
           children: [
-            Spacer(),
+            const Spacer(),
             ElevatedButton.icon(
-            icon: const Icon(Icons.add),
-            label: Text("Add Product Type".tr()),
-            onPressed: () {
-              setState(() {
-                final newProductTypeField = FormFieldModel(
-                  title: "New Product Type".tr(),
-                  type: FormHelper.fieldTypeProductType,
-                  isTicketField: true,
-                  isRequired: false,
-                  isHidden: false,
-                  order:
-                  (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
-                  productType: ProductTypeModel(
+              icon: const Icon(Icons.add),
+              label: Text("Add Product Type".tr()),
+              onPressed: () {
+                setState(() {
+                  final newProductTypeField = FormFieldModel(
                     title: "New Product Type".tr(),
-                    products: [],
-                  ),
-                );
-                form!.relatedFields!.add(newProductTypeField);
-              });
-            },
-          )
+                    type: FormHelper.fieldTypeProductType,
+                    isTicketField: true,
+                    isRequired: false,
+                    isHidden: false,
+                    order: (form!.relatedFields!
+                        .map((x) => x.order ?? 0)
+                        .fold(0, max)) +
+                        1,
+                    productType: ProductTypeModel(
+                      title: "New Product Type".tr(),
+                      products: [],
+                    ),
+                  );
+                  form!.relatedFields!.add(newProductTypeField);
+                });
+              },
+            ),
           ],
         ),
       ],
@@ -807,7 +833,21 @@ class _FormEditorContentState extends State<FormEditorContent> {
     final group = ptField.productType!;
     group.products ??= [];
 
-    // We do NOT show toggles or delete icons in read-only.
+    final groupHidden = ptField.isHidden ?? false;
+    final requiredStar = (ptField.isRequired ?? false)
+        ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
+        : null;
+
+    // Strikethrough if hidden
+    final groupTitleStyle = groupHidden
+        ? Theme.of(context).textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+      decoration: TextDecoration.lineThrough,
+    )
+        : Theme.of(context).textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
+
     return Card(
       elevation: 3,
       child: Padding(
@@ -815,36 +855,83 @@ class _FormEditorContentState extends State<FormEditorContent> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Group title
-            Text(
-              ptField.title ?? group.title ?? '',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            // Group title + optional star
+            RichText(
+              text: TextSpan(
+                text: ptField.title ?? group.title ?? '',
+                style: groupTitleStyle?.copyWith(
+                  color: groupTitleStyle.color,
+                ),
+                children: [
+                  if (requiredStar != null) requiredStar,
+                ],
               ),
             ),
+
             const SizedBox(height: 8),
+
             if (group.products!.isEmpty)
               Text('No Products'.tr())
-            else
+            else ...[
+              // 2) Show "Title / Price" headers
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        "Title".tr(),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        "Price".tr(),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Products
               Column(
                 children: group.products!.map((product) {
+                  final productHidden = product.isHidden ?? false;
+                  // If hidden, strikethrough the row
+                  final rowStyle = productHidden
+                      ? const TextStyle(decoration: TextDecoration.lineThrough)
+                      : const TextStyle();
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
                       children: [
                         Expanded(
                           flex: 3,
-                          child: Text(product.title ?? ''),
+                          child: Text(product.title ?? '', style: rowStyle),
                         ),
                         Expanded(
                           flex: 1,
-                          child: Text('${product.price ?? 0}'),
+                          child: Text(
+                            '${product.price ?? 0}',
+                            style: rowStyle,
+                          ),
                         ),
                       ],
                     ),
                   );
                 }).toList(),
               ),
+            ],
           ],
         ),
       ),
@@ -853,10 +940,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   /// Editable product-type "group"
   Widget _buildTicketGroupEditor(FormFieldModel ptField) {
-    ptField.productType ??= ProductTypeModel(
-      title: ptField.title,
-      products: [],
-    );
+    ptField.productType ??=
+        ProductTypeModel(title: ptField.title, products: []);
     final group = ptField.productType!;
     group.products ??= [];
 
@@ -926,7 +1011,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     ],
                   ),
                   const SizedBox(width: 12),
-                  // Delete group only if ptField.id == null
+                  // Delete group (only if ptField.id == null => newly added)
                   if (ptField.id == null)
                     IconButton(
                       icon: const Icon(Icons.delete),
@@ -990,7 +1075,8 @@ class _TicketProductEditorRow extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<_TicketProductEditorRow> createState() => _TicketProductEditorRowState();
+  State<_TicketProductEditorRow> createState() =>
+      _TicketProductEditorRowState();
 }
 
 class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
@@ -1005,7 +1091,6 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
       text: (widget.product.price ?? 0).toString(),
     );
 
-    // Keep model updated without forcing entire screen rebuild
     _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
@@ -1023,7 +1108,8 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveOpacity = (widget.product.isHidden ?? false) ? kHiddenOpacity : 1.0;
+    final effectiveOpacity =
+    (widget.product.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
     return Opacity(
       opacity: effectiveOpacity,
@@ -1060,7 +1146,8 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
             // Hidden switch
             Column(
               children: [
-                Text("Show".tr(), style: Theme.of(context).textTheme.bodySmall),
+                Text("Show".tr(),
+                    style: Theme.of(context).textTheme.bodySmall),
                 Switch(
                   value: !(widget.product.isHidden ?? false),
                   onChanged: (val) {
@@ -1072,10 +1159,10 @@ class _TicketProductEditorRowState extends State<_TicketProductEditorRow> {
               ],
             ),
             const SizedBox(width: 8),
-            // Delete (only if product.id == null)
+            // Delete (only if product.id == null => newly added)
             if (widget.product.id == null)
               IconButton(
-                icon: const Icon(Icons.close),
+                icon: const Icon(Icons.delete),
                 onPressed: widget.onDelete,
               ),
           ],
