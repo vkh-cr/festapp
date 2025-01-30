@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
@@ -35,8 +36,7 @@ class DbForms {
     return null;
   }
 
-  static Future<void> updateForm(FormModel form) async {
-    var rjson = form.toEditedJson();
+  static Future<void> updateForm(BuildContext context, FormModel form) async {
     final response = await _supabase.rpc(
       'update_form',
       params: {
@@ -45,8 +45,8 @@ class DbForms {
     );
 
     if (response["code"] != 200) {
-      var x = 4;
-      return;
+      ToastHelper.Show(context, response["message"], severity: ToastSeverity.NotOk);
+      throw Exception(response);
     }
   }
 
