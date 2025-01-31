@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/AppRouter.gr.dart';
@@ -32,16 +33,16 @@ class _FormEditorContentState extends State<FormEditorContent> {
   String? formLink;
 
   static const Map<String, IconData> fieldTypeIcons = {
+    FormHelper.fieldTypeText: Icons.text_fields,
+    FormHelper.fieldTypeSelectOne: Icons.radio_button_checked,
+    FormHelper.fieldTypeEmail: Icons.email,
     FormHelper.fieldTypeName: Icons.person,
     FormHelper.fieldTypeSurname: Icons.person_outline,
-    FormHelper.fieldTypeCity: Icons.location_city,
-    FormHelper.fieldTypeEmail: Icons.email,
     FormHelper.fieldTypeSex: Icons.wc,
+    FormHelper.fieldTypeCity: Icons.location_city,
     FormHelper.fieldTypeBirthYear: Icons.cake,
     FormHelper.fieldTypeNote: Icons.note,
     FormHelper.fieldTypeSpot: Icons.place,
-    FormHelper.fieldTypeText: Icons.text_fields,
-    FormHelper.fieldTypeSelectOne: Icons.radio_button_checked,
     FormHelper.fieldTypeProductType: Icons.category,
     FormHelper.fieldTypeTicket: Icons.confirmation_number,
   };
@@ -783,16 +784,13 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   /// A checkbox that, if checked, ensures there's a subfield with type=note, isTicketField=true
   void _toggleTicketNote(bool val) {
-    final noteField = form!.relatedFields!.firstWhere(
-          (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote,
-      orElse: () => FormFieldModel(type: 'none'),
-    );
-    final noteExists = noteField.type == FormHelper.fieldTypeNote;
+    var ticketNote = form!.relatedFields!
+        .firstWhereOrNull((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
 
     setState(() {
       if (val) {
         // Create if not existing
-        if (!noteExists) {
+        if (ticketNote == null) {
           final newNoteField = FormFieldModel(
             title: "Note".tr(),
             type: FormHelper.fieldTypeNote,
@@ -803,11 +801,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
             (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1,
           );
           form!.relatedFields!.add(newNoteField);
+        } else {
+          ticketNote.isHidden = false;
+          ticketNote.order = (form!.relatedFields!.map((x) => x.order ?? 0).fold(0, max)) + 1;
         }
       } else {
-        // Remove existing note subfield(s)
-        form!.relatedFields!
-            .removeWhere((f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
+        if (ticketNote != null) {
+          ticketNote.isHidden = true;
+        }
       }
     });
   }
@@ -815,7 +816,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   /// Build the small "Note" checkbox in the ticket field's row
   Widget _buildTicketNoteCheckbox() {
     final noteFieldIndex = form!.relatedFields!.indexWhere(
-            (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote);
+            (f) => f.isTicketField == true && f.type == FormHelper.fieldTypeNote && !f.isHidden!);
     final noteExists = noteFieldIndex != -1;
     return Checkbox(
       value: noteExists,
