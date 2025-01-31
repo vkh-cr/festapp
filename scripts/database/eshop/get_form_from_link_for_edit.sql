@@ -11,11 +11,12 @@ BEGIN
         'data', jsonb_build_object(
             'id', f.id,
             'key', f.key,
+            'is_open', f.is_open,
             'created_at', f.created_at,
             'data', f.data,
             'type', f.type,
             'header', f.header,
-            'footer', f.footer,
+            'header_off', f.header_off,
             'occasion', f.occasion,
             'blueprint', f.blueprint,
             'link', f.link,
