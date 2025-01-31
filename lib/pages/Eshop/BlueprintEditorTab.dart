@@ -389,7 +389,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
           "Used".tr(),
           SeatState.used,
           isActive: false,
-          grayedOut: false,
+          grayedOut: true,
         ),
         const SizedBox(height: 8),
         buildLegendItem(
@@ -416,7 +416,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
       child: GestureDetector(
         onTap: grayedOut ? null : onTap,
         child: Opacity(
-          opacity: grayedOut ? 0.4 : 1.0, // Reduce opacity for grayed-out items
+          opacity: grayedOut ? 0.8 : 1.0, // Reduce opacity for grayed-out items
           child: Container(
             decoration: BoxDecoration(
               border: Border.all(
