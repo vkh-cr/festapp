@@ -16,6 +16,7 @@ class SeatWidgetHelper {
     final bool hasPadding = state == SeatState.ordered ||
         state == SeatState.selected ||
         state == SeatState.selected_by_me ||
+        state == SeatState.used ||
         state == SeatState.available;
 
     return Container(
@@ -52,6 +53,8 @@ class SeatWidgetHelper {
         return Colors.black26;
       case SeatState.black:
         return Colors.black87;
+      case SeatState.used:
+        return ThemeConfig.blueColor();
       case SeatState.ordered:
         return Colors.black26;
       case SeatState.empty:

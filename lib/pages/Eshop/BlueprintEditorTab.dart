@@ -87,7 +87,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             child: _buildLeftPanel(),
           ),
           // Main content
-          Container(
+          SizedBox(
             width: 400,
             child: _buildMainContent(),
           ),
@@ -383,6 +383,13 @@ class _BlueprintTabState extends State<BlueprintTab> {
               currentSelectionMode = selectionMode.emptyArea;
             });
           },
+        ),
+        const SizedBox(height: 8),
+        buildLegendItem(
+          "Used".tr(),
+          SeatState.used,
+          isActive: false,
+          grayedOut: false,
         ),
         const SizedBox(height: 8),
         buildLegendItem(

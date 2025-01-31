@@ -9,20 +9,20 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class FormResponseModel extends IPlutoRowModel {
   int? id;
-  String? orderSymbol;
+  OrderModel? order;
   Map<String, dynamic>? fields;
   List<FormFieldModel>? allFields;
 
   FormResponseModel({
     this.id,
-    this.orderSymbol,
+    this.order,
     this.fields,
     this.allFields,
   });
 
   static FormResponseModel fromPlutoJson(Map<String, dynamic> json) {
     return FormResponseModel(
-        orderSymbol: json[TbEshop.orders.order_symbol]);
+        order: json[TbEshop.orders.order_symbol]);
   }
 
   @override
@@ -30,7 +30,8 @@ class FormResponseModel extends IPlutoRowModel {
     // Initialize the cells with fixed fields
     Map<String, PlutoCell> cells = {
       TbEshop.orders.id: PlutoCell(value: id),
-      TbEshop.orders.order_symbol: PlutoCell(value: orderSymbol),
+      TbEshop.orders.order_symbol: PlutoCell(value: order!.id),
+      TbEshop.orders.state: PlutoCell(value: order!.state),
     };
 
     for (var f in allFields!) {
@@ -67,7 +68,7 @@ class FormResponseModel extends IPlutoRowModel {
 
     return FormResponseModel(
       id: order.id,
-      orderSymbol: extractedOrderSymbol,
+      order: order,
       fields: extractedFields,
       allFields: allFields
     );
@@ -83,7 +84,7 @@ class FormResponseModel extends IPlutoRowModel {
 
   @override
   String toBasicString() {
-    return orderSymbol.toString();
+    return order.toString();
   }
 
 }

@@ -59,6 +59,7 @@ class ThemeConfig {
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
 
   static Color greenColor() => Colors.green.changeColorLightness(0.3).changeColorSaturation(0.5);
+  static Color blueColor() => Colors.deepPurple.changeColorLightness(0.3).changeColorSaturation(0.5);
   static Color redColor(BuildContext context) => isDarkMode(context) ? Color(0xFFff5252) : Color(0xFFd32f2f);
   static Color darkColor(BuildContext context) => isDarkMode(context) ? dddText : seed1;
   static Color blackColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.black;
