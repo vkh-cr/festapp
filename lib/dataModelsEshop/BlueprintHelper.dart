@@ -85,7 +85,7 @@ class BlueprintHelper {
           orderProductTicket: matchingSpot?.orderProductTicket,
           groupId: object.groupId,
           title: matchingSpot?.title ?? object.title,
-          stateEnum: BlueprintObjectModel.States.entries
+          stateEnum: BlueprintObjectModel.statesMap.entries
               .firstWhereOrNull((entry) => entry.value == matchingSpot?.state)
               ?.key ??
               SeatState.available,

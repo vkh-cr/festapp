@@ -12,6 +12,9 @@ enum SeatState {
   /// this seat is already sold to other user
   ordered,
 
+  /// this seat is was used
+  used,
+
   /// this seat is disabled to be booked for some reason
   black,
 

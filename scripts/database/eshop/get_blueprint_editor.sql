@@ -65,19 +65,24 @@ BEGIN
       AND obj->>'id' IS NOT NULL;
 
     -- Fetch enriched spots data
-    SELECT jsonb_agg(jsonb_build_object(
+    SELECT jsonb_agg(
+      jsonb_build_object(
         'id', s.id,
         'title', s.title,
         'product', s.product,
         'order_product_ticket', s.order_product_ticket,
         'state', CASE
-            WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
-            WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN 'selected'
-            ELSE 'available'
+          WHEN t.state = 'used' THEN 'used'
+          WHEN s.order_product_ticket IS NOT NULL THEN 'ordered'
+          WHEN s.secret IS NOT NULL AND s.secret_expiration_time > now() THEN 'selected'
+          ELSE 'available'
         END
-    ))
+      )
+    )
     INTO spotsData
     FROM eshop.spots s
+    LEFT JOIN eshop.order_product_ticket opt ON s.order_product_ticket = opt.id
+    LEFT JOIN eshop.tickets t ON opt.ticket = t.id
     WHERE s.id = ANY(SELECT jsonb_array_elements_text(valid_spots)::BIGINT)
       AND s.occasion = occasion_id;
 
@@ -92,8 +97,7 @@ BEGIN
     INTO productsData
     FROM eshop.products p
     JOIN eshop.product_types pt ON pt.id = p.product_type
-    WHERE pt.type IN ('spot', 'taxi', 'food')
-      AND pt.occasion = occasion_id;
+    WHERE pt.occasion = occasion_id;
 
     -- Fetch relevant tickets associated with the order_product_ticket in spots
     SELECT jsonb_agg(jsonb_build_object(

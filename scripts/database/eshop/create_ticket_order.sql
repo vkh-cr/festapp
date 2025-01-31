@@ -186,19 +186,20 @@ BEGIN
 
             -- Process each product from the accumulated products_array
             FOREACH product_id IN ARRAY products_array LOOP
-                SELECT i.*, it.type, it.title as type_title, '' as spot_title
+                SELECT i.*, it.type, it.title AS type_title, '' AS spot_title
                 INTO product_data
                 FROM eshop.products i
                 LEFT JOIN eshop.product_types it ON i.product_type = it.id
                 WHERE i.id = product_id
-                  AND i.occasion = occasion_id;
+                  AND it.occasion = occasion_id;
 
                 IF product_data IS NULL THEN
-                    RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(
-                        'code', 1011,
-                        'message', 'Product not found or not part of occasion',
-                        'details', product_id
-                    )::TEXT;
+                    RAISE EXCEPTION '%',
+                        jsonb_build_object(
+                            'code', 1011,
+                            'message', 'Product not found or not part of occasion',
+                            'details', product_id
+                        )::text;
                 END IF;
 
                 IF product_data.type = 'spot' AND spot_product IS NULL THEN
