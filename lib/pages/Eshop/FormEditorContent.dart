@@ -76,6 +76,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
     await DbForms.updateForm(context, form!);
     ToastHelper.Show(context, "${"Saved".tr()}: ${form?.link}");
+    loadData();
   }
 
   void cancelEdit() {
