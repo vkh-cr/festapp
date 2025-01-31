@@ -36,9 +36,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
   String? formLink;
 
   List<SeatModel> allBoxes = [];
-
   selectionMode currentSelectionMode = selectionMode.none;
-
   final AutoResizeInteractiveViewerController seatLayoutController =
   AutoResizeInteractiveViewerController();
 
@@ -51,12 +49,115 @@ class _BlueprintTabState extends State<BlueprintTab> {
     loadData();
   }
 
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Left panel
+        Container(
+          width: 250,
+          padding: const EdgeInsets.all(16.0),
+          child: _buildLeftPanel(),
+        ),
+        const SizedBox(width: 16),
+        // Main content
+        Expanded(
+          child: _buildMainContent(),
+        ),
+        const SizedBox(width: 16),
+        // Right panel
+        Container(
+          width: 250,
+          padding: const EdgeInsets.all(16.0),
+          child: _buildRightPanel(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left panel
+          Container(
+            width: 250,
+            padding: const EdgeInsets.all(16.0),
+            child: _buildLeftPanel(),
+          ),
+          // Main content
+          Container(
+            width: 400,
+            child: _buildMainContent(),
+          ),
+          // Right panel
+          Container(
+            width: 250,
+            padding: const EdgeInsets.all(16.0),
+            child: _buildRightPanel(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeftPanel() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Text(
+            "Click an option in the legend to add seats.",
+            style: Theme.of(context).textTheme.bodySmall,
+            textAlign: TextAlign.left,
+          ).tr(),
+        ),
+        buildLegend(),
+      ],
+    );
+  }
+
+  Widget _buildMainContent() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 16),
+        blueprint == null ? const SizedBox.shrink() : buildDimensionControls(),
+        const SizedBox(height: 16),
+        Flexible(
+          child: blueprint == null
+              ? const Center(child: CircularProgressIndicator())
+              : SeatLayoutWidget(
+            isEditorMode: true,
+            controller: seatLayoutController,
+            onSeatTap: handleSeatTap,
+            stateModel: SeatLayoutStateModel(
+              rows: blueprint!.configuration!.height!,
+              cols: blueprint!.configuration!.width!,
+              seatSize: SeatReservationWidget.boxSize,
+              currentObjects: blueprint!.objects!,
+              allBoxes: allBoxes,
+              backgroundSvg: blueprint!.backgroundSvg,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _buildRightPanel() {
+    return buildGroupsSection();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(blueprint?.title??"Edit".tr()),
+        title: Text(blueprint?.title ?? "Edit".tr()),
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
@@ -66,69 +167,14 @@ class _BlueprintTabState extends State<BlueprintTab> {
         ],
       ),
       body: SafeArea(
-        child: Center(
-          child: Row(
-            children: [
-              // Left panel (Legend)
-              Container(
-                width: 250,
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Text(
-                        "Click an option in the legend to add seats.",
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.left,
-                      ).tr(),
-                    ),
-                    buildLegend(),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16), // Padding between legend and main content
-              // Main content section
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 16),
-                    blueprint == null
-                        ? const SizedBox.shrink() :
-                    buildDimensionControls(),
-                    const SizedBox(height: 16),
-                    Flexible(
-                      child: blueprint == null
-                          ? const Center(child: CircularProgressIndicator())
-                          : SeatLayoutWidget(
-                        isEditorMode: true,
-                        controller: seatLayoutController,
-                        onSeatTap: handleSeatTap,
-                        stateModel: SeatLayoutStateModel(
-                          rows: blueprint!.configuration!.height!,
-                          cols: blueprint!.configuration!.width!,
-                          seatSize: SeatReservationWidget.boxSize,
-                          currentObjects: blueprint!.objects!,
-                          allBoxes: allBoxes,
-                          backgroundSvg: blueprint!.backgroundSvg
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16), // Padding between main content and groups
-              // Right panel (Groups)
-              Container(
-                width: 250,
-                padding: const EdgeInsets.all(16.0),
-                child: buildGroupsSection(),
-              ),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth > 800) {
+              return _buildDesktopLayout();
+            } else {
+              return _buildMobileLayout();
+            }
+          },
         ),
       ),
       bottomNavigationBar: Container(

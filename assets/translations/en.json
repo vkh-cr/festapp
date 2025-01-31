@@ -408,5 +408,8 @@
   "Product Type Title": "Product Type Title",
   "New Product": "New Product",
   "Add Product": "Add Product",
+  "Form is open": "Form is open",
+  "This form is currently turned off": "This form is currently turned off",
+  "Edit off text": "Edit off text",
   "_":"_"
 }
