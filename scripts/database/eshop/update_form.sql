@@ -271,7 +271,7 @@ BEGIN
 
                             -- Validate product price must be > 0
                             price_val := COALESCE(NULLIF(product_data->>'price',''), '0')::NUMERIC;
-                            IF price_val <= 0 THEN
+                            IF price_val < 0 THEN
                                 RAISE EXCEPTION '%',
                                     JSONB_BUILD_OBJECT(
                                         'code', 4015,
