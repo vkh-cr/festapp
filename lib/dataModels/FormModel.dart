@@ -16,7 +16,7 @@ class FormModel {
   String? accountNumber;
   String? secret;
   String? header;
-  String? footer;
+  String? headerOff;
   String? link;
   List<FormFieldModel>? relatedFields;
 
@@ -34,7 +34,7 @@ class FormModel {
     this.accountNumber,
     this.secret,
     this.header,
-    this.footer,
+    this.headerOff,
     this.link,
     this.relatedFields,
   });
@@ -56,7 +56,7 @@ class FormModel {
       accountNumber: json['account_number'],
       secret: json['secret'],
       header: json[Tb.forms.header],
-      footer: json[Tb.forms.footer],
+      headerOff: json[Tb.forms.header_off],
       link: json[Tb.forms.link],
       relatedFields: json['fields'] != null
           ? (json['fields'] as List)
@@ -80,7 +80,7 @@ class FormModel {
     'account_number': accountNumber,
     'secret': secret,
     Tb.forms.header: header,
-    Tb.forms.footer: footer,
+    Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
     'fields': relatedFields,
   };
@@ -97,7 +97,7 @@ class FormModel {
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     Tb.forms.header: header,
-    Tb.forms.footer: footer,
+    Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
     Tb.form_fields.table: relatedFields,
   };

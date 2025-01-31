@@ -13,32 +13,40 @@ DECLARE
     occasion_id      BIGINT;               -- ID of the occasion to which the form belongs
     now_ts           TIMESTAMPTZ := NOW(); -- Current timestamp for record updates
 
-    link_param           TEXT;       -- Unique link for the form, must not conflict within the same org
-    occasion_org         BIGINT;     -- Organization stored in the occasions table
-    occasion_unit        BIGINT;     -- The 'unit' that must match for bank accounts
-    conflict_check       INT;        -- Used for verifying uniqueness constraints
-    deadline_val         BIGINT;     -- Field for validating form deadlines
-    price_val            NUMERIC;    -- Field for validating product price
+    link_param           TEXT;         -- Unique link for the form, must not conflict within the same org
+    occasion_org         BIGINT;       -- Organization stored in the occasions table
+    occasion_unit        BIGINT;       -- The 'unit' that must match for bank accounts
+    conflict_check       INT;          -- Used for verifying uniqueness constraints
+    deadline_val         BIGINT;       -- Field for validating form deadlines
+    price_val            NUMERIC;      -- Field for validating product price
 
-    bank_account_val     BIGINT;     -- Bank account from input_data
-    bank_account_unit    BIGINT;     -- Unit of the bank account, must match occasion_unit
+    bank_account_val     BIGINT;       -- Bank account from input_data
+    bank_account_unit    BIGINT;       -- Unit of the bank account, must match occasion_unit
 
-    -- Variables for handling product_type logic (now nested inside form_fields.product_type)
-    product_type_data    JSONB;      -- Each product_type object from a form_field
-    product_type_id      BIGINT;     -- Product_type ID (new or existing)
-    product_type_occ     BIGINT;     -- Occasion to verify for an existing product_type
+    ----------------------------------------------------------------------------
+    -- Since product_type data is now inside form_fields, we no longer read from
+    -- a top-level product_types array. Instead, we will parse product_type objects
+    -- directly from each form_field (if present).
+    ----------------------------------------------------------------------------
 
-    -- Variables for handling products (within each product_type)
-    products_data        JSONB;      -- Placeholder for product array from product_type_data
-    product_array_data   JSONB;      -- Rebuilt array of products
-    product_data         JSONB;      -- Each product object from the product array
-    product_id           BIGINT;     -- ID for a product (new or existing)
-    product_occ          BIGINT;     -- Occasion check for an existing product
+    product_type_data    JSONB;        -- The JSONB data for product_type within a form_field
+    product_type_id      BIGINT;       -- ID (new or existing) of the product_type
+    product_type_occ     BIGINT;       -- For checking product_type's occasion
 
-    -- Variables for handling form_fields
-    form_fields_data     JSONB := '[]'::JSONB;
-    field_data           JSONB;       -- Each form_field from input
-    field_id             BIGINT;      -- ID for a form_field (new or existing)
+    products_data        JSONB;        -- JSONB array of products inside a product_type
+    product_array_data   JSONB;        -- Rebuilt array of products
+    product_data         JSONB;        -- Each product object from the products array
+    product_id           BIGINT;       -- ID for a product (new or existing)
+    product_occ          BIGINT;       -- Occasion check for an existing product
+
+    ----------------------------------------------------------------------------
+    -- form_fields data
+    ----------------------------------------------------------------------------
+    form_fields_data     JSONB := '[]'::JSONB; -- Final array of form_fields for the response
+    field_data           JSONB;                -- Each form_field from input
+    field_id             BIGINT;               -- ID for a form_field (new or existing)
+    field_product_type   BIGINT;               -- Will store the final product_type.id for the form_field
+    field_occ            BIGINT;               -- Verify product_type's occasion if referenced
 BEGIN
     BEGIN
         /* All logic is inside this sub-block so we can catch exceptions similarly
@@ -159,36 +167,32 @@ BEGIN
         END IF;
 
         ----------------------------------------------------------------------------
-        -- Process form_fields array from input_data. Each form_field can contain
-        -- a nested product_type object with its own 'products' array.
+        -- Process form_fields array from input_data if present
+        -- Each form_field may contain a product_type object. If so, we insert/update
+        -- the product_type and its products, then set the resulting product_type.id
+        -- in the form_field.
         ----------------------------------------------------------------------------
         IF (input_data->'form_fields') IS NOT NULL THEN
             form_fields_data := '[]'::JSONB;
 
-            FOR field_data IN
-                SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'form_fields')
+            FOR field_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(input_data->'form_fields')
             LOOP
                 field_id := NULLIF(field_data->>'id', '')::BIGINT;
 
-                -- If this form_field contains product_type data, handle it (create or update)
-                IF (field_data->'product_type') IS NOT NULL THEN
-                    product_type_data := field_data->'product_type';
+                ----------------------------------------------------------------------------
+                -- product_type logic now lives here, inside each form_field
+                ----------------------------------------------------------------------------
+                product_type_data := field_data->'product_type';  -- This is JSONB (could be null)
+                field_product_type := NULL;                        -- We'll store numeric ID here if we have a product_type
 
-                    -- Make sure product_type_data is an object before proceeding:
-                    IF jsonb_typeof(product_type_data) <> 'object' THEN
-                        RAISE EXCEPTION '%',
-                            JSONB_BUILD_OBJECT(
-                                'code', 4022,
-                                'message', 'Invalid product_type (expected object)',
-                                'details', product_type_data
-                            )::TEXT;
-                    END IF;
-
-                    -- Parse out potential ID
+                IF product_type_data IS NOT NULL AND product_type_data::TEXT <> 'null' THEN
+                    -- Attempt to parse the product_type.id if it exists
                     product_type_id := NULLIF(product_type_data->>'id', '')::BIGINT;
 
                     IF product_type_id IS NULL THEN
+                        ----------------------------------------------------------------------------
                         -- New product_type
+                        ----------------------------------------------------------------------------
                         INSERT INTO eshop.product_types (
                             created_at,
                             updated_at,
@@ -209,14 +213,20 @@ BEGIN
                         )
                         RETURNING id INTO product_type_id;
 
-                        -- Update the JSONB object with the new ID
-                        product_type_data := jsonb_set(product_type_data, '{id}', TO_JSONB(product_type_id));
+                        product_type_data := jsonb_set(
+                            product_type_data,
+                            '{id}',
+                            TO_JSONB(product_type_id)
+                        );
                     ELSE
+                        ----------------------------------------------------------------------------
                         -- Existing product_type: check existence and occasion
-                        SELECT occasion
+                        ----------------------------------------------------------------------------
+                        SELECT pt.occasion
                           INTO product_type_occ
-                          FROM eshop.product_types
-                         WHERE id = product_type_id;
+                          FROM eshop.product_types pt
+                         WHERE pt.id = product_type_id
+                         LIMIT 1;
 
                         IF NOT FOUND THEN
                             RAISE EXCEPTION '%',
@@ -249,20 +259,13 @@ BEGIN
                     END IF;
 
                     ----------------------------------------------------------------------------
-                    -- Process products within this product_type
+                    -- Process products within this product_type, if any
                     ----------------------------------------------------------------------------
-                    product_array_data :=
-                        CASE
-                            WHEN (product_type_data->'products') IS NOT NULL
-                                 AND jsonb_typeof(product_type_data->'products') = 'array'
-                            THEN product_type_data->'products'
-                            ELSE '[]'::JSONB
-                        END;
+                    products_data := product_type_data->'products';
+                    IF products_data IS NOT NULL AND products_data::TEXT <> 'null' THEN
+                        product_array_data := '[]'::JSONB;
 
-                    IF jsonb_array_length(product_array_data) > 0 THEN
-                        -- Only iterate if there's something in the array
-                        FOR product_data IN
-                            SELECT * FROM JSONB_ARRAY_ELEMENTS(product_array_data)
+                        FOR product_data IN SELECT * FROM JSONB_ARRAY_ELEMENTS(products_data)
                         LOOP
                             product_id := NULLIF(product_data->>'id', '')::BIGINT;
 
@@ -278,7 +281,9 @@ BEGIN
                             END IF;
 
                             IF product_id IS NULL THEN
+                                ----------------------------------------------------------------------------
                                 -- New product
+                                ----------------------------------------------------------------------------
                                 INSERT INTO eshop.products (
                                     created_at,
                                     updated_at,
@@ -309,7 +314,9 @@ BEGIN
 
                                 product_data := jsonb_set(product_data, '{id}', TO_JSONB(product_id));
                             ELSE
-                                -- Existing product: must match same occasion/product_type
+                                ----------------------------------------------------------------------------
+                                -- Existing product: must match the same occasion and product_type
+                                ----------------------------------------------------------------------------
                                 SELECT p.occasion
                                   INTO product_occ
                                   FROM eshop.products p
@@ -353,17 +360,27 @@ BEGIN
 
                             product_array_data := product_array_data || product_data;
                         END LOOP;
+
+                        product_type_data := jsonb_set(
+                            product_type_data,
+                            '{products}',
+                            product_array_data
+                        );
                     END IF;
 
-                    -- Store updated products array back into product_type_data
-                    product_type_data := jsonb_set(product_type_data, '{products}', product_array_data);
+                    ----------------------------------------------------------------------------
+                    -- Store product_type_id in field_product_type for the form_fields table
+                    ----------------------------------------------------------------------------
+                    field_product_type := product_type_id;
 
-                    -- Put the updated product_type object back into field_data
+                    ----------------------------------------------------------------------------
+                    -- Merge updated product_type_data back into the field_data
+                    ----------------------------------------------------------------------------
                     field_data := jsonb_set(field_data, '{product_type}', product_type_data);
                 END IF;
 
                 ----------------------------------------------------------------------------
-                -- Now handle insertion/update of the form_field itself
+                -- Insert or update the form_field itself
                 ----------------------------------------------------------------------------
                 IF field_id IS NOT NULL THEN
                     -- Update existing form_field
@@ -376,13 +393,7 @@ BEGIN
                            is_required = COALESCE((field_data->>'is_required')::BOOLEAN, false),
                            is_hidden = COALESCE((field_data->>'is_hidden')::BOOLEAN, false),
                            "order" = NULLIF(field_data->>'order','')::BIGINT,
-                           product_type =
-                             CASE
-                                 WHEN (field_data->'product_type') IS NOT NULL
-                                      AND jsonb_typeof(field_data->'product_type') = 'object'
-                                 THEN (field_data->'product_type'->>'id')::BIGINT
-                                 ELSE NULL
-                             END,
+                           product_type = field_product_type,
                            is_ticket_field = COALESCE((field_data->>'is_ticket_field')::BOOLEAN, false),
                            form = form_id
                      WHERE id = field_id
@@ -421,12 +432,7 @@ BEGIN
                         form_id,
                         COALESCE((field_data->>'is_hidden')::BOOLEAN, false),
                         NULLIF(field_data->>'order','')::BIGINT,
-                        CASE
-                            WHEN (field_data->'product_type') IS NOT NULL
-                                 AND jsonb_typeof(field_data->'product_type') = 'object'
-                            THEN (field_data->'product_type'->>'id')::BIGINT
-                            ELSE NULL
-                        END,
+                        field_product_type,
                         COALESCE((field_data->>'is_ticket_field')::BOOLEAN, false)
                     )
                     RETURNING id INTO field_id;
@@ -489,7 +495,7 @@ BEGIN
            SET
                data = input_data->'data',
                header = input_data->>'header',
-               footer = input_data->>'footer',
+               header_off = input_data->>'header_off',
                link = link_param,
                blueprint = NULLIF(input_data->>'blueprint','')::BIGINT,
                bank_account = bank_account_val,

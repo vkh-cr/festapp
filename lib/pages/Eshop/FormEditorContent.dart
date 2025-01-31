@@ -97,6 +97,78 @@ class _FormEditorContentState extends State<FormEditorContent> {
     }).toList();
   }
 
+  Widget _buildFormOpenToggleAndOffTextEditor() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Center the switch + text
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Form is open".tr()),
+              Switch(
+                value: form!.isOpen ?? true,
+                onChanged: (value) {
+                  setState(() {
+                    form!.isOpen = value;
+                  });
+                },
+              ),
+            ],
+          ),
+
+          // If form is off => show the red text + footer editor
+          if (!(form!.isOpen ?? true)) ...[
+            const SizedBox(height: 12),
+
+            // Center the red "off" text
+            Text(
+              "This form is currently turned off".tr(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: ThemeConfig.redColor(context),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(
+              thickness: 1,
+              color: Colors.grey,
+            ),
+            if (form!.headerOff?.isNotEmpty ?? false)
+              IntrinsicWidth(
+                child: HtmlView(
+                  html: form!.headerOff!,
+                  isSelectable: true,
+                ),
+              ),
+            const SizedBox(height: 16),
+
+            Center(
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.edit),
+                label: Text("Edit off text".tr()),
+                onPressed: () async {
+                  final result = await RouterService.navigatePageInfo(
+                    context,
+                    HtmlEditorRoute(
+                      content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
+                    ),
+                  );
+                  if (result != null) {
+                    setState(() => form!.headerOff = result as String);
+                  }
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   /// Adds a new field of a selected type.
   void _addNewField() async {
     final selectedType = await showDialog<String>(
@@ -153,6 +225,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
               padding: EdgeInsetsDirectional.all(6),
               child: Column(
                 children: [
+                  _buildFormOpenToggleAndOffTextEditor(),
+                  const Divider(
+                    thickness: 1,
+                    color: Colors.grey,
+                  ),
                   if (form?.header != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

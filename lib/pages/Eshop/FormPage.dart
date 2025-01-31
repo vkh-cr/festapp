@@ -346,10 +346,14 @@ class _FormPageState extends State<FormPage> {
   }
 
   Widget _buildFormNotAvailableMessage() {
+    String notAvailableText = (form?.headerOff?.isNotEmpty ?? false)
+        ? form!.headerOff!
+        : "Reservation for the selected event is currently unavailable.".tr();
     return Center(
       child: Container(
         padding: const EdgeInsets.all(24.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             const Icon(
@@ -366,13 +370,12 @@ class _FormPageState extends State<FormPage> {
               textAlign: TextAlign.center,
             ).tr(),
             const SizedBox(height: 8),
-            const Text(
-              "Reservation for the selected event is currently unavailable.",
-              style: TextStyle(
-                fontSize:  16,
+            IntrinsicWidth(
+              child: HtmlView(
+                html: notAvailableText,
+                isSelectable: true,
               ),
-              textAlign: TextAlign.center,
-            ).tr(),
+            ),
             const SizedBox(height: 24),
           ],
         ),

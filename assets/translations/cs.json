@@ -408,5 +408,8 @@
   "Product Type Title": "Název typu produktu",
   "New Product": "Nový produkt",
   "Add Product": "Přidat produkt",
+  "Form is open": "Formulář je otevřen",
+  "This form is currently turned off": "Tento formulář je momentálně vypnutý",
+  "Edit off text": "Upravit text pro vypnutý stav",
   "_": "_"
 }
