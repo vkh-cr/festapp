@@ -275,7 +275,7 @@ BEGIN
                                 RAISE EXCEPTION '%',
                                     JSONB_BUILD_OBJECT(
                                         'code', 4015,
-                                        'message', 'Product price must be greater than zero',
+                                        'message', 'Product price must be greater or equal to zero',
                                         'details', product_data
                                     )::TEXT;
                             END IF;
