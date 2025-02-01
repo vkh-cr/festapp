@@ -67,17 +67,31 @@ class _FormEditorContentState extends State<FormEditorContent> {
   }
 
   Future<void> saveChanges() async {
-    // 1) Before saving, ensure the fields have consistent `order` from 0..N
+    // Update order for form fields
     form!.relatedFields!
         .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
     for (int i = 0; i < form!.relatedFields!.length; i++) {
       form!.relatedFields![i].order = i;
     }
 
+    // Update order for products within each product type field
+    for (final field in form!.relatedFields!) {
+      if (field.isTicketField == true &&
+          field.type == FormHelper.fieldTypeProductType &&
+          field.productType != null &&
+          field.productType!.products != null) {
+        field.productType!.products!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+        for (int i = 0; i < field.productType!.products!.length; i++) {
+          field.productType!.products![i].order = i;
+        }
+      }
+    }
+
     await DbForms.updateForm(context, form!);
     ToastHelper.Show(context, "${"Saved".tr()}: ${form?.link}");
     loadData();
   }
+
 
   void cancelEdit() {
     Navigator.of(context).pop();
@@ -1130,6 +1144,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           title: "New Product".tr(),
                           price: 0.0,
                           isHidden: false,
+                          order: (group.products!.lastOrNull?.order ?? 0) + 1,
                         ),
                       );
                     });
