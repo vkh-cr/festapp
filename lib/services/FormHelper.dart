@@ -105,7 +105,7 @@ class FormHelper {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context, {FocusNode? focusNode, TextStyle? textStyle}) {
     final TextStyle defaultLabelStyle =
         Theme.of(context).inputDecorationTheme.labelStyle ??
-            TextStyle(fontSize: 16 * fontSizeFactor, color: ThemeConfig.grey600(context), fontFamily: "Futura");
+            TextStyle(fontSize: 16 * fontSizeFactor, color: ThemeConfig.grey600(context), fontFamily: ThemeConfig.fontFamily);
     final TextStyle effectiveBaseStyle = textStyle != null ? defaultLabelStyle.merge(textStyle) : defaultLabelStyle;
 
     if (focusNode != null) {
