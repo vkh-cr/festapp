@@ -107,7 +107,10 @@ class ThemeConfig {
   static Color qrButtonColor(BuildContext context) => isDarkMode(context) ? grey380(context) : bigButtonColor(context);
   static Color songButtonColor(BuildContext context) => isDarkMode(context) ? seed3.changeColorSaturation(0.2) : seed3.changeColorSaturation(0.2);
 
+  static Color grey900(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[900]!;
+  static Color grey850(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[850]!;
   static Color grey800(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[800]!;
+  static Color grey700(BuildContext context) => isDarkMode(context) ? Colors.grey[300]! : Colors.grey[700]!;
   static Color grey600(BuildContext context) => isDarkMode(context) ? Colors.grey[400]! : Colors.grey[600]!;
   static Color grey380(BuildContext context) => Colors.black38;
   static Color grey200(BuildContext context) => isDarkMode(context) ? Colors.grey[800]! : Colors.grey[200]!;
