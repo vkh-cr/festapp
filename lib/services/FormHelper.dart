@@ -99,18 +99,66 @@ class FormHelper {
 
   static double fontSizeFactor = 1.2;
 
+  /// Helper method that creates a title widget.
+  /// When the provided FocusNode is focused (i.e. the associated field has a cursor),
+  /// the title text changes to the primary color.
+  static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context, {FocusNode? focusNode, TextStyle? textStyle}) {
+    final TextStyle defaultLabelStyle =
+        Theme.of(context).inputDecorationTheme.labelStyle ??
+            TextStyle(fontSize: 16 * fontSizeFactor, color: ThemeConfig.grey600(context), fontFamily: "Futura");
+    final TextStyle effectiveBaseStyle = textStyle != null ? defaultLabelStyle.merge(textStyle) : defaultLabelStyle;
+
+    if (focusNode != null) {
+      return AnimatedBuilder(
+        animation: focusNode,
+        builder: (context, child) {
+          final bool isFocused = focusNode.hasFocus;
+          final TextStyle effectiveStyle = effectiveBaseStyle.copyWith(
+            color: isFocused ? Theme.of(context).primaryColor : effectiveBaseStyle.color,
+          );
+          final TextSpan? requiredStar = isRequired
+              ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
+              : null;
+          return RichText(
+            text: TextSpan(
+              style: effectiveStyle,
+              text: displayTitle,
+              children: [if (requiredStar != null) requiredStar],
+            ),
+          );
+        },
+      );
+    } else {
+      final TextSpan? requiredStar = isRequired
+          ? TextSpan(text: ' *', style: TextStyle(color: ThemeConfig.redColor(context)))
+          : null;
+      return RichText(
+        text: TextSpan(
+          style: effectiveBaseStyle,
+          text: displayTitle,
+          children: [if (requiredStar != null) requiredStar],
+        ),
+      );
+    }
+  }
+
+
   static List<Widget> getAllFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder) {
-    return formHolder.fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
+    return formHolder.fields
+        .map<Widget>((field) => createFormField(context, formKey, formHolder, field))
+        .toList();
   }
 
   static List<Widget> getFormFields(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, List<FieldHolder> fields) {
-    return fields.map<Widget>((field) => createFormField(context, formKey, formHolder, field)).toList();
+    return fields
+        .map<Widget>((field) => createFormField(context, formKey, formHolder, field))
+        .toList();
   }
 
-  static bool saveAndValidate(FormHolder formHolder){
+  static bool saveAndValidate(FormHolder formHolder) {
     bool toReturn = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
-    for(var k in formHolder.getTicket()!.tickets){
-      if(!(k.ticketKey.currentState?.saveAndValidate() ?? false)){
+    for (var k in formHolder.getTicket()!.tickets) {
+      if (!(k.ticketKey.currentState?.saveAndValidate() ?? false)) {
         toReturn = false;
       }
     }
@@ -123,20 +171,19 @@ class FormHelper {
     for (var k in formHolder.fields) {
       var value = getFieldData(formHolder.controller!.globalKey, k);
 
-      if(k.fieldType == fieldTypeTicket){
+      if (k.fieldType == fieldTypeTicket) {
         toReturn[fieldTypeTicket] = value;
       } else {
-
-        if(returnWithType == true){
-          if(toReturn[metaFields] == null) {
+        if (returnWithType == true) {
+          if (toReturn[metaFields] == null) {
             toReturn[metaFields] = {};
           }
           toReturn[metaFields][k.fieldType] = value;
         } else {
-          if(toReturn[metaFields] == null) {
+          if (toReturn[metaFields] == null) {
             toReturn[metaFields] = [];
           }
-          toReturn[metaFields].add({ k.id.toString(): value });
+          toReturn[metaFields].add({k.id.toString(): value});
         }
       }
     }
@@ -162,61 +209,56 @@ class FormHelper {
     } else if (fieldHolder.fieldType == fieldTypeTicket) {
       // Collect ticket data from multiple ticket forms
       List<Map<String, dynamic>> tickets = [];
-
       var ticket = fieldHolder as TicketHolder;
       for (int i = 0; i < ticket.tickets.length; i++) {
         final ticketKey = ticket.tickets[i].ticketKey;
         if (ticketKey.currentState == null) continue;
-
         Map<String, dynamic> ticketData = {};
-
-        for(var subFieldHolder in ticket.fields) {
-          if(ticketData[FormHelper.metaFields] == null) {
-            ticketData[FormHelper.metaFields] = [];
+        for (var subFieldHolder in ticket.fields) {
+          if (ticketData[metaFields] == null) {
+            ticketData[metaFields] = [];
           }
           var value = getFieldData(ticketKey, subFieldHolder);
-          ticketData[FormHelper.metaFields].add({subFieldHolder.fieldType: value});
+          ticketData[metaFields].add({subFieldHolder.fieldType: value});
         }
-        if(ticket.tickets[i].seat != null){
+        if (ticket.tickets[i].seat != null) {
           ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
         }
         tickets.add(ticketData);
       }
-
       return tickets;
     }
-
-    if(fieldValue is String){
+    if (fieldValue is String) {
       return fieldValue.trim();
     }
     return fieldValue;
   }
 
-
   // Create individual form field widget based on configuration
-  static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder field) {
+  static Widget createFormField(
+      BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder field) {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeText:
-        return buildTextFieldWithDescription(field, []);
+        return buildTextFieldWithDescription(context, field, []);
       case fieldTypeNote:
         field.title = noteLabel();
-        return buildTextField(field, []);
+        return buildTextField(context, field, []);
       case fieldTypeName:
         field.title = nameLabel();
-        return buildTextField(field, [AutofillHints.givenName]);
+        return buildTextField(context, field, [AutofillHints.givenName]);
       case fieldTypeSurname:
         field.title = surnameLabel();
-        return buildTextField(field, [AutofillHints.familyName]);
+        return buildTextField(context, field, [AutofillHints.familyName]);
       case fieldTypeCity:
         field.title = cityLabel();
-        return buildTextField(field, [AutofillHints.addressCity]);
+        return buildTextField(context, field, [AutofillHints.addressCity]);
       case fieldTypeSpot:
         field.title = spotLabel();
         return buildSpotField(context, formKey, formHolder, field);
       case fieldTypeEmail:
         field.title = emailLabel();
-        return buildEmailField(field);
+        return buildEmailField(context, field);
       case fieldTypeSex:
         field.title = sexLabel();
         var sexOptions = [
@@ -235,7 +277,7 @@ class FormHelper {
         return buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthYear:
         field.title = birthYearLabel();
-        return buildBirthYearField(field);
+        return buildBirthYearField(context, field);
       case fieldTypeTicket:
         var ticketHolder = field as TicketHolder;
         return buildTicketField(context, formHolder, ticketHolder);
@@ -245,16 +287,11 @@ class FormHelper {
   }
 
   static Widget buildTicketField(
-      BuildContext context,
-      FormHolder formHolder,
-      TicketHolder ticket
-      ) {
-
-    if(ticket.fields.none((f)=>f.fieldType == fieldTypeSpot)){
-      if(ticket.tickets.isEmpty){
+      BuildContext context, FormHolder formHolder, TicketHolder ticket) {
+    if (ticket.fields.none((f) => f.fieldType == fieldTypeSpot)) {
+      if (ticket.tickets.isEmpty) {
         ticket.tickets.add(FormTicketModel(ticketValues: ticket.fields, ticketKey: GlobalKey<FormBuilderState>()));
       }
-      //return buildRadioField(context, ticket, ticket.fields[0] as OptionsFieldHolder, formHolder);
       return FormBuilder(
         key: ticket.tickets[0].ticketKey, // Assign the corresponding key
         onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
@@ -263,17 +300,16 @@ class FormHelper {
         ),
       );
     }
-
     return StatefulBuilder(
       builder: (context, setState) {
         Future<void> removeTicket(int index) async {
-          await DbOrders.selectSpot(context, formHolder.controller!.formKey!, formHolder.controller!.secret!, ticket.tickets[index].seat!.objectModel!.id!, false);
+          await DbOrders.selectSpot(context, formHolder.controller!.formKey!, formHolder.controller!.secret!,
+              ticket.tickets[index].seat!.objectModel!.id!, false);
           setState(() {
             ticket.tickets.removeAt(index);
           });
           formHolder.controller!.updateTotalPrice?.call();
         }
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -282,8 +318,8 @@ class FormHelper {
               child: ButtonsHelper.primaryButton(
                 context: context,
                 onPressed: () async {
-                  var seats = await formHolder.controller!.showSeatReservation!(ticket.tickets.map((t)=>t.seat!).toList());
-                  if(seats != null){
+                  var seats = await formHolder.controller!.showSeatReservation!(ticket.tickets.map((t) => t.seat!).toList());
+                  if (seats != null) {
                     ticket.updateTickets(seats);
                   }
                   formHolder.controller!.updateTotalPrice?.call();
@@ -291,7 +327,7 @@ class FormHelper {
                 label: "Seat selection".tr(),
                 height: 50.0,
                 width: 250.0,
-                suffixIcon: Icon(Icons.event_seat)
+                suffixIcon: Icon(Icons.event_seat),
               ),
             ),
             const SizedBox(height: 12),
@@ -316,12 +352,10 @@ class FormHelper {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               child: Align(
                                 alignment: Alignment.center,
-                                child: Text(
-                                  "${"Ticket".tr()} ${i+1}", // Use translated string
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16 * fontSizeFactor,
-                                  ),
+                                child: buildTitleWidget(
+                                  "${"Ticket".tr()} ${i + 1}",
+                                  false,
+                                  context,
                                 ),
                               ),
                             ),
@@ -335,18 +369,20 @@ class FormHelper {
                             ),
                           ],
                         ),
-                        Text("${ticket.tickets[i].seat!.objectModel}",
-                          style: TextStyle(
-                          fontSize: 14 * fontSizeFactor,
-                        ),),
-                        Divider(
-                            color: Colors.black
+                        Text(
+                          "${ticket.tickets[i].seat!.objectModel}",
+                          style: TextStyle(fontSize: 14 * fontSizeFactor),
                         ),
+                        Divider(color: Colors.black),
                         FormBuilder(
                           key: ticket.tickets[i].ticketKey, // Assign the corresponding key
                           onChanged: formHolder.controller!.updateTotalPrice, // Trigger price update on change
                           child: Column(
-                            children: getFormFields(context, ticket.tickets[i].ticketKey, formHolder, ticket.tickets[i].ticketValues.where((f)=>f.fieldType != fieldTypeSpot).toList()),
+                            children: getFormFields(
+                                context,
+                                ticket.tickets[i].ticketKey,
+                                formHolder,
+                                ticket.tickets[i].ticketValues.where((f) => f.fieldType != fieldTypeSpot).toList()),
                           ),
                         ),
                       ],
@@ -360,11 +396,10 @@ class FormHelper {
     );
   }
 
-
-  // Build a simple text field with optional validation
+  // Build a simple text field with optional validation for seat selection
   static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey, FormHolder formHolder, FieldHolder fieldHolder) {
+    FocusNode _focusNode = FocusNode();
     TextEditingController textController = TextEditingController();
-
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
       validator: FormBuilderValidators.compose([
@@ -376,16 +411,16 @@ class FormHelper {
         textController.text = seat?.objectModel?.toString() ?? metaEmpty;
         return TextField(
           controller: textController,
+          focusNode: _focusNode,
           readOnly: true,
-          canRequestFocus: false,
+          canRequestFocus: true,
           decoration: InputDecoration(
-            labelText: fieldHolder.title,
+            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
             suffixIcon: const Icon(Icons.event_seat),
-            labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
             errorText: field.errorText,
           ),
           onTap: () async {
-            await formHolder.controller!.showSeatReservation!(seat == null ? []:[seat]);
+            await formHolder.controller!.showSeatReservation!(seat == null ? [] : [seat]);
           },
         );
       },
@@ -393,40 +428,38 @@ class FormHelper {
   }
 
   // Build a simple text field with optional validation
-  static FormBuilderTextField buildTextField(FieldHolder fieldHolder, Iterable<String> autofillHints) {
+  static FormBuilderTextField buildTextField(BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
+    FocusNode _focusNode = FocusNode();
     return FormBuilderTextField(
       maxLines: null,
       name: fieldHolder.id.toString(),
+      focusNode: _focusNode,
       autofillHints: autofillHints,
       decoration: InputDecoration(
-        labelText: fieldHolder.title,
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
       ),
       validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
     );
   }
 
-  static Widget buildTextFieldWithDescription(FieldHolder fieldHolder, Iterable<String> autofillHints) {
+  static Widget buildTextFieldWithDescription(BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // if (fieldHolder.description != null)
-        //   HtmlView(
-        //     html: fieldHolder.description!,
-        //     isSelectable: true,
-        //   ),
-        buildTextField(fieldHolder, []),
+        // Optionally, you can add an HtmlView widget here to display a description.
+        buildTextField(context, fieldHolder, autofillHints),
       ],
     );
   }
 
-  static FormBuilderTextField buildEmailField(FieldHolder fieldHolder) {
+  static FormBuilderTextField buildEmailField(BuildContext context, FieldHolder fieldHolder) {
+    FocusNode _focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
+      focusNode: _focusNode,
       autofillHints: [AutofillHints.email],
       decoration: InputDecoration(
-        labelText: fieldHolder.title,
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
       ),
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),
@@ -437,22 +470,25 @@ class FormHelper {
 
   // Build a radio group field using the FieldHolder as parameter
   static FormBuilderRadioGroup buildRadioField(BuildContext context, FieldHolder fieldHolder, List<FormOptionModel> optionsIn, FormHolder formHolder) {
-    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn.map(
+    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn
+        .map(
           (o) => FormBuilderFieldOption(
         value: o,
         child: Text(
-          o.title + (o.price > 0 ? " (${Utilities.formatPrice(context, o.price)})":""),
+          o.title + (o.price > 0 ? " (${Utilities.formatPrice(context, o.price)})" : ""),
           style: TextStyle(fontSize: 14.0 * fontSizeFactor),
         ),
       ),
-    ).toList();
-
+    )
+        .toList();
     return FormBuilderRadioGroup<FormOptionModel>(
-      onChanged: (v) {formHolder.controller!.updateTotalPrice?.call();},
+      onChanged: (v) {
+        formHolder.controller!.updateTotalPrice?.call();
+      },
       name: fieldHolder.id.toString(),
       decoration: InputDecoration(
-        labelText: fieldHolder.title,
-        labelStyle: StylesConfig.textStyleBig.copyWith(fontSize: 16 * fontSizeFactor),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context,
+            textStyle: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.grey700(context), fontSize: 16 * fontSizeFactor)),
       ),
       validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
       options: options,
@@ -462,20 +498,22 @@ class FormHelper {
     );
   }
 
-  static FormBuilderTextField buildBirthYearField(FieldHolder fieldHolder) {
+  static FormBuilderTextField buildBirthYearField(BuildContext context, FieldHolder fieldHolder) {
+    FocusNode _focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
-      decoration: InputDecoration(labelText: fieldHolder.title,
-        labelStyle: TextStyle(fontSize: 16 * fontSizeFactor),),
+      focusNode: _focusNode,
+      decoration: InputDecoration(
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+      ),
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),
-        // Allow empty for optional field; validate only if non-empty
             (value) {
           if (value == null || value.isEmpty || value == "") {
             return null;
           }
           if (int.tryParse(value) == null) {
-            return NumericValidator().translatedErrorText; // uses default numeric error message
+            return NumericValidator().translatedErrorText;
           }
           final numericValue = int.parse(value);
           if (numericValue < 1900 || numericValue > DateTime.now().year - 12) {
@@ -491,7 +529,6 @@ class FormHelper {
   static Map<String, dynamic> replaceSpotWithId(Map<String, dynamic> inputData) {
     if (inputData.containsKey(fieldTypeTicket) && inputData[fieldTypeTicket] is List) {
       List<dynamic> tickets = inputData[fieldTypeTicket];
-
       // Process each ticket in the list using an index
       for (int i = 0; i < tickets.length; i++) {
         var ticket = tickets[i];
