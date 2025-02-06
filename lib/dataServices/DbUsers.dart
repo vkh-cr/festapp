@@ -110,6 +110,15 @@ class DbUsers {
     return null;
   }
 
+  static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
+    var data = await _supabase.rpc("get_all_occasions_for_edit",
+        params:
+        {
+          "unit_id": unitId,
+        });
+    return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
+  }
+
   static Future<List<OccasionModel>> getAllOccasions(int unit) async {
     var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.unit, unit);
     var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
