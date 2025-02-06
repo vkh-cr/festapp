@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
+import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class OccasionsScreen extends StatefulWidget {
-  final int organizationId;
+  final UnitModel unit;
 
-  OccasionsScreen({required this.organizationId});
+  OccasionsScreen({required this.unit});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -27,14 +30,14 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _loadOccasions() async {
-    var occasions = await DbUsers.getAllOccasions(widget.organizationId);
+    var occasions = await DbUsers.getAllOccasions(widget.unit.id!);
     setState(() {
       _occasions = occasions;
     });
   }
 
   void _addNewEvent() {
-    OccasionCreationHelper.createNewOccasion(context, widget.organizationId, _occasions, _loadOccasions);
+    OccasionCreationHelper.createNewOccasion(context, widget.unit, _occasions, _loadOccasions);
   }
 
   @override
@@ -53,7 +56,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
-                ),
+                ).tr(),
                 ElevatedButton.icon(
                   onPressed: _addNewEvent,
                   icon: Icon(Icons.add),
@@ -80,6 +83,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                       await RightsService.updateOccasionData(occasion.link!);
                       RouterService.navigateOccasion(context, "");
                     },
+                    onReservation: () async {
+                      await RightsService.updateOccasionData(occasion.link!);
+                      RouterService.navigate(
+                          context, "${FormPage.ROUTE}/${occasion.link!}/edit");
+                    },
                     onEdit: () {
                       // Define what happens when the "Edit" button is pressed
                     },
@@ -103,12 +111,14 @@ class OccasionCard extends StatelessWidget {
   final VoidCallback onView;
   final VoidCallback onEdit;
   final VoidCallback onAdmin;
+  final VoidCallback onReservation;
 
   OccasionCard({
     required this.occasion,
     required this.onView,
     required this.onEdit,
     required this.onAdmin,
+    required this.onReservation,
   });
 
   @override
@@ -122,7 +132,7 @@ class OccasionCard extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey.shade300, // Slightly gray background color
+              color: ThemeConfig.grey380(context), // Slightly gray background color
               borderRadius: BorderRadius.circular(15.0), // Rounded corners
             ),
             child: Padding(
@@ -135,11 +145,11 @@ class OccasionCard extends StatelessWidget {
                       GestureDetector(
                         onTap: onView,
                         child: Text(
-                          occasion.title ?? 'No Title',
+                          occasion.title!,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black, // Black text color for contrast
+                            color: ThemeConfig.blackColor(context), // Black text color for contrast
                             decoration: TextDecoration.underline, // Underline the title to show it's a link
                           ),
                         ),
@@ -147,20 +157,25 @@ class OccasionCard extends StatelessWidget {
                       SizedBox(height: 8),
                       Text(
                         '${DateFormat.yMMMd().format(occasion.startTime!)} - ${DateFormat.yMMMd().format(occasion.endTime!)}',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[700]), // Darker gray for the dates
+                        style: TextStyle(fontSize: 14, color: ThemeConfig.grey600(context)), // Darker gray for the dates
                       ),
                       Spacer(),
                       Row(
                         children: [
                           TextButton.icon(
+                            onPressed: onReservation,
+                            icon: Icon(Icons.login), // Black icon for contrast
+                            label: Text('Reservation').tr(),
+                          ),
+                          TextButton.icon(
                             onPressed: onAdmin,
-                            icon: Icon(Icons.admin_panel_settings, color: Colors.black), // Black icon for contrast
-                            label: Text('Admin', style: TextStyle(color: Colors.black)).tr(),
+                            icon: Icon(Icons.admin_panel_settings), // Black icon for contrast
+                            label: Text('Admin').tr(),
                           ),
                           TextButton.icon(
                             onPressed: onEdit,
-                            icon: Icon(Icons.settings, color: Colors.black), // Black icon for contrast
-                            label: Text('Settings', style: TextStyle(color: Colors.black)).tr(),
+                            icon: Icon(Icons.settings), // Black icon for contrast
+                            label: Text('Settings').tr(),
                           ),
                         ],
                       ),
@@ -173,7 +188,7 @@ class OccasionCard extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.green, // Green background for "Open"
+                          color: ThemeConfig.greenColor(), // Green background for "Open"
                           borderRadius: BorderRadius.circular(12), // Rounded corners
                         ),
                         child: const Text(

@@ -12,6 +12,7 @@ class OccasionModel {
   String? title;
   Map<String, dynamic>? data;
   int? organization;
+  int? unit;
 
   OccasionModel({
     this.id,
@@ -25,21 +26,31 @@ class OccasionModel {
     this.title,
     this.data,
     this.organization,
+    this.unit,
   });
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
     return OccasionModel(
       id: json[Tb.occasions.id],
-      createdAt: json[Tb.occasions.created_at] != null ? DateTime.parse(json[Tb.occasions.created_at]) : null,
-      updatedAt: json[Tb.occasions.updated_at] != null ? DateTime.parse(json[Tb.occasions.updated_at]) : null,
-      startTime: json[Tb.occasions.start_time] != null ? DateTime.parse(json[Tb.occasions.start_time]) : null,
-      endTime: json[Tb.occasions.end_time] != null ? DateTime.parse(json[Tb.occasions.end_time]) : null,
+      createdAt: json[Tb.occasions.created_at] != null
+          ? DateTime.parse(json[Tb.occasions.created_at])
+          : null,
+      updatedAt: json[Tb.occasions.updated_at] != null
+          ? DateTime.parse(json[Tb.occasions.updated_at])
+          : null,
+      startTime: json[Tb.occasions.start_time] != null
+          ? DateTime.parse(json[Tb.occasions.start_time])
+          : null,
+      endTime: json[Tb.occasions.end_time] != null
+          ? DateTime.parse(json[Tb.occasions.end_time])
+          : null,
       isOpen: json[Tb.occasions.is_open],
       isHidden: json[Tb.occasions.is_hidden],
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       data: json[Tb.occasions.data],
       organization: json[Tb.occasions.organization],
+      unit: json["unit"],
     );
   }
 
@@ -54,6 +65,7 @@ class OccasionModel {
       Tb.occasions.title: title,
       Tb.occasions.data: data,
       Tb.occasions.organization: organization,
+      Tb.occasions.unit: unit,
     };
   }
 }

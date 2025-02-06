@@ -11,6 +11,7 @@ import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 class UserColumns {
   // Column identifier constants
   static const String ID = "id";
+  static const String UNIT = "unit";
   static const String EMAIL = "email";
   static const String NAME = "name";
   static const String SURNAME = "surname";
@@ -24,7 +25,7 @@ class UserColumns {
   static const String TEXT3 = "text3";
   static const String NOTE = "note";
   static const String DIET = "diet";
-  static const String ADMINISTRATOR = "administrator";
+  static const String MANAGER = "manager";
   static const String EDITOR = "editor";
   static const String APPROVER = "approver";
   static const String APPROVED = "approved";
@@ -38,6 +39,16 @@ class UserColumns {
         hide: true,
         title: "Id".tr(),
         field: Tb.occasion_users.user,
+        type: PlutoColumnType.text(),
+        readOnly: true,
+        width: 50,
+      ),
+    ],
+    UNIT: [
+      PlutoColumn(
+        hide: true,
+        title: "Unit".tr(),
+        field: Tb.unit_users.unit,
         type: PlutoColumnType.text(),
         readOnly: true,
         width: 50,
@@ -179,7 +190,7 @@ class UserColumns {
         width: 100
       )];
     },
-    ADMINISTRATOR: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
+    MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
     APPROVER: [_statusColumn("Approver".tr(), Tb.occasion_users.is_approver)],
     APPROVED: [_statusColumn("Approved".tr(), Tb.occasion_users.is_approved)],
