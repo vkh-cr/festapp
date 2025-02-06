@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -16,6 +17,7 @@ class OccasionUserModel extends IPlutoRowModel {
   int? occasion;
   String? user;
   int? role;
+  int? unit;
 
   bool? isEditor = false;
   bool? isManager = false;
@@ -25,13 +27,14 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-     this.isEditor, this.isManager, this.isApprover, this.isApproved, this.services});
+     this.isEditor, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
         createdAt: json[Tb.occasion_users.created_at]!=null ? DateTime.parse(json[Tb.occasion_users.created_at]):null,
         occasion: json[Tb.occasion_users.occasion],
         user: json[Tb.occasion_users.user],
+        unit: json[Tb.unit_users.unit],
         isEditor: json[Tb.occasion_users.is_editor],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
@@ -320,4 +323,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
     return true;
   }
+
+  @override
+  get id => user;
 }

@@ -1,25 +1,27 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/dataModels/OrganizationModel.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/pages/AdminDashboard/OccasionScreen.dart';
-import 'package:fstapp/pages/AdminDashboard/UsersScreen.dart';
+import 'package:fstapp/pages/AdminDashboard/UnitUsersScreen.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
-class AdminDashboardPage extends StatefulWidget {
-  static const ROUTE = "adminDashboard";
-  const AdminDashboardPage({super.key});
+class UnitAdminPage extends StatefulWidget {
+  int? id;
+
+  UnitAdminPage({@pathParam required this.id, super.key});
 
   @override
-  _AdminDashboardPageState createState() => _AdminDashboardPageState();
+  _UnitAdminPageState createState() => _UnitAdminPageState();
 }
 
-class _AdminDashboardPageState extends State<AdminDashboardPage> {
-  OrganizationModel? _currentOrganization;
+class _UnitAdminPageState extends State<UnitAdminPage> {
+  UnitModel? _currentUnit;
   Widget _currentScreen = Center(child: Text("Select an option from the menu"));
-  String _currentMenu = "";  // Track the current menu
+  String _currentMenu = "";
 
   void _setCurrentScreen(Widget screen, String menu) {
     setState(() {
@@ -29,15 +31,18 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.id == null && context.routeData.hasPendingChildren) {
+      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+    }
     _loadOrganization();
   }
 
   Future<void> _loadOrganization() async {
-    _currentOrganization = await DbUsers.getCurrentOrganization();
-    if (_currentOrganization != null) {
-      _setCurrentScreen(OccasionsScreen(organizationId: _currentOrganization!.id!), "Occasions");
+    _currentUnit = await DbUsers.getCurrentUnit(widget.id!);
+    if (_currentUnit != null) {
+      _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
     }
   }
 
@@ -46,7 +51,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     return Scaffold(
       drawer: SideMenu(
         onMenuItemSelected: _setCurrentScreen,
-        organization: _currentOrganization,
+        unit: _currentUnit,
         currentMenu: _currentMenu,
       ),
       body: SafeArea(
@@ -58,7 +63,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 flex: 1,
                 child: SideMenu(
                   onMenuItemSelected: _setCurrentScreen,
-                  organization: _currentOrganization,
+                  unit: _currentUnit,
                   currentMenu: _currentMenu,
                 ),
               )
@@ -67,7 +72,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 width: 50,
                 child: SideMenu(
                   onMenuItemSelected: _setCurrentScreen,
-                  organization: _currentOrganization,
+                  unit: _currentUnit,
                   currentMenu: _currentMenu,
                 ),
               ),
@@ -84,10 +89,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
 class SideMenu extends StatefulWidget {
   final Function(Widget, String) onMenuItemSelected;
-  final OrganizationModel? organization;
+  final UnitModel? unit;
   final String currentMenu;
 
-  SideMenu({required this.onMenuItemSelected, required this.organization, required this.currentMenu});
+  SideMenu({required this.onMenuItemSelected, required this.unit, required this.currentMenu});
 
   @override
   _SideMenuState createState() => _SideMenuState();
@@ -119,7 +124,7 @@ class _SideMenuState extends State<SideMenu> {
           if (isDesktop)
             DrawerHeader(
               padding: EdgeInsets.all(12),
-              child: Text(widget.organization?.title ?? ""),
+              child: Text(widget.unit?.title ?? ""),
             ),
           Expanded(
             child: ListView(
@@ -130,9 +135,9 @@ class _SideMenuState extends State<SideMenu> {
                   label: "Occasions",
                   isSelected: widget.currentMenu == "Occasions",
                   onTap: () {
-                    if (widget.organization != null) {
+                    if (widget.unit != null) {
                       widget.onMenuItemSelected(
-                          OccasionsScreen(organizationId: widget.organization!.id!), "Occasions");
+                          OccasionsScreen(unit: widget.unit!), "Occasions");
                     }
                   },
                 ),
@@ -141,7 +146,7 @@ class _SideMenuState extends State<SideMenu> {
                   label: "Users",
                   isSelected: widget.currentMenu == "Users",
                   onTap: () {
-                    widget.onMenuItemSelected(UsersScreen(), "Users");
+                    widget.onMenuItemSelected(UnitUsersScreen(unit: widget.unit!), "Users");
                   },
                 ),
               ],
@@ -152,7 +157,7 @@ class _SideMenuState extends State<SideMenu> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 _versionInfo,
-                style: TextStyle(fontSize: 12, color: Colors.grey),
+                style: TextStyle(fontSize: 12),
               ),
             ),
         ],
@@ -179,7 +184,7 @@ class _SideMenuState extends State<SideMenu> {
       )
           : null,
       selected: isSelected,
-      selectedTileColor: Colors.grey.shade300, // Highlight selected item
+      selectedTileColor: ThemeConfig.grey380(context), // Highlight selected item
       onTap: onTap,
     );
   }

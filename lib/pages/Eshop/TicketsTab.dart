@@ -120,7 +120,7 @@ class _TicketsTabState extends State<TicketsTab> {
 
       await DialogHelper.showProgressDialogAsync(
         context,
-        "Processing".tr(),
+        "Processing...".tr(),
         stornoFutures.length,
         futures: stornoFutures,
       );

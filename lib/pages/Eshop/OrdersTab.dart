@@ -102,7 +102,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            "Processing".tr(),
+            "Processing...".tr(),
             futures.length,
             futures: futures
         );
@@ -141,7 +141,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
         await DialogHelper.showProgressDialogAsync(
             context,
-            "Processing".tr(),
+            "Processing...".tr(),
             futures.length,
             futures: futures,
             isBasic: true
@@ -165,7 +165,7 @@ class _OrdersTabState extends State<OrdersTab> {
 
       await DialogHelper.showProgressDialogAsync(
           context,
-          "Processing".tr(),
+          "Processing...".tr(),
           futures.length,
           futures: futures
       );
