@@ -4,6 +4,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 
 @RoutePage()
@@ -57,6 +58,13 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),
           children: activeTabs.map((tab) => tab.widget).toList(),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            RouterService.navigate(
+                context, "${FormPage.ROUTE}/${widget.formLink}");
+          },
+          child: const Icon(Icons.remove_red_eye_rounded),
         ),
       ),
     );

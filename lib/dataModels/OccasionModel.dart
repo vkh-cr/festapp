@@ -1,3 +1,4 @@
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 
 class OccasionModel {
@@ -13,6 +14,7 @@ class OccasionModel {
   Map<String, dynamic>? data;
   int? organization;
   int? unit;
+  FormModel? form;
 
   OccasionModel({
     this.id,
@@ -27,6 +29,7 @@ class OccasionModel {
     this.data,
     this.organization,
     this.unit,
+    this.form,
   });
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +54,7 @@ class OccasionModel {
       data: json[Tb.occasions.data],
       organization: json[Tb.occasions.organization],
       unit: json["unit"],
+      form: json["form"] != null ? FormModel.fromJson(json["form"]) : null
     );
   }
 

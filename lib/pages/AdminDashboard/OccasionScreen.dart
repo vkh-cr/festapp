@@ -14,7 +14,7 @@ import 'package:fstapp/themeConfig.dart';
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
 
-  OccasionsScreen({required this.unit});
+  const OccasionsScreen({super.key, required this.unit});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -30,7 +30,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _loadOccasions() async {
-    var occasions = await DbUsers.getAllOccasions(widget.unit.id!);
+    var occasions = await DbUsers.getAllOccasionsForEdit(widget.unit.id!);
     setState(() {
       _occasions = occasions;
     });
@@ -64,15 +64,15 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16), // Add some space between the header and the grid
+            SizedBox(height: 16),
             Expanded(
               child: GridView.builder(
                 shrinkWrap: true,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: ResponsiveService.isDesktop(context) ? 3 : ResponsiveService.isTablet(context) ? 2 : 1, // Number of columns
+                  crossAxisCount: ResponsiveService.isDesktop(context) ? 3 : ResponsiveService.isTablet(context) ? 2 : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: 2, // Aspect ratio to maintain the general layout
+                  childAspectRatio: 2,
                 ),
                 itemCount: _occasions.length,
                 itemBuilder: (context, index) {
@@ -86,7 +86,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                     onReservation: () async {
                       await RightsService.updateOccasionData(occasion.link!);
                       RouterService.navigate(
-                          context, "${FormPage.ROUTE}/${occasion.link!}/edit");
+                          context, "${FormPage.ROUTE}/${occasion.form!.link!}/edit");
                     },
                     onEdit: () {
                       // Define what happens when the "Edit" button is pressed
@@ -132,8 +132,8 @@ class OccasionCard extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: ThemeConfig.grey380(context), // Slightly gray background color
-              borderRadius: BorderRadius.circular(15.0), // Rounded corners
+              color: ThemeConfig.grey380(context),
+              borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -149,32 +149,33 @@ class OccasionCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: ThemeConfig.blackColor(context), // Black text color for contrast
-                            decoration: TextDecoration.underline, // Underline the title to show it's a link
+                            color: ThemeConfig.blackColor(context),
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
                       SizedBox(height: 8),
                       Text(
                         '${DateFormat.yMMMd().format(occasion.startTime!)} - ${DateFormat.yMMMd().format(occasion.endTime!)}',
-                        style: TextStyle(fontSize: 14, color: ThemeConfig.grey600(context)), // Darker gray for the dates
+                        style: TextStyle(fontSize: 14, color: ThemeConfig.grey600(context)),
                       ),
                       Spacer(),
                       Row(
                         children: [
+                          if(occasion.form != null)
                           TextButton.icon(
                             onPressed: onReservation,
-                            icon: Icon(Icons.login), // Black icon for contrast
+                            icon: Icon(Icons.login),
                             label: Text('Reservation').tr(),
                           ),
                           TextButton.icon(
                             onPressed: onAdmin,
-                            icon: Icon(Icons.admin_panel_settings), // Black icon for contrast
+                            icon: Icon(Icons.admin_panel_settings),
                             label: Text('Admin').tr(),
                           ),
                           TextButton.icon(
                             onPressed: onEdit,
-                            icon: Icon(Icons.settings), // Black icon for contrast
+                            icon: Icon(Icons.settings),
                             label: Text('Settings').tr(),
                           ),
                         ],
@@ -188,13 +189,13 @@ class OccasionCard extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: ThemeConfig.greenColor(), // Green background for "Open"
+                          color: ThemeConfig.greenColor(),
                           borderRadius: BorderRadius.circular(12), // Rounded corners
                         ),
                         child: const Text(
                           'Open',
                           style: TextStyle(
-                            color: Colors.white, // White text color for contrast
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
