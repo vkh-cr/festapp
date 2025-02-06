@@ -75,6 +75,10 @@ class RightsService{
     return currentUnitUser?.isEditor??false;
   }
 
+  static bool canUserSeeUnitWorkspace() {
+    return isUnitEditor() || isUnitManager();
+  }
+
   static bool isManager() {
     return currentOccasionUser?.isManager??false;
   }

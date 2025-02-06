@@ -13,56 +13,37 @@ import 'package:auto_route/auto_route.dart' as _i28;
 import 'package:flutter/foundation.dart' as _i30;
 import 'package:flutter/material.dart' as _i29;
 import 'package:fstapp/dataModels/PlaceModel.dart' as _i31;
-import 'package:fstapp/pages/AdminDashboardPage.dart' deferred as _i1;
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart'
-    deferred as _i2;
-import 'package:fstapp/pages/CheckPage.dart' deferred as _i3;
-import 'package:fstapp/pages/Eshop/FormEditPage.dart' deferred as _i7;
-import 'package:fstapp/pages/Eshop/FormPage.dart' deferred as _i8;
-import 'package:fstapp/pages/EventEditPage.dart' deferred as _i4;
-import 'package:fstapp/pages/EventPage.dart' deferred as _i5;
-import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i6;
-import 'package:fstapp/pages/GamePage.dart' deferred as _i9;
-import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i10;
-import 'package:fstapp/pages/InfoPage.dart' deferred as _i11;
-import 'package:fstapp/pages/InstallPage.dart' deferred as _i12;
-import 'package:fstapp/pages/LoginPage.dart' deferred as _i13;
-import 'package:fstapp/pages/MapPage.dart' deferred as _i14;
-import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i15;
-import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i16;
-import 'package:fstapp/pages/NewsPage.dart' deferred as _i17;
-import 'package:fstapp/pages/OccasionHomePage.dart' deferred as _i18;
-import 'package:fstapp/pages/ScanPage.dart' deferred as _i20;
-import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i21;
-import 'package:fstapp/pages/SchedulePage.dart' deferred as _i22;
-import 'package:fstapp/pages/SettingsPage.dart' deferred as _i23;
-import 'package:fstapp/pages/SignupPage.dart' deferred as _i24;
-import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i19;
-import 'package:fstapp/pages/SongPage.dart' deferred as _i25;
-import 'package:fstapp/pages/TimetablePage.dart' deferred as _i26;
+    deferred as _i1;
+import 'package:fstapp/pages/CheckPage.dart' deferred as _i2;
+import 'package:fstapp/pages/Eshop/FormEditPage.dart' deferred as _i6;
+import 'package:fstapp/pages/Eshop/FormPage.dart' deferred as _i7;
+import 'package:fstapp/pages/EventEditPage.dart' deferred as _i3;
+import 'package:fstapp/pages/EventPage.dart' deferred as _i4;
+import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i5;
+import 'package:fstapp/pages/GamePage.dart' deferred as _i8;
+import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i9;
+import 'package:fstapp/pages/InfoPage.dart' deferred as _i10;
+import 'package:fstapp/pages/InstallPage.dart' deferred as _i11;
+import 'package:fstapp/pages/LoginPage.dart' deferred as _i12;
+import 'package:fstapp/pages/MapPage.dart' deferred as _i13;
+import 'package:fstapp/pages/MySchedulePage.dart' deferred as _i14;
+import 'package:fstapp/pages/NewsFormPage.dart' deferred as _i15;
+import 'package:fstapp/pages/NewsPage.dart' deferred as _i16;
+import 'package:fstapp/pages/OccasionHomePage.dart' deferred as _i17;
+import 'package:fstapp/pages/ScanPage.dart' deferred as _i19;
+import 'package:fstapp/pages/ScheduleNavigationScreen.dart' deferred as _i20;
+import 'package:fstapp/pages/SchedulePage.dart' deferred as _i21;
+import 'package:fstapp/pages/SettingsPage.dart' deferred as _i22;
+import 'package:fstapp/pages/SignupPage.dart' deferred as _i23;
+import 'package:fstapp/pages/SignupPasswordPage.dart' deferred as _i18;
+import 'package:fstapp/pages/SongPage.dart' deferred as _i24;
+import 'package:fstapp/pages/TimetablePage.dart' deferred as _i25;
+import 'package:fstapp/pages/UnitAdminPage.dart' deferred as _i26;
 import 'package:fstapp/pages/UserPage.dart' deferred as _i27;
 
 /// generated route for
-/// [_i1.AdminDashboardPage]
-class AdminDashboardRoute extends _i28.PageRouteInfo<void> {
-  const AdminDashboardRoute({List<_i28.PageRouteInfo>? children})
-    : super(AdminDashboardRoute.name, initialChildren: children);
-
-  static const String name = 'AdminDashboardRoute';
-
-  static _i28.PageInfo page = _i28.PageInfo(
-    name,
-    builder: (data) {
-      return _i28.DeferredWidget(
-        _i1.loadLibrary,
-        () => _i1.AdminDashboardPage(),
-      );
-    },
-  );
-}
-
-/// generated route for
-/// [_i2.AdminPage]
+/// [_i1.AdminPage]
 class AdminRoute extends _i28.PageRouteInfo<void> {
   const AdminRoute({List<_i28.PageRouteInfo>? children})
     : super(AdminRoute.name, initialChildren: children);
@@ -72,13 +53,13 @@ class AdminRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i2.loadLibrary, () => _i2.AdminPage());
+      return _i28.DeferredWidget(_i1.loadLibrary, () => _i1.AdminPage());
     },
   );
 }
 
 /// generated route for
-/// [_i3.CheckPage]
+/// [_i2.CheckPage]
 class CheckRoute extends _i28.PageRouteInfo<CheckRouteArgs> {
   CheckRoute({
     required int id,
@@ -101,8 +82,8 @@ class CheckRoute extends _i28.PageRouteInfo<CheckRouteArgs> {
         orElse: () => CheckRouteArgs(id: pathParams.getInt('id')),
       );
       return _i28.DeferredWidget(
-        _i3.loadLibrary,
-        () => _i3.CheckPage(id: args.id, key: args.key),
+        _i2.loadLibrary,
+        () => _i2.CheckPage(id: args.id, key: args.key),
       );
     },
   );
@@ -122,7 +103,7 @@ class CheckRouteArgs {
 }
 
 /// generated route for
-/// [_i4.EventEditPage]
+/// [_i3.EventEditPage]
 class EventEditRoute extends _i28.PageRouteInfo<EventEditRouteArgs> {
   EventEditRoute({_i29.Key? key, int? id, List<_i28.PageRouteInfo>? children})
     : super(
@@ -142,8 +123,8 @@ class EventEditRoute extends _i28.PageRouteInfo<EventEditRouteArgs> {
         orElse: () => EventEditRouteArgs(id: pathParams.optInt('id')),
       );
       return _i28.DeferredWidget(
-        _i4.loadLibrary,
-        () => _i4.EventEditPage(key: args.key, id: args.id),
+        _i3.loadLibrary,
+        () => _i3.EventEditPage(key: args.key, id: args.id),
       );
     },
   );
@@ -163,7 +144,7 @@ class EventEditRouteArgs {
 }
 
 /// generated route for
-/// [_i5.EventPage]
+/// [_i4.EventPage]
 class EventRoute extends _i28.PageRouteInfo<EventRouteArgs> {
   EventRoute({int? id, _i29.Key? key, List<_i28.PageRouteInfo>? children})
     : super(
@@ -183,8 +164,8 @@ class EventRoute extends _i28.PageRouteInfo<EventRouteArgs> {
         orElse: () => EventRouteArgs(id: pathParams.optInt('id')),
       );
       return _i28.DeferredWidget(
-        _i5.loadLibrary,
-        () => _i5.EventPage(id: args.id, key: args.key),
+        _i4.loadLibrary,
+        () => _i4.EventPage(id: args.id, key: args.key),
       );
     },
   );
@@ -204,7 +185,7 @@ class EventRouteArgs {
 }
 
 /// generated route for
-/// [_i6.ForgotPasswordPage]
+/// [_i5.ForgotPasswordPage]
 class ForgotPasswordRoute extends _i28.PageRouteInfo<void> {
   const ForgotPasswordRoute({List<_i28.PageRouteInfo>? children})
     : super(ForgotPasswordRoute.name, initialChildren: children);
@@ -215,15 +196,15 @@ class ForgotPasswordRoute extends _i28.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i28.DeferredWidget(
-        _i6.loadLibrary,
-        () => _i6.ForgotPasswordPage(),
+        _i5.loadLibrary,
+        () => _i5.ForgotPasswordPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i7.FormEditPage]
+/// [_i6.FormEditPage]
 class FormEditRoute extends _i28.PageRouteInfo<FormEditRouteArgs> {
   FormEditRoute({
     _i29.Key? key,
@@ -247,8 +228,8 @@ class FormEditRoute extends _i28.PageRouteInfo<FormEditRouteArgs> {
             () => FormEditRouteArgs(formLink: pathParams.optString('formLink')),
       );
       return _i28.DeferredWidget(
-        _i7.loadLibrary,
-        () => _i7.FormEditPage(key: args.key, formLink: args.formLink),
+        _i6.loadLibrary,
+        () => _i6.FormEditPage(key: args.key, formLink: args.formLink),
       );
     },
   );
@@ -268,7 +249,7 @@ class FormEditRouteArgs {
 }
 
 /// generated route for
-/// [_i8.FormPage]
+/// [_i7.FormPage]
 class FormRoute extends _i28.PageRouteInfo<FormRouteArgs> {
   FormRoute({
     _i29.Key? key,
@@ -291,8 +272,8 @@ class FormRoute extends _i28.PageRouteInfo<FormRouteArgs> {
         orElse: () => FormRouteArgs(formLink: pathParams.optString('formLink')),
       );
       return _i28.DeferredWidget(
-        _i8.loadLibrary,
-        () => _i8.FormPage(key: args.key, formLink: args.formLink),
+        _i7.loadLibrary,
+        () => _i7.FormPage(key: args.key, formLink: args.formLink),
       );
     },
   );
@@ -312,7 +293,7 @@ class FormRouteArgs {
 }
 
 /// generated route for
-/// [_i9.GamePage]
+/// [_i8.GamePage]
 class GameRoute extends _i28.PageRouteInfo<GameRouteArgs> {
   GameRoute({_i29.Key? key, List<_i28.PageRouteInfo>? children})
     : super(
@@ -330,8 +311,8 @@ class GameRoute extends _i28.PageRouteInfo<GameRouteArgs> {
         orElse: () => const GameRouteArgs(),
       );
       return _i28.DeferredWidget(
-        _i9.loadLibrary,
-        () => _i9.GamePage(key: args.key),
+        _i8.loadLibrary,
+        () => _i8.GamePage(key: args.key),
       );
     },
   );
@@ -349,7 +330,7 @@ class GameRouteArgs {
 }
 
 /// generated route for
-/// [_i10.HtmlEditorPage]
+/// [_i9.HtmlEditorPage]
 class HtmlEditorRoute extends _i28.PageRouteInfo<HtmlEditorRouteArgs> {
   HtmlEditorRoute({
     Map<String, dynamic>? content,
@@ -370,8 +351,8 @@ class HtmlEditorRoute extends _i28.PageRouteInfo<HtmlEditorRouteArgs> {
         orElse: () => const HtmlEditorRouteArgs(),
       );
       return _i28.DeferredWidget(
-        _i10.loadLibrary,
-        () => _i10.HtmlEditorPage(content: args.content, key: args.key),
+        _i9.loadLibrary,
+        () => _i9.HtmlEditorPage(content: args.content, key: args.key),
       );
     },
   );
@@ -391,7 +372,7 @@ class HtmlEditorRouteArgs {
 }
 
 /// generated route for
-/// [_i11.InfoPage]
+/// [_i10.InfoPage]
 class InfoRoute extends _i28.PageRouteInfo<InfoRouteArgs> {
   InfoRoute({int? id, _i30.Key? key, List<_i28.PageRouteInfo>? children})
     : super(
@@ -411,8 +392,8 @@ class InfoRoute extends _i28.PageRouteInfo<InfoRouteArgs> {
         orElse: () => InfoRouteArgs(id: pathParams.optInt('id')),
       );
       return _i28.DeferredWidget(
-        _i11.loadLibrary,
-        () => _i11.InfoPage(id: args.id, key: args.key),
+        _i10.loadLibrary,
+        () => _i10.InfoPage(id: args.id, key: args.key),
       );
     },
   );
@@ -432,7 +413,7 @@ class InfoRouteArgs {
 }
 
 /// generated route for
-/// [_i12.InstallPage]
+/// [_i11.InstallPage]
 class InstallRoute extends _i28.PageRouteInfo<void> {
   const InstallRoute({List<_i28.PageRouteInfo>? children})
     : super(InstallRoute.name, initialChildren: children);
@@ -442,13 +423,13 @@ class InstallRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i12.loadLibrary, () => _i12.InstallPage());
+      return _i28.DeferredWidget(_i11.loadLibrary, () => _i11.InstallPage());
     },
   );
 }
 
 /// generated route for
-/// [_i13.LoginPage]
+/// [_i12.LoginPage]
 class LoginRoute extends _i28.PageRouteInfo<void> {
   const LoginRoute({List<_i28.PageRouteInfo>? children})
     : super(LoginRoute.name, initialChildren: children);
@@ -458,13 +439,13 @@ class LoginRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i13.loadLibrary, () => _i13.LoginPage());
+      return _i28.DeferredWidget(_i12.loadLibrary, () => _i12.LoginPage());
     },
   );
 }
 
 /// generated route for
-/// [_i14.MapPage]
+/// [_i13.MapPage]
 class MapRoute extends _i28.PageRouteInfo<MapRouteArgs> {
   MapRoute({
     int? id,
@@ -488,8 +469,8 @@ class MapRoute extends _i28.PageRouteInfo<MapRouteArgs> {
         orElse: () => MapRouteArgs(id: pathParams.optInt('id')),
       );
       return _i28.DeferredWidget(
-        _i14.loadLibrary,
-        () => _i14.MapPage(id: args.id, place: args.place, key: args.key),
+        _i13.loadLibrary,
+        () => _i13.MapPage(id: args.id, place: args.place, key: args.key),
       );
     },
   );
@@ -511,7 +492,7 @@ class MapRouteArgs {
 }
 
 /// generated route for
-/// [_i15.MySchedulePage]
+/// [_i14.MySchedulePage]
 class MyScheduleRoute extends _i28.PageRouteInfo<void> {
   const MyScheduleRoute({List<_i28.PageRouteInfo>? children})
     : super(MyScheduleRoute.name, initialChildren: children);
@@ -521,13 +502,13 @@ class MyScheduleRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i15.loadLibrary, () => _i15.MySchedulePage());
+      return _i28.DeferredWidget(_i14.loadLibrary, () => _i14.MySchedulePage());
     },
   );
 }
 
 /// generated route for
-/// [_i16.NewsFormPage]
+/// [_i15.NewsFormPage]
 class NewsFormRoute extends _i28.PageRouteInfo<void> {
   const NewsFormRoute({List<_i28.PageRouteInfo>? children})
     : super(NewsFormRoute.name, initialChildren: children);
@@ -537,13 +518,13 @@ class NewsFormRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i16.loadLibrary, () => _i16.NewsFormPage());
+      return _i28.DeferredWidget(_i15.loadLibrary, () => _i15.NewsFormPage());
     },
   );
 }
 
 /// generated route for
-/// [_i17.NewsPage]
+/// [_i16.NewsPage]
 class NewsRoute extends _i28.PageRouteInfo<NewsRouteArgs> {
   NewsRoute({
     _i29.Key? key,
@@ -564,8 +545,8 @@ class NewsRoute extends _i28.PageRouteInfo<NewsRouteArgs> {
         orElse: () => const NewsRouteArgs(),
       );
       return _i28.DeferredWidget(
-        _i17.loadLibrary,
-        () => _i17.NewsPage(key: args.key, onSetAsRead: args.onSetAsRead),
+        _i16.loadLibrary,
+        () => _i16.NewsPage(key: args.key, onSetAsRead: args.onSetAsRead),
       );
     },
   );
@@ -585,7 +566,7 @@ class NewsRouteArgs {
 }
 
 /// generated route for
-/// [_i18.OccasionHomePage]
+/// [_i17.OccasionHomePage]
 class OccasionHomeRoute extends _i28.PageRouteInfo<void> {
   const OccasionHomeRoute({List<_i28.PageRouteInfo>? children})
     : super(OccasionHomeRoute.name, initialChildren: children);
@@ -596,15 +577,15 @@ class OccasionHomeRoute extends _i28.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i28.DeferredWidget(
-        _i18.loadLibrary,
-        () => _i18.OccasionHomePage(),
+        _i17.loadLibrary,
+        () => _i17.OccasionHomePage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i19.ResetPasswordPage]
+/// [_i18.ResetPasswordPage]
 class ResetPasswordRoute extends _i28.PageRouteInfo<void> {
   const ResetPasswordRoute({List<_i28.PageRouteInfo>? children})
     : super(ResetPasswordRoute.name, initialChildren: children);
@@ -615,15 +596,15 @@ class ResetPasswordRoute extends _i28.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i28.DeferredWidget(
-        _i19.loadLibrary,
-        () => _i19.ResetPasswordPage(),
+        _i18.loadLibrary,
+        () => _i18.ResetPasswordPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i20.ScanPage]
+/// [_i19.ScanPage]
 class ScanRoute extends _i28.PageRouteInfo<ScanRouteArgs> {
   ScanRoute({
     String? scanCode,
@@ -646,8 +627,8 @@ class ScanRoute extends _i28.PageRouteInfo<ScanRouteArgs> {
         orElse: () => ScanRouteArgs(scanCode: pathParams.optString('scanCode')),
       );
       return _i28.DeferredWidget(
-        _i20.loadLibrary,
-        () => _i20.ScanPage(scanCode: args.scanCode, key: args.key),
+        _i19.loadLibrary,
+        () => _i19.ScanPage(scanCode: args.scanCode, key: args.key),
       );
     },
   );
@@ -667,7 +648,7 @@ class ScanRouteArgs {
 }
 
 /// generated route for
-/// [_i21.ScheduleNavigationPage]
+/// [_i20.ScheduleNavigationPage]
 class ScheduleNavigationRoute extends _i28.PageRouteInfo<void> {
   const ScheduleNavigationRoute({List<_i28.PageRouteInfo>? children})
     : super(ScheduleNavigationRoute.name, initialChildren: children);
@@ -678,15 +659,15 @@ class ScheduleNavigationRoute extends _i28.PageRouteInfo<void> {
     name,
     builder: (data) {
       return _i28.DeferredWidget(
-        _i21.loadLibrary,
-        () => _i21.ScheduleNavigationPage(),
+        _i20.loadLibrary,
+        () => _i20.ScheduleNavigationPage(),
       );
     },
   );
 }
 
 /// generated route for
-/// [_i22.SchedulePage]
+/// [_i21.SchedulePage]
 class ScheduleRoute extends _i28.PageRouteInfo<void> {
   const ScheduleRoute({List<_i28.PageRouteInfo>? children})
     : super(ScheduleRoute.name, initialChildren: children);
@@ -696,13 +677,13 @@ class ScheduleRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i22.loadLibrary, () => _i22.SchedulePage());
+      return _i28.DeferredWidget(_i21.loadLibrary, () => _i21.SchedulePage());
     },
   );
 }
 
 /// generated route for
-/// [_i23.SettingsPage]
+/// [_i22.SettingsPage]
 class SettingsRoute extends _i28.PageRouteInfo<void> {
   const SettingsRoute({List<_i28.PageRouteInfo>? children})
     : super(SettingsRoute.name, initialChildren: children);
@@ -712,13 +693,13 @@ class SettingsRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i23.loadLibrary, () => _i23.SettingsPage());
+      return _i28.DeferredWidget(_i22.loadLibrary, () => _i22.SettingsPage());
     },
   );
 }
 
 /// generated route for
-/// [_i24.SignupPage]
+/// [_i23.SignupPage]
 class SignupRoute extends _i28.PageRouteInfo<void> {
   const SignupRoute({List<_i28.PageRouteInfo>? children})
     : super(SignupRoute.name, initialChildren: children);
@@ -728,13 +709,13 @@ class SignupRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i24.loadLibrary, () => _i24.SignupPage());
+      return _i28.DeferredWidget(_i23.loadLibrary, () => _i23.SignupPage());
     },
   );
 }
 
 /// generated route for
-/// [_i25.SongbookPage]
+/// [_i24.SongbookPage]
 class SongbookRoute extends _i28.PageRouteInfo<SongbookRouteArgs> {
   SongbookRoute({_i29.Key? key, List<_i28.PageRouteInfo>? children})
     : super(
@@ -752,8 +733,8 @@ class SongbookRoute extends _i28.PageRouteInfo<SongbookRouteArgs> {
         orElse: () => const SongbookRouteArgs(),
       );
       return _i28.DeferredWidget(
-        _i25.loadLibrary,
-        () => _i25.SongbookPage(key: args.key),
+        _i24.loadLibrary,
+        () => _i24.SongbookPage(key: args.key),
       );
     },
   );
@@ -771,7 +752,7 @@ class SongbookRouteArgs {
 }
 
 /// generated route for
-/// [_i26.TimetablePage]
+/// [_i25.TimetablePage]
 class TimetableRoute extends _i28.PageRouteInfo<void> {
   const TimetableRoute({List<_i28.PageRouteInfo>? children})
     : super(TimetableRoute.name, initialChildren: children);
@@ -781,9 +762,53 @@ class TimetableRoute extends _i28.PageRouteInfo<void> {
   static _i28.PageInfo page = _i28.PageInfo(
     name,
     builder: (data) {
-      return _i28.DeferredWidget(_i26.loadLibrary, () => _i26.TimetablePage());
+      return _i28.DeferredWidget(_i25.loadLibrary, () => _i25.TimetablePage());
     },
   );
+}
+
+/// generated route for
+/// [_i26.UnitAdminPage]
+class UnitAdminRoute extends _i28.PageRouteInfo<UnitAdminRouteArgs> {
+  UnitAdminRoute({
+    required int? id,
+    _i29.Key? key,
+    List<_i28.PageRouteInfo>? children,
+  }) : super(
+         UnitAdminRoute.name,
+         args: UnitAdminRouteArgs(id: id, key: key),
+         rawPathParams: {'id': id},
+         initialChildren: children,
+       );
+
+  static const String name = 'UnitAdminRoute';
+
+  static _i28.PageInfo page = _i28.PageInfo(
+    name,
+    builder: (data) {
+      final pathParams = data.inheritedPathParams;
+      final args = data.argsAs<UnitAdminRouteArgs>(
+        orElse: () => UnitAdminRouteArgs(id: pathParams.optInt('id')),
+      );
+      return _i28.DeferredWidget(
+        _i26.loadLibrary,
+        () => _i26.UnitAdminPage(id: args.id, key: args.key),
+      );
+    },
+  );
+}
+
+class UnitAdminRouteArgs {
+  const UnitAdminRouteArgs({required this.id, this.key});
+
+  final int? id;
+
+  final _i29.Key? key;
+
+  @override
+  String toString() {
+    return 'UnitAdminRouteArgs{id: $id, key: $key}';
+  }
 }
 
 /// generated route for

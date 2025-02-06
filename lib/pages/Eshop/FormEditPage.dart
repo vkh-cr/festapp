@@ -4,7 +4,6 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 
 @RoutePage()

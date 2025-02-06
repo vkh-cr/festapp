@@ -122,7 +122,8 @@ BEGIN
                 'code', 403,
                 'message', 'Access forbidden',
                 'link', occasion_link,
-                'version_recommended', version_recommended
+                'version_recommended', version_recommended,
+                'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL)
             );
         END IF;
     END IF;

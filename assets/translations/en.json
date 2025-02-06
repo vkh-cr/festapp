@@ -235,7 +235,7 @@
   "Reducing Images Size...": "Reducing Images Size...",
   "Large Images Detected": "Large Images Detected",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Some images are large and may slow down the app. Press OK to convert them into optimal size.",
-  "Workspace": "Workspace",
+  "Events Overview": "Events Overview",
   "Home": "Home",
   "Appearance": "Appearance",
   "Light": "Light",
@@ -411,5 +411,6 @@
   "Form is open": "Form is open",
   "This form is currently turned off": "This form is currently turned off",
   "Edit off text": "Edit off text",
+  "Reservation": "Reservation",
   "_":"_"
 }

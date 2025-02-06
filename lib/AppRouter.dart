@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
@@ -21,6 +20,7 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
+import 'package:fstapp/pages/UnitAdminPage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 
 import 'AppRouter.gr.dart';
@@ -42,7 +42,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
-    AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
+    AutoRoute(page: UnitAdminRoute.page, path: "/unit/:id/edit"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
     ]),
@@ -94,7 +94,7 @@ class AppRouter extends RootStackRouter {
       SignupPage.ROUTE,
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
-      AdminDashboardPage.ROUTE,
+      "unit",
       FormPage.ROUTE,
       ScanPage.ROUTE,
     ];

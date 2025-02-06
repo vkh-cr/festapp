@@ -2,8 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
-import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataModels/UnitUserModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
@@ -46,11 +47,20 @@ class DbUsers {
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
-    var oc = RightsService.currentOccasion!;
     var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
-        params: {"oc": RightsService.currentOccasion!});
+        params: {"oc": RightsService.currentOccasion});
     if(result["code"] == 200) {
       var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+      return t;
+    }
+    return [];
+  }
+
+  static Future<List<UnitUserModel>> getAllUsersFromUnit(int unitId) async {
+    var result = await _supabase.rpc("get_all_users_from_unit",
+        params: {"unit_id": unitId});
+    if(result["code"] == 200) {
+      var t = List<UnitUserModel>.from(result["data"].map((x) => UnitUserModel.fromJson(x)));
       return t;
     }
     return [];
@@ -73,16 +83,25 @@ class DbUsers {
     {
       throw Exception("Creating of user has failed.");
     }
-    await _supabase.rpc("add_user_to_occasion",
-        params: {"oc": occasion, "usr": newId});
+    await addUserToOccasion(newId, occasion);
     return newId;
   }
 
-  static Future<OrganizationModel?> getCurrentOrganization() async {
+  static Future<UnitModel?> getCurrentUnit(int unit) async {
+    var result = await _supabase.rpc("get_unit_for_edit",
+        params: {"unit_id": unit});
+
+    if (result != null && result["code"] == 200) {
+      return UnitModel.fromJson(result["data"]);
+    }
+    return null;
+  }
+
+  static Future<UnitModel?> getCurrentOrganization() async {
     var result = await _supabase.rpc("get_current_organization_data");
 
     if (result != null && result["code"] == 200) {
-      return OrganizationModel.fromJson(result["data"]);
+      return UnitModel.fromJson(result["data"]);
     } else if (result != null && result["code"] == 403) {
       print("User is not authorized or found (admin rights required)");
     }
@@ -91,8 +110,8 @@ class DbUsers {
     return null;
   }
 
-  static Future<List<OccasionModel>> getAllOccasions(int org) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.organization, org);
+  static Future<List<OccasionModel>> getAllOccasions(int unit) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.unit, unit);
     var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
     return toReturn;
   }
@@ -120,6 +139,14 @@ class DbUsers {
     return OccasionModel.fromJson(data);
   }
 
+  static Future<void> updateUnitUser(UnitUserModel uum) async {
+    await _supabase.rpc("update_unit_user",
+        params:
+        {
+          "input_data": uum,
+        });
+  }
+
   static updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     if (oum.user == null) {
@@ -143,6 +170,15 @@ class DbUsers {
         {
           "usr": id,
           "oc": occasion,
+        });
+  }
+
+  static Future<void> addUserToUnit(String id, int unit) async {
+    await _supabase.rpc("add_user_to_unit",
+        params:
+        {
+          "usr": id,
+          "unit_id": unit,
         });
   }
 

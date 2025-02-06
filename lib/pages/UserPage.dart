@@ -13,7 +13,6 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/AdminDashboardPage.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -353,17 +352,6 @@ class _UserPageState extends State<UserPage> {
                     context: context,
                     onPressed: () async => _redirectToAdminPage(),
                     label: "Event management".tr(),
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Visibility(
-                  visible: RightsService.isAdmin(),
-                  child: ButtonsHelper.bigButton(
-                    context: context,
-                    onPressed: () => RouterService.navigate(context, AdminDashboardPage.ROUTE),
-                    label: "Workspace".tr(),
                   ),
                 ),
                 const SizedBox(

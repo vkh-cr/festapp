@@ -235,7 +235,7 @@
   "Reducing Images Size...": "Probíhá zmenšování velikosti obrázků...",
   "Large Images Detected": "Zjištěny velké obrázky",
   "Some images are large and may slow down the app. Press OK to convert them into optimal size.": "Některé obrázky jsou velké a mohou zpomalit aplikaci. Stiskněte OK pro jejich převod na optimální velikost.",
-  "Workspace": "Workspace",
+  "Events Overview": "Přehled akcí",
   "Home": "Domů",
   "Appearance": "Vzhled",
   "Light": "Světlý",
@@ -411,5 +411,6 @@
   "Form is open": "Formulář je otevřen",
   "This form is currently turned off": "Tento formulář je momentálně vypnutý",
   "Edit off text": "Upravit text pro vypnutý stav",
+  "Reservation": "Rezervace",
   "_": "_"
 }
