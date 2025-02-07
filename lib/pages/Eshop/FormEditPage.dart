@@ -59,6 +59,7 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
           physics: const NeverScrollableScrollPhysics(),
           children: activeTabs.map((tab) => tab.widget).toList(),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             RouterService.navigate(

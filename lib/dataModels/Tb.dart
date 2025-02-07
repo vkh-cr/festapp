@@ -42,6 +42,7 @@ class OccasionsTb {
   String get is_open => "is_open";
   String get link => "link";
   String get title => "title";
+  String get features => "features";
   String get data => "data";
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";
