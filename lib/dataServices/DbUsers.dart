@@ -125,27 +125,15 @@ class DbUsers {
     return toReturn;
   }
 
-  static Future<OccasionModel> updateOccasion(OccasionModel occasionModel) async {
-    var json = occasionModel.toJson();
-    Map<String, dynamic> data;
-
-    if (occasionModel.id != null) {
-      data = await _supabase
-          .from(Tb.occasions.table)
-          .update(json)
-          .eq(Tb.occasions.id, occasionModel.id!)
-          .select()
-          .single();
-    } else {
-      json.remove(Tb.occasions.id);
-      data = await _supabase
-          .from(Tb.occasions.table)
-          .insert(json)
-          .select()
-          .single();
+  static Future<void> updateOccasion(OccasionModel occasionModel) async {
+    var data = await _supabase.rpc("update_occasion",
+        params:
+        {
+          "input_data": occasionModel,
+        });
+    if(data["code"] != 200){
+      throw Exception(data["message"]);
     }
-
-    return OccasionModel.fromJson(data);
   }
 
   static Future<void> updateUnitUser(UnitUserModel uum) async {

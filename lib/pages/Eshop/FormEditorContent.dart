@@ -257,13 +257,10 @@ class _FormEditorContentState extends State<FormEditorContent> {
                             icon: const Icon(Icons.edit),
                             label: Text("Edit content".tr()),
                             onPressed: () async {
-                              final result =
-                              await RouterService.navigatePageInfo(
+                              final result = await RouterService.navigatePageInfo(
                                 context,
                                 HtmlEditorRoute(
-                                  content: {
-                                    HtmlEditorPage.parContent: form!.header!
-                                  },
+                                  content: {HtmlEditorPage.parContent: form!.header!},
                                 ),
                               );
                               if (result != null) {

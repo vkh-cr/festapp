@@ -331,6 +331,7 @@ class _FormPageState extends State<FormPage> {
           _buildPriceAndTicketInfo(),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: Visibility(
         visible: RightsService.isEditor(),
         child: FloatingActionButton(

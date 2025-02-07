@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/pages/AdminDashboard/OccasionSettingPage.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
 import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';
@@ -14,7 +15,7 @@ import 'package:fstapp/themeConfig.dart';
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
 
-  const OccasionsScreen({super.key, required this.unit});
+  const OccasionsScreen({Key? key, required this.unit}) : super(key: key);
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -38,6 +39,25 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   void _addNewEvent() {
     OccasionCreationHelper.createNewOccasion(context, widget.unit, _occasions, _loadOccasions);
+  }
+
+  /// Opens the settings dialog for the given occasion.
+  Future<void> _openSettingsDialog(OccasionModel occasion) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(16.0),
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveService.isDesktop(context) ? 600 : double.infinity,
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: OccasionSettingsPage(occasion: occasion),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -64,12 +84,16 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Expanded(
               child: GridView.builder(
                 shrinkWrap: true,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: ResponsiveService.isDesktop(context) ? 3 : ResponsiveService.isTablet(context) ? 2 : 1,
+                  crossAxisCount: ResponsiveService.isDesktop(context)
+                      ? 3
+                      : ResponsiveService.isTablet(context)
+                      ? 2
+                      : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   childAspectRatio: 2,
@@ -88,8 +112,10 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                       RouterService.navigate(
                           context, "${FormPage.ROUTE}/${occasion.form!.link!}/edit");
                     },
-                    onEdit: () {
-                      // Define what happens when the "Edit" button is pressed
+                    onEdit: () async {
+                      // Open the settings dialog with the current occasion.
+                      await _openSettingsDialog(occasion);
+                      await _loadOccasions();
                     },
                     onAdmin: () async {
                       await RightsService.updateOccasionData(occasion.link!);
