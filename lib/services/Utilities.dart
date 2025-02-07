@@ -31,12 +31,14 @@ class Utilities {
     return regex.hasMatch(link);
   }
 
-  static String sanitizeUrl(String link) {
-    // Define the regex pattern for invalid characters
-    final RegExp invalidChars = RegExp(r'[^a-zA-Z0-9-_]');
-
-    // Replace all invalid characters with '_'
-    return link.replaceAll(invalidChars, '_');
+  static String sanitizeFullUrl(String link) {
+    // First, remove diacritics from the input string.
+    final String cleaned = removeDiacritics(link);
+    // Define a RegExp that matches all characters not allowed in a URL segment.
+    // Allowed characters: a-z, A-Z, 0-9, dash (-), and underscore (_)
+    final RegExp invalidChars = RegExp(r'[^a-zA-Z0-9\-_]');
+    // Remove all invalid characters from the cleaned string.
+    return cleaned.replaceAll(invalidChars, '');
   }
 
 
