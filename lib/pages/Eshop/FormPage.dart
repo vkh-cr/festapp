@@ -331,16 +331,19 @@ class _FormPageState extends State<FormPage> {
           _buildPriceAndTicketInfo(),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: Visibility(
-        visible: RightsService.isEditor(),
-        child: FloatingActionButton(
-          onPressed: () {
-            RouterService.navigate(
-                context, "${FormPage.ROUTE}/${widget.formLink}/edit")
-                .then((value) => loadData());
-          },
-          child: const Icon(Icons.edit),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(bottom: 24),
+        child: Visibility(
+          visible: RightsService.isEditor(),
+          child: FloatingActionButton(
+            onPressed: () {
+              RouterService.navigate(
+                  context, "${FormPage.ROUTE}/${widget.formLink}/edit")
+                  .then((value) => loadData());
+            },
+            child: const Icon(Icons.edit),
+          ),
         ),
       ),
     );

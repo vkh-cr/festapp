@@ -10,6 +10,7 @@ import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
+import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -225,11 +226,24 @@ class _FormEditorContentState extends State<FormEditorContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addNewField,
-        tooltip: 'Add Field'.tr(),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+              FloatingActionButton(
+                onPressed: () {
+                  RouterService.navigate(
+                      context, "${FormPage.ROUTE}/$formLink");
+                },
+                child: const Icon(Icons.remove_red_eye_rounded),
+              ),
+              SizedBox.square(dimension: 12,),
+              FloatingActionButton(
+              onPressed: _addNewField,
+              tooltip: 'Add Field'.tr(),
+              child: const Icon(Icons.add),
+            ),
+            SizedBox.square(dimension: 64,),]),
       body: form == null
           ? const Center(child: CircularProgressIndicator())
           : Align(
