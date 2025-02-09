@@ -71,7 +71,7 @@ class UsersTabHelper {
     DialogHelper.chooseUser(context, (chosenUser) async {
       if (chosenUser != null) {
         await DbUsers.addUserToOccasion(
-            chosenUser.id, RightsService.currentOccasion!);
+            chosenUser.id, RightsService.currentOccasionId!);
         ToastHelper.Show(context, "Updated {item}.".tr(
             namedArgs: {"item": chosenUser.toString()}));
         await reloadUsers();

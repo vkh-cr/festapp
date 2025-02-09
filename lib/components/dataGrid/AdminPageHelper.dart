@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
@@ -16,27 +18,76 @@ import 'package:fstapp/pages/Eshop/ReportTab.dart';
 import 'package:fstapp/pages/Eshop/TicketsTab.dart';
 
 class AdminPageHelper {
-  static PreferredSizeWidget buildAdminAppBar(
+  /// This method returns an adaptive AppBar based on the screen width.
+  /// For small screens (mobile), only a hamburger (logo) and a signed in icon are shown.
+  /// For larger screens, a full AppBar with tabs is displayed.
+  static PreferredSizeWidget buildAdaptiveAdminAppBar(
+      BuildContext context,
+      List<AdminTabDefinition> activeTabs,
+      TabController? tabController
+      ) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    // Adjust the breakpoint as needed. Here we use 600.
+    if (screenWidth < 600) {
+      var title = RightsService.currentOccasion!.title!;
+      return buildMobileAdminAppBar(context, title);
+    } else {
+      var title = "${RightsService.currentUnit!.title!} - ${RightsService.currentOccasion!.title!}";
+      return buildDesktopAdminAppBar(context, activeTabs, tabController!, title);
+    }
+  }
+
+  /// Desktop/Tablet version of the AppBar: includes the logo, title,
+  /// signed-in user info, and a TabBar.
+  static PreferredSizeWidget buildDesktopAdminAppBar(
       BuildContext context,
       List<AdminTabDefinition> activeTabs,
       TabController tabController,
       String title,
       ) {
+    final String logoAsset = 'assets/icons/fstapplogo.dark.svg';
+    final currentUser = RightsService.currentOccasionUser;
+
     return AppBar(
+      toolbarHeight: 60,
+      leadingWidth: 140,
       title: Text(title),
-      leading: BackButton(
-        onPressed: () => RouterService.goBack(context),
+      leading: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: () {
+            // Navigate to the unit edit page if the user has rights.
+            if (RightsService.canUserSeeUnitWorkspace()) {
+              RouterService.navigate(
+                context,
+                "unit/${RightsService.currentUnitUser?.unit}/edit",
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: SvgPicture.asset(
+              logoAsset,
+              semanticsLabel: 'Festapp logo',
+            ),
+          ),
+        ),
       ),
       actions: [
-        if (RightsService.canUserSeeUnitWorkspace())
+        if (currentUser != null)
           Padding(
-            padding: EdgeInsets.all(12),
-            child: ElevatedButton(
-              onPressed: () => RouterService.navigate(
-                  context, "unit/${RightsService.currentUnitUser?.unit}/edit"),
-              child: Text(
-                "Events Overview".tr(),
-              ),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.person),
+                const SizedBox(width: 8),
+                Text(
+                  "${currentUser.data?[Tb.occasion_users.data_name]} "
+                      "${currentUser.data?[Tb.occasion_users.data_surname]} "
+                      "(${currentUser.data?[Tb.occasion_users.data_email]})",
+                ),
+              ],
             ),
           ),
       ],
@@ -63,6 +114,49 @@ class AdminPageHelper {
       ),
     );
   }
+
+  /// Mobile version of the AppBar: shows the logo as a hamburger menu
+  /// (which opens the Drawer) and only the signed in icon.
+  static PreferredSizeWidget buildMobileAdminAppBar(BuildContext context, String title) {
+    final String logoAsset = 'assets/icons/fstapplogo.dark.svg';
+    final currentUser = RightsService.currentOccasionUser;
+
+    return AppBar(
+      toolbarHeight: 60,
+      // Leading is the logo displayed as an IconButton.
+      // If you have a Drawer, this will open it.
+      leading: Builder(
+        builder: (context) {
+          return IconButton(
+            icon: SvgPicture.asset(
+              logoAsset,
+              width: 40,
+              height: 40,
+              semanticsLabel: 'Festapp logo',
+            ),
+            onPressed: () {
+              if (RightsService.canUserSeeUnitWorkspace()) {
+                RouterService.navigate(
+                  context,
+                  "unit/${RightsService.currentUnitUser?.unit}/edit",
+                );
+              }
+            },
+          );
+        },
+      ),
+      title: Text(title),
+      actions: [
+        if (currentUser != null)
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              // Handle signed-in user actions (e.g., open a profile page or a popup).
+            },
+          ),
+      ],
+    );
+  }
 }
 
 class AdminTabDefinition {
@@ -76,7 +170,7 @@ class AdminTabDefinition {
     required this.widget,
   });
 
-  // Tab labels as static const strings
+  // Tab labels as static const strings.
   static const String info = "Info";
   static const String events = "Events";
   static const String places = "Places";
@@ -91,7 +185,7 @@ class AdminTabDefinition {
   static const String orders = "Orders";
   static const String report = "Report";
 
-  // Available tabs defined in a dictionary
+  // Available tabs defined in a dictionary.
   static Map<String, AdminTabDefinition> get availableTabs => {
     info: AdminTabDefinition(
         label: "Info".tr(), icon: Icons.info, widget: InformationTab()),
