@@ -19,20 +19,21 @@ import 'package:fstapp/pages/Eshop/TicketsTab.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
-  /// For small screens (mobile), only a hamburger (logo) and a signed in icon are shown.
-  /// For larger screens, a full AppBar with tabs is displayed.
+  /// For both small screens (mobile) and larger screens, all tabs are shown.
   static PreferredSizeWidget buildAdaptiveAdminAppBar(
       BuildContext context,
       List<AdminTabDefinition> activeTabs,
-      TabController? tabController
+      TabController? tabController,
       ) {
     final screenWidth = MediaQuery.of(context).size.width;
-    // Adjust the breakpoint as needed. Here we use 600.
     if (screenWidth < 600) {
+      // For mobile, we show only the occasion title.
       var title = RightsService.currentOccasion!.title!;
-      return buildMobileAdminAppBar(context, title);
+      return buildMobileAdminAppBar(context, title, activeTabs, tabController!);
     } else {
-      var title = "${RightsService.currentUnit!.title!} - ${RightsService.currentOccasion!.title!}";
+      // For larger screens, we show a more detailed title.
+      var title =
+          "${RightsService.currentUnit!.title!} - ${RightsService.currentOccasion!.title!}";
       return buildDesktopAdminAppBar(context, activeTabs, tabController!, title);
     }
   }
@@ -115,16 +116,19 @@ class AdminPageHelper {
     );
   }
 
-  /// Mobile version of the AppBar: shows the logo as a hamburger menu
-  /// (which opens the Drawer) and only the signed in icon.
-  static PreferredSizeWidget buildMobileAdminAppBar(BuildContext context, String title) {
+  /// Mobile version of the AppBar: now also shows the TabBar with all tabs.
+  static PreferredSizeWidget buildMobileAdminAppBar(
+      BuildContext context,
+      String title,
+      List<AdminTabDefinition> activeTabs,
+      TabController tabController,
+      ) {
     final String logoAsset = 'assets/icons/fstapplogo.dark.svg';
     final currentUser = RightsService.currentOccasionUser;
 
     return AppBar(
       toolbarHeight: 60,
-      // Leading is the logo displayed as an IconButton.
-      // If you have a Drawer, this will open it.
+      // The logo is shown as an IconButton.
       leading: Builder(
         builder: (context) {
           return IconButton(
@@ -155,6 +159,28 @@ class AdminPageHelper {
             },
           ),
       ],
+      // Added TabBar to the mobile AppBar
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(40),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: TabBar(
+            controller: tabController,
+            isScrollable: true,
+            tabs: activeTabs.map((tab) {
+              return Row(
+                children: [
+                  Icon(tab.icon),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(tab.label),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ),
+      ),
     );
   }
 }
