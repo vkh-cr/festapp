@@ -1,4 +1,5 @@
-CREATE OR REPLACE FUNCTION get_app_config(data_in jsonb) RETURNS jsonb
+CREATE OR REPLACE FUNCTION get_app_config_v2(data_in jsonb)
+RETURNS jsonb
 LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
 AS $$
@@ -17,6 +18,8 @@ DECLARE
     version_recommended text;
     occasion_unit bigint;
     bank_account_ids bigint[];
+    occasion_json jsonb;
+    unit_json jsonb;
 BEGIN
     -- Log the request details in log_app_config table
     INSERT INTO public.log_app_config (organization, platform)
@@ -29,7 +32,8 @@ BEGIN
 
     -- If form_link is provided, fetch the occasion from forms
     IF form_link IS NOT NULL AND form_link <> '' THEN
-        SELECT forms.occasion, occasions.link INTO occasionId, occasion_link
+        SELECT forms.occasion, occasions.link
+          INTO occasionId, occasion_link
         FROM forms
         JOIN occasions ON forms.occasion = occasions.id
         WHERE forms.link = form_link
@@ -38,13 +42,17 @@ BEGIN
 
         -- If no occasion is found, return a 404 response
         IF occasionId IS NULL THEN
-            RETURN json_build_object('code', 404, 'message', 'No occasion found for the provided form link');
+            RETURN json_build_object(
+                'code', 404,
+                'message', 'No occasion found for the provided form link'
+            );
         END IF;
 
     -- If no form_link but link_txt is provided
     ELSIF link_txt IS NOT NULL AND link_txt <> '' THEN
         -- Get the occasion ID and link for the provided link within the specified organization
-        SELECT id, link INTO occasionId, occasion_link
+        SELECT id, link
+          INTO occasionId, occasion_link
         FROM occasions
         WHERE link = link_txt
           AND is_hidden = false
@@ -52,19 +60,24 @@ BEGIN
 
         -- If the occasion ID is not found, return a 404 response
         IF occasionId IS NULL THEN
-            RETURN json_build_object('code', 404, 'message', 'Occasion not found');
+            RETURN json_build_object(
+                'code', 404,
+                'message', 'Occasion not found'
+            );
         END IF;
 
     -- If no link or form_link is provided
     ELSE
         -- Get the default occasion from the organization
-        SELECT (data->>'DEFAULT_OCCASION')::bigint INTO occasionId
+        SELECT (data->>'DEFAULT_OCCASION')::bigint
+          INTO occasionId
         FROM organizations
         WHERE id = org_id;
 
         -- If no default occasion is set, get the first open and non-hidden occasion within the organization
         IF occasionId IS NULL THEN
-            SELECT id, link INTO occasionId, occasion_link
+            SELECT id, link
+              INTO occasionId, occasion_link
             FROM occasions
             WHERE is_open = true
               AND is_hidden = false
@@ -73,41 +86,52 @@ BEGIN
 
             -- If no open occasion is found, return a 404 response
             IF occasionId IS NULL THEN
-                RETURN json_build_object('code', 404, 'message', 'No open occasion found for the organization');
+                RETURN json_build_object(
+                    'code', 404,
+                    'message', 'No open occasion found for the organization'
+                );
             END IF;
         ELSE
             -- Get the link for the default occasion
-            SELECT link INTO occasion_link
+            SELECT link
+              INTO occasion_link
             FROM occasions
             WHERE id = occasionId AND organization = org_id;
         END IF;
     END IF;
 
     -- Retrieve version_recommended for the specific platform, or leave as NULL if not found
-    SELECT (SELECT item->>'prompt'
-            FROM jsonb_array_elements(data->'PLATFORMS') AS item
-            WHERE item->>'platform' = platform_name) INTO version_recommended
+    SELECT (
+             SELECT item->>'prompt'
+             FROM jsonb_array_elements(data->'PLATFORMS') AS item
+             WHERE item->>'platform' = platform_name
+           )
+      INTO version_recommended
     FROM organizations
     WHERE id = org_id;
 
     -- Get the is_open status for the occasion
-    SELECT is_open INTO is_open_bool
+    SELECT is_open
+      INTO is_open_bool
     FROM occasions
     WHERE id = occasionId;
 
     -- Get the occasion user record if it exists
-    SELECT * INTO occasion_user
+    SELECT *
+      INTO occasion_user
     FROM occasion_users
     WHERE occasion = occasionId
       AND "user" = auth.uid();
 
     -- Retrieve the unit ID from the occasions table
-    SELECT unit INTO occasion_unit
+    SELECT unit
+      INTO occasion_unit
     FROM occasions
     WHERE id = occasionId;
 
     -- Get the unit user record if it exists
-    SELECT * INTO unit_user
+    SELECT *
+      INTO unit_user
     FROM unit_users
     WHERE unit = occasion_unit
       AND "user" = auth.uid();
@@ -134,7 +158,8 @@ BEGIN
         PERFORM add_user_to_occasion(occasionId, auth.uid());
 
         -- Fetch the updated occasion user record
-        SELECT * INTO occasion_user
+        SELECT *
+          INTO occasion_user
         FROM occasion_users
         WHERE occasion = occasionId
           AND "user" = auth.uid();
@@ -142,17 +167,31 @@ BEGIN
 
     -- Retrieve unit_user again in case the user was added to the occasion and now belongs to a unit
     IF unit_user IS NULL AND occasion_unit IS NOT NULL AND auth.uid() IS NOT NULL THEN
-        SELECT * INTO unit_user
+        SELECT *
+          INTO unit_user
         FROM unit_users
         WHERE unit = occasion_unit
           AND "user" = auth.uid();
     END IF;
 
     -- Fetch list of bank account IDs where the user is an admin
-    SELECT array_agg(bank_account) INTO bank_account_ids
+    SELECT array_agg(bank_account)
+      INTO bank_account_ids
     FROM eshop.bank_account_users
     WHERE "user" = auth.uid()
       AND is_admin = true;
+
+    -- Fetch full occasion details as a JSON object
+    SELECT row_to_json(o)
+      INTO occasion_json
+    FROM occasions o
+    WHERE o.id = occasionId;
+
+    -- Fetch full unit details as a JSON object
+    SELECT row_to_json(u)
+      INTO unit_json
+    FROM units u
+    WHERE u.id = occasion_unit;
 
     -- Return final response with all data and status code 200 at the end
     RETURN json_build_object(
@@ -160,8 +199,8 @@ BEGIN
         'is_admin', is_admin_bool,
         'occasion_user', COALESCE(row_to_json(occasion_user)::jsonb, NULL),
         'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL),
-        'link', occasion_link,
-        'occasion', occasionId,
+        'occasion', COALESCE(occasion_json, '{}'::jsonb),
+        'unit', COALESCE(unit_json, '{}'::jsonb),
         'version_recommended', version_recommended,
         'bank_accounts_admin', COALESCE(bank_account_ids, '{}')
     );

@@ -15,7 +15,7 @@ class DbOccasions {
 
   static Future<List<ServiceItemModel>> getAllServices(String type) async {
     var data = await _supabase.rpc("get_all_service_items", params: {
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'type': type,
     });
     var items = List<ServiceItemModel>.from(
@@ -25,7 +25,7 @@ class DbOccasions {
 
   static Future<bool> createService(String type, ServiceItemModel item) async {
     var result = await _supabase.rpc("create_service_item", params: {
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'type': type,
       'code': item.code,
       'title': item.title,
@@ -36,7 +36,7 @@ class DbOccasions {
 
   static Future<bool> updateService(String type, ServiceItemModel item) async {
     var result = await _supabase.rpc("update_service_item", params: {
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'type': type,
       'code': item.code,
       'new_title': item.title,
@@ -47,7 +47,7 @@ class DbOccasions {
 
   static Future<bool> deleteService(String type, ServiceItemModel item, [bool force = false]) async {
     var result = await _supabase.rpc("delete_service_item", params: {
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'code': item.code,
       'type': type,
       'force': force
@@ -59,7 +59,7 @@ class DbOccasions {
     final response = await _supabase
         .from(Tb.occasions.table)
         .select(Tb.occasions.data)
-        .eq(Tb.occasions.id, RightsService.currentOccasion!)
+        .eq(Tb.occasions.id, RightsService.currentOccasionId!)
         .maybeSingle();
 
     if (response != null) {
@@ -73,7 +73,7 @@ class DbOccasions {
 
   static Future<bool> updateGameSettings(GameSettingsModel settings) async {
     final response = await _supabase.rpc('game_update_settings', params: {
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'new_start_time': settings.start?.toIso8601String(),
       'new_end_time': settings.end?.toIso8601String(),
     });

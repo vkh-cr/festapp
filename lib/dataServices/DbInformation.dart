@@ -27,11 +27,11 @@ class DbInformation {
     List<Map<String, dynamic>> data = [];
     if(informationType != null) {
       data = await _supabase.from(Tb.information.table).select(select)
-          .eq(Tb.information.occasion, RightsService.currentOccasion!)
+          .eq(Tb.information.occasion, RightsService.currentOccasionId!)
           .filter(Tb.information.type, "eq", informationType);
     } else {
       data = await _supabase.from(Tb.information.table).select(select)
-          .eq(Tb.information.occasion, RightsService.currentOccasion!)
+          .eq(Tb.information.occasion, RightsService.currentOccasionId!)
           .or("${Tb.information.type}.eq.,${Tb.information.type}.is.null");
     }
 
@@ -66,7 +66,7 @@ class DbInformation {
             "${Tb.information.data}"
         )
         .eq(Tb.information.is_hidden, false)
-        .eq(Tb.information.occasion, RightsService.currentOccasion!);
+        .eq(Tb.information.occasion, RightsService.currentOccasionId!);
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -91,7 +91,7 @@ class DbInformation {
           "${Tb.information.id},"
           "${Tb.information.updated_at}")
         .eq(Tb.information.is_hidden, false)
-        .eq(Tb.information.occasion, RightsService.currentOccasion!);
+        .eq(Tb.information.occasion, RightsService.currentOccasionId!);
 
     return List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -103,7 +103,7 @@ class DbInformation {
 
       Map<String, dynamic> upsertObj = {
         Tb.information_hidden.data: info.informationHidden?.data,
-        Tb.information_hidden.occasion: RightsService.currentOccasion!
+        Tb.information_hidden.occasion: RightsService.currentOccasionId!
       };
       Map<String, dynamic> ref;
       if(info.informationHidden?.id != null){
@@ -134,7 +134,7 @@ class DbInformation {
     }
     else
     {
-      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasion!});
+      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasionId!});
       await _supabase.from(Tb.information.table).insert(upsertObj);
     }
   }

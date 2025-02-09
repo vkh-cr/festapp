@@ -1,6 +1,7 @@
-import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
@@ -11,14 +12,17 @@ class RightsService{
   static final _supabase = Supabase.instance.client;
   static OccasionUserModel? currentOccasionUser;
   static OccasionUserModel? currentUnitUser;
-  static int? currentOccasion;
+  static int? currentOccasionId;
+  static OccasionModel? currentOccasion;
+  static UnitModel? currentUnit;
+
   static String? currentLink;
   static bool? isAdminField;
   static List<int>? bankAccountAdmin;
 
 
   static Future<bool> updateOccasionData([String? link]) async {
-    if (currentOccasion == null || link != currentLink) {
+    if (currentOccasionId == null || link != currentLink) {
       LinkModel model = LinkModel(occasionLink: link);
       var occasionLink = link ?? RouterService.currentOccasionLink;
       if (occasionLink.isEmpty) {
@@ -47,7 +51,7 @@ class RightsService{
 
   static Future<bool> getIsAdmin() async {
     var data = await _supabase.rpc("get_is_admin_on_occasion",
-        params: {"oc": RightsService.currentOccasion!});
+        params: {"oc": RightsService.currentOccasionId!});
     return data;
   }
 

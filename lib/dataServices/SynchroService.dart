@@ -18,14 +18,14 @@ class SynchroService {
 
   static Future<OccasionSettingsModel> loadOrInitOccasionSettings() async {
     OccasionSettingsModel toReturn;
-    if(RightsService.currentOccasion == null) {
+    if(RightsService.currentOccasionId == null) {
       toReturn =  OccasionSettingsModel.DefaultSettings;
     }
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
           .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
-          .eq(Tb.occasions.id, RightsService.currentOccasion!)
+          .eq(Tb.occasions.id, RightsService.currentOccasionId!)
           .single();
 
       toReturn = OccasionSettingsModel.fromJson(data);
@@ -69,7 +69,7 @@ class SynchroService {
     print(occasionLink);
     print(formLink);
 
-    var data = await _supabase.rpc("get_app_config",
+    var data = await _supabase.rpc("get_app_config_v2",
         params: {"data_in": {
           "link": occasionLink,
           "form_link": formLink,

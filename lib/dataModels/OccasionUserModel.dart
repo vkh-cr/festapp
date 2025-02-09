@@ -47,7 +47,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   dynamic toUpdateJson() =>
   {
-    Tb.occasion_users.occasion: RightsService.currentOccasion,
+    Tb.occasion_users.occasion: RightsService.currentOccasionId,
     Tb.occasion_users.user: user,
     Tb.occasion_users.is_editor: isEditor??false,
     Tb.occasion_users.is_approver: isApprover??false,
@@ -60,7 +60,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
-        occasion: RightsService.currentOccasion!,
+        occasion: RightsService.currentOccasionId!,
         user: original?.user ?? json[Tb.occasion_users.user],
         role: json[Tb.occasion_users.role],
         data: {
@@ -217,7 +217,7 @@ class OccasionUserModel extends IPlutoRowModel {
     mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[DbOccasions.serviceTypeAccommodation], value);
 
     return OccasionUserModel(
-      occasion: RightsService.currentOccasion,
+      occasion: RightsService.currentOccasionId,
       user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
       isApprover: json[Tb.occasion_users.is_approver] == "true" ? true : false,
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,

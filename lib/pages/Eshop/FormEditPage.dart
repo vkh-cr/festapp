@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/pages/Eshop/FormPage.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/LoginPage.dart';
 
 @RoutePage()
@@ -53,7 +52,7 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
     return DefaultTabController(
       length: _tabController.length,
       child: Scaffold(
-        appBar: AdminPageHelper.buildAdminAppBar(context, activeTabs, _tabController, "Admin".tr()),
+        appBar: AdminPageHelper.buildAdaptiveAdminAppBar(context, activeTabs, _tabController),
         body: TabBarView(
           controller: _tabController,
           physics: const NeverScrollableScrollPhysics(),

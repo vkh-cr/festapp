@@ -158,7 +158,7 @@ class OccasionCard extends StatelessWidget {
           ),
           child: Container(
             decoration: BoxDecoration(
-              color: ThemeConfig.grey380(context),
+              color: ThemeConfig.grey300(context),
               borderRadius: BorderRadius.circular(15.0),
             ),
             child: Padding(

@@ -21,7 +21,7 @@ class DbUsers {
 
   static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
     var result = await _supabase.rpc("get_user_info_for_users",
-        params: {"oc": RightsService.currentOccasion, "user_ids": userIds});
+        params: {"oc": RightsService.currentOccasionId, "user_ids": userIds});
     if(result["code"] == 200) {
       return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
     }
@@ -38,7 +38,7 @@ class DbUsers {
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
     var result = await _supabase.rpc("get_all_user_basics_from_occasion",
-        params: {"oc": RightsService.currentOccasion});
+        params: {"oc": RightsService.currentOccasionId});
     if(result["code"] == 200) {
       var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
       return t;
@@ -48,7 +48,7 @@ class DbUsers {
 
   static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
     var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
-        params: {"oc": RightsService.currentOccasion});
+        params: {"oc": RightsService.currentOccasionId});
     if(result["code"] == 200) {
       var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
       return t;
@@ -219,13 +219,13 @@ class DbUsers {
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasionId!);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsersServiceTab() async {
     var allFood = await DbOccasions.getAllServices("food");
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasionId!);
     for(var ou in data){
       for(var f in allFood) {
         if(ou[Tb.occasion_users.services] == null){
