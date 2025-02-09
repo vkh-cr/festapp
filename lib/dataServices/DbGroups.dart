@@ -30,7 +30,7 @@ class DbGroups {
             "${Tb.user_group_info.type},"
             "${Tb.user_group_info.data},"
             "${Tb.user_groups.table}(${Tb.user_info_public.table}(${Tb.user_info.id}, ${Tb.user_info.name}, ${Tb.user_info.surname}))")
-    .eq(Tb.user_group_info.occasion, RightsService.currentOccasion!)
+    .eq(Tb.user_group_info.occasion, RightsService.currentOccasionId!)
     .filter(Tb.user_group_info.type, type == null ? "is" : "eq", type);
 
     var toReturn = List<UserGroupInfoModel>.from(
@@ -98,7 +98,7 @@ class DbGroups {
       upsertObj.addAll({Tb.user_group_info.id: model.id.toString()});
       eventData = await _supabase.from(Tb.user_group_info.table).update(upsertObj).eq(Tb.user_group_info.id, model.id!).select().single();
     } else {
-      upsertObj.addAll({Tb.user_group_info.occasion: RightsService.currentOccasion!});
+      upsertObj.addAll({Tb.user_group_info.occasion: RightsService.currentOccasionId!});
       eventData = await _supabase.from(Tb.user_group_info.table).insert(upsertObj).select().single();
     }
 
@@ -143,7 +143,7 @@ class DbGroups {
   static Future<List<int>> getCorrectlyGuessedCheckpoints() async {
 
     var response = await await _supabase
-        .rpc('game_get_correctly_guessed_checkpoints', params: {'oc': RightsService.currentOccasion});
+        .rpc('game_get_correctly_guessed_checkpoints', params: {'oc': RightsService.currentOccasionId});
     if (response == null || response["code"] != 200) {
       return [];
     }

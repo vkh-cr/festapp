@@ -195,7 +195,7 @@ class AuthService {
         params:
         {
           "usr": occasionUserModel.user,
-          "oc": occasionUserModel.occasion??RightsService.currentOccasion,
+          "oc": occasionUserModel.occasion??RightsService.currentOccasionId,
           "password": pwd
         });
   }
