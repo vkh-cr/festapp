@@ -96,7 +96,7 @@ BEGIN
                 COALESCE((input_data->>'start_time')::TIMESTAMPTZ, NULL),
                 COALESCE((input_data->>'end_time')::TIMESTAMPTZ, NULL),
                 COALESCE((input_data->>'organization')::BIGINT, NULL),
-                COALESCE(input_data->'services', '[]'::jsonb),
+                COALESCE(input_data->'services', '{}'::jsonb),
                 final_unit,
                 COALESCE(input_data->'features', '[]'::jsonb)
             )
