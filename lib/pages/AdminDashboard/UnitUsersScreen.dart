@@ -36,6 +36,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
     UserColumns.SEX,
     UserColumns.MANAGER,
     UserColumns.EDITOR,
+    UserColumns.EDITOR_VIEW,
   ];
 
   List<UnitUserModel>? _allUsers;

@@ -4,7 +4,7 @@ DECLARE
     allData JSON;
 BEGIN
 
-    PERFORM check_is_editor_via_form_link(form_link);
+    PERFORM check_is_editor_view_via_form_link(form_link);
 
     SELECT jsonb_build_object(
         'code', 200,

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
@@ -132,7 +133,7 @@ class _SideMenuState extends State<SideMenu> {
               children: [
                 _buildMenuItem(
                   icon: Icons.calendar_month,
-                  label: "Events",
+                  label: "Events".tr(),
                   isSelected: widget.currentMenu == "Occasions",
                   onTap: () {
                     if (widget.unit != null) {
@@ -143,7 +144,7 @@ class _SideMenuState extends State<SideMenu> {
                 ),
                 _buildMenuItem(
                   icon: Icons.people,
-                  label: "Users",
+                  label: "Users".tr(),
                   isSelected: widget.currentMenu == "Users",
                   onTap: () {
                     widget.onMenuItemSelected(UnitUsersScreen(unit: widget.unit!), "Users");

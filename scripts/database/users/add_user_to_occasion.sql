@@ -12,6 +12,7 @@ DECLARE
     unit_id          BIGINT;
     unit_is_manager  BOOLEAN := false;
     unit_is_editor   BOOLEAN := false;
+    unit_is_editor_view BOOLEAN := false;
 BEGIN
     -- Retrieve the organization, the unit, and the open status of the occasion.
     SELECT organization, unit, is_open
@@ -42,13 +43,14 @@ BEGIN
     END IF;
 
     -- Retrieve the unit-level role information from unit_users.
-    SELECT is_manager, is_editor
-      INTO unit_is_manager, unit_is_editor
+    SELECT is_manager, is_editor, is_editor_view
+      INTO unit_is_manager, unit_is_editor, unit_is_editor_view
       FROM unit_users
      WHERE unit = unit_id AND "user" = usr;
     IF NOT FOUND THEN
         unit_is_manager := false;
         unit_is_editor  := false;
+        unit_is_editor_view := false;
     END IF;
 
     -- Retrieve the user info and build a JSON object merging any existing data.
@@ -74,7 +76,8 @@ BEGIN
         UPDATE occasion_users
            SET data       = user_data,
                is_manager = unit_is_manager,
-               is_editor  = unit_is_editor
+               is_editor  = unit_is_editor,
+               is_editor_view = unit_is_editor_view
          WHERE occasion = oc AND "user" = usr;
     ELSE
         -- Insert a new row into occasion_users, using the unit-level role flags.
@@ -84,6 +87,7 @@ BEGIN
             created_at,
             is_editor,
             is_manager,
+            is_editor_view,
             is_approved,
             is_approver,
             data,
@@ -95,6 +99,7 @@ BEGIN
             now(),
             unit_is_editor,
             unit_is_manager,
+            unit_is_editor_view,
             FALSE,
             FALSE,
             user_data,

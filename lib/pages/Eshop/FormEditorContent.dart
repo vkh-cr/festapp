@@ -9,6 +9,7 @@ import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/services/FormHelper.dart';
@@ -127,11 +128,11 @@ class _FormEditorContentState extends State<FormEditorContent> {
               Text("Form is open".tr()),
               Switch(
                 value: form!.isOpen ?? true,
-                onChanged: (value) {
+                onChanged: RightsService.canEditOccasion() ? (value) {
                   setState(() {
                     form!.isOpen = value;
                   });
-                },
+                } : null,
               ),
             ],
           ),
@@ -238,6 +239,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 child: const Icon(Icons.remove_red_eye_rounded),
               ),
               SizedBox.square(dimension: 12,),
+              if(RightsService.canEditOccasion())
               FloatingActionButton(
               onPressed: _addNewField,
               tooltip: 'Add Field'.tr(),
@@ -314,12 +316,12 @@ class _FormEditorContentState extends State<FormEditorContent> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: cancelEdit,
+                onPressed: RightsService.canEditOccasion() ? cancelEdit : null,
                 child: Text("Storno".tr()),
               ),
               const SizedBox(width: 16),
               ElevatedButton(
-                onPressed: saveChanges,
+                onPressed: RightsService.canEditOccasion() ? saveChanges : null,
                 child: Text("Save changes".tr()),
               ),
             ],

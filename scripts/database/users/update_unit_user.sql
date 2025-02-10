@@ -8,6 +8,7 @@ DECLARE
     v_unit bigint;
     v_is_manager boolean;
     v_is_editor boolean;
+    v_is_editor_view boolean;
     v_data jsonb;
     update_count integer;
 BEGIN
@@ -16,6 +17,7 @@ BEGIN
     v_unit := (input_data->>'unit')::bigint;
     v_is_manager := (input_data->>'is_manager')::boolean;
     v_is_editor := (input_data->>'is_editor')::boolean;
+    v_is_editor_view := (input_data->>'is_editor_view')::boolean;
     v_data := input_data->'data';
 
     -- Step 1: Verify that the unit exists
@@ -40,18 +42,22 @@ BEGIN
     END IF;
 
     -- Step 3: Check if the target user exists within the given unit
-    IF NOT EXISTS (SELECT 1 FROM public.unit_users WHERE "user" = v_user AND unit = v_unit) THEN
+    IF NOT EXISTS (
+      SELECT 1 FROM public.unit_users
+      WHERE "user" = v_user AND unit = v_unit
+    ) THEN
       RETURN jsonb_build_object(
         'code', 404,
         'message', 'User not found in unit'
       );
     END IF;
 
-    -- Step 4: Update the unit user record with the new values
+    -- Step 4: Update the unit user record with the new values, including is_editor_view
     UPDATE public.unit_users
-    SET is_manager = v_is_manager,
-        is_editor = v_is_editor,
-        data = v_data
+    SET is_manager     = v_is_manager,
+        is_editor      = v_is_editor,
+        is_editor_view = v_is_editor_view,
+        data           = v_data
     WHERE "user" = v_user
       AND unit = v_unit;
 
