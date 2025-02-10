@@ -63,6 +63,10 @@ class RightsService{
     return isManager() || isAdmin();
   }
 
+  static bool canUpdateUnitUsers() {
+    return isUnitManager() || isAdmin();
+  }
+
   static bool canEditOccasion() {
     return isManager() || isEditor();
   }
@@ -72,7 +76,6 @@ class RightsService{
   }
 
   static bool isAdmin() {
-    return false;
     return isAdminField??false;
   }
 
@@ -89,7 +92,7 @@ class RightsService{
   }
 
   static bool canUserSeeUnitWorkspace() {
-    return isUnitEditor() || isUnitManager() || isUnitManager();
+    return isUnitEditor() || isUnitManager() || isUnitEditorView();
   }
 
   static bool isManager() {

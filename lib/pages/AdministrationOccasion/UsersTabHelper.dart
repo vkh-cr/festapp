@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/IHasId.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
@@ -63,7 +64,7 @@ class UsersTabHelper {
   /// [currentUsers] are the users already added in the current state.
   /// [reloadUsers] is a callback to trigger reloading the user list.
   static Future<void> addExisting(BuildContext context,
-      SingleTableDataGrid dataGrid, List<IPlutoRowModel> currentUsers,
+      SingleTableDataGrid dataGrid, List<IHasId> currentUsers,
       Future<void> Function() reloadUsers) async {
     var existing = await DbUsers.getAllUsersBasicsForUnit();
     var nonAdded =

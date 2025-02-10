@@ -34,9 +34,9 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
     UserColumns.NAME,
     UserColumns.SURNAME,
     UserColumns.SEX,
-    UserColumns.MANAGER,
-    UserColumns.EDITOR,
-    UserColumns.EDITOR_VIEW,
+    UserColumns.UNIT_MANAGER,
+    UserColumns.UNIT_EDITOR,
+    UserColumns.UNIT_EDITOR_VIEW,
   ];
 
   List<UnitUserModel>? _allUsers;
@@ -70,9 +70,9 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
         DataGridFirstColumn.deleteAndCheck,
         Tb.occasion_users.user,
         actionsExtended: DataGridActionsController(
-            areAllActionsEnabled: RightsService.canUpdateUsers),
+            areAllActionsEnabled: RightsService.canUpdateUnitUsers),
         headerChildren: [
-          if (RightsService.isManager())
+          if (RightsService.isUnitManager())
             DataGridAction(
               name: "Add existing".tr(),
               action: (SingleTableDataGrid p0, [_]) => UsersTabHelper.addExistingToUnit(
@@ -82,7 +82,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
               name: "Change password".tr(),
               action: (SingleTableDataGrid p0, [_]) =>
                   UsersTabHelper.setPassword(context, p0),
-              isEnabled: RightsService.canUpdateUsers),
+              isEnabled: RightsService.canUpdateUnitUsers),
           // DataGridAction(name: "Add to group".tr(), action: (SingleTableDataGrid p0, [_]) => UsersTabHelper.addToGroup(context, p0)),
         ],
         columns: UserColumns.generateColumns(columnIdentifiers),
