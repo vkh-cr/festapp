@@ -8,6 +8,7 @@ DECLARE
   order_product_ticket_ids BIGINT[];
   ticket_ids BIGINT[];
   order_oc BIGINT;
+  unit_id BIGINT;
   is_manager BOOLEAN;
 BEGIN
   -- Retrieve the order's occasion and payment_info.
@@ -17,15 +18,16 @@ BEGIN
    WHERE id = order_id;
 
   IF order_oc IS NULL THEN
-    RETURN JSONB_BUILD_OBJECT('code', 404, 'message', 'Order not found.');
+    RAISE EXCEPTION 'Order not found.';
   END IF;
 
   -- Check if the current user is a manager on the order's occasion.
-  is_manager := get_is_manager_on_occasion(order_oc);
+  SELECT unit
+  INTO unit_id
+  FROM public.occasions
+  WHERE id = order_oc;
 
-  IF NOT is_manager THEN
-    RETURN JSONB_BUILD_OBJECT('code', 403, 'message', 'Unauthorized: User is not a manager for the occasion.');
-  END IF;
+  PERFORM check_is_manager_on_unit(unit_id);
 
   -- Collect all order_product_ticket IDs for the order.
   SELECT ARRAY(SELECT id FROM eshop.order_product_ticket WHERE "order" = order_id)
