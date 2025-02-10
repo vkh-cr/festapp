@@ -11,6 +11,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/GamePage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -83,7 +84,7 @@ class _InfoPageState extends State<InfoPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Game button
-                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME))
+                          if(FeatureService.isFeatureEnabled(FeatureService.game))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
@@ -96,12 +97,12 @@ class _InfoPageState extends State<InfoPage> {
                               icon: Icons.gamepad,
                               label: "Game",
                             ),
-                          const SizedBox(width: 16), // Add spacing between buttons
-                          if (SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
+                          const SizedBox(width: 16),
+                          if(FeatureService.isFeatureEnabled(FeatureService.songbook))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
-                                RouterService.navigateOccasion(context, SongbookPage.ROUTE); // Replace with your songbook route
+                                RouterService.navigateOccasion(context, SongbookPage.ROUTE);
                               },
                               icon: Icons.library_music,
                               label: "Songbook",

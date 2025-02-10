@@ -18,7 +18,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -80,7 +80,7 @@ class _EventPageState extends State<EventPage> {
           leading: ScheduleBackButton(),
           actions:[
             Visibility(
-              visible: showLoginLogoutButton() && RightsService.isApprover(),
+              visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureService.entryCode),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
@@ -136,10 +136,7 @@ class _EventPageState extends State<EventPage> {
                                           child: const Text("Sign out").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          ((SynchroService.globalSettingsModel
-                                                      ?.maxCompanions ??
-                                                  0) >
-                                              0),
+                                          FeatureService.isFeatureEnabled(FeatureService.companions),
                                       child: Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                             8, 0, 0, 0),
@@ -521,7 +518,7 @@ class _EventPageState extends State<EventPage> {
       builder: (BuildContext context) {
         return CompanionDialog(
           eventId: _event!.id!,
-          maxCompanions: SynchroService.globalSettingsModel!.maxCompanions!,
+          maxCompanions: FeatureService.getMaxCompanions()??0,
           companions: _companions,
           refreshData: () async {
             await loadData(widget.id!);

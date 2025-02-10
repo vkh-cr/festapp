@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/InformationContent.dart';
 import 'package:fstapp/pages/AdministrationOccasion/SongbookContent.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -41,6 +42,7 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               isScrollable: true,
               tabs: [
                 DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
+                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
                 DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
               ],
             ),
@@ -50,8 +52,9 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                InformationContent(),  // Information grid
-                SongbookContent(),     // Songbook grid
+                InformationContent(),
+                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
+                SongbookContent(),
               ],
             ),
           ),

@@ -1,9 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-///
-/// A helper widget that renders the form for an individual feature.
-///
 class FeatureForm extends StatefulWidget {
   final Map<String, dynamic> feature;
 
@@ -18,12 +15,14 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? lightColorController;
   TextEditingController? darkColorController;
   TextEditingController? backgroundController;
+  TextEditingController? companionsController;
 
   @override
   void initState() {
     super.initState();
     isEnabled = widget.feature['is_enabled'] ?? false;
 
+    // For the 'ticket' feature, initialize color fields.
     if (widget.feature['code'] == 'ticket') {
       widget.feature['lightColor'] ??= 'FFFFFF';
       widget.feature['darkColor'] ??= '000000';
@@ -36,6 +35,13 @@ class _FeatureFormState extends State<FeatureForm> {
       backgroundController =
           TextEditingController(text: widget.feature['background']);
     }
+    // For the 'companions' feature, initialize the max_companions field.
+    else if (widget.feature['code'] == 'companions') {
+      // Set a default value of 1 if not provided.
+      widget.feature['max_companions'] ??= 1;
+      companionsController = TextEditingController(
+          text: widget.feature['max_companions'].toString());
+    }
   }
 
   @override
@@ -43,6 +49,7 @@ class _FeatureFormState extends State<FeatureForm> {
     lightColorController?.dispose();
     darkColorController?.dispose();
     backgroundController?.dispose();
+    companionsController?.dispose();
     super.dispose();
   }
 
@@ -55,7 +62,7 @@ class _FeatureFormState extends State<FeatureForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Feature header (displaying the code)
+            // Feature header (displaying the feature code)
             Text(
               widget.feature['code']?.toString().toUpperCase() ?? 'UNKNOWN',
             ),
@@ -70,7 +77,7 @@ class _FeatureFormState extends State<FeatureForm> {
                 });
               },
             ),
-            // Additional fields are shown only when the feature is enabled.
+            // Show additional fields only when the feature is enabled.
             if (isEnabled) ..._buildFeatureFields(context),
           ],
         ),
@@ -78,7 +85,7 @@ class _FeatureFormState extends State<FeatureForm> {
     );
   }
 
-  /// Build the additional fields for a feature.
+  /// Builds additional form fields for the feature based on its code.
   List<Widget> _buildFeatureFields(BuildContext context) {
     List<Widget> fields = [];
 
@@ -119,6 +126,32 @@ class _FeatureFormState extends State<FeatureForm> {
         ),
       );
     }
+    else if (widget.feature['code'] == 'companions') {
+      fields.add(
+        TextFormField(
+          controller: companionsController,
+          decoration: InputDecoration(
+            labelText: "Max",
+          ),
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return "Max Companions is required".tr();
+            }
+            final intValue = int.tryParse(value);
+            if (intValue == null || intValue < 1) {
+              return "Enter a number greater than 0".tr();
+            }
+            return null;
+          },
+          onSaved: (val) {
+            widget.feature['max_companions'] = int.tryParse(val ?? '1') ?? 1;
+          },
+        ),
+      );
+    }
+    // You can add other feature-specific fields here if needed.
+
     return fields;
   }
 }

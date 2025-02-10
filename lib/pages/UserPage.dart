@@ -12,7 +12,7 @@ import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/pages/LoginPage.dart';
@@ -21,7 +21,6 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -136,7 +135,6 @@ class _UserPageState extends State<UserPage> {
 
   @override
   Widget build(BuildContext context) {
-
     List<Widget> actions = [
       IconButton(
         icon: Icon(Icons.settings),
@@ -160,192 +158,203 @@ class _UserPageState extends State<UserPage> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                const SizedBox(
-                  height: 15,
-                ),
-                Visibility(
-                  visible:
-                      SynchroService.globalSettingsModel!.isEnabledEntryCode ??
-                          false,
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ButtonsHelper.buildReferenceButton(
-                          context: context,
-                          onPressed: () => _showFullScreenDialog(
-                              context,
-                              userData?.occasionUser!.data![Tb.occasion_users.data_name],
-                              AppConfig.appName,
-                              userData?.occasionUser!.user!??""),
-                          icon: Icons.qr_code,
-                          label: "Show my code".tr(),
-                        ),
+                const SizedBox(height: 15),
+
+                // Show QR code button only if the 'ticket' feature is enabled.
+                if (FeatureService.isFeatureEnabled(FeatureService.entryCode))
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ButtonsHelper.buildReferenceButton(
+                      context: context,
+                      onPressed: () => _showFullScreenDialog(
+                        context,
+                        userData?.occasionUser!.data![Tb.occasion_users.data_name],
+                        AppConfig.appName,
+                        userData?.occasionUser!.user ?? "",
                       ),
-                      Visibility(
-                        visible: userData?.companions?.isNotEmpty ?? false,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            border: Border(
-                                bottom: BorderSide(color: Colors.grey[300]!)),
-                          ),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: (userData?.companions?.length ?? 0) + 1,
-                            itemBuilder: (context, index) {
-                              if (index == 0) {
-                                return ListTile(
+                      icon: Icons.qr_code,
+                      label: "Show my code".tr(),
+                    ),
+                  ),
+
+                // Show companions only if the 'companions' feature is enabled and there is at least one companion.
+                if (FeatureService.isFeatureEnabled(FeatureService.companions) &&
+                    (userData?.companions?.isNotEmpty ?? false))
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey[300]!),
+                      ),
+                    ),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: (userData?.companions?.length ?? 0) + 1,
+                      itemBuilder: (context, index) {
+                        if (index == 0) {
+                          return ListTile(
+                            title: Text(
+                              "Companions",
+                              style: TextStyle(
+                                color: ThemeConfig.blackColor(context),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ).tr(),
+                          );
+                        }
+                        final companion = userData?.companions![index - 1];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 10),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: ThemeConfig.qrButtonColor(context),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: ExpansionTile(
+                                  shape: const Border(),
                                   title: Text(
-                                    "Companions",
-                                    style: TextStyle(color: ThemeConfig.blackColor(context), fontWeight: FontWeight.bold),
-                                  ).tr(),
-                                );
-                              }
-
-                              final companion =
-                                  userData?.companions![index - 1];
-
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 10),
-                                child: Column(
+                                    companion!.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    "Signed in events: {count}"
+                                        .tr(namedArgs: {
+                                      "count": companion.schedule?.length.toString() ?? "0"
+                                    }),
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  trailing: ButtonsHelper.buildReferenceButton(
+                                    context: context,
+                                    onPressed: () => _showFullScreenDialog(
+                                      context,
+                                      companion.name,
+                                      AppConfig.appName,
+                                      companion.id,
+                                    ),
+                                    icon: Icons.qr_code,
+                                    label: "Show Code".tr(),
+                                  ),
+                                  expandedCrossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    const SizedBox(height: 10),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        color: ThemeConfig.qrButtonColor(context),
-                                        // Match the background color
-                                        borderRadius: BorderRadius.circular(
-                                            12), // Optional: Rounded corners
+                                    const SizedBox(height: 36),
+                                    ConstrainedBox(
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 600,
                                       ),
-                                      child: ExpansionTile(
-                                        //collapsedShape: Border.fromBorderSide(BorderSide(width: 2)),
-                                        shape: const Border(),
-                                        title: Text(companion!.name, style: TextStyle(
-                                            fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),),
-                                        subtitle: Text("Signed in events: {count}".tr(namedArgs: {"count":companion.schedule?.length.toString()??0.toString()}),
-                                            style: TextStyle(
-                                                color: Theme.of(context).colorScheme.onSurface,
-                                            fontSize: 13)),
-                                        trailing:
-                                            ButtonsHelper.buildReferenceButton(
-                                              context: context,
-                                          onPressed: () =>
-                                              _showFullScreenDialog(
-                                            context,
-                                            companion.name,
-                                            AppConfig.appName,
-                                            companion.id,
-                                          ),
-                                          icon: Icons.qr_code,
-                                          label: "Show Code".tr(),
+                                      child: ScheduleTimeline(
+                                        eventGroups: TimeBlockHelper.splitTimeBlocksByDay(
+                                          companion.timeBlocks,
+                                          context,
                                         ),
-                                        expandedCrossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          SizedBox.fromSize(size: const Size.fromHeight(36)),
-                                          ConstrainedBox(
-                                            constraints: const BoxConstraints(
-                                              maxWidth: 600,
+                                        onEventPressed: (eventId) async {
+                                          await RouterService.navigateOccasion(
+                                            context,
+                                            "${EventPage.ROUTE}/$eventId",
+                                          ).then((value) => loadData());
+                                          await loadData();
+                                        },
+                                        nodePosition: 0.3,
+                                        emptyContent: Center(
+                                          child: Text(
+                                            "Companion's events will appear here.",
+                                            style: TextStyle(
+                                              color: ThemeConfig.grey600(context),
                                             ),
-                                              child: ScheduleTimeline(
-                                                  eventGroups: TimeBlockHelper.splitTimeBlocksByDay(companion.timeBlocks, context),
-                                                  onEventPressed: (eventId) async {
-                                                    await RouterService.navigateOccasion(
-                                                        context,
-                                                        "${EventPage.ROUTE}/$eventId").then((value) => loadData());
-                                                    await loadData();
-                                                  },
-                                                  nodePosition: 0.3,
-                                                  emptyContent: Center(child: Text(
-                                                    "Companion's events will appear here.",
-                                                      style: TextStyle(
-                                                          color: ThemeConfig.grey600(context))
-                                                  ).tr(),),)),
-                                          SizedBox.fromSize(size: const Size.fromHeight(48)),
-                                          Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              TextButton(
-                                                onPressed: () async {
-                                                  var answer = await DialogHelper.showConfirmationDialogAsync(
-                                                      context,
-                                                      "Delete companion".tr(),
-                                                      "By deleting your companion you will also sign him/her out of all signed in sessions."
-                                                          .tr());
-                                                  if (!answer) {
-                                                    return;
-                                                  }
-                                                  await DbCompanions.delete(companion);
-                                                  await loadData();
-                                                },
-                                                child: Text(
-                                                  "Delete companion", // Set the text color to black
-                                                ).tr(),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+                                          ).tr(),
+                                        ),
                                       ),
+                                    ),
+                                    const SizedBox(height: 48),
+                                    Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () async {
+                                            var answer =
+                                            await DialogHelper.showConfirmationDialogAsync(
+                                                context,
+                                                "Delete companion".tr(),
+                                                "By deleting your companion you will also sign him/her out of all signed in sessions."
+                                                    .tr());
+                                            if (!answer) {
+                                              return;
+                                            }
+                                            await DbCompanions.delete(companion);
+                                            await loadData();
+                                          },
+                                          child: Text("Delete companion").tr(),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              );
-                            },
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
-                // Companions section
-                const SizedBox(
-                  height: 15,
-                ),
-                buildTextField("Name".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
-                buildTextField("Surname".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
-                buildTextField("E-mail".tr(), userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                buildTextField("I am".tr(), UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+
+                const SizedBox(height: 15),
+                buildTextField("Name".tr(),
+                    userData?.occasionUser?.data![Tb.occasion_users.data_name] ?? ""),
+                buildTextField("Surname".tr(),
+                    userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
+                buildTextField("E-mail".tr(),
+                    userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
+                buildTextField("I am".tr(),
+                    UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text("Accommodation").tr(),
-                      SizedBox.fromSize(size: const Size(4.0, 4.0)),
+                      const SizedBox(height: 4),
                       Container(
                         alignment: Alignment.topLeft,
                         child: TextButton(
-                            onPressed: userData?.accommodationPlace == null
-                                ? null
-                                : () => RouterService.navigateOccasion(context,
-                                    "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}"),
-                            child: userData?.accommodationPlace == null ?
-                            Text(
-                                userData?.accommodationPlace?.title ??
-                                    "Without accommodation".tr(),
-                                style: const TextStyle(fontSize: 20)) :
-                            IntrinsicWidth(
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.place),
-                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                  Text(userData!.accommodationPlace!.title!, style: const TextStyle(fontSize: 20)),
-                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                ],
-                              ),
-                            )
+                          onPressed: userData?.accommodationPlace == null
+                              ? null
+                              : () => RouterService.navigateOccasion(
+                            context,
+                            "${MapPage.ROUTE}/${userData?.accommodationPlace!.id!}",
+                          ),
+                          child: userData?.accommodationPlace == null
+                              ? Text(
+                            userData?.accommodationPlace?.title ?? "Without accommodation".tr(),
+                            style: const TextStyle(fontSize: 20),
+                          )
+                              : IntrinsicWidth(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.place),
+                                const SizedBox(width: 4),
+                                Text(
+                                  userData!.accommodationPlace!.title!,
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                                const SizedBox(width: 4),
+                              ],
+                            ),
+                          ),
                         ),
                       )
                     ],
                   ),
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
+                const SizedBox(height: 16),
                 Visibility(
                   visible: RightsService.canSeeAdmin(),
                   child: ButtonsHelper.bigButton(
@@ -354,65 +363,64 @@ class _UserPageState extends State<UserPage> {
                     label: "Event management".tr(),
                   ),
                 ),
-                const SizedBox(
-                  height: 16,
-                ),
+                const SizedBox(height: 16),
                 ButtonsHelper.bigButton(
-                    context: context,
-                    onPressed: () async => _logout(),
-                    label: "Sign out".tr(),
-                    color: ThemeConfig.seed1,
-                    textColor: Colors.white),
-                const SizedBox(
-                  height: 24,
+                  context: context,
+                  onPressed: () async => _logout(),
+                  label: "Sign out".tr(),
+                  color: ThemeConfig.seed1,
+                  textColor: Colors.white,
                 ),
+                const SizedBox(height: 24),
                 Container(
-                    alignment: Alignment.topCenter,
-                    child: TextButton(
-                      onPressed: () async {
-                        var answer = await DialogHelper.showConfirmationDialogAsync(
+                  alignment: Alignment.topCenter,
+                  child: TextButton(
+                    onPressed: () async {
+                      var answer = await DialogHelper.showConfirmationDialogAsync(
+                        context,
+                        "Change Password Instructions".tr(),
+                        "You'll receive an email with a link to reset your password. Do you want to proceed?"
+                            .tr(),
+                        confirmButtonMessage: "Proceed".tr(),
+                      );
+                      if (answer) {
+                        await AuthService
+                            .resetPasswordForEmail(userData!.occasionUser!.data![Tb.occasion_users.data_email])
+                            .then((value) {
+                          ToastHelper.Show(context, "Password reset email has been sent.".tr());
+                          DialogHelper.showInformationDialog(
                             context,
                             "Change Password Instructions".tr(),
-                            "You'll receive an email with a link to reset your password. Do you want to proceed?"
-                                .tr(),
-                            confirmButtonMessage: "Proceed".tr());
-                        if (answer) {
-                          await AuthService.resetPasswordForEmail(
-                              userData!.occasionUser!.data![Tb.occasion_users.data_email])
-                              .then((value) {
-                            ToastHelper.Show(
-                                context,
-                                "Password reset email has been sent.".tr());
-                            DialogHelper.showInformationDialog(
-                                context,
-                                "Change Password Instructions".tr(),
-                                "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
-                                    .tr(namedArgs: {
-                                  "email": userData!.occasionUser!.data![Tb.occasion_users.data_email]
-                                }));
-                          });
-                        }
-                      },
-                      child: Text(
-                        "Change password".tr(),
-                        style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
-                      ).tr(),
-                    )),
-                const SizedBox(
-                  height: 8,
+                            "A password reset link has been sent to {email}. Please check your inbox and follow the instructions to reset your password."
+                                .tr(namedArgs: {
+                              "email": userData!.occasionUser!.data![Tb.occasion_users.data_email]
+                            }),
+                          );
+                        });
+                      }
+                    },
+                    child: Text(
+                      "Change password".tr(),
+                      style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
+                    ).tr(),
+                  ),
                 ),
+                const SizedBox(height: 8),
                 Container(
-                    alignment: Alignment.topCenter,
-                    child: TextButton(
-                        onPressed: () => DialogHelper.showInformationDialog(
-                            context,
-                            "Delete account".tr(),
-                            "Request account deletion by sending email with your credentials to info@festapp.net."
-                                .tr()),
-                        child: Text(
-                          "Delete account".tr(),
-                          style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
-                        ).tr()))
+                  alignment: Alignment.topCenter,
+                  child: TextButton(
+                    onPressed: () => DialogHelper.showInformationDialog(
+                      context,
+                      "Delete account".tr(),
+                      "Request account deletion by sending email with your credentials to info@festapp.net."
+                          .tr(),
+                    ),
+                    child: Text(
+                      "Delete account".tr(),
+                      style: TextStyle(fontSize: StylesConfig.normalClickableFontSize),
+                    ).tr(),
+                  ),
+                )
               ],
             ),
           ),

@@ -14,6 +14,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -88,7 +89,7 @@ class AuthService {
     if(eUserGroup!=null) {
       user.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
     }
-    if(SynchroService.globalSettingsModel!.isEnabledEntryCode??false) {
+    if(FeatureService.isFeatureEnabled(FeatureService.companions)) {
       user.companions = await DbCompanions.getAllCompanions();
     }
     var place = SynchroService.globalSettingsModel!.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
