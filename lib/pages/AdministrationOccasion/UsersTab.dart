@@ -71,7 +71,7 @@ class _UsersTabState extends State<UsersTab> {
         actionsExtended: DataGridActionsController(
             areAllActionsEnabled: RightsService.canUpdateUsers),
         headerChildren: [
-          DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0), isEnabled: RightsService.canUpdateUsers),
+          //DataGridAction(name: "Import".tr(), action: (SingleTableDataGrid p0, [_]) => _import(p0), isEnabled: RightsService.canUpdateUsers),
           if (RightsService.isManager())
             DataGridAction(
               name: "Add existing".tr(),
