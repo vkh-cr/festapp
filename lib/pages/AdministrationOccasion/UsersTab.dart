@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/IHasId.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
@@ -75,7 +76,7 @@ class _UsersTabState extends State<UsersTab> {
             DataGridAction(
               name: "Add existing".tr(),
               action: (SingleTableDataGrid p0, [_]) => UsersTabHelper.addExisting(
-                  context, p0, _allUsers!.cast<IPlutoRowModel>(), loadUsers),
+                  context, p0, _allUsers!.cast<IHasId>(), loadUsers),
             ),
           DataGridAction(
               name: "Invite".tr(),
