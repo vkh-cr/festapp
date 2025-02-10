@@ -132,7 +132,7 @@ class _SideMenuState extends State<SideMenu> {
               children: [
                 _buildMenuItem(
                   icon: Icons.calendar_month,
-                  label: "Occasions",
+                  label: "Events",
                   isSelected: widget.currentMenu == "Occasions",
                   onTap: () {
                     if (widget.unit != null) {
