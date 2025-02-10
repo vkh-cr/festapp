@@ -412,5 +412,6 @@
   "This form is currently turned off": "This form is currently turned off",
   "Edit off text": "Edit off text",
   "Reservation": "Reservation",
+  "Are you sure you want to delete this event? All the event data will be lost.": "Are you sure you want to delete this event? All the event data will be lost.",
   "_":"_"
 }

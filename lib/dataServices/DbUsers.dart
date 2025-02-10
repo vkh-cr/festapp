@@ -66,6 +66,10 @@ class DbUsers {
     return [];
   }
 
+  static Future<void> deleteOccasion(int oc) async {
+    await _supabase.rpc("delete_occasion", params: {"oc": oc});
+  }
+
   static Future<void> updateUserInfo(OccasionUserModel data) async {
     await _supabase.rpc("update_user",
         params:

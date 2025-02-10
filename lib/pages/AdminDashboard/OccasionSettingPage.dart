@@ -7,27 +7,22 @@ import 'package:fstapp/pages/AdminDashboard/FeatureForm.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
+import 'package:fstapp/ThemeConfig.dart';
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;
-
   const OccasionSettingsPage({Key? key, required this.occasion}) : super(key: key);
-
   @override
   _OccasionSettingsPageState createState() => _OccasionSettingsPageState();
 }
 
 class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   final _formKey = GlobalKey<FormState>();
-
   late String? _title;
   late String? _link;
   DateTime? _from;
   DateTime? _to;
-
-  // Controller for the link text field.
   late TextEditingController _linkController;
-
   @override
   void initState() {
     super.initState();
@@ -36,31 +31,12 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _from = widget.occasion.startTime;
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
-
-    // Ensure the features list is initialized.
-    // Always add default features if they are not already part of occasion.features.
     List<Map<String, dynamic>> defaultFeatures = [
-      {
-        "code": "form",
-        "is_enabled": false,
-      },
-      {
-        "code": "ticket",
-        "color": "000000",
-        "background": "",
-        "is_enabled": false,
-      },
-      {
-        "code": "songbook",
-        "is_enabled": false,
-      },
-      {
-        "code": "game",
-        "is_enabled": false,
-      },
+      {"code": "form", "is_enabled": false},
+      {"code": "ticket", "color": "000000", "background": "", "is_enabled": false},
+      {"code": "songbook", "is_enabled": false},
+      {"code": "game", "is_enabled": false},
     ];
-
-    // If the features list is null or empty, it will already be an empty list by model default.
     for (var defaultFeature in defaultFeatures) {
       bool exists = widget.occasion.features.any((f) => f['code'] == defaultFeature['code']);
       if (!exists) {
@@ -68,13 +44,11 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       }
     }
   }
-
   @override
   void dispose() {
     _linkController.dispose();
     super.dispose();
   }
-
   Future<void> _saveSettings() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
@@ -82,17 +56,43 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       widget.occasion.link = _link;
       widget.occasion.startTime = _from;
       widget.occasion.endTime = _to;
-      // The feature fields are saved via their onSaved callbacks.
       await DbUsers.updateOccasion(widget.occasion);
       ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
       Navigator.of(context).pop();
     }
   }
-
+  Future<void> _deleteOccasion() async {
+    await DbUsers.deleteOccasion(widget.occasion.id!);
+    ToastHelper.Show(context, "${"Deleted".tr()}: ${widget.occasion.title!}");
+    Navigator.of(context).pop();
+  }
+  Future<void> _confirmDelete() async {
+    bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        insetPadding: EdgeInsets.all(16.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+        title: Text("Delete".tr()),
+        content: Text("Are you sure you want to delete this event? All the event data will be lost.".tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text("Storno".tr()),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text("Delete".tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true) {
+      await _deleteOccasion();
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Using an AppBar with a close icon.
       appBar: AppBar(
         title: Text("Settings".tr()),
         automaticallyImplyLeading: false,
@@ -104,43 +104,35 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              // Title field
               TextFormField(
                 initialValue: _title,
                 decoration: InputDecoration(
                   labelText: "Title".tr(),
                 ),
                 validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(
-                    errorText: 'Title is required'.tr(),
-                  ),
+                  FormBuilderValidators.required(errorText: 'Title is required'.tr()),
                 ]),
                 onSaved: (val) {
                   _title = val;
                 },
               ),
               const SizedBox(height: 16),
-              // Link field with automatic diacritics removal
               TextFormField(
                 controller: _linkController,
                 decoration: InputDecoration(
                   labelText: "Link".tr(),
                 ),
                 validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(
-                    errorText: 'Link is required'.tr(),
-                  ),
+                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
                 ]),
                 onChanged: (val) {
-                  // Remove diacritics from the entered text immediately
                   final fixed = Utilities.sanitizeFullUrl(val);
                   if (fixed != val) {
-                    // Update the controller text while preserving the cursor position
                     _linkController.value = _linkController.value.copyWith(
                       text: fixed,
                       selection: TextSelection.collapsed(offset: fixed.length),
@@ -151,12 +143,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   });
                 },
                 onSaved: (val) {
-                  // Use the already fixed value from the controller
                   _link = _linkController.text;
                 },
               ),
               const SizedBox(height: 16),
-              // Date range picker for From (start time) and To (end time)
               TimeDateRangePicker(
                 start: _from,
                 end: _to,
@@ -172,33 +162,41 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 },
               ),
               const SizedBox(height: 24),
-              // FEATURES SECTION
-              Text(
-                "Features".tr(),
-              ),
+              Text("Features".tr()),
               const SizedBox(height: 8),
-              // Build a FeatureForm widget for each feature.
               ...widget.occasion.features.map<Widget>((feature) {
                 return FeatureForm(feature: feature);
               }),
-              const SizedBox(height: 24),
-              // Action buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text("Storno".tr()),
+              const SizedBox(height: 80),
+              Center(
+                child: TextButton(
+                  onPressed: _confirmDelete,
+                  child: Text(
+                    "Delete".tr(),
+                    style: TextStyle(color: ThemeConfig.redColor(context)),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton(
-                    onPressed: _saveSettings,
-                    child: Text("Save".tr()),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text("Storno".tr()),
+            ),
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: _saveSettings,
+              child: Text("Save".tr()),
+            ),
+          ],
         ),
       ),
     );
