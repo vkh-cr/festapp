@@ -56,11 +56,15 @@ class RightsService{
   }
 
   static bool canSeeAdmin(){
-    return isEditor() || isManager() || isAdmin();
+    return isEditor() || isManager() || isUnitEditorView() || isAdmin();
   }
 
   static bool canUpdateUsers() {
     return isManager() || isAdmin();
+  }
+
+  static bool canEditOccasion() {
+    return isManager() || isEditor();
   }
 
   static bool canSignInOutUsersFromEvents() {
@@ -68,6 +72,7 @@ class RightsService{
   }
 
   static bool isAdmin() {
+    return false;
     return isAdminField??false;
   }
 
@@ -79,8 +84,12 @@ class RightsService{
     return currentUnitUser?.isEditor??false;
   }
 
+  static bool isUnitEditorView() {
+    return currentUnitUser?.isEditorView??false;
+  }
+
   static bool canUserSeeUnitWorkspace() {
-    return isUnitEditor() || isUnitManager();
+    return isUnitEditor() || isUnitManager() || isUnitManager();
   }
 
   static bool isManager() {

@@ -72,6 +72,7 @@ class OccasionUsersTb{
   String get occasion => "occasion";
   String get created_at => "created_at";
   String get user => "user";
+  String get is_editor_view => "is_editor_view";
   String get is_editor => "is_editor";
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";
@@ -365,5 +366,6 @@ class UnitUsersTb {
   String get user => "user";
   String get is_manager => "is_manager";
   String get is_editor => "is_editor";
+  String get is_editor_view => "is_editor_view";
   String get data => "data";
 }

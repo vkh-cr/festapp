@@ -11,7 +11,7 @@ BEGIN
         FROM unit_users
         WHERE "user" = auth.uid()
           AND unit = unit_id
-          AND (is_editor = true OR is_manager = true)
+          AND (is_editor = true OR is_manager = true OR is_editor_view = true)
     ) THEN
         RETURN jsonb_build_object('code', 403);
     END IF;
