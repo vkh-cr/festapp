@@ -192,6 +192,24 @@ class DbUsers {
 
   }
 
+  static Future<void> deleteUnitUser(String user, int unit) async {
+    await _supabase.rpc("delete_unit_user",
+        params:
+        {
+          "usr": user,
+          "unit_id": unit
+        });
+  }
+
+  static Future<void> deleteOccasionUser(String user, int occasion) async {
+    await _supabase.rpc("delete_occasion_user",
+        params:
+        {
+          "usr": user,
+          "oc": occasion
+        });
+  }
+
   static Future<void> deleteUser(String user, int occasion) async {
     await _supabase.rpc("delete_user",
         params:

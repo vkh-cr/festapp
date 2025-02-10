@@ -28,6 +28,9 @@ class UserColumns {
   static const String MANAGER = "manager";
   static const String EDITOR = "editor";
   static const String EDITOR_VIEW = "editorView";
+  static const String UNIT_MANAGER = "unitManager";
+  static const String UNIT_EDITOR = "unitEditor";
+  static const String UNIT_EDITOR_VIEW = "unitEditorView";
   static const String APPROVER = "approver";
   static const String APPROVED = "approved";
   static const String INVITED = "invited";
@@ -194,6 +197,9 @@ class UserColumns {
     MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
     EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view)],
+    UNIT_MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager, canUpdateUser: RightsService.canUpdateUnitUsers)],
+    UNIT_EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor, canUpdateUser: RightsService.canUpdateUnitUsers)],
+    UNIT_EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view, canUpdateUser: RightsService.canUpdateUnitUsers)],
     APPROVER: [_statusColumn("Approver".tr(), Tb.occasion_users.is_approver)],
     APPROVED: [_statusColumn("Approved".tr(), Tb.occasion_users.is_approved)],
     INVITED: [_statusColumn("Invited".tr(), Tb.occasion_users.data_isInvited)],
@@ -215,7 +221,7 @@ class UserColumns {
     }).toList();
   }
 
-  static PlutoColumn _statusColumn(String title, String field) {
+  static PlutoColumn _statusColumn(String title, String field, {bool Function()? canUpdateUser}) {
     return PlutoColumn(
       title: title,
       field: field,
@@ -224,7 +230,7 @@ class UserColumns {
       enableEditingMode: false,
       width: 100,
       renderer: (rendererContext) =>
-          DataGridHelper.checkBoxRenderer(rendererContext, field, RightsService.canUpdateUsers),
+          DataGridHelper.checkBoxRenderer(rendererContext, field, canUpdateUser ?? RightsService.canUpdateUsers),
     );
   }
 

@@ -88,7 +88,9 @@ class UnitUserModel extends IPlutoRowModel {
   };
 
   @override
-  Future<void> deleteMethod() async {}
+  Future<void> deleteMethod() async {
+    await DbUsers.deleteUnitUser(user!, unit!);
+  }
 
   @override
   Future<void> updateMethod() async {
