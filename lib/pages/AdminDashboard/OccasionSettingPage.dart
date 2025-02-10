@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdminDashboard/FeatureForm.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -175,9 +176,9 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               const SizedBox(height: 80),
               Center(
                 child: TextButton(
-                  onPressed: _confirmDelete,
+                  onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
                   child: Text(
-                    "Delete".tr(),
+                    "${"Delete".tr()}: ${widget.occasion.title}",
                     style: TextStyle(color: ThemeConfig.redColor(context)),
                   ),
                 ),
