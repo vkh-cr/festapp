@@ -35,7 +35,7 @@ class UnitUserModel extends IPlutoRowModel {
       name: json[Tb.occasion_users.data_name]?.toString().trim(),
       surname: json[Tb.occasion_users.data_surname]?.toString().trim(),
       sex: json[Tb.occasion_users.data_sex]?.toString().trim(),
-      emailReadonly: json[Tb.occasion_users.data_email]?.toString().trim(),
+      emailReadonly: json[Tb.user_info.email_readonly]?.toString().trim(),
       isManager: json[Tb.occasion_users.is_manager] == true ||
           json[Tb.occasion_users.is_manager]?.toString().toLowerCase() == 'true',
       isEditor: json[Tb.occasion_users.is_editor] == true ||
