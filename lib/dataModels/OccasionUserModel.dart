@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class OccasionUserModel extends IPlutoRowModel {
-
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
   DateTime? createdAt;
@@ -20,6 +19,7 @@ class OccasionUserModel extends IPlutoRowModel {
   int? unit;
 
   bool? isEditor = false;
+  bool? isEditorView = false;
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
@@ -27,15 +27,16 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-     this.isEditor, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
+    this.isEditor, this.isEditorView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
-        createdAt: json[Tb.occasion_users.created_at]!=null ? DateTime.parse(json[Tb.occasion_users.created_at]):null,
+        createdAt: json[Tb.occasion_users.created_at] != null ? DateTime.parse(json[Tb.occasion_users.created_at]) : null,
         occasion: json[Tb.occasion_users.occasion],
         user: json[Tb.occasion_users.user],
         unit: json[Tb.unit_users.unit],
         isEditor: json[Tb.occasion_users.is_editor],
+        isEditorView: json[Tb.occasion_users.is_editor_view],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
@@ -45,14 +46,14 @@ class OccasionUserModel extends IPlutoRowModel {
     );
   }
 
-  dynamic toUpdateJson() =>
-  {
+  dynamic toUpdateJson() => {
     Tb.occasion_users.occasion: RightsService.currentOccasionId,
     Tb.occasion_users.user: user,
-    Tb.occasion_users.is_editor: isEditor??false,
-    Tb.occasion_users.is_approver: isApprover??false,
-    Tb.occasion_users.is_approved: isApproved??false,
-    Tb.occasion_users.is_manager: isManager??false,
+    Tb.occasion_users.is_editor: isEditor ?? false,
+    Tb.occasion_users.is_editor_view: isEditorView ?? false,
+    Tb.occasion_users.is_approver: isApprover ?? false,
+    Tb.occasion_users.is_approved: isApproved ?? false,
+    Tb.occasion_users.is_manager: isManager ?? false,
     Tb.occasion_users.role: role,
     Tb.occasion_users.data: data,
     Tb.occasion_users.services: services,
@@ -86,9 +87,9 @@ class OccasionUserModel extends IPlutoRowModel {
   Map<String, dynamic> convertDateTime(Map<String, dynamic> map) {
     map.forEach((key, value) {
       if (value is DateTime) {
-        map[key] = value.toIso8601String();  // Convert DateTime to ISO 8601 string format
+        map[key] = value.toIso8601String();
       } else if (value is Map<String, dynamic>) {
-        map[key] = convertDateTime(value);  // Recursively convert nested maps
+        map[key] = convertDateTime(value);
       }
     });
     return map;
@@ -99,6 +100,7 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.occasion: occasion,
       Tb.occasion_users.user: user,
       Tb.occasion_users.role: role,
+      Tb.occasion_users.is_editor_view: isEditorView ?? false,
       Tb.occasion_users.data: data,
       Tb.occasion_users.services: services,
     };
@@ -114,8 +116,7 @@ class OccasionUserModel extends IPlutoRowModel {
 
   Map<String, PlutoCell> servicesToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
     PlutoCell cell = PlutoCell(value: "");
-    var emptyResult =  { serviceType : cell };
-
+    var emptyResult = { serviceType : cell };
     if(services?[serviceType] == null) {
       return emptyResult;
     }
@@ -136,26 +137,24 @@ class OccasionUserModel extends IPlutoRowModel {
     return serviceCells;
   }
 
-
   @override
   Future<void> deleteMethod() async {
     await DbUsers.deleteUser(user!, occasion!);
   }
 
   @override
-  String toBasicString() => data?[Tb.occasion_users.data_email]??"";
+  String toBasicString() => data?[Tb.occasion_users.data_email] ?? "";
 
   @override
   PlutoRow toPlutoRow(BuildContext context) {
     Map<String, PlutoCell> json = {};
     Map<String, PlutoCell> foodServices = servicesToPlutoRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);
-
     json.addAll(servicesToOneColumnPlutoRow(services, DbOccasions.serviceTypeAccommodation));
-
     json.addAll({
       Tb.occasion_users.user: PlutoCell(value: user),
       Tb.occasion_users.is_editor: PlutoCell(value: isEditor.toString()),
+      Tb.occasion_users.is_editor_view: PlutoCell(value: isEditorView.toString()),
       Tb.occasion_users.is_manager: PlutoCell(value: isManager.toString()),
       Tb.occasion_users.is_approved: PlutoCell(value: isApproved.toString()),
       Tb.occasion_users.is_approver: PlutoCell(value: isApprover.toString()),
@@ -165,7 +164,7 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_surname: PlutoCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
       Tb.occasion_users.data_sex: PlutoCell(value: data?[Tb.occasion_users.data_sex]),
       Tb.occasion_users.data_phone: PlutoCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
-      Tb.occasion_users.data_birthDate: PlutoCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate]??"")??DateTime.fromMicrosecondsSinceEpoch(0)),
+      Tb.occasion_users.data_birthDate: PlutoCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
       Tb.occasion_users.data_isInvited: PlutoCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
       Tb.occasion_users.data_note: PlutoCell(value: data?[Tb.occasion_users.data_note] ?? ""),
       Tb.occasion_users.data_diet: PlutoCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
@@ -174,7 +173,6 @@ class OccasionUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_text3: PlutoCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
       Tb.occasion_users.data_text4: PlutoCell(value: data?[Tb.occasion_users.data_text4] ?? ""),
     });
-
     return PlutoRow(cells: json);
   }
 
@@ -201,21 +199,17 @@ class OccasionUserModel extends IPlutoRowModel {
   static OccasionUserModel fromPlutoJson(Map<String, dynamic> json) {
     DateTime? bd;
     var jsonTime = json[Tb.occasion_users.data_birthDate];
-    if (jsonTime!=null && jsonTime is String){
+    if (jsonTime != null && jsonTime is String) {
       var birthDateString = json[Tb.occasion_users.data_birthDate];
       var dateFormat = DateFormat(birthDateJsonFormat);
       bd = dateFormat.parse(birthDateString);
-    }
-    else{
+    } else {
       bd = jsonTime;
     }
-
     Map<String, dynamic> services = {};
     mapJsonToServices(json, services, DbOccasions.serviceTypeFood);
-
     var value = json[DbOccasions.serviceTypeAccommodation]?.isEmpty ?? true ? DbOccasions.serviceNone : DbOccasions.servicePaid;
     mapOneToServices(services, DbOccasions.serviceTypeAccommodation, json[DbOccasions.serviceTypeAccommodation], value);
-
     return OccasionUserModel(
       occasion: RightsService.currentOccasionId,
       user: json[Tb.occasion_users.user]?.isEmpty == true ? null : json[Tb.occasion_users.user],
@@ -223,13 +217,13 @@ class OccasionUserModel extends IPlutoRowModel {
       isApproved: json[Tb.occasion_users.is_approved] == "true" ? true : false,
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-      role: int.tryParse(json[Tb.occasion_users.role]??""),
+      isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
+      role: int.tryParse(json[Tb.occasion_users.role] ?? ""),
       services: services,
       data: {
         Tb.occasion_users.data_name: json[Tb.occasion_users.data_name]?.trim(),
         Tb.occasion_users.data_surname: json[Tb.occasion_users.data_surname]?.trim(),
         Tb.occasion_users.data_sex: json[Tb.occasion_users.data_sex]?.trim(),
-
         Tb.occasion_users.data_email: json[Tb.occasion_users.data_email]?.trim(),
         Tb.occasion_users.data_phone: json[Tb.occasion_users.data_phone]?.trim(),
         Tb.occasion_users.data_birthDate: bd?.toIso8601String(),
@@ -293,12 +287,10 @@ class OccasionUserModel extends IPlutoRowModel {
   static bool compareServicesJson(Map<String, dynamic>? json1, Map<String, dynamic>? json2, List<String> serviceTypes) {
     if (json1 == null && json2 == null) return true;
     if (json1 == null || json2 == null) return false;
-
     for (String serviceType in serviceTypes) {
       // Check if both JSON objects contain the current service type key
       if (!(json1.containsKey(serviceType) && json2.containsKey(serviceType)))
         return false;
-
       Map<String, dynamic> service1 = json1[serviceType];
       Map<String, dynamic> service2 = json2[serviceType];
 
@@ -320,7 +312,6 @@ class OccasionUserModel extends IPlutoRowModel {
           return false;
       }
     }
-
     return true;
   }
 

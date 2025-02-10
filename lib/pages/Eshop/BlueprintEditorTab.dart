@@ -6,7 +6,7 @@ import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -162,7 +162,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: "Change title".tr(),
-            onPressed: editBlueprintTitle,
+            onPressed: RightsService.canEditOccasion() ? editBlueprintTitle : null,
           ),
         ],
       ),
@@ -184,7 +184,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: RightsService.canEditOccasion() ? () => Navigator.pop(context) : null,
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
               ),
@@ -192,7 +192,7 @@ class _BlueprintTabState extends State<BlueprintTab> {
             ),
             const SizedBox(width: 16),
             ElevatedButton(
-              onPressed: saveChanges,
+              onPressed: RightsService.canEditOccasion() ? saveChanges : null,
               child: Text("Save").tr(),
             ),
           ],
@@ -219,17 +219,17 @@ class _BlueprintTabState extends State<BlueprintTab> {
                 IconButton(
                   icon: const Icon(Icons.add),
                   tooltip: "Add new".tr(),
-                  onPressed: addGroup,
+                  onPressed: RightsService.canEditOccasion() ? addGroup : null,
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   tooltip: "Delete".tr(),
-                  onPressed: deleteGroup,
+                  onPressed: RightsService.canEditOccasion() ? deleteGroup : null,
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   tooltip: "Rename".tr(),
-                  onPressed: renameGroup,
+                  onPressed: RightsService.canEditOccasion() ? renameGroup : null,
                 ),
               ],
             ),

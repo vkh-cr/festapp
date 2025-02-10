@@ -24,7 +24,7 @@ BEGIN
     END IF;
 
     -- 3. Verify if the user is an editor on the occasion
-    IF NOT get_is_editor_on_occasion(occasion_id) THEN
+    IF NOT get_is_editor_view_on_occasion(occasion_id) THEN
         RETURN jsonb_build_object(
             'code', 403,
             'message', 'User is not authorized to view scan code for this occasion.'

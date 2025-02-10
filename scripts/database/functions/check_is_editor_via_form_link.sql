@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.check_is_editor_via_form_link(form_link text)
+CREATE OR REPLACE FUNCTION public.check_is_editor_view_via_form_link(form_link text)
 RETURNS void
 SECURITY DEFINER
 LANGUAGE plpgsql
@@ -17,7 +17,7 @@ BEGIN
     END IF;
 
     -- Verify editor permissions using existing helper function
-    IF NOT public.get_is_editor_on_occasion(occasion_id) THEN
+    IF NOT public.get_is_editor_view_on_occasion(occasion_id) THEN
         RAISE EXCEPTION 'User is not authorized to edit this occasion.';
     END IF;
 END;

@@ -13,6 +13,7 @@ class UnitUserModel extends IPlutoRowModel {
   String? emailReadonly;
   bool? isManager;
   bool? isEditor;
+  bool? isEditorView;
   Map<String, dynamic>? data;
 
   UnitUserModel({
@@ -24,10 +25,10 @@ class UnitUserModel extends IPlutoRowModel {
     this.emailReadonly,
     this.isManager,
     this.isEditor,
+    this.isEditorView,
     this.data,
   });
 
-  /// Creates a UnitUserModel from JSON using Tb.occasion_users constants.
   factory UnitUserModel.fromJson(Map<String, dynamic> json) {
     return UnitUserModel(
       unit: json[Tb.unit_users.unit],
@@ -40,13 +41,14 @@ class UnitUserModel extends IPlutoRowModel {
           json[Tb.occasion_users.is_manager]?.toString().toLowerCase() == 'true',
       isEditor: json[Tb.occasion_users.is_editor] == true ||
           json[Tb.occasion_users.is_editor]?.toString().toLowerCase() == 'true',
+      isEditorView: json[Tb.occasion_users.is_editor_view] == true ||
+          json[Tb.occasion_users.is_editor_view]?.toString().toLowerCase() == 'true',
       data: json[Tb.occasion_users.data] is Map<String, dynamic>
           ? Map<String, dynamic>.from(json[Tb.occasion_users.data])
           : {},
     );
   }
 
-  /// Converts the model to a PlutoRow using Tb.occasion_users keys.
   @override
   PlutoRow toPlutoRow(BuildContext context) {
     final Map<String, PlutoCell> cells = {
@@ -59,35 +61,34 @@ class UnitUserModel extends IPlutoRowModel {
       Tb.occasion_users.data_email: PlutoCell(value: emailReadonly ?? ""),
       Tb.occasion_users.is_manager: PlutoCell(value: isManager.toString()),
       Tb.occasion_users.is_editor: PlutoCell(value: isEditor.toString()),
+      Tb.occasion_users.is_editor_view: PlutoCell(value: isEditorView.toString()),
     };
 
     return PlutoRow(cells: cells);
   }
 
   static UnitUserModel fromPlutoJson(Map<String, dynamic> json) {
-
     return UnitUserModel(
-      unit: json[Tb.unit_users.unit],
-      user: json["id"],
-      isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
-      isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
-      data: json[Tb.occasion_users.data]
+        unit: json[Tb.unit_users.unit],
+        user: json["id"],
+        isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
+        isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
+        isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
+        data: json[Tb.occasion_users.data]
     );
   }
 
-  Map toJson() =>
-  {
+  Map toJson() => {
     Tb.unit_users.user: user,
     Tb.unit_users.unit: unit,
     Tb.unit_users.is_manager: isManager,
     Tb.unit_users.is_editor: isEditor,
+    Tb.unit_users.is_editor_view: isEditorView,
     Tb.unit_users.data: data,
   };
 
   @override
-  Future<void> deleteMethod() async {
-    //DbUsers.deleteUser(id!, occasion)
-  }
+  Future<void> deleteMethod() async {}
 
   @override
   Future<void> updateMethod() async {

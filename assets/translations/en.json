@@ -414,5 +414,6 @@
   "Reservation": "Reservation",
   "Are you sure you want to delete this event? All the event data will be lost.": "Are you sure you want to delete this event? All the event data will be lost.",
   "App": "App",
+  "Read only": "Read only",
   "_":"_"
 }

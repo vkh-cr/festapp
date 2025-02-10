@@ -27,6 +27,7 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.SEX,
     UserColumns.MANAGER,
     UserColumns.EDITOR,
+    UserColumns.EDITOR_VIEW,
     UserColumns.INVITED
   ];
 

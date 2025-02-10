@@ -27,6 +27,7 @@ class UserColumns {
   static const String DIET = "diet";
   static const String MANAGER = "manager";
   static const String EDITOR = "editor";
+  static const String EDITOR_VIEW = "editorView";
   static const String APPROVER = "approver";
   static const String APPROVED = "approved";
   static const String INVITED = "invited";
@@ -192,6 +193,7 @@ class UserColumns {
     },
     MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
+    EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view)],
     APPROVER: [_statusColumn("Approver".tr(), Tb.occasion_users.is_approver)],
     APPROVED: [_statusColumn("Approved".tr(), Tb.occasion_users.is_approved)],
     INVITED: [_statusColumn("Invited".tr(), Tb.occasion_users.data_isInvited)],

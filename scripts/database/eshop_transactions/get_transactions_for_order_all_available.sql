@@ -3,7 +3,17 @@ RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+    bank_acc bigint;
 BEGIN
+    -- Retrieve the associated order_id from payment_info
+    SELECT pi.bank_account INTO bank_acc
+    FROM eshop.payment_info pi
+    WHERE pi.id = payment_info_id
+    LIMIT 1;
+
+    PERFORM public.check_is_admin_for_bank_account(bank_acc);
+
     RETURN (
         SELECT jsonb_agg(t ORDER BY t.date DESC)
         FROM eshop.transactions t
