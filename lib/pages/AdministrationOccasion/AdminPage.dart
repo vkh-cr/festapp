@@ -1,8 +1,7 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 
 
 @RoutePage()
@@ -22,8 +21,11 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.info,
     AdminTabDefinition.events,
     AdminTabDefinition.places,
+    if(FeatureService.isFeatureEnabled(FeatureService.userGroups))
     AdminTabDefinition.groups,
+    if(FeatureService.isFeatureEnabled(FeatureService.game))
     AdminTabDefinition.game,
+    if(FeatureService.isFeatureEnabled(FeatureService.services))
     AdminTabDefinition.service,
     AdminTabDefinition.users,
   ];
