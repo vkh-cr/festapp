@@ -197,7 +197,7 @@ class OccasionCard extends StatelessWidget {
                           TextButton.icon(
                             onPressed: onAdmin,
                             icon: Icon(Icons.admin_panel_settings),
-                            label: Text('Admin').tr(),
+                            label: Text('App').tr(),
                           ),
                           TextButton.icon(
                             onPressed: onEdit,

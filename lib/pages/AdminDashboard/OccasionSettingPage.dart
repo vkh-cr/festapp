@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdminDashboard/FeatureForm.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -32,13 +33,17 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
     List<Map<String, dynamic>> defaultFeatures = [
-      {"code": "form", "is_enabled": false},
-      {"code": "ticket", "color": "000000", "background": "", "is_enabled": false},
-      {"code": "songbook", "is_enabled": false},
-      {"code": "game", "is_enabled": false},
+      {FeatureService.metaCode: FeatureService.form, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.ticket, "color": "000000", "background": "", FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.songbook, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.game, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.services, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.userGroups, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.entryCode, FeatureService.metaIsEnabled: false},
+      {FeatureService.metaCode: FeatureService.companions, FeatureService.metaIsEnabled: false},
     ];
     for (var defaultFeature in defaultFeatures) {
-      bool exists = widget.occasion.features.any((f) => f['code'] == defaultFeature['code']);
+      bool exists = widget.occasion.features.any((f) => f[FeatureService.metaCode] == defaultFeature[FeatureService.metaCode]);
       if (!exists) {
         widget.occasion.features.add(defaultFeature);
       }

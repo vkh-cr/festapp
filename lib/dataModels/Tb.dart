@@ -47,8 +47,6 @@ class OccasionsTb {
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";
   String get data_events_registration_start => "events_registration_start";
-  String get data_is_enabled_entry_code => "is_enabled_entry_code";
-  String get data_max_companions => "max_companions";
 
   // Map layer keys as nested object
   String get data_map_layer => "map_layer";
