@@ -143,7 +143,7 @@ class DbOrders {
 
       // Attach products related to the tickets
       final List<ProductModel> relatedProducts = products!.where((product) {
-        return relatedTickets.any((ticket) => ticket.id == product.id);
+        return relatedTickets.any((ticket) => ticket.relatedProducts!.any((p)=>p.id == product.id));
       }).toList();
 
       // Attach payment info
