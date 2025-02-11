@@ -4,6 +4,7 @@ import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
@@ -11,7 +12,6 @@ import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/pages/Eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ToastHelper.dart';
 
 class OrdersTab extends StatefulWidget {
   const OrdersTab({super.key});
@@ -192,6 +192,8 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
+    if(!FeatureService.isFeatureEnabled(FeatureService.ticket))
+    EshopColumns.TICKET_PRODUCTS,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
