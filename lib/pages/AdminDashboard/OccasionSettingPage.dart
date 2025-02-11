@@ -78,7 +78,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       builder: (context) => AlertDialog(
         insetPadding: EdgeInsets.all(16.0),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-        title: Text("Delete".tr()),
+        title: Text("Delete Event".tr()),
         content: Text("Are you sure you want to delete this event? All the event data will be lost.".tr()),
         actions: [
           TextButton(
