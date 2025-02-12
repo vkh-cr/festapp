@@ -27,6 +27,7 @@ class Tb {
   static FormFieldsTb form_fields = const FormFieldsTb();
   static UnitsTb units = const UnitsTb();
   static UnitUsersTb unit_users = const UnitUsersTb();
+  static ImagesTb images = const ImagesTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -42,11 +43,13 @@ class OccasionsTb {
   String get is_open => "is_open";
   String get link => "link";
   String get title => "title";
+  String get description => "description";
   String get features => "features";
   String get data => "data";
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";
   String get data_events_registration_start => "events_registration_start";
+  String get data_image => "image";
 
   // Map layer keys as nested object
   String get data_map_layer => "map_layer";
@@ -368,4 +371,13 @@ class UnitUsersTb {
   String get is_editor => "is_editor";
   String get is_editor_view => "is_editor_view";
   String get data => "data";
+}
+
+class ImagesTb {
+  const ImagesTb();
+  String get table => "images";
+  String get id => "id";
+  String get link => "link";
+  String get occasion => "occasion";
+  String get unit => "unit";
 }

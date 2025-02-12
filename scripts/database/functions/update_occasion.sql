@@ -53,6 +53,7 @@ BEGIN
             UPDATE public.occasions
                SET updated_at = now,
                    title      = COALESCE(input_data->>'title', title),
+                   description = COALESCE(input_data->>'description', description),
                    link       = COALESCE(input_data->>'link', link),
                    data       = COALESCE(input_data->'data', data),
                    is_hidden  = COALESCE((input_data->>'is_hidden')::BOOLEAN, is_hidden),
@@ -74,6 +75,7 @@ BEGIN
                 created_at,
                 updated_at,
                 title,
+                description,
                 link,
                 data,
                 is_hidden,
@@ -89,6 +91,7 @@ BEGIN
                 now,
                 now,
                 COALESCE(input_data->>'title', ''),
+                COALESCE(input_data->>'description', ''),
                 COALESCE(input_data->>'link', NULL),
                 COALESCE(input_data->'data', '{}'::jsonb),
                 COALESCE((input_data->>'is_hidden')::BOOLEAN, false),

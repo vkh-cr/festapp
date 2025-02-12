@@ -20,12 +20,22 @@ BEGIN
     email := format('%s+%s', org, original_email);
 
     -- Retrieve IS_REGISTRATION_ENABLED value from organizations.data JSON
-    SELECT (organizations.data->>'IS_REGISTRATION_ENABLED')::boolean INTO is_registration_enabled
+    SELECT (organizations.data->>'IS_REGISTRATION_ENABLED')::boolean
+      INTO is_registration_enabled
     FROM organizations
     WHERE id = org;
 
-    -- Check if registration is enabled or if the user is a manager on any occasion
-    IF NOT is_registration_enabled AND NOT get_is_manager_on_any_occasion() THEN
+    -- Check if registration is enabled OR if the caller is a manager on any occasion
+    -- OR if the caller is an editor on at least one unit associated with an occasion in this organization.
+    IF NOT is_registration_enabled AND NOT (
+           get_is_manager_on_any_occasion()
+           OR EXISTS (
+               SELECT 1
+               FROM occasions o
+               WHERE o.organization = org
+                 AND get_is_editor_on_unit(o.unit)
+           )
+       ) THEN
         RETURN jsonb_build_object('code', 403, 'error', 'Registration is disabled for this organization');
     END IF;
 

@@ -4,17 +4,25 @@ LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
 AS $$
 DECLARE
-    _key   text;
-    _value text;
+    oc_unit bigint;
     usr_info user_info%rowtype;
 BEGIN
-    -- Check if the caller is a manager or admin for the occasion
-    IF (SELECT get_is_manager_on_occasion(oc)) <> TRUE AND (SELECT get_is_admin_on_occasion(oc)) <> TRUE THEN
+    -- Retrieve the unit for the given occasion
+    SELECT unit INTO oc_unit FROM occasions WHERE id = oc;
+    IF oc_unit IS NULL THEN
+        RETURN jsonb_build_object('code', 404, 'msg', 'Unit not found');
+    END IF;
+
+    -- Allow update if the caller is a manager, admin, or unit editor for the occasion’s unit.
+    IF (SELECT get_is_manager_on_occasion(oc)) IS NOT TRUE
+       AND (SELECT get_is_admin_on_occasion(oc)) IS NOT TRUE
+       AND (SELECT get_is_editor_on_unit(oc_unit)) IS NOT TRUE
+    THEN
         RETURN jsonb_build_object('code', 403);
     END IF;
 
     -- Check if the user exists for the occasion
-    IF (SELECT get_exists_on_occasion_user(usr, oc)) <> TRUE THEN
+    IF (SELECT get_exists_on_occasion_user(usr, oc)) IS NOT TRUE THEN
          RETURN jsonb_build_object('code', 403);
     END IF;
 
@@ -31,21 +39,23 @@ BEGIN
         usr_info.data := '{}'::jsonb;
     END IF;
 
-    -- Merge the input data with existing usr_info.data
+    -- Merge the input data with the existing user data
     usr_info.data := usr_info.data || data;
 
-    -- Update individual columns if they are part of the input JSON data
+    -- Update individual columns if they are provided in the input JSON data
     IF usr_info.data ? 'name' THEN
         UPDATE user_info SET name = usr_info.data->>'name' WHERE id = usr;
     END IF;
+
     IF usr_info.data ? 'surname' THEN
         UPDATE user_info SET surname = usr_info.data->>'surname' WHERE id = usr;
     END IF;
+
     IF usr_info.data ? 'sex' THEN
         UPDATE user_info SET sex = usr_info.data->>'sex' WHERE id = usr;
     END IF;
 
-    -- Update the user_info data column with the modified JSON data
+    -- Update the user_info.data column with the modified JSON data
     UPDATE user_info SET data = usr_info.data WHERE id = usr;
 
     -- Return a success code

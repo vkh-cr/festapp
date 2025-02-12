@@ -2,11 +2,20 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class DropFile extends StatefulWidget {
-  const DropFile({Key? key, required this.onFilePathChanged}) : super(key: key);
-
+  /// Called when a file is dropped/selected.
   final void Function(XFile) onFilePathChanged;
+
+  /// Optional hint text (e.g. what files, dimensions, etc.) displayed above the upload icon.
+  final String? hint;
+
+  const DropFile({
+    Key? key,
+    required this.onFilePathChanged,
+    this.hint,
+  }) : super(key: key);
 
   @override
   _DropFileState createState() => _DropFileState();
@@ -59,9 +68,11 @@ class _DropFileState extends State<DropFile> {
         margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
-          color: _dragging ? Colors.blue.withOpacity(0.2) : Colors.grey.shade200,
+          color: _dragging
+              ? Colors.blue.withOpacity(0.2)
+              : ThemeConfig.grey200(context),
           border: Border.all(
-            color: _dragging ? Colors.blue : Colors.grey.shade400,
+            color: _dragging ? Colors.blue : ThemeConfig.grey380(context),
             width: 2,
           ),
         ),
@@ -73,7 +84,9 @@ class _DropFileState extends State<DropFile> {
               Icon(
                 Icons.cloud_upload,
                 size: 50,
-                color: _dragging ? Colors.blue : Colors.grey,
+                color: _dragging
+                    ? Colors.blue
+                    : ThemeConfig.grey600(context),
               ),
               const SizedBox(height: 12),
               Text(
@@ -81,9 +94,26 @@ class _DropFileState extends State<DropFile> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: _dragging ? Colors.blue : Colors.black54,
+                  color: _dragging
+                      ? Colors.blue
+                      : ThemeConfig.grey600(context),
                 ),
               ),
+              if (widget.hint != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    widget.hint!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _dragging
+                          ? Colors.blue
+                          : ThemeConfig.grey600(context),
+                    ),
+                  ),
+                ),
             ],
           )
               : Column(
@@ -101,7 +131,7 @@ class _DropFileState extends State<DropFile> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+                  color: ThemeConfig.grey800(context),
                 ),
               ),
             ],

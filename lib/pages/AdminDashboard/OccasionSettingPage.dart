@@ -1,19 +1,29 @@
+import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:fstapp/AppRouter.gr.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdminDashboard/FeatureForm.dart';
+import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/ImageArea.dart';
+import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
+import 'package:fstapp/dataServices/DbImages.dart';
+import 'package:fstapp/widgets/HtmlView.dart';  // Add this import for HtmlView
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;
   const OccasionSettingsPage({Key? key, required this.occasion}) : super(key: key);
+
   @override
   _OccasionSettingsPageState createState() => _OccasionSettingsPageState();
 }
@@ -25,6 +35,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   DateTime? _from;
   DateTime? _to;
   late TextEditingController _linkController;
+  String? _description;  // Add description for editable content
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +45,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _from = widget.occasion.startTime;
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
+    _description = widget.occasion.description ?? ""; // Load description
     List<Map<String, dynamic>> defaultFeatures = [
       {FeatureService.metaCode: FeatureService.form, FeatureService.metaIsEnabled: false},
       {FeatureService.metaCode: FeatureService.ticket, "color": "000000", "background": "", FeatureService.metaIsEnabled: false},
@@ -44,17 +57,20 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       {FeatureService.metaCode: FeatureService.companions, FeatureService.metaIsEnabled: false},
     ];
     for (var defaultFeature in defaultFeatures) {
-      bool exists = widget.occasion.features.any((f) => f[FeatureService.metaCode] == defaultFeature[FeatureService.metaCode]);
+      bool exists = widget.occasion.features.any((f) =>
+      f[FeatureService.metaCode] == defaultFeature[FeatureService.metaCode]);
       if (!exists) {
         widget.occasion.features.add(defaultFeature);
       }
     }
   }
+
   @override
   void dispose() {
     _linkController.dispose();
     super.dispose();
   }
+
   Future<void> _saveSettings() async {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState!.save();
@@ -62,16 +78,19 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       widget.occasion.link = _link;
       widget.occasion.startTime = _from;
       widget.occasion.endTime = _to;
+      widget.occasion.description = _description;  // Save the description
       await DbUsers.updateOccasion(widget.occasion);
       ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
       Navigator.of(context).pop();
     }
   }
+
   Future<void> _deleteOccasion() async {
     await DbUsers.deleteOccasion(widget.occasion.id!);
     ToastHelper.Show(context, "${"Deleted".tr()}: ${widget.occasion.title!}");
     Navigator.of(context).pop();
   }
+
   Future<void> _confirmDelete() async {
     bool? confirm = await showDialog<bool>(
       context: context,
@@ -96,8 +115,25 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       await _deleteOccasion();
     }
   }
+
+  Future<void> _removeImage() async {
+    final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
+    if (imageUrl != null) {
+      try {
+        await DbImages.removeImage(imageUrl);
+        setState(() {
+          widget.occasion.data?[Tb.occasions.data_image] = null;
+        });
+        ToastHelper.Show(context, "Image removed successfully.".tr());
+      } catch (e) {
+        ToastHelper.Show(context, "Failed to remove image.".tr());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings".tr()),
@@ -167,6 +203,71 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   });
                 },
               ),
+              const SizedBox(height: 16),
+              Text("Image".tr()),
+              const SizedBox(height: 8),
+              ImageArea(
+                hint: "(Image with ratio $kCardWidth : $kCardHeight)",
+                imageUrl: imageUrl,
+                onFileSelected: (file) async {
+                  Uint8List imageData = await file.readAsBytes();
+                  try {
+                    final publicUrl =
+                    await DbImages.uploadImage(imageData, widget.occasion.id, null);
+                    setState(() {
+                      widget.occasion.data?[Tb.occasions.data_image] = publicUrl;
+                    });
+                    ToastHelper.Show(context, "File uploaded successfully.".tr());
+                  } catch (e) {
+                    ToastHelper.Show(context, "Failed to upload image.".tr());
+                  }
+                },
+                onRemove: _removeImage,
+              ),
+              const SizedBox(height: 16),
+              Text("Description".tr()),
+              const SizedBox(height: 8),
+              ClipRect(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: 400),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) {
+                      return LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white,
+                          Colors.transparent,
+                        ],
+                        stops: const [0.9, 1.0],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: HtmlView(
+                      html: _description ?? "",
+                      isSelectable: true,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    RouterService.navigatePageInfo(
+                      context,
+                      HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
+                    ).then((value) {
+                      if (value != null) {
+                        setState(() {
+                          _description = value as String;
+                        });
+                      }
+                    });
+                  },
+                  child: Text("Edit Content".tr()),
+                ),
+              ),
               const SizedBox(height: 24),
               Text("Features".tr()),
               const SizedBox(height: 8),
@@ -176,9 +277,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               const SizedBox(height: 80),
               Center(
                 child: TextButton(
-                  onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
+                  onPressed:
+                  RightsService.isUnitManager() ? _confirmDelete : null,
                   child: Text(
-                    "${"Delete".tr()}: ${widget.occasion.title}",
+                    "Delete Event".tr(),
                     style: TextStyle(color: ThemeConfig.redColor(context)),
                   ),
                 ),
@@ -188,8 +290,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+        padding:
+        const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        color: Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).primaryColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

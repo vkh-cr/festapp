@@ -1,10 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/pages/AdminDashboard/OccasionScreen.dart';
 import 'package:fstapp/pages/AdminDashboard/UnitUsersScreen.dart';
+import 'package:fstapp/pages/UnitPage.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -84,6 +86,13 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          RouterService.navigate(context, "${UnitPage.ROUTE}/${widget.id}")
+              .then((_) => _loadOrganization());
+        },
+        child: const Icon(Icons.remove_red_eye_rounded),
+      )
     );
   }
 }

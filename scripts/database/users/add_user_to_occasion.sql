@@ -4,15 +4,15 @@ LANGUAGE plpgsql VOLATILE
 SECURITY DEFINER
 AS $$
 DECLARE
-    occasion_open    BOOLEAN;
-    user_data        JSONB;
-    user_exists      BOOLEAN;
-    user_org         BIGINT;
-    occasion_org     BIGINT;
-    unit_id          BIGINT;
-    unit_is_manager  BOOLEAN := false;
-    unit_is_editor   BOOLEAN := false;
-    unit_is_editor_view BOOLEAN := false;
+    occasion_open         BOOLEAN;
+    user_data             JSONB;
+    user_exists           BOOLEAN;
+    user_org              BIGINT;
+    occasion_org          BIGINT;
+    unit_id               BIGINT;
+    unit_is_manager       BOOLEAN := false;
+    unit_is_editor        BOOLEAN := false;
+    unit_is_editor_view   BOOLEAN := false;
 BEGIN
     -- Retrieve the organization, the unit, and the open status of the occasion.
     SELECT organization, unit, is_open
@@ -34,10 +34,12 @@ BEGIN
               );
     END IF;
 
-    -- If the occasion is not open, allow only those with manager/admin permissions.
+    -- If the occasion is not open, allow only those with manager, admin, or editor (on the unit) permissions.
     IF NOT occasion_open THEN
         IF (SELECT get_is_manager_on_occasion(oc)) IS NOT TRUE
-           AND (SELECT get_is_admin_on_occasion(oc)) IS NOT TRUE THEN
+           AND (SELECT get_is_admin_on_occasion(oc)) IS NOT TRUE
+           AND (SELECT get_is_editor_on_unit(unit_id)) IS NOT TRUE
+        THEN
             RETURN jsonb_build_object('code', 403);
         END IF;
     END IF;
@@ -48,8 +50,8 @@ BEGIN
       FROM unit_users
      WHERE unit = unit_id AND "user" = usr;
     IF NOT FOUND THEN
-        unit_is_manager := false;
-        unit_is_editor  := false;
+        unit_is_manager     := false;
+        unit_is_editor      := false;
         unit_is_editor_view := false;
     END IF;
 
@@ -74,9 +76,9 @@ BEGIN
     IF user_exists THEN
         -- Update the existing row with the new data and the unit role flags.
         UPDATE occasion_users
-           SET data       = user_data,
-               is_manager = unit_is_manager,
-               is_editor  = unit_is_editor,
+           SET data           = user_data,
+               is_manager     = unit_is_manager,
+               is_editor      = unit_is_editor,
                is_editor_view = unit_is_editor_view
          WHERE occasion = oc AND "user" = usr;
     ELSE
