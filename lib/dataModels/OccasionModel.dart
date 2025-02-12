@@ -11,6 +11,7 @@ class OccasionModel {
   bool isHidden;
   String? link;
   String? title;
+  String? description;
   Map<String, dynamic>? data;
   int? organization;
   int? unit;
@@ -27,6 +28,7 @@ class OccasionModel {
     required this.isHidden,
     this.link,
     this.title,
+    this.description,
     this.data,
     this.organization,
     this.unit,
@@ -53,7 +55,8 @@ class OccasionModel {
       isHidden: json[Tb.occasions.is_hidden],
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
-      data: json[Tb.occasions.data],
+      description: json[Tb.occasions.description],
+      data: json[Tb.occasions.data] ?? {},
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
@@ -72,6 +75,7 @@ class OccasionModel {
       Tb.occasions.is_hidden: isHidden,
       Tb.occasions.link: link,
       Tb.occasions.title: title,
+      Tb.occasions.description: description,
       Tb.occasions.data: data,
       Tb.occasions.organization: organization,
       Tb.occasions.unit: unit,

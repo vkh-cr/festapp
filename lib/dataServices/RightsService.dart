@@ -60,7 +60,7 @@ class RightsService{
   }
 
   static bool canUpdateUsers() {
-    return isManager() || isAdmin();
+    return isManager() || isAdmin() || isUnitEditor();
   }
 
   static bool canUpdateUnitUsers() {

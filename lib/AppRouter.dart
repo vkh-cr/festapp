@@ -20,7 +20,7 @@ import 'package:fstapp/pages/SettingsPage.dart';
 import 'package:fstapp/pages/SignupPage.dart';
 import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
-import 'package:fstapp/pages/UnitAdminPage.dart';
+import 'package:fstapp/pages/UnitPage.dart';
 import 'package:fstapp/pages/UserPage.dart';
 
 import 'AppRouter.gr.dart';
@@ -43,6 +43,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: UnitAdminRoute.page, path: "/unit/:id/edit"),
+    AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
     ]),
