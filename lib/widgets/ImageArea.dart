@@ -34,7 +34,7 @@ class _ImageAreaState extends State<ImageArea> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.imageUrl != null) {
+    if (widget.imageUrl != null && widget.imageUrl!.isNotEmpty) {
       return Stack(
         clipBehavior: Clip.none,
         children: [

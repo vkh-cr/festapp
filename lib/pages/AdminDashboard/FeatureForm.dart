@@ -1,5 +1,10 @@
+import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/dataServices/DbImages.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/widgets/ImageArea.dart';
 
 class FeatureForm extends StatefulWidget {
   final Map<String, dynamic> feature;
@@ -14,7 +19,8 @@ class _FeatureFormState extends State<FeatureForm> {
   late bool isEnabled;
   TextEditingController? lightColorController;
   TextEditingController? darkColorController;
-  TextEditingController? backgroundController;
+  // Removed backgroundController – use backgroundUrl instead.
+  String? backgroundUrl;
   TextEditingController? companionsController;
 
   @override
@@ -22,22 +28,16 @@ class _FeatureFormState extends State<FeatureForm> {
     super.initState();
     isEnabled = widget.feature['is_enabled'] ?? false;
 
-    // For the 'ticket' feature, initialize color fields.
     if (widget.feature['code'] == 'ticket') {
       widget.feature['lightColor'] ??= 'FFFFFF';
       widget.feature['darkColor'] ??= '000000';
-      widget.feature['background'] ??= '';
+      backgroundUrl = widget.feature['background'];
 
       lightColorController =
           TextEditingController(text: widget.feature['lightColor']);
       darkColorController =
           TextEditingController(text: widget.feature['darkColor']);
-      backgroundController =
-          TextEditingController(text: widget.feature['background']);
-    }
-    // For the 'companions' feature, initialize the max_companions field.
-    else if (widget.feature['code'] == 'companions') {
-      // Set a default value of 1 if not provided.
+    } else if (widget.feature['code'] == 'companions') {
       widget.feature['max_companions'] ??= 1;
       companionsController = TextEditingController(
           text: widget.feature['max_companions'].toString());
@@ -48,9 +48,30 @@ class _FeatureFormState extends State<FeatureForm> {
   void dispose() {
     lightColorController?.dispose();
     darkColorController?.dispose();
-    backgroundController?.dispose();
     companionsController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _removeBackgroundImage() async {
+    if (backgroundUrl != null && backgroundUrl!.isNotEmpty) {
+      final confirmation = await DialogHelper.showConfirmationDialogAsync(
+        context,
+        "Confirm removal".tr(),
+        "Are you sure you want to delete this image?".tr(),
+      );
+      if (confirmation == true) {
+        try {
+          await DbImages.removeImage(backgroundUrl!);
+          setState(() {
+            backgroundUrl = "";
+            widget.feature['background'] = "";
+          });
+          ToastHelper.Show(context, "Image removed successfully.".tr());
+        } catch (e) {
+          ToastHelper.Show(context, "Failed to remove image.".tr());
+        }
+      }
+    }
   }
 
   @override
@@ -62,11 +83,9 @@ class _FeatureFormState extends State<FeatureForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Feature header (displaying the feature code)
             Text(
               widget.feature['code']?.toString().toUpperCase() ?? 'UNKNOWN',
             ),
-            // The basic is_enabled switch.
             SwitchListTile(
               title: Text("Enabled".tr()),
               value: isEnabled,
@@ -77,7 +96,6 @@ class _FeatureFormState extends State<FeatureForm> {
                 });
               },
             ),
-            // Show additional fields only when the feature is enabled.
             if (isEnabled) ..._buildFeatureFields(context),
           ],
         ),
@@ -85,7 +103,7 @@ class _FeatureFormState extends State<FeatureForm> {
     );
   }
 
-  /// Builds additional form fields for the feature based on its code.
+  /// Builds additional fields based on the feature code.
   List<Widget> _buildFeatureFields(BuildContext context) {
     List<Widget> fields = [];
 
@@ -114,19 +132,28 @@ class _FeatureFormState extends State<FeatureForm> {
         ),
       );
       fields.add(const SizedBox(height: 16));
+      // Replace the background URL field with an ImageArea widget.
       fields.add(
-        TextFormField(
-          controller: backgroundController,
-          decoration: InputDecoration(
-            labelText: "Background URL",
-          ),
-          onSaved: (val) {
-            widget.feature['background'] = val;
+        ImageArea(
+          hint: "Image (1600x900 px)".tr(),
+          imageUrl: backgroundUrl,
+          onFileSelected: (file) async {
+            Uint8List imageData = await file.readAsBytes();
+            try {
+              final publicUrl = await DbImages.uploadImage(imageData, null, null);
+              setState(() {
+                backgroundUrl = publicUrl;
+                widget.feature['background'] = publicUrl;
+              });
+              ToastHelper.Show(context, "File uploaded successfully.".tr());
+            } catch (e) {
+              ToastHelper.Show(context, "Failed to upload image.".tr());
+            }
           },
+          onRemove: _removeBackgroundImage,
         ),
       );
-    }
-    else if (widget.feature['code'] == 'companions') {
+    } else if (widget.feature['code'] == 'companions') {
       fields.add(
         TextFormField(
           controller: companionsController,
@@ -150,8 +177,7 @@ class _FeatureFormState extends State<FeatureForm> {
         ),
       );
     }
-    // You can add other feature-specific fields here if needed.
-
+    // Add other feature-specific fields here if needed.
     return fields;
   }
 }
