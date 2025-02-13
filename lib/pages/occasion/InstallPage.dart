@@ -10,7 +10,7 @@ import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:flutter/services.dart';
-import '../services/js/js_interop.dart';
+import '../../services/js/js_interop.dart';
 
 @RoutePage()
 class InstallPage extends StatefulWidget {

@@ -1,19 +1,18 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/InformationContent.dart';
-import 'package:fstapp/pages/AdministrationOccasion/SongbookContent.dart';
+import 'package:fstapp/pages/occasionAdmin/ExclusivityContent.dart';
+import 'package:fstapp/pages/occasionAdmin/ScheduleContent.dart';
 import 'package:fstapp/themeConfig.dart';
 
-class InformationTab extends StatefulWidget {
-  const InformationTab({Key? key}) : super(key: key);
+class ScheduleTab extends StatefulWidget {
+  const ScheduleTab({Key? key}) : super(key: key);
 
   @override
-  _InformationTabState createState() => _InformationTabState();
+  _ScheduleTabState createState() => _ScheduleTabState();
 }
 
-class _InformationTabState extends State<InformationTab> with SingleTickerProviderStateMixin {
+class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -41,9 +40,8 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
-                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
-                DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
+                DataGridHelper.buildTab(context, Icons.calendar_month, "Schedule".tr()),
+                DataGridHelper.buildTab(context, Icons.punch_clock_rounded, "Exclusivity".tr()),
               ],
             ),
           ),
@@ -52,9 +50,8 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                InformationContent(),
-                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
-                SongbookContent(),
+                ScheduleContent(),
+                ExclusivityContent(),
               ],
             ),
           ),

@@ -2,13 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
-import 'package:fstapp/pages/EventPage.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
+import 'package:fstapp/pages/occasion/EventPage.dart';
 
 import 'package:fstapp/styles/StylesConfig.dart';
 

@@ -4,18 +4,18 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/GameTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/InformationTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/PlacesTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ScheduleTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
-import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
 import 'package:fstapp/pages/Eshop/BlueprintEditorTab.dart';
 import 'package:fstapp/pages/form/FormTab.dart';
 import 'package:fstapp/pages/Eshop/OrdersTab.dart';
 import 'package:fstapp/pages/Eshop/ReportTab.dart';
 import 'package:fstapp/pages/Eshop/TicketsTab.dart';
+import 'package:fstapp/pages/occasionAdmin/GameTab.dart';
+import 'package:fstapp/pages/occasionAdmin/InformationTab.dart';
+import 'package:fstapp/pages/occasionAdmin/PlacesTab.dart';
+import 'package:fstapp/pages/occasionAdmin/ScheduleTab.dart';
+import 'package:fstapp/pages/occasionAdmin/ServiceTab.dart';
+import 'package:fstapp/pages/occasionAdmin/UserGroupsTab.dart';
+import 'package:fstapp/pages/occasionAdmin/UsersTab.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.

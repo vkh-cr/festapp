@@ -4,7 +4,7 @@ import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/pages/SongDialog.dart';
+import 'package:fstapp/pages/occasion/SongDialog.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/styles/StylesConfig.dart';

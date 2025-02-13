@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
@@ -19,21 +20,20 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/EventEditPage.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/occasion/EventEditPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
 import 'package:fstapp/services/StylesHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/AddNewEventDialog.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/CompanionDialog.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/NavigateBackButton.dart';
 
-import '../services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
-import '../widgets/HtmlView.dart';
-import '../components/timeline/ScheduleTimeline.dart';
 import 'MapPage.dart';
 
 @RoutePage()

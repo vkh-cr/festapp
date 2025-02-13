@@ -1,13 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class InformationContent extends StatelessWidget {

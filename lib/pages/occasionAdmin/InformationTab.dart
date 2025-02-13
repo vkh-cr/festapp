@@ -1,25 +1,25 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/pages/AdministrationOccasion/GameCheckPointsContent.dart';
-import 'package:fstapp/pages/AdministrationOccasion/GameSettingsContent.dart';
-import 'package:fstapp/pages/AdministrationOccasion/GameUserGroupsContent.dart';
+import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/pages/occasionAdmin/InformationContent.dart';
+import 'package:fstapp/pages/occasionAdmin/SongbookContent.dart';
 import 'package:fstapp/themeConfig.dart';
 
-class GameTab extends StatefulWidget {
-  const GameTab({Key? key}) : super(key: key);
+class InformationTab extends StatefulWidget {
+  const InformationTab({Key? key}) : super(key: key);
 
   @override
-  _GameTabState createState() => _GameTabState();
+  _InformationTabState createState() => _InformationTabState();
 }
 
-class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
+class _InformationTabState extends State<InformationTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -41,9 +41,9 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.gamepad, "Check points".tr()),
-                DataGridHelper.buildTab(context, Icons.groups, "Groups".tr()),
-                DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
+                DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
+                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
+                DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
               ],
             ),
           ),
@@ -52,9 +52,9 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                GameCheckPointsContent(),  // Game Check Points content
-                GameUserGroupsContent(),   // Game User Groups content
-                GameSettingsContent(),     // Game Settings content for start and end times
+                InformationContent(),
+                if(FeatureService.isFeatureEnabled(FeatureService.songbook))
+                SongbookContent(),
               ],
             ),
           ),
@@ -63,6 +63,3 @@ class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
     );
   }
 }
-
-
-

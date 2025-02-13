@@ -12,18 +12,18 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/GamePage.dart';
-import 'package:fstapp/pages/SongPage.dart';
+import 'package:fstapp/pages/occasion/GamePage.dart';
+import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
-import '../services/ToastHelper.dart';
-import '../services/js/js_interop.dart';
-import '../widgets/HtmlView.dart';
-import 'HtmlEditorPage.dart';
+import '../../services/ToastHelper.dart';
+import '../../services/js/js_interop.dart';
+import '../../widgets/HtmlView.dart';
+import '../utility/HtmlEditorPage.dart';
 
 @RoutePage()
 class InfoPage extends StatefulWidget {

@@ -8,7 +8,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';

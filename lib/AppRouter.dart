@@ -1,31 +1,31 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/CheckPage.dart';
-import 'package:fstapp/pages/EventEditPage.dart';
-import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
-import 'package:fstapp/pages/InfoPage.dart';
-import 'package:fstapp/pages/InstallPage.dart';
-import 'package:fstapp/pages/LoginPage.dart';
-import 'package:fstapp/pages/MapPage.dart';
-import 'package:fstapp/pages/NewsFormPage.dart';
-import 'package:fstapp/pages/NewsPage.dart';
-import 'package:fstapp/pages/MySchedulePage.dart';
-import 'package:fstapp/pages/ResetPasswordPage.dart';
-import 'package:fstapp/pages/ForgotPasswordPage.dart';
-import 'package:fstapp/pages/ScanPage.dart';
-import 'package:fstapp/pages/SettingsPage.dart';
-import 'package:fstapp/pages/SignupPage.dart';
-import 'package:fstapp/pages/SongPage.dart';
-import 'package:fstapp/pages/TimetablePage.dart';
-import 'package:fstapp/pages/UnitPage.dart';
-import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/pages/occasion/CheckPage.dart';
+import 'package:fstapp/pages/occasion/EventEditPage.dart';
+import 'package:fstapp/pages/occasion/EventPage.dart';
+import 'package:fstapp/pages/occasionAdmin/AdminPage.dart';
+import 'package:fstapp/pages/unit/UnitPage.dart';
+import 'package:fstapp/pages/user/LoginPage.dart';
+import 'package:fstapp/pages/user/SignupPasswordPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
+import 'package:fstapp/pages/occasion/InfoPage.dart';
+import 'package:fstapp/pages/occasion/InstallPage.dart';
+import 'package:fstapp/pages/occasion/MapPage.dart';
+import 'package:fstapp/pages/occasion/NewsFormPage.dart';
+import 'package:fstapp/pages/occasion/NewsPage.dart';
+import 'package:fstapp/pages/occasion/MySchedulePage.dart';
+import 'package:fstapp/pages/user/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/occasion/ScanPage.dart';
+import 'package:fstapp/pages/occasion/SettingsPage.dart';
+import 'package:fstapp/pages/user/SignupPage.dart';
+import 'package:fstapp/pages/occasion/SongPage.dart';
+import 'package:fstapp/pages/occasion/TimetablePage.dart';
+import 'package:fstapp/pages/occasion/UserPage.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
 
 import 'AppRouter.gr.dart';
-import 'pages/AdministrationOccasion/AdminPage.dart';
-import 'pages/GamePage.dart';
+import 'pages/occasion/GamePage.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
