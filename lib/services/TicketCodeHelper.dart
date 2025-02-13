@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbTickets.dart';
-import 'package:fstapp/pages/ScanPage.dart';
+import 'package:fstapp/pages/occasion/ScanPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'dart:math';

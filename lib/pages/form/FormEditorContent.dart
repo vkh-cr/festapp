@@ -13,7 +13,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 
