@@ -6,7 +6,7 @@ import 'package:fstapp/dataServices/DbNews.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/NewsFormPage.dart';
+import 'package:fstapp/pages/occasion/NewsFormPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -14,7 +14,7 @@ import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/PopButton.dart';
-import 'HtmlEditorPage.dart';
+import '../utility/HtmlEditorPage.dart';
 
 @RoutePage()
 class NewsPage extends StatefulWidget {

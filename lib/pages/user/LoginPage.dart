@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/pages/ForgotPasswordPage.dart';
-import 'package:fstapp/pages/SignupPage.dart';
-import 'package:fstapp/pages/SettingsPage.dart';
+import 'package:fstapp/pages/user/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/occasion/SettingsPage.dart';
+import 'package:fstapp/pages/user/SignupPage.dart';
 import 'package:fstapp/services/LinkModel.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';

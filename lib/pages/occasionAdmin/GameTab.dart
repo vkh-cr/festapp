@@ -1,24 +1,25 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ScheduleContent.dart';
-import 'package:fstapp/pages/AdministrationOccasion/ExclusivityContent.dart';
+import 'package:fstapp/pages/occasionAdmin/GameCheckPointsContent.dart';
+import 'package:fstapp/pages/occasionAdmin/GameSettingsContent.dart';
+import 'package:fstapp/pages/occasionAdmin/GameUserGroupsContent.dart';
 import 'package:fstapp/themeConfig.dart';
 
-class ScheduleTab extends StatefulWidget {
-  const ScheduleTab({Key? key}) : super(key: key);
+class GameTab extends StatefulWidget {
+  const GameTab({Key? key}) : super(key: key);
 
   @override
-  _ScheduleTabState createState() => _ScheduleTabState();
+  _GameTabState createState() => _GameTabState();
 }
 
-class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStateMixin {
+class _GameTabState extends State<GameTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -40,8 +41,9 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
               controller: _tabController,
               isScrollable: true,
               tabs: [
-                DataGridHelper.buildTab(context, Icons.calendar_month, "Schedule".tr()),
-                DataGridHelper.buildTab(context, Icons.punch_clock_rounded, "Exclusivity".tr()),
+                DataGridHelper.buildTab(context, Icons.gamepad, "Check points".tr()),
+                DataGridHelper.buildTab(context, Icons.groups, "Groups".tr()),
+                DataGridHelper.buildTab(context, Icons.settings, "Settings".tr()),
               ],
             ),
           ),
@@ -50,8 +52,9 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
               controller: _tabController,
               physics: const NeverScrollableScrollPhysics(),
               children: [
-                ScheduleContent(),  // Schedule-specific content
-                ExclusivityContent(),  // Exclusivity-related content
+                GameCheckPointsContent(),  // Game Check Points content
+                GameUserGroupsContent(),   // Game User Groups content
+                GameSettingsContent(),     // Game Settings content for start and end times
               ],
             ),
           ),
@@ -60,3 +63,6 @@ class _ScheduleTabState extends State<ScheduleTab> with SingleTickerProviderStat
     );
   }
 }
+
+
+

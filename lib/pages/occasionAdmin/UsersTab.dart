@@ -2,15 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/IHasId.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdministrationOccasion/UserColumns.dart';
-import 'package:fstapp/pages/AdministrationOccasion/UsersTabHelper.dart';
+import 'package:fstapp/pages/occasionAdmin/UserColumns.dart';
+import 'package:fstapp/pages/occasionAdmin/UsersTabHelper.dart';
 
 class UsersTab extends StatefulWidget {
   const UsersTab({Key? key}) : super(key: key);

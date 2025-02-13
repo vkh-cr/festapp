@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../widgets/HtmlView.dart';
+import '../../widgets/HtmlView.dart';
 
 class SongDialog extends StatefulWidget {
   final String title;

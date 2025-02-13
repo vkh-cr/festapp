@@ -4,7 +4,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/LoginPage.dart';
+import 'package:fstapp/pages/user/LoginPage.dart';
 
 @RoutePage()
 class FormEditPage extends StatefulWidget {

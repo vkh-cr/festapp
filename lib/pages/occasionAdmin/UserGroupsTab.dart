@@ -11,7 +11,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
