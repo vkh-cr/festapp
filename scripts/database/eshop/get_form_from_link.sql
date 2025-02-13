@@ -1,31 +1,45 @@
-CREATE OR REPLACE FUNCTION get_form_from_linkt(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_form_from_link(form_link TEXT)
 RETURNS JSON LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
     allData JSON;
     generated_secret UUID := gen_random_uuid();
     form_exists BOOLEAN;
 BEGIN
+    -- Check if the form exists
     SELECT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link
     ) INTO form_exists;
+
     IF NOT form_exists THEN
         RETURN jsonb_build_object(
             'code', 404,
             'message', 'Form does not exist.'
         );
     END IF;
+
+    -- Check if the form is open
     IF NOT EXISTS (
         SELECT 1
         FROM public.forms
         WHERE link = form_link AND is_open = true
     ) THEN
-        RETURN jsonb_build_object(
-            'code', 400,
-            'message', 'Form is not open.'
-        );
+        -- Retrieve only the header_off when the form is not open
+        SELECT jsonb_build_object(
+            'code', 400, -- You can adjust the code as needed
+            'data', jsonb_build_object(
+                'header_off', f.header_off
+            )
+        )
+        INTO allData
+        FROM public.forms f
+        WHERE f.link = form_link;
+
+        RETURN allData;
     END IF;
+
+    -- Retrieve full form data when the form is open
     SELECT jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
@@ -35,7 +49,7 @@ BEGIN
             'data', f.data,
             'type', f.type,
             'header', f.header,
-            'footer', f.footer,
+            'header_off', f.header_off,
             'occasion', f.occasion,
             'blueprint', f.blueprint,
             'deadline_duration_seconds', f.deadline_duration_seconds,
@@ -75,7 +89,7 @@ BEGIN
                                             )
                                             FROM eshop.products p
                                             WHERE p.product_type = pt.id
-                                            AND p.is_hidden = FALSE
+                                              AND NOT p.is_hidden
                                         )
                                     )
                                 ELSE NULL
@@ -93,6 +107,7 @@ BEGIN
     FROM public.forms f
     LEFT JOIN eshop.bank_accounts ba ON f.bank_account = ba.id
     WHERE f.link = form_link;
+
     RETURN allData;
 END;
 $$;

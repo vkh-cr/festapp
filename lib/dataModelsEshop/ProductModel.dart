@@ -38,8 +38,6 @@ class ProductModel {
 
   Map<String, dynamic> toJson() => {
     TbEshop.products.id: id,
-    TbEshop.products.created_at: createdAt?.toIso8601String(),
-    TbEshop.products.updated_at: updatedAt?.toIso8601String(),
     TbEshop.products.title: title,
     TbEshop.products.is_hidden: isHidden,
     TbEshop.products.description: description,
@@ -47,7 +45,7 @@ class ProductModel {
     TbEshop.products.data: data,
     TbEshop.products.product_type: productType,
     TbEshop.products.occasion: occasion,
-    'order': order
+    TbEshop.products.order: order
   };
 
   String toBasicString() => title ?? id.toString();

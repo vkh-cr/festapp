@@ -7,9 +7,8 @@ import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
-import 'package:fstapp/dataServices/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -171,21 +170,25 @@ class OrderModel extends IPlutoRowModel {
             : "",
       ),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
+      TicketModel.metaTicketsProducts: PlutoCell(
+          value: relatedProducts != null
+              ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              : ""),
       TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
       TbEshop.orders.note_hidden: PlutoCell(value: noteHidden ?? ""),
       TbEshop.orders_history.table: PlutoCell(value: ""),
-
+      TbEshop.transactions.table: PlutoCell(value: ""),
     });
   }
 
   @override
   Future<void> deleteMethod() async {
-    await DbEshop.deleteOrder(this);
+    await DbOrders.deleteOrder(this);
   }
 
   @override
   Future<void> updateMethod() async {
-    await DbEshop.updateOrderNoteHidden(id!, noteHidden!);
+    await DbOrders.updateOrderNoteHidden(id!, noteHidden!);
   }
 
   @override

@@ -19,17 +19,19 @@ class BlueprintObjectModel {
   static const String metaGroupId = "group";
 
   static const String orderedType = "ordered";
+  static const String usedType = "used";
   static const String selectedType = "selected";
   static const String selectedByMeType = "selected_by_me";
   static const String blackType = "black";
   static const String availableType = "available";
 
-  static Map<SeatState, String> States = {
+  static Map<SeatState, String> statesMap = {
     SeatState.black: blackType,
     SeatState.available: availableType,
     SeatState.selected: selectedType,
     SeatState.selected_by_me: selectedByMeType,
     SeatState.ordered: orderedType,
+    SeatState.used: usedType,
   };
 
   @override
@@ -68,6 +70,16 @@ class BlueprintObjectModel {
       spotProduct: json[TbEshop.spots.product],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    metaX: x,
+    metaY: y,
+    metaType: type,
+    metaTitle: title,
+    if (id != null) metaId: id,
+    if (group?.id != null) metaGroupId: group?.id,
+    if (spotProduct != null || product != null) TbEshop.spots.product: spotProduct ?? product?.id,
+  };
 
   BlueprintObjectModel({
     this.x,

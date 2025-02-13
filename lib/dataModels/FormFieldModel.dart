@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/services/FormHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -19,7 +21,7 @@ class FormFieldModel extends IPlutoRowModel {
   int? order;
   int? productTypeId;
   dynamic data;
-
+  List<FormOptionModel> options;
   ProductTypeModel? productType;
 
   static const String metaRequired = "required";
@@ -42,9 +44,18 @@ class FormFieldModel extends IPlutoRowModel {
     this.data,
     this.productTypeId,
     this.productType,
-  });
+    List<FormOptionModel>? options,
+  }) : options = options ?? [];
 
   factory FormFieldModel.fromJson(Map<String, dynamic> json) {
+    var type = json[TbEshop.form_fields.type];
+    var data = json[TbEshop.form_fields.data];
+    List<FormOptionModel> options = [];
+    if (type == FormHelper.fieldTypeSelectOne && data is Map) {
+      options = data[FormHelper.metaOptions].map<FormOptionModel>((e) {
+        return FormOptionModel.fromJson(e);
+      }).toList();
+    }
     return FormFieldModel(
         id: json[TbEshop.form_fields.id],
         createdAt: json[TbEshop.form_fields.created_at] != null
@@ -52,31 +63,43 @@ class FormFieldModel extends IPlutoRowModel {
             : null,
         title: json[TbEshop.form_fields.title],
         description: json[TbEshop.form_fields.description],
-        type: json[TbEshop.form_fields.type],
+        type: type,
         isRequired: json[TbEshop.form_fields.is_required],
         isHidden: json[TbEshop.form_fields.is_hidden],
         isTicketField: json[TbEshop.form_fields.is_ticket_field],
         form: json[TbEshop.form_fields.form],
         order: json[TbEshop.form_fields.order],
-        data: json[TbEshop.form_fields.data],
+        data: data,
         productTypeId: json[TbEshop.form_fields.product_type],
         productType: json[TbEshop.form_fields.product_type_data] != null
             ? ProductTypeModel.fromJson(json[TbEshop.form_fields.product_type_data])
-            : null
+            : null,
+        options: options
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    TbEshop.form_fields.title: title,
-    TbEshop.form_fields.description: description,
-    TbEshop.form_fields.type: type,
-    TbEshop.form_fields.is_required: isRequired,
-    TbEshop.form_fields.is_hidden: isHidden,
-    TbEshop.form_fields.is_ticket_field: isTicketField,
-    TbEshop.form_fields.order: order,
-    TbEshop.form_fields.data: data,
-    'product_type': productType?.toJson(),
-  };
+  Map<String, dynamic> toJson() {
+    final jsonData = Map<String, dynamic>.from(data ?? {});
+
+    if (options.isNotEmpty) {
+      jsonData[FormHelper.metaOptions] = options.map((option) {
+        return {'value': option.title};
+      }).toList();
+    }
+
+    return {
+      TbEshop.form_fields.id: id,
+      TbEshop.form_fields.title: title,
+      TbEshop.form_fields.description: description,
+      TbEshop.form_fields.type: type,
+      TbEshop.form_fields.is_required: isRequired,
+      TbEshop.form_fields.is_hidden: isHidden,
+      TbEshop.form_fields.is_ticket_field: isTicketField,
+      TbEshop.form_fields.order: order,
+      TbEshop.form_fields.data: jsonData.isNotEmpty ? jsonData : null,
+      TbEshop.form_fields.product_type: productType,
+    };
+  }
 
   @override
   PlutoRow toPlutoRow(BuildContext context) {

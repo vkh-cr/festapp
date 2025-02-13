@@ -2,8 +2,9 @@ import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
-import 'package:fstapp/dataModels/OrganizationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataModels/UnitUserModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
@@ -20,7 +21,7 @@ class DbUsers {
 
   static Future<List<UserInfoModel>> getUsersInfo(List<String> userIds) async {
     var result = await _supabase.rpc("get_user_info_for_users",
-        params: {"oc": RightsService.currentOccasion, "user_ids": userIds});
+        params: {"oc": RightsService.currentOccasionId, "user_ids": userIds});
     if(result["code"] == 200) {
       return List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
     }
@@ -37,7 +38,7 @@ class DbUsers {
 
   static Future<List<UserInfoModel>> getAllUsersBasics() async {
     var result = await _supabase.rpc("get_all_user_basics_from_occasion",
-        params: {"oc": RightsService.currentOccasion});
+        params: {"oc": RightsService.currentOccasionId});
     if(result["code"] == 200) {
       var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
       return t;
@@ -46,11 +47,20 @@ class DbUsers {
   }
 
   static Future<List<UserInfoModel>> getAllUsersBasicsForUnit() async {
-    var oc = RightsService.currentOccasion!;
     var result = await _supabase.rpc("get_all_user_basics_from_occasion_unit",
-        params: {"oc": RightsService.currentOccasion!});
+        params: {"oc": RightsService.currentOccasionId});
     if(result["code"] == 200) {
       var t = List<UserInfoModel>.from(result["data"].map((x) => UserInfoModel.fromJson(x)));
+      return t;
+    }
+    return [];
+  }
+
+  static Future<List<UnitUserModel>> getAllUsersFromUnit(int unitId) async {
+    var result = await _supabase.rpc("get_all_users_from_unit",
+        params: {"unit_id": unitId});
+    if(result["code"] == 200) {
+      var t = List<UnitUserModel>.from(result["data"].map((x) => UnitUserModel.fromJson(x)));
       return t;
     }
     return [];
@@ -73,16 +83,25 @@ class DbUsers {
     {
       throw Exception("Creating of user has failed.");
     }
-    await _supabase.rpc("add_user_to_occasion",
-        params: {"oc": occasion, "usr": newId});
+    await addUserToOccasion(newId, occasion);
     return newId;
   }
 
-  static Future<OrganizationModel?> getCurrentOrganization() async {
+  static Future<UnitModel?> getCurrentUnit(int unit) async {
+    var result = await _supabase.rpc("get_unit_for_edit",
+        params: {"unit_id": unit});
+
+    if (result != null && result["code"] == 200) {
+      return UnitModel.fromJson(result["data"]);
+    }
+    return null;
+  }
+
+  static Future<UnitModel?> getCurrentOrganization() async {
     var result = await _supabase.rpc("get_current_organization_data");
 
     if (result != null && result["code"] == 200) {
-      return OrganizationModel.fromJson(result["data"]);
+      return UnitModel.fromJson(result["data"]);
     } else if (result != null && result["code"] == 403) {
       print("User is not authorized or found (admin rights required)");
     }
@@ -91,33 +110,21 @@ class DbUsers {
     return null;
   }
 
-  static Future<List<OccasionModel>> getAllOccasions(int org) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.organization, org);
-    var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
-    return toReturn;
+  static Future<List<OccasionModel>> getAllOccasionsForUnit(int unitId) async {
+    var data = await _supabase.rpc("get_all_occasions",
+        params:
+        {
+          "unit_id": unitId,
+        });
+    return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
   }
 
-  static Future<OccasionModel> updateOccasion(OccasionModel occasionModel) async {
-    var json = occasionModel.toJson();
-    Map<String, dynamic> data;
-
-    if (occasionModel.id != null) {
-      data = await _supabase
-          .from(Tb.occasions.table)
-          .update(json)
-          .eq(Tb.occasions.id, occasionModel.id!)
-          .select()
-          .single();
-    } else {
-      json.remove(Tb.occasions.id);
-      data = await _supabase
-          .from(Tb.occasions.table)
-          .insert(json)
-          .select()
-          .single();
-    }
-
-    return OccasionModel.fromJson(data);
+  static Future<void> updateUnitUser(UnitUserModel uum) async {
+    await _supabase.rpc("update_unit_user",
+        params:
+        {
+          "input_data": uum,
+        });
   }
 
   static updateOccasionUser(OccasionUserModel oum) async {
@@ -146,6 +153,15 @@ class DbUsers {
         });
   }
 
+  static Future<void> addUserToUnit(String id, int unit) async {
+    await _supabase.rpc("add_user_to_unit",
+        params:
+        {
+          "usr": id,
+          "unit_id": unit,
+        });
+  }
+
   static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     await _supabase.from(Tb.occasion_users.table).upsert(
@@ -153,6 +169,24 @@ class DbUsers {
     );
     await DbUsers.updateUserInfo(oum);
 
+  }
+
+  static Future<void> deleteUnitUser(String user, int unit) async {
+    await _supabase.rpc("delete_unit_user",
+        params:
+        {
+          "usr": user,
+          "unit_id": unit
+        });
+  }
+
+  static Future<void> deleteOccasionUser(String user, int occasion) async {
+    await _supabase.rpc("delete_occasion_user",
+        params:
+        {
+          "usr": user,
+          "oc": occasion
+        });
   }
 
   static Future<void> deleteUser(String user, int occasion) async {
@@ -186,13 +220,13 @@ class DbUsers {
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsers() async {
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasionId!);
     return List<OccasionUserModel>.from(data.map((x) => OccasionUserModel.fromJson(x))).sortedBy((ou)=>ou.createdAt!);
   }
 
   static Future<List<OccasionUserModel>> getOccasionUsersServiceTab() async {
     var allFood = await DbOccasions.getAllServices("food");
-    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasion!);
+    var data = await _supabase.from(Tb.occasion_users.table).select().eq(Tb.occasion_users.occasion, RightsService.currentOccasionId!);
     for(var ou in data){
       for(var f in allFood) {
         if(ou[Tb.occasion_users.services] == null){

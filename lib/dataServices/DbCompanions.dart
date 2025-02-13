@@ -32,13 +32,13 @@ class DbCompanions {
   static Future<void> create(String name) async {
     await _supabase.rpc("create_companion_in_organization", params: {
       'org': AppConfig.organization,
-      'oc': RightsService.currentOccasion,
+      'oc': RightsService.currentOccasionId,
       'usr': RightsService.currentOccasionUser!.user!,
       'c_name': name,
     });
   }
 
   static Future<void> delete(CompanionModel companion) async {
-    await DbUsers.deleteUser(companion.id, RightsService.currentOccasion!);
+    await DbUsers.deleteUser(companion.id, RightsService.currentOccasionId!);
   }
 }

@@ -1,11 +1,14 @@
+import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 
 class OccasionLinkModel {
   int? code;
-  int? occasionId;
-  String? link;
+  OccasionModel? occasion;
+  UnitModel? unit;
   OccasionUserModel? user;
   OccasionUserModel? unitUser;
+  List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
   String? versionRecommended; // New field for version_recommended
 
@@ -20,8 +23,9 @@ class OccasionLinkModel {
       code: json["code"],
       unitUser: unitUser,
       user: occasionUser,
-      link: json["link"],
-      occasionId: json["occasion"],
+      bankAccountsAdmin: List<int>.from(json["bank_accounts_admin"]??[]),
+      occasion: json["occasion"] != null ? OccasionModel.fromJson(json["occasion"]) : null,
+      unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
       isAdmin: json["is_admin"],
       versionRecommended: json["version_recommended"],
     );
@@ -31,8 +35,9 @@ class OccasionLinkModel {
     this.code,
     this.user,
     this.unitUser,
-    this.link,
-    this.occasionId,
+    this.bankAccountsAdmin,
+    this.occasion,
+    this.unit,
     this.isAdmin,
     this.versionRecommended,
   });

@@ -24,6 +24,10 @@ class Tb {
   static OrganizationsTb organizations = const OrganizationsTb();
   static OrganizationUsersTb organization_users = const OrganizationUsersTb();
   static FormsTb forms = const FormsTb();
+  static FormFieldsTb form_fields = const FormFieldsTb();
+  static UnitsTb units = const UnitsTb();
+  static UnitUsersTb unit_users = const UnitUsersTb();
+  static ImagesTb images = const ImagesTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -32,18 +36,21 @@ class OccasionsTb {
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get organization => "organization";
+  String get unit => "unit";
   String get is_hidden => "is_hidden";
   String get start_time => "start_time";
   String get end_time => "end_time";
   String get is_open => "is_open";
   String get link => "link";
   String get title => "title";
+  String get description => "description";
+  String get features => "features";
+  String get place => "place";
   String get data => "data";
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";
   String get data_events_registration_start => "events_registration_start";
-  String get data_is_enabled_entry_code => "is_enabled_entry_code";
-  String get data_max_companions => "max_companions";
+  String get data_image => "image";
 
   // Map layer keys as nested object
   String get data_map_layer => "map_layer";
@@ -69,6 +76,7 @@ class OccasionUsersTb{
   String get occasion => "occasion";
   String get created_at => "created_at";
   String get user => "user";
+  String get is_editor_view => "is_editor_view";
   String get is_editor => "is_editor";
   String get is_manager => "is_manager";
   String get is_approved => "is_approved";
@@ -323,6 +331,54 @@ class FormsTb {
   String get deadline_duration_seconds => "deadline_duration_seconds";
   String get is_open => "is_open";
   String get header => "header";
-  String get footer => "footer";
+  String get header_off => "header_off";
   String get link => "link";
+}
+
+class FormFieldsTb {
+  const FormFieldsTb();
+  String get table => "form_fields";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get title => "title";
+  String get description => "description";
+  String get data => "data";
+  String get type => "type";
+  String get is_required => "is_required";
+  String get form => "form";
+  String get is_hidden => "is_hidden";
+  String get order => "order";
+  String get product_type => "product_type";
+  String get is_ticket_field => "is_ticket_field";
+}
+
+class UnitsTb {
+  const UnitsTb();
+  String get table => "units";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get title => "title";
+  String get organization => "organization";
+  String get data => "data";
+}
+
+class UnitUsersTb {
+  const UnitUsersTb();
+  String get table => "unit_users";
+  String get created_at => "created_at";
+  String get unit => "unit";
+  String get user => "user";
+  String get is_manager => "is_manager";
+  String get is_editor => "is_editor";
+  String get is_editor_view => "is_editor_view";
+  String get data => "data";
+}
+
+class ImagesTb {
+  const ImagesTb();
+  String get table => "images";
+  String get id => "id";
+  String get link => "link";
+  String get occasion => "occasion";
+  String get unit => "unit";
 }

@@ -10,21 +10,24 @@ class TimeDateRangePicker extends StatelessWidget {
   final DateTime? end;
   final void Function(DateTime?) onStartChanged;
   final void Function(DateTime?) onEndChanged;
-  final DateTime minDate;
-  final DateTime maxDate;
+  DateTime? minDate;
+  DateTime? maxDate;
 
-  const TimeDateRangePicker({
-    Key? key,
+  TimeDateRangePicker({
+    super.key,
     required this.start,
     required this.end,
     required this.onStartChanged,
     required this.onEndChanged,
-    required this.minDate,
-    required this.maxDate,
-  }) : super(key: key);
+    this.minDate,
+    this.maxDate,
+  });
 
   @override
   Widget build(BuildContext context) {
+    minDate ??= DateTime.fromMicrosecondsSinceEpoch(0);
+    maxDate ??= DateTime.now().add(Duration(days: 365*20));
+
     final isStartValid = start != null;
     final isEndValid = end != null && start != null && !end!.isBefore(start!);
 
@@ -98,8 +101,8 @@ class TimeDateRangePicker extends StatelessWidget {
                       final pickedDate = await showDatePicker(
                         context: context,
                         initialDate: start ?? DateTime.now(),
-                        firstDate: minDate,
-                        lastDate: maxDate,
+                        firstDate: minDate!,
+                        lastDate: maxDate!,
                         initialEntryMode: datePickerMode,
                       );
                       if (pickedDate != null) {
@@ -188,8 +191,8 @@ class TimeDateRangePicker extends StatelessWidget {
                       final pickedDate = await showDatePicker(
                         context: context,
                         initialDate: end ?? DateTime.now(),
-                        firstDate: minDate,
-                        lastDate: maxDate,
+                        firstDate: minDate!,
+                        lastDate: maxDate!,
                         initialEntryMode: datePickerMode,
                       );
                       if (pickedDate != null) {

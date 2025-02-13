@@ -98,7 +98,7 @@ class DbEvents {
           "${Tb.event_users.table}!inner(*)")
           .eq("${Tb.event_users.table}.${Tb.event_users.user}", AuthService.currentUserId())
           .eq(Tb.events.is_hidden, false)
-          .eq(Tb.events.occasion, RightsService.currentOccasion!)
+          .eq(Tb.events.occasion, RightsService.currentOccasionId!)
           .order(Tb.events.start_time, ascending: true)
           .order(Tb.events.max_participants, ascending: false);
 
@@ -121,7 +121,7 @@ class DbEvents {
                 "${Tb.events.is_group_event}")
             .eq(EventModel.isGroupEventColumn, true)
             .eq(Tb.events.is_hidden, false)
-            .eq(Tb.events.occasion, RightsService.currentOccasion!)
+            .eq(Tb.events.occasion, RightsService.currentOccasionId!)
             .order(Tb.events.start_time, ascending: true);
         data.addAll(List<EventModel>.from(
             groupData.map((x) => EventModel.fromJson(x))));
@@ -142,7 +142,7 @@ class DbEvents {
             "${Tb.events.is_group_event}, "
             "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasion!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
 
@@ -166,7 +166,7 @@ class DbEvents {
         "${Tb.event_users_saved.table}!inner(*)")
         .eq("${Tb.event_users_saved.table}.${Tb.event_users_saved.user}", AuthService.currentUserId())
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasion!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
 
@@ -193,7 +193,7 @@ class DbEvents {
         "${Tb.events.is_group_event}")
         .inFilter(Tb.events.id, events)
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasion!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
         .order(Tb.events.start_time, ascending: true)
         .order(Tb.events.max_participants, ascending: false);
     var localEvents = List<EventModel>.from(
@@ -223,7 +223,7 @@ class DbEvents {
         "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
         "${Tb.event_users_saved.table}(count),"
         "${Tb.event_users.table}(count)")
-        .eq(Tb.events.occasion, RightsService.currentOccasion!)
+        .eq(Tb.events.occasion, RightsService.currentOccasionId!)
         .order(Tb.events.start_time, ascending: true);
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -245,7 +245,7 @@ class DbEvents {
         "${Tb.events.id},"
         "${Tb.events.updated_at}")
         .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasion!);
+        .eq(Tb.events.occasion, RightsService.currentOccasionId!);
 
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
@@ -583,7 +583,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasion!});
+      upsertObj.addAll({Tb.events.occasion: RightsService.currentOccasionId!});
       eventData = await _supabase.from(Tb.events.table).insert(upsertObj).select().single();
     }
     var updatedEvent = EventModel.fromJson(eventData);
@@ -649,7 +649,7 @@ class DbEvents {
         "${Tb.exclusive_groups.id}, "
         "${Tb.exclusive_groups.title}, "
         "${Tb.exclusive_events.table}(${Tb.exclusive_events.event})")
-        .eq(Tb.exclusive_groups.occasion, RightsService.currentOccasion!);
+        .eq(Tb.exclusive_groups.occasion, RightsService.currentOccasionId!);
     return List<ExclusiveGroupModel>.from(
         data.map((x) => ExclusiveGroupModel.fromJson(x)));
   }
@@ -666,7 +666,7 @@ class DbEvents {
     }
     else
     {
-      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasion!});
+      upsertObj.addAll({Tb.exclusive_groups.occasion: RightsService.currentOccasionId!});
       eventData = await _supabase.from(Tb.exclusive_groups.table).insert(upsertObj).select().single();
     }
     var updated = ExclusiveGroupModel.fromJson(eventData);
