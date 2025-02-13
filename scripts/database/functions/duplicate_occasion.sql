@@ -230,7 +230,7 @@ BEGIN
 
     INSERT INTO eshop.spots
       (created_at, occasion, product, updated_at, secret, secret_expiration_time, title, order_product_ticket, blueprint)
-    VALUES (now(), new_occ, COALESCE(new_product_id, rec.product), now(), rec.secret, rec.secret_expiration_time, rec.title, rec.order_product_ticket, COALESCE(new_bp_id, rec.blueprint))
+    VALUES (now(), new_occ, COALESCE(new_product_id, rec.product), now(), null, null, rec.title, null, COALESCE(new_bp_id, rec.blueprint))
     RETURNING id INTO v_new_id;
 
     INSERT INTO tmp_spots (old_id, new_id)
@@ -253,10 +253,11 @@ BEGIN
         SELECT jsonb_agg(
           CASE
             WHEN obj->>'type' = 'spot' THEN
-              obj || jsonb_build_object('id',
+              obj || jsonb_build_object(
+                'id',
                 COALESCE(
-                  (SELECT ts.new_id::text FROM tmp_spots ts WHERE ts.old_id = (obj->>'id')::bigint),
-                  obj->>'id'
+                  (SELECT ts.new_id FROM tmp_spots ts WHERE ts.old_id = (obj->>'id')::bigint),
+                  (obj->>'id')::int
                 )
               )
             ELSE obj
@@ -267,6 +268,7 @@ BEGIN
       WHERE id = rec.new_bp;
     END IF;
   END LOOP;
+
 
   ------------------------------------------------------------------
   -- 7. Duplicate Forms and Form Fields
