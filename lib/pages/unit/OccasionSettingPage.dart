@@ -291,8 +291,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               Text("Features".tr()),
               const SizedBox(height: 8),
               ...widget.occasion.features.map<Widget>((feature) {
-                return FeatureForm(feature: feature);
-              }).toList(),
+                return FeatureForm(feature: feature, occasion: widget.occasion.id!,);
+              }),
               const SizedBox(height: 80),
               Center(
                 child: TextButton(

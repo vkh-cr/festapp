@@ -8,8 +8,9 @@ import 'package:fstapp/widgets/ImageArea.dart';
 
 class FeatureForm extends StatefulWidget {
   final Map<String, dynamic> feature;
+  final int occasion;
 
-  const FeatureForm({Key? key, required this.feature}) : super(key: key);
+  const FeatureForm({Key? key, required this.feature, required this.occasion}) : super(key: key);
 
   @override
   _FeatureFormState createState() => _FeatureFormState();
@@ -140,7 +141,7 @@ class _FeatureFormState extends State<FeatureForm> {
           onFileSelected: (file) async {
             Uint8List imageData = await file.readAsBytes();
             try {
-              final publicUrl = await DbImages.uploadImage(imageData, null, null);
+              final publicUrl = await DbImages.uploadImage(imageData, widget.occasion, null);
               setState(() {
                 backgroundUrl = publicUrl;
                 widget.feature['background'] = publicUrl;

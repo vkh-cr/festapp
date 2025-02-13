@@ -152,19 +152,25 @@ class OccasionEditCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert, color: Colors.white),
-                    onSelected: (value) async {
-                      if (value == "create_copy") {
-                        onCreateCopy();
-                      }
-                    },
-                    itemBuilder: (BuildContext context) => [
-                      PopupMenuItem(
-                        value: "create_copy",
-                        child: Text("Create Copy".tr()),
-                      ),
-                    ],
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      shape: BoxShape.circle,
+                    ),
+                    child: PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white),
+                      onSelected: (value) async {
+                        if (value == "create_copy") {
+                          onCreateCopy();
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem(
+                          value: "create_copy",
+                          child: Text("Create Copy".tr()),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
