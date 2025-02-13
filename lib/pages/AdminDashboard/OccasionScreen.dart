@@ -8,7 +8,7 @@ import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdminDashboard/OccasionSettingPage.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
-import 'package:fstapp/pages/Eshop/FormPage.dart';
+import 'package:fstapp/pages/form/FormPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/RouterService.dart';

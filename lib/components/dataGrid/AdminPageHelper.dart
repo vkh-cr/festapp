@@ -12,7 +12,7 @@ import 'package:fstapp/pages/AdministrationOccasion/ServiceTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UserGroupsTab.dart';
 import 'package:fstapp/pages/AdministrationOccasion/UsersTab.dart';
 import 'package:fstapp/pages/Eshop/BlueprintEditorTab.dart';
-import 'package:fstapp/pages/Eshop/FormTab.dart';
+import 'package:fstapp/pages/form/FormTab.dart';
 import 'package:fstapp/pages/Eshop/OrdersTab.dart';
 import 'package:fstapp/pages/Eshop/ReportTab.dart';
 import 'package:fstapp/pages/Eshop/TicketsTab.dart';

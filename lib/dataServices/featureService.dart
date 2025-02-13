@@ -12,6 +12,7 @@ class FeatureService {
   static const String services = "services";
   static const String entryCode = "entry_code";
   static const String companions = "companions";
+  static const String blueprint = "blueprint";
 
   static const String ticketBackground = "background";
 
@@ -30,6 +31,25 @@ class FeatureService {
       }
     }
     return false;
+  }
+
+  static List<Map<String, dynamic>> getDefaultFeatures() {
+    return [
+      {metaCode: form, metaIsEnabled: false},
+      {
+        metaCode: ticket,
+        'color': '000000',
+        'background': '',
+        metaIsEnabled: false,
+      },
+      {metaCode: blueprint, metaIsEnabled: false},
+      {metaCode: songbook, metaIsEnabled: false},
+      {metaCode: game, metaIsEnabled: false},
+      {metaCode: services, metaIsEnabled: false},
+      {metaCode: userGroups, metaIsEnabled: false},
+      {metaCode: entryCode, metaIsEnabled: false},
+      {metaCode: companions, metaIsEnabled: false},
+    ];
   }
 
   /// Returns the complete feature map for [featureCode] if available.
