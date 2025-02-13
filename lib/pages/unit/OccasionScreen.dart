@@ -135,7 +135,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Events',
+                    'Events'.tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ).tr(),
                   ElevatedButton.icon(

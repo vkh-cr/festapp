@@ -220,7 +220,13 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               Text("Intro Image".tr()),
               const SizedBox(height: 8),
               ImageArea(
-                hint: "(Image with ratio $kCardWidth : $kCardHeight)",
+                hint: "(${ "Image with ratio {width} : {height}".tr(
+                  namedArgs: {
+                    "width": kCardWidth.toString(),
+                    "height": kCardHeight.toString(),
+                  },
+                )
+                })",
                 imageUrl: imageUrl,
                 onFileSelected: (file) async {
                   Uint8List imageData = await file.readAsBytes();

@@ -416,5 +416,24 @@
   "App": "App",
   "Read only": "Read only",
   "Delete Event": "Delete Event",
+  "Create Copy": "Create Copy",
+  "Do you want to create copy of this event?": "Do you want to create copy of this event?",
+  "Event copy created successfully.": "Event copy created successfully.",
+  "Failed to create event copy.": "Failed to create event copy.",
+  "Happening Now": "Happening Now",
+  "Past Events": "Past Events",
+  "Are you sure you want to delete this image?": "Are you sure you want to delete this image?",
+  "Image removed successfully.": "Image removed successfully.",
+  "Failed to remove image.": "Failed to remove image.",
+  "Title is required": "Title is required",
+  "Link is required": "Link is required",
+  "Intro Image": "Intro Image",
+  "Failed to upload image.": "Failed to upload image.",
+  "Image with ratio {width} : {height}": "Image with ratio {width} : {height}",
+  "Features": "Features",
+  "Background color": "Background color",
+  "Font color": "Font color",
+
+
   "_":"_"
 }
