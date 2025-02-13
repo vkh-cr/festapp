@@ -4,7 +4,6 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/CheckPage.dart';
 import 'package:fstapp/pages/EventEditPage.dart';
 import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/pages/HtmlEditorPage.dart';
 import 'package:fstapp/pages/InfoPage.dart';
 import 'package:fstapp/pages/InstallPage.dart';
@@ -22,6 +21,7 @@ import 'package:fstapp/pages/SongPage.dart';
 import 'package:fstapp/pages/TimetablePage.dart';
 import 'package:fstapp/pages/UnitPage.dart';
 import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/pages/form/FormPage.dart';
 
 import 'AppRouter.gr.dart';
 import 'pages/AdministrationOccasion/AdminPage.dart';

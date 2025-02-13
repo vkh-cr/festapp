@@ -36,7 +36,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   DateTime? _from;
   DateTime? _to;
   late TextEditingController _linkController;
-  String? _description; // Editable HTML content
+  String? _description;
 
   @override
   void initState() {
@@ -47,21 +47,11 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
     _description = widget.occasion.description ?? "";
-    List<Map<String, dynamic>> defaultFeatures = [
-      {FeatureService.metaCode: FeatureService.form, FeatureService.metaIsEnabled: false},
-      {
-        FeatureService.metaCode: FeatureService.ticket,
-        "color": "000000",
-        "background": "",
-        FeatureService.metaIsEnabled: false
-      },
-      {FeatureService.metaCode: FeatureService.songbook, FeatureService.metaIsEnabled: false},
-      {FeatureService.metaCode: FeatureService.game, FeatureService.metaIsEnabled: false},
-      {FeatureService.metaCode: FeatureService.services, FeatureService.metaIsEnabled: false},
-      {FeatureService.metaCode: FeatureService.userGroups, FeatureService.metaIsEnabled: false},
-      {FeatureService.metaCode: FeatureService.entryCode, FeatureService.metaIsEnabled: false},
-      {FeatureService.metaCode: FeatureService.companions, FeatureService.metaIsEnabled: false},
-    ];
+
+    // Get the default features
+    final defaultFeatures = FeatureService.getDefaultFeatures();
+
+    // Add missing default features
     for (var defaultFeature in defaultFeatures) {
       bool exists = widget.occasion.features.any(
               (f) => f[FeatureService.metaCode] == defaultFeature[FeatureService.metaCode]);
@@ -69,7 +59,17 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         widget.occasion.features.add(defaultFeature);
       }
     }
+
+    // Sort the features according to the order defined in defaultFeatures
+    widget.occasion.features.sort((a, b) {
+      final aIndex = defaultFeatures.indexWhere(
+              (defaultFeature) => defaultFeature[FeatureService.metaCode] == a[FeatureService.metaCode]);
+      final bIndex = defaultFeatures.indexWhere(
+              (defaultFeature) => defaultFeature[FeatureService.metaCode] == b[FeatureService.metaCode]);
+      return aIndex.compareTo(bIndex);
+    });
   }
+
 
   @override
   void dispose() {

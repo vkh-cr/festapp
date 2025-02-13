@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/pages/Eshop/FormEditorContent.dart';
-import 'package:fstapp/pages/Eshop/FormResponsesContent.dart';
+import 'package:fstapp/pages/form/FormEditorContent.dart';
+import 'package:fstapp/pages/form/FormResponsesContent.dart';
 import 'package:fstapp/themeConfig.dart';
 
 class FormTab extends StatefulWidget {

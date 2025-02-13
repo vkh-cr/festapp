@@ -15,6 +15,7 @@ class OccasionModel {
   Map<String, dynamic>? data;
   int? organization;
   int? unit;
+  int? placeId;
   FormModel? form;
   List<Map<String, dynamic>> features;
 
@@ -32,6 +33,7 @@ class OccasionModel {
     this.data,
     this.organization,
     this.unit,
+    this.placeId,
     this.form,
     List<Map<String, dynamic>>? features,
   }) : features = features ?? [];
@@ -59,6 +61,7 @@ class OccasionModel {
       data: json[Tb.occasions.data] ?? {},
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
+      placeId: json[Tb.occasions.place],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
       features: json[Tb.occasions.features] is List
           ? List<Map<String, dynamic>>.from(json[Tb.occasions.features])
@@ -79,6 +82,7 @@ class OccasionModel {
       Tb.occasions.data: data,
       Tb.occasions.organization: organization,
       Tb.occasions.unit: unit,
+      Tb.occasions.place: placeId,
       Tb.occasions.features: features,
     };
   }

@@ -45,6 +45,7 @@ class OccasionsTb {
   String get title => "title";
   String get description => "description";
   String get features => "features";
+  String get place => "place";
   String get data => "data";
   String get data_defaultMapZoom => "defaultMapZoom";
   String get data_defaultMapLocation => "defaultMapLocation";

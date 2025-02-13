@@ -16,11 +16,11 @@ import 'package:fstapp/dataModels/PlaceModel.dart' as _i32;
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart'
     deferred as _i1;
 import 'package:fstapp/pages/CheckPage.dart' deferred as _i2;
-import 'package:fstapp/pages/Eshop/FormEditPage.dart' deferred as _i6;
-import 'package:fstapp/pages/Eshop/FormPage.dart' deferred as _i7;
 import 'package:fstapp/pages/EventEditPage.dart' deferred as _i3;
 import 'package:fstapp/pages/EventPage.dart' deferred as _i4;
 import 'package:fstapp/pages/ForgotPasswordPage.dart' deferred as _i5;
+import 'package:fstapp/pages/form/FormEditPage.dart' deferred as _i6;
+import 'package:fstapp/pages/form/FormPage.dart' deferred as _i7;
 import 'package:fstapp/pages/GamePage.dart' deferred as _i8;
 import 'package:fstapp/pages/HtmlEditorPage.dart' deferred as _i9;
 import 'package:fstapp/pages/InfoPage.dart' deferred as _i10;
