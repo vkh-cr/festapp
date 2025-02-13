@@ -7,6 +7,7 @@ import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/form/FormEditorContent.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -555,7 +556,99 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     );
   }
 
+  Widget _buildSpotFieldEditor() {
+    // Check if a spot field exists.
+    var spotField = widget.form.relatedFields!.firstWhereOrNull((f) =>
+    f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "Seat selection".tr(),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            Switch(
+              value: !(spotField?.isHidden??true),
+              onChanged: (val) {
+                setState(() {
+                  if (val) {
+                    // Add spot field if it does not exist.
+                    if (spotField == null) {
+                      spotField = FormFieldModel(
+                        type: FormHelper.fieldTypeSpot,
+                        isTicketField: true,
+                        isRequired: false,
+                        isHidden: false,
+                        order: (widget.form.relatedFields!
+                            .map((x) => x.order ?? 0)
+                            .fold(0, max)) +
+                            1,
+                      );
+                      widget.form.relatedFields!.add(spotField!);
+                    }
+                    spotField!.isHidden = false;
+                  } else {
+                    // Remove spot field if it exists.
+                    var field = widget.form.relatedFields!.firstWhereOrNull((f) =>
+                    f.isTicketField == true &&
+                        f.type == FormHelper.fieldTypeSpot);
+                    if(field != null) {
+                      field.isHidden = true;
+                    }
+                  }
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpotFieldReadOnly() {
+    // Only display if a non-hidden spot field exists.
+    bool spotExists = widget.form.relatedFields!.any((f) =>
+    f.isTicketField == true &&
+        f.type == FormHelper.fieldTypeSpot &&
+        !(f.isHidden ?? false));
+    return Card(
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "Seat selection".tr(),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            Switch(
+              value: spotExists,
+              onChanged: null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  /// --- END OF SPOT FIELD SECTION ---
+
   Widget _buildTicketEditorReadOnly(FormFieldModel ticketField) {
+    List<Widget> children = [];
+    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+      children.add(_buildSpotFieldReadOnly());
+      children.add(const SizedBox(height: 8));
+    }
     final productTypeFields = widget.form.relatedFields!
         .where((f) =>
     f.isTicketField == true &&
@@ -563,73 +656,77 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
         .toList();
 
     if (productTypeFields.isEmpty) {
-      return Padding(
+      children.add(Padding(
         padding: const EdgeInsets.only(top: 8.0),
         child: Text(
           'No Product Types'.tr(),
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-      );
+      ));
+    } else {
+      productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
+      for (var ptField in productTypeFields) {
+        children.add(_buildTicketGroupReadOnly(ptField));
+        children.add(const SizedBox(height: 16));
+      }
     }
-    productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
     return Column(
-      children: [
-        const SizedBox(height: 8),
-        for (var ptField in productTypeFields) ...[
-          _buildTicketGroupReadOnly(ptField),
-          const SizedBox(height: 16),
-        ],
-      ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 
   Widget _buildTicketEditor(FormFieldModel ticketField) {
+    List<Widget> children = [];
+    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+      children.add(_buildSpotFieldEditor());
+      children.add(const SizedBox(height: 16));
+    }
     final productTypeFields = widget.form.relatedFields!
         .where((f) =>
     f.isTicketField == true &&
         f.type == FormHelper.fieldTypeProductType)
         .toList();
     productTypeFields.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    children.add(Text('Product Types'.tr(),
+        style: Theme.of(context).textTheme.titleSmall));
+    children.add(const SizedBox(height: 8));
+    for (var ptField in productTypeFields) {
+      children.add(_buildTicketGroupEditor(ptField));
+      children.add(const SizedBox(height: 16));
+    }
+    children.add(Row(
       children: [
-        Text('Product Types'.tr(),
-            style: Theme.of(context).textTheme.titleSmall),
-        const SizedBox(height: 8),
-        for (var ptField in productTypeFields) ...[
-          _buildTicketGroupEditor(ptField),
-          const SizedBox(height: 16),
-        ],
-        Row(
-          children: [
-            const Spacer(),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.add),
-              label: Text("Add Product Type".tr()),
-              onPressed: () {
-                setState(() {
-                  final newProductTypeField = FormFieldModel(
-                    title: "New Product Type".tr(),
-                    type: FormHelper.fieldTypeProductType,
-                    isTicketField: true,
-                    isRequired: false,
-                    isHidden: false,
-                    order: (widget.form.relatedFields!
-                        .map((x) => x.order ?? 0)
-                        .fold(0, max)) +
-                        1,
-                    productType: ProductTypeModel(
-                      title: "New Product Type".tr(),
-                      products: [],
-                    ),
-                  );
-                  widget.form.relatedFields!.add(newProductTypeField);
-                });
-              },
-            ),
-          ],
+        const Spacer(),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.add),
+          label: Text("Add Product Type".tr()),
+          onPressed: () {
+            setState(() {
+              final newProductTypeField = FormFieldModel(
+                title: "New Product Type".tr(),
+                type: FormHelper.fieldTypeProductType,
+                isTicketField: true,
+                isRequired: false,
+                isHidden: false,
+                order: (widget.form.relatedFields!
+                    .map((x) => x.order ?? 0)
+                    .fold(0, max)) +
+                    1,
+                productType: ProductTypeModel(
+                  title: "New Product Type".tr(),
+                  products: [],
+                ),
+              );
+              widget.form.relatedFields!.add(newProductTypeField);
+            });
+          },
         ),
       ],
+    ));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 
@@ -714,7 +811,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                       children: [
                         Expanded(
                           flex: 3,
-                          child: Text(product.title ?? '', style: rowStyle),
+                          child:
+                          Text(product.title ?? '', style: rowStyle),
                         ),
                         Expanded(
                           flex: 1,
