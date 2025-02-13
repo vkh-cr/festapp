@@ -6,7 +6,7 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/AdminDashboard/FeatureForm.dart';
@@ -85,14 +85,14 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       widget.occasion.startTime = _from;
       widget.occasion.endTime = _to;
       widget.occasion.description = _description;
-      await DbUsers.updateOccasion(widget.occasion);
+      await DbOccasions.updateOccasion(widget.occasion);
       ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
       Navigator.of(context).pop();
     }
   }
 
   Future<void> _deleteOccasion() async {
-    await DbUsers.deleteOccasion(widget.occasion.id!);
+    await DbOccasions.deleteOccasion(widget.occasion.id!);
     ToastHelper.Show(context, "${"Deleted".tr()}: ${widget.occasion.title!}");
     Navigator.of(context).pop();
   }
@@ -217,7 +217,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 },
               ),
               const SizedBox(height: 16),
-              Text("Image".tr()),
+              Text("Intro Image".tr()),
               const SizedBox(height: 8),
               ImageArea(
                 hint: "(Image with ratio $kCardWidth : $kCardHeight)",

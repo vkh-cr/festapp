@@ -1,9 +1,10 @@
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/AdminDashboard/OccasionSettingPage.dart';
 import 'package:fstapp/pages/AdministrationOccasion/AdminPage.dart';
@@ -11,7 +12,8 @@ import 'package:fstapp/pages/Eshop/FormPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/OccasionEditCard.dart';
 
@@ -34,7 +36,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
   }
 
   Future<void> _loadOccasions() async {
-    var occasions = await DbUsers.getAllOccasionsForEdit(widget.unit.id!);
+    var occasions = await DbOccasions.getAllOccasionsForEdit(widget.unit.id!);
     setState(() {
       _occasions = occasions;
     });
@@ -68,16 +70,59 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     );
   }
 
+  /// Handles viewing an occasion.
+  Future<void> _handleView(OccasionModel occasion) async {
+    await RightsService.updateOccasionData(occasion.link!);
+    RouterService.navigateOccasion(context, "");
+  }
+
+  /// Handles the reservation action.
+  Future<void> _handleReservation(OccasionModel occasion) async {
+    await RightsService.updateOccasionData(occasion.link!);
+    RouterService.navigate(
+      context,
+      "${FormPage.ROUTE}/${occasion.form!.link!}/edit",
+    );
+  }
+
+  /// Handles editing an occasion.
+  Future<void> _handleEdit(OccasionModel occasion) async {
+    await _openSettingsDialog(occasion);
+    await _loadOccasions();
+  }
+
+  /// Handles administration navigation.
+  Future<void> _handleAdmin(OccasionModel occasion) async {
+    await RightsService.updateOccasionData(occasion.link!);
+    RouterService.navigateOccasion(context, AdminPage.ROUTE);
+  }
+
+  /// Handles creating a copy of the occasion after confirmation.
+  Future<void> _handleCreateCopy(OccasionModel occasion) async {
+    final confirmation = await DialogHelper.showConfirmationDialogAsync(
+      context,
+      "Create Copy".tr(),
+      "Do you want to create copy of this event?".tr(),
+    );
+    if (confirmation == true) {
+      try {
+        await DbOccasions.duplicateOccasion(occasion.id!, occasion.unit);
+        ToastHelper.Show(context, "Event copy created successfully.".tr());
+        await _loadOccasions();
+      } catch (e) {
+        ToastHelper.Show(context, "Failed to create event copy.".tr());
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
     final presentEvents = _occasions
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
         .toList();
-    final upcomingEvents =
-    _occasions.where((o) => o.startTime!.isAfter(now)).toList();
-    final pastEvents =
-    _occasions.where((o) => o.endTime!.isBefore(now)).toList();
+    final upcomingEvents = _occasions.where((o) => o.startTime!.isAfter(now)).toList();
+    final pastEvents = _occasions.where((o) => o.endTime!.isBefore(now)).toList();
 
     return Scaffold(
       body: Padding(
@@ -106,8 +151,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
             if (presentEvents.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: Text(
                     "Happening Now".tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -132,25 +176,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                       final occasion = presentEvents[index];
                       return OccasionEditCard(
                         occasion: occasion,
-                        onView: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, "");
-                        },
-                        onReservation: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigate(
-                            context,
-                            "${FormPage.ROUTE}/${occasion.form!.link!}/edit",
-                          );
-                        },
-                        onEdit: () async {
-                          await _openSettingsDialog(occasion);
-                          await _loadOccasions();
-                        },
-                        onAdmin: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, AdminPage.ROUTE);
-                        },
+                        onView: () => _handleView(occasion),
+                        onReservation: () => _handleReservation(occasion),
+                        onEdit: () => _handleEdit(occasion),
+                        onAdmin: () => _handleAdmin(occasion),
+                        onCreateCopy: () => _handleCreateCopy(occasion),
                         // Mark as present so the card gets a glowing border.
                         isPresent: true,
                       );
@@ -164,8 +194,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
             if (upcomingEvents.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: Text(
                     "Events".tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -190,25 +219,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                       final occasion = upcomingEvents[index];
                       return OccasionEditCard(
                         occasion: occasion,
-                        onView: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, "");
-                        },
-                        onReservation: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigate(
-                            context,
-                            "${FormPage.ROUTE}/${occasion.form!.link!}/edit",
-                          );
-                        },
-                        onEdit: () async {
-                          await _openSettingsDialog(occasion);
-                          await _loadOccasions();
-                        },
-                        onAdmin: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, AdminPage.ROUTE);
-                        },
+                        onView: () => _handleView(occasion),
+                        onReservation: () => _handleReservation(occasion),
+                        onEdit: () => _handleEdit(occasion),
+                        onAdmin: () => _handleAdmin(occasion),
+                        onCreateCopy: () => _handleCreateCopy(occasion),
                         isPresent: false,
                       );
                     },
@@ -221,8 +236,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
             if (pastEvents.isNotEmpty) ...[
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: Text(
                     "Past Events".tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
@@ -247,25 +261,11 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                       final occasion = pastEvents[index];
                       return OccasionEditCard(
                         occasion: occasion,
-                        onView: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, "");
-                        },
-                        onReservation: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigate(
-                            context,
-                            "${FormPage.ROUTE}/${occasion.form!.link!}/edit",
-                          );
-                        },
-                        onEdit: () async {
-                          await _openSettingsDialog(occasion);
-                          await _loadOccasions();
-                        },
-                        onAdmin: () async {
-                          await RightsService.updateOccasionData(occasion.link!);
-                          RouterService.navigateOccasion(context, AdminPage.ROUTE);
-                        },
+                        onView: () => _handleView(occasion),
+                        onReservation: () => _handleReservation(occasion),
+                        onEdit: () => _handleEdit(occasion),
+                        onAdmin: () => _handleAdmin(occasion),
+                        onCreateCopy: () => _handleCreateCopy(occasion),
                         isPresent: false,
                       );
                     },

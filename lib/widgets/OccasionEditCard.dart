@@ -1,9 +1,10 @@
 import 'dart:ui';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:intl/intl.dart';
 
 class OccasionEditCard extends StatelessWidget {
   final OccasionModel occasion;
@@ -11,6 +12,7 @@ class OccasionEditCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onAdmin;
   final VoidCallback onReservation;
+  final VoidCallback onCreateCopy;
   final bool isPresent;
 
   const OccasionEditCard({
@@ -20,6 +22,7 @@ class OccasionEditCard extends StatelessWidget {
     required this.onEdit,
     required this.onAdmin,
     required this.onReservation,
+    required this.onCreateCopy,
     this.isPresent = false,
   }) : super(key: key);
 
@@ -32,7 +35,7 @@ class OccasionEditCard extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ConstrainedBox(
-          constraints: BoxConstraints(minWidth: 300, minHeight: 150),
+          constraints: const BoxConstraints(minWidth: 300, minHeight: 150),
           child: Material(
             clipBehavior: Clip.antiAlias,
             elevation: 2,
@@ -43,7 +46,7 @@ class OccasionEditCard extends StatelessWidget {
             child: Stack(
               children: [
                 // Background image.
-                if(occasion.data?[Tb.occasions.data_image] != null)
+                if (occasion.data?[Tb.occasions.data_image] != null)
                   Positioned.fill(
                     child: Image.network(
                       occasion.data?[Tb.occasions.data_image],
@@ -56,7 +59,7 @@ class OccasionEditCard extends StatelessWidget {
                   right: 0,
                   bottom: 0,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(15.0),
                       bottomRight: Radius.circular(15.0),
                     ),
@@ -73,7 +76,7 @@ class OccasionEditCard extends StatelessWidget {
                               onTap: onView,
                               child: SelectableText(
                                 occasion.title ?? '',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -82,8 +85,9 @@ class OccasionEditCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             SelectableText(
-                              '${DateFormat.yMMMd().format(occasion.startTime!)} - ${DateFormat.yMMMd().format(occasion.endTime!)}',
-                              style: TextStyle(
+                              '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.startTime!)} - '
+                                  '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.endTime!)}',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                               ),
@@ -94,18 +98,27 @@ class OccasionEditCard extends StatelessWidget {
                                 if (occasion.form != null)
                                   TextButton.icon(
                                     onPressed: onReservation,
-                                    icon: Icon(Icons.login, color: Colors.white),
-                                    label: Text('Reservation', style: TextStyle(color: Colors.white)),
+                                    icon: const Icon(Icons.login, color: Colors.white),
+                                    label: Text(
+                                      'Reservation'.tr(),
+                                      style: const TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 TextButton.icon(
                                   onPressed: onAdmin,
-                                  icon: Icon(Icons.admin_panel_settings, color: Colors.white),
-                                  label: Text('App', style: TextStyle(color: Colors.white)),
+                                  icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
+                                  label: Text(
+                                    'App'.tr(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                 ),
                                 TextButton.icon(
                                   onPressed: onEdit,
-                                  icon: Icon(Icons.settings, color: Colors.white),
-                                  label: Text('Settings', style: TextStyle(color: Colors.white)),
+                                  icon: const Icon(Icons.settings, color: Colors.white),
+                                  label: Text(
+                                    'Settings'.tr(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               ],
                             ),
@@ -115,13 +128,13 @@ class OccasionEditCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // "Open" badge, shifted slightly down and left.
+                // "Open" badge at top left.
                 if (occasion.isOpen)
                   Positioned(
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: ThemeConfig.greenColor(),
                         borderRadius: BorderRadius.circular(12),
@@ -135,6 +148,25 @@ class OccasionEditCard extends StatelessWidget {
                       ),
                     ),
                   ),
+                // Three vertical dots at top right.
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    onSelected: (value) async {
+                      if (value == "create_copy") {
+                        onCreateCopy();
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      PopupMenuItem(
+                        value: "create_copy",
+                        child: Text("Create Copy".tr()),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),

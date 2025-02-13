@@ -13,14 +13,16 @@ class FeatureService {
   static const String entryCode = "entry_code";
   static const String companions = "companions";
 
+  static const String ticketBackground = "background";
+
   /// Returns `true` if the feature identified by [featureCode] is enabled.
   /// Returns `false` if the feature is not found or disabled.
-  static bool isFeatureEnabled(String featureCode) {
+  static bool isFeatureEnabled(String featureCode, {List<dynamic>? fromFeatures}) {
     if (RightsService.currentOccasion == null) {
       return false;
     }
 
-    final features = RightsService.currentOccasion!.features as List<dynamic>;
+    final features = fromFeatures ?? RightsService.currentOccasion!.features as List<dynamic>;
 
     for (final feature in features) {
       if (feature is Map<String, dynamic> && feature[metaCode] == featureCode) {
@@ -31,12 +33,12 @@ class FeatureService {
   }
 
   /// Returns the complete feature map for [featureCode] if available.
-  static Map<String, dynamic>? getFeatureDetails(String featureCode) {
+  static Map<String, dynamic>? getFeatureDetails(String featureCode, {List<dynamic>? fromFeatures}) {
     if (RightsService.currentOccasion == null) {
       return null;
     }
 
-    final features = RightsService.currentOccasion!.features as List<dynamic>;
+    final features = fromFeatures ?? RightsService.currentOccasion!.features as List<dynamic>;
     for (final feature in features) {
       if (feature is Map<String, dynamic> && feature[metaCode] == featureCode) {
         return feature;

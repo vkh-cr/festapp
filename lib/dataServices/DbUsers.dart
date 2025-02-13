@@ -1,6 +1,5 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataModels/ImageModel.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -8,7 +7,6 @@ import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataModels/UnitUserModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -68,16 +66,6 @@ class DbUsers {
     return [];
   }
 
-  static Future<void> deleteOccasion(int oc) async {
-    var data = await _supabase.from(Tb.images.table).select().eq(Tb.images.occasion, oc);
-    var occasionImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
-    for(var oc in occasionImages){
-      await DbImages.removeImage(oc.link!);
-    }
-    await _supabase.from(Tb.images.table).delete().eq(Tb.images.occasion, oc);
-    await _supabase.rpc("delete_occasion", params: {"oc": oc});
-  }
-
   static Future<void> updateUserInfo(OccasionUserModel data) async {
     await _supabase.rpc("update_user",
         params:
@@ -129,32 +117,6 @@ class DbUsers {
           "unit_id": unitId,
         });
     return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
-  }
-
-  static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
-    var data = await _supabase.rpc("get_all_occasions_for_edit",
-        params:
-        {
-          "unit_id": unitId,
-        });
-    return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
-  }
-
-  static Future<List<OccasionModel>> getAllOccasions(int unit) async {
-    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.unit, unit);
-    var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
-    return toReturn;
-  }
-
-  static Future<void> updateOccasion(OccasionModel occasionModel) async {
-    var data = await _supabase.rpc("update_occasion",
-        params:
-        {
-          "input_data": occasionModel,
-        });
-    if(data["code"] != 200){
-      throw Exception(data["message"]);
-    }
   }
 
   static Future<void> updateUnitUser(UnitUserModel uum) async {
