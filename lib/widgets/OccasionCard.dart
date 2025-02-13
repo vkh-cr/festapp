@@ -14,8 +14,8 @@ const double kMinCardHeight = 150.0;
 const Duration kAnimationDuration = Duration(milliseconds: 200);
 const double kButtonVerticalPadding = 16.0;
 const double kButtonHorizontalPadding = 20.0;
-const double kCardWidth = 768.0;
-const double kCardHeight = 432.0;
+const double kCardWidth = 16.0;
+const double kCardHeight = 9.0;
 
 class OccasionCard extends StatefulWidget {
   final OccasionModel occasion;
@@ -124,7 +124,10 @@ class _OccasionCardState extends State<OccasionCard> {
                               ),
                               const SizedBox(height: 4),
                               SelectableText(
-                                '${DateFormat.yMMMd().format(widget.occasion.startTime!)} - ${DateFormat.yMMMd().format(widget.occasion.endTime!)}',
+                                '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+                                    .format(widget.occasion.startTime!)} - '
+                                    '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
+                                    .format(widget.occasion.endTime!)}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,

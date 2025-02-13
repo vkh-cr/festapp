@@ -1,7 +1,11 @@
 import 'package:fstapp/dataModels/GameSettingsModel.dart';
+import 'package:fstapp/dataModels/ImageModel.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/ServiceItemModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOccasions {
@@ -83,5 +87,83 @@ class DbOccasions {
     }
 
     return response != null && response['code'] == 200;
+  }
+
+  static Future<OccasionModel> getOccasion(int oc) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.id, oc).single();
+    return OccasionModel.fromJson(data);
+  }
+
+  static Future<List<OccasionModel>> getAllOccasionsForEdit(int unitId) async {
+    var data = await _supabase.rpc("get_all_occasions_for_edit",
+        params:
+        {
+          "unit_id": unitId,
+        });
+    return List<OccasionModel>.from(data["data"].map((x) => OccasionModel.fromJson(x)));
+  }
+
+  static Future<List<OccasionModel>> getAllOccasions(int unit) async {
+    var data = await _supabase.from(Tb.occasions.table).select().eq(Tb.occasions.unit, unit);
+    var toReturn = List<OccasionModel>.from(data.map((x) => OccasionModel.fromJson(x)));
+    return toReturn;
+  }
+
+  static Future<void> updateOccasion(OccasionModel occasionModel) async {
+    var data = await _supabase.rpc("update_occasion",
+        params:
+        {
+          "input_data": occasionModel,
+        });
+    if(data["code"] != 200){
+      throw Exception(data["message"]);
+    }
+  }
+
+  static Future<void> duplicateOccasion(int oc, int? unit) async {
+
+    var ocId = await _supabase.rpc("duplicate_occasion",
+        params:
+        {
+          "oc": oc,
+        });
+
+    var occasion = await getOccasion(ocId);
+
+    var ticketDetails = FeatureService.getFeatureDetails(FeatureService.ticket, fromFeatures: occasion.features);
+    if(ticketDetails != null && ticketDetails[FeatureService.ticketBackground].isNotEmpty)
+    {
+      var cpy = await DbImages.createCopyOfImage(ticketDetails[FeatureService.ticketBackground], ocId, unit);
+      ticketDetails[FeatureService.ticketBackground] = cpy;
+    }
+
+    var ocImage = occasion.data?["image"];
+    if(ocImage != null)
+    {
+      var cpy = await DbImages.createCopyOfImage(ocImage, ocId, unit);
+      occasion.data!["image"] = cpy;
+    }
+
+    await updateOccasion(occasion);
+
+
+
+    // var imageData = await _supabase.from(Tb.images.table).select().eq(Tb.images.occasion, oc);
+    // var occasionImages = List<ImageModel>.from(imageData.map((x) => ImageModel.fromJson(x)));
+    //
+    // for(var oc in occasionImages){
+    //   await DbImages.removeImage(oc.link!);
+    // }
+    // await _supabase.from(Tb.images.table).delete().eq(Tb.images.occasion, oc);
+  }
+
+  static Future<void> deleteOccasion(int oc) async {
+    var data = await _supabase.from(Tb.images.table).select().eq(Tb.images.occasion, oc);
+    var occasionImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
+    for(var oc in occasionImages){
+      await DbImages.removeImage(oc.link!);
+    }
+    await _supabase.from(Tb.images.table).delete().eq(Tb.images.occasion, oc);
+    await _supabase.rpc("delete_occasion", params: {"oc": oc});
   }
 }

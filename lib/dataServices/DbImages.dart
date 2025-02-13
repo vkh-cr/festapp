@@ -22,11 +22,12 @@ class DbImages {
   }
 
   static Future<void> removeImage(String imageUrl) async {
-
     final uri = Uri.parse(imageUrl);
     final segments = uri.pathSegments;
     final bucketIndex = segments.indexOf(_bucketName);
-    if (bucketIndex == -1 || bucketIndex + 1 >= segments.length) throw Exception('Invalid image URL');
+    if (bucketIndex == -1 || bucketIndex + 1 >= segments.length) {
+      throw Exception('Invalid image URL');
+    }
     final filePathSegments = segments.sublist(bucketIndex + 1);
     final filePath = filePathSegments.join('/');
     await _supabase.storage.from(_bucketName).remove([filePath]);
@@ -34,5 +35,29 @@ class DbImages {
         .from(Tb.images.table)
         .delete()
         .eq(Tb.images.link, imageUrl);
+  }
+
+  static Future<String> createCopyOfImage(String imageUrl, int? occasion, int? unit) async {
+    final uri = Uri.parse(imageUrl);
+    final segments = uri.pathSegments;
+    final bucketIndex = segments.indexOf(_bucketName);
+    if (bucketIndex == -1 || bucketIndex + 1 >= segments.length) {
+      throw Exception('Invalid image URL');
+    }
+    final filePathSegments = segments.sublist(bucketIndex + 1);
+    final filePath = filePathSegments.join('/');
+
+    final newPath = 'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
+    await _supabase.storage.from(_bucketName).copy(filePath, newPath);
+
+    final newPublicUrl = _supabase.storage.from(_bucketName).getPublicUrl(newPath);
+
+    await _supabase.from(Tb.images.table).insert({
+      Tb.images.link: newPublicUrl,
+      Tb.images.occasion: occasion,
+      Tb.images.unit: unit,
+    });
+
+    return newPublicUrl;
   }
 }

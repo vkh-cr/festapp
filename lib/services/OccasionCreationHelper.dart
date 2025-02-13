@@ -3,7 +3,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -186,7 +186,7 @@ class OccasionCreationHelper {
                             organization: unit.organization,
                           );
 
-                          await DbUsers.updateOccasion(newOccasion);
+                          await DbOccasions.updateOccasion(newOccasion);
                           onEventCreated();
                           Navigator.of(context).pop();
                         }
