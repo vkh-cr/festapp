@@ -298,7 +298,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   const SizedBox(height: 16),
                   // Delegate the field‐generation UI to the separate widget.
                   FormFieldsGenerator(form: form!),
-                  const SizedBox(height: 52),
+                  const SizedBox(height: 102),
                 ],
               ),
             ),
