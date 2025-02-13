@@ -58,8 +58,8 @@ dependencies:
   url_strategy: ^0.3.0
   desktop_drop: ^0.5.0
   csv: ^6.0.0
-  sembast: ^3.8.3
-  sembast_web: ^2.4.0+4
+  sembast: ^3.8.4
+  sembast_web: ^2.4.1
   path_provider: ^2.1.5
   select_dialog: ^2.0.1
   onesignal_flutter: ^5.2.9
