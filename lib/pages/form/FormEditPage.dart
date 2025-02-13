@@ -25,6 +25,7 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
     AdminTabDefinition.orders,
     if(FeatureService.isFeatureEnabled(FeatureService.ticket))
     AdminTabDefinition.tickets,
+    if(FeatureService.isFeatureEnabled(FeatureService.blueprint))
     AdminTabDefinition.blueprint,
     AdminTabDefinition.form,
     AdminTabDefinition.report,

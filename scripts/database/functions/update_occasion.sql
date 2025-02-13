@@ -15,6 +15,10 @@ DECLARE
     new_product_type_id BIGINT;
     old_unit BIGINT;
     final_unit BIGINT;
+    new_blueprint_id BIGINT;
+    v_feature_blueprint_enabled BOOLEAN;
+    v_form_id BIGINT;
+    v_form_blueprint BIGINT;
 BEGIN
     BEGIN
         IF input_data IS NULL THEN
@@ -63,7 +67,8 @@ BEGIN
                    organization = COALESCE((input_data->>'organization')::BIGINT, organization),
                    services   = COALESCE(input_data->'services', services),
                    unit       = final_unit,
-                   features   = COALESCE(input_data->'features', features)
+                   features   = COALESCE(input_data->'features', features),
+                   place = COALESCE((input_data->>'place')::BIGINT, place)
              WHERE id = occ_id
              RETURNING to_jsonb(public.occasions.*) INTO updated_occ;
 
@@ -85,7 +90,8 @@ BEGIN
                 organization,
                 services,
                 unit,
-                features
+                features,
+                place
             )
             VALUES(
                 now,
@@ -101,7 +107,8 @@ BEGIN
                 COALESCE((input_data->>'organization')::BIGINT, NULL),
                 COALESCE(input_data->'services', '{}'::jsonb),
                 final_unit,
-                COALESCE(input_data->'features', '[]'::jsonb)
+                COALESCE(input_data->'features', '[]'::jsonb),
+                COALESCE((input_data->>'place')::BIGINT, NULL)
             )
             RETURNING to_jsonb(public.occasions.*) INTO updated_occ;
 
@@ -261,6 +268,107 @@ BEGIN
                     true
                 );
             END IF;
+        END IF;
+
+        -- Blueprint feature check and creation
+        v_feature_blueprint_enabled := false;
+        IF input_data ? 'features' THEN
+            SELECT bool_or(
+                (elem->>'code' = 'blueprint')
+                AND ((elem->>'is_enabled')::BOOLEAN)
+            )
+              INTO v_feature_blueprint_enabled
+              FROM jsonb_array_elements(input_data->'features') AS elem;
+        END IF;
+
+        IF v_feature_blueprint_enabled THEN
+            SELECT id, blueprint
+              INTO v_form_id, v_form_blueprint
+              FROM public.forms
+             WHERE occasion = occ_id
+             LIMIT 1;
+            IF FOUND THEN
+                IF v_form_blueprint IS NULL THEN
+                    INSERT INTO eshop.blueprints(
+                        configuration,
+                        occasion,
+                        organization,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        '{"dimensions": {"width": 28, "height": 52}}'::jsonb,
+                        occ_id,
+                        COALESCE((updated_occ->>'organization')::BIGINT, 1),
+                        now,
+                        now
+                    )
+                    RETURNING id INTO new_blueprint_id;
+
+                    UPDATE public.forms
+                       SET blueprint = new_blueprint_id,
+                           updated_at = now
+                     WHERE id = v_form_id;
+                END IF;
+            END IF;
+        END IF;
+
+        -- Ensure product_type of type "spot" exists and has at least one product
+        IF NOT EXISTS (
+            SELECT 1 FROM eshop.product_types
+             WHERE occasion = occ_id AND type = 'spot'
+        ) THEN
+            INSERT INTO eshop.product_types(
+                title,
+                description,
+                type,
+                data,
+                occasion
+            )
+            VALUES (
+                '',
+                '',
+                'spot',
+                '{}'::jsonb,
+                occ_id
+            )
+            RETURNING id INTO new_product_type_id;
+        ELSE
+            SELECT id
+              INTO new_product_type_id
+              FROM eshop.product_types
+             WHERE occasion = occ_id AND type = 'spot'
+             LIMIT 1;
+        END IF;
+
+        IF NOT EXISTS (
+            SELECT 1 FROM eshop.products
+             WHERE occasion = occ_id AND product_type = new_product_type_id
+        ) THEN
+            INSERT INTO eshop.products(
+                title,
+                description,
+                price,
+                data,
+                product_type,
+                occasion,
+                is_hidden,
+                currency_code,
+                title_short,
+                "order"
+            )
+            VALUES (
+                '',
+                '',
+                100,
+                '{}'::jsonb,
+                new_product_type_id,
+                occ_id,
+                false,
+                'CZK',
+                '',
+                0
+            );
         END IF;
 
         result := JSONB_BUILD_OBJECT(

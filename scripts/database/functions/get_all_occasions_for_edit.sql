@@ -41,6 +41,7 @@ BEGIN
       'services', o.services,
       'unit', o.unit,
       'features', o.features,
+      'place', o.place,
       -- Subquery to fetch the first form for the occasion (if any)
       'form', (
          SELECT row_to_json(f)
