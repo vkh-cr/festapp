@@ -112,7 +112,7 @@ class _FeatureFormState extends State<FeatureForm> {
         TextFormField(
           controller: lightColorController,
           decoration: InputDecoration(
-            labelText: "Light Color",
+            labelText: "Background color".tr(),
           ),
           onSaved: (val) {
             widget.feature['lightColor'] = val;
@@ -124,7 +124,7 @@ class _FeatureFormState extends State<FeatureForm> {
         TextFormField(
           controller: darkColorController,
           decoration: InputDecoration(
-            labelText: "Dark Color",
+            labelText: "Font color".tr(),
           ),
           onSaved: (val) {
             widget.feature['darkColor'] = val;
@@ -135,7 +135,7 @@ class _FeatureFormState extends State<FeatureForm> {
       // Replace the background URL field with an ImageArea widget.
       fields.add(
         ImageArea(
-          hint: "Image (1600x900 px)".tr(),
+          hint: "(1600x900 px)".tr(),
           imageUrl: backgroundUrl,
           onFileSelected: (file) async {
             Uint8List imageData = await file.readAsBytes();
@@ -163,11 +163,11 @@ class _FeatureFormState extends State<FeatureForm> {
           keyboardType: TextInputType.number,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return "Max Companions is required".tr();
+              return "Max Companions is required";
             }
             final intValue = int.tryParse(value);
             if (intValue == null || intValue < 1) {
-              return "Enter a number greater than 0".tr();
+              return "Enter a number greater than 0";
             }
             return null;
           },
