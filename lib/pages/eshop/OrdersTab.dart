@@ -9,7 +9,7 @@ import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/dataServicesEshop/DbTickets.dart';
-import 'package:fstapp/pages/Eshop/EshopColumns.dart';
+import 'package:fstapp/pages/eshop/EshopColumns.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 
@@ -192,6 +192,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
+    EshopColumns.ORDER_EMAIL,
     if(!FeatureService.isFeatureEnabled(FeatureService.ticket))
     EshopColumns.TICKET_PRODUCTS,
     EshopColumns.ORDER_STATE,
