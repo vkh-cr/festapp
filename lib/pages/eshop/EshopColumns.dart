@@ -42,7 +42,6 @@ class EshopColumns {
 
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
-  static const String ORDER_EMAIL = "orderEmail";
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
@@ -205,17 +204,7 @@ class EshopColumns {
         title: "Customer".tr(),
         field: TbEshop.orders.data,
         type: PlutoColumnType.text(),
-        width: 150,
-      ),
-    ],
-    ORDER_EMAIL: [
-      PlutoColumn(
-        readOnly: true,
-        enableEditingMode: true,
-        title: "Email".tr(),
-        field: TbEshop.orders.data_email,
-        type: PlutoColumnType.text(),
-        width: 140,
+        width: 250,
       ),
     ],
     ORDER_DATA_NOTE: [
