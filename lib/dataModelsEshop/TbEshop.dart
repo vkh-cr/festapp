@@ -66,6 +66,7 @@ class OrdersTb {
   String get payment_info => "payment_info";
   String get currency_code => "currency_code";
   String get data_note => "note";
+  String get data_email => "email";
   String get note_hidden => "note_hidden";
 }
 

@@ -78,7 +78,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
           stateManager = event.stateManager;
-          event.stateManager.setSelectingMode(PlutoGridSelectingMode.row);
+          event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
           event.stateManager.setShowColumnFilter(true);
           reloadData();
         },

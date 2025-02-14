@@ -170,6 +170,7 @@ class OrderModel extends IPlutoRowModel {
             : "",
       ),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
+      TbEshop.orders.data_email: PlutoCell(value: data?[TbEshop.orders.data_email]),
       TicketModel.metaTicketsProducts: PlutoCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
@@ -194,7 +195,7 @@ class OrderModel extends IPlutoRowModel {
   @override
   String toBasicString() => "Order #$id";
 
-  String toCustomerData() => "${data?["name"]} ${data?["surname"]} (${data?["email"]})";
+  String toCustomerData() => "${data?["name"]} ${data?["surname"]}";
 
   String toCustomerNote() => "${data?["note"] ?? ""}";
   String toCustomerNoteHidden() => "${data?["note_hidden"] ?? ""}";
