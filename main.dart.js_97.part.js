@@ -136,11 +136,11 @@ while(true)switch(x){case 0:t={}
 s=B.ah5()
 t.a=null
 x=3
-return B.c(A.cUc(d,new A.b4n(),s,B.z("Choose language",null),new A.b4o(t),null,!1,y.c),$async$b4m)
+return B.c(A.cUc(d,new A.b4n(),s,B.y("Choose language",null),new A.b4o(t),null,!1,y.c),$async$b4m)
 case 3:u=t.a
 if(u!=null){A.ciD(d,u.a)
 u=y.N
-B.bE(d,B.z("Language was set to {language}.",B.y(["language",t.a.b],u,u)),C.a4)}v=t.a
+B.bE(d,B.y("Language was set to {language}.",B.z(["language",t.a.b],u,u)),C.a4)}v=t.a
 x=1
 break
 case 1:return B.j(v,w)}})
@@ -1096,7 +1096,7 @@ u=s.x
 u=u==null?r:u.b
 if(u==null)u="---"
 t=y.N
-C.b.I(w,B.a([v,I.al,B.aM(B.a([B.a1(B.z("Current Language: {language}",B.y(["language",u],t,t)),r,r,r,r,r,r,r,D.a4b,r,r,r,r,r),B.cl(r,r,r,r,r,D.amt,r,r,r,new A.c63(s,d),r,r,r,r,r)],x),C.j,C.cc,C.i,r),G.h6],x))}B.aVr()
+C.b.I(w,B.a([v,I.al,B.aM(B.a([B.a1(B.y("Current Language: {language}",B.z(["language",u],t,t)),r,r,r,r,r,r,r,D.a4b,r,r,r,r,r),B.cl(r,r,r,r,r,D.amt,r,r,r,new A.c63(s,d),r,r,r,r,r)],x),C.j,C.cc,C.i,r),G.h6],x))}B.aVr()
 v=B.a([E.bt(D.b4i,r),I.al,B.aM(B.a([E.bt(D.b3y,r),P.DG(r,r,r,!1,C.u,r,r,r,r,r,r,new A.c64(s),r,r,r,r,r,r,r,r,s.d)],x),C.j,C.cc,C.i,r)],x)
 if(s.w)v.push(new B.a6(H.hs,E.bt(D.b3Z,r),r))
 C.b.I(w,v)
@@ -1108,7 +1108,7 @@ v=B.a([v===C.nV,v===C.jT,v===C.lJ],y.u)
 u=B.cW(8)
 w.push(new A.aAQ(B.a([new B.a6(new B.an(12,0,12,0),E.bt(D.b3o,r),r),new B.a6(new B.an(12,0,12,0),E.bt(B.a1("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new B.a6(new B.an(12,0,12,0),E.bt(B.a1("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),v,new A.c65(s),u,r))
 w.push(G.h6)
-u=B.z("Install App",r)
+u=B.y("Install App",r)
 v=!s.e
 t=v&&s.r&&s.f?s.gaaP():r
 if(v&&s.r&&s.f)v=B.E(d).ax.a===C.w?$.fK():C.t
@@ -1117,7 +1117,7 @@ x=B.a([Y.M0(v,d,50,!0,u,t,B.E(d).ax.a===C.w?$.iW():C.m,250)],x)
 if(!s.r)x.push(new B.a6(H.hs,E.bt(D.b4a,r),r))
 if(s.e||!s.f)x.push(new B.a6(H.hs,E.bt(B.a1("The app is already installed.",r,r,r,r,r,r,r,B.aU(r,r,B.E(d).ax.a===C.w?$.fK():C.t,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.bc,r,r,r,r),r),r))
 w.push(B.cd(B.aA(x,C.j,C.f,C.i,r,C.q),r,r))
-return A0.fc(q,r,new B.ct(C.aI,r,r,new B.a6(S.aY,new B.cT(new B.ad(0,820,0,1/0),B.aA(w,C.a0,C.f,C.i,r,C.q),r),r),r),r,r,r,r,r)}}
+return A0.fc(q,r,new B.cu(C.aI,r,r,new B.a6(S.aY,new B.cT(new B.ad(0,820,0,1/0),B.aA(w,C.a0,C.f,C.i,r,C.q),r),r),r),r,r,r,r,r)}}
 A.atq.prototype={}
 A.aDI.prototype={
 J(){return"WindowStrategy."+this.b}}
@@ -1134,7 +1134,7 @@ if(x>0)u.z=x-1},
 MS(d,e,f){return d.dK(e,f)},
 GJ(d,e){var x,w,v=this
 v.as=!0
-if(v.a===D.DX)return
+if(v.a===D.DY)return
 x=v.x
 w=x.gT(0)
 if(!w)v.xu(x.a.a.gCG(),e)
@@ -1172,7 +1172,7 @@ if(x!=null)x.a0(0)
 return this.b.$1(d)},
 xu(d,e){},
 DR(d,e){var x,w,v,u=this
-if(e&&u.a===D.DX){x=!1
+if(e&&u.a===D.DY){x=!1
 if(u.Q)x=u.x.b>1
 if(x)d.t(0,u.d.$1(B.iM(u.x,u.$ti.c)))
 u.x.S(0)
@@ -1182,7 +1182,7 @@ u.at=null
 d.ak(0)
 return}x=!e
 if(x){w=u.a
-w=w===D.DX||w===D.a5e}else w=!0
+w=w===D.DY||w===D.a5e}else w=!0
 if(w){w=u.at
 if(w!=null)w.a0(0)
 u.at=null}if(u.Q){w=u.x.gT(0)
@@ -1866,14 +1866,14 @@ D.a4b=new B.a_(!0,null,null,null,null,null,16,null,null,null,null,null,null,null
 D.b3o=new B.cf("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3y=new B.cf("Enable Notifications",null,D.a4b,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3A=new B.cf("Appearance",null,F.lx,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b3Z=new B.cf("Failed to enable notifications.",null,K.Dm,null,C.bc,null,null,null,null,null,null,null,null,null,null)
-D.b4a=new B.cf("This platform or browser does not support the PWA install prompt or the app is already installed.",null,K.Dm,null,C.bc,null,null,null,null,null,null,null,null,null,null)
+D.b3Z=new B.cf("Failed to enable notifications.",null,K.Dn,null,C.bc,null,null,null,null,null,null,null,null,null,null)
+D.b4a=new B.cf("This platform or browser does not support the PWA install prompt or the app is already installed.",null,K.Dn,null,C.bc,null,null,null,null,null,null,null,null,null,null)
 D.b4c=new B.cf("Language Settings",null,F.lx,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4e=new B.cf("Settings",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4i=new B.cf("Notification Settings",null,F.lx,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b7q=new B.bn(C.T,B.x("bn<f9>"))
 D.b7r=new B.bn(C.ih,B.x("bn<h8>"))
 D.a5e=new A.aDI(0,"everyEvent")
-D.DX=new A.aDI(1,"eventAfterLastWindow")})()};
+D.DY=new A.aDI(1,"eventAfterLastWindow")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_97",e:"endPart",h:b})})($__dart_deferred_initializers__,"0qsTIWoX2lMzvYJNkM7S3Yg/xSU=");
+a.eventLog.push({p:"main.dart.js_97",e:"endPart",h:b})})($__dart_deferred_initializers__,"Tf9O4rQpJTQgHvUEea1vM90z8Do=");

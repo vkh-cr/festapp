@@ -79,9 +79,9 @@ t=M.iE(u,u,u,!0,u,u,1,u,u,u,!1,u,!1,u,u,U.tb(new C.bXv(d)),u,!0,u,u,u,u,u,t,u,u,
 x=A.cW(12)
 x=A.aK(u,u,B.l,u,u,new A.bJ(u,I.crz(B.J,L.lO,new O.Fe("assets/icons/fstappicon.png",u,u),u,K.eH),u,x,u,u,u,B.R),u,64,u,u,u,u,64)
 w=y.g
-w=A.z("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.y(["title","Festapp"],w,w))
+w=A.y("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.z(["title","Festapp"],w,w))
 v=y.e
-return A3.fc(t,u,new A.ct(B.aI,u,u,new A.a6(D.aiW,new A.cT(new A.ad(0,820,0,1/0),A.aA(A.a([A.cd(A.aM(A.a([x,D.aYe,A.c4(E.bt(A.a1(w,u,u,u,u,u,u,u,A.aU(u,u,A.E(d).ax.a===B.w?$.fK():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.j,B.bj,B.i,u),u,u),P.a3t,this.brE(d,A.z("Install for Apple",u),D.am6,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.brF(d,A.z("Install for Android",u),D.akF,"",1,A.z("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.brD(d,A.z("Install for PC/Mac",u),D.akS,"",2)],v),B.j,B.f,B.i,u,B.q),u),u),u),u,u,u,u,u)},
+return A3.fc(t,u,new A.cu(B.aI,u,u,new A.a6(D.aiW,new A.cT(new A.ad(0,820,0,1/0),A.aA(A.a([A.cd(A.aM(A.a([x,D.aYe,A.c4(E.bt(A.a1(w,u,u,u,u,u,u,u,A.aU(u,u,A.E(d).ax.a===B.w?$.fK():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.j,B.bj,B.i,u),u,u),P.a3t,this.brE(d,A.y("Install for Apple",u),D.am6,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.brF(d,A.y("Install for Android",u),D.akF,"",1,A.y("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.brD(d,A.y("Install for PC/Mac",u),D.akS,"",2)],v),B.j,B.f,B.i,u,B.q),u),u),u),u,u,u,u,u)},
 a8h(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
 if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
 else o=n
@@ -90,7 +90,7 @@ n=y.e
 x=A.aM(A.a([A.bR(f,q,q,24),R.jz,A.a1(e,q,q,q,q,q,q,q,B.jC,q,q,q,q,q)],n),B.j,B.f,B.i,q)
 w=A.a([],n)
 if(j!=null){v=A.E(d).ax.a===B.w?$.fK():B.t
-B.b.I(w,A.a([new A.a6(B.cT,E.bt(A.a1(j,q,q,q,q,q,q,q,A.aU(q,q,A.ee(204,v.aG()>>>16&255,v.aG()>>>8&255,v.aG()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),S.ip],n))}v=i?A.z("Download App",q):A.z("Install Now",q)
+B.b.I(w,A.a([new A.a6(B.cT,E.bt(A.a1(j,q,q,q,q,q,q,q,A.aU(q,q,A.ee(204,v.aG()>>>16&255,v.aG()>>>8&255,v.aG()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),S.ip],n))}v=i?A.y("Download App",q):A.y("Install Now",q)
 if(i)u=new C.bXs(g)
 else u=!r.d&&!r.f&&r.e?r.gaaP():q
 t=!i
@@ -141,7 +141,7 @@ return null},
 $S:0}
 C.bXt.prototype={
 $0(){H.v9(new H.oi(this.a.w.a.a))
-A.bE(this.b,A.z("Copied to clipboard",null),B.a4)},
+A.bE(this.b,A.y("Copied to clipboard",null),B.a4)},
 $S:0};(function installTearOffs(){var x=a._instance_0u
 x(C.aa0.prototype,"gaaP","wX",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(C.BH,A.G)
@@ -154,8 +154,8 @@ D.akF=new A.aG(57477,"MaterialIcons",null,!1)
 D.akS=new A.aG(57795,"MaterialIcons",null,!1)
 D.am6=new A.aG(984254,"MaterialIcons",null,!1)
 D.aYe=new A.at(22,null,null,null)
-D.b4_=new A.cf("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,N.Dm,null,B.bc,null,null,null,null,null,null,null,null,null,null)
+D.b4_=new A.cf("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,N.Dn,null,B.bc,null,null,null,null,null,null,null,null,null,null)
 D.b40=new A.cf("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dcc","coF",()=>new A.OJ())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_135",e:"endPart",h:b})})($__dart_deferred_initializers__,"fmEMqcrI+KmmHRWZUxgplap2Jfw=");
+a.eventLog.push({p:"main.dart.js_135",e:"endPart",h:b})})($__dart_deferred_initializers__,"fNmDk/OgYFrIPaR1+8MZ9mSicyc=");

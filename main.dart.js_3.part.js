@@ -228,21 +228,21 @@ this.e=f},
 aEz:function aEz(){},
 aEA:function aEA(){},
 cst(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,b0,b1,b2,b3,b4,b5,b6,b7,b8,b9,c0,c1,c2,c3,c4,c5,c6,c7,c8,c9,d0,d1,d2,d3,d4,d5,d6,d7,d8,d9,e0,e1,e2,e3,e4,e5,e6,e7,e8,e9,f0,f1,f2,f3,f4,f5){var x,w,v,u,t
-if(e1==null)x=b6?D.CK:D.CL
+if(e1==null)x=b6?D.CL:D.CM
 else x=e1
-if(e2==null)w=b6?D.CM:D.CN
+if(e2==null)w=b6?D.CN:D.CO
 else w=e2
-if(y.i.b(d6))v=D.DG
-else if(b6)v=c7?D.DG:D.b5t
+if(y.i.b(d6))v=D.DH
+else if(b6)v=c7?D.DH:D.b5t
 else v=c7?D.b5u:D.b5v
 u=b1==null?B.cNr(g,b3):b1
 if(b3===1){t=A.a([$.cEb()],y.aS)
 C.b.I(t,a8==null?D.aaz:a8)}else t=a8
 return new B.G6(m,a5,b7,b6,f0,f3,c7,a6,v,e0,d9==null?!c7:d9,!0,x,w,!0,e5,f5,e4,e7,e9,e8,f2,n,e,i,b3,b4,a4,h,d5,d6,u,f1,b9,c0,c3,b8,c1,c2,a7,c4,c5,t,b5,!0,s,o,r,q,p,c6,d7,d8,b0,d3,a2,a0,d2,d4,!0,!0,g,f,j,c9,d1,!0,k,l,e3,b2,a9)},
-cNr(d,e){return e===1?D.Df:C.wo},
+cNr(d,e){return e===1?D.Dg:C.wo},
 cNp(){var x,w=null,v=$.ag(),u=y.eF,t=F.crB(),s=A.a([],y.gv),r=A.bu()
 $label0$0:{if(C.aS===r||C.aw===r){x=!0
-break $label0$0}if(C.dn===r||C.dQ===r||C.cy===r||C.dR===r){x=!1
+break $label0$0}if(C.dn===r||C.dP===r||C.cy===r||C.dQ===r){x=!1
 break $label0$0}x=w}return new B.ng(new A.bT(!0,v,y.f),new A.aJ(w,u),new B.aQK(E.o9,E.oa,v),new A.aJ(w,u),new F.yb(),new F.yb(),new F.yb(),t,s,x,w,w,w)},
 cNq(d){var x=d==null,w=x?null:d.a,v=x||d.k(0,D.nw)
 x=w==null
@@ -636,7 +636,7 @@ s.push(A.dD(t,t,t,x,C.e.a8(r,w,u)));++m
 p=u}}n=r.length
 if(p<n)s.push(A.dD(t,t,t,f,C.e.a8(r,p,n)))
 return s},
-d0l(d,e,f,g,h){var x,w,v,u=null,t=A.a([],y.o),s=e.a,r=e.c,q=f.e1(H.Di),p=f.e1(g),o=0,n=r.a,m=s.length,l=J.a3(d),k=r.b,j=!h,i=0
+d0l(d,e,f,g,h){var x,w,v,u=null,t=A.a([],y.o),s=e.a,r=e.c,q=f.e1(H.Dj),p=f.e1(g),o=0,n=r.a,m=s.length,l=J.a3(d),k=r.b,j=!h,i=0
 while(!0){if(!(o<m&&i<l.gu(d)))break
 x=l.i(d,i).a
 w=x.a
@@ -792,7 +792,7 @@ return A.k($async$aiL,w)},
 bwo(){var x=0,w=A.l(y.y),v,u
 var $async$bwo=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=3
-return A.c(D.Yl.q1("Scribe.isFeatureAvailable",y.fQ),$async$bwo)
+return A.c(D.Ym.q1("Scribe.isFeatureAvailable",y.fQ),$async$bwo)
 case 3:u=e
 if(u==null)throw A.f(A.il("MethodChannel.invokeMethod unexpectedly returned null."))
 v=u
@@ -1087,7 +1087,7 @@ w=x.w
 w.toString
 d.bU=w
 d.e=!0
-d.dS(C.Ck,i.f_)
+d.dS(C.Cl,i.f_)
 d.dS(C.a2B,!0)
 d.dS(C.a2y,i.hS)
 if(i.f_&&i.gn8())d.sZU(i.gb7p())
@@ -1162,7 +1162,7 @@ if(g)c1=b0}else g=!1
 else g=!0
 if(g){if(c1!=null){a6.lG(C.jt,c1)
 a6.w=c1
-a6.dS(C.Cl,!0)}break $label0$1}b1=b8
+a6.dS(C.Cm,!0)}break $label0$1}b1=b8
 if(a8 instanceof A.kJ){b2=a8.p2
 c1=s.b(b2)
 if(c1)b1=b2}else c1=!1
@@ -1587,9 +1587,9 @@ v.zu=v.uV=v.tB=!1}u=!u
 v.h8=u
 v.zv=g
 if(u){v.iu=f
-if(g!=null){u=A.amE(D.HP,C.T,g)
+if(g!=null){u=A.amE(D.HQ,C.T,g)
 u.toString
-x=u}else x=D.HP
+x=u}else x=D.HQ
 u=v.glH()
 w=v.nu
 w===$&&A.b()
@@ -2002,7 +2002,7 @@ B.ei.prototype={
 scP(d,e){this.ke(0,this.a.GX(C.aA,C.bd,e))},
 awl(d,e,f){var x,w,v,u,t=null
 if(!this.a.gaB7()||!f)return A.dD(t,t,t,e,this.a.a)
-x=e.e1(H.Di)
+x=e.e1(H.Dj)
 w=this.a
 v=w.c
 w=w.a
@@ -2220,7 +2220,7 @@ if(d<=w.i(x,t).a.b&&d>=s)return w.i(x,t)
 else if(d<=s)v=t-1
 else u=t+1}return null},
 brT(){var x,w=this,v=null,u=w.a.z
-if(u===D.DG)return v
+if(u===D.DH)return v
 x=A.a([],y.t)
 if(u.b&&w.gH6())x.push(new F.h2(new B.b6B(w),E.oD,v))
 if(u.a&&w.gGS())x.push(new F.h2(new B.b6C(w),E.mf,v))
@@ -2606,7 +2606,7 @@ x=r.d
 v=r.b
 u=w.b
 t=x-v>=u?u/2-r.gdT().b:A.Y(0,x-u,v)
-s=C.e6}x=p.gni().gao(0).at
+s=C.e5}x=p.gni().gao(0).at
 x.toString
 v=C.b.gdQ(p.gni().f).z
 v.toString
@@ -2940,7 +2940,7 @@ if(v!=null)u.U1(v,null)}else{w.lY(u)
 u.B(new B.b6h(u))}u.AD()},
 aib(){var x,w,v,u=this,t=A.bu()
 $label0$0:{if(C.aS===t||C.aw===t||C.dn===t)break $label0$0
-if(C.cy===t||C.dQ===t||C.dR===t)break $label0$0}x=u.a
+if(C.cy===t||C.dP===t||C.dQ===t)break $label0$0}x=u.a
 if(x.aA)w=x.k2===1&&!u.rx&&!u.k3
 else w=!1
 u.k3=!1
@@ -2987,10 +2987,10 @@ q=g.c
 q.toString
 q=A.b3T(q)
 p=new B.c4Q(s,r,v,q,f,g.a.grZ(),g.bW,g.gaT().gC(0),x)
-if(d)o=C.dP
+if(d)o=C.dO
 else{v=g.y2
 v=v==null?f:v.bsY(p)
-o=v==null?C.dP:v}if(o.a<3)return
+o=v==null?C.dO:v}if(o.a<3)return
 g.y2=p
 n=A.a([],y.Q)
 m=x.xA(!1)
@@ -3103,7 +3103,7 @@ ga82(){return"EditableText-"+A.dJ(this)},
 goo(){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=m.a.b1
 if(l==null)x=null
 else x=J.pI(l.slice(0),A.X(l).c)
-w=x!=null?new B.VM(!0,"EditableText-"+A.dJ(m),x,m.a.c.a,null):D.EP
+w=x!=null?new B.VM(!0,"EditableText-"+A.dJ(m),x,m.a.c.a,null):D.EQ
 l=m.c
 l.toString
 l=A.zk(l).a
@@ -3117,7 +3117,7 @@ q=v.ay
 if(v.aA)p=!t||!s
 else p=!1
 v=v.p4
-if(v==null)v=u.k(0,C.wo)?C.a41:C.De
+if(v==null)v=u.k(0,C.wo)?C.a41:C.Df
 o=m.a
 n=o.dy
 o=o.aI
@@ -3358,7 +3358,7 @@ l=a6.ho(l)
 x=A.a([],x)
 a7=a9.c
 a7.toString
-a8=A.y([D.b5C,new A.XZ(!1,new A.cb(w,v)),D.b6l,b0,D.b6y,t,C.DI,new A.XU(!0,new A.cb(u,v)),C.DJ,new A.ez(a9.gb8H(),new A.cb(s,v),y.W),D.b5I,o,D.b6G,m,D.b5J,j,E.a4O,k,D.b5O,i,E.a4V,h,D.b6O,f,E.a5_,e,E.a4U,d,D.b6s,a0,D.b6h,g,E.a4W,a2,E.a4Z,p,D.b6I,a1,C.DL,new A.ez(a9.gb_y(),new A.cb(q,v),y.b),E.a4I,a3,E.a4J,r,E.a4S,n,E.a4L,a4,D.b63,a5,D.b6r,l,D.b5M,new B.aHo(new A.cb(x,v)).ho(a7)],y.n,y.V)
+a8=A.z([D.b5C,new A.XZ(!1,new A.cb(w,v)),D.b6l,b0,D.b6y,t,C.DJ,new A.XU(!0,new A.cb(u,v)),C.DK,new A.ez(a9.gb8H(),new A.cb(s,v),y.W),D.b5I,o,D.b6G,m,D.b5J,j,E.a4O,k,D.b5O,i,E.a4V,h,D.b6O,f,E.a5_,e,E.a4U,d,D.b6s,a0,D.b6h,g,E.a4W,a2,E.a4Z,p,D.b6I,a1,C.DM,new A.ez(a9.gb_y(),new A.cb(q,v),y.b),E.a4I,a3,E.a4J,r,E.a4S,n,E.a4L,a4,D.b63,a5,D.b6r,l,D.b5M,new B.aHo(new A.cb(x,v)).ho(a7)],y.n,y.V)
 a9.ac!==$&&A.a8()
 a9.ac=a8
 b0=a8}return b0},
@@ -3390,7 +3390,7 @@ if(u>=0&&u<=l.c.a.a.length){t=A.a([],y.ax)
 l=n.a
 s=l.c.a.a.length-n.bW
 if(l.k2!==1){t.push(D.bbb)
-t.push(new B.KX(new A.P(n.gaT().gC(0).a,0),C.a9,C.e9,m,m))}else t.push(D.bba)
+t.push(new B.KX(new A.P(n.gaT().gC(0).a,0),C.a9,C.e8,m,m))}else t.push(D.bba)
 l=n.fr
 l===$&&A.b()
 u=A.a([A.dD(m,m,m,m,C.e.a8(n.a.c.a.a,0,s))],y.aF)
@@ -3486,7 +3486,7 @@ if(d===v)return C.ig
 x=!0
 if(v.a===d.a)if(v.b===d.b){if(v.c.k(0,d.c))w=!D.a4_.k(0,D.a4_)||!v.f.k(0,d.f)||v.r!==d.r||!v.w.k(0,d.w)
 else w=x
-x=w}return x?C.dP:v.x.c_(0,d.x)}}
+x=w}return x?C.dO:v.x.c_(0,d.x)}}
 B.ac7.prototype={
 N(){var x=$.czG
 $.czG=x+1
@@ -4042,7 +4042,7 @@ u.toString
 u.jH()
 if(v){s=s.gb_().gX()
 s.toString
-t.a3w(x,D.ch,s.gaT().f_?null:D.Dh)
+t.a3w(x,D.ch,s.gaT().f_?null:D.Di)
 return}s=s.gb_().gX()
 s.toString
 s=s.gaT()
@@ -4114,7 +4114,7 @@ w.n7(D.ch,v)
 break
 case 2:if(x){m=m.gb_().gX()
 m.toString
-u=m.gaT().f_?null:D.Dh
+u=m.gaT().f_?null:D.Di
 n.a3w(d.a,D.ch,u)
 return}switch(d.c.a){case 1:case 4:case 2:case 3:w=m.gb_().gX()
 w.toString
@@ -4221,7 +4221,7 @@ v.toString
 v=v.a.c.a.b
 u=s.gb_().gX()
 u.toString
-u.a0h(new A.Qk(C.k,new A.am(w,new A.bz(x.c,v.e)),C.Ih))}}break
+u.a0h(new A.Qk(C.k,new A.am(w,new A.bz(x.c,v.e)),C.Ii))}}break
 case 0:case 1:case 3:case 5:x=s.gb_().gX()
 x.toString
 x=x.gaT()
@@ -4403,12 +4403,12 @@ break}else switch(A.bu().a){case 2:switch(x){case C.cv:case C.cx:u=u.gb_().gX()
 u.toString
 u.gaT().n7(D.bV,d.b)
 break
-case C.cw:case C.ea:case C.bQ:case C.dO:case null:case void 0:break}break
+case C.cw:case C.ea:case C.bQ:case C.dN:case null:case void 0:break}break
 case 0:case 1:switch(x){case C.cv:case C.cx:u=u.gb_().gX()
 u.toString
 u.gaT().n7(D.bV,d.b)
 break
-case C.cw:case C.ea:case C.bQ:case C.dO:w=u.gb_().gX()
+case C.cw:case C.ea:case C.bQ:case C.dN:w=u.gb_().gX()
 w.toString
 if(w.gaT().f_){u=u.gb_().gX()
 u.toString
@@ -4443,18 +4443,18 @@ t=d.x
 if(B.Ul(t)===2){s=n.gb_().gX()
 s.toString
 s.gaT().Rn(D.bV,u.a3(0,w).a3(0,x),v)
-switch(d.f){case C.cw:case C.ea:case C.bQ:case C.dO:return o.Mn(v)
+switch(d.f){case C.cw:case C.ea:case C.bQ:case C.dN:return o.Mn(v)
 case C.cv:case C.cx:case null:case void 0:return}}if(B.Ul(t)===3)switch(A.bu().a){case 0:case 1:case 2:switch(d.f){case C.cv:case C.cx:return o.a6b(D.bV,u.a3(0,w).a3(0,x),v)
-case C.cw:case C.ea:case C.bQ:case C.dO:case null:case void 0:break}return
+case C.cw:case C.ea:case C.bQ:case C.dN:case null:case void 0:break}return
 case 3:return o.arH(D.bV,u.a3(0,w).a3(0,x),v)
 case 5:case 4:return o.a6b(D.bV,u.a3(0,w).a3(0,x),v)}switch(A.bu().a){case 2:switch(d.f){case C.cv:case C.cx:n=n.gb_().gX()
 n.toString
 return n.gaT().Rm(D.bV,u.a3(0,w).a3(0,x),v)
-case C.cw:case C.ea:case C.bQ:case C.dO:case null:case void 0:break}return
+case C.cw:case C.ea:case C.bQ:case C.dN:case null:case void 0:break}return
 case 0:case 1:switch(d.f){case C.cv:case C.cx:case C.cw:case C.ea:n=n.gb_().gX()
 n.toString
 return n.gaT().Rm(D.bV,u.a3(0,w).a3(0,x),v)
-case C.bQ:case C.dO:x=n.gb_().gX()
+case C.bQ:case C.dN:x=n.gb_().gX()
 x.toString
 if(x.gaT().f_){n=n.gb_().gX()
 n.toString
@@ -4581,7 +4581,7 @@ if(x.b===this){v=v.length!==0&&w.b>0
 w=w.gawG()
 x=x.a
 x===$&&A.b()
-x.fN("UndoManager.setUndoState",A.y(["canUndo",v,"canRedo",w],y.N,y.y),y.H)}},
+x.fN("UndoManager.setUndoState",A.z(["canUndo",v,"canRedo",w],y.N,y.y),y.H)}},
 bnx(d){this.vA()},
 bhH(d){this.vn()},
 a6V(d,e){var x=this
@@ -4646,7 +4646,7 @@ w=x.f
 if(w!=null)w.a0(0)
 x.ai()},
 A(d){var x=y.k,w=y.j
-return A.A8(A.y([D.b6x,new A.ez(this.gbnw(),new A.cb(A.a([],x),w),y.d1).ho(d),D.b6i,new A.ez(this.gbhG(),new A.cb(A.a([],x),w),y.U).ho(d)],y.n,y.V),this.a.x)},
+return A.A8(A.z([D.b6x,new A.ez(this.gbnw(),new A.cb(A.a([],x),w),y.d1).ho(d),D.b6i,new A.ez(this.gbhG(),new A.cb(A.a([],x),w),y.U).ho(d)],y.n,y.V),this.a.x)},
 bmB(d){return this.gbmA().$1(d)}}
 B.S9.prototype={
 j(d){return"UndoHistoryValue(canUndo: "+this.a+", canRedo: "+this.b+")"},
@@ -5018,7 +5018,7 @@ x=x.gaT()
 w=x.fe
 w.toString
 x.n7(D.nj,w)
-D.Yl.q1("Scribe.startStylusHandwriting",y.H)}},
+D.Ym.q1("Scribe.startStylusHandwriting",y.H)}},
 $S:107}
 B.c8O.prototype={
 $0(){return A.RM(this.a,null)},
@@ -5248,12 +5248,12 @@ A.ks(b.typeUniverse,JSON.parse('{"adK":1}'))
 var y=(function rtii(){var x=A.x
 return{V:x("c_<bP>"),r:x("LF"),g:x("ad"),W:x("ez<on>"),D:x("ez<b8s>"),M:x("ez<Ct>"),U:x("ez<D1>"),T:x("ez<u3>"),b:x("ez<kP>"),J:x("ez<yW>"),Y:x("ez<DX>"),d1:x("ez<E_>"),G:x("ez<rF>"),I:x("na"),v:x("dp"),bp:x("fq"),O:x("on"),c0:x("vm"),dq:x("B5"),s:x("B6"),dX:x("vo"),c:x("vp"),A:x("ot"),dG:x("xJ"),eO:x("Gg"),gr:x("vq"),bq:x("B9"),q:x("d1<tz>"),bF:x("d1<kJ>"),bZ:x("d1<nN>"),hd:x("d1<nO>"),al:x("d1<kn>"),aI:x("pF<eb>"),dt:x("my<aL>"),fm:x("aL"),fq:x("bP"),t:x("q<h2>"),p:x("q<iK>"),aF:x("q<iq>"),d8:x("q<vH>"),gv:x("q<CV>"),u:x("q<D5>"),Q:x("q<J4>"),L:x("q<fy>"),gM:x("q<e>"),aU:x("q<cxp>"),R:x("q<DF>"),af:x("q<m5>"),aS:x("q<m6>"),X:x("q<rC>"),o:x("q<za>"),ax:x("q<KX>"),k:x("q<~(c_<bP>)>"),et:x("f_"),eF:x("aJ<L<G>>"),cK:x("OT"),_:x("B<@>"),ee:x("B<D?>"),x:x("H"),C:x("bj<n,bz>"),l:x("bj<r,n>"),P:x("aa<e,@>"),ce:x("aa<@,@>"),w:x("fl"),cA:x("fn<iw>"),fL:x("ax"),j:x("cb<~(c_<bP>)>"),fB:x("oM"),bN:x("jT"),E:x("IN"),F:x("u3"),m:x("Dk"),eV:x("fy"),N:x("e"),h:x("qk"),d:x("clL"),i:x("ql"),n:x("iy"),bW:x("S7<dd>"),e:x("rF"),f:x("bT<w>"),a:x("Sv"),a6:x("Sz"),f9:x("zw<FZ>"),f2:x("zw<G_>"),dr:x("zw<G0>"),dZ:x("adT<ms>"),y:x("w"),z:x("@"),ci:x("r"),K:x("oi?"),b7:x("B<DF>?"),B:x("U?"),Z:x("IN?"),S:x("Dk?"),fQ:x("w?"),g5:x("~()?"),H:x("~")}})();(function constants(){var x=a.makeConstList
 D.b_=new A.dd("",C.bd,C.aA)
-D.EP=new B.VM(!1,"",C.bu,D.b_,null)
+D.EQ=new B.VM(!1,"",C.bu,D.b_,null)
 D.aaz=new A.kD(A.x("kD<m6>"))
 D.abt=new B.ayL()
 D.bS=new A.an(20,20,20,20)
 D.bcg=new A.an(4,4,4,5)
-D.HP=new A.an(0.5,1,0.5,1)
+D.HQ=new A.an(0.5,1,0.5,1)
 D.ba7=new B.p9(0,1)
 D.bac=new B.p9(0.5,1)
 D.baf=new B.p9(0.5375,0.75)
@@ -5268,10 +5268,10 @@ D.ba9=new B.p9(1,1)
 D.arY=A.a(x([D.ba7,D.bac,D.baf,D.bah,D.bad,D.bab,D.baa,D.bag,D.bae,D.ba8,D.ba9]),A.x("q<p9>"))
 D.ayZ=A.a(x([]),y.X)
 D.aNu={"deleteBackward:":0,"deleteWordBackward:":1,"deleteToBeginningOfLine:":2,"deleteForward:":3,"deleteWordForward:":4,"deleteToEndOfLine:":5,"moveLeft:":6,"moveRight:":7,"moveForward:":8,"moveBackward:":9,"moveUp:":10,"moveDown:":11,"moveLeftAndModifySelection:":12,"moveRightAndModifySelection:":13,"moveUpAndModifySelection:":14,"moveDownAndModifySelection:":15,"moveWordLeft:":16,"moveWordRight:":17,"moveToBeginningOfParagraph:":18,"moveToEndOfParagraph:":19,"moveWordLeftAndModifySelection:":20,"moveWordRightAndModifySelection:":21,"moveParagraphBackwardAndModifySelection:":22,"moveParagraphForwardAndModifySelection:":23,"moveToLeftEndOfLine:":24,"moveToRightEndOfLine:":25,"moveToBeginningOfDocument:":26,"moveToEndOfDocument:":27,"moveToLeftEndOfLineAndModifySelection:":28,"moveToRightEndOfLineAndModifySelection:":29,"moveToBeginningOfDocumentAndModifySelection:":30,"moveToEndOfDocumentAndModifySelection:":31,"transpose:":32,"scrollToBeginningOfDocument:":33,"scrollToEndOfDocument:":34,"scrollPageUp:":35,"scrollPageDown:":36,"pageUpAndModifySelection:":37,"pageDownAndModifySelection:":38,"cancelOperation:":39,"insertTab:":40,"insertBacktab:":41}
-D.aJT=new A.F(D.aNu,[C.yW,C.yZ,C.yX,C.mn,C.mo,C.yY,C.kg,C.kh,C.kh,C.kg,C.ki,C.kj,C.oY,C.oZ,C.mw,C.mx,C.p1,C.p2,C.iU,C.iV,C.Id,C.Ie,C.I9,C.Ia,C.iU,C.iV,C.p_,C.p0,C.HY,C.HZ,C.zl,C.zm,C.Fz,C.a2l,C.a2m,C.C7,C.w6,C.p3,C.p4,C.Fk,C.y0,C.Fu],A.x("F<e,bP>"))
+D.aJT=new A.F(D.aNu,[C.yW,C.yZ,C.yX,C.mn,C.mo,C.yY,C.kg,C.kh,C.kh,C.kg,C.ki,C.kj,C.oY,C.oZ,C.mw,C.mx,C.p1,C.p2,C.iU,C.iV,C.Ie,C.If,C.Ia,C.Ib,C.iU,C.iV,C.p_,C.p0,C.HZ,C.I_,C.zl,C.zm,C.FA,C.a2l,C.a2m,C.C8,C.w6,C.p3,C.p4,C.Fl,C.y0,C.Fv],A.x("F<e,bP>"))
 D.aRF=new A.oL("flutter/undomanager",C.k2,null)
 D.aRH=new A.oL("flutter/spellcheck",C.bo,null)
-D.Yl=new A.oL("flutter/scribe",C.k2,null)
+D.Ym=new A.oL("flutter/scribe",C.k2,null)
 D.ch=new A.oU(0,"tap")
 D.a2p=new A.oU(1,"doubleTap")
 D.dm=new A.oU(2,"longPress")
@@ -5279,21 +5279,21 @@ D.ni=new A.oU(3,"forcePress")
 D.bV=new A.oU(6,"drag")
 D.nj=new A.oU(7,"scribble")
 D.aWt=new A.hN([C.aS,C.dn,C.aw],A.x("hN<m4>"))
-D.CK=new B.az4(0,"disabled")
-D.CL=new B.az4(1,"enabled")
-D.CM=new B.az5(0,"disabled")
-D.CN=new B.az5(1,"enabled")
+D.CL=new B.az4(0,"disabled")
+D.CM=new B.az4(1,"enabled")
+D.CN=new B.az5(0,"disabled")
+D.CO=new B.az5(1,"enabled")
 D.nw=new B.a5g(null,null,null,null,!1)
 D.bX=new B.bCJ(3,"none")
-D.Dh=new A.kS(0,0,C.D,!1,0,0)
-D.lu=new A.dd("",D.Dh,C.aA)
-D.a4_=new A.a5R(C.Dg)
-D.Df=new A.rB(0,null,null)
+D.Di=new A.kS(0,0,C.D,!1,0,0)
+D.lu=new A.dd("",D.Di,C.aA)
+D.a4_=new A.a5R(C.Dh)
+D.Dg=new A.rB(0,null,null)
 D.lw=new A.rB(2,!1,!1)
 D.aZL=new A.rB(2,!1,!0)
 D.aZM=new A.rB(4,null,null)
 D.aZN=new A.rB(5,null,null)
-D.DG=new B.S3(!1,!1,!1,!1)
+D.DH=new B.S3(!1,!1,!1,!1)
 D.b5t=new B.S3(!1,!1,!0,!0)
 D.b5u=new B.S3(!0,!1,!1,!0)
 D.b5v=new B.S3(!0,!0,!0,!0)
@@ -5317,8 +5317,8 @@ D.b6P=new B.aB7(0,"undo")
 D.b6Q=new B.aB7(1,"redo")
 D.b6R=new B.S9(!1,!1)
 D.aXF=new A.P(100,0)
-D.bba=new B.KX(D.aXF,C.a9,C.e9,null,null)
-D.bbb=new B.KX(C.U,C.a9,C.e9,null,null)})();(function staticFields(){$.cxM=1
+D.bba=new B.KX(D.aXF,C.a9,C.e8,null,null)
+D.bbb=new B.KX(C.U,C.a9,C.e8,null,null)})();(function staticFields(){$.cxM=1
 $.czG=1})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dbQ","cEb",()=>new B.YX("\n",!1,""))
 x($,"df1","aTK",()=>{var w=new B.aB8()
@@ -5326,4 +5326,4 @@ w.a=D.aRF
 w.gbny().qo(w.gb8g())
 return w})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"vvJATsR4JASvNMSm2Tps84IB2lc=");
+a.eventLog.push({p:"main.dart.js_3",e:"endPart",h:b})})($__dart_deferred_initializers__,"dGW9XFYDsujVeegrPLFraT0j2hw=");

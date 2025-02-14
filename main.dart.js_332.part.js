@@ -6,7 +6,7 @@ alw(){var x=0,w=A.l(y.x),v,u,t,s
 var $async$alw=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.A3().ej("game_get_correctly_guessed_checkpoints",A.y(["oc",$.dW],y.w,u),u),$async$alw)
+return A.c($.A3().ej("game_get_correctly_guessed_checkpoints",A.z(["oc",$.dW],y.w,u),u),$async$alw)
 case 3:t=e
 x=4
 return A.c(y.i.b(t)?t:A.cC(t,u),$async$alw)
@@ -75,7 +75,7 @@ var $async$b2u=A.h(function(g,h){if(g===1)return A.i(h,w)
 while(true)switch(x){case 0:u=y.b
 case 3:t=J
 x=13
-return A.c($.uV().ej("game_guess",A.y(["check_point_id",e,"guess",f],y.w,u),u),$async$b2u)
+return A.c($.uV().ej("game_guess",A.z(["check_point_id",e,"guess",f],y.w,u),u),$async$b2u)
 case 13:switch(t.u(h,"code")){case 200:x=5
 break
 case 4031:x=6
@@ -92,29 +92,29 @@ case 4001:x=11
 break
 default:x=12
 break}break
-case 5:A.bE(d,A.z("Correct!",null),C.a4)
+case 5:A.bE(d,A.y("Correct!",null),C.a4)
 v=!0
 x=1
 break
-case 6:A.bE(d,A.z("You are not part of this occasion.",null),C.b0)
+case 6:A.bE(d,A.y("You are not part of this occasion.",null),C.b0)
 x=4
 break
-case 7:A.bE(d,A.z("You are not part of a game group.",null),C.b0)
+case 7:A.bE(d,A.y("You are not part of a game group.",null),C.b0)
 x=4
 break
 case 8:A.bE(d,"Guessing is only allowed within the game time window.",C.b0)
 x=4
 break
-case 9:A.bE(d,A.z("Correct answer for this check point was not set.",null),C.b0)
+case 9:A.bE(d,A.y("Correct answer for this check point was not set.",null),C.b0)
 x=4
 break
-case 10:A.bE(d,A.z("Correct answer was not set.",null),C.b0)
+case 10:A.bE(d,A.y("Correct answer was not set.",null),C.b0)
 x=4
 break
-case 11:A.bE(d,A.z("Incorrect, try again!",null),C.b0)
+case 11:A.bE(d,A.y("Incorrect, try again!",null),C.b0)
 x=4
 break
-case 12:A.bE(d,A.z("An unexpected error occurred.",null),C.b0)
+case 12:A.bE(d,A.y("An unexpected error occurred.",null),C.b0)
 x=4
 break
 case 4:v=!1
@@ -146,7 +146,7 @@ U=c[164]
 B.b_R.prototype={
 gZr(){return $.cDT().gZr().a9V(new B.b_U())}}
 B.Bk.prototype={
-N(){return new B.aIf(A.a([],y.p),A.aT(y.e),A.z("Game",null))}}
+N(){return new B.aIf(A.a([],y.p),A.aT(y.e),A.y("Game",null))}}
 B.aIf.prototype={
 Y(){var x,w=this
 w.aj()
@@ -213,15 +213,15 @@ o.toString
 w=p.jK(o)}else w=!1
 o=A.a1(r.f,q,q,q,q,q,q,q,q,q,q,q,q,q)
 o=I.iE(q,q,q,!0,q,q,1,q,q,q,!1,q,!1,q,q,M.tb(new B.bUS(d)),q,!0,q,q,q,q,q,o,q,q,q,1,q)
-v=A.a([new A.ct(C.aI,q,q,new A.cT(new A.ad(0,820,0,1/0),L.aoJ(q,C.u,D.aYs,new B.bUT(r),r.d.length,q,C.aG,q,C.G,!1),q),q)],y.u)
-if(!r.z)v.push(r.Sq(A.z("For playing the game, you must be assigned to a game group",q)))
-if(r.z&&x)v.push(r.Sq(A.z("Game has not started yet",q)))
+v=A.a([new A.cu(C.aI,q,q,new A.cT(new A.ad(0,820,0,1/0),L.aoJ(q,C.u,D.aYs,new B.bUT(r),r.d.length,q,C.aG,q,C.G,!1),q),q)],y.u)
+if(!r.z)v.push(r.Sq(A.y("For playing the game, you must be assigned to a game group",q)))
+if(r.z&&x)v.push(r.Sq(A.y("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.cW(8)
 t=r.y.a
 s=y.w
-v.push(A.fH(q,A.aK(q,A.a1(A.z("Time left: {time}",A.y(["time",""+C.c.b7(t,36e8)+":"+C.e.h1(C.c.j(C.c.ap(C.c.b7(t,6e7),60)),2,"0")+":"+C.e.h1(C.c.j(C.c.ap(C.c.b7(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,O.Dn,q,q,q,q,q),C.l,q,q,new A.bJ(C.aJ,q,q,u,q,q,q,C.R),q,q,q,C.aG,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Sq(A.z("Game has ended",q)))
-if(r.Q)v.push(r.Sq(A.z("You are offline. Please check your internet connection.",q)))
-return T.fc(o,q,new A.cs(C.ag,q,C.ad,C.C,v,q),q,q,q,q,q)},
+v.push(A.fH(q,A.aK(q,A.a1(A.y("Time left: {time}",A.z(["time",""+C.c.b7(t,36e8)+":"+C.e.h1(C.c.j(C.c.ap(C.c.b7(t,6e7),60)),2,"0")+":"+C.e.h1(C.c.j(C.c.ap(C.c.b7(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,O.Do,q,q,q,q,q),C.l,q,q,new A.bJ(C.aJ,q,q,u,q,q,q,C.R),q,q,q,C.aG,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Sq(A.y("Game has ended",q)))
+if(r.Q)v.push(r.Sq(A.y("You are offline. Please check your internet connection.",q)))
+return T.fc(o,q,new A.ct(C.ag,q,C.ad,C.C,v,q),q,q,q,q,q)},
 Sq(d){var x=null
 return A.aK(C.J,A.cd(new A.a6(K.aY,A.a1(d,x,x,x,x,x,x,x,D.b_s,C.bc,x,x,x,x),x),x,x),C.l,C.aq,x,x,x,x,x,x,x,x,x)},
 Vu(d,e){return this.bkM(d,e)},
@@ -288,7 +288,7 @@ $0(){return R.wd(this.a)},
 $S:0}
 B.bUT.prototype={
 $2(d,e){var x,w,v,u=null,t=this.a
-if(t.e.n(0,t.d[e].a))x=A.E(d).ax.a===C.w?C.aP:Q.G3
+if(t.e.n(0,t.d[e].a))x=A.E(d).ax.a===C.w?C.aP:Q.G4
 else x=C.bC
 w=A.cW(8)
 v=t.d[e].d
@@ -299,10 +299,10 @@ $0(){return this.a.Vu(this.b,this.c)},
 $S:0}
 B.bUQ.prototype={
 $1(d){var x,w,v,u=this,t=null,s=y.w
-s=A.a1(A.z("Check point {title}",A.y(["title",u.c],s,s)),t,t,t,t,t,t,t,t,t,t,t,t,t)
+s=A.a1(A.y("Check point {title}",A.z(["title",u.c],s,s)),t,t,t,t,t,t,t,t,t,t,t,t,t)
 x=u.a
 w=y.u
-v=A.aA(A.a([E.jZ(!0,C.bu,!1,t,!0,C.C,t,E.l_(),t,t,t,t,t,t,2,E.ec(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.z("Take a guess",t),t,t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t),C.u,!0,t,!0,t,!1,t,P.bz,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.bUO(x),t,t,t,!1,t,t,!1,t,!0,t,G.bS,t,t,C.bn,C.bg,t,t,t,t,t,t,t,!0,C.W,t,G.bX,t,t,t,t)],w),C.j,C.f,C.a2,t,C.q)
+v=A.aA(A.a([E.jZ(!0,C.bu,!1,t,!0,C.C,t,E.l_(),t,t,t,t,t,t,2,E.ec(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.y("Take a guess",t),t,t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t),C.u,!0,t,!0,t,!1,t,P.bz,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.bUO(x),t,t,t,!1,t,t,!1,t,!0,t,G.bS,t,t,C.bn,C.bg,t,t,t,t,t,t,t,!0,C.W,t,G.bX,t,t,t,t)],w),C.j,C.f,C.a2,t,C.q)
 return H.jJ(A.a([A.dj(!1,S.bt(D.b3N,t),t,t,t,t,t,t,new B.bUP(x,u.b,u.d,u.e,d),t,t)],w),t,v,t,t,t,s)},
 $S:z+0}
 B.bUO.prototype={
@@ -343,4 +343,4 @@ D.b_s=new A.a_(!0,C.m,null,null,null,null,24,C.a5,null,null,null,null,null,null,
 D.b0L=new A.a_(!0,C.m,null,null,null,null,16,C.a5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3N=new A.cf("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cr8=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_332",e:"endPart",h:b})})($__dart_deferred_initializers__,"5RN5mA1oYsvrVUq5ozYKR0bAY+s=");
+a.eventLog.push({p:"main.dart.js_332",e:"endPart",h:b})})($__dart_deferred_initializers__,"BuvJox2pb1JPvnF9a9hQYYKI2gg=");

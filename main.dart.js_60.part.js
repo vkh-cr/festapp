@@ -63,12 +63,12 @@ if(u.e){x=A.aU(t,t,A.E(d).ax.a===C.w?$.fK():C.t,t,t,t,t,t,t,t,t,18,t,t,t,t,t,!0,
 w=u.f
 w=w==null?t:w.i(0,"email")
 v=y.w
-v=new A.a6(D.aiG,A.yR(t,t,t,C.bY,t,t,!0,t,A.dD(A.a([A.dD(t,t,t,x,A.z("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",A.y(["email",w],v,v))),D.b7m],y.F),t,t,t,t),C.bc,t,t,C.Y,C.aB),t)
+v=new A.a6(D.aiG,A.yR(t,t,t,C.bY,t,t,!0,t,A.dD(A.a([A.dD(t,t,t,x,A.y("Almost done! Your credentials for signing in to the app have been sent to your email {email}. Please check your inbox to complete the registration.",A.z(["email",w],v,v))),D.b7m],y.F),t,t,t,t),C.bc,t,t,C.Y,C.aB),t)
 x=v}else{w=u.r
 w=A.J(E.ct1(d,w.a.c,w),!0,y.u)
 w.push(L.al)
-w.push(M.M0(C.cn,d,50,!0,A.z("Sign up",t),new B.c6j(u,d),C.m,250))
-x=P.ant(new F.xc(A.aA(w,C.j,C.f,C.i,t,C.q),t),x,t)}return R.fc(s,t,new A.ct(C.aI,t,t,new A.cT(new A.ad(0,820,0,1/0),I.eo(new A.a6(O.bM,x,t),t,C.u,t,t,t,C.G),t),t),t,t,t,t,t)}}
+w.push(M.M0(C.cn,d,50,!0,A.y("Sign up",t),new B.c6j(u,d),C.m,250))
+x=P.ant(new F.xc(A.aA(w,C.j,C.f,C.i,t,C.q),t),x,t)}return R.fc(s,t,new A.cu(C.aI,t,t,new A.cT(new A.ad(0,820,0,1/0),I.eo(new A.a6(O.bM,x,t),t,C.u,t,t,t,C.G),t),t),t,t,t,t,t)}}
 var z=a.updateTypes([])
 B.c6i.prototype={
 $0(){return N.wd(this.a)},
@@ -100,9 +100,9 @@ x=4
 return A.c(B.aWz(q),$async$$0)
 case 4:p=e
 t=J.a3(p)
-if(J.m(t.i(p,"code"),200)){A.bE(r,A.z("Registration is almost complete!",null),C.a4)
-u.B(new B.c6g(u))}else if(J.m(t.i(p,"code"),409))A.bE(r,A.z("Registration failed: Email {email} is already in use.",A.y(["email",t.i(p,"email")],s,s)),C.b0)
-else A.bE(r,A.z("Registration has failed.",null),C.b0)
+if(J.m(t.i(p,"code"),200)){A.bE(r,A.y("Registration is almost complete!",null),C.a4)
+u.B(new B.c6g(u))}else if(J.m(t.i(p,"code"),409))A.bE(r,A.y("Registration failed: Email {email} is already in use.",A.z(["email",t.i(p,"email")],s,s)),C.b0)
+else A.bE(r,A.y("Registration has failed.",null),C.b0)
 u.B(new B.c6h(u))
 case 3:return A.j(null,w)}})
 return A.k($async$$0,w)},
@@ -122,7 +122,7 @@ w(A.ck,[B.c6i,B.c6j,B.c6f,B.c6g,B.c6h])})()
 A.bo(b.typeUniverse,JSON.parse('{"Dw":{"G":[],"d":[]},"aO5":{"L":["Dw"]}}'))
 var y={a:A.x("q<im>"),F:A.x("q<iq>"),c:A.x("aJ<xW>"),y:A.x("aa<e,@>"),w:A.x("e"),u:A.x("d"),v:A.x("nZ"),b:A.x("@"),q:A.x("~")};(function constants(){D.aiG=new A.an(12,88,12,12)
 D.b3p=new A.cf("Sign up",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.aRP=new A.a6(S.HL,T.J_,null)
-D.b7m=new K.mc(D.aRP,C.e9,null,null)})()};
+D.aRP=new A.a6(S.HM,T.J0,null)
+D.b7m=new K.mc(D.aRP,C.e8,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_60",e:"endPart",h:b})})($__dart_deferred_initializers__,"doT+PzE4Vc6EJK8b9znFYlDIqaE=");
+a.eventLog.push({p:"main.dart.js_60",e:"endPart",h:b})})($__dart_deferred_initializers__,"15BSFed+lLhDHZIN3i8jkfFVSzk=");

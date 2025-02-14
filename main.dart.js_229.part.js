@@ -192,7 +192,7 @@ t=B
 s=J
 r=J
 x=3
-return B.c($.l0().ej("get_all_occasions",B.y(["unit_id",d],y.N,u),u),$async$b3l)
+return B.c($.l0().ej("get_all_occasions",B.z(["unit_id",d],y.N,u),u),$async$b3l)
 case 3:v=t.b4(s.h1(r.u(f,"data"),new A.b3m()),!0,y.k)
 x=1
 break
@@ -345,7 +345,7 @@ A.auc.prototype={
 zf(d){var x,w=null,v=B.E(d),u=v.ax
 if(B.E(d).z)x=new A.aKq(d,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,C.K,!0,C.J,w,w,w)
 else{x=u.k3
-x=M.bof(C.J,C.K,C.B,C.B,x.O(0.38),C.bW,0,!0,C.bJ,u.b,C.wh,C.CG,A.cBF(d),v.id,C.eb,new B.bg(x.O(0.12),1,C.E,-1),C.lW,v.f,v.p1.as,v.Q)}return x},
+x=M.bof(C.J,C.K,C.B,C.B,x.O(0.38),C.bW,0,!0,C.bJ,u.b,C.wh,C.CH,A.cBF(d),v.id,C.eb,new B.bg(x.O(0.12),1,C.E,-1),C.lW,v.f,v.p1.as,v.Q)}return x},
 a_R(d){var x
 d.ad(y.f)
 x=B.E(d)
@@ -363,8 +363,8 @@ gdG(d){return C.cM},
 gef(){return C.cM},
 gfY(d){return C.jJ},
 geE(d){return new B.bn(A.cBF(this.fy),y.a)},
-gnH(){return C.DV},
-gkp(){return C.DU},
+gnH(){return C.DW},
+gkp(){return C.DV},
 gfg(){return new B.bf(new A.c13(this),y.g)},
 gnG(){return C.jK},
 gjU(){return new B.bf(new A.c16(this),y.C)},
@@ -639,24 +639,24 @@ x=B.J(o,!0,o.$ti.h("v.E"))
 o=J.hc(s.d,new A.cb7(p))
 w=B.J(o,!0,o.$ti.h("v.E"))
 o=B.lX()||Q.QD()||A5.buS()?B.Z0(r,A8.fQ,r,r,!1,new A.cb8(s,d),r):r
-if(B.E(d).ax.a===C.w)v=A6.Gv
+if(B.E(d).ax.a===C.w)v=A6.Gw
 else v=(B.E(d).ax.a===C.w?$.iW():C.m).xF(0.9)
 u=B.lI(!1,r,!0,A9.bBO(q,60,"Festapp logo",40),r,!0,r,r,r,r,r,r,r,r,r,r,r,new A.cb9(s),r,r,r,r,r)
 t=B.E(d).ax.a===C.w?$.iW():C.m
 t=B.a([new A.a59(u,2,v,!1,16,!0,!1,!0,80,r),new F.qj(new B.a6(D.aiL,B.cd(new B.cT(new B.ad(0,680,0,1/0),B.aK(r,new F.jQ("Drah\xe9 d\u011bti!<br><br>V tomto milostiv\xe9m roce v\xe1s vol\xe1m k obr\xe1cen\xed. Dejte Boha, drah\xe9 d\u011bti, do centra sv\xe9ho \u017eivota a plody budou l\xe1ska k bli\u017en\xedmu i radost ze sv\u011bdectv\xed a svatost va\u0161eho \u017eivota se stane pravdiv\xfdm sv\u011bdectv\xedm v\xedry.<br><br>D\u011bkuji v\xe1m, \u017ee jste odpov\u011bd\u011bly na m\xe9 pozv\xe1n\xed.",18,!0,r),C.l,r,r,new B.bJ(t,r,S.kz(A7.cxY(d),C.E,1),B.cW(8),D.att,r,r,C.R),r,r,r,G.aY,r,r,r),r),r,r),r),r)],y.p)
 v=n.length
 u=v!==0
-if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.z("Happening Now",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
+if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.y("Happening Now",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
 if(u){if(B.au(d,r,y.w).w.a.a>=1100)u=3
 else u=H.a3L(d)?2:1
 t.push(new E.uc(C.cG,K.Rh(new E.qi(new A.cba(n),v,!0,!0,!0,r),new L.rt(u,10,10,1.7777777777777777)),r))}v=x.length
 u=v!==0
-if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.z("Events",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
+if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.y("Events",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
 if(u){if(B.au(d,r,y.w).w.a.a>=1100)u=3
 else u=H.a3L(d)?2:1
 t.push(new E.uc(C.cG,K.Rh(new E.qi(new A.cbb(x),v,!0,!0,!0,r),new L.rt(u,10,10,1.7777777777777777)),r))}v=w.length
 u=v!==0
-if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.z("Past Events",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
+if(u)t.push(new F.qj(new B.a6(G.aY,B.a1(B.y("Past Events",r),r,r,r,r,r,r,r,N.wq,r,r,r,r,r),r),r))
 if(u){if(B.au(d,r,y.w).w.a.a>=1100)u=3
 else u=H.a3L(d)?2:1
 t.push(new E.uc(C.cG,K.Rh(new E.qi(new A.cbc(w),v,!0,!0,!0,r),new L.rt(u,10,10,1.7777777777777777)),r))}t.push(P.a3w)
@@ -808,11 +808,11 @@ p=q.e7(p)
 r=B.ve(d.ad(r).r.f.gf8(0))
 q=l.a.c.e
 q.toString
-u.push(B.fH(0,B.oh(B.LN(B.aK(o,B.aA(B.a([s,A3.wj,I.jY(p+" - "+r.e7(q),Z.Do)],v),C.a0,C.f,C.a2,o,C.q),C.l,t,o,o,o,o,o,C.aG,o,o,o),x),C.C,o),o,o,0,0,o,o))
+u.push(B.fH(0,B.oh(B.LN(B.aK(o,B.aA(B.a([s,A3.wj,I.jY(p+" - "+r.e7(q),Z.Dp)],v),C.a0,C.f,C.a2,o,C.q),C.l,t,o,o,o,o,o,C.aG,o,o,o),x),C.C,o),o,o,0,0,o,o))
 x=M.bof(o,o,o,o,o,o,o,o,o,o,o,o,O.aiR,o,o,D.a8k,o,o,o,o)
 v=l.a
-u.push(B.fH(8,A.cvl(B.a1(v.d||v.e?B.z("Detail",o):B.z("Reserve a spot",o),o,o,o,o,o,o,o,Aa.Dn,o,o,o,o,o),new A.c_K(l,d),x),o,o,o,8,o,o))
-return new B.cT(P.F7,A_.Fa(V.ti(w,new B.cs(C.ag,o,C.ad,C.C,u,o),C.bL),C.a1,new B.bJ(o,o,this.b,n,m,o,o,C.R),C.K,o,o,o,o,o),o)},
+u.push(B.fH(8,A.cvl(B.a1(v.d||v.e?B.y("Detail",o):B.y("Reserve a spot",o),o,o,o,o,o,o,o,Aa.Do,o,o,o,o,o),new A.c_K(l,d),x),o,o,o,8,o,o))
+return new B.cT(P.F8,A_.Fa(V.ti(w,new B.ct(C.ag,o,C.ad,C.C,u,o),C.bL),C.a1,new B.bJ(o,o,this.b,n,m,o,o,C.R),C.K,o,o,o,o,o),o)},
 $S:318}
 A.c_K.prototype={
 $0(){var x=null
@@ -864,4 +864,4 @@ D.a5L=new A.acC(0,"small")
 D.bbg=new A.acC(1,"medium")
 D.bbh=new A.acC(2,"large")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_229",e:"endPart",h:b})})($__dart_deferred_initializers__,"VWsluDRjpzECjQM4LbyJCF0tn7c=");
+a.eventLog.push({p:"main.dart.js_229",e:"endPart",h:b})})($__dart_deferred_initializers__,"pulEEbNhUCzvqiTwNBUDBsMLXPw=");

@@ -18,7 +18,7 @@ aWu(d,e){var x=0,w=A.l(y.b),v,u
 var $async$aWu=A.h(function(f,g){if(f===1)return A.i(g,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.e_().ej("set_user_password_token",A.y(["token",d,"password",e],y.w,u),u),$async$aWu)
+return A.c($.e_().ej("set_user_password_token",A.z(["token",d,"password",e],y.w,u),u),$async$aWu)
 case 3:v=g
 x=1
 break
@@ -65,11 +65,11 @@ return A.k($async$aW,w)},
 A(d){var x,w,v,u,t=null,s=G.bt(D.b3J,t)
 s=K.iE(t,t,t,!0,t,t,1,!0,t,t,!1,t,!1,t,t,L.tb(new B.c3t(d)),t,!0,t,t,t,t,t,s,t,t,t,1,t)
 x=y.w
-x=A.a1(A.z("Welcome in {name}!",A.y(["name","Festapp"],x,x)),t,t,t,t,t,t,t,D.b2Y,t,t,t,t,t)
-w=A.a1(A.z("Create a new password to continue.",t),t,t,t,t,t,t,t,Q.fy,t,t,t,t,t)
-v=A.z("New Password",t)
+x=A.a1(A.y("Welcome in {name}!",A.z(["name","Festapp"],x,x)),t,t,t,t,t,t,t,D.b2Y,t,t,t,t,t)
+w=A.a1(A.y("Create a new password to continue.",t),t,t,t,t,t,t,t,Q.fy,t,t,t,t,t)
+v=A.y("New Password",t)
 u=A.cW(20)
-return U.fc(s,t,new A.ct(C.J,t,t,new A.cT(new A.ad(0,820,0,1/0),M.eo(N.vw(t,t,new E.xc(A.aA(A.a([x,F.al,w,R.a3u,new A.a6(S.z8,new O.HQ(v,this.e,"password",t),t),F.al,A.aK(t,A.dj(!1,G.bt(D.b4g,t),t,t,t,t,t,t,new B.c3u(this,d),t,t),C.l,t,t,new A.bJ(C.cn,t,t,u,t,t,t,C.R),t,50,t,t,t,t,250)],y.u),C.j,C.f,C.i,t,C.q),t),this.d,t,t),t,C.u,t,t,t,C.G),t),t),t,t,t,t,t)}}
+return U.fc(s,t,new A.cu(C.J,t,t,new A.cT(new A.ad(0,820,0,1/0),M.eo(N.vw(t,t,new E.xc(A.aA(A.a([x,F.al,w,R.a3u,new A.a6(S.z8,new O.HQ(v,this.e,"password",t),t),F.al,A.aK(t,A.dj(!1,G.bt(D.b4g,t),t,t,t,t,t,t,new B.c3u(this,d),t,t),C.l,t,t,new A.bJ(C.cn,t,t,u,t,t,t,C.R),t,50,t,t,t,t,250)],y.u),C.j,C.f,C.i,t,C.q),t),this.d,t,t),t,C.u,t,t,t,C.G),t),t),t,t,t,t,t)}}
 var z=a.updateTypes([])
 B.c3t.prototype={
 $0(){return H.axH(this.a)},
@@ -96,7 +96,7 @@ var $async$$1=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:u=J.a3(d)
 x=J.m(u.i(d,"code"),403)||J.m(u.i(d,"code"),404)?2:4
 break
-case 2:A.bE(v.b,A.z("Token is not valid.",null),C.b0)
+case 2:A.bE(v.b,A.y("Token is not valid.",null),C.b0)
 x=3
 break
 case 4:x=J.m(u.i(d,"code"),200)?5:6
@@ -104,7 +104,7 @@ break
 case 5:x=7
 return A.c(I.LI(u.i(d,"email"),v.a.e.a.a),$async$$1)
 case 7:u=v.b
-A.bE(u,A.z("Password has been changed.",null),C.a4)
+A.bE(u,A.y("Password has been changed.",null),C.a4)
 H.axH(u)
 case 6:case 3:return A.j(null,w)}})
 return A.k($async$$1,w)},
@@ -123,4 +123,4 @@ D.b3J=new A.cf("New Password",null,null,null,null,null,null,null,null,null,null,
 D.b1M=new A.a_(!0,C.m,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4g=new A.cf("Change Password",null,D.b1M,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"5zATqY2fp1tkfzq+r2ZLAXCH+8g=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"lZDpUJybeZomlC49/IxCOY+n3Tk=");
