@@ -16,6 +16,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
+import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
@@ -159,6 +160,9 @@ class _SchedulePageState extends State<SchedulePage>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   GestureDetector(
+                    onTap: () async {
+                      RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit!.id!}");
+                    },
                     onDoubleTap: () async {
                       var packageInfo = await PackageInfo.fromPlatform();
                       ToastHelper.Show(context,
