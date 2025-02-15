@@ -422,6 +422,7 @@
   "Failed to create event copy.": "Failed to create event copy.",
   "Happening Now": "Happening Now",
   "Past Events": "Past Events",
+  "Upcoming Events": "Upcoming Events",
   "Are you sure you want to delete this image?": "Are you sure you want to delete this image?",
   "Image removed successfully.": "Image removed successfully.",
   "Failed to remove image.": "Failed to remove image.",
@@ -433,7 +434,8 @@
   "Features": "Features",
   "Background color": "Background color",
   "Font color": "Font color",
-
-
+  "Quotes": "Quotes",
+  "Reserve a spot": "Reserve a spot",
+  "Detail": "Detail",
   "_":"_"
 }

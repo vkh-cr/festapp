@@ -96,6 +96,7 @@ class _UnitPageState extends State<UnitPage> {
         slivers: [
           // Slim header: a SliverAppBar showing only the logo aligned to the left.
           SliverAppBar(
+            automaticallyImplyLeading: false,
             floating: true,
             snap: true,
             pinned: false,
@@ -202,7 +203,7 @@ class _UnitPageState extends State<UnitPage> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: kHorizontalPadding),
                 child: Text(
-                  "Events".tr(),
+                  "Upcoming Events".tr(),
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),

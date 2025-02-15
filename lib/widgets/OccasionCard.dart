@@ -1,7 +1,13 @@
 import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/pages/occasion/EventPage.dart';
+import 'package:fstapp/pages/occasion/SchedulePage.dart';
+import 'package:fstapp/services/LinkModel.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
@@ -144,13 +150,17 @@ class _OccasionCardState extends State<OccasionCard> {
                     bottom: 8,
                     right: 8,
                     child: OutlinedButton(
-                      onPressed: () {
-                        // Show detail dialog.
-                        showDialog(
-                          context: context,
-                          builder: (context) => OccasionDetailDialog(
-                              occasion: widget.occasion),
-                        );
+                      onPressed: () async {
+                        if (!FeatureService.isFeatureEnabled(FeatureService.form, fromFeatures: widget.occasion.features)) {
+                          await RightsService.updateOccasionData(widget.occasion.link!);
+                          await RouterService.navigateOccasion(context, "");
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (context) => OccasionDetailDialog(
+                                occasion: widget.occasion),
+                          );
+                        }
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -161,7 +171,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         ),
                       ),
                       child: Text(
-                        widget.isPast || widget.isPresent
+                        widget.isPast || widget.isPresent || !FeatureService.isFeatureEnabled(FeatureService.form, fromFeatures: widget.occasion.features)
                             ? "Detail".tr()
                             : "Reserve a spot".tr(),
                         style: const TextStyle(

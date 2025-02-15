@@ -9,8 +9,8 @@ import 'package:intl/intl.dart';
 class OccasionEditCard extends StatelessWidget {
   final OccasionModel occasion;
   final VoidCallback onView;
-  final VoidCallback onEdit;
-  final VoidCallback onAdmin;
+  final VoidCallback onSettings;
+  final VoidCallback onApp;
   final VoidCallback onReservation;
   final VoidCallback onCreateCopy;
   final bool isPresent;
@@ -19,8 +19,8 @@ class OccasionEditCard extends StatelessWidget {
     Key? key,
     required this.occasion,
     required this.onView,
-    required this.onEdit,
-    required this.onAdmin,
+    required this.onSettings,
+    required this.onApp,
     required this.onReservation,
     required this.onCreateCopy,
     this.isPresent = false,
@@ -105,7 +105,7 @@ class OccasionEditCard extends StatelessWidget {
                                     ),
                                   ),
                                 TextButton.icon(
-                                  onPressed: onAdmin,
+                                  onPressed: onApp,
                                   icon: const Icon(Icons.admin_panel_settings, color: Colors.white),
                                   label: Text(
                                     'App'.tr(),
@@ -113,7 +113,7 @@ class OccasionEditCard extends StatelessWidget {
                                   ),
                                 ),
                                 TextButton.icon(
-                                  onPressed: onEdit,
+                                  onPressed: onSettings,
                                   icon: const Icon(Icons.settings, color: Colors.white),
                                   label: Text(
                                     'Settings'.tr(),

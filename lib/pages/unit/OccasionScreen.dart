@@ -135,7 +135,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Events'.tr(),
+                    "Events".tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ).tr(),
                   ElevatedButton.icon(
@@ -178,8 +178,8 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         occasion: occasion,
                         onView: () => _handleView(occasion),
                         onReservation: () => _handleReservation(occasion),
-                        onEdit: () => _handleEdit(occasion),
-                        onAdmin: () => _handleAdmin(occasion),
+                        onSettings: () => _handleEdit(occasion),
+                        onApp: () => _handleAdmin(occasion),
                         onCreateCopy: () => _handleCreateCopy(occasion),
                         // Mark as present so the card gets a glowing border.
                         isPresent: true,
@@ -196,7 +196,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
                   child: Text(
-                    "Events".tr(),
+                    "Upcoming Events".tr(),
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -221,8 +221,8 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         occasion: occasion,
                         onView: () => _handleView(occasion),
                         onReservation: () => _handleReservation(occasion),
-                        onEdit: () => _handleEdit(occasion),
-                        onAdmin: () => _handleAdmin(occasion),
+                        onSettings: () => _handleEdit(occasion),
+                        onApp: () => _handleAdmin(occasion),
                         onCreateCopy: () => _handleCreateCopy(occasion),
                         isPresent: false,
                       );
@@ -263,8 +263,8 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         occasion: occasion,
                         onView: () => _handleView(occasion),
                         onReservation: () => _handleReservation(occasion),
-                        onEdit: () => _handleEdit(occasion),
-                        onAdmin: () => _handleAdmin(occasion),
+                        onSettings: () => _handleEdit(occasion),
+                        onApp: () => _handleAdmin(occasion),
                         onCreateCopy: () => _handleCreateCopy(occasion),
                         isPresent: false,
                       );
