@@ -13,6 +13,7 @@ class FeatureService {
   static const String entryCode = "entry_code";
   static const String companions = "companions";
   static const String blueprint = "blueprint";
+  static const String quotes = "quotes";
 
   static const String ticketBackground = "background";
 

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/pages/unit/UnitUsersScreen.dart';
+import 'package:fstapp/pages/unit/QuotesTab.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -46,6 +48,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
   Future<void> _loadOrganization() async {
     _currentUnit = await DbUsers.getCurrentUnit(widget.id!);
     if (_currentUnit != null) {
+      // Set the default screen to Occasions
       _setCurrentScreen(OccasionsScreen(unit: _currentUnit!), "Occasions");
     }
   }
@@ -93,7 +96,7 @@ class _UnitAdminPageState extends State<UnitAdminPage> {
               .then((_) => _loadOrganization());
         },
         child: const Icon(Icons.remove_red_eye_rounded),
-      )
+      ),
     );
   }
 }
@@ -134,7 +137,7 @@ class _SideMenuState extends State<SideMenu> {
         children: [
           if (isDesktop)
             DrawerHeader(
-              padding: EdgeInsets.all(12),
+              padding: const EdgeInsets.all(12),
               child: Text(widget.unit?.title ?? ""),
             ),
           Expanded(
@@ -148,7 +151,9 @@ class _SideMenuState extends State<SideMenu> {
                   onTap: () {
                     if (widget.unit != null) {
                       widget.onMenuItemSelected(
-                          OccasionsScreen(unit: widget.unit!), "Occasions");
+                        OccasionsScreen(unit: widget.unit!),
+                        "Occasions",
+                      );
                     }
                   },
                 ),
@@ -157,9 +162,28 @@ class _SideMenuState extends State<SideMenu> {
                   label: "Users".tr(),
                   isSelected: widget.currentMenu == "Users",
                   onTap: () {
-                    widget.onMenuItemSelected(UnitUsersScreen(unit: widget.unit!), "Users");
+                    if (widget.unit != null) {
+                      widget.onMenuItemSelected(
+                        UnitUsersScreen(unit: widget.unit!),
+                        "Users",
+                      );
+                    }
                   },
                 ),
+                // Conditionally add the Quotes tab if the feature is enabled.
+                if (widget.unit != null &&
+                    FeatureService.isFeatureEnabled(FeatureService.quotes, fromFeatures: widget.unit!.features))
+                  _buildMenuItem(
+                    icon: Icons.format_quote,
+                    label: "Quotes".tr(),
+                    isSelected: widget.currentMenu == "Quotes",
+                    onTap: () {
+                      widget.onMenuItemSelected(
+                        QuotesTab(unitId: widget.unit!.id!),
+                        "Quotes",
+                      );
+                    },
+                  ),
               ],
             ),
           ),
@@ -168,7 +192,7 @@ class _SideMenuState extends State<SideMenu> {
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 _versionInfo,
-                style: TextStyle(fontSize: 12),
+                style: const TextStyle(fontSize: 12),
               ),
             ),
         ],
@@ -183,7 +207,7 @@ class _SideMenuState extends State<SideMenu> {
     required VoidCallback onTap,
   }) {
     return ListTile(
-      contentPadding: EdgeInsets.only(left: 8.0, right: 4.0), // Maintain left padding, reduce right padding
+      contentPadding: const EdgeInsets.only(left: 8.0, right: 4.0), // Maintain left padding, reduce right padding
       leading: Icon(icon, size: 24),
       title: ResponsiveService.isDesktop(context)
           ? Text(

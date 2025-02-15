@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -35,11 +36,12 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
   @override
   Widget build(BuildContext context) {
     return SingleTableDataGrid<UserGroupInfoModel>(
-        context,
-        () => DbGroups.getAllUserGroupInfo(InformationModel.gameType),
-        UserGroupInfoModel.fromGamePlutoJson,
-        DataGridFirstColumn.delete,
-        Tb.user_group_info.id,
+      SingleDataGridController<UserGroupInfoModel>(
+        context: context,
+        loadData: () => DbGroups.getAllUserGroupInfo(InformationModel.gameType),
+        fromPlutoJson: UserGroupInfoModel.fromGamePlutoJson,
+        firstColumnType: DataGridFirstColumn.delete,
+        idColumn: Tb.user_group_info.id,
         columns: [
           PlutoColumn(
             hide: true,
@@ -52,61 +54,67 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
           PlutoColumn(
-              title: "Name".tr(),
-              field: Tb.user_group_info.title,
-              type: PlutoColumnType.text(),
-              width: 200
+            title: "Name".tr(),
+            field: Tb.user_group_info.title,
+            type: PlutoColumnType.text(),
+            width: 200,
           ),
           PlutoColumn(
-              title: "Progress".tr(),
-              field: UserGroupInfoModel.progressColumn,
-              readOnly: true,
-              type: PlutoColumnType.text(),
-              width: 200
+            title: "Progress".tr(),
+            field: UserGroupInfoModel.progressColumn,
+            readOnly: true,
+            type: PlutoColumnType.text(),
+            width: 200,
           ),
           PlutoColumn(
-              title: "Participants".tr(),
-              field: UserGroupInfoModel.participantsColumn,
-              type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
-              enableEditingMode: false,
-              width: 600,
-              renderer: (rendererContext) {
-                String? userNames;
-                Set<UserInfoModel> participants = {};
-                var currentValue = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value;
-                if(currentValue!=null && currentValue.toString().isNotEmpty)
-                {
-                  participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as Set<UserInfoModel>);
-                  userNames = participants.join(", ");
-                }
-                return Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-
-                      IconButton(
-                          onPressed: () async{
-                            if(_allUsers.isEmpty)
-                            {
-                              _allUsers = await DbUsers.getAllUsersBasics();
-                            }
-                            DialogHelper.chooseUser(context, (person) =>
-                                setState(() {
-                                  rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
-                                  var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
-                                  rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
-                                }), _allUsers, "Add".tr());
-                          },
-                          icon: const Icon(Icons.add_circle_rounded)),
-                      IconButton(
-                          onPressed: () async{
-                            var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
-                            rendererContext.stateManager.changeCellValue(cell, <UserInfoModel>{}, force: true);
-                          },
-                          icon: const Icon(Icons.remove_circle)),
-                      Text("(${participants.length}) $userNames"),]
-                );
+            title: "Participants".tr(),
+            field: UserGroupInfoModel.participantsColumn,
+            type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
+            enableEditingMode: false,
+            width: 600,
+            renderer: (rendererContext) {
+              String? userNames;
+              Set<UserInfoModel> participants = {};
+              var currentValue = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value;
+              if (currentValue != null && currentValue.toString().isNotEmpty) {
+                participants = (rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value as Set<UserInfoModel>);
+                userNames = participants.join(", ");
               }
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                    onPressed: () async {
+                      if (_allUsers.isEmpty) {
+                        _allUsers = await DbUsers.getAllUsersBasics();
+                      }
+                      DialogHelper.chooseUser(
+                        context,
+                            (person) => setState(() {
+                          rendererContext.row.cells[UserGroupInfoModel.participantsColumn]?.value.add(person);
+                          var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
+                          rendererContext.stateManager.changeCellValue(cell, cell.value, force: true);
+                        }),
+                        _allUsers,
+                        "Add".tr(),
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle_rounded),
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      var cell = rendererContext.row.cells[UserGroupInfoModel.participantsColumn]!;
+                      rendererContext.stateManager.changeCellValue(cell, <UserInfoModel>{}, force: true);
+                    },
+                    icon: const Icon(Icons.remove_circle),
+                  ),
+                  Text("(${participants.length}) $userNames"),
+                ],
+              );
+            },
           ),
-        ]).DataGrid();
+        ],
+      ),
+    ).DataGrid();
   }
 }

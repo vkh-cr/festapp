@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -45,33 +46,39 @@ class _OrdersTabState extends State<OrdersTab> {
     return KeyedSubtree(
         key: refreshKey,
         child: SingleTableDataGrid<OrderModel>(
-          context,
-              () => DbOrders.getAllOrders(formLink!),
-          OrderModel.fromPlutoJson,
-          RightsService.isUnitManager() ? DataGridFirstColumn.deleteAndCheck : DataGridFirstColumn.check,
-          TbEshop.orders.id,
-          actionsExtended: DataGridActionsController(
+          SingleDataGridController<OrderModel>(
+            context: context,
+            loadData: () => DbOrders.getAllOrders(formLink!),
+            fromPlutoJson: OrderModel.fromPlutoJson,
+            firstColumnType: RightsService.isUnitManager()
+                ? DataGridFirstColumn.deleteAndCheck
+                : DataGridFirstColumn.check,
+            idColumn: TbEshop.orders.id,
+            actionsExtended: DataGridActionsController(
               areAllActionsEnabled: RightsService.canUpdateUsers,
-              isAddActionPossible: () => false),
-          headerChildren: [
-            DataGridAction(
-              name: "Cancel".tr(),
-              action: (SingleTableDataGrid dataGrid, [_]) => cancelOrders(dataGrid),
-              isEnabled: RightsService.isEditor,
+              isAddActionPossible: () => false,
             ),
-            DataGridAction(
-              name: "Synchronize payments".tr(),
-              action: (SingleTableDataGrid dataGrid, [_]) => synchronizePayments(),
-              isEnabled: RightsService.isEditor,
-            ),
-            DataGridAction(
-              name: "Send tickets".tr(),
-              action: (SingleTableDataGrid dataGrid, [_]) => sendTickets(dataGrid),
-              isEnabled: RightsService.isEditor,
-            ),
-          ],
-          columns: EshopColumns.generateColumns(context, columnIdentifiers),
+            headerChildren: [
+              DataGridAction(
+                name: "Cancel".tr(),
+                action: (SingleDataGridController dataGrid, [_]) => cancelOrders(dataGrid),
+                isEnabled: RightsService.isEditor,
+              ),
+              DataGridAction(
+                name: "Synchronize payments".tr(),
+                action: (SingleDataGridController dataGrid, [_]) => synchronizePayments(),
+                isEnabled: RightsService.isEditor,
+              ),
+              DataGridAction(
+                name: "Send tickets".tr(),
+                action: (SingleDataGridController dataGrid, [_]) => sendTickets(dataGrid),
+                isEnabled: RightsService.isEditor,
+              ),
+            ],
+            columns: EshopColumns.generateColumns(context, columnIdentifiers),
+          ),
         ).DataGrid()
+
     );
   }
 
@@ -80,7 +87,7 @@ class _OrdersTabState extends State<OrdersTab> {
     refreshData();
   }
 
-  Future<void> cancelOrders(SingleTableDataGrid dataGrid) async {
+  Future<void> cancelOrders(SingleDataGridController dataGrid) async {
     var selected = _getChecked(dataGrid);
     if (selected.isEmpty) {
       return;
@@ -111,7 +118,7 @@ class _OrdersTabState extends State<OrdersTab> {
     }
   }
 
-  Future<void> sendTickets(SingleTableDataGrid dataGrid) async {
+  Future<void> sendTickets(SingleDataGridController dataGrid) async {
     var selected = _getChecked(dataGrid);
     if (selected.isEmpty) {
       return;
@@ -180,7 +187,7 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  List<OrderModel> _getChecked(SingleTableDataGrid dataGrid) {
+  List<OrderModel> _getChecked(SingleDataGridController dataGrid) {
     return List<OrderModel>.from(
       dataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
