@@ -2,7 +2,6 @@ import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
@@ -13,6 +12,7 @@ import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/widgets/LogoWidget.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/RouterService.dart';
@@ -68,10 +68,6 @@ class _UnitPageState extends State<UnitPage> {
 
   @override
   Widget build(BuildContext context) {
-    final logoAsset = ThemeConfig.isDarkMode(context)
-        ? 'assets/icons/fstapplogo.dark.svg'
-        : 'assets/icons/fstapplogo.svg';
-
     final now = DateTime.now();
     final presentEvents = _occasions
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
@@ -113,12 +109,7 @@ class _UnitPageState extends State<UnitPage> {
                   curve: Curves.easeOut,
                 );
               },
-              child: SvgPicture.asset(
-                logoAsset,
-                height: 60,
-                width: 40,
-                semanticsLabel: 'Festapp logo',
-              ),
+              child: LogoWidget(width: 40, height: 60,)
             ),
           ),
           // Quote section rendered as HTML in a paper-like container.
