@@ -9,20 +9,20 @@ class LogoWidget extends StatelessWidget {
   /// Optional parameters to control the logo size.
   final double? height;
   final double? width;
-  final bool? onlyLight;
+  final bool? forceDark;
 
   const LogoWidget({
     Key? key,
     this.onTap,
     this.height,
     this.width,
-    this.onlyLight
+    this.forceDark
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     // You can adjust the asset based on the theme, if needed.
-    final logoAsset = ThemeConfig.isDarkMode(context) && onlyLight == true
+    final logoAsset = ThemeConfig.isDarkMode(context) || forceDark == true
         ? 'assets/icons/fstapplogo.png'
         : 'assets/icons/fstapplogo.png';
     return InkWell(
