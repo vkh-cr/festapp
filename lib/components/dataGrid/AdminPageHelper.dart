@@ -16,6 +16,7 @@ import 'package:fstapp/pages/occasionAdmin/ScheduleTab.dart';
 import 'package:fstapp/pages/occasionAdmin/ServiceTab.dart';
 import 'package:fstapp/pages/occasionAdmin/UserGroupsTab.dart';
 import 'package:fstapp/pages/occasionAdmin/UsersTab.dart';
+import 'package:fstapp/widgets/LogoWidget.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
@@ -46,7 +47,6 @@ class AdminPageHelper {
       TabController tabController,
       String title,
       ) {
-    final String logoAsset = 'assets/icons/fstapplogo.dark.svg';
     final currentUser = RightsService.currentOccasionUser;
 
     return AppBar(
@@ -67,10 +67,7 @@ class AdminPageHelper {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: SvgPicture.asset(
-              logoAsset,
-              semanticsLabel: 'Festapp logo',
-            ),
+            child: LogoWidget(height: 40, onlyLight: true),
           ),
         ),
       ),
@@ -123,7 +120,6 @@ class AdminPageHelper {
       List<AdminTabDefinition> activeTabs,
       TabController tabController,
       ) {
-    final String logoAsset = 'assets/icons/fstapplogo.dark.svg';
     final currentUser = RightsService.currentOccasionUser;
 
     return AppBar(
@@ -132,12 +128,7 @@ class AdminPageHelper {
       leading: Builder(
         builder: (context) {
           return IconButton(
-            icon: SvgPicture.asset(
-              logoAsset,
-              width: 40,
-              height: 40,
-              semanticsLabel: 'Festapp logo',
-            ),
+            icon: LogoWidget(height: 40, onlyLight: true,),
             onPressed: () {
               if (RightsService.canUserSeeUnitWorkspace()) {
                 RouterService.navigate(
