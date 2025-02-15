@@ -45,6 +45,6 @@ class StylesConfig {
   }
 
   static String formatTimelineRightText(String string){
-    return string;
+    return string.toUpperCase();
   }
 }

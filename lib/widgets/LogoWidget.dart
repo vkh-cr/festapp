@@ -21,16 +21,15 @@ class LogoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // You can adjust the asset based on the theme, if needed.
     final logoAsset = ThemeConfig.isDarkMode(context)
-        ? 'assets/icons/fstapplogo.dark.svg'
-        : 'assets/icons/fstapplogo.svg';
+        ? 'assets/icons/fstapplogo.png'
+        : 'assets/icons/fstapplogo.png';
 
     return InkWell(
       onTap: onTap,
-      child: SvgPicture.asset(
+      child: Image.asset(
         logoAsset,
         height: height,
         width: width,
-        semanticsLabel: 'Festapp logo',
       ),
     );
   }

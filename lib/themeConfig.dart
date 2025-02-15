@@ -16,7 +16,7 @@ class ThemeConfig {
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
-      appBarTheme: AppBarTheme(color: appBarColor()),
+      appBarTheme: AppBarTheme(color: seed2),
       tabBarTheme: TabBarTheme(indicatorColor: lllPrimary)
   );
 
@@ -42,10 +42,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF80BDF2);
-  static Color seed3 = const Color(0xFF4465A6);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seed1 = const Color(0xFF53707f);
+  static Color seed2 = const Color(0xFFf8c04f);
+  static Color seed3 = const Color(0xFFe9dabb);
+  static Color seed4 = const Color(0xFFde703e);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
@@ -82,7 +82,7 @@ class ThemeConfig {
   static Color profileButtonColor(BuildContext context) => appBarColor();
   static Color profileButtonTextColor(BuildContext context) => isDarkMode(context) ? darkColor(context) : Colors.grey;
 
-  static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
+  static Color appBarColor() => seed1.changeColorSaturation(0.4).changeColorLightness(0.10);
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
   static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
