@@ -49,21 +49,16 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
 class _AdministrationHeaderState<T extends IPlutoRowModel>
     extends State<AdministrationHeader<T>> {
   final SingleDataGridController<T> controller;
-  List<DataGridAction>? headerChildren;
-  final DataGridActionsController? actionsController;
   List<Widget> allChildren = [];
 
   _AdministrationHeaderState(
-      this.controller, {
-        this.headerChildren,
-        this.actionsController,
-      });
+      this.controller);
 
   @override
   Widget build(BuildContext context) {
     allChildren.clear();
-    headerChildren = headerChildren ?? [];
-    for (var a in headerChildren!) {
+    var headerChildren = controller.headerChildren ?? [];
+    for (var a in headerChildren) {
       allChildren.add(
         ElevatedButton(
           onPressed: a.isEnabled != null && !a.isEnabled!()
@@ -73,9 +68,10 @@ class _AdministrationHeaderState<T extends IPlutoRowModel>
         ),
       );
     }
-    if (headerChildren!.isNotEmpty) {
+    if (headerChildren.isNotEmpty) {
       allChildren.insertAll(0, [const VerticalDivider()]);
     }
+    var actionsController = controller.actionsExtended;
     allChildren.insertAll(0, [
       if (actionsController?.isAddActionPossible?.call() ?? true)
         ElevatedButton(
@@ -88,16 +84,16 @@ class _AdministrationHeaderState<T extends IPlutoRowModel>
         ),
       ElevatedButton(
         onPressed: actionsController != null &&
-            actionsController!.areAllActionsEnabled != null &&
-            !actionsController!.areAllActionsEnabled!()
+            actionsController.areAllActionsEnabled != null &&
+            !actionsController.areAllActionsEnabled!()
             ? null
             : _cancelChanges,
         child: const Text("Discard changes").tr(),
       ),
       ElevatedButton(
         onPressed: actionsController != null &&
-            actionsController!.areAllActionsEnabled != null &&
-            !actionsController!.areAllActionsEnabled!()
+            actionsController.areAllActionsEnabled != null &&
+            !actionsController.areAllActionsEnabled!()
             ? null
             : () {
           actionsController?.saveAction?.action == null
