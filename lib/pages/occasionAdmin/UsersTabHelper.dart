@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/IHasId.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -25,7 +26,7 @@ class UsersTabHelper {
 
   /// Returns the list of checked OccasionUserModel items from the data grid.
   static List<OccasionUserModel> getCheckedUsers(
-      SingleTableDataGrid dataGrid) {
+      SingleDataGridController dataGrid) {
     return List<OccasionUserModel>.from(
       dataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
@@ -35,7 +36,7 @@ class UsersTabHelper {
 
   /// Changes passwords for all checked users.
   static Future<void> setPassword(
-      BuildContext context, SingleTableDataGrid dataGrid) async {
+      BuildContext context, SingleDataGridController dataGrid) async {
     var users = getCheckedUsers(dataGrid);
     if (users.isEmpty) return;
     for (var u in users) {
@@ -46,7 +47,7 @@ class UsersTabHelper {
 
   /// Opens the add-to-group dialog and updates the group with checked users.
   static Future<void> addToGroup(
-      BuildContext context, SingleTableDataGrid dataGrid) async {
+      BuildContext context, SingleDataGridController dataGrid) async {
     var users = getCheckedUsers(dataGrid);
     var chosenGroup = await DialogHelper.showAddToGroupDialogAsync(
         context, await DbGroups.getAllUserGroupInfo());
@@ -64,7 +65,7 @@ class UsersTabHelper {
   /// [currentUsers] are the users already added in the current state.
   /// [reloadUsers] is a callback to trigger reloading the user list.
   static Future<void> addExisting(BuildContext context,
-      SingleTableDataGrid dataGrid, List<IHasId> currentUsers,
+      SingleDataGridController dataGrid, List<IHasId> currentUsers,
       Future<void> Function() reloadUsers) async {
     var existing = await DbUsers.getAllUsersBasicsForUnit();
     var nonAdded =
@@ -82,7 +83,7 @@ class UsersTabHelper {
 
 
   static Future<void> addExistingToUnit(BuildContext context,
-      SingleTableDataGrid dataGrid, List<IPlutoRowModel> currentUsers,
+      SingleDataGridController dataGrid, List<IPlutoRowModel> currentUsers,
       Future<void> Function() reloadUsers, int unit) async {
     var existing = await DbUsers.getAllUsersBasicsForUnit();
     var nonAdded =
@@ -101,7 +102,7 @@ class UsersTabHelper {
   /// Invites the checked users.
   /// [reloadUsers] is a callback to trigger reloading the user list.
   static Future<void> invite(
-      BuildContext context, SingleTableDataGrid dataGrid,
+      BuildContext context, SingleDataGridController dataGrid,
       Future<void> Function() reloadUsers) async {
     var users = getCheckedUsers(dataGrid);
     if (users.isEmpty) return;
