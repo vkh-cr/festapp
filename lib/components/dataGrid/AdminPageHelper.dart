@@ -67,7 +67,7 @@ class AdminPageHelper {
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: LogoWidget(height: 40, onlyLight: true),
+            child: LogoWidget(height: 40, forceDark: true),
           ),
         ),
       ),
@@ -128,7 +128,7 @@ class AdminPageHelper {
       leading: Builder(
         builder: (context) {
           return IconButton(
-            icon: LogoWidget(height: 40, onlyLight: true,),
+            icon: LogoWidget(height: 40, forceDark: true,),
             onPressed: () {
               if (RightsService.canUserSeeUnitWorkspace()) {
                 RouterService.navigate(
