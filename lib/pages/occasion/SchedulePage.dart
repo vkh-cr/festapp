@@ -22,6 +22,7 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/Styles.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/AddNewEventDialog.dart';
+import 'package:fstapp/widgets/LogoWidget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 @RoutePage()
@@ -143,9 +144,6 @@ class _SchedulePageState extends State<SchedulePage>
 
   @override
   Widget build(BuildContext context) {
-    final logoAsset = ThemeConfig.isDarkMode(context)
-        ? 'assets/icons/fstapplogo.dark.svg' // Dark mode logo
-        : 'assets/icons/fstapplogo.svg'; // Light mode logo
     return SafeArea(
       top: true,
       bottom: false,
@@ -173,11 +171,7 @@ class _SchedulePageState extends State<SchedulePage>
                         });
                       }
                     },
-                    child: SvgPicture.asset(
-                      width: 200,
-                      semanticsLabel: 'Festapp logo',
-                      logoAsset,
-                    ),
+                    child: LogoWidget(width: 200,),
                   ),
                   const Spacer(),
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
