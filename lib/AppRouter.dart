@@ -95,7 +95,7 @@ class AppRouter extends RootStackRouter {
       SignupPage.ROUTE,
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
-      "unit",
+      UnitPage.ROUTE,
       FormPage.ROUTE,
       ScanPage.ROUTE,
     ];

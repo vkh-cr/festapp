@@ -1,14 +1,14 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/pages/eshop/EshopColumns.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/TicketCodeHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -23,7 +23,6 @@ class TicketsTab extends StatefulWidget {
 class _TicketsTabState extends State<TicketsTab> {
   String? formLink;
   Key refreshKey = UniqueKey();
-
 
   @override
   void didChangeDependencies() {
@@ -57,42 +56,42 @@ class _TicketsTabState extends State<TicketsTab> {
   Widget build(BuildContext context) {
     return KeyedSubtree(
         key: refreshKey,
-      child:
-        SingleTableDataGrid<TicketModel>(
-      context,
-          () => DbTickets.getAllTickets(formLink!),
-      TicketModel.fromPlutoJson,
-      DataGridFirstColumn.check,
-      TbEshop.tickets.id,
-      actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
-        isAddActionPossible: () => false,
-      ),
-      headerChildren: [
-        DataGridAction(
-          name: "Cancel".tr(),
-          action: (SingleTableDataGrid dataGrid, [_]) => _stornoTickets(dataGrid),
-          isEnabled: RightsService.isEditor,
-        ),
-        DataGridAction(
-          name: "Scan tickets".tr(),
-          action: (SingleTableDataGrid dataGrid, [_]) => _scanTickets(dataGrid),
-          isEnabled: RightsService.isEditor,
-        ),
-      ],
-      columns: EshopColumns.generateColumns(context, columnIdentifiers),
-    ).DataGrid());
+        child: SingleTableDataGrid<TicketModel>(
+          SingleDataGridController<TicketModel>(
+            context: context,
+            loadData: () => DbTickets.getAllTickets(formLink!),
+            fromPlutoJson: TicketModel.fromPlutoJson,
+            firstColumnType: DataGridFirstColumn.check,
+            idColumn: TbEshop.tickets.id,
+            actionsExtended: DataGridActionsController(
+              areAllActionsEnabled: RightsService.canUpdateUsers,
+              isAddActionPossible: () => false,
+            ),
+            headerChildren: [
+              DataGridAction(
+                name: "Cancel".tr(),
+                action: (SingleDataGridController dataGrid, [_]) =>
+                    _stornoTickets(dataGrid),
+                isEnabled: RightsService.isEditor,
+              ),
+              DataGridAction(
+                name: "Scan tickets".tr(),
+                action: (SingleDataGridController dataGrid, [_]) =>
+                    _scanTickets(dataGrid),
+                isEnabled: RightsService.isEditor,
+              ),
+            ],
+            columns: EshopColumns.generateColumns(context, columnIdentifiers),
+          ),
+        ).DataGrid());
   }
 
-  Future<void> _scanTickets(SingleTableDataGrid dataGrid) async {
+  Future<void> _scanTickets(SingleDataGridController dataGrid) async {
     await TicketCodeHelper.showScanTicketCode(
-      context,
-      "Scan tickets".tr(),
-      formLink!
-    );
+        context, "Scan tickets".tr(), formLink!);
   }
 
-  Future<void> _stornoTickets(SingleTableDataGrid dataGrid) async {
+  Future<void> _stornoTickets(SingleDataGridController dataGrid) async {
     var selectedTickets = _getCheckedTickets(dataGrid);
 
     if (selectedTickets.isEmpty) {
@@ -108,14 +107,16 @@ class _TicketsTabState extends State<TicketsTab> {
     if (confirm) {
       var stornoFutures = selectedTickets.map((ticket) {
         return () async {
-        if(await DbTickets.stornoTicket(ticket.id!)) {
-          ToastHelper.Show(context, "Storno completed for {ticket}.".tr(namedArgs: {
-          "ticket": ticket.ticketSymbol ?? ticket.id.toString()
-        }));
-        } else{
-          throw Exception("Ticket cancel has failed.");
-        }
-      };
+          if (await DbTickets.stornoTicket(ticket.id!)) {
+            ToastHelper.Show(
+                context,
+                "Storno completed for {ticket}.".tr(namedArgs: {
+                  "ticket": ticket.ticketSymbol ?? ticket.id.toString()
+                }));
+          } else {
+            throw Exception("Ticket cancel has failed.");
+          }
+        };
       }).toList();
 
       await DialogHelper.showProgressDialogAsync(
@@ -128,7 +129,7 @@ class _TicketsTabState extends State<TicketsTab> {
     }
   }
 
-  List<TicketModel> _getCheckedTickets(SingleTableDataGrid dataGrid) {
+  List<TicketModel> _getCheckedTickets(SingleDataGridController dataGrid) {
     return List<TicketModel>.from(
       dataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)

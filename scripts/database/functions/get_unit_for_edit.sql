@@ -21,6 +21,7 @@ BEGIN
         'id', id,
         'title', title,
         'data', data,
+        'features', features,
         'organization', organization
     ) INTO unit_data
     FROM units

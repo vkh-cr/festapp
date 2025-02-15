@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/ServiceItemModel.dart';
@@ -61,35 +62,41 @@ class _ServiceTabState extends State<ServiceTab> {
       child: allFood == null
           ? Center(child: CircularProgressIndicator())
           : SingleTableDataGrid<OccasionUserModel>(
-        context,
-        DbUsers.getOccasionUsersServiceTab,
-        OccasionUserModel.fromPlutoJson,
-        DataGridFirstColumn.none,
-        Tb.occasion_users.user,
-        actionsExtended: DataGridActionsController(
+        SingleDataGridController<OccasionUserModel>(
+          context: context,
+          loadData: DbUsers.getOccasionUsersServiceTab,
+          fromPlutoJson: OccasionUserModel.fromPlutoJson,
+          firstColumnType: DataGridFirstColumn.none,
+          idColumn: Tb.occasion_users.user,
+          actionsExtended: DataGridActionsController(
             areAllActionsEnabled: RightsService.canUpdateUsers,
-            isAddActionPossible: () => false),
-        headerChildren: [
-          DataGridAction(
+            isAddActionPossible: () => false,
+          ),
+          headerChildren: [
+            DataGridAction(
               name: "Accommodation settings".tr(),
-              action: (SingleTableDataGrid p0, [_]) =>
-                  _accommodationDefinition(p0),
-              isEnabled: RightsService.isManager),
-          DataGridAction(
+              action: (SingleDataGridController p0, [_]) => _accommodationDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+            DataGridAction(
               name: "Food settings".tr(),
-              action: (SingleTableDataGrid p0, [_]) =>
-                  _foodDefinition(p0),
-              isEnabled: RightsService.isManager),
-        ],
-        columns: UserColumns.generateColumns(columnIdentifiers, data: {
-          UserColumns.FOOD: allFood,
-          UserColumns.ACCOMMODATION: allAccommodation
-        }),
+              action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
+              isEnabled: RightsService.isManager,
+            ),
+          ],
+          columns: UserColumns.generateColumns(
+            columnIdentifiers,
+            data: {
+              UserColumns.FOOD: allFood,
+              UserColumns.ACCOMMODATION: allAccommodation,
+            },
+          ),
+        ),
       ).DataGrid(),
     );
   }
 
-  _accommodationDefinition(SingleTableDataGrid<IPlutoRowModel> p0) async {
+  _accommodationDefinition(SingleDataGridController<IPlutoRowModel> p0) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -106,7 +113,7 @@ class _ServiceTabState extends State<ServiceTab> {
     await loadData();
   }
 
-  _foodDefinition(SingleTableDataGrid<IPlutoRowModel> p0) async {
+  _foodDefinition(SingleDataGridController<IPlutoRowModel> p0) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {

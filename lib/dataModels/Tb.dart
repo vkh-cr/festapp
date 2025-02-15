@@ -164,6 +164,7 @@ class InformationTb{
   String get table => "information";
   String get id => "id";
   String get occasion => "occasion";
+  String get unit => "unit";
   String get created_at => "created_at";
   String get updated_at => "updated_at";
   String get is_hidden => "is_hidden";
@@ -359,6 +360,7 @@ class UnitsTb {
   String get created_at => "created_at";
   String get title => "title";
   String get organization => "organization";
+  String get features => "features";
   String get data => "data";
 }
 
