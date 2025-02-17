@@ -32,5 +32,3 @@ BEGIN
     END LOOP;
 END;
 $$ LANGUAGE plpgsql;
-
-SELECT cron.schedule('apply_planned_changes', '*/1 * * * *', 'CALL apply_planned_changes()');

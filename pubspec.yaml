@@ -83,8 +83,8 @@ dependencies:
 
 dev_dependencies:
   auto_route_generator: ^9.0.0
-  build_runner: ^2.4.13
-  flutter_launcher_icons: ^0.14.1
+  build_runner: ^2.4.15
+  flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
 
