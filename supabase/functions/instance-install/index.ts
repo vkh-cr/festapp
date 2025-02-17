@@ -86,6 +86,32 @@ Deno.serve(async (req) => {
     tls: { rejectUnauthorized: false }, // adjust as needed for your security requirements
   });
 
+  // Helper function to recursively process directories and execute SQL files.
+  async function processDirectory(dir: string) {
+    const apiUrl = `https://api.github.com/repos/${repo}/contents/${dir}`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch directory ${dir}`);
+    }
+    const items = await response.json();
+
+    for (const item of items) {
+      if (item.type === "dir") {
+        // Recursively process child directories.
+        await processDirectory(`${dir}/${item.name}`);
+      } else if (item.type === "file" && item.name.endsWith(".sql") && item.download_url) {
+        console.log(`Executing ${dir}/${item.name} ...`);
+        const fileResponse = await fetch(item.download_url);
+        if (!fileResponse.ok) {
+          console.error(`Failed to download ${dir}/${item.name}`);
+          continue;
+        }
+        const sql = await fileResponse.text();
+        await client.queryObject(sql);
+      }
+    }
+  }
+
   try {
     await client.connect();
     console.log("Connected to the database.");
@@ -116,38 +142,21 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fetch the list of files from the GitHub repository directory
-    const apiUrl = `https://api.github.com/repos/${repo}/contents/${directory}`;
-    const githubResponse = await fetch(apiUrl);
-    if (!githubResponse.ok) {
+    // Recursively process the specified directory and its subdirectories.
+    try {
+      await processDirectory(directory);
+    } catch (err) {
+      console.error("Error processing directories:", err);
       return new Response(
-        JSON.stringify({ error: "Failed to fetch files from GitHub" }),
+        JSON.stringify({
+          error: "Failed to process SQL files",
+          details: err.toString(),
+        }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 500,
         }
       );
-    }
-    const files = await githubResponse.json();
-
-    // Process each SQL file found in the directory
-    for (const file of files) {
-      if (file.name.endsWith(".sql") && file.download_url) {
-        const fileResponse = await fetch(file.download_url);
-        if (!fileResponse.ok) {
-          console.error(`Failed to download ${file.name}`);
-          continue;
-        }
-        const sql = await fileResponse.text();
-
-        try {
-          console.log(`Executing ${file.name} ...`);
-          await client.queryObject(sql);
-        } catch (sqlError) {
-          console.error(`Error executing ${file.name}:`, sqlError);
-          // Optionally: abort further processing or simply continue with the next file.
-        }
-      }
     }
 
     return new Response(
