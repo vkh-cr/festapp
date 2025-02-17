@@ -87,4 +87,4 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE INDEX idx_transaction_id ON eshop.transactions (transaction_id);
+CREATE INDEX IF NOT EXISTS idx_transaction_id ON eshop.transactions (transaction_id);
