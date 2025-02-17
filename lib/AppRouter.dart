@@ -10,7 +10,7 @@ import 'package:fstapp/pages/user/LoginPage.dart';
 import 'package:fstapp/pages/user/SignupPasswordPage.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/pages/occasion/InfoPage.dart';
-import 'package:fstapp/pages/occasion/InstallPage.dart';
+import 'package:fstapp/pages/utility/InstallPage.dart';
 import 'package:fstapp/pages/occasion/MapPage.dart';
 import 'package:fstapp/pages/occasion/NewsFormPage.dart';
 import 'package:fstapp/pages/occasion/NewsPage.dart';
@@ -23,6 +23,7 @@ import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
 import 'package:fstapp/pages/occasion/UserPage.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/utility/InstanceInstallPage.dart';
 
 import 'AppRouter.gr.dart';
 import 'pages/occasion/GamePage.dart';
@@ -42,6 +43,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
+    AutoRoute(page: InstanceInstallRoute.page, path: sl(InstanceInstallPage.ROUTE)),
     AutoRoute(page: UnitAdminRoute.page, path: "/unit/:id/edit"),
     AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [

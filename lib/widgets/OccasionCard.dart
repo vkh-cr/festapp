@@ -51,14 +51,18 @@ class _OccasionCardState extends State<OccasionCard> {
         : null;
 
     // Adjust the inner clipping radius to account for the border width.
-    final double innerRadius = widget.isPresent
-        ? kCardBorderRadius - kPresentBorderWidth
-        : kCardBorderRadius;
+    final double innerRadius =
+    widget.isPresent ? kCardBorderRadius - kPresentBorderWidth : kCardBorderRadius;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: LayoutBuilder(builder: (context, constraints) {
+        // Compute a scale factor for the button based on the card's width.
+        // When the card's width is less than kMinCardWidth, the button scales down.
+        final double buttonScale =
+        (constraints.maxWidth / kMinCardWidth).clamp(0.0, 1.0);
+
         return ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: kMinCardWidth,
@@ -72,8 +76,7 @@ class _OccasionCardState extends State<OccasionCard> {
               boxShadow: [
                 if (widget.isPresent)
                   BoxShadow(
-                    color:
-                    Theme.of(context).primaryColor.withOpacity(0.6),
+                    color: Theme.of(context).primaryColor.withOpacity(0.6),
                     blurRadius: 20,
                     spreadRadius: 4,
                   ),
@@ -91,13 +94,13 @@ class _OccasionCardState extends State<OccasionCard> {
               borderRadius: BorderRadius.circular(innerRadius),
               child: Stack(
                 children: [
-                  if(widget.occasion.data?[Tb.occasions.data_image] != null)
-                  Positioned.fill(
-                    child: Image.network(
-                      widget.occasion.data?[Tb.occasions.data_image],
-                      fit: BoxFit.cover,
+                  if (widget.occasion.data?[Tb.occasions.data_image] != null)
+                    Positioned.fill(
+                      child: Image.network(
+                        widget.occasion.data?[Tb.occasions.data_image],
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                  ),
                   // If the event is past, add a gray overlay.
                   if (widget.isPast)
                     Positioned.fill(
@@ -130,10 +133,8 @@ class _OccasionCardState extends State<OccasionCard> {
                               ),
                               const SizedBox(height: 4),
                               SelectableText(
-                                '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
-                                    .format(widget.occasion.startTime!)} - '
-                                    '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode)
-                                    .format(widget.occasion.endTime!)}',
+                                '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.startTime!)} - '
+                                    '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.endTime!)}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -147,11 +148,13 @@ class _OccasionCardState extends State<OccasionCard> {
                   ),
                   // Detail/reserve button over the image at the bottom right.
                   Positioned(
-                    bottom: 8,
-                    right: 8,
+                    bottom: 10,
+                    right: 10,
                     child: OutlinedButton(
                       onPressed: () async {
-                        if (!FeatureService.isFeatureEnabled(FeatureService.form, fromFeatures: widget.occasion.features)) {
+                        if (!FeatureService.isFeatureEnabled(
+                            FeatureService.form,
+                            fromFeatures: widget.occasion.features)) {
                           await RightsService.updateOccasionData(widget.occasion.link!);
                           await RouterService.navigateOccasion(context, "");
                         } else {
@@ -163,20 +166,25 @@ class _OccasionCardState extends State<OccasionCard> {
                         }
                       },
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: kButtonVerticalPadding,
-                            horizontal: kButtonHorizontalPadding),
+                        padding: EdgeInsets.symmetric(
+                          vertical: kButtonVerticalPadding * buttonScale,
+                          horizontal: kButtonHorizontalPadding * buttonScale,
+                        ),
                         side: const BorderSide(
                           color: Colors.white,
                         ),
                       ),
                       child: Text(
-                        widget.isPast || widget.isPresent || !FeatureService.isFeatureEnabled(FeatureService.form, fromFeatures: widget.occasion.features)
+                        widget.isPast ||
+                            widget.isPresent ||
+                            !FeatureService.isFeatureEnabled(
+                                FeatureService.form,
+                                fromFeatures: widget.occasion.features)
                             ? "Detail".tr()
                             : "Reserve a spot".tr(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 19 * buttonScale,
                         ),
                       ),
                     ),
