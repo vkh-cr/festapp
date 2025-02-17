@@ -94,14 +94,13 @@ Deno.serve(async (req) => {
     if (directory === "scripts/seed") {
       try {
         console.log("Executing seed_org_with_admin...");
-        // You might want to use SELECT * FROM ... if you need the returned values.
-        await client.query("SELECT seed_org_with_admin($1, $2)", [
-          admin_email,
-          admin_password,
-        ]);
+        // Build the query string directly.
+        const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
+        await client.queryObject(seedQuery);
 
         console.log("Executing setup_triggers...");
-        await client.query("SELECT setup_triggers($1)", [supabase_instance_id]);
+        const triggerQuery = `SELECT setup_triggers('${supabase_instance_id}')`;
+        await client.queryObject(triggerQuery);
       } catch (err) {
         console.error("Error executing seed functions:", err);
         return new Response(
@@ -143,7 +142,7 @@ Deno.serve(async (req) => {
 
         try {
           console.log(`Executing ${file.name} ...`);
-          await client.query(sql);
+          await client.queryObject(sql);
         } catch (sqlError) {
           console.error(`Error executing ${file.name}:`, sqlError);
           // Optionally: abort further processing or simply continue with the next file.
