@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,6 +14,9 @@ class InstanceInstallPage extends StatefulWidget {
 
 class _InstanceInstallPageState extends State<InstanceInstallPage> {
   // Common fields for all operations.
+  final TextEditingController _projectRefController = TextEditingController(
+    text: "kjdpmixlnhntmxjedpxh",
+  );
   final TextEditingController _dbController = TextEditingController(
     text:
     'postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres',
@@ -21,12 +25,29 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
   TextEditingController(text: 'vkh-cr/festapp');
 
   // Define the list of operations for the Initial section.
+  // Note: Order is now Tables, Functions, Policies, Seed.
   final List<OperationSectionData> _initialOperations = [
     OperationSectionData(title: "1. Tables", fixedDirectory: "scripts/tables"),
-    OperationSectionData(title: "2. Policies", fixedDirectory: "scripts/policies"),
-    OperationSectionData(title: "3. Functions", fixedDirectory: "scripts/functions"),
+    OperationSectionData(title: "2. Functions", fixedDirectory: "scripts/functions"),
+    OperationSectionData(title: "3. Policies", fixedDirectory: "scripts/policies"),
     OperationSectionData(title: "4. Seed", fixedDirectory: "scripts/seed"),
   ];
+
+  /// Generates the deploy commands using the current project ref.
+  String get _deployCommands {
+    final ref = _projectRefController.text.trim();
+    return '''
+supabase functions deploy notify --no-verify-jwt --project-ref $ref
+supabase functions deploy register --no-verify-jwt --project-ref $ref
+supabase functions deploy send-email --no-verify-jwt --project-ref $ref
+supabase functions deploy send-sign-in-code --no-verify-jwt --project-ref $ref
+supabase functions deploy send-reset-password-link --no-verify-jwt --project-ref $ref
+supabase functions deploy send-ticket-order --no-verify-jwt --project-ref $ref
+supabase functions deploy send-tickets --no-verify-jwt --project-ref $ref
+supabase functions deploy fetch-transactions --no-verify-jwt --project-ref $ref
+supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
+''';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +58,26 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Common fields for all sections.
+            // Common fields: Supabase Project Ref, Database Connection String, and Repo.
+            TextField(
+              controller: _projectRefController,
+              decoration: const InputDecoration(
+                labelText: 'Supabase Project Ref',
+                hintText: 'Enter your Supabase project reference',
+              ),
+              onChanged: (_) {
+                // Rebuild to update the deploy commands when project ref changes.
+                setState(() {});
+              },
+            ),
+            const SizedBox(height: 8),
             TextField(
               controller: _dbController,
               decoration: const InputDecoration(
                 labelText: 'Database Connection String',
               ),
             ),
+            const SizedBox(height: 8),
             TextField(
               controller: _repoController,
               decoration: const InputDecoration(
@@ -51,8 +85,51 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
               ),
             ),
             const SizedBox(height: 20),
+            // Card with deploy commands (selectable and copyable)
+            Card(
+              elevation: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Supabase Function Deploy Commands:',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.copy),
+                          onPressed: () {
+                            Clipboard.setData(
+                                ClipboardData(text: _deployCommands));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Copied to clipboard"),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    SelectableText(
+                      _deployCommands,
+                      style: const TextStyle(fontFamily: 'monospace'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             // Initial Section
-            const Text("Initial"),
+            const Text(
+              "Initial",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const Divider(),
             Column(
               children: _initialOperations.map((op) {
@@ -61,24 +138,29 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
                   child: OperationSectionWidget(
                     title: op.title,
                     fixedDirectory: op.fixedDirectory,
+                    customDirectory: false,
                     dbController: _dbController,
                     repoController: _repoController,
+                    projectRefController: _projectRefController,
                   ),
                 );
               }).toList(),
             ),
             const SizedBox(height: 20),
             // Migrations Section
-            const Text("Migrations"),
+            const Text(
+              "Migrations",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             const Divider(),
             OperationSectionWidget(
               title: "Migrations",
               // For migrations, let the user type the directory.
               customDirectory: true,
-              // Optionally, you can provide an initial value for the custom directory.
               initialDirectory: "migrations",
               dbController: _dbController,
               repoController: _repoController,
+              projectRefController: _projectRefController,
             ),
           ],
         ),
@@ -101,12 +183,14 @@ class OperationSectionWidget extends StatefulWidget {
   final String? initialDirectory;
   final TextEditingController dbController;
   final TextEditingController repoController;
+  final TextEditingController projectRefController;
 
   const OperationSectionWidget({
     Key? key,
     required this.title,
     required this.dbController,
     required this.repoController,
+    required this.projectRefController,
     this.fixedDirectory,
     this.customDirectory = false,
     this.initialDirectory,
@@ -126,8 +210,8 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   // Only used when running the seed scripts.
   TextEditingController? _adminEmailController;
   TextEditingController? _adminPasswordController;
-  TextEditingController? _supabaseInstanceIdController;
 
+  // Determines if this operation is the Seed operation.
   bool get _isSeed => widget.fixedDirectory == "scripts/seed";
 
   @override
@@ -136,12 +220,12 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
     if (widget.customDirectory) {
       _customDirController.text = widget.initialDirectory ?? '';
     }
-    // Initialize seed-specific controllers if needed.
+    // For seed, initialize admin-specific controllers.
     if (_isSeed) {
       _adminEmailController = TextEditingController();
       _adminPasswordController = TextEditingController();
-      _supabaseInstanceIdController =
-          TextEditingController(text: "kjdpmixlnhntmxjedpxh");
+      // Note: Instead of a separate controller for instance id,
+      // we use the common projectRefController from the parent.
     }
   }
 
@@ -150,7 +234,6 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
     _customDirController.dispose();
     _adminEmailController?.dispose();
     _adminPasswordController?.dispose();
-    _supabaseInstanceIdController?.dispose();
     super.dispose();
   }
 
@@ -165,12 +248,12 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
 
     // For seed, validate extra parameters.
     if (_isSeed) {
-      if ((_adminEmailController?.text.trim().isEmpty ?? true) ||
-          (_adminPasswordController?.text.trim().isEmpty ?? true) ||
-          (_supabaseInstanceIdController?.text.trim().isEmpty ?? true)) {
+      if (( _adminEmailController?.text.trim().isEmpty ?? true) ||
+          ( _adminPasswordController?.text.trim().isEmpty ?? true) ||
+          (widget.projectRefController.text.trim().isEmpty)) {
         setState(() {
           _statusMessage =
-          "Please fill out Admin Email, Admin Password, and Supabase Instance ID.";
+          "Please fill out Admin Email, Admin Password, and Supabase Project Ref.";
           _wasSuccess = false;
         });
         return;
@@ -189,7 +272,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
       bodyMap.addAll({
         "admin_email": _adminEmailController!.text.trim(),
         "admin_password": _adminPasswordController!.text.trim(),
-        "supabase_instance_id": _supabaseInstanceIdController!.text.trim(),
+        "supabase_instance_id": widget.projectRefController.text.trim(),
       });
     }
 
@@ -271,9 +354,17 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text("Directory: ${widget.fixedDirectory}"),
             ),
-            // If this is the seed section, add extra fields.
+            // If this is the seed section, show a note and extra fields.
             if (_isSeed) ...[
               const Divider(),
+              const Text(
+                "Before running seed, please ensure that you have enabled:\n"
+                    " - Webhooks in Supabase Dashboard (Database > Webhooks)\n"
+                    " - moddatetime extension (Database > Extensions)\n"
+                    " - unaccent extension (Database > Extensions)",
+                style: TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 8),
               TextField(
                 controller: _adminEmailController,
                 decoration: const InputDecoration(labelText: 'Admin Email'),
@@ -283,10 +374,13 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
                 decoration: const InputDecoration(labelText: 'Admin Password'),
                 obscureText: true,
               ),
-              TextField(
-                controller: _supabaseInstanceIdController,
-                decoration:
-                const InputDecoration(labelText: 'Supabase Instance ID'),
+              // Show the common Supabase Project Ref as read-only in the seed section.
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Supabase Project Ref: ${widget.projectRefController.text}",
+                  style: const TextStyle(fontStyle: FontStyle.italic),
+                ),
               ),
             ],
             const SizedBox(height: 8),
