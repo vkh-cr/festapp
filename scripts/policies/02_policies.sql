@@ -146,13 +146,6 @@ AS PERMISSIVE FOR SELECT
 TO public
 USING (true);
 
-DROP POLICY IF EXISTS "Enable all for admins" ON public.exclusive_events;
-CREATE POLICY "Enable all for admins" ON public.exclusive_events
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_editor'::text) = 'true'::jsonb));
-
 DROP POLICY IF EXISTS "Enable all for editors" ON public.exclusive_events;
 CREATE POLICY "Enable all for editors" ON public.exclusive_events
 AS PERMISSIVE FOR ALL
@@ -177,25 +170,11 @@ TO authenticated
 USING (get_is_editor_on_occasion(occasion))
 WITH CHECK (get_is_editor_on_occasion(occasion));
 
-DROP POLICY IF EXISTS "Enable all for editors.old" ON public.events;
-CREATE POLICY "Enable all for editors.old" ON public.events
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_editor'::text) = 'true'::jsonb));
-
 DROP POLICY IF EXISTS "Enable read for all" ON public.events;
 CREATE POLICY "Enable read for all" ON public.events
 AS PERMISSIVE FOR SELECT
 TO public
 USING (get_is_event_allowed(id));
-
-DROP POLICY IF EXISTS "Enable all for editors" ON public.event_users_saved;
-CREATE POLICY "Enable all for editors" ON public.event_users_saved
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_editor'::text) = 'true'::jsonb));
 
 DROP POLICY IF EXISTS "Enable all on own record" ON public.event_users_saved;
 CREATE POLICY "Enable all on own record" ON public.event_users_saved
@@ -217,25 +196,12 @@ AS PERMISSIVE FOR SELECT
 TO authenticated
 USING (true);
 
-DROP POLICY IF EXISTS "Enable all for admins" ON public.user_info;
-CREATE POLICY "Enable all for admins" ON public.user_info
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_admin'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_admin'::text) = 'true'::jsonb));
-
 DROP POLICY IF EXISTS "Enable all on own record" ON public.user_info;
 CREATE POLICY "Enable all on own record" ON public.user_info
 AS PERMISSIVE FOR ALL
 TO authenticated
 USING ((auth.uid() = id))
 WITH CHECK ((auth.uid() = id));
-
-DROP POLICY IF EXISTS "Enable read for editors" ON public.user_info;
-CREATE POLICY "Enable read for editors" ON public.user_info
-AS PERMISSIVE FOR SELECT
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb));
 
 DROP POLICY IF EXISTS "Enable all for editors" ON public.user_groups;
 CREATE POLICY "Enable all for editors" ON public.user_groups
@@ -253,13 +219,6 @@ CREATE POLICY "Enable select to all auth" ON public.user_groups
 AS PERMISSIVE FOR SELECT
 TO authenticated
 USING (true);
-
-DROP POLICY IF EXISTS "Enable all for editors" ON public.user_news;
-CREATE POLICY "Enable all for editors" ON public.user_news
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_editor'::text) = 'true'::jsonb));
 
 DROP POLICY IF EXISTS "Enable all on own record" ON public.user_news;
 CREATE POLICY "Enable all on own record" ON public.user_news
@@ -291,13 +250,6 @@ USING (get_is_editor_on_occasion(( SELECT events.occasion
 WITH CHECK (get_is_editor_on_occasion(( SELECT events.occasion
    FROM events
   WHERE (events.id = event_roles.event))));
-
-DROP POLICY IF EXISTS "Enable all for editors" ON public.event_users;
-CREATE POLICY "Enable all for editors" ON public.event_users
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING ((get_my_claim('is_editor'::text) = 'true'::jsonb))
-WITH CHECK ((get_my_claim('is_editor'::text) = 'true'::jsonb));
 
 DROP POLICY IF EXISTS "Enable all on own record" ON public.event_users;
 CREATE POLICY "Enable all on own record" ON public.event_users
