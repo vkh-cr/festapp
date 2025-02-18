@@ -51,8 +51,8 @@ class OccasionModel {
       endTime: json[Tb.occasions.end_time] != null
           ? DateTime.parse(json[Tb.occasions.end_time])
           : null,
-      isOpen: json[Tb.occasions.is_open],
-      isHidden: json[Tb.occasions.is_hidden],
+      isOpen: json[Tb.occasions.is_open] ?? false,
+      isHidden: json[Tb.occasions.is_hidden] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],

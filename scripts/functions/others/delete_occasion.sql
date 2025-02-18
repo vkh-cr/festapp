@@ -67,6 +67,9 @@ BEGIN
   DELETE FROM public.email_templates
     WHERE occasion = oc;
 
+  DELETE FROM public.email_wrappers
+    WHERE occasion = oc;
+
   DELETE FROM public.information
     WHERE occasion = oc;
 

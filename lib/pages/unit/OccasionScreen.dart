@@ -57,7 +57,6 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     await DialogHelper.showCustomDialog(
       context: context,
       child: OccasionSettingsPage(occasion: occasion),
-      barrierDismissible: false,
     );
   }
 

@@ -1,4 +1,6 @@
 import 'package:fstapp/dataModels/EmailTemplateModel.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbEmailTemplates {
@@ -11,11 +13,12 @@ class DbEmailTemplates {
     );
   }
 
-  static Future<List<EmailTemplateModel>> getAllEmailTemplatesViaFormLink(String link) async {
-    final response = await _supabase.rpc("get_all_email_templates_via_form_link", params: {"form_link": link});
-    return List<EmailTemplateModel>.from(
-        (response as List).map((x) => EmailTemplateModel.fromJson(x))
+  static Future<EmailTemplatesResponse> getAllEmailTemplatesViaFormLink(String link) async {
+    final response = await _supabase.rpc(
+        "get_all_email_templates_via_form_link",
+        params: {"form_link": link}
     );
+    return EmailTemplatesResponse.fromJson(response);
   }
 
   static Future<void> updateEmailTemplate(EmailTemplateModel template) async {
@@ -38,6 +41,32 @@ class DbEmailTemplates {
       body: body,
     );
     return response;
+  }
+
+}
+
+class EmailTemplatesResponse {
+  final OccasionModel occasion;
+  final UnitModel unit;
+  final UnitModel organization;
+  final List<EmailTemplateModel> templates;
+
+  EmailTemplatesResponse({
+    required this.occasion,
+    required this.unit,
+    required this.organization,
+    required this.templates,
+  });
+
+  factory EmailTemplatesResponse.fromJson(Map<String, dynamic> json) {
+    return EmailTemplatesResponse(
+      occasion: OccasionModel.fromJson(json['occasion']),
+      unit: UnitModel.fromJson(json['unit']),
+      organization: UnitModel.fromJson(json['organization']),
+      templates: (json['templates'] as List)
+          .map((x) => EmailTemplateModel.fromJson(x))
+          .toList(),
+    );
   }
 
 }

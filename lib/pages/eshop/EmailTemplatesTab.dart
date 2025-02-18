@@ -7,8 +7,6 @@ import 'package:fstapp/dataModels/EmailTemplateModel.dart';
 import 'package:fstapp/dataServices/DbEmailTemplates.dart';
 import 'package:fstapp/pages/eshop/EmailTemplateSettingsPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ResponsiveService.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/EmailTemplateCard.dart';
 
 class EmailTemplatesTab extends StatefulWidget {
@@ -19,6 +17,7 @@ class EmailTemplatesTab extends StatefulWidget {
 }
 
 class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
+  EmailTemplatesResponse? emailTemplatesResponse;
   List<EmailTemplateModel> _templates = [];
   String? formLink;
 
@@ -32,20 +31,32 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   }
 
   Future<void> loadData() async {
-    _templates = await DbEmailTemplates.getAllEmailTemplatesViaFormLink(formLink!);
+    emailTemplatesResponse =
+    await DbEmailTemplates.getAllEmailTemplatesViaFormLink(formLink!);
+    _templates = emailTemplatesResponse!.templates;
     setState(() {});
   }
 
   Future<void> _handleEdit(EmailTemplateModel template) async {
     await DialogHelper.showCustomDialog(
       context: context,
-      child: EmailTemplateSettingsPage(template: template),
-      barrierDismissible: false,
+      child: EmailTemplateSettingsPage(template: template, emailTemplatesResponse: emailTemplatesResponse!,),
     );
-    // Reload the email templates after editing.
     await loadData();
   }
 
+  /// Determines the meta title based on the individual template's values.
+  String _getMetaTitle(EmailTemplateModel template) {
+    if (template.occasion != null) {
+      return emailTemplatesResponse!.occasion.title!;
+    } else if (template.unit != null) {
+      return emailTemplatesResponse!.unit.title!;
+    } else if (template.organization != null) {
+      return emailTemplatesResponse!.organization.title!;
+    } else {
+      return 'default'.tr();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +81,8 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               sliver: SliverGrid(
                 gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 250, // Cards will be at most 250 pixels wide.
+                  maxCrossAxisExtent: 250,
+                  mainAxisExtent: 150,
                   mainAxisSpacing: 10,
                   crossAxisSpacing: 10,
                   childAspectRatio: 250 / 150, // Adjust as needed.
@@ -78,16 +90,17 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
                     final template = _templates[index];
+                    final metaTitle = _getMetaTitle(template);
                     return EmailTemplateCard(
                       template: template,
                       onEdit: () => _handleEdit(template),
+                      contextTitle: metaTitle,
                     );
                   },
                   childCount: _templates.length,
                 ),
               ),
             ),
-            // Extra space at the bottom.
             const SliverToBoxAdapter(child: SizedBox(height: 64)),
           ],
         ),

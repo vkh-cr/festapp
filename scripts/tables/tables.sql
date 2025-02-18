@@ -414,7 +414,9 @@ create table public.email_wrappers (
   organization bigint null,
   unit bigint null,
   html text null,
+  occasion bigint null,
   constraint email_wrappers_pkey primary key (id),
+  constraint email_wrappers_occasion_fkey foreign KEY (occasion) references occasions (id),
   constraint email_wrappers_organization_fkey foreign KEY (organization) references organizations (id),
   constraint email_wrappers_unit_fkey foreign KEY (unit) references units (id)
 ) TABLESPACE pg_default;
