@@ -5,6 +5,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/eshop/BlueprintEditorTab.dart';
+import 'package:fstapp/pages/eshop/EmailTemplatesTab.dart';
 import 'package:fstapp/pages/form/FormTab.dart';
 import 'package:fstapp/pages/eshop/OrdersTab.dart';
 import 'package:fstapp/pages/eshop/ReportTab.dart';
@@ -201,6 +202,7 @@ class AdminTabDefinition {
   static const String tickets = "Tickets";
   static const String orders = "Orders";
   static const String report = "Report";
+  static const String emailTemplates = "Email Templates";
 
   // Available tabs defined in a dictionary.
   static Map<String, AdminTabDefinition> get availableTabs => {
@@ -248,5 +250,9 @@ class AdminTabDefinition {
         label: "Report".tr(),
         icon: Icons.stacked_bar_chart,
         widget: ReportTab()),
+    emailTemplates: AdminTabDefinition(
+        label: "Email Templates".tr(),
+        icon: Icons.email,
+        widget: EmailTemplatesTab()),
   };
 }

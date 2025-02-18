@@ -1,6 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
+import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -30,6 +31,7 @@ Deno.serve(async (req) => {
     const userId = reqData.usr;  // ID of the user to invite
     const occasionId = reqData.oc;  // ID of the occasion
 
+    // Generate a 6-digit sign in code.
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     const { data: answer, error: passwordSetError } = await supabaseUser.rpc("set_user_password", {
@@ -46,6 +48,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Retrieve occasion user data.
     const occasionUser = await supabaseAdmin
       .from("occasion_users")
       .select("data")
@@ -61,6 +64,7 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Retrieve the occasion's organization.
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
       .select("organization")
@@ -77,6 +81,7 @@ Deno.serve(async (req) => {
 
     const organizationId = occasionData.organization;
 
+    // Get organization config.
     const orgData = await supabaseAdmin
       .from("organizations")
       .select("data")
@@ -90,15 +95,11 @@ Deno.serve(async (req) => {
 
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
-    const template = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("organization", organizationId)
-      .eq("code", "SIGN_IN_CODE")
-      .single();
-
-    if (template.error || !template.data) {
-      console.error("Email template not found for the organization.");
+    // Instead of directly selecting an email template, use the RPC procedure.
+    const context = { organization: organizationId };
+    const templateAndWrapper: any = await getEmailTemplateAndWrapper("SIGN_IN_CODE", context);
+    if (!templateAndWrapper || !templateAndWrapper.template) {
+      console.error("Email template not found for SIGN_IN_CODE.");
       return new Response(JSON.stringify({ error: "Email template not found" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 404,
@@ -107,16 +108,17 @@ Deno.serve(async (req) => {
 
     const subs = {
       code: code,
-      email: occasionUser.data.data.email, // Access the user's email from the data field
+      email: occasionUser.data.data.email,
       appName: appName,
       platformLinks: platformLinksHtml,
     };
 
     await sendEmailWithSubs({
-      to: occasionUser.data.data.email, // Use the user’s email from the data field
-      subject: template.data.subject,
-      content: template.data.html,
+      to: occasionUser.data.data.email,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
       subs,
+      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
       from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
     });
 
@@ -125,14 +127,15 @@ Deno.serve(async (req) => {
       .insert({
         "from": _DEFAULT_EMAIL,
         "to": occasionUser.data.data.email,
-        "template": template.data.id,
+        "template": templateAndWrapper.template.id,
         "organization": organizationId
       });
 
+    // Mark user as invited.
     occasionUser.data.data.is_invited = true;
     const { error: updateError } = await supabaseAdmin
       .from("occasion_users")
-      .update({ data: occasionUser.data.data }) // Preserve other data, update only is_invited
+      .update({ data: occasionUser.data.data })
       .eq("user", userId)
       .eq("occasion", occasionId)
       .select()

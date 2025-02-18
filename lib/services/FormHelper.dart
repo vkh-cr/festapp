@@ -10,10 +10,8 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
 
 class FormHelper {
   // Field Type Constants

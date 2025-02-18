@@ -40,6 +40,7 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
 supabase functions deploy notify --no-verify-jwt --project-ref $ref
 supabase functions deploy register --no-verify-jwt --project-ref $ref
 supabase functions deploy send-email --no-verify-jwt --project-ref $ref
+supabase functions deploy send-custom-email --no-verify-jwt --project-ref $ref
 supabase functions deploy send-sign-in-code --no-verify-jwt --project-ref $ref
 supabase functions deploy send-reset-password-link --no-verify-jwt --project-ref $ref
 supabase functions deploy send-ticket-order --no-verify-jwt --project-ref $ref

@@ -1,12 +1,9 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
+import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
-const supabaseAdmin = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -74,15 +71,14 @@ Deno.serve(async (req) => {
       "token": token,
     });
 
-  const template = await supabaseAdmin
-    .from("email_templates")
-    .select()
-    .eq("code", "RESET_PASSWORD")
-    .eq("organization", organizationId)
-    .single();
+  // Build the context for template selection.
+  // For a reset password email, we may only need organization.
+  const context = { organization: organizationId };
 
-  if (template.error || !template.data) {
-    console.error("Template not found for the specified organization.");
+  // Call the stored procedure to get both the email template and the wrapper.
+  const templateAndWrapper: any = await getEmailTemplateAndWrapper("RESET_PASSWORD", context);
+  if (!templateAndWrapper || !templateAndWrapper.template) {
+    console.error("Template not found for code RESET_PASSWORD.");
     return new Response(JSON.stringify({ error: "Template not found" }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 404,
@@ -100,9 +96,10 @@ Deno.serve(async (req) => {
 
   await sendEmailWithSubs({
     to: userEmail,
-    subject: template.data.subject,
-    content: template.data.html,
+    subject: templateAndWrapper.template.subject,
+    content: templateAndWrapper.template.html,
     subs,
+    wrapper: templateAndWrapper.wrapper.html,
     from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
@@ -111,7 +108,7 @@ Deno.serve(async (req) => {
     .insert({
       "from": _DEFAULT_EMAIL,
       "to": userEmail,
-      "template": template.data.id,
+      "template": templateAndWrapper.template.id,
       "organization": organizationId
     });
 
