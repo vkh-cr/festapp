@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _refreshSignedInStatus(value) async {
     var loggedIn = await AuthService.tryAuthUser();
     if (loggedIn) {
-      RouterService.updateOccasionFromLink(LinkModel(occasionLink: RouterService.currentOccasionLink));
+      await RouterService.updateOccasionFromLink(LinkModel(occasionLink: RouterService.currentOccasionLink));
       RouterService.popOrHome(context);
     }
   }

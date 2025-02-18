@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -13,11 +14,12 @@ class SongbookContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleTableDataGrid<InformationModel>(
-        context,
-        ()=>DbInformation.getAllInformationForDataGrid(InformationModel.songType),  // Fetch function for songbooks
-        InformationModel.fromPlutoJsonSong,
-        DataGridFirstColumn.deleteAndDuplicate,
-        Tb.information.id,
+      SingleDataGridController<InformationModel>(
+        context: context,
+        loadData: () => DbInformation.getAllInformationForDataGrid(InformationModel.songType),
+        fromPlutoJson: (plutoData) => InformationModel.fromPlutoJsonType(plutoData, InformationModel.songType),
+        firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
+        idColumn: Tb.information.id,
         columns: [
           PlutoColumn(
             hide: true,
@@ -26,7 +28,8 @@ class SongbookContent extends StatelessWidget {
             type: PlutoColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
-            renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),),
+            renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+          ),
           PlutoColumn(
             title: "Hide".tr(),
             field: Tb.information.is_hidden,
@@ -34,12 +37,14 @@ class SongbookContent extends StatelessWidget {
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
+            renderer: (rendererContext) =>
+                DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
           ),
           PlutoColumn(
-              title: "Title".tr(),
-              field: Tb.information.title,
-              type: PlutoColumnType.text()),
+            title: "Title".tr(),
+            field: Tb.information.title,
+            type: PlutoColumnType.text(),
+          ),
           PlutoColumn(
             width: 150,
             title: "Content".tr(),
@@ -70,6 +75,8 @@ class SongbookContent extends StatelessWidget {
             applyFormatterInEditing: true,
             width: 100,
           ),
-        ]).DataGrid();
+        ],
+      ),
+    ).DataGrid();
   }
 }

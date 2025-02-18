@@ -421,7 +421,8 @@
   "Event copy created successfully.": "Kopie události byla úspěšně vytvořena.",
   "Failed to create event copy.": "Nepodařilo se vytvořit kopii události.",
   "Happening Now": "Právě probíhá",
-  "Past Events": "Minulé události",
+  "Past Events": "Proběhlé události",
+  "Upcoming Events": "Nadcházející události",
   "Are you sure you want to delete this image?": "Opravdu chcete smazat tento obrázek?",
   "Image removed successfully.": "Obrázek byl úspěšně odstraněn.",
   "Failed to remove image.": "Nepodařilo se odstranit obrázek.",
@@ -433,5 +434,8 @@
   "Features": "Funkce",
   "Background color": "Barva pozadí",
   "Font color": "Barva písma",
+  "Quotes": "Citáty",
+  "Reserve a spot": "Rezervovat",
+  "Detail": "Detail",
   "_": "_"
 }

@@ -1,200 +1,71 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-import 'DataGridAction.dart';
 import 'PlutoAbstract.dart';
 import 'AdministrationHeader.dart';
 
-enum DataGridFirstColumn{
-  none, delete, deleteAndDuplicate, deleteAndCheck, check
-}
+enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
 
 class SingleTableDataGrid<T extends IPlutoRowModel> {
-  late PlutoGridStateManager stateManager;
-  Set<PlutoRow> updatedRows = {};
-  Set<PlutoRow> deletedRows = {};
-  Set<PlutoRow> newRows = {};
-  List<PlutoRow> rows = [];
-  List<PlutoColumn> columns = [];
-  final Future<List<T>> Function() loadData;
-  final DataGridFirstColumn firstColumnType;
-  final String idColumn;
-  final T Function(Map<String, dynamic>) fromPlutoJson;
-  final BuildContext context;
+  final SingleDataGridController<T> controller;
 
-  final DataGridActionsController? actionsExtended;
-  final List<DataGridAction>? headerChildren;
+  SingleTableDataGrid(this.controller);
 
-  SingleTableDataGrid(this.context, this.loadData, this.fromPlutoJson, this.firstColumnType, this.idColumn, {required this.columns, this.headerChildren, this.actionsExtended});
-  DataGrid() {
+  Widget DataGrid() {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: ThemeConfig.whiteColor(context),
+        color: ThemeConfig.whiteColor(controller.context),
       ),
       child: PlutoGrid(
-        columns: columns,
-        rows: rows,
+        columns: controller.columns,
+        rows: controller.rows,
         onChanged: (PlutoGridOnChangedEvent event) {
-    
-          if(event.row.state == PlutoRowState.updated)
-          {
-            if(event.row.cells[idColumn]?.value != -1)
-            {
-              deletedRows.remove(event.row);
-              if(!newRows.contains(event.row))
-              {
-                updatedRows.add(event.row);
+          if (event.row.state == PlutoRowState.updated) {
+            if (event.row.cells[controller.idColumn]?.value != -1) {
+              controller.deletedRows.remove(event.row);
+              if (!controller.newRows.contains(event.row)) {
+                controller.updatedRows.add(event.row);
               }
-    
-              // todo add check for real value change
-              // bool isAnythingChanged = false;
-              // var oldRow = stateManager.refRows.originalList.firstWhere((r)=>r.key == event.row.key);
-              //
-              // for(var c in event.row.cells.entries)
-              // {
-              //   if(c.value != oldRow.cells[c.key])
-              //   {
-              //     isAnythingChanged = true;
-              //     break;
-              //   }
-              // }
-              //
-              // if(isAnythingChanged)
-              // {
-              //   updatedRows.add(event.row);
-              // }
-              // else
-              // {
-              //   updatedRows.remove(event.row);
-              // }
             }
           }
-    
-          stateManager.notifyListeners();
+          controller.stateManager.notifyListeners();
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
-          stateManager = event.stateManager;
+          controller.stateManager = event.stateManager;
           event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
           event.stateManager.setShowColumnFilter(true);
-          reloadData();
+          controller.reloadData();
         },
-        rowColorCallback: (rowContext){
-          var row = deletedRows.firstWhereOrNull((element) => element.key == rowContext.row.key);
-          if(row != null)
-          {
+        rowColorCallback: (rowContext) {
+          var row = controller.deletedRows.firstWhereOrNull(
+                  (element) => element.key == rowContext.row.key);
+          if (row != null) {
             return Colors.redAccent.withOpacity(0.3);
           }
-    
-          row = updatedRows.firstWhereOrNull((element) => element.key == rowContext.row.key);
-          if(row != null)
-          {
+          row = controller.updatedRows.firstWhereOrNull(
+                  (element) => element.key == rowContext.row.key);
+          if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
           }
-    
-          row = newRows.firstWhereOrNull((element) => element.key == rowContext.row.key);
-          if(row != null)
-          {
+          row = controller.newRows.firstWhereOrNull(
+                  (element) => element.key == rowContext.row.key);
+          if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
           }
           return Colors.transparent;
         },
-        createHeader: (stateManager) =>
-            AdministrationHeader(
-                stateManager: stateManager,
-                fromPlutoJson: fromPlutoJson,
-                loadData: reloadData,
-                headerChildren: headerChildren,
-                saveExtended: actionsExtended,
-                dataGrid: this),
-        configuration: AdministrationHeader.defaultPlutoGridConfiguration(context, context.locale.languageCode),
+        createHeader: (stateManager) => AdministrationHeader(
+          stateManager: stateManager,
+          controller: controller,
+        ),
+        configuration: AdministrationHeader.defaultPlutoGridConfiguration(
+            controller.context, controller.context.locale.languageCode),
       ),
     );
-  }
-  String firstColumnTypeId = "delete0";
-  Future<void> reloadData() async {
-    var defaultRow =  { firstColumnTypeId: PlutoCell(value: "delete")};
-    final dataList = await loadData();
-    var rowList = dataList.map((i) => i.toPlutoRow(context)!).toList();
-    for (var element in rowList) {element.cells.addAll(defaultRow);}
-    stateManager.removeAllRows();
-    stateManager.appendRows(rowList);
-    deletedRows.clear();
-    newRows.clear();
-    updatedRows.clear();
-
-    if(stateManager.columns.first.field != firstColumnTypeId && firstColumnType != DataGridFirstColumn.none)
-    {
-      var firstColumn = PlutoColumn(
-          title: "",
-          field: firstColumnTypeId,
-          type: PlutoColumnType.text(),
-          readOnly: true,
-          enableFilterMenuItem: false,
-          enableSorting: false,
-          enableDropToResize: false,
-          enableColumnDrag: false,
-          enableContextMenu: false,
-          enableRowChecked: firstColumnType == DataGridFirstColumn.deleteAndCheck || firstColumnType == DataGridFirstColumn.check,
-          cellPadding: EdgeInsets.zero,
-          width: firstColumnType == DataGridFirstColumn.delete || firstColumnType == DataGridFirstColumn.check ? 50 : 100,
-          renderer: (rendererContext) {
-            List<Widget> rowChildren = [];
-            if(firstColumnType != DataGridFirstColumn.check){
-              rowChildren.add(IconButton(
-                  onPressed: () async{
-                    var row = rendererContext.row;
-                    if(deletedRows.contains(row))
-                    {
-                      deletedRows.remove(row);
-                    }
-                    else if (newRows.contains(row))
-                    {
-                      newRows.remove(row);
-                      rendererContext.stateManager.removeRows([rendererContext.row]);
-                    }
-                    else{
-                      deletedRows.add(row);
-                    }
-                    row.setState(PlutoRowState.updated);
-                    rendererContext.stateManager.notifyListeners();
-                  },
-                  icon: const Icon(Icons.delete_forever)));
-            }
-            if(firstColumnType == DataGridFirstColumn.deleteAndDuplicate)
-            {
-              rowChildren.add(IconButton(
-                  onPressed: () async{
-                    var originRow = rendererContext.row;
-                    var newRow = rendererContext.stateManager.getNewRows()[0];
-                    var readOnlyColumns = rendererContext.stateManager.columns.where((element) => element.readOnly).map((e) => e.field).toList();
-                    for(var c in originRow.cells.entries)
-                    {
-                      if (readOnlyColumns.contains(c.key)) {
-                        continue;
-                        //and use default value
-                      } else {
-                        newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
-                      }
-                    }
-
-                    var currentIndex = rendererContext.stateManager.rows.indexOf(originRow);
-                    rendererContext.stateManager.insertRows(currentIndex+1, [newRow]);
-                    newRows.add(newRow);
-                    rendererContext.stateManager.notifyListeners();
-                  },
-                  icon: const Icon(Icons.add)),);
-            }
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: rowChildren,);
-          });
-      stateManager.insertColumns(0, [
-        firstColumn
-      ]);
-    }
   }
 }

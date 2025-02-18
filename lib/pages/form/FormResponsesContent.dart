@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
@@ -58,19 +59,23 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
     return KeyedSubtree(
         key: refreshKey,
         child: SingleTableDataGrid<FormResponseModel>(
-          context,
-              () => DbForms.getAllResponses(formLink!),
-          FormResponseModel.fromPlutoJson,
-          DataGridFirstColumn.none,
-          TbEshop.orders.id,
-          actionsExtended: DataGridActionsController(
+          SingleDataGridController<FormResponseModel>(
+            context: context,
+            loadData: () => DbForms.getAllResponses(formLink!),
+            fromPlutoJson: FormResponseModel.fromPlutoJson,
+            firstColumnType: DataGridFirstColumn.none,
+            idColumn: TbEshop.orders.id,
+            actionsExtended: DataGridActionsController(
               areAllActionsEnabled: RightsService.canUpdateUsers,
-              isAddActionPossible: () => false),
-          headerChildren: [
-          ],
-          columns: EshopColumns.generateColumns(context, columnIdentifiers, data: {
-            EshopColumns.RESPONSES: formFieldModels,
-          }),
+              isAddActionPossible: () => false,
+            ),
+            headerChildren: [],
+            columns: EshopColumns.generateColumns(
+              context,
+              columnIdentifiers,
+              data: {EshopColumns.RESPONSES: formFieldModels},
+            ),
+          ),
         ).DataGrid()
     );
   }
@@ -78,7 +83,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
 
   List<OrderModel> _getChecked(SingleTableDataGrid dataGrid) {
     return List<OrderModel>.from(
-      dataGrid.stateManager.refRows.originalList
+      dataGrid.controller.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );

@@ -2,13 +2,17 @@ import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataServices/DbInformation.dart';
+import 'package:fstapp/dataServices/DbUnits.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/widgets/LogoWidget.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/RouterService.dart';
@@ -30,20 +34,30 @@ class UnitPage extends StatefulWidget {
 }
 
 class _UnitPageState extends State<UnitPage> {
+  UnitModel? _unit;
   List<OccasionModel> _occasions = [];
+  InformationModel? _quote;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _loadOccasions();
+    _loadUnitAndOccasions();
   }
 
-  Future<void> _loadOccasions() async {
-    var occasions = await DbUsers.getAllOccasionsForUnit(widget.id);
+  Future<void> _loadUnitAndOccasions() async {
+    final unit = await DbUnits.getUnit(widget.id);
+    final occasions = unit.occasions!;
+
+    if(FeatureService.isFeatureEnabled(FeatureService.quotes,
+        fromFeatures: unit.features)) {
+      _quote = await DbInformation.getCurrentQuote(widget.id);
+    }
     setState(() {
+      _unit = unit;
       _occasions = occasions;
     });
+
   }
 
   @override
@@ -54,16 +68,6 @@ class _UnitPageState extends State<UnitPage> {
 
   @override
   Widget build(BuildContext context) {
-    final logoAsset = ThemeConfig.isDarkMode(context)
-        ? 'assets/icons/fstapplogo.dark.svg'
-        : 'assets/icons/fstapplogo.svg';
-
-    // Define the HTML content for the quote section.
-    final String eventDescription =
-        "Drahé děti!<br><br>"
-        "V tomto milostivém roce vás volám k obrácení. Dejte Boha, drahé děti, do centra svého života a plody budou láska k bližnímu i radost ze svědectví a svatost vašeho života se stane pravdivým svědectvím víry.<br><br>"
-        "Děkuji vám, že jste odpověděly na mé pozvání.";
-
     final now = DateTime.now();
     final presentEvents = _occasions
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
@@ -78,7 +82,7 @@ class _UnitPageState extends State<UnitPage> {
           ? FloatingActionButton(
         onPressed: () {
           RouterService.navigate(context, "unit/${widget.id}/edit")
-              .then((_) => _loadOccasions());
+              .then((_) => _loadUnitAndOccasions());
         },
         child: const Icon(Icons.edit),
       )
@@ -88,6 +92,7 @@ class _UnitPageState extends State<UnitPage> {
         slivers: [
           // Slim header: a SliverAppBar showing only the logo aligned to the left.
           SliverAppBar(
+            automaticallyImplyLeading: false,
             floating: true,
             snap: true,
             pinned: false,
@@ -104,46 +109,43 @@ class _UnitPageState extends State<UnitPage> {
                   curve: Curves.easeOut,
                 );
               },
-              child: SvgPicture.asset(
-                logoAsset,
-                height: 60,
-                width: 40,
-                semanticsLabel: 'Festapp logo',
-              ),
+              child: LogoWidget(width: 40, height: 60,)
             ),
           ),
           // Quote section rendered as HTML in a paper-like container.
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  vertical: kVerticalPadding, horizontal: kHorizontalPadding),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints:
-                  BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
-                  child: Container(
-                    padding: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: ThemeConfig.whiteColor(context),
-                      border: Border.all(color: ThemeConfig.grey300(context)),
-                      borderRadius: BorderRadius.circular(8.0),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4.0,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: HtmlView(
-                      html: eventDescription,
-                      isSelectable: true,
+          // This section is shown only if the unit's features enable quotes.
+          if (_unit != null && _quote != null)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                    vertical: kVerticalPadding, horizontal: kHorizontalPadding),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints:
+                    BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: ThemeConfig.whiteColor(context),
+                        border: Border.all(color: ThemeConfig.grey300(context)),
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4.0,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: HtmlView(
+                        html: _quote!.description!,
+                        isSelectable: true,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
           // "Happening Now" title for present events.
           if (presentEvents.isNotEmpty)
             SliverToBoxAdapter(
@@ -192,7 +194,7 @@ class _UnitPageState extends State<UnitPage> {
                 padding: const EdgeInsets.symmetric(
                     vertical: 16.0, horizontal: kHorizontalPadding),
                 child: Text(
-                  "Events".tr(),
+                  "Upcoming Events".tr(),
                   style: const TextStyle(
                       fontSize: 24, fontWeight: FontWeight.bold),
                 ),

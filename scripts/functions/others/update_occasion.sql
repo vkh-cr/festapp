@@ -67,8 +67,7 @@ BEGIN
                    organization = COALESCE((input_data->>'organization')::BIGINT, organization),
                    services   = COALESCE(input_data->'services', services),
                    unit       = final_unit,
-                   features   = COALESCE(input_data->'features', features),
-                   place = COALESCE((input_data->>'place')::BIGINT, place)
+                   features   = COALESCE(input_data->'features', features)
              WHERE id = occ_id
              RETURNING to_jsonb(public.occasions.*) INTO updated_occ;
 
@@ -90,8 +89,7 @@ BEGIN
                 organization,
                 services,
                 unit,
-                features,
-                place
+                features
             )
             VALUES(
                 now,
@@ -107,8 +105,7 @@ BEGIN
                 COALESCE((input_data->>'organization')::BIGINT, NULL),
                 COALESCE(input_data->'services', '{}'::jsonb),
                 final_unit,
-                COALESCE(input_data->'features', '[]'::jsonb),
-                COALESCE((input_data->>'place')::BIGINT, NULL)
+                COALESCE(input_data->'features', '[]'::jsonb)
             )
             RETURNING to_jsonb(public.occasions.*) INTO updated_occ;
 
