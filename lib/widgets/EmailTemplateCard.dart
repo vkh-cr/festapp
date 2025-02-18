@@ -8,12 +8,15 @@ import 'package:fstapp/themeConfig.dart';
 class EmailTemplateCard extends StatelessWidget {
   final EmailTemplateModel template;
   final VoidCallback onEdit;
+  /// Additional field to show the context title (occasion/unit/organization).
+  final String contextTitle;
 
   const EmailTemplateCard({
-    Key? key,
+    super.key,
     required this.template,
     required this.onEdit,
-  }) : super(key: key);
+    required this.contextTitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +55,19 @@ class EmailTemplateCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Template title.
+                    // Meta title in italic with reduced opacity and overflow handling.
+                    Text(
+                      "${'Template'.tr()} - ${contextTitle.isNotEmpty ? contextTitle : 'default'.tr()}",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: ThemeConfig.blackColor(context).withOpacity(0.7),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    // Template title with overflow handling.
                     Text(
                       template.getUsageDetails()['title'] ?? '',
                       style: TextStyle(
@@ -60,29 +75,41 @@ class EmailTemplateCard extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    // Usage description.
+                    // Usage description with overflow handling.
                     Text(
                       template.getUsageDetails()['description'] ?? '',
                       style: TextStyle(
                         color: ThemeConfig.blackColor(context),
                         fontSize: 12,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    // Edit button.
-                    Row(
-                      children: [
-                        TextButton.icon(
-                          onPressed: onEdit,
-                          icon: Icon(Icons.edit, color: ThemeConfig.blackColor(context)),
-                          label: Text(
-                            'Edit'.tr(),
-                            style: TextStyle(color: ThemeConfig.blackColor(context)),
+                    // Edit button wrapped in FittedBox to prevent overflow.
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        children: [
+                          TextButton.icon(
+                            onPressed: onEdit,
+                            icon: Icon(
+                              Icons.edit,
+                              color: ThemeConfig.blackColor(context),
+                            ),
+                            label: Text(
+                              'Edit'.tr(),
+                              style: TextStyle(
+                                color: ThemeConfig.blackColor(context),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
