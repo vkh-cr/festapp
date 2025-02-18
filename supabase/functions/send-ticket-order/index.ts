@@ -4,6 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
+import { getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -170,15 +171,10 @@ Deno.serve(async (req) => {
 
     const organizationId = occasionData.organization;
 
-    const template = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("organization", organizationId)
-      .eq("occasion", occasion.id)
-      .eq("code", "TICKET_ORDER_CONFIRMATION")
-      .single();
-
-    if (template.error || !template.data) {
+    // Instead of directly selecting an email template, use the RPC procedure.
+    const context = { organization: organizationId, occasion: occasion.id };
+    const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_CONFIRMATION", context);
+    if (!templateAndWrapper || !templateAndWrapper.template) {
       console.error("Email template not found for the occasion.");
       return new Response(JSON.stringify({ error: "Email template not found" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -203,18 +199,19 @@ Deno.serve(async (req) => {
 
     await sendEmailWithSubs({
       to: ticketOrder.order.data.email,
-      subject: template.data.subject,
-      content: template.data.html,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
       subs,
       from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments: [
         {
-            filename: `qr-payment.${occasionData.link}.png`, // Name of the file
-            content: qrCode, // Ensure qrCode is a Uint8Array
-            contentType: "image/png", // MIME type for GIF
-            encoding: "binary", // Specify binary encoding
+          filename: `qr-payment.${occasionData.link}.png`,
+          content: qrCode,
+          contentType: "image/png",
+          encoding: "binary",
         },
       ],
+      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
     });
 
     await supabaseAdmin
@@ -222,7 +219,7 @@ Deno.serve(async (req) => {
       .insert({
         "from": _DEFAULT_EMAIL,
         "to": ticketOrder.order.data.email,
-        "template": template.data.id,
+        "template": templateAndWrapper.template.id,
         "organization": organizationId,
         "occasion": occasion.id,
       });

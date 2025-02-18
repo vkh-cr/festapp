@@ -12,9 +12,7 @@ BEGIN
     END IF;
 
     -- Verify if the user is an editor on the occasion
-    IF NOT get_is_editor_on_occasion(occasion_id) THEN
-        RAISE EXCEPTION 'User is not authorized to edit this occasion.';
-    END IF;
+    PERFORM public.check_is_editor_view_on_occasion(occasion_id);
 
     -- Call the original function to update the order and tickets
     RETURN update_order_and_tickets_to_storno(order_id);

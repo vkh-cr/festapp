@@ -44,6 +44,25 @@ export async function isUserEditor(userId: string, occasionId: bigint): Promise<
   return data.is_editor;
 }
 
+/**
+ * Calls the stored function get_email_template_and_wrapper in Postgres.
+ * The function returns a JSON object with keys "template" and "wrapper".
+ *
+ * @param p_code - The email template code (e.g., "RESET_PASSWORD").
+ * @param p_context - A JSON object with keys such as "occasion", "unit", and "organization".
+ * @returns A promise that resolves to the email template and wrapper.
+ */
+export async function getEmailTemplateAndWrapper(p_code: string, p_context: any) {
+  const { data, error } = await supabaseAdmin.rpc('get_email_template_and_wrapper', { p_code, p_context });
+  if (error) {
+    console.error('Error calling get_email_template_and_wrapper:', error);
+    throw error;
+  }
+
+  return data;
+}
+
+
 export const supabaseAdmin = createClient(
   Deno.env.get('SUPABASE_URL')!,
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!

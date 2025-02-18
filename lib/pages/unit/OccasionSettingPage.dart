@@ -19,7 +19,7 @@ import 'package:fstapp/widgets/ImageArea.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
-import 'package:fstapp/widgets/HtmlView.dart';  // For HtmlView
+import 'package:fstapp/widgets/HtmlView.dart';
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;
