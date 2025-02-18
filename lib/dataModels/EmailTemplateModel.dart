@@ -63,68 +63,68 @@ class EmailTemplateModel {
   }
 
   // Common substitution definitions (codes are now without '{{' and '}}'):
-  static const EmailTemplateSub userNameSub = EmailTemplateSub(
-    code: 'userName',
-    description: 'The name of the user',
+  static EmailTemplateSub emailSub = EmailTemplateSub(
+    code: 'email',
+    description: 'The email of the user'.tr(),
     defaultValue: 'Jan Novák',
   );
 
-  static const EmailTemplateSub resetLinkSub = EmailTemplateSub(
+  static EmailTemplateSub resetLinkSub = EmailTemplateSub(
     code: 'resetLink',
-    description: 'The link to reset the password',
+    description: 'The link to reset the password'.tr(),
     defaultValue: 'https://live.festapp.net/reset',
   );
 
-  static const EmailTemplateSub signInCodeSub = EmailTemplateSub(
+  static EmailTemplateSub signInCodeSub = EmailTemplateSub(
     code: 'signInCode',
-    description: 'The sign-in code',
+    description: 'The sign-in code'.tr(),
     defaultValue: '123456',
   );
 
-  static const EmailTemplateSub occasionTitleSub = EmailTemplateSub(
+  static EmailTemplateSub occasionTitleSub = EmailTemplateSub(
     code: 'occasionTitle',
-    description: 'The title of the occasion',
+    description: 'The title of the occasion'.tr(),
     defaultValue: 'Festival of Creaky Music',
   );
 
-  static const EmailTemplateSub amountSub = EmailTemplateSub(
+  static EmailTemplateSub amountSub = EmailTemplateSub(
     code: 'amount',
-    description: 'The remaining amount',
+    description: 'Payment Amount'.tr(),
     defaultValue: '100 CZK',
   );
 
-  static const EmailTemplateSub accountNumberSub = EmailTemplateSub(
+  static EmailTemplateSub accountNumberSub = EmailTemplateSub(
     code: 'accountNumber',
-    description: 'The bank account number',
+    description: 'The bank account number'.tr(),
     defaultValue: '2502719268/2010',
   );
 
-  static const EmailTemplateSub variableSymbolSub = EmailTemplateSub(
+  static EmailTemplateSub variableSymbolSub = EmailTemplateSub(
     code: 'variableSymbol',
-    description: 'The payment identifier',
+    description: 'Variable symbol'.tr(),
     defaultValue: '9654',
   );
 
-  static const EmailTemplateSub deadlineSub = EmailTemplateSub(
+  static EmailTemplateSub deadlineSub = EmailTemplateSub(
     code: 'deadline',
-    description: 'The payment deadline',
+    description: 'The payment deadline'.tr(),
     defaultValue: '30. 2. 2026',
   );
 
-  static const EmailTemplateSub fullOrderSub = EmailTemplateSub(
+  static EmailTemplateSub fullOrderSub = EmailTemplateSub(
     code: 'fullOrder',
-    description: 'Full order details',
+    description: 'Full order details'.tr(),
     defaultValue: 'Order details here',
   );
 
   /// Mapping of template codes to their available substitutions.
   static final Map<String, List<EmailTemplateSub>> substitutionDefinitions = {
     'RESET_PASSWORD': [
-      userNameSub,
+      emailSub,
       resetLinkSub,
     ],
     'SIGN_IN_CODE': [
-      userNameSub,
+      emailSub,
       signInCodeSub,
     ],
     'TICKET_ORDER_CONFIRMATION': [
@@ -192,8 +192,8 @@ class EmailTemplateModel {
         };
       default:
         return {
-          'title': 'Unknown Template'.tr(),
-          'description': ''.tr(),
+          'title': 'Unknown Template',
+          'description': '-',
           'subs': [],
         };
     }

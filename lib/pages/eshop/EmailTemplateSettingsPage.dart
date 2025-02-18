@@ -13,9 +13,13 @@ import 'package:fstapp/widgets/HtmlView.dart';
 
 class EmailTemplateSettingsPage extends StatefulWidget {
   final EmailTemplateModel template;
+  final EmailTemplatesResponse emailTemplatesResponse;
 
-  const EmailTemplateSettingsPage({Key? key, required this.template})
-      : super(key: key);
+  const EmailTemplateSettingsPage({
+    Key? key,
+    required this.template,
+    required this.emailTemplatesResponse,
+  }) : super(key: key);
 
   @override
   _EmailTemplateSettingsPageState createState() =>
@@ -26,6 +30,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
   final _formKey = GlobalKey<FormState>();
   late String? _subject;
   late String? _htmlContent;
+  bool _isSendingTestEmail = false;
 
   @override
   void initState() {
@@ -39,6 +44,13 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
       _formKey.currentState!.save();
       widget.template.subject = _subject;
       widget.template.html = _htmlContent;
+
+      // Set the integer fields from the emailTemplatesResponse if available.
+      widget.template.occasion = widget.emailTemplatesResponse.occasion.id;
+      widget.template.unit = widget.emailTemplatesResponse.unit.id;
+      widget.template.organization =
+          widget.emailTemplatesResponse.organization.id;
+
       await DbEmailTemplates.updateEmailTemplate(widget.template);
       ToastHelper.Show(
           context, "${"Saved".tr()}: ${widget.template.subject ?? ''}");
@@ -47,7 +59,11 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
   }
 
   Future<void> _sendTestEmail() async {
-    // Retrieve usage details from the template
+    setState(() {
+      _isSendingTestEmail = true;
+    });
+
+    // Retrieve usage details from the template.
     final usageDetails = widget.template.getUsageDetails();
     final subsMap = <String, String>{};
 
@@ -60,13 +76,19 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
     }
 
     try {
-      await DbEmailTemplates.sendCustomEmail(widget.template, subsMap, RightsService.currentUser!.email!);
-      ToastHelper.Show(context, "Test email sent successfully".tr());
+      await DbEmailTemplates.sendCustomEmail(widget.template, subsMap,
+          RightsService.currentUser!.email!);
+      ToastHelper.Show(context, "Test email sent successfully.".tr());
     } catch (e) {
-      ToastHelper.Show(context, "Failed to send test email".tr());
+      ToastHelper.Show(context, "Failed to send test email.".tr());
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSendingTestEmail = false;
+        });
+      }
     }
   }
-
 
   /// Builds a widget displaying the available substitutions.
   /// If [subs] is a list, each substitution is shown on its own line.
@@ -80,6 +102,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
             return SelectableText(
               "{{${sub.code}}}: ${sub.description}",
               style: const TextStyle(fontSize: 14),
+              maxLines: 1,
             );
           }
           return const SizedBox();
@@ -89,6 +112,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
       return SelectableText(
         subs,
         style: const TextStyle(fontSize: 14),
+        maxLines: 2,
       );
     } else if (subs is Map<String, dynamic>) {
       final subsText = subs.entries
@@ -97,6 +121,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
       return SelectableText(
         subsText,
         style: const TextStyle(fontSize: 14),
+        maxLines: 3,
       );
     }
     return const SizedBox();
@@ -108,7 +133,14 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
     final usageDetails = widget.template.getUsageDetails();
     return Scaffold(
       appBar: AppBar(
-        title: Text(usageDetails['title'] ?? ''),
+        title: Text(
+          usageDetails['title'] ?? '',
+          maxLines: 1,
+          style: TextStyle(
+            color: Theme.of(context).appBarTheme.titleTextStyle?.color ??
+                Colors.white.withOpacity(0.85),
+          ),
+        ),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -133,8 +165,16 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ElevatedButton.icon(
-                        onPressed: _sendTestEmail,
-                        icon: const Icon(Icons.send),
+                        onPressed: _isSendingTestEmail ? null : _sendTestEmail,
+                        icon: _isSendingTestEmail
+                            ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Icon(Icons.send),
                         label: Text("Send Test Email".tr()),
                       ),
                     ],
@@ -154,17 +194,27 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                         children: [
                           Text(
                             usageDetails['title'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             usageDetails['description'] ?? '',
-                            style: const TextStyle(fontSize: 14),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.black.withOpacity(0.8),
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
                             "Available Substitutions:".tr(),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                                 fontSize: 14, fontWeight: FontWeight.bold),
                           ),
@@ -184,6 +234,9 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                           errorText: "Subject is required".tr()),
                     ]),
                     onSaved: (val) => _subject = val,
+                    style: TextStyle(
+                      color: Colors.black.withOpacity(0.85),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   // Email Template Content Section header.
@@ -199,6 +252,8 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     ),
                     child: Text(
                       "Email Template Content".tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -206,7 +261,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                             .inputDecorationTheme
                             .labelStyle
                             ?.color ??
-                            Colors.grey[700],
+                            Colors.grey[700]?.withOpacity(0.85),
                       ),
                     ),
                   ),
@@ -234,7 +289,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                             });
                           }
                         },
-                        child: Text("Edit Content".tr()),
+                        child: Text("Edit content".tr()),
                       ),
                     ],
                   ),

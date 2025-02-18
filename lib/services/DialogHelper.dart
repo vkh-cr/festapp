@@ -541,7 +541,7 @@ class DialogHelper{
   static Future<T?> showCustomDialog<T>({
     required BuildContext context,
     required Widget child,
-    bool barrierDismissible = false,
+    bool barrierDismissible = true,
   }) {
     return showDialog<T>(
       context: context,
