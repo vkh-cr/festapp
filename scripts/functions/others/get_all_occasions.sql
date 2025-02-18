@@ -29,7 +29,6 @@ BEGIN
       'services', o.services,
       'unit', o.unit,
       'features', o.features,
-      'place', o.place,
       'form', (
          SELECT row_to_json(f)
          FROM public.forms f
