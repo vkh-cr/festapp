@@ -91,72 +91,70 @@ class DbOrders {
   }
 
   static Future<List<OrderModel>> getAllOrders(String formLink) async {
+    final response = await _supabase.rpc('get_orders', params: {'form_link': formLink});
+    if (response["code"] != 200) return [];
+    final json = response["data"];
 
-    final response = await _supabase.rpc(
-      'get_orders',
-      params: {
-        'form_link': formLink,
-      },
-    );
+    final spots = BlueprintHelper.parseSpots(json);
+    final products = BlueprintHelper.parseProducts(json);
+    final tickets = BlueprintHelper.parseTickets(json);
+    final orders = BlueprintHelper.parseOrders(json)!;
+    final payments = BlueprintHelper.parsePaymentInfo(json);
+    final orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
 
-    if (response["code"] != 200) {
-      return [];
+    // Precompute maps
+    final ticketMap = {for (var t in tickets!) t.id: t};
+    final productMap = {for (var p in products!) p.id: p};
+    final paymentMap = {for (var p in payments!) p.id: p};
+    final spotByOptId = {for (var s in spots!) s.orderProductTicket: s};
+
+    final Map<int, List<OrderProductTicketModel>> orderToOpt = {};
+    final Map<int, List<OrderProductTicketModel>> ticketToOpt = {};
+    for (var opt in orderProductTickets!) {
+      orderToOpt.putIfAbsent(opt.orderId!, () => []).add(opt);
+      ticketToOpt.putIfAbsent(opt.ticketId!, () => []).add(opt);
     }
-    var json = response["data"];
-
-    final List<BlueprintObjectModel>? spots = BlueprintHelper.parseSpots(json);
-    final List<ProductModel>? products = BlueprintHelper.parseProducts(json);
-    final List<TicketModel>? tickets = BlueprintHelper.parseTickets(json);
-    final List<OrderModel> orders = BlueprintHelper.parseOrders(json)!;
-    final List<PaymentInfoModel>? payments = BlueprintHelper.parsePaymentInfo(json);
-    final List<OrderProductTicketModel>? orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
 
     for (var order in orders) {
-      // Attach tickets related to the order via orderProductTickets
-      final List<TicketModel> relatedTickets = tickets!.where((ticket) {
-        return orderProductTickets!.any((opt) => opt.orderId == order.id && opt.ticketId == ticket.id);
-      }).toList();
+      final orderOpts = orderToOpt[order.id] ?? [];
+      final ticketIds = orderOpts.map((opt) => opt.ticketId).toSet();
+      final relatedTickets = ticketIds.map((id) => ticketMap[id]).whereType<TicketModel>().toList();
       order.relatedTickets = relatedTickets;
 
-      for (var ticket in order.relatedTickets!) {
-        // Relate spots to the ticket via orderProductTickets
-        ticket.relatedSpot = spots!.firstWhereOrNull((spot) {
-          return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.id == spot.orderProductTicket);
-        });
-
-        // Relate products to the ticket via orderProductTickets
-        ticket.relatedProducts = products!.where((product) {
-          return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.productId == product.id);
-        }).toList();
-
-        // Relate order to the ticket via orderProductTickets
-        ticket.relatedOrder = orders!.firstWhereOrNull((order) {
-          return orderProductTickets!.any((opt) => opt.ticketId == ticket.id && opt.orderId == order.id);
-        });
+      for (var ticket in relatedTickets) {
+        final ticketOpts = ticketToOpt[ticket.id] ?? [];
+        for (var opt in ticketOpts) {
+          if (spotByOptId.containsKey(opt.id)) {
+            ticket.relatedSpot = spotByOptId[opt.id];
+            break;
+          }
+        }
+        final productIds = ticketOpts.map((opt) => opt.productId).toSet();
+        ticket.relatedProducts =
+            productIds.map((pid) => productMap[pid]).whereType<ProductModel>().toList();
+        ticket.relatedOrder = order;
       }
 
+      final ticketIdsForOrder = relatedTickets.map((t) => t.id).toSet();
+      order.relatedSpots =
+          spots!.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
 
-      // Attach spots related to the tickets
-      final List<BlueprintObjectModel> relatedSpots = spots!.where((spot) {
-        return relatedTickets.any((ticket) => ticket.id == spot.orderProductTicket);
-      }).toList();
+      final orderProductIds = <int>{};
+      for (var ticket in relatedTickets) {
+        if (ticket.relatedProducts != null) {
+          orderProductIds.addAll(ticket.relatedProducts!.map((p) => p.id!));
+        }
+      }
+      order.relatedProducts =
+          products!.where((p) => orderProductIds.contains(p.id)).toList();
 
-      // Attach products related to the tickets
-      final List<ProductModel> relatedProducts = products!.where((product) {
-        return relatedTickets.any((ticket) => ticket.relatedProducts!.any((p)=>p.id == product.id));
-      }).toList();
-
-      // Attach payment info
-      final PaymentInfoModel? relatedPaymentInfo =
-      payments!.firstWhereOrNull((payment) => payment.id == order.paymentInfo);
-
-      // Update the order object
-      order.relatedSpots = relatedSpots;
-      order.relatedProducts = relatedProducts;
-      order.paymentInfoModel = relatedPaymentInfo;
+      order.paymentInfoModel = paymentMap[order.paymentInfo];
     }
-    return orders.sortedBy((ou)=>ou.createdAt!).reversed.toList();
+
+    orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+    return orders;
   }
+
 
   static Future<void> deleteOrder(OrderModel model) async {
     final response = await _supabase.rpc(
