@@ -637,6 +637,7 @@ CREATE TABLE public.unit_users (
   is_editor BOOLEAN NOT NULL DEFAULT false,
   data JSONB NULL,
   is_editor_view BOOLEAN NOT NULL DEFAULT false,
+  CONSTRAINT unit_users_pkey PRIMARY KEY (unit, "user"),
   CONSTRAINT unit_users_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id),
   CONSTRAINT unit_users_user_fkey FOREIGN KEY ("user") REFERENCES public.user_info (id)
 ) TABLESPACE pg_default;
