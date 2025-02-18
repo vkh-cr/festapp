@@ -28,6 +28,7 @@ class Tb {
   static UnitsTb units = const UnitsTb();
   static UnitUsersTb unit_users = const UnitUsersTb();
   static ImagesTb images = const ImagesTb();
+  static EmailTemplatesTb email_templates = const EmailTemplatesTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -382,5 +383,17 @@ class ImagesTb {
   String get id => "id";
   String get link => "link";
   String get occasion => "occasion";
+  String get unit => "unit";
+}
+
+class EmailTemplatesTb {
+  const EmailTemplatesTb();
+  String get table => "email_templates";
+  String get id => "id";
+  String get html => "html";
+  String get occasion => "occasion";
+  String get subject => "subject";
+  String get organization => "organization";
+  String get code => "code";
   String get unit => "unit";
 }

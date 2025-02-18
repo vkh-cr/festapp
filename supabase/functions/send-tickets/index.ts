@@ -1,24 +1,8 @@
-/**
- * sendTickets.ts
- *
- * This Edge Function:
- *  - Authenticates the user (must be editor for the occasion).
- *  - Fetches tickets and an email template from Supabase.
- *  - Uses generateTicketImage(...) to produce a PDF in memory (no temp files).
- *  - Sends each ticket PDF as an email attachment (using sendEmailWithSubs).
- */
-
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts"; // Ensure this path is correct
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
+import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
-// Initialize Supabase client
-const supabaseAdmin: SupabaseClient = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
-
-// Default sender email
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
 // CORS Headers
@@ -175,23 +159,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fetch email template
-    const { data: template, error: templateError } = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("occasion", occasionId)
-      .eq("code", "TICKET_ORDER_PAYMENT_DONE")
-      .single();
-
-    if (templateError || !template) {
-      console.error("Email template not found:", templateError);
-      return new Response(
-        JSON.stringify({ error: "Email template not found" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 404,
-        }
-      );
+    // Instead of directly querying email_templates, call the RPC procedure.
+    const organizationId = occasionData.organization;
+    const context = { organization: organizationId, occasion: occasionId };
+    const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_PAYMENT_DONE", context);
+    if (!templateAndWrapper || !templateAndWrapper.template) {
+      console.error("Email template not found for code TICKET_ORDER_PAYMENT_DONE.");
+      return new Response(JSON.stringify({ error: "Email template not found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 404,
+      });
     }
 
     let attachments: Array<{
@@ -209,15 +186,13 @@ Deno.serve(async (req) => {
       for (const ticket of tickets) {
         try {
           console.log("Generating PDF for ticket:", ticket.ticket_symbol);
-
-          // "generateTicketImage" now returns a PDF (Uint8Array), renamed to reflect it.
+          // "generateTicketImage" returns a PDF (Uint8Array)
           const pdfBytes = await generateTicketImage(ticket, resources);
-
           attachments.push({
             filename: `ticket_${ticket.ticket_symbol}.pdf`,
             content: pdfBytes,
             contentType: "application/pdf",
-            encoding: "binary", // or "base64" if your mailer requires it
+            encoding: "binary",
           });
         } catch (error) {
           console.error(`Error generating PDF for ticket ${ticket.id}:`, error);
@@ -225,32 +200,30 @@ Deno.serve(async (req) => {
       }
 
       if (!attachments.length) {
-        return new Response(
-          JSON.stringify({ error: "Failed to generate any ticket PDFs" }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 500,
-          }
-        );
+        return new Response(JSON.stringify({ error: "Failed to generate any ticket PDFs" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
       }
     }
 
     console.log("Sending email...");
     await sendEmailWithSubs({
       to: email,
-      subject: template.subject,
-      content: template.html,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
       subs: { occasionTitle },
       from: `${occasionTitle} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments,
+      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
     });
 
     // Log email sending in the database
     await supabaseAdmin.from("log_emails").insert({
       from: _DEFAULT_EMAIL,
       to: email,
-      template: template.id,
-      organization: template.organization,
+      template: templateAndWrapper.template.id,
+      organization: organizationId,
       occasion: occasionId,
     });
 
@@ -265,22 +238,16 @@ Deno.serve(async (req) => {
 
     if (updateError) {
       console.error("Failed to update order and tickets to sent:", updateError);
-      return new Response(
-        JSON.stringify({ error: "Failed to update order/tickets to sent" }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        }
-      );
+      return new Response(JSON.stringify({ error: "Failed to update order/tickets to sent" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
-    return new Response(
-      JSON.stringify({ message: "Tickets sent successfully", code: 200 }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return new Response(JSON.stringify({ message: "Tickets sent successfully", code: 200 }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 200,
+    });
   } catch (error) {
     console.error("Unexpected error:", error);
     return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
