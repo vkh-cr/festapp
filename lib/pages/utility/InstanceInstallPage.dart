@@ -362,7 +362,8 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
                 "Before running seed, please ensure that you have enabled:\n"
                     " - Webhooks in Supabase Dashboard (Database > Webhooks)\n"
                     " - moddatetime extension (Database > Extensions)\n"
-                    " - unaccent extension (Database > Extensions)",
+                    " - unaccent extension (Database > Extensions)\n"
+                    " - pg_cron extension (Database > Extensions)",
                 style: TextStyle(color: Colors.red),
               ),
               const SizedBox(height: 8),

@@ -140,7 +140,7 @@ all_constraints AS (
 ),
 create_statements AS (
   SELECT
-    'create table ' || quote_ident(t.table_schema) || '.' || quote_ident(t.table_name) || E' (\n' ||
+    'create table if not exists ' || quote_ident(t.table_schema) || '.' || quote_ident(t.table_name) || E' (\n' ||
     COALESCE(tc.columns_definition, '') ||
     CASE
       WHEN ac.constraints_def IS NOT NULL THEN E',\n' || ac.constraints_def
