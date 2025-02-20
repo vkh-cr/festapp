@@ -1,10 +1,9 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_164",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
 A=c[0]
-B=c[334]
-C=c[343]
-var z=a.updateTypes([]);(function constants(){B.b0E=new A.a_(!0,null,null,null,null,null,null,null,C.kr,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+B=c[344]
+var z=a.updateTypes([]);(function constants(){B.kq=new A.GD(1,"italic")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_164",e:"endPart",h:b})})($__dart_deferred_initializers__,"kpmbQAAjnP/RcC06O5Pj2VZ8nmY=");
+a.eventLog.push({p:"main.dart.js_164",e:"endPart",h:b})})($__dart_deferred_initializers__,"to1IMAeeEJNyTtjZqtFoNZaFi8A=");
