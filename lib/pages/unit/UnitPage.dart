@@ -109,7 +109,7 @@ class _UnitPageState extends State<UnitPage> {
                   curve: Curves.easeOut,
                 );
               },
-              child: LogoWidget(width: 40, height: 60,)
+              child: LogoWidget(height: 60,)
             ),
           ),
           // Quote section rendered as HTML in a paper-like container.

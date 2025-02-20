@@ -43,10 +43,10 @@ class ThemeConfig {
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
   //static Color seed1 = const Color(0xFFF2BC1B);
-  static Color seed1 = const Color(0xFF0F2940);
-  static Color seed2 = const Color(0xFF347EBF);
-  static Color seed3 = const Color(0xFF1F4C73);
-  static Color seed4 = const Color(0xFF081826);
+  static Color seed1 = const Color(0xFF1F64BF);
+  static Color seed2 = const Color(0xFF79A3D9);
+  static Color seed3 = const Color(0xFF122640);
+  static Color seed4 = const Color(0xFFEBEEF2);
 
   static const primaryColor = 0xFF0F2940;
   //static const backgroundColor = Color(0xFFD6DEEE);
