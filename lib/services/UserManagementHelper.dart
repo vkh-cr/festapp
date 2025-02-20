@@ -155,7 +155,7 @@ class UserManagementHelper{
       "Removing users".tr(),
       toBeDeleted.length,
       futures: toBeDeleted.map((existing) => ()  async {
-        await DbUsers.deleteUser(existing.user!, existing.occasion!);
+        await DbUsers.deleteOccasionUser(existing.user!, existing.occasion!);
         ToastHelper.Show(context, "Removed {item}.".tr(namedArgs: {"item": existing.toBasicString()}));
       }).toList(),
     );

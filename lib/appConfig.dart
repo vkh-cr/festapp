@@ -17,6 +17,9 @@ class AppConfig {
   static const String oneSignalAppId = '009d3437-d794-459f-9e3d-4bd70b740f7d';
 
   static const int organization = 3;
+  //setup occasion id to force occasion
+  static const String? forceOccasionLink = null;
+  static const bool isPublicNotificationSendingDisabled = false;
 
   static const String webLink = "https://clovekavira.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/%C4%8Dlov%C4%9Bk-a-v%C3%ADra/id6471667352";

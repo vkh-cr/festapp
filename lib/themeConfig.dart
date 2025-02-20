@@ -58,13 +58,15 @@ class ThemeConfig {
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);
 
+  static Color greenColor() => Colors.green.changeColorLightness(0.3).changeColorSaturation(0.5);
+  static Color blueColor() => Colors.deepPurple.changeColorLightness(0.3).changeColorSaturation(0.5);
   static Color redColor(BuildContext context) => isDarkMode(context) ? Color(0xFFff5252) : Color(0xFFd32f2f);
   static Color darkColor(BuildContext context) => isDarkMode(context) ? dddText : seed1;
   static Color blackColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.black;
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteTextColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.white;
 
-  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withOpacity(0.9);
+  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withValues(alpha: 0.9);
 
   static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.4) : seed1.changeColorSaturation(0.4).changeColorLightness(0.3);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
@@ -98,15 +100,20 @@ class ThemeConfig {
   static Color timetableTimeSplitColor(BuildContext context) => Colors.red;
   static Color timetableBackground1(BuildContext context) => whiteColor(context);
   static Color timetableBackground2(BuildContext context) => whiteColorDarker(context);
+  static Color timetableBackgroundOutside(BuildContext context) => backgroundColor(context);
   static double get timetableTimeSplitOpacity => 0.15;
 
   static Color bigButtonColor(BuildContext context) => isDarkMode(context) ? Color(0xFF5A5F6B) : Color(0xFFDCE2ED);
   static Color qrButtonColor(BuildContext context) => isDarkMode(context) ? grey380(context) : bigButtonColor(context);
   static Color songButtonColor(BuildContext context) => isDarkMode(context) ? seed3.changeColorSaturation(0.2) : seed3.changeColorSaturation(0.2);
 
+  static Color grey900(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[900]!;
+  static Color grey850(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[850]!;
   static Color grey800(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[800]!;
+  static Color grey700(BuildContext context) => isDarkMode(context) ? Colors.grey[300]! : Colors.grey[700]!;
   static Color grey600(BuildContext context) => isDarkMode(context) ? Colors.grey[400]! : Colors.grey[600]!;
   static Color grey380(BuildContext context) => Colors.black38;
+  static Color grey300(BuildContext context) => isDarkMode(context) ? Colors.grey[800]! : Colors.grey[300]!;
   static Color grey200(BuildContext context) => isDarkMode(context) ? Colors.grey[800]! : Colors.grey[200]!;
   static Color grey150(BuildContext context) => isDarkMode(context) ? Colors.grey[850]! : Colors.grey[200]!;
 
@@ -125,6 +132,10 @@ class ThemeConfig {
         return seed4;
     }
     return appBarColor();
+  }
+
+  static Color eventTypeToColorTimetable(BuildContext context, String? type) {
+    return eventTypeToColor(context, type);
   }
 
   static Color getShade(Color color, {bool darker = false, double value = .1}) {

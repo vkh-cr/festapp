@@ -147,6 +147,9 @@
 <body>
 
 <script>
+  // Disable swipe back gesture globally
+  document.body.style.overscrollBehaviorX = "none";
+
   let deferredPrompt;
 
   window.addEventListener('beforeinstallprompt', (e) => {

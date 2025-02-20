@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/services.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/appConfig.dart';
@@ -10,7 +9,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/OccasionHomePage.dart';
+import 'package:fstapp/pages/occasion/OccasionHomePage.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

@@ -7,7 +7,7 @@ import 'package:fstapp/themeConfig.dart';
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
   HtmlWithAppLinksWidget(this.context, super.html,
-      {required ColumnMode renderMode,
+      {super.key, required ColumnMode renderMode,
         super.textStyle,
         super.customStylesBuilder});
 
@@ -16,7 +16,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   @override
   FutureOr<bool> Function(String p1)? get onTapUrl {
     return (String url) {
-      if (AppConfig.compatibleUrls().any((u) => url.startsWith(u)) || url.contains("localhost")) {
+      if (AppConfig.compatibleUrls().where((u) => u.isNotEmpty).any((u) =>url.startsWith(u)) || url.contains("localhost")) {
         var path = url.split('/#/').last;
         RouterService.navigate(context, path);
         return true;
