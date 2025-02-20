@@ -1,24 +1,20 @@
+import 'package:fstapp/services/FormHelper.dart';
+
 class FormOptionModel {
+  static const String metaValue = "value";
   static const String metaOptionsId = "id";
   static const String metaOptionsName = "name";
   static const String metaOptionsPrice = "price";
 
-  final String name;
+  final String type;
+  final String title;
   final String id;
   final double price;
 
-  FormOptionModel(this.id, this.name, {this.price = 0.0});
-
-  factory FormOptionModel.fromJson(Map<String, dynamic> json) {
-    return FormOptionModel(
-      json[metaOptionsId],
-      json[metaOptionsName],
-      price: (json[metaOptionsPrice] as num?)?.toDouble() ?? 0.0,
-    );
-  }
+  FormOptionModel(this.id, this.title, {this.price = 0.0, this.type = FormHelper.fieldTypeSelectOne});
 
   @override
-  String toString() => name;
+  String toString() => title;
 
   @override
   bool operator ==(Object other) =>
@@ -30,9 +26,19 @@ class FormOptionModel {
   @override
   int get hashCode => id.hashCode;
 
-  Map<String, dynamic> toJson() {
+  factory FormOptionModel.fromJson(Map<String, dynamic> json) {
+    return FormOptionModel(
+      json[metaValue]!, json[metaValue]!
+    );
+  }
+
+  dynamic toJson() {
+    if(type == FormHelper.fieldTypeSelectOne){
+      return title;
+    }
+    return id;
     return {
-      metaOptionsName: name,
+      metaOptionsName: title,
       metaOptionsId: id,
       metaOptionsPrice: price,
     };

@@ -53,8 +53,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           height: widget.itemHeight,
           decoration: BoxDecoration(
             color: (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                ? ThemeConfig.timetableSelectedColor(context, ThemeConfig.eventTypeToColor(context, widget.item.eventType))
-                : ThemeConfig.timetableUnselectedColor(context, ThemeConfig.eventTypeToColor(context, widget.item.eventType)),
+                ? ThemeConfig.timetableSelectedColor(context, ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType))
+                : ThemeConfig.timetableUnselectedColor(context, ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType)),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Stack(

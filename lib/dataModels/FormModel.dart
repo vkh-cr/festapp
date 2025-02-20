@@ -1,4 +1,6 @@
+import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
 class FormModel {
   int? id;
@@ -14,8 +16,9 @@ class FormModel {
   String? accountNumber;
   String? secret;
   String? header;
-  String? footer;
+  String? headerOff;
   String? link;
+  List<FormFieldModel>? relatedFields;
 
   FormModel({
     this.id,
@@ -31,8 +34,9 @@ class FormModel {
     this.accountNumber,
     this.secret,
     this.header,
-    this.footer,
+    this.headerOff,
     this.link,
+    this.relatedFields,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -52,8 +56,13 @@ class FormModel {
       accountNumber: json['account_number'],
       secret: json['secret'],
       header: json[Tb.forms.header],
-      footer: json[Tb.forms.footer],
+      headerOff: json[Tb.forms.header_off],
       link: json[Tb.forms.link],
+      relatedFields: json['fields'] != null
+          ? (json['fields'] as List)
+          .map((field) => FormFieldModel.fromJson(field))
+          .toList()
+          : null, // Parsing related fields from JSON
     );
   }
 
@@ -71,8 +80,9 @@ class FormModel {
     'account_number': accountNumber,
     'secret': secret,
     Tb.forms.header: header,
-    Tb.forms.footer: footer,
+    Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
+    'fields': relatedFields,
   };
 
   Map<String, dynamic> toEditedJson() => {
@@ -87,7 +97,8 @@ class FormModel {
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     Tb.forms.header: header,
-    Tb.forms.footer: footer,
+    Tb.forms.header_off: headerOff,
     Tb.forms.link: link,
+    Tb.form_fields.table: relatedFields,
   };
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbEshop.dart';
+import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
@@ -20,20 +22,16 @@ class TicketModel extends IPlutoRowModel {
   double? totalPrice;
 
   // Relating spots and products directly to the ticket
-  List<BlueprintObjectModel>? relatedSpots;
+  BlueprintObjectModel? relatedSpot;
   List<ProductModel>? relatedProducts;
 
   // Relating order directly to the ticket
   OrderModel? relatedOrder;
 
-  static const String orderedState = "ordered";
-  static const String paidState = "paid";
-  static const String usedState = "used";
-  static const String stornoState = "storno";
-
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
   static const String metaPrice = "price";
+  static const String metaSpot = "spot";
 
   TicketModel({
     this.id,
@@ -44,7 +42,7 @@ class TicketModel extends IPlutoRowModel {
     this.occasion,
     this.note,
     this.noteHidden,
-    this.relatedSpots,
+    this.relatedSpot,
     this.relatedProducts,
     this.relatedOrder,
   });
@@ -80,7 +78,7 @@ class TicketModel extends IPlutoRowModel {
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
       TbEshop.tickets.ticket_symbol: PlutoCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: PlutoCell(value: state ?? orderedState),
+      TbEshop.tickets.state: PlutoCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
       TbEshop.tickets.note: PlutoCell(value: note ?? ""),
       TbEshop.tickets.note_hidden: PlutoCell(value: noteHidden ?? ""),
       TbEshop.orders.order_symbol: PlutoCell(
@@ -95,13 +93,19 @@ class TicketModel extends IPlutoRowModel {
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
+      metaSpot: PlutoCell(
+          value: relatedSpot != null
+              ? relatedSpot?.toShortString()
+              : ""),
       metaPrice: PlutoCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
     });
   }
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
     return TicketModel(
-        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id]);
+        id: json[TbEshop.tickets.id] == -1 ? null : json[TbEshop.tickets.id],
+        noteHidden: json[TbEshop.tickets.note_hidden]
+    );
   }
 
   @override
@@ -111,7 +115,7 @@ class TicketModel extends IPlutoRowModel {
 
   @override
   Future<void> updateMethod() async {
-    // Implement your update logic here
+    await DbTickets.updateTicketNoteHidden(id!, noteHidden!);
   }
 
   @override

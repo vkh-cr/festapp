@@ -46,8 +46,9 @@ Both technologies were chosen to speed up development, and they have effectively
 - [BISCUP](https://biscup.netlify.app)
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app)
 - [Festival Slunovrat](https://app.festivalslunovrat.cz)
+- [Hvězda mořská](https://hvezdamorska.netlify.app)
 
-Links to phone install are usually saved in info section.
+Under similar names usually available in AppStore and Google Play Store.
 
 ---
 ## Latest development

@@ -114,26 +114,29 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
       transformationController: _controller,
       child: Stack(
         children: [
-          if (widget.stateModel.backgroundSvg != null)
-            Positioned.fill(
-              child: Container(
-                width: layoutWidth,
-                height: layoutHeight,
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: SvgPicture.string(
-                    widget.stateModel.backgroundSvg!,
-                    width: layoutWidth,
-                    height: layoutHeight,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+          Positioned.fill(
+            child: Container(
+              width: layoutWidth,
+              height: layoutHeight,
+              decoration: BoxDecoration(
+                color: widget.stateModel.backgroundSvg != null
+                    ? Colors.transparent
+                    : ThemeConfig.grey300(context),
+                borderRadius: BorderRadius.circular(12.0),
               ),
+              child: widget.stateModel.backgroundSvg != null
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                child: SvgPicture.string(
+                  widget.stateModel.backgroundSvg!,
+                  width: layoutWidth,
+                  height: layoutHeight,
+                  fit: BoxFit.cover,
+                ),
+              )
+                  : null,
             ),
+          ),
           SizedBox(
             width: layoutWidth,
             height: layoutHeight,
@@ -147,21 +150,22 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                 return Positioned(
                   left: seatModel.colI * seatModel.seatSize.toDouble(),
                   top: seatModel.rowI * seatModel.seatSize.toDouble(),
-                  child: seatModel.objectModel == null ?
-                      GestureDetector(
-                        onTap: () {
-                          if (widget.onSeatTap != null) {
-                            widget.onSeatTap!(seatModel);
-                          }
-                        },
-                        child: SeatWidgetHelper.buildSeat(
-                          state: seatModel.seatState,
-                          size: seatModel.seatSize.toDouble(),
-                        ),
-                      )
+                  child: seatModel.objectModel == null
+                      ? GestureDetector(
+                    onTap: () {
+                      if (widget.onSeatTap != null) {
+                        widget.onSeatTap!(seatModel);
+                      }
+                    },
+                    child: SeatWidgetHelper.buildSeat(
+                      state: seatModel.seatState,
+                      size: seatModel.seatSize.toDouble(),
+                    ),
+                  )
                       : Tooltip(
                     showDuration: const Duration(seconds: 0),
-                    message: "${seatModel.objectModel?.blueprintTooltip(context)}",
+                    message:
+                    "${seatModel.objectModel?.blueprintTooltip(context)}",
                     child: GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {
@@ -174,15 +178,18 @@ class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
                       ),
                     ),
                     decoration: BoxDecoration(
-                      color: ThemeConfig.whiteColor(context), // Tooltip background color
+                      color: ThemeConfig.whiteColor(context),
                       borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(width: 2, color: ThemeConfig.blackColor(context))
+                      border: Border.all(
+                        width: 2,
+                        color: ThemeConfig.blackColor(context),
+                      ),
                     ),
                     textStyle: TextStyle(
-                      fontSize: 16.0, // Adjust the font size
-                      color: ThemeConfig.blackColor(context), // Tooltip text color
+                      fontSize: 16.0,
+                      color: ThemeConfig.blackColor(context),
                     ),
-                    verticalOffset: 20.0, // Adjust the vertical offset
+                    verticalOffset: 20.0,
                   ),
                 );
               }).toList(),

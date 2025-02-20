@@ -1,8 +1,10 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
+import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
+import { getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -17,10 +19,10 @@ const supabaseAdmin = createClient(
 );
 
 // Function to generate QR code as base64
-async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle: string): Promise<Uint8Array> {
+async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: string): Promise<Uint8Array> {
   console.log("Starting QR code generation with text...");
   console.log("Payment Info:", paymentInfo);
-  console.log("Order Details:", orderDetails);
+  console.log("Order Details:", orderData);
   console.log("Occasion Title:", occasionTitle);
 
   // Create canvas
@@ -36,7 +38,7 @@ async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle
   // Generate QR code
   const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
     2
-  )}*CC:${paymentInfo.currency_code}*MSG:${orderDetails.name} ${orderDetails.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  )}*CC:${paymentInfo.currency_code}*MSG:${orderData.name} ${orderData.surname}*X-VS:${paymentInfo.variable_symbol}`;
   console.log("Generated QR data string:", qrData);
 
   const base64QrCode = await qrcode(qrData, { size: 500 });
@@ -57,7 +59,7 @@ async function generateQrCode(paymentInfo: any, orderDetails: any, occasionTitle
   ctx.fillText(`Objednávka: ${occasionTitle}`, 32, 550);
   ctx.fillText(`Bankovní účet: ${paymentInfo.account_number_human_readable}`, 32, 580);
   ctx.fillText(`VS: ${paymentInfo.variable_symbol}`, 32, 610);
-  ctx.fillText(`Poznámka: ${orderDetails.name} ${orderDetails.surname}`, 32, 640);
+  ctx.fillText(`Poznámka: ${orderData.name} ${orderData.surname}`, 32, 640);
   ctx.fillText(`Celková cena: ${formatCurrency(paymentInfo.amount, paymentInfo.currency_code)}`, 32, 670);
   console.log("Text added below QR code.");
 
@@ -77,17 +79,8 @@ function formatDatetime(datetime: string): string {
   }).format(date);
 }
 
-function formatCurrency(amount, currencyCode) {
-  return new Intl.NumberFormat("cs-CZ", {
-    style: "currency",
-    currency: currencyCode,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
-
-function generateFullOrder(orderDetails: any, tickets: any[]): string {
-  const { name, surname, email, note } = orderDetails;
+function generateFullOrder(orderData: any, tickets: any[]): string {
+  const { name, surname, email, note } = orderData;
 
   const orderHeader = `
     <div style="border-radius:10px;border:2px solid #122640;font-size:16px;margin:20px 0;padding:20px;text-align:center;">
@@ -103,18 +96,28 @@ function generateFullOrder(orderDetails: any, tickets: any[]): string {
   const ticketsDetails = tickets
     .map((ticket) => {
       const ticketSymbol = ticket.ticket_symbol;
-      const seat = ticket.products.find((p: any) => p.type === "spot")?.spot_title || "N/A";
+      const spotProduct = ticket.products.find((p: any) => p.type === "spot");
+      const spot = spotProduct?.spot_title || spotProduct?.title;
+      const spot_type_title = spotProduct?.type_tile || "Místo";
       const food = ticket.products.find((p: any) => p.type === "food")?.title;
       const taxi = ticket.products.find((p: any) => p.type === "taxi")?.title;
       const note = ticket.note || "";
 
+      const accumulatedPrice = ticket.products.reduce(
+        (total: number, product: any) => total + Number(product.price || 0),
+        0
+      );
+
+      const price = formatCurrency(accumulatedPrice, ticket.products[0].currency_code);
+
       return `
         <p style="text-align:left;">
           <span style="display:block; margin-left:20px;"><strong>Vstupenka ${ticketSymbol}</strong></span>
-          <span style="display:block; margin-left:20px;">Místo: ${seat}</span>
+          <span style="display:block; margin-left:20px;">${spot_type_title}: ${spot}</span>
           ${food ? `<span style="display:block; margin-left:20px;">Večeře: ${food}</span>` : ""}
           ${taxi ? `<span style="display:block; margin-left:20px;">Odvoz: ${taxi}</span>` : ""}
           ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
+          <span style="display:block; margin-left:20px;">Cena: ${price}</span>
         </p>
       `;
     })
@@ -138,18 +141,27 @@ Deno.serve(async (req) => {
       input_data: orderDetails,
     });
 
-    if (ticketError || ticketOrder.code !== 200) {
-      console.error("Error creating ticket order:", ticketError);
-      return new Response(JSON.stringify({ "code": ticketOrder.code + ": " + ticketOrder.message }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+    // Create a string combining the code and message from the ticketOrder
+    const errorString = `${ticketOrder.code}: ${ticketOrder.message}`;
+
+    if (ticketOrder.code !== 200) {
+      console.error("Error creating ticket order:", errorString);
+      return new Response(
+        JSON.stringify({
+          code: ticketOrder.code,
+          message: ticketOrder.message,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
     console.log(ticketOrder);
 
-    const occasion = ticketOrder.occasion;
-    const paymentInfo = ticketOrder.payment_info;
+    const occasion = ticketOrder.order.occasion;
+    const paymentInfo = ticketOrder.order.payment_info;
 
     const { data: occasionData, error: occasionError } = await supabaseAdmin
       .from("occasions")
@@ -159,15 +171,10 @@ Deno.serve(async (req) => {
 
     const organizationId = occasionData.organization;
 
-    const template = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("organization", organizationId)
-      .eq("occasion", occasion.id)
-      .eq("code", "TICKET_ORDER_CONFIRMATION")
-      .single();
-
-    if (template.error || !template.data) {
+    // Instead of directly selecting an email template, use the RPC procedure.
+    const context = { organization: organizationId, occasion: occasion.id };
+    const templateAndWrapper: any = await getEmailTemplateAndWrapper("TICKET_ORDER_CONFIRMATION", context);
+    if (!templateAndWrapper || !templateAndWrapper.template) {
       console.error("Email template not found for the occasion.");
       return new Response(JSON.stringify({ error: "Email template not found" }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -176,8 +183,8 @@ Deno.serve(async (req) => {
     }
 
     const formattedDeadline = formatDatetime(paymentInfo.deadline);
-    const qrCode = await generateQrCode(paymentInfo, orderDetails, occasion.occasion_title);
-    const fullOrder = generateFullOrder(orderDetails, ticketOrder.tickets);
+    const qrCode = await generateQrCode(paymentInfo, ticketOrder.order.data, occasion.occasion_title);
+    const fullOrder = generateFullOrder(ticketOrder.order.data, ticketOrder.order.data.tickets);
 
     const subs = {
       occasionTitle: occasion.occasion_title,
@@ -191,28 +198,29 @@ Deno.serve(async (req) => {
     };
 
     await sendEmailWithSubs({
-      to: orderDetails.email,
-      subject: template.data.subject,
-      content: template.data.html,
+      to: ticketOrder.order.data.email,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
       subs,
       from: `${occasion.occasion_title} | Festapp <${_DEFAULT_EMAIL}>`,
       attachments: [
         {
-            filename: `qr-payment.${occasionData.link}.png`, // Name of the file
-            content: qrCode, // Ensure qrCode is a Uint8Array
-            contentType: "image/png", // MIME type for GIF
-            encoding: "binary", // Specify binary encoding
+          filename: `qr-payment.${occasionData.link}.png`,
+          content: qrCode,
+          contentType: "image/png",
+          encoding: "binary",
         },
       ],
+      wrapper: templateAndWrapper.wrapper ? templateAndWrapper.wrapper.html : null,
     });
 
     await supabaseAdmin
       .from("log_emails")
       .insert({
         "from": _DEFAULT_EMAIL,
-        "to": orderDetails.email,
-        "template": "TICKET_ORDER_CONFIRMATION",
-        "organization": occasion.id,
+        "to": ticketOrder.order.data.email,
+        "template": templateAndWrapper.template.id,
+        "organization": organizationId,
         "occasion": occasion.id,
       });
 

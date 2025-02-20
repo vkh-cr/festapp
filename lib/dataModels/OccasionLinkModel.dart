@@ -1,10 +1,14 @@
+import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 
 class OccasionLinkModel {
   int? code;
-  int? occasionId;
-  String? link;
+  OccasionModel? occasion;
+  UnitModel? unit;
   OccasionUserModel? user;
+  OccasionUserModel? unitUser;
+  List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
   String? versionRecommended; // New field for version_recommended
 
@@ -13,11 +17,15 @@ class OccasionLinkModel {
   bool isNotFound() => code == 404;
 
   factory OccasionLinkModel.fromJson(Map<String, dynamic> json) {
+    var unitUser = json["unit_user"] != null ? OccasionUserModel.fromJson(json["unit_user"]) : null;
+    var occasionUser = json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null;
     return OccasionLinkModel(
       code: json["code"],
-      user: json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null,
-      link: json["link"],
-      occasionId: json["occasion"],
+      unitUser: unitUser,
+      user: occasionUser,
+      bankAccountsAdmin: List<int>.from(json["bank_accounts_admin"]??[]),
+      occasion: json["occasion"] != null ? OccasionModel.fromJson(json["occasion"]) : null,
+      unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
       isAdmin: json["is_admin"],
       versionRecommended: json["version_recommended"],
     );
@@ -26,8 +34,10 @@ class OccasionLinkModel {
   OccasionLinkModel({
     this.code,
     this.user,
-    this.link,
-    this.occasionId,
+    this.unitUser,
+    this.bankAccountsAdmin,
+    this.occasion,
+    this.unit,
     this.isAdmin,
     this.versionRecommended,
   });

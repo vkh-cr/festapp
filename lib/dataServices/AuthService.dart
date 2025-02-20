@@ -14,6 +14,7 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/services/NotificationHelper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -80,15 +81,15 @@ class AuthService {
   static Future<UserInfoModel> getFullUserInfo() async {
     var user = UserInfoModel();
     user.occasionUser = await DbUsers.getOccasionUser(AuthService.currentUserId());
-    if(RightsService.currentUserOccasion?.role != null) {
-      user.roleString = await getRoleInfo(RightsService.currentUserOccasion!.role!);
+    if(RightsService.currentOccasionUser?.role != null) {
+      user.roleString = await getRoleInfo(RightsService.currentOccasionUser!.role!);
     }
     user.userGroups = await DbGroups.getUserGroups();
     var eUserGroup = user.userGroups!.firstWhereOrNull((g)=>g.type == null);
     if(eUserGroup!=null) {
       user.eventUserGroup = await DbGroups.getUserGroupInfo(eUserGroup.id!);
     }
-    if(SynchroService.globalSettingsModel!.isEnabledEntryCode??false) {
+    if(FeatureService.isFeatureEnabled(FeatureService.companions)) {
       user.companions = await DbCompanions.getAllCompanions();
     }
     var place = SynchroService.globalSettingsModel!.getReferenceToService(DbOccasions.serviceTypeAccommodation, user.occasionUser?.services);
@@ -195,7 +196,7 @@ class AuthService {
         params:
         {
           "usr": occasionUserModel.user,
-          "oc": occasionUserModel.occasion??RightsService.currentOccasion,
+          "oc": occasionUserModel.occasion??RightsService.currentOccasionId,
           "password": pwd
         });
   }
