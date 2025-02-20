@@ -63,6 +63,18 @@ class EmailTemplateModel {
   }
 
   // Common substitution definitions (codes are now without '{{' and '}}'):
+  static EmailTemplateSub appPlatformLinksSub = EmailTemplateSub(
+    code: 'platformLinks',
+    description: 'Links for opening app on different platforms.'.tr(),
+    defaultValue: 'Open the app on https://live.festapp.net/.',
+  );
+
+  static EmailTemplateSub appNameSub = EmailTemplateSub(
+    code: 'appName',
+    description: 'The name of current Application'.tr(),
+    defaultValue: 'Festapp',
+  );
+
   static EmailTemplateSub emailSub = EmailTemplateSub(
     code: 'email',
     description: 'The email of the user'.tr(),
@@ -76,7 +88,7 @@ class EmailTemplateModel {
   );
 
   static EmailTemplateSub signInCodeSub = EmailTemplateSub(
-    code: 'signInCode',
+    code: 'code',
     description: 'The sign-in code'.tr(),
     defaultValue: '123456',
   );
@@ -120,10 +132,14 @@ class EmailTemplateModel {
   /// Mapping of template codes to their available substitutions.
   static final Map<String, List<EmailTemplateSub>> substitutionDefinitions = {
     'RESET_PASSWORD': [
+      appNameSub,
+      appPlatformLinksSub,
       emailSub,
       resetLinkSub,
     ],
     'SIGN_IN_CODE': [
+      appNameSub,
+      appPlatformLinksSub,
       emailSub,
       signInCodeSub,
     ],

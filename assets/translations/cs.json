@@ -471,5 +471,7 @@
   "Is Open": "Otevřené",
   "Determines whether event details (schedule, info, etc.) are available to the public.": "Určuje, zda jsou podrobnosti o akci (rozvrh, informace atd.) veřejně dostupné.",
   "Public": "Veřejné",
+  "The name of current Application": "Název aplikace",
+  "Links for opening app on different platforms.": "Odkazy pro otevření aplikace na různých platformách.",
   "_": "_"
 }
