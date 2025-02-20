@@ -16,7 +16,7 @@ class DbPlaces {
         .from(Tb.places.table)
         .select()
         .eq(Tb.places.is_hidden, false)
-        .eq(Tb.places.occasion, RightsService.currentOccasion!);
+        .eq(Tb.places.occasion, RightsService.currentOccasionId!);
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces(false);
     return toReturn;
@@ -26,7 +26,7 @@ class DbPlaces {
     var data = await _supabase
         .from(Tb.places.table)
         .select()
-        .eq(Tb.places.occasion, RightsService.currentOccasion!);
+        .eq(Tb.places.occasion, RightsService.currentOccasionId!);
     var toReturn = List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
     return toReturn;
@@ -70,7 +70,7 @@ class DbPlaces {
     else
     {
       upsertObj.remove(Tb.places.id);
-      upsertObj.addAll({Tb.places.occasion: RightsService.currentOccasion!});
+      upsertObj.addAll({Tb.places.occasion: RightsService.currentOccasionId!});
       data = await _supabase.from(Tb.places.table).insert(upsertObj).select().single();
     }
     return PlaceModel.fromJson(data);

@@ -1,20 +1,29 @@
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class DropFile extends StatefulWidget {
-  const DropFile({Key? key, required this.onFilePathChanged}) : super(key: key);
-
+  /// Called when a file is dropped/selected.
   final void Function(XFile) onFilePathChanged;
+
+  /// Optional hint text (e.g. what files, dimensions, etc.) displayed above the upload icon.
+  final String? hint;
+
+  const DropFile({
+    Key? key,
+    required this.onFilePathChanged,
+    this.hint,
+  }) : super(key: key);
+
   @override
   _DropFileState createState() => _DropFileState();
 }
 
 class _DropFileState extends State<DropFile> {
   XFile? file;
-
   bool _dragging = false;
-
   Offset? offset;
 
   @override
@@ -26,13 +35,14 @@ class _DropFileState extends State<DropFile> {
           widget.onFilePathChanged(file!);
         });
 
-
-        debugPrint('onDragDone:');
-        for (final file in detail.files) {
-          debugPrint('  ${file.path} ${file.name}'
-              '  ${await file.lastModified()}'
-              '  ${await file.length()}'
-              '  ${file.mimeType}');
+        debugPrint('File dropped:');
+        for (final droppedFile in detail.files) {
+          debugPrint(
+            '  ${droppedFile.path} ${droppedFile.name} '
+                '  ${await droppedFile.lastModified()} '
+                '  ${await droppedFile.length()} '
+                '  ${droppedFile.mimeType}',
+          );
         }
       },
       onDragUpdated: (details) {
@@ -53,16 +63,79 @@ class _DropFileState extends State<DropFile> {
         });
       },
       child: Container(
-        height: 200,
-        width: 200,
-        color: _dragging ? Colors.blue.withOpacity(0.4) : Colors.black26,
-        child: Stack(
-          children: [
-            if (file == null)
-              const Center(child: Text("Soubor zde"))
-            else
-              Text(file?.path??"")
-          ],
+        height: 250,
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          color: _dragging
+              ? Colors.blue.withOpacity(0.2)
+              : ThemeConfig.grey200(context),
+          border: Border.all(
+            color: _dragging ? Colors.blue : ThemeConfig.grey380(context),
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: file == null
+              ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.cloud_upload,
+                size: 50,
+                color: _dragging
+                    ? Colors.blue
+                    : ThemeConfig.grey600(context),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Drop file here".tr(),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: _dragging
+                      ? Colors.blue
+                      : ThemeConfig.grey600(context),
+                ),
+              ),
+              if (widget.hint != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    widget.hint!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: _dragging
+                          ? Colors.blue
+                          : ThemeConfig.grey600(context),
+                    ),
+                  ),
+                ),
+            ],
+          )
+              : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.insert_drive_file,
+                size: 50,
+                color: Colors.green,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                file!.name,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: ThemeConfig.grey800(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:fstapp/components/dataGrid/IHasId.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
@@ -8,7 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 
-class UserInfoModel {
+class UserInfoModel extends IHasId {
   String? id;
   String? email;
   String? name;
