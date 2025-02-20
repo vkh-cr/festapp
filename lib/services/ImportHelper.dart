@@ -62,7 +62,7 @@ class ImportHelper {
             break;
           }
           trimmedString =
-              trimmedString.toLowerCase().startsWith("m") ? "male" : "female";
+          (trimmedString.toLowerCase().startsWith("m") || trimmedString.toLowerCase().startsWith("k")) ? "male" : "female";
         } else if (entry.key == Tb.occasion_users.data_birthDate) {
           if (trimmedString.isEmpty) {
             continue;

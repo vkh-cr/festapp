@@ -1,78 +1,79 @@
-// ignore_for_file: unused_import
-
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataModels/CompanionModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbInformation {
   static final _supabase = Supabase.instance.client;
 
-  static Future<List<InformationModel>> getAllInformationForDataGrid([String? informationType]) async {
-    var data = await _supabase.from(Tb.information.table).select(
-        "${Tb.information.id},"
-            "${Tb.information.occasion},"
-            "${Tb.information.created_at},"
-            "${Tb.information.updated_at},"
-            "${Tb.information.is_hidden},"
-            "${Tb.information.title},"
-            "${Tb.information.order},"
-            "${Tb.information.type},"
-            "${Tb.information.data},"
-            "${Tb.information_hidden.table}(*)")
-        .eq(Tb.information.occasion, RightsService.currentOccasion!)
-        .filter(Tb.information.type, "eq", informationType ?? "");
-
-    var infoList = List<InformationModel>.from(
-        data.map((x) => InformationModel.fromJson(x)));
-
+  static List<InformationModel> _sortInformationList(List<InformationModel> infoList) {
     infoList.sort((a, b) {
-      // Sort by order first
       final orderComparison = a.getOrder().compareTo(b.getOrder());
       if (orderComparison != 0) {
         return orderComparison;
       }
-      // If order is the same, sort naturally by title
-      return _naturalCompare(
-          a.title?.toLowerCase() ?? "", b.title?.toLowerCase() ?? "");
+      return Utilities.naturalCompare(a.title?.toLowerCase() ?? "", b.title?.toLowerCase() ?? "");
     });
-
     return infoList;
   }
 
-  static int _naturalCompare(String a, String b) {
-    final regex = RegExp(r'\d+|\D+');
-    final aMatches = regex.allMatches(a).map((m) => m.group(0)!).toList();
-    final bMatches = regex.allMatches(b).map((m) => m.group(0)!).toList();
-
-    for (var i = 0; i < aMatches.length && i < bMatches.length; i++) {
-      final aPart = aMatches[i];
-      final bPart = bMatches[i];
-
-      // Compare numbers as numbers
-      if (RegExp(r'^\d+$').hasMatch(aPart) && RegExp(r'^\d+$').hasMatch(bPart)) {
-        final aNum = int.parse(aPart);
-        final bNum = int.parse(bPart);
-        final numCompare = aNum.compareTo(bNum);
-        if (numCompare != 0) return numCompare;
-      } else {
-        // Compare non-numeric parts lexicographically
-        final strCompare = aPart.compareTo(bPart);
-        if (strCompare != 0) return strCompare;
-      }
+  static Future<List<InformationModel>> getAllInformationForDataGrid([String? type]) async {
+    var select = "${Tb.information.id},"
+        "${Tb.information.occasion},"
+        "${Tb.information.created_at},"
+        "${Tb.information.updated_at},"
+        "${Tb.information.is_hidden},"
+        "${Tb.information.title},"
+        "${Tb.information.order},"
+        "${Tb.information.type},"
+        "${Tb.information.data},"
+        "${Tb.information_hidden.table}(*)";
+    List<Map<String, dynamic>> data = [];
+    if (type != null) {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .eq(Tb.information.occasion, RightsService.currentOccasionId!)
+          .filter(Tb.information.type, "eq", type);
+    } else {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .eq(Tb.information.occasion, RightsService.currentOccasionId!)
+          .or("${Tb.information.type}.eq.,${Tb.information.type}.is.null");
     }
+    var infoList = List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
+    return _sortInformationList(infoList);
+  }
 
-    // If all parts are equal so far, compare lengths
-    return aMatches.length.compareTo(bMatches.length);
+  static Future<List<InformationModel>> getAllInformationForDataGridForUnit(int unitId, [String? type]) async {
+    var select = "${Tb.information.id},"
+        "${Tb.information.unit},"
+        "${Tb.information.occasion},"
+        "${Tb.information.created_at},"
+        "${Tb.information.updated_at},"
+        "${Tb.information.is_hidden},"
+        "${Tb.information.title},"
+        "${Tb.information.order},"
+        "${Tb.information.type},"
+        "${Tb.information.data},"
+        "${Tb.information_hidden.table}(*)";
+    List<Map<String, dynamic>> data = [];
+    if (type != null) {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .or("${Tb.information.occasion}.is.null")
+          .eq(Tb.information.unit, unitId)
+          .filter(Tb.information.type, "eq", type);
+    } else {
+      data = await _supabase.from(Tb.information.table).select(select)
+          .or("${Tb.information.occasion}.is.null")
+          .eq(Tb.information.unit, unitId)
+          .or("${Tb.information.type}.eq.,${Tb.information.type}.is.null");
+    }
+    var infoList = List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
+    return _sortInformationList(infoList);
   }
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
@@ -88,7 +89,7 @@ class DbInformation {
             "${Tb.information.data}"
         )
         .eq(Tb.information.is_hidden, false)
-        .eq(Tb.information.occasion, RightsService.currentOccasion!);
+        .eq(Tb.information.occasion, RightsService.currentOccasionId!);
 
     var infoList = List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -113,7 +114,7 @@ class DbInformation {
           "${Tb.information.id},"
           "${Tb.information.updated_at}")
         .eq(Tb.information.is_hidden, false)
-        .eq(Tb.information.occasion, RightsService.currentOccasion!);
+        .eq(Tb.information.occasion, RightsService.currentOccasionId!);
 
     return List<InformationModel>.from(
         data.map((x) => InformationModel.fromJson(x)));
@@ -125,7 +126,7 @@ class DbInformation {
 
       Map<String, dynamic> upsertObj = {
         Tb.information_hidden.data: info.informationHidden?.data,
-        Tb.information_hidden.occasion: RightsService.currentOccasion!
+        Tb.information_hidden.occasion: RightsService.currentOccasionId!
       };
       Map<String, dynamic> ref;
       if(info.informationHidden?.id != null){
@@ -156,7 +157,11 @@ class DbInformation {
     }
     else
     {
-      upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasion!});
+      if(info.unit == null){
+        upsertObj.addAll({Tb.information.occasion: RightsService.currentOccasionId!});
+      } else{
+        upsertObj.addAll({Tb.information.unit: info.unit});
+      }
       await _supabase.from(Tb.information.table).insert(upsertObj);
     }
   }
@@ -203,6 +208,18 @@ class DbInformation {
         needsUpdate.add(infoMeta.id!);
       }
     }
+  }
+
+  static Future<InformationModel?> getCurrentQuote(int unitId) async {
+    var data = await _supabase.rpc("get_current_quote",
+        params:
+        {
+          "unit_id": unitId,
+        });
+    if(data["code"] == 200){
+      return InformationModel.fromJson(data["data"]);
+    }
+    return null;
   }
 
   static Future<bool> makeGameGuess(BuildContext context, int checkPointId, String guess) async {

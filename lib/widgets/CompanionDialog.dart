@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 
 class CompanionDialog extends StatefulWidget {
@@ -79,7 +79,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
             children: [
               const Text(
                       "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.", )
-                  .tr(namedArgs: {"max_companions": SynchroService.globalSettingsModel!.maxCompanions!.toString()}),
+                  .tr(namedArgs: {"max_companions": FeatureService.getMaxCompanions().toString()}),
               const SizedBox(height: 20),
               Visibility(
                 visible: widget.companions.length < widget.maxCompanions,

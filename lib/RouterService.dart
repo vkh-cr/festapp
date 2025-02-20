@@ -5,6 +5,7 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/LinkModel.dart';
 
 class RouterService {
   static const LINK = "link";
@@ -101,16 +102,20 @@ class RouterService {
 
   static final router = AppRouter();
 
-  static Future<bool> updateOccasionFromLink(String newLink) async {
+  static Future<bool> updateOccasionFromLink(LinkModel link) async {
     bool canContinue = true;
-    var checkedObject = await SynchroService.getAppConfig(newLink);
-    RightsService.currentUserOccasion = checkedObject.user;
-    RightsService.currentOccasion = checkedObject.occasionId;
-    RightsService.currentLink = checkedObject.link;
+    var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
+    RightsService.currentOccasionUser = checkedObject.user;
+    RightsService.currentUnitUser = checkedObject.unitUser;
+    RightsService.currentOccasion = checkedObject.occasion;
+    RightsService.currentUnit = checkedObject.unit;
+    RightsService.currentOccasionId = checkedObject.occasion?.id;
+    RightsService.currentLink = checkedObject.occasion?.link;
     RightsService.isAdminField = checkedObject.isAdmin;
+    RightsService.bankAccountAdmin = checkedObject.bankAccountsAdmin;
     AppConfigService.versionRecommended = checkedObject.versionRecommended;
 
-    if (checkedObject.link != RouterService.currentOccasionLink &&
+    if (checkedObject.occasion?.link != RouterService.currentOccasionLink &&
         checkedObject.isAvailable()) {
       canContinue = true;
     } else if (checkedObject.isAccessDenied()) {

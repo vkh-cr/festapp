@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:fstapp/dataModels/LanguageModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:search_page/search_page.dart';
 import 'package:select_dialog/select_dialog.dart';
@@ -52,8 +57,7 @@ class DialogHelper{
         ));
   }
 
-
-  static Future<void> showInformationDialogAsync(
+  static Future<void> showInformationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage,
@@ -63,7 +67,7 @@ class DialogHelper{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(titleMessage),
-            content: Text(textMessage),
+            content: SelectableText(textMessage),
             actions: [
               ElevatedButton(
                 child: Text(buttonMessage),
@@ -74,6 +78,37 @@ class DialogHelper{
             ],
           );
         });
+  }
+
+  static Future<bool> showScanTicketCode(
+      BuildContext context,
+      String titleMessage,
+      String textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: Container(
+
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
   }
 
   static Future<bool> showConfirmationDialogAsync(
@@ -111,7 +146,6 @@ class DialogHelper{
     );
     return result;
   }
-
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
       BuildContext context,
@@ -230,21 +264,29 @@ class DialogHelper{
     return result;
   }
 
-  static Future<XFile?>  dropFilesHere(
+  static Future<XFile?> dropFilesHere(
       BuildContext context,
       String titleMessage,
       String confirmButtonMessage,
       String cancelButtonMessage,
       ) async {
     XFile? filePath;
-    Widget dropFile = DropFile(onFilePathChanged: (f) => filePath = f);
+    final dropFileWidget = DropFile(
+      onFilePathChanged: (file) => filePath = file,
+    );
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(titleMessage),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Text(
+            titleMessage,
+          ),
           content: SingleChildScrollView(
-            child: dropFile,
+            child: dropFileWidget,
           ),
           actions: [
             TextButton(
@@ -254,8 +296,8 @@ class DialogHelper{
               },
               child: Text(cancelButtonMessage),
             ),
-            TextButton(
-              onPressed: () async {
+            ElevatedButton(
+              onPressed: () {
                 Navigator.pop(context);
               },
               child: Text(confirmButtonMessage),
@@ -266,7 +308,6 @@ class DialogHelper{
     );
     return filePath;
   }
-
 
   static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
     bool result = false;
@@ -305,13 +346,24 @@ class DialogHelper{
     return result;
   }
 
-  static Future<void> showProgressDialogAsync(
+  static Future<bool> showProgressDialogAsync(
       BuildContext context,
       String title,
-      int total,
-      ValueNotifier<int> progressNotifier,
-      ) async {
-    await showDialog(
+      int total, {
+        List<Future<void> Function()>? futures,
+        Duration? delay,
+        bool isBasic = false, // New isBasic option
+      }) async {
+    final completer = Completer<bool>();
+    final progressNotifier = ValueNotifier<int>(0);
+    final isCancelled = ValueNotifier<bool>(false); // Track cancellation state
+    final statusMessage = ValueNotifier<String>(""); // Track status message
+    final isStornoActive = ValueNotifier<bool>(!isBasic); // Storno button state depends on isBasic
+    final isOkActive = ValueNotifier<bool>(false); // Ok button state
+    final hasError = ValueNotifier<bool>(false); // Track if any error occurred
+
+    // Show the dialog
+    showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -326,10 +378,190 @@ class DialogHelper{
                   Text("${"Progress".tr()}: $progress/$total"),
                   SizedBox(height: 20),
                   LinearProgressIndicator(value: total > 0 ? progress / total : 0),
+                  SizedBox(height: 20),
+                  ValueListenableBuilder<String>(
+                    valueListenable: statusMessage,
+                    builder: (context, message, _) {
+                      return Text(
+                        message,
+                        style: TextStyle(
+                          color: hasError.value
+                              ? ThemeConfig.redColor(context)
+                              : ThemeConfig.blackColor(context),
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: hasError,
+                    builder: (context, errorOccurred, _) {
+                      if (!isBasic || errorOccurred) {
+                        return Column(
+                          children: [
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center, // Center the row
+                              children: [
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: isStornoActive,
+                                  builder: (context, isActive, _) {
+                                    return SizedBox(
+                                      width: 100, // Equal width for both buttons
+                                      child: ElevatedButton(
+                                        onPressed: isActive
+                                            ? () {
+                                          isCancelled.value = true; // Mark as cancelled
+                                          isStornoActive.value = false; // Disable Storno
+                                          isOkActive.value = true; // Enable Ok button
+                                          statusMessage.value =
+                                              "The processing has been cancelled.".tr(); // Update status
+                                        }
+                                            : null,
+                                        child: Text("Storno".tr()),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                SizedBox(width: 20), // Space between buttons
+                                ValueListenableBuilder<bool>(
+                                  valueListenable: isOkActive,
+                                  builder: (context, isActive, _) {
+                                    return SizedBox(
+                                      width: 100, // Equal width for both buttons
+                                      child: ElevatedButton(
+                                        onPressed: isActive
+                                            ? () {
+                                          Navigator.of(context).pop();
+                                          completer.complete(false); // Cancel or error result
+                                        }
+                                            : null,
+                                        child: Text("Ok".tr()),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
+                  ),
                 ],
               ),
             );
           },
+        );
+      },
+    );
+
+    // Execute futures sequentially
+    if (futures != null && futures.isNotEmpty) {
+      for (var future in futures) {
+        if (isCancelled.value) break; // Stop execution if cancelled
+        try {
+          statusMessage.value = "Processing...".tr(); // Update processing message
+          await future.call(); // Wait for each future to finish
+          progressNotifier.value++;
+          if (delay != null) {
+            await Future.delayed(delay);
+          }
+        } catch (e) {
+          // On error: Stop further execution and display the error
+          statusMessage.value = "$e";
+          isCancelled.value = true; // Stop further processing
+          isStornoActive.value = false; // Disable Storno button
+          isOkActive.value = true; // Enable Ok button
+          hasError.value = true; // Mark that an error occurred
+          break;
+        }
+      }
+    }
+
+    // Mark actions as completed
+    isOkActive.value = true; // Enable Ok button after actions are completed
+    isStornoActive.value = false; // Disable Storno button whenever Ok is enabled
+    if (hasError.value) {
+      statusMessage.value = "The processing has finished with error.".tr();
+    } else if (isCancelled.value) {
+      statusMessage.value = "The processing has been cancelled.".tr();
+    } else {
+      statusMessage.value = "The processing has completed successfully.".tr();
+      if (isBasic && !hasError.value) {
+        Navigator.of(context).pop(); // Automatically close dialog for basic mode
+        completer.complete(true); // Success result
+      }
+    }
+
+    // Await the completer if not already completed
+    if (!completer.isCompleted) {
+      completer.complete(!hasError.value && !isCancelled.value); // Return result based on state
+    }
+
+    return completer.future;
+  }
+
+  static Future<String?> showInputDialog({
+    required BuildContext context,
+    String? initialValue,
+    required String dialogTitle,
+    required String labelText,
+  }) async {
+    final TextEditingController controller = TextEditingController(text: initialValue);
+
+    return await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(dialogTitle),
+          content: TextField(
+            controller: controller,
+            decoration: InputDecoration(labelText: labelText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context), // Cancel button
+              child: const Text("Storno").tr(),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, controller.text.trim()); // Return the input
+              },
+              child: const Text("Save").tr(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<T?> showCustomDialog<T>({
+    required BuildContext context,
+    required Widget child,
+    bool barrierDismissible = true,
+  }) {
+    return showDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveService.isDesktop(context)
+                  ? StylesConfig.formMaxWidth
+                  : double.infinity,
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: child,
+          ),
         );
       },
     );

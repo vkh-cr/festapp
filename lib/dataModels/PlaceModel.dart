@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -87,7 +88,7 @@ class PlaceModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     return PlutoRow(cells: {
       Tb.places.id: PlutoCell(value: id),
       Tb.places.title: PlutoCell(value: title),
