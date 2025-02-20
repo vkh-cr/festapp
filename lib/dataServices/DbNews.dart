@@ -19,7 +19,7 @@ class DbNews {
 // from some reason lower than is behaving like lower and equal than on web platform
 // therefore additional check
         .neq(Tb.news.id, message.id)
-        .eq(Tb.news.occasion, RightsService.currentOccasion!)
+        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
         .order(Tb.news.created_at)
         .limit(1)
         .maybeSingle();
@@ -62,12 +62,25 @@ class DbNews {
         .eq(Tb.news.id, message.id);
   }
 
+  static Future<void> sendGroupNotification(List<String> to, String message, String title) async {
+    await _supabase.from(Tb.log_notifications.table)
+        .insert(
+        {
+          Tb.log_notifications.occasion: RightsService.currentOccasionId!,
+          Tb.log_notifications.to: to,
+          Tb.log_notifications.content: message,
+          Tb.log_notifications.heading: title,
+          Tb.log_notifications.organization: AppConfig.organization,
+        }
+    );
+  }
+
   static insertNewsMessage(BuildContext context, String? heading, String headingDefault, String message, bool addToNews, bool withNotification, List<String>? to) async {
     if (addToNews) {
       var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
       await _supabase.from(Tb.news.table).insert(
           {
-            Tb.news.occasion: RightsService.currentOccasion!,
+            Tb.news.occasion: RightsService.currentOccasionId!,
             Tb.news.message: messageForNews,
             Tb.news.created_by: AuthService.currentUserId()
           }
@@ -88,7 +101,7 @@ class DbNews {
       await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
-            Tb.log_notifications.occasion: RightsService.currentOccasion!,
+            Tb.log_notifications.occasion: RightsService.currentOccasionId!,
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
             Tb.log_notifications.heading: heading ?? headingDefault,
@@ -111,7 +124,7 @@ class DbNews {
     var result = await _supabase
         .from(Tb.news.table)
         .select()
-        .eq(Tb.news.occasion, RightsService.currentOccasion!)
+        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
         .gt(Tb.news.id, lastMessageId)
         .count();
     return result.count;
@@ -126,7 +139,7 @@ class DbNews {
         "${Tb.news.id},"
         "${Tb.user_news.table}!inner(${Tb.user_news.news_id})"
         )
-        .eq(Tb.news.occasion, RightsService.currentOccasion!)
+        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
         .eq("${Tb.user_news.table}.${Tb.user_news.user}", AuthService.currentUserId())
         .maybeSingle();
     if (lastMessage != null) {
@@ -135,18 +148,18 @@ class DbNews {
     return lastMessageId;
   }
 
-  static void setMessagesAsRead(int newId, int oldId) async {
+  static Future<void> setMessagesAsRead(int newId) async {
     AuthService.ensureUserIsLoggedIn();
     await _supabase
         .from(Tb.user_news.table)
         .delete()
         .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq(Tb.user_news.news_id, oldId);
+        .eq(Tb.user_news.occasion, RightsService.currentOccasionId!);
 
     await _supabase
         .from(Tb.user_news.table)
         .insert(
-        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId, Tb.user_news.occasion: RightsService.currentOccasion}
+        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId, Tb.user_news.occasion: RightsService.currentOccasionId}
     ).select();
   }
 
@@ -155,16 +168,7 @@ class DbNews {
     if (AuthService.isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
-    var data = await _supabase
-        .from(Tb.news.table)
-        .select(
-            "${Tb.news.id},"
-            "${Tb.news.created_at},"
-            "${Tb.news.message},"
-            "${Tb.user_info_public.table}(${Tb.user_info_public.name},${Tb.user_info_public.surname}),"
-            "${Tb.user_news_views.table}(count)")
-        .eq(Tb.news.occasion, RightsService.currentOccasion!)
-        .order(Tb.news.created_at);
+    var data = await _supabase.rpc("get_news_with_views", params: {"oc":RightsService.currentOccasionId!});
 
     List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
 
@@ -175,10 +179,6 @@ class DbNews {
       if (AuthService.isLoggedIn()) {
         message.isRead = lastReadMessageId >= message.id;
       }
-    }
-
-    if (AuthService.isLoggedIn() && loadedMessages.isNotEmpty) {
-      DbNews.setMessagesAsRead(loadedMessages.first.id, lastReadMessageId);
     }
 
     return loadedMessages;

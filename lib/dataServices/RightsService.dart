@@ -1,71 +1,87 @@
-import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/LinkModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
   static final _supabase = Supabase.instance.client;
-  static OccasionUserModel? currentUserOccasion;
-  static int? currentOccasion;
+  static UserInfoModel? get currentUser => UserInfoModel(
+      email: currentOccasionUser!.data?[Tb.occasion_users.data_email],
+      name: currentOccasionUser!.data?[Tb.occasion_users.data_name],
+      surname: currentOccasionUser!.data?[Tb.occasion_users.data_surname]
+  );
+  static OccasionUserModel? currentOccasionUser;
+  static OccasionUserModel? currentUnitUser;
+  static int? currentOccasionId;
+  static OccasionModel? currentOccasion;
+  static UnitModel? currentUnit;
+
   static String? currentLink;
   static bool? isAdminField;
+  static List<int>? bankAccountAdmin;
+
 
   static Future<bool> updateOccasionData([String? link]) async {
-    if (currentOccasion == null || link != currentLink) {
-      var toUpdate = link ?? RouterService.currentOccasionLink;
-      if (toUpdate.isEmpty) {
-        toUpdate = extractOccasionLink(Uri.base.toString());
-
-        var rootLinks = AppRouter.getRootLinks();
-        if (rootLinks.any((rootLink) => toUpdate == rootLink)) {
-          toUpdate = "";
-        }
+    if (currentOccasionId == null || link != currentLink) {
+      LinkModel model = LinkModel(occasionLink: link);
+      var occasionLink = link ?? RouterService.currentOccasionLink;
+      if (occasionLink.isEmpty) {
+        model = LinkModel.extractOccasionLink(Uri.base.toString());
+        print(Uri.base.toString());
       }
 
-      if (!await RouterService.updateOccasionFromLink(toUpdate)) {
+      if(AppConfig.forceOccasionLink != null) {
+        model.occasionLink = AppConfig.forceOccasionLink;
+      }
+
+      if (!await RouterService.updateOccasionFromLink(model)) {
         throw Exception("Cannot continue.");
       }
 
-      RouterService.currentOccasionLink = currentLink!;
+      RouterService.currentOccasionLink = currentLink??"";
       var globalSettings = await SynchroService.loadOrInitOccasionSettings();
       await OfflineDataService.saveGlobalSettings(globalSettings);
 
-      SynchroService.refreshOfflineData();
+      if(RightsService.currentOccasion?.id != null){
+        SynchroService.refreshOfflineData();
+      }
     }
     return true;
   }
 
-  static String extractOccasionLink(String url) {
-    // Use a regular expression to match the pattern after the hash sign (#)
-    final regex = RegExp(r'#\/([^\/]+)');
-    final match = regex.firstMatch(url);
 
-    if (match != null && match.groupCount > 0) {
-      return match.group(1)!;
-    }
-
-    return '';
-  }
 
   static Future<bool> getIsAdmin() async {
     var data = await _supabase.rpc("get_is_admin_on_occasion",
-        params: {"oc": RightsService.currentOccasion!});
+        params: {"oc": RightsService.currentOccasionId!});
     return data;
   }
 
   static bool canSeeAdmin(){
-    return isEditor() || isManager() || isAdmin();
+    return isEditor() || isManager() || isUnitEditorView() || isAdmin();
   }
 
   static bool canUpdateUsers() {
-    return isEditor() || isAdmin();
+    return isManager() || isAdmin() || isUnitEditor();
+  }
+
+  static bool canUpdateUnitUsers() {
+    return isUnitManager() || isAdmin();
+  }
+
+  static bool canEditOccasion() {
+    return isManager() || isEditor();
   }
 
   static bool canSignInOutUsersFromEvents() {
-    return currentUserOccasion?.isEditor??false;
+    return currentOccasionUser?.isEditor??false;
   }
 
   static bool isAdmin() {
@@ -73,14 +89,30 @@ class RightsService{
   }
 
   static bool isEditor() {
-    return currentUserOccasion?.isEditor??false;
+    return currentOccasionUser?.isEditor??false;
+  }
+
+  static bool isUnitEditor() {
+    return currentUnitUser?.isEditor??false;
+  }
+
+  static bool isUnitEditorView() {
+    return currentUnitUser?.isEditorView??false;
+  }
+
+  static bool canUserSeeUnitWorkspace() {
+    return isUnitEditor() || isUnitManager() || isUnitEditorView();
   }
 
   static bool isManager() {
-    return currentUserOccasion?.isManager??false;
+    return currentOccasionUser?.isManager??false;
+  }
+
+  static bool isUnitManager() {
+    return currentUnitUser?.isManager??false;
   }
 
   static bool isApprover() {
-    return currentUserOccasion?.isApprover??false;
+    return currentOccasionUser?.isApprover??false;
   }
 }

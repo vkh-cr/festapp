@@ -1,6 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class ExclusiveGroupModel extends IPlutoRowModel {
@@ -49,7 +49,7 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
       titleColumn: PlutoCell(value: title),

@@ -8,7 +8,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
@@ -54,6 +54,21 @@ class DataGridHelper
           ),
         ],
       ),
+    );
+  }
+
+  static Widget buildTab(BuildContext context, IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: ThemeConfig.blackColor(context)),
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: Text(
+            text,
+            style: TextStyle(color: ThemeConfig.blackColor(context)),
+          ),
+        ),
+      ],
     );
   }
 
@@ -103,12 +118,15 @@ class DataGridHelper
         },
     );}
 
-  static Widget threeStateCheckBoxRenderer(
+  static Widget foodCheckBoxRenderer(
       rendererContext, String idString, [bool Function()? isEnabled]) {
     // Get the current state (default to "none" if the value is null or invalid)
     String currentState = rendererContext.cell.value ?? DbOccasions.serviceNone;
 
     return CustomThreeStateCheckbox(
+      noneStateIcon: Icons.close,
+      paidStateIcon: Icons.radio_button_checked,
+      usedStateIcon: Icons.radio_button_off,
       currentState: currentState,
       onStateChanged: (String newState) {
         var cell = rendererContext.row.cells[idString]!;
@@ -117,6 +135,14 @@ class DataGridHelper
       },
       isEnabled: isEnabled == null || isEnabled(),
     );
+  }
+
+  static Widget backgroundFromText(rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+    String value = rendererContext.cell.value;
+    String textValue = processText?.call(value);
+    return Container(
+      color: getBackground(value),
+      child: Center(child: Text(textValue)));
   }
 
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
