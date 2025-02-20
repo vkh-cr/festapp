@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:fstapp/dataModels/LanguageModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
 
 import 'package:flutter/material.dart';
 import 'package:cross_file/cross_file.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/PasswordField.dart';
 import 'package:search_page/search_page.dart';
@@ -55,8 +57,7 @@ class DialogHelper{
         ));
   }
 
-
-  static Future<void> showInformationDialogAsync(
+  static Future<void> showInformationDialog(
       BuildContext context,
       String titleMessage,
       String textMessage,
@@ -66,7 +67,7 @@ class DialogHelper{
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text(titleMessage),
-            content: Text(textMessage),
+            content: SelectableText(textMessage),
             actions: [
               ElevatedButton(
                 child: Text(buttonMessage),
@@ -77,6 +78,37 @@ class DialogHelper{
             ],
           );
         });
+  }
+
+  static Future<bool> showScanTicketCode(
+      BuildContext context,
+      String titleMessage,
+      String textMessage, {
+        String confirmButtonMessage = "Ok",
+        String cancelButtonMessage = "Storno",
+      }) async {
+    bool result = false;
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(titleMessage),
+          content: Container(
+
+          ),
+          actions: [
+            ElevatedButton(
+              child: Text(confirmButtonMessage),
+              onPressed: () {
+                result = true;
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    return result;
   }
 
   static Future<bool> showConfirmationDialogAsync(
@@ -114,7 +146,6 @@ class DialogHelper{
     );
     return result;
   }
-
 
   static Future<UserGroupInfoModel?> showAddToGroupDialogAsync(
       BuildContext context,
@@ -275,11 +306,8 @@ class DialogHelper{
         );
       },
     );
-
     return filePath;
   }
-
-
 
   static Future<bool> showNotificationPermissionDialog(BuildContext context) async {
     bool result = false;
@@ -510,4 +538,32 @@ class DialogHelper{
     );
   }
 
+  static Future<T?> showCustomDialog<T>({
+    required BuildContext context,
+    required Widget child,
+    bool barrierDismissible = true,
+  }) {
+    return showDialog<T>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          insetPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+          child: Container(
+            constraints: BoxConstraints(
+              maxWidth: ResponsiveService.isDesktop(context)
+                  ? StylesConfig.formMaxWidth
+                  : double.infinity,
+            ),
+            padding: const EdgeInsets.all(16.0),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 }

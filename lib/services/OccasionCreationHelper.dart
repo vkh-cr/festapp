@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -11,7 +12,7 @@ import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 
 class OccasionCreationHelper {
   static Future<void> createNewOccasion(
-      BuildContext context, int organizationId, List<OccasionModel> existingOccasions, Function onEventCreated) async {
+      BuildContext context, UnitModel unit, List<OccasionModel> existingOccasions, Function onEventCreated) async {
     final formKey = GlobalKey<FormState>();
     String? title = "myfestival".tr();
     String? link = "myfestival${DateTime.now().add(Duration(days: 33)).year}";
@@ -181,10 +182,11 @@ class OccasionCreationHelper {
                             link: link,
                             isOpen: true,
                             isHidden: false,
-                            organization: organizationId,
+                            unit: unit.id,
+                            organization: unit.organization,
                           );
 
-                          await DbUsers.updateOccasion(newOccasion);
+                          await DbOccasions.updateOccasion(newOccasion);
                           onEventCreated();
                           Navigator.of(context).pop();
                         }
@@ -213,8 +215,7 @@ class OccasionCreationHelper {
     if (link.isEmpty) {
       return 'Link is required'.tr();
     }
-    final urlPattern = r'^[a-zA-Z0-9-_]+$';
-    final isValidFormat = RegExp(urlPattern).hasMatch(link);
+    final isValidFormat = Utilities.isValidUrl(link);
     if (!isValidFormat) {
       return 'Invalid characters'.tr();
     }

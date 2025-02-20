@@ -55,7 +55,7 @@ class BlueprintModel {
       configuration: json[TbEshop.blueprints.configuration] != null
           ? BlueprintConfiguration.fromJson(json[TbEshop.blueprints.configuration])
           : null,
-      objects: enrichedObjects,
+      objects: enrichedObjects??[],
       groups: groups,
       backgroundSvg: json[TbEshop.blueprints.background_svg],
       products: products,

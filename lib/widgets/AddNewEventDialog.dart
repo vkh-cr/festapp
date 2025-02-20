@@ -20,7 +20,7 @@ class AddNewEventDialog {
       List<TimeBlockGroup> timelineItems,
       [TimeBlockItem? parentEvent]
       ) async {
-    final _formKey = GlobalKey<FormState>();
+    final formKey = GlobalKey<FormState>();
     String? title;
     DateTime? startDate;
     DateTime? endDate;
@@ -71,7 +71,7 @@ class AddNewEventDialog {
                 return AlertDialog(
                   title: Text("Add To Schedule").tr(),
                   content: Form(
-                    key: _formKey,
+                    key: formKey,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -152,8 +152,8 @@ class AddNewEventDialog {
                     ElevatedButton(
                       onPressed: isFormValid
                           ? () async {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
+                        if (formKey.currentState!.validate()) {
+                          formKey.currentState!.save();
                           final newEvent = EventModel(
                             title: title,
                             place: places?.firstWhereOrNull(

@@ -3,20 +3,44 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Utilities {
-  static String formatPrice(BuildContext context, double price) {
-    // Get locale from context or fallback to Czech locale
-    //final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
-    final locale = 'cs_CZ';
+  static String formatPrice(BuildContext context, double price, {String? currencyCode, int? decimalDigits = 0}) {
+    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    final currency = currencyCode ?? 'CZK';
 
-    // Configure the currency formatter
     final NumberFormat currencyFormatter = NumberFormat.currency(
       locale: locale,
-      symbol: 'KČ', // Use the CZK symbol
-      decimalDigits: 0
+      name: currency,
+      symbol: NumberFormat.simpleCurrency(name: currency).currencySymbol,
+      decimalDigits: decimalDigits,
     );
 
-    return currencyFormatter.format(price); // Format the price as currency
+    return currencyFormatter.format(price);
   }
+
+  static bool isValidUrl(String link) {
+    // 1. Check if the link is empty
+    if (link.isEmpty) {
+      return false;
+    }
+
+    // 2. Define the regex pattern for validation
+    final String urlPattern = r'^[a-zA-Z0-9-_]+$';
+
+    // 3. Create a RegExp object and check for a match
+    final RegExp regex = RegExp(urlPattern);
+    return regex.hasMatch(link);
+  }
+
+  static String sanitizeFullUrl(String link) {
+    // First, remove diacritics from the input string.
+    final String cleaned = removeDiacritics(link);
+    // Define a RegExp that matches all characters not allowed in a URL segment.
+    // Allowed characters: a-z, A-Z, 0-9, dash (-), and underscore (_)
+    final RegExp invalidChars = RegExp(r'[^a-zA-Z0-9\-_]');
+    // Remove all invalid characters from the cleaned string.
+    return cleaned.replaceAll(invalidChars, '');
+  }
+
 
 
 
