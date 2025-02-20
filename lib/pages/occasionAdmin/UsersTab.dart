@@ -26,15 +26,14 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.NAME,
     UserColumns.SURNAME,
     UserColumns.SEX,
-    UserColumns.ACCOMMODATION,
-    UserColumns.PHONE,
     UserColumns.BIRTHDAY,
-    UserColumns.ROLE,
+    UserColumns.TEXT1,
+    UserColumns.TEXT2,
+    UserColumns.TEXT3,
     UserColumns.MANAGER,
     UserColumns.EDITOR,
     UserColumns.EDITOR_VIEW,
     UserColumns.APPROVER,
-    UserColumns.APPROVED,
     UserColumns.INVITED
   ];
 
@@ -91,11 +90,11 @@ class _UsersTabState extends State<UsersTab> {
                   UsersTabHelper.setPassword(context, p0),
               isEnabled: RightsService.canUpdateUsers,
             ),
-            // DataGridAction(
-            //   name: "Add to group".tr(),
-            //   action: (SingleTableDataGrid p0, [_]) =>
-            //       UsersTabHelper.addToGroup(context, p0),
-            // ),
+            DataGridAction(
+              name: "Add to group".tr(),
+              action: (SingleDataGridController p0, [_]) =>
+                  UsersTabHelper.addToGroup(context, p0),
+            ),
           ],
           columns: UserColumns.generateColumns(columnIdentifiers),
         ),

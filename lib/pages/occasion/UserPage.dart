@@ -313,8 +313,12 @@ class _UserPageState extends State<UserPage> {
                     userData?.occasionUser?.data![Tb.occasion_users.data_surname] ?? ""),
                 buildTextField("E-mail".tr(),
                     userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
-                buildTextField("I am".tr(),
-                    UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                // buildTextField("I am".tr(),
+                //     UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                buildTextField("Typ účastníka", userData?.occasionUser?.data![Tb.occasion_users.data_text1] ?? ""),
+                buildTextField("Přípravný tým", userData?.occasionUser?.data![Tb.occasion_users.data_text2] ?? ""),
+                if(userData?.getGameUserGroup != null)
+                  buildTextField("Tým (hra)", userData?.getGameUserGroup?.title ?? ""),
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(
