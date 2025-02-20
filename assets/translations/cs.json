@@ -437,7 +437,7 @@
   "Quotes": "Citáty",
   "Reserve a spot": "Rezervovat",
   "Detail": "Detail",
-  "Description": "Description",
+  "Description": "Popis",
   "Email Templates": "Šablony e-mailů",
   "Subject": "Předmět",
   "Test email sent successfully.": "Testovací e-mail byl úspěšně odeslán.",
@@ -468,5 +468,8 @@
   "This template is used to notify users about ticket order cancellations.": "Tato šablona se používá pro informování uživatelů o zrušení objednávek vstupenek.",
   "default": "výchozí",
   "Template": "Šablona",
+  "Is Open": "Otevřené",
+  "Determines whether event details (schedule, info, etc.) are available to the public.": "Určuje, zda jsou podrobnosti o akci (rozvrh, informace atd.) veřejně dostupné.",
+  "Public": "Veřejné",
   "_": "_"
 }

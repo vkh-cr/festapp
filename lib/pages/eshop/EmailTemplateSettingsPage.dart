@@ -9,6 +9,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 
 class EmailTemplateSettingsPage extends StatefulWidget {
@@ -138,7 +139,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
           maxLines: 1,
           style: TextStyle(
             color: Theme.of(context).appBarTheme.titleTextStyle?.color ??
-                Colors.white.withOpacity(0.85),
+                Colors.white,
           ),
         ),
         automaticallyImplyLeading: false,
@@ -185,9 +186,9 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
+                        color: ThemeConfig.grey150(context),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: ThemeConfig.grey300(context)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +208,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.black.withOpacity(0.8),
+                              color: ThemeConfig.grey850(context),
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -235,7 +236,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     ]),
                     onSaved: (val) => _subject = val,
                     style: TextStyle(
-                      color: Colors.black.withOpacity(0.85),
+                      color: ThemeConfig.grey850(context),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -245,7 +246,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: Colors.grey.shade300,
+                          color: ThemeConfig.grey300(context),
                           width: 1.0,
                         ),
                       ),
@@ -261,7 +262,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                             .inputDecorationTheme
                             .labelStyle
                             ?.color ??
-                            Colors.grey[700]?.withOpacity(0.85),
+                            ThemeConfig.grey700(context).withOpacity(0.85),
                       ),
                     ),
                   ),

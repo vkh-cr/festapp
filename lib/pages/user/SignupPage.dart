@@ -98,7 +98,7 @@ class _SignupPageState extends State<SignupPage> {
                           TextInput.finishAutofillContext();
                           if (_formKey.currentState?.saveAndValidate() ?? false) {
                             setState(() {
-                              //_isLoading = true;
+                              _isLoading = true;
                             });
                             var data = FormHelper.getDataFromForm(formHolder!, true);
                             fieldsData = Map<String, dynamic>.from(data[FormHelper.metaFields]);

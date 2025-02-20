@@ -128,7 +128,6 @@ class OccasionEditCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                // "Open" badge at top left.
                 if (occasion.isOpen)
                   Positioned(
                     top: 8,
@@ -140,12 +139,12 @@ class OccasionEditCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Text(
-                        'Open',
+                        'Public',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      ).tr(),
                     ),
                   ),
                 // Three vertical dots at top right.
