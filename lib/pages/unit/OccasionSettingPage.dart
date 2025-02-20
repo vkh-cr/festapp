@@ -37,6 +37,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   DateTime? _to;
   late TextEditingController _linkController;
   String? _description;
+  bool _isOpen = false; // new property for open setting
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
     _description = widget.occasion.description ?? "";
+    _isOpen = widget.occasion.isOpen ?? false; // initialize from model, defaulting to false
 
     // Get the default features
     final defaultFeatures = FeatureService.getDefaultFeatures();
@@ -70,7 +72,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     });
   }
 
-
   @override
   void dispose() {
     _linkController.dispose();
@@ -85,6 +86,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       widget.occasion.startTime = _from;
       widget.occasion.endTime = _to;
       widget.occasion.description = _description;
+      widget.occasion.isOpen = _isOpen;
       await DbOccasions.updateOccasion(widget.occasion);
       ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
       Navigator.of(context).pop();
@@ -284,20 +286,51 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                       }
                     });
                   },
-                  child: Text("Edit Content".tr()),
+                  child: Text("Edit content".tr()),
                 ),
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                title: Row(
+                  children: [
+                    Expanded(child: Text("Is Open".tr())),
+                    IconButton(
+                      icon: Icon(Icons.help_outline, color: ThemeConfig.blackColor(context),),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text("Is Open".tr()),
+                            content: Text("Determines whether event details (schedule, info, etc.) are available to the public.".tr()),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text("Ok".tr()),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                value: _isOpen,
+                onChanged: (value) {
+                  setState(() {
+                    _isOpen = value;
+                  });
+                },
               ),
               const SizedBox(height: 24),
               Text("Features".tr()),
               const SizedBox(height: 8),
               ...widget.occasion.features.map<Widget>((feature) {
-                return FeatureForm(feature: feature, occasion: widget.occasion.id!,);
+                return FeatureForm(feature: feature, occasion: widget.occasion.id!);
               }),
               const SizedBox(height: 80),
               Center(
                 child: TextButton(
-                  onPressed:
-                  RightsService.isUnitManager() ? _confirmDelete : null,
+                  onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
                   child: Text(
                     "Delete Event".tr(),
                     style: TextStyle(color: ThemeConfig.redColor(context)),
@@ -309,10 +342,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-        color: Theme.of(context).appBarTheme.backgroundColor ??
-            Theme.of(context).primaryColor,
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [

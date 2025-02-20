@@ -44,7 +44,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
     AutoRoute(page: InstanceInstallRoute.page, path: sl(InstanceInstallPage.ROUTE)),
-    AutoRoute(page: UnitAdminRoute.page, path: "/unit/:id/edit"),
+    AutoRoute(page: UnitAdminRoute.page, path: "/${UnitPage.ROUTE}/:id/edit"),
     AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
@@ -79,8 +79,16 @@ class AppRouter extends RootStackRouter {
         ),
       ]),
     ]),
-    RedirectRoute(path: '*', redirectTo: "/${RightsService.currentLink}"),
+
+    RedirectRoute(path: '*', redirectTo: getDefaultLink()),
   ];
+
+  static String getDefaultLink() {
+    if(RightsService.currentLink != null){
+      return "/${RightsService.currentLink}";
+    }
+    return "/${UnitPage.ROUTE}/${RightsService.currentUnit?.id??1}";
+  }
 
   static void Function()? regenerateRoutes;
 

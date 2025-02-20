@@ -468,5 +468,8 @@
   "This template is used to notify users about ticket order cancellations.": "This template is used to notify users about ticket order cancellations.",
   "default": "default",
   "Template": "Template",
+  "Is Open": "Is Open",
+  "Determines whether event details (schedule, info, etc.) are available to the public.": "Determines whether event details (schedule, info, etc.) are available to the public.",
+  "Public": "Public",
   "_":"_"
 }
