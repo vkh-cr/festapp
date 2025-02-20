@@ -45,11 +45,13 @@ class RightsService{
         throw Exception("Cannot continue.");
       }
 
-      RouterService.currentOccasionLink = currentLink!;
+      RouterService.currentOccasionLink = currentLink??"";
       var globalSettings = await SynchroService.loadOrInitOccasionSettings();
       await OfflineDataService.saveGlobalSettings(globalSettings);
 
-      SynchroService.refreshOfflineData();
+      if(RightsService.currentOccasion?.id != null){
+        SynchroService.refreshOfflineData();
+      }
     }
     return true;
   }
