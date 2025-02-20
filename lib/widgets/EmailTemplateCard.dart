@@ -21,7 +21,7 @@ class EmailTemplateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Fixed header height for the upper part.
-    const double headerHeight = 20;
+    const double headerHeight = 10;
     final theme = Theme.of(context);
 
     return ConstrainedBox(
@@ -46,7 +46,7 @@ class EmailTemplateCard extends StatelessWidget {
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
                   // Use primary color with transparency for a light overlay.
-                  color: theme.primaryColor.withOpacityUniversal(context, 0.2),
+                  color: theme.primaryColor.withOpacityUniversal(context, 0.1),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(10.0),
                     bottomRight: Radius.circular(10.0),
@@ -90,25 +90,21 @@ class EmailTemplateCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
-                    // Edit button wrapped in FittedBox to prevent overflow.
-                    FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Row(
-                        children: [
-                          TextButton.icon(
-                            onPressed: onEdit,
-                            icon: Icon(
-                              Icons.edit,
-                              color: ThemeConfig.blackColor(context),
-                            ),
-                            label: Text(
-                              'Edit'.tr(),
-                              style: TextStyle(
-                                color: ThemeConfig.blackColor(context),
-                              ),
-                            ),
+                    // Align the edit button to the right.
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: onEdit,
+                        icon: Icon(
+                          Icons.edit,
+                          color: ThemeConfig.blackColor(context),
+                        ),
+                        label: Text(
+                          'Edit'.tr(),
+                          style: TextStyle(
+                            color: ThemeConfig.blackColor(context),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   ],

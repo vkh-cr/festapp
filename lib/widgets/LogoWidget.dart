@@ -9,6 +9,8 @@ class LogoWidget extends StatelessWidget {
   /// Optional parameters to control the logo size.
   final double? height;
   final double? width;
+
+  /// Force dark mode assets even if the current theme is light.
   final bool? forceDark;
 
   const LogoWidget({
@@ -16,23 +18,34 @@ class LogoWidget extends StatelessWidget {
     this.onTap,
     this.height,
     this.width,
-    this.forceDark
+    this.forceDark,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // You can adjust the asset based on the theme, if needed.
-    final logoAsset = ThemeConfig.isDarkMode(context) || forceDark == true
+    // Determine the asset path based on the current theme or forceDark flag.
+    // Change these asset paths to match your actual file names.
+    final String logoAsset = ThemeConfig.isDarkMode(context) || forceDark == true
         ? 'assets/icons/fstapplogo.dark.svg'
         : 'assets/icons/fstapplogo.svg';
+
+    // If the asset file is an SVG, use SvgPicture; otherwise, use Image.
+    final Widget logo = logoAsset.toLowerCase().endsWith('.svg')
+        ? SvgPicture.asset(
+      logoAsset,
+      height: height,
+      width: width,
+      semanticsLabel: 'Festapp logo',
+    )
+        : Image.asset(
+      logoAsset,
+      height: height,
+      width: width,
+    );
+
     return InkWell(
       onTap: onTap,
-      child: SvgPicture.asset(
-        logoAsset,
-        height: height,
-        width: width,
-        semanticsLabel: 'Festapp logo',
-      ),
+      child: logo,
     );
   }
 }

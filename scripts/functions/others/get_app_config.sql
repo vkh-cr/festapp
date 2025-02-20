@@ -10,6 +10,7 @@ DECLARE
     platform_info jsonb := data_in->'platform';
     platform_name text := platform_info->>'platform';
     occasionId bigint;
+    default_unit bigint;
     is_open_bool BOOLEAN;
     occasion_user occasion_users%rowtype;
     unit_user unit_users%rowtype;
@@ -50,7 +51,6 @@ BEGIN
 
     -- If no form_link but link_txt is provided
     ELSIF link_txt IS NOT NULL AND link_txt <> '' THEN
-        -- Get the occasion ID and link for the provided link within the specified organization
         SELECT id, link
           INTO occasionId, occasion_link
         FROM occasions
@@ -58,7 +58,6 @@ BEGIN
           AND is_hidden = false
           AND organization = org_id;
 
-        -- If the occasion ID is not found, return a 404 response
         IF occasionId IS NULL THEN
             RETURN json_build_object(
                 'code', 404,
@@ -66,33 +65,53 @@ BEGIN
             );
         END IF;
 
-    -- If no link or form_link is provided
     ELSE
-        -- Get the default occasion from the organization
+        -- No link or form_link provided: first try to get the default occasion
         SELECT (data->>'DEFAULT_OCCASION')::bigint
           INTO occasionId
         FROM organizations
         WHERE id = org_id;
 
-        -- If no default occasion is set, get the first open and non-hidden occasion within the organization
         IF occasionId IS NULL THEN
-            SELECT id, link
-              INTO occasionId, occasion_link
-            FROM occasions
-            WHERE is_open = true
-              AND is_hidden = false
-              AND organization = org_id
-            LIMIT 1;
+            -- No default occasion; try to get the default unit instead
+            SELECT (data->>'DEFAULT_UNIT')::bigint
+              INTO default_unit
+            FROM organizations
+            WHERE id = org_id;
 
-            -- If no open occasion is found, return a 404 response
-            IF occasionId IS NULL THEN
-                RETURN json_build_object(
-                    'code', 404,
-                    'message', 'No open occasion found for the organization'
-                );
+            IF default_unit IS NOT NULL THEN
+                -- Default unit exists so we leave occasion unset
+                occasionId := NULL;
+                -- Fetch unit details from the default unit
+                SELECT row_to_json(u)
+                  INTO unit_json
+                FROM units u
+                WHERE u.id = default_unit;
+
+                SELECT *
+                  INTO unit_user
+                FROM unit_users
+                WHERE unit = default_unit
+                  AND "user" = auth.uid();
+            ELSE
+                -- Neither default occasion nor default unit exists; search for first open, non-hidden occasion
+                SELECT id, link
+                  INTO occasionId, occasion_link
+                FROM occasions
+                WHERE is_open = true
+                  AND is_hidden = false
+                  AND organization = org_id
+                LIMIT 1;
+
+                IF occasionId IS NULL THEN
+                    RETURN json_build_object(
+                        'code', 404,
+                        'message', 'No open occasion found for the organization'
+                    );
+                END IF;
             END IF;
         ELSE
-            -- Get the link for the default occasion
+            -- Default occasion exists; fetch its link
             SELECT link
               INTO occasion_link
             FROM occasions
@@ -110,62 +129,69 @@ BEGIN
     FROM organizations
     WHERE id = org_id;
 
-    -- Get the is_open status for the occasion
-    SELECT is_open
-      INTO is_open_bool
-    FROM occasions
-    WHERE id = occasionId;
+    IF occasionId IS NOT NULL THEN
+        -- Process occasion-related queries only if an occasion was determined
 
-    -- Get the occasion user record if it exists
-    SELECT *
-      INTO occasion_user
-    FROM occasion_users
-    WHERE occasion = occasionId
-      AND "user" = auth.uid();
+        -- Get the is_open status for the occasion
+        SELECT is_open
+          INTO is_open_bool
+        FROM occasions
+        WHERE id = occasionId;
 
-    -- Retrieve the unit ID from the occasions table
-    SELECT unit
-      INTO occasion_unit
-    FROM occasions
-    WHERE id = occasionId;
-
-    -- Get the unit user record if it exists
-    SELECT *
-      INTO unit_user
-    FROM unit_users
-    WHERE unit = occasion_unit
-      AND "user" = auth.uid();
-
-    -- Check if the current user is an admin on the occasion
-    is_admin_bool := get_is_admin_on_occasion(occasionId);
-
-    -- If the occasion is not open, enforce access restrictions
-    IF is_open_bool = FALSE THEN
-        IF auth.uid() IS NULL OR (occasion_user IS NULL AND NOT is_admin_bool) THEN
-            RETURN json_build_object(
-                'code', 403,
-                'message', 'Access forbidden',
-                'link', occasion_link,
-                'version_recommended', version_recommended,
-                'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL)
-            );
-        END IF;
-    END IF;
-
-    -- If the occasion user record is not found, the user is authenticated, and the occasion is open
-    IF occasion_user IS NULL AND auth.uid() IS NOT NULL THEN
-        -- Add the user to the occasion
-        PERFORM add_user_to_occasion(occasionId, auth.uid());
-
-        -- Fetch the updated occasion user record
+        -- Get the occasion user record if it exists
         SELECT *
           INTO occasion_user
         FROM occasion_users
         WHERE occasion = occasionId
           AND "user" = auth.uid();
+
+        -- Retrieve the unit ID from the occasion
+        SELECT unit
+          INTO occasion_unit
+        FROM occasions
+        WHERE id = occasionId;
+
+        -- Get the unit user record if it exists
+        SELECT *
+          INTO unit_user
+        FROM unit_users
+        WHERE unit = occasion_unit
+          AND "user" = auth.uid();
+
+        -- Check if the current user is an admin on the occasion
+        is_admin_bool := get_is_admin_on_occasion(occasionId);
+
+        -- If the occasion is not open, enforce access restrictions
+        IF is_open_bool = FALSE THEN
+            IF auth.uid() IS NULL OR (occasion_user IS NULL AND NOT is_admin_bool) THEN
+                RETURN json_build_object(
+                    'code', 403,
+                    'message', 'Access forbidden',
+                    'link', occasion_link,
+                    'version_recommended', version_recommended,
+                    'unit_user', COALESCE(row_to_json(unit_user)::jsonb, NULL)
+                );
+            END IF;
+        END IF;
+
+        -- If the occasion user record is not found and the user is authenticated, add the user to the occasion
+        IF occasion_user IS NULL AND auth.uid() IS NOT NULL THEN
+            PERFORM add_user_to_occasion(occasionId, auth.uid());
+
+            SELECT *
+              INTO occasion_user
+            FROM occasion_users
+            WHERE occasion = occasionId
+              AND "user" = auth.uid();
+        END IF;
+    ELSE
+        -- If no occasion is set (because default unit exists), use the default unit as the unit context
+        occasion_unit := default_unit;
+        -- Here we assume no occasion means no occasion-based admin check
+        is_admin_bool := false;
     END IF;
 
-    -- Retrieve unit_user again in case the user was added to the occasion and now belongs to a unit
+    -- Retrieve unit_user again in case the user was added and now belongs to the unit
     IF unit_user IS NULL AND occasion_unit IS NOT NULL AND auth.uid() IS NOT NULL THEN
         SELECT *
           INTO unit_user
@@ -181,19 +207,26 @@ BEGIN
     WHERE "user" = auth.uid()
       AND is_admin = true;
 
-    -- Fetch full occasion details as a JSON object
-    SELECT row_to_json(o)
-      INTO occasion_json
-    FROM occasions o
-    WHERE o.id = occasionId;
+    -- Fetch full occasion details as a JSON object if an occasion is set
+    IF occasionId IS NOT NULL THEN
+        SELECT row_to_json(o)
+          INTO occasion_json
+        FROM occasions o
+        WHERE o.id = occasionId;
+    ELSE
+        occasion_json := '{}'::jsonb;
+    END IF;
 
     -- Fetch full unit details as a JSON object
-    SELECT row_to_json(u)
-      INTO unit_json
-    FROM units u
-    WHERE u.id = occasion_unit;
+    IF occasion_unit IS NOT NULL THEN
+        SELECT row_to_json(u)
+          INTO unit_json
+        FROM units u
+        WHERE u.id = occasion_unit;
+    ELSE
+        unit_json := '{}'::jsonb;
+    END IF;
 
-    -- Return final response with all data and status code 200 at the end
     RETURN json_build_object(
         'code', 200,
         'is_admin', is_admin_bool,

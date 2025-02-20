@@ -12,14 +12,11 @@ import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
 
-// Constants for card styling.
 const double kCardBorderRadius = 15.0;
 const double kPresentBorderWidth = 4.0;
 const double kMinCardWidth = 300.0;
 const double kMinCardHeight = 150.0;
 const Duration kAnimationDuration = Duration(milliseconds: 200);
-const double kButtonVerticalPadding = 16.0;
-const double kButtonHorizontalPadding = 20.0;
 const double kCardWidth = 16.0;
 const double kCardHeight = 9.0;
 
@@ -44,13 +41,11 @@ class _OccasionCardState extends State<OccasionCard> {
 
   @override
   Widget build(BuildContext context) {
-    // When the event is present, add a thicker border and an extra glowing shadow.
     final Border? border = widget.isPresent
         ? Border.all(
         color: Theme.of(context).primaryColor, width: kPresentBorderWidth)
         : null;
 
-    // Adjust the inner clipping radius to account for the border width.
     final double innerRadius =
     widget.isPresent ? kCardBorderRadius - kPresentBorderWidth : kCardBorderRadius;
 
@@ -58,10 +53,9 @@ class _OccasionCardState extends State<OccasionCard> {
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: LayoutBuilder(builder: (context, constraints) {
-        // Compute a scale factor for the button based on the card's width.
-        // When the card's width is less than kMinCardWidth, the button scales down.
-        final double buttonScale =
-        (constraints.maxWidth / kMinCardWidth).clamp(0.0, 1.0);
+        final double widthScale = (constraints.maxWidth / kMinCardWidth).clamp(1.0, 1.5);
+        final double heightScale = (constraints.maxHeight / kMinCardHeight).clamp(1.0, 1.2);
+        final double buttonScale = (widthScale + heightScale) / 2;
 
         return ConstrainedBox(
           constraints: const BoxConstraints(
@@ -89,7 +83,6 @@ class _OccasionCardState extends State<OccasionCard> {
                 ),
               ],
             ),
-            // Clip the child so that the content respects the rounded corners.
             child: ClipRRect(
               borderRadius: BorderRadius.circular(innerRadius),
               child: Stack(
@@ -101,14 +94,12 @@ class _OccasionCardState extends State<OccasionCard> {
                         fit: BoxFit.cover,
                       ),
                     ),
-                  // If the event is past, add a gray overlay.
                   if (widget.isPast)
                     Positioned.fill(
                       child: Container(
                         color: Colors.grey.withOpacity(0.6),
                       ),
                     ),
-                  // Blurred and darkened overlay at the bottom for title and dates.
                   Positioned(
                     left: 0,
                     right: 0,
@@ -146,10 +137,9 @@ class _OccasionCardState extends State<OccasionCard> {
                       ),
                     ),
                   ),
-                  // Detail/reserve button over the image at the bottom right.
                   Positioned(
-                    bottom: 10,
-                    right: 10,
+                    bottom: 6 * buttonScale,
+                    right: 10 * buttonScale,
                     child: OutlinedButton(
                       onPressed: () async {
                         if (!FeatureService.isFeatureEnabled(
@@ -166,13 +156,12 @@ class _OccasionCardState extends State<OccasionCard> {
                         }
                       },
                       style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.white),
                         padding: EdgeInsets.symmetric(
-                          vertical: kButtonVerticalPadding * buttonScale,
-                          horizontal: kButtonHorizontalPadding * buttonScale,
+                          horizontal: 16 * buttonScale,
+                          vertical: 8 * buttonScale,
                         ),
-                        side: const BorderSide(
-                          color: Colors.white,
-                        ),
+                        minimumSize: Size(112 * buttonScale, 36 * buttonScale),
                       ),
                       child: Text(
                         widget.isPast ||
@@ -184,7 +173,7 @@ class _OccasionCardState extends State<OccasionCard> {
                             : "Reserve a spot".tr(),
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 19 * buttonScale,
+                          fontSize: 14 * buttonScale,
                         ),
                       ),
                     ),
