@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
+import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/pages/user/LoginPage.dart';
+
+@RoutePage()
+class FormEditPage extends StatefulWidget {
+  static const ROUTE = "formEdit";
+  String? formLink;
+
+  FormEditPage({super.key, @pathParam this.formLink});
+
+  @override
+  _FormEditPageState createState() => _FormEditPageState();
+}
+
+class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  // List of active tabs by name
+  final List<String> activeTabNames = [
+    AdminTabDefinition.orders,
+    if(FeatureService.isFeatureEnabled(FeatureService.ticket))
+    AdminTabDefinition.tickets,
+    if(FeatureService.isFeatureEnabled(FeatureService.blueprint))
+    AdminTabDefinition.blueprint,
+    AdminTabDefinition.form,
+    AdminTabDefinition.report,
+    AdminTabDefinition.emailTemplates,
+    AdminTabDefinition.users,
+  ];
+
+  @override
+  Future<void> didChangeDependencies() async {
+    if (!AuthService.isLoggedIn()) {
+      await RouterService.navigate(context, LoginPage.ROUTE);
+    }
+
+    super.didChangeDependencies();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(vsync: this, length: activeTabNames.length);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activeTabs = activeTabNames.map((name) => AdminTabDefinition.availableTabs[name]!).toList();
+
+    return DefaultTabController(
+      length: _tabController.length,
+      child: Scaffold(
+        appBar: AdminPageHelper.buildAdaptiveAdminAppBar(context, activeTabs, _tabController),
+        body: TabBarView(
+          controller: _tabController,
+          physics: const NeverScrollableScrollPhysics(),
+          children: activeTabs.map((tab) => tab.widget).toList(),
+        ),
+      ),
+    );
+  }
+}
+

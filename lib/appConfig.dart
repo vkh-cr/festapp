@@ -16,6 +16,9 @@ class AppConfig {
   static const String oneSignalAppId = '8ba73a49-1190-4b5a-a7e2-4edc344c4c5e';
 
   static const int organization = 2;
+  //setup occasion id to force occasion
+  static const String? forceOccasionLink = null;
+  static const bool isPublicNotificationSendingDisabled = false;
 
   static const String webLink = "https://biscup.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/cz/app/biscup/id6472435824";

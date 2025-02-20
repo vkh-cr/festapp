@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'package:timelines/timelines.dart';
+import 'package:timelines_plus/timelines_plus.dart';
 
 
 enum DotType {
