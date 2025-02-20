@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:intl/intl.dart';
 
 class StylesConfig {
   // Text styles
@@ -19,6 +22,9 @@ class StylesConfig {
 
   // Dimensions
   static const double appMaxWidth = 820;
+  static const double formMaxWidth = 680;
+
+  static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 
   // Button styles
   static ButtonStyle mainPageButtonStyle(BuildContext context) =>
@@ -29,4 +35,16 @@ class StylesConfig {
         backgroundColor: ThemeConfig.seed2,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
+
+  static String formatDateTimeForTab(BuildContext context, DateTime time){
+    return time.weekdayToString(context);
+  }
+
+  static String formatTimelineSplit(String string){
+    return string;
+  }
+
+  static String formatTimelineRightText(String string){
+    return string;
+  }
 }

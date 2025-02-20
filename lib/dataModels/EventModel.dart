@@ -230,7 +230,7 @@ class EventModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow() {
+  PlutoRow toPlutoRow(BuildContext context) {
     return PlutoRow(cells: {
       idColumn: PlutoCell(value: id),
       isHiddenColumn: PlutoCell(value: isHidden.toString()),

@@ -1,11 +1,9 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
+import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
+import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
-const _supabase = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,7 +19,7 @@ Deno.serve(async (req) => {
   const userEmail = reqData.email ? reqData.email.toLowerCase() : "bujnmi@gmail.com";
   const organizationId = reqData.organization;
 
-  const orgData = await _supabase
+  const orgData = await supabaseAdmin
     .from("organizations")
     .select("data")
     .eq("id", organizationId)
@@ -38,8 +36,13 @@ Deno.serve(async (req) => {
   const orgConfig = orgData.data.data;
   const appName = orgConfig.APP_NAME || "DefaultAppName";
   const defaultUrl = orgConfig.DEFAULT_URL || "http://default.url";
+  const platforms = orgConfig.PLATFORMS || [];
+  const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
 
-  const userData = await _supabase
+  // Generate platform links HTML
+  const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
+
+  const userData = await supabaseAdmin
     .from("user_info")
     .select()
     .eq("organization", organizationId)
@@ -56,27 +59,26 @@ Deno.serve(async (req) => {
   const userId = userData.data.id;
   const token = crypto.randomUUID();
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .delete()
     .eq("user", userId);
 
-  await _supabase
+  await supabaseAdmin
     .from("user_reset_token")
     .insert({
       "user": userId,
       "token": token,
     });
 
-  const template = await _supabase
-    .from("email_templates")
-    .select()
-    .eq("id", "RESET_PASSWORD")
-    .eq("organization", organizationId)
-    .single();
+  // Build the context for template selection.
+  // For a reset password email, we may only need organization.
+  const context = { organization: organizationId };
 
-  if (template.error || !template.data) {
-    console.error("Template not found for the specified organization.");
+  // Call the stored procedure to get both the email template and the wrapper.
+  const templateAndWrapper: any = await getEmailTemplateAndWrapper("RESET_PASSWORD", context);
+  if (!templateAndWrapper || !templateAndWrapper.template) {
+    console.error("Template not found for code RESET_PASSWORD.");
     return new Response(JSON.stringify({ error: "Template not found" }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 404,
@@ -84,24 +86,29 @@ Deno.serve(async (req) => {
   }
 
   const resetPasswordLink = `${defaultUrl}/#/resetPassword?token=${token}`;
+
+  // Prepare substitutions
   const subs = {
     resetPasswordLink: resetPasswordLink,
+    platformLinks: platformLinksHtml,
+    appName: appName,
   };
 
   await sendEmailWithSubs({
     to: userEmail,
-    subject: template.data.subject,
-    content: template.data.html,
+    subject: templateAndWrapper.template.subject,
+    content: templateAndWrapper.template.html,
     subs,
+    wrapper: templateAndWrapper.wrapper.html,
     from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
   });
 
-  await _supabase
+  await supabaseAdmin
     .from("log_emails")
     .insert({
       "from": _DEFAULT_EMAIL,
       "to": userEmail,
-      "template": template.data.id,
+      "template": templateAndWrapper.template.id,
       "organization": organizationId
     });
 

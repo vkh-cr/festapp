@@ -1,30 +1,32 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/AdminDashboardPage.dart';
-import 'package:fstapp/pages/CheckPage.dart';
-import 'package:fstapp/pages/EventEditPage.dart';
-import 'package:fstapp/pages/EventPage.dart';
-import 'package:fstapp/pages/HtmlEditorPage.dart';
-import 'package:fstapp/pages/InfoPage.dart';
-import 'package:fstapp/pages/InstallPage.dart';
-import 'package:fstapp/pages/LoginPage.dart';
-import 'package:fstapp/pages/MapPage.dart';
-import 'package:fstapp/pages/NewsFormPage.dart';
-import 'package:fstapp/pages/NewsPage.dart';
-import 'package:fstapp/pages/MySchedulePage.dart';
-import 'package:fstapp/pages/ResetPasswordPage.dart';
-import 'package:fstapp/pages/ForgotPasswordPage.dart';
-import 'package:fstapp/pages/SchedulePage.dart';
-import 'package:fstapp/pages/SettingsPage.dart';
-import 'package:fstapp/pages/SignupPage.dart';
-import 'package:fstapp/pages/SongPage.dart';
-import 'package:fstapp/pages/TimetablePage.dart';
-import 'package:fstapp/pages/UserPage.dart';
+import 'package:fstapp/pages/occasion/CheckPage.dart';
+import 'package:fstapp/pages/occasion/EventEditPage.dart';
+import 'package:fstapp/pages/occasion/EventPage.dart';
+import 'package:fstapp/pages/occasionAdmin/AdminPage.dart';
+import 'package:fstapp/pages/unit/UnitPage.dart';
+import 'package:fstapp/pages/user/LoginPage.dart';
+import 'package:fstapp/pages/user/SignupPasswordPage.dart';
+import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
+import 'package:fstapp/pages/occasion/InfoPage.dart';
+import 'package:fstapp/pages/utility/InstallPage.dart';
+import 'package:fstapp/pages/occasion/MapPage.dart';
+import 'package:fstapp/pages/occasion/NewsFormPage.dart';
+import 'package:fstapp/pages/occasion/NewsPage.dart';
+import 'package:fstapp/pages/occasion/MySchedulePage.dart';
+import 'package:fstapp/pages/user/ForgotPasswordPage.dart';
+import 'package:fstapp/pages/occasion/ScanPage.dart';
+import 'package:fstapp/pages/occasion/SettingsPage.dart';
+import 'package:fstapp/pages/user/SignupPage.dart';
+import 'package:fstapp/pages/occasion/SongPage.dart';
+import 'package:fstapp/pages/occasion/TimetablePage.dart';
+import 'package:fstapp/pages/occasion/UserPage.dart';
+import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/utility/InstanceInstallPage.dart';
 
 import 'AppRouter.gr.dart';
-import 'pages/AdministrationOccasion/AdminPage.dart';
-import 'pages/GamePage.dart';
+import 'pages/occasion/GamePage.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
@@ -41,7 +43,14 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
-    AutoRoute(page: AdminDashboardRoute.page, path: sl(AdminDashboardPage.ROUTE)),
+    AutoRoute(page: InstanceInstallRoute.page, path: sl(InstanceInstallPage.ROUTE)),
+    AutoRoute(page: UnitAdminRoute.page, path: "/${UnitPage.ROUTE}/:id/edit"),
+    AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
+    AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
+      AutoRoute(path: ':scanCode', page: ScanRoute.page,),
+    ]),
+    AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
+    AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
     AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
     AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
     AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
@@ -54,7 +63,7 @@ class AppRouter extends RootStackRouter {
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
     AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
-      AutoRoute(page: UserRoute.page, path: "${UserPage.ROUTE}"),
+      AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
                   AutoRoute(page: EventRoute.page, path: ":id")
@@ -70,8 +79,16 @@ class AppRouter extends RootStackRouter {
         ),
       ]),
     ]),
-    RedirectRoute(path: '*', redirectTo: "/${RightsService.currentLink}"),
+
+    RedirectRoute(path: '*', redirectTo: getDefaultLink()),
   ];
+
+  static String getDefaultLink() {
+    if(RightsService.currentLink != null){
+      return "/${RightsService.currentLink}";
+    }
+    return "/${UnitPage.ROUTE}/${RightsService.currentUnit?.id??1}";
+  }
 
   static void Function()? regenerateRoutes;
 
@@ -88,7 +105,9 @@ class AppRouter extends RootStackRouter {
       SignupPage.ROUTE,
       SettingsPage.ROUTE,
       InstallPage.ROUTE,
-      AdminDashboardPage.ROUTE,
+      UnitPage.ROUTE,
+      FormPage.ROUTE,
+      ScanPage.ROUTE,
     ];
   }
 }
