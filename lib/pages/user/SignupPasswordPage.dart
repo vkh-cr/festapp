@@ -12,7 +12,7 @@ import 'package:fstapp/widgets/PasswordField.dart';
 
 @RoutePage()
 class ResetPasswordPage extends StatefulWidget {
-  static const ROUTE = "signupPassword";
+  static const ROUTE = "resetPassword";
 
   const ResetPasswordPage({Key? key}) : super(key: key);
 

@@ -153,7 +153,7 @@ class _SchedulePageState extends State<SchedulePage>
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 0),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
@@ -171,7 +171,7 @@ class _SchedulePageState extends State<SchedulePage>
                         });
                       }
                     },
-                    child: LogoWidget(width: 200,),
+                    child: LogoWidget(height: 60,),
                   ),
                   const Spacer(),
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
