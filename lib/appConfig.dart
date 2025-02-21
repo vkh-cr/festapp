@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/LanguageModel.dart';
 class AppConfig {
   static const String supabaseUrl = 'https://jxagtmxojljlkabacgcj.supabase.co';
   static const String anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4YWd0bXhvamxqbGthYmFjZ2NqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk4MTIxNTMsImV4cCI6MjA1NTM4ODE1M30.I9s25yl_dFBGFFGa3De9vbM3xlxkMzWRKPeg65oDsUo';
-  static const String appName = 'Absolventský Velehrad';
+  static const String appName = 'AV 2025 TEST';
   static String mapTitle = "Map".tr();
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
@@ -20,7 +20,7 @@ class AppConfig {
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = true;
 
-  static const String webLink = "https://avtest.netlify.app";
+  static const String webLink = "https://av2025test.netlify.app";
   static const String appStoreLink = "";
   static const String playStoreLink = "";
   static const String playStoreLaunchLink = "";
