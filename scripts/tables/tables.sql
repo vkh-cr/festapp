@@ -397,7 +397,7 @@ create table if not exists public.email_templates (
   html text null,
   occasion bigint null,
   subject text null,
-  organization bigint null default '1'::bigint,
+  organization bigint null,
   code text null,
   unit bigint null,
   title text null,
