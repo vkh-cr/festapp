@@ -471,5 +471,7 @@
   "Is Open": "Is Open",
   "Determines whether event details (schedule, info, etc.) are available to the public.": "Determines whether event details (schedule, info, etc.) are available to the public.",
   "Public": "Public",
+  "The name of current Application": "The name of current Application",
+  "Links for opening app on different platforms.": "Links for opening app on different platforms.",
   "_":"_"
 }
