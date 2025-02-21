@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_154",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var B,A,S,T,U,V,W,X,C={
-cRh(){return new C.BN(null)},
-cwm(d,e,f,g,h,i,j){return new C.a1B(j,f,d,g,e,i,h,null)},
+cRj(){return new C.BN(null)},
+cwo(d,e,f,g,h,i,j){return new C.a1B(j,f,d,g,e,i,h,null)},
 BN:function BN(d){this.a=d},
 aJr:function aJr(d,e,f,g){var _=this
 _.d=d
@@ -16,7 +16,7 @@ bYq:function bYq(){},
 bYs:function bYs(d,e){this.a=d
 this.b=e},
 bYt:function bYt(d){this.a=d},
-yx:function yx(d,e){this.a=d
+yy:function yy(d,e){this.a=d
 this.b=e},
 a1B:function a1B(d,e,f,g,h,i,j,k){var _=this
 _.c=d
@@ -76,13 +76,13 @@ R=c[219]
 A7=c[201]
 C.BN.prototype={
 N(){var x=$.ag()
-return new C.aJr(new H.dM(new B.d4("kjdpmixlnhntmxjedpxh",A.b5,A.at),x),new H.dM(new B.d4("postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",A.b5,A.at),x),new H.dM(new B.d4("vkh-cr/festapp",A.b5,A.at),x),B.a([new C.yx("1. Tables","scripts/tables"),new C.yx("2. Functions","scripts/functions"),new C.yx("3. Policies","scripts/policies"),new C.yx("4. Seed","scripts/seed")],y.D))}}
+return new C.aJr(new H.dM(new B.d4("kjdpmixlnhntmxjedpxh",A.b5,A.at),x),new H.dM(new B.d4("postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",A.b5,A.at),x),new H.dM(new B.d4("vkh-cr/festapp",A.b5,A.at),x),B.a([new C.yy("1. Tables","scripts/tables"),new C.yy("2. Functions","scripts/functions"),new C.yy("3. Policies","scripts/policies"),new C.yy("4. Seed","scripts/seed")],y.D))}}
 C.aJr.prototype={
 gaku(){var x=A.e.d2(this.d.a.a)
 return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\n"},
 A(d){var x=this,w=null,v=x.d,u=x.e,t=x.f,s=y.u,r=x.r,q=B.X(r).h("Q<1,a6>")
-return S.eW(W.i3(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.b49,w,w,w,1,w),w,A5.ek(B.ax(B.a([E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),v,w,w,w,w,w,2,D.anw,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.bYr(x),w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),u,w,w,w,w,w,2,D.any,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),t,w,w,w,w,w,2,D.anz,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),L.dp,M.qJ(new B.a6(Q.bp,B.ax(B.a([B.aH(B.a([D.b4x,B.ch(w,w,w,w,w,A3.Jk,w,w,w,new C.bYs(x,d),w,w,w,w,w)],s),A.j,A.c8,A.h,w),I.aP,N.iV(x.gaku(),w,D.b1C)],s),A.Y,A.f,A.h,w,A.p),w),w,2,w,w),L.dp,D.b4m,K.iT,B.ax(B.J(new B.Q(r,new C.bYt(x),q),!0,q.h("ac.E")),A.j,A.f,A.h,w,A.p),L.dp,D.b3T,K.iT,C.cwm(!0,u,w,"migrations",v,t,"Migrations")],s),A.Y,A.f,A.h,w,A.p),w,A.u,T.b2,w,w,A.F),w,w,w,w,w)}}
-C.yx.prototype={
+return S.eW(W.i3(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.b4a,w,w,w,1,w),w,A5.ek(B.ax(B.a([E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),v,w,w,w,w,w,2,D.anw,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.bYr(x),w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),u,w,w,w,w,w,2,D.any,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),t,w,w,w,w,w,2,D.anz,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),L.dp,M.qJ(new B.a6(Q.bp,B.ax(B.a([B.aH(B.a([D.b4x,B.ch(w,w,w,w,w,A3.Jk,w,w,w,new C.bYs(x,d),w,w,w,w,w)],s),A.j,A.c8,A.h,w),I.aP,N.iV(x.gaku(),w,D.b1C)],s),A.Y,A.f,A.h,w,A.p),w),w,2,w,w),L.dp,D.b4n,K.iT,B.ax(B.J(new B.Q(r,new C.bYt(x),q),!0,q.h("ac.E")),A.j,A.f,A.h,w,A.p),L.dp,D.b3U,K.iT,C.cwo(!0,u,w,"migrations",v,t,"Migrations")],s),A.Y,A.f,A.h,w,A.p),w,A.u,T.b2,w,w,A.F),w,w,w,w,w)}}
+C.yy.prototype={
 gdv(d){return this.a}}
 C.a1B.prototype={
 N(){var x=$.hk().b
@@ -158,15 +158,15 @@ x=B.bN(A0.pn,B.D(v).ax.a===A.v?B.bo(4294922834):B.bo(4292030255),w,w)
 v=x}return v},
 A(d){var x=this,w=null,v=y.u,u=B.aH(B.a([B.Y(x.a.c,w,w,w,w,w,w,w,D.b2r,w,w,w,w,w),A6.c9,x.aVU()],v),A.j,A.f,A.h,w),t=x.a
 u=B.a([u,X.hb,t.e?E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),x.e,w,w,w,w,w,2,D.ans,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w):new B.a6(R.e1,B.Y("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
-if(x.a.d==="scripts/seed")A.b.I(u,B.a([K.iT,D.b4p,I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),x.x,w,w,w,w,w,2,D.anB,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),x.y,w,w,w,w,w,2,D.anA,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),new B.a6(R.e1,B.Y("Supabase Project Ref: "+x.a.x.a.a,w,w,w,w,w,w,w,A1.b0G,w,w,w,w,w),w)],v))
+if(x.a.d==="scripts/seed")A.b.I(u,B.a([K.iT,D.b3N,I.aP,E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),x.x,w,w,w,w,w,2,D.anB,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),E.hZ(!0,A.b3,!1,w,!0,A.z,w,E.iH(),x.y,w,w,w,w,w,2,D.anA,A.u,!0,w,!0,w,!1,w,G.b7,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.bk,w,w,A.b0,A.aX,w,w,w,w,w,w,w,!0,A.P,w,F.bn,w,w,w,w),new B.a6(R.e1,B.Y("Supabase Project Ref: "+x.a.x.a.a,w,w,w,w,w,w,w,A1.b0G,w,w,w,w,w),w)],v))
 u.push(I.aP)
-u.push(B.ds(!1,D.b4i,w,w,w,w,w,w,x.f?w:x.gbnv(),w,w))
+u.push(B.ds(!1,D.b4j,w,w,w,w,w,w,x.f?w:x.gbnv(),w,w))
 u.push(I.aP)
 if(x.f)v=A.cU
 else{v=x.r
 v=v.length!==0?N.iV(v,w,U.Dx):A.cj}u.push(v)
 return M.qJ(new B.a6(Q.bp,B.ax(u,A.Y,A.f,A.h,w,A.p),w),w,3,w,w)}}
-var z=a.updateTypes(["a6(yx)","S<~>()"])
+var z=a.updateTypes(["a6(yy)","S<~>()"])
 C.bYr.prototype={
 $1(d){this.a.B(new C.bYq())},
 $S:23}
@@ -179,7 +179,7 @@ this.b.ab(y.v).f.agc(D.aYS)},
 $S:0}
 C.bYt.prototype={
 $1(d){var x=this.a
-return new B.a6(A4.HN,C.cwm(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
+return new B.a6(A4.HN,C.cwo(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
 $S:z+0}
 C.c1J.prototype={
 $0(){var x=this.a
@@ -213,9 +213,9 @@ x(B.F,[C.BN,C.a1B])
 x(B.L,[C.aJr,C.aba])
 x(B.bG,[C.bYr,C.bYt])
 x(B.cl,[C.bYq,C.bYs,C.c1J,C.c1K,C.c1L,C.c1M,C.c1N])
-w(C.yx,B.E)})()
+w(C.yy,B.E)})()
 B.bl(b.typeUniverse,JSON.parse('{"a1B":{"F":[],"d":[]},"BN":{"F":[],"d":[]},"aJr":{"L":["BN"]},"aba":{"L":["a1B"]}}'))
-var y={D:B.z("q<yx>"),u:B.z("q<d>"),w:B.z("e"),v:B.z("EK"),b:B.z("@"),q:B.z("~")};(function constants(){D.ans=new E.oH(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+var y={D:B.z("q<yy>"),u:B.z("q<d>"),w:B.z("e"),v:B.z("EK"),b:B.z("@"),q:B.z("~")};(function constants(){D.ans=new E.oH(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.anw=new E.oH(null,null,null,"Supabase Project Ref",null,null,null,null,null,null,"Enter your Supabase project reference",null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.any=new E.oH(null,null,null,"Database Connection String",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.anz=new E.oH(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
@@ -225,11 +225,11 @@ D.b4q=new B.bZ("Copied to clipboard",null,null,null,null,null,null,null,null,nul
 D.aYS=new Y.DF(D.b4q,null,null,null,null,null,null,null,null,null,null,null,null,Z.HG,null,null,null,A.z,null)
 D.b1C=new B.a_(!0,null,null,"monospace",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b2r=new B.a_(!0,null,null,null,null,null,18,A.a5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b3T=new B.bZ("Migrations",null,P.DB,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b49=new B.bZ("Instance Installation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b4i=new B.bZ("Run Scripts",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b4m=new B.bZ("Initial",null,P.DB,null,null,null,null,null,null,null,null,null,null,null,null)
-D.b4p=new B.bZ("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)",null,V.ww,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b3N=new B.bZ("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)\n - pg_cron extension (Database > Extensions)",null,V.ww,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b3U=new B.bZ("Migrations",null,P.DB,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4a=new B.bZ("Instance Installation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4j=new B.bZ("Run Scripts",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4n=new B.bZ("Initial",null,P.DB,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4x=new B.bZ("Supabase Function Deploy Commands:",null,A2.Dw,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_154",e:"endPart",h:b})})($__dart_deferred_initializers__,"DxUpBHEgwhEs4g0MWqxrDC2A3hQ=");
+a.eventLog.push({p:"main.dart.js_154",e:"endPart",h:b})})($__dart_deferred_initializers__,"L4lpYvwei2JXkFRQdXgVZaOk76s=");

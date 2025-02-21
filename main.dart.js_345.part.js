@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_345",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,D,E,B={
-crS(d,e,f,g,h){var x=null,w=A.ih(new A.a6(D.dy,A.ch(x,x,x,x,x,A.bN(E.IM,h,x,x),x,x,x,new B.aYV(e),x,x,x,x,x),x),d===!0)
+crU(d,e,f,g,h){var x=null,w=A.ih(new A.a6(D.dy,A.ch(x,x,x,x,x,A.bN(E.IM,h,x,x),x,x,x,new B.aYV(e),x,x,x,x,x),x),d===!0)
 return A.a([w,A.ih(new A.a6(D.dy,A.ch(x,x,x,x,x,A.bN(G.j1,g,x,x),x,x,x,new B.aYW(f),x,x,x,x,x),x),d===!1)],y.p)},
 aYV:function aYV(d){this.a=d},
 aYW:function aYW(d){this.a=d},
@@ -15,7 +15,7 @@ case 2:x=4
 return A.c($.h3().bX("event_users_saved").k6(0).cn("event",e).cn("user",v.gdH().c.a),$async$Xz)
 case 4:case 3:x=5
 return A.c(B.auk(e),$async$Xz)
-case 5:A.bB(d,A.x("Removed from My schedule.",null),C.a2)
+case 5:A.bB(d,A.w("Removed from My schedule.",null),C.a2)
 return A.j(null,w)}})
 return A.k($async$Xz,w)},
 Xx(d,e){var x=0,w=A.l(y.e),v,u
@@ -27,7 +27,7 @@ case 3:x=5
 return A.c($.h3().bX("event_users_saved").jJ(0,A.y(["event",e,"user",u.gdH().c.a],y.g,y.o)),$async$Xx)
 case 5:case 4:x=6
 return A.c(B.auh(e),$async$Xx)
-case 6:A.bB(d,A.x("Added to My schedule.",null),C.a2)
+case 6:A.bB(d,A.w("Added to My schedule.",null),C.a2)
 v=!0
 x=1
 break
@@ -86,6 +86,6 @@ case 2:return A.j(null,w)}})
 return A.k($async$$0,w)},
 $S:1};(function inheritance(){var x=a.inheritMany
 x(A.cl,[B.aYV,B.aYW])})()
-var y={p:A.z("q<zq>"),o:A.z("E"),g:A.z("e"),e:A.z("w"),f:A.z("~")}};
+var y={p:A.z("q<zr>"),o:A.z("E"),g:A.z("e"),e:A.z("x"),f:A.z("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_345",e:"endPart",h:b})})($__dart_deferred_initializers__,"NudqCgQ6nQGUfYtp9YdZOx7zI4I=");
+a.eventLog.push({p:"main.dart.js_345",e:"endPart",h:b})})($__dart_deferred_initializers__,"tyEqUIb5CXWQ/A8xnLCgG+q1Uto=");
