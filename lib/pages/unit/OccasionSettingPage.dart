@@ -180,31 +180,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _linkController,
-                decoration: InputDecoration(
-                  labelText: "Link".tr(),
-                ),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
-                ]),
-                onChanged: (val) {
-                  final fixed = Utilities.sanitizeFullUrl(val);
-                  if (fixed != val) {
-                    _linkController.value = _linkController.value.copyWith(
-                      text: fixed,
-                      selection: TextSelection.collapsed(offset: fixed.length),
-                    );
-                  }
-                  setState(() {
-                    _link = fixed;
-                  });
-                },
-                onSaved: (val) {
-                  _link = _linkController.text;
-                },
-              ),
-              const SizedBox(height: 16),
               TimeDateRangePicker(
                 start: _from,
                 end: _to,
@@ -303,6 +278,31 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   setState(() {
                     _isOpen = value;
                   });
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _linkController,
+                decoration: InputDecoration(
+                  labelText: "Link".tr(),
+                ),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
+                ]),
+                onChanged: (val) {
+                  final fixed = Utilities.sanitizeFullUrl(val);
+                  if (fixed != val) {
+                    _linkController.value = _linkController.value.copyWith(
+                      text: fixed,
+                      selection: TextSelection.collapsed(offset: fixed.length),
+                    );
+                  }
+                  setState(() {
+                    _link = fixed;
+                  });
+                },
+                onSaved: (val) {
+                  _link = _linkController.text;
                 },
               ),
               const SizedBox(height: 24),
