@@ -94,6 +94,7 @@ class _EventPageState extends State<EventPage> {
                     )),
               ),
             ),
+            if(FeatureService.isFeatureEnabled(FeatureService.mySchedule))
             ...ButtonsHelper.getAddToMyProgramButton(
                 _event?.canSaveEventToMyProgram(),
                 addToMySchedule,
