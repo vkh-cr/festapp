@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/services/LaunchUrlService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +16,25 @@ class OccasionDetailDialog extends StatelessWidget {
   final OccasionModel occasion;
 
   const OccasionDetailDialog({super.key, required this.occasion});
+
+  /// Unified reserve button logic.
+  void _onReservePressed(BuildContext context) async {
+    var details = FeatureService.getFeatureDetails(
+      FeatureService.form,
+      fromFeatures: occasion.features,
+    );
+    if (details?[FeatureService.formUseExternal] == true) {
+      final externalUrl = details?[FeatureService.formExternalLink];
+      if (externalUrl != null && externalUrl.isNotEmpty) {
+        await LaunchUrlService.launchURL(externalUrl);
+      }
+    } else {
+      RouterService.navigate(
+        context,
+        "${FormPage.ROUTE}/${occasion.form!.link!}",
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,17 +89,12 @@ class OccasionDetailDialog extends StatelessWidget {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () {
-                                RouterService.navigate(
-                                  context,
-                                  "${FormPage.ROUTE}/${occasion.form!.link!}",
-                                );
-                                Navigator.of(context).pop();
-                              },
+                              onPressed: () => _onReservePressed(context),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 16),
-                                textStyle: Theme.of(context).textTheme.labelLarge,
+                                textStyle:
+                                Theme.of(context).textTheme.labelLarge,
                                 side: BorderSide(
                                   color: ThemeConfig.blackColor(context),
                                   width: 1.0,
@@ -88,7 +105,8 @@ class OccasionDetailDialog extends StatelessWidget {
                                 "Reserve a spot",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ThemeConfig.blackColor(context)),
+                                style: TextStyle(
+                                    color: ThemeConfig.blackColor(context)),
                               ).tr(),
                             ),
                           ),
@@ -96,14 +114,16 @@ class OccasionDetailDialog extends StatelessWidget {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () async {
-                                await RightsService.updateOccasionData(occasion.link!);
+                                await RightsService.updateOccasionData(
+                                    occasion.link!);
                                 await RouterService.navigateOccasion(context, "");
                                 Navigator.of(context).pop();
                               },
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 16),
-                                textStyle: Theme.of(context).textTheme.labelLarge,
+                                textStyle:
+                                Theme.of(context).textTheme.labelLarge,
                                 side: BorderSide(
                                   color: ThemeConfig.blackColor(context),
                                   width: 1.0,
@@ -114,7 +134,8 @@ class OccasionDetailDialog extends StatelessWidget {
                                 "Detail",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(color: ThemeConfig.blackColor(context)),
+                                style: TextStyle(
+                                    color: ThemeConfig.blackColor(context)),
                               ).tr(),
                             ),
                           ),
@@ -122,12 +143,7 @@ class OccasionDetailDialog extends StatelessWidget {
                       )
                     else
                       OutlinedButton(
-                        onPressed: () {
-                          RouterService.navigate(
-                            context, "${FormPage.ROUTE}/${occasion.form!.link!}",
-                          );
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: () => _onReservePressed(context),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 16),
@@ -142,7 +158,8 @@ class OccasionDetailDialog extends StatelessWidget {
                           "Reserve a spot",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(color: ThemeConfig.blackColor(context)),
+                          style:
+                          TextStyle(color: ThemeConfig.blackColor(context)),
                         ).tr(),
                       ),
                   ],
@@ -154,7 +171,8 @@ class OccasionDetailDialog extends StatelessWidget {
                 child: IconButton(
                   icon: Icon(Icons.close,
                       size: 24,
-                      color: ThemeConfig.blackColor(context).withOpacity(0.6)),
+                      color: ThemeConfig.blackColor(context)
+                          .withOpacity(0.6)),
                   splashRadius: 20,
                   onPressed: () => Navigator.of(context).pop(),
                   tooltip: 'Close', // Accessibility feature

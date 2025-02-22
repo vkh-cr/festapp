@@ -468,9 +468,11 @@
   "This template is used to notify users about ticket order cancellations.": "Tato šablona se používá pro informování uživatelů o zrušení objednávek vstupenek.",
   "default": "výchozí",
   "Template": "Šablona",
-  "Is Open": "Otevřené",
   "Determines whether event details (schedule, info, etc.) are available to the public.": "Určuje, zda jsou podrobnosti o akci (rozvrh, informace atd.) veřejně dostupné.",
   "Public": "Veřejné",
+  "Use external form": "Použít externí formulář",
+  "Reservation Link": "Rezervační odkaz",
+  "Reservation will be done via this external link.": "Rezervace bude provedena přes tento externí odkaz.",
   "The name of current Application": "Název aplikace",
   "Links for opening app on different platforms.": "Odkazy pro otevření aplikace na různých platformách.",
   "_": "_"
