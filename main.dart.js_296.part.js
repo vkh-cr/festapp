@@ -1,24 +1,39 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_296",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-cls(d){var x=null,w=A.y(["id",null],y.g,y.b)
-return new B.ars("MapRoute",new A.C8(x,d,x),w,C.bQ,x,"",x)},
-ars:function ars(d,e,f,g,h,i,j){var _=this
-_.a=d
-_.b=e
-_.c=f
-_.d=g
-_.e=h
-_.f=i
-_.r=j}}
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B={
+alM(d){var x=0,w=A.l(y.b),v,u,t,s,r,q
+var $async$alM=A.h(function(e,f){if(e===1)return A.i(f,w)
+while(true)switch(x){case 0:r=A.X(d).h("Q<1,r?>")
+q=J
+x=2
+return A.c($.h3().bX("events").hd(0,"id, event_users!inner(count)").cn("event_users.user",$.e0().gdH().c.a).Di("id",A.J(new A.Q(d,new B.b2s(),r),!0,r.h("ac.E"))),$async$alM)
+case 2:r=q.i2(f,new B.b2t())
+v=r.$ti.h("dj<1,r>")
+u=A.fy(new A.dj(r,new B.b2u(),v),v.h("v.E"))
+for(r=d.length,t=0;t<d.length;d.length===r||(0,A.P)(d),++t){s=d[t]
+v=s.b
+v.toString
+v=u.n(0,v)
+s.ax=v}return A.j(null,w)}})
+return A.k($async$alM,w)},
+b2s:function b2s(){},
+b2t:function b2t(){},
+b2u:function b2u(){}}
+J=c[1]
 A=c[0]
-C=c[2]
-B=a.updateHolder(c[61],B)
-B.ars.prototype={}
-var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.ars,A.jA)})()
-A.bl(b.typeUniverse,JSON.parse('{"ars":{"jA":["C8"]}}'))
-var y={g:A.z("e"),b:A.z("@")}};
+B=a.updateHolder(c[128],B)
+var z=a.updateTypes([])
+B.b2s.prototype={
+$1(d){return d.b},
+$S:131}
+B.b2t.prototype={
+$1(d){return J.cK1(J.u(J.u(J.u(d,"event_users"),0),"count"),0)},
+$S:73}
+B.b2u.prototype={
+$1(d){return A.b8(J.u(d,"id"))},
+$S:128};(function inheritance(){var x=a.inheritMany
+x(A.bG,[B.b2s,B.b2t,B.b2u])})()
+var y={b:A.z("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_296",e:"endPart",h:b})})($__dart_deferred_initializers__,"BZkxr7qs9557g8tPBEr2soeYOaM=");
+a.eventLog.push({p:"main.dart.js_296",e:"endPart",h:b})})($__dart_deferred_initializers__,"4T0PF99r/qgYqAa9qtnQhUf5Slg=");
