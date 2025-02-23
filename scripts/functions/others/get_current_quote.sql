@@ -15,7 +15,7 @@ DECLARE
   curr_quote_rec RECORD;
   next_quote_rec RECORD;
 
-  utc_today date := (now() at time zone 'utc')::date;
+  utc_today date := timezone('utc', now())::date;
   updated_features jsonb;
 BEGIN
   -- Check if the unit exists and get its features
@@ -80,9 +80,9 @@ BEGIN
     LIMIT 1;
   END IF;
 
-  -- If we have a current quote record and its stored quote_date is today, return it
+  -- If we have a current quote record and its stored quote_date (in UTC) is today, return it
   IF curr_quote_rec IS NOT NULL AND curr_quote_date IS NOT NULL THEN
-    IF (curr_quote_date at time zone 'utc')::date = utc_today THEN
+    IF timezone('utc', curr_quote_date)::date = utc_today THEN
       RETURN jsonb_build_object(
         'code', 200,
         'data', row_to_json(curr_quote_rec)
@@ -90,43 +90,17 @@ BEGIN
     END IF;
   END IF;
 
-  -- Either there's no current quote, or it's outdated.
-  -- Determine the next quote based on the current one’s order.
-  IF curr_quote_rec IS NOT NULL THEN
-    SELECT *
-    INTO next_quote_rec
-    FROM public.information
-    WHERE type = 'quote'
-      AND occasion IS NULL
-      AND unit = unit_id
-      AND is_hidden = false
-      AND COALESCE("order", 0) > COALESCE(curr_quote_rec."order", 0)
-    ORDER BY COALESCE("order", 0) ASC
-    LIMIT 1;
-  ELSE
-    SELECT *
-    INTO next_quote_rec
-    FROM public.information
-    WHERE type = 'quote'
-      AND occasion IS NULL
-      AND unit = unit_id
-      AND is_hidden = false
-    ORDER BY COALESCE("order", 0) ASC
-    LIMIT 1;
-  END IF;
-
-  -- If no next quote is found, try wrapping around to the first one in order.
-  IF next_quote_rec IS NULL THEN
-    SELECT *
-    INTO next_quote_rec
-    FROM public.information
-    WHERE type = 'quote'
-      AND occasion IS NULL
-      AND unit = unit_id
-      AND is_hidden = false
-    ORDER BY COALESCE("order", 0) ASC
-    LIMIT 1;
-  END IF;
+  -- Either there's no current quote or it's outdated.
+  -- Select a random quote from the available quotes.
+  SELECT *
+  INTO next_quote_rec
+  FROM public.information
+  WHERE type = 'quote'
+    AND occasion IS NULL
+    AND unit = unit_id
+    AND is_hidden = false
+  ORDER BY random()
+  LIMIT 1;
 
   IF next_quote_rec IS NULL THEN
     RETURN jsonb_build_object(
@@ -146,7 +120,7 @@ BEGIN
         ARRAY[feature_idx::text],
         (feature || jsonb_build_object(
             'quote_id', next_quote_rec.id,
-            'quote_date', (now() at time zone 'utc')
+            'quote_date', timezone('utc', now())
          ))
       );
       EXIT;

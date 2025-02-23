@@ -23,7 +23,7 @@ class QuotesTab extends StatelessWidget {
             unitId, InformationModel.quoteType),
         fromPlutoJson: (plutoData) =>
             InformationModel.fromPlutoJsonType(plutoData, InformationModel.quoteType),
-        firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
+        firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.information.id,
         newObject: () => InformationModel.newRow(unitId),
         columns: [
