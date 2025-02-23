@@ -138,7 +138,7 @@ class _UnitPageState extends State<UnitPage> {
                         ],
                       ),
                       child: HtmlView(
-                        html: _quote!.description!,
+                        html: _quote!.description??"",
                         isSelectable: true,
                       ),
                     ),
