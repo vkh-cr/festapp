@@ -12,6 +12,7 @@ import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/pages/unit/FeatureForm.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ImageCompressionHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -209,8 +210,9 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 onFileSelected: (file) async {
                   Uint8List imageData = await file.readAsBytes();
                   try {
+                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
                     final publicUrl =
-                    await DbImages.uploadImage(imageData, widget.occasion.id, null);
+                    await DbImages.uploadImage(compressedImageData, widget.occasion.id, null);
                     setState(() {
                       widget.occasion.data?[Tb.occasions.data_image] = publicUrl;
                     });
