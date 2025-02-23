@@ -35,19 +35,19 @@
 - Edit and seed the password reset template.
 
 ##### Environment Variables
-- Fill `.env` structure as following:
+- Fill `.env` file as following:
 ```
-    ONESIGNAL_APP_ID=
-    USER_AUTH_KEY=
-    ONESIGNAL_REST_API_KEY=
-    SMTP_HOSTNAME=
-    SMTP_USER_NAME=
-    SMTP_USER_PASSWORD=
-    DEFAULT_EMAIL=
+ONESIGNAL_APP_ID=
+USER_AUTH_KEY=
+ONESIGNAL_REST_API_KEY=
+SMTP_HOSTNAME=
+SMTP_USER_NAME=
+SMTP_USER_PASSWORD=
+DEFAULT_EMAIL=
 ```
 - Set `.env` to your project:
 ```
-    supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
+supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
 ```
 
 ---
@@ -133,4 +133,3 @@ fvm flutter pub run flutter_launcher_icon
     - 1290×2796 px, 2796×1290 px
     - 1242×2688 px, 2688×1242 px
     - 1284×2778 px, 2778×1284 px
-~~~~markdown
