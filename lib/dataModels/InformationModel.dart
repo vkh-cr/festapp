@@ -129,7 +129,7 @@ class InformationModel extends IPlutoRowModel {
   }
 
   @override
-  String toBasicString() => title??id!.toString();
+  String toBasicString() => title??id.toString();
 
   InformationModel({
     this.id,

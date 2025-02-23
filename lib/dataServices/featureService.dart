@@ -9,13 +9,27 @@ class FeatureService {
   static const String songbook = "songbook";
   static const String game = "game";
   static const String userGroups = "user_groups";
+  static const String mySchedule = "my_schedule";
   static const String services = "services";
   static const String entryCode = "entry_code";
   static const String companions = "companions";
   static const String blueprint = "blueprint";
   static const String quotes = "quotes";
 
+  // New constants for ticket feature
+  static const String ticketLightColor = "lightColor";
+  static const String ticketDarkColor = "darkColor";
   static const String ticketBackground = "background";
+
+  // New constants for form feature
+  static const String formUseExternal = "use_external_form";
+  static const String formExternalLink = "external_form_link";
+
+  // New constant for companions feature
+  static const String companionsMax = "max_companions";
+
+  // For my schedule
+  static const String enableWithoutSignIn = "enable_without_sign_in";
 
   /// Returns `true` if the feature identified by [featureCode] is enabled.
   /// Returns `false` if the feature is not found or disabled.
@@ -39,17 +53,19 @@ class FeatureService {
       {metaCode: form, metaIsEnabled: false},
       {
         metaCode: ticket,
-        'color': '000000',
-        'background': '',
+        ticketLightColor: 'FFFFFF',
+        ticketDarkColor: '000000',
+        ticketBackground: '',
         metaIsEnabled: false,
       },
       {metaCode: blueprint, metaIsEnabled: false},
       {metaCode: songbook, metaIsEnabled: false},
       {metaCode: game, metaIsEnabled: false},
+      {metaCode: mySchedule, metaIsEnabled: false},
       {metaCode: services, metaIsEnabled: false},
       {metaCode: userGroups, metaIsEnabled: false},
       {metaCode: entryCode, metaIsEnabled: false},
-      {metaCode: companions, metaIsEnabled: false},
+      {metaCode: companions, metaIsEnabled: false, companionsMax: 1},
     ];
   }
 
@@ -72,8 +88,8 @@ class FeatureService {
   /// If the feature is not found or the max is not specified, this returns null.
   static int? getMaxCompanions() {
     final companionFeature = getFeatureDetails(companions);
-    if (companionFeature != null && companionFeature.containsKey('max_companions')) {
-      return companionFeature['max_companions'] as int;
+    if (companionFeature != null && companionFeature.containsKey(companionsMax)) {
+      return companionFeature[companionsMax] as int;
     }
     return null;
   }
