@@ -164,13 +164,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         minimumSize: Size(112 * buttonScale, 36 * buttonScale),
                       ),
                       child: Text(
-                        widget.isPast ||
-                            widget.isPresent ||
-                            !FeatureService.isFeatureEnabled(
-                                FeatureService.form,
-                                fromFeatures: widget.occasion.features)
-                            ? "Detail".tr()
-                            : "Reserve a spot".tr(),
+                        "Detail".tr(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14 * buttonScale,
