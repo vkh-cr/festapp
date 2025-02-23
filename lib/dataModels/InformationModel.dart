@@ -10,6 +10,9 @@ class InformationModel extends IPlutoRowModel {
   static const String songType = "song";
   static const String quoteType = "quote";
 
+  static const String data_date = "date";
+
+
   int? id;
   InformationHiddenModel? informationHidden;
   DateTime? updatedAt;
