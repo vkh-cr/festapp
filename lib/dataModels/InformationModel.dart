@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -10,9 +11,6 @@ class InformationModel extends IPlutoRowModel {
   static const String songType = "song";
   static const String quoteType = "quote";
 
-  static const String data_date = "date";
-
-
   int? id;
   InformationHiddenModel? informationHidden;
   DateTime? updatedAt;
@@ -24,6 +22,7 @@ class InformationModel extends IPlutoRowModel {
   int? unit;
   Map<String, dynamic>? data;
   int getOrder()  => order ?? 0;
+  DateTime getDateTime()  => data?[Tb.information.data_date] != null ? DateTime.parse(data?[Tb.information.data_date]) : DateTime.fromMillisecondsSinceEpoch(0);
 
   bool isExpanded = false;
 
@@ -95,6 +94,7 @@ class InformationModel extends IPlutoRowModel {
   }
 
   static InformationModel fromPlutoJsonType(Map<String, dynamic> json, String type) {
+    var quoteDate = json[Tb.information.data_date] != null ? DateFormat("yyyy-MM-dd").parse(json[Tb.information.data_date]) : null;
     return InformationModel(
       id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
       title: json[Tb.information.title],
@@ -103,6 +103,7 @@ class InformationModel extends IPlutoRowModel {
       isHidden: json[Tb.information.is_hidden] == "true" ? true : false,
       order: json[Tb.information.order],
       unit: json[Tb.information.unit],
+      data: quoteDate != null ? { Tb.information.data_date : quoteDate.toIso8601String() } : null,
     );
   }
 
@@ -118,6 +119,9 @@ class InformationModel extends IPlutoRowModel {
       Tb.information.unit: PlutoCell(value: unit),
       Tb.information.data_correct: PlutoCell(value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
       Tb.information.data_correct_reference: PlutoCell(value: informationHidden?.id),
+      Tb.information.data_date: PlutoCell(value:
+        data?[Tb.information.data_date] != null ?
+        DateFormat('yyyy-MM-dd').format(DateTime.parse(data?[Tb.information.data_date])) : DateTime.now()),
     });
   }
 
@@ -132,7 +136,12 @@ class InformationModel extends IPlutoRowModel {
   }
 
   @override
-  String toBasicString() => title??id.toString();
+  String toBasicString() {
+    if(data?[Tb.information.data_date] != null) {
+      return DateFormat.yMMMd('en').format(DateTime.parse(data?[Tb.information.data_date])).toString();
+    }
+    return title??id.toString();
+  }
 
   InformationModel({
     this.id,
