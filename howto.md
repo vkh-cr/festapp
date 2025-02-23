@@ -15,18 +15,11 @@
 - Copy generated supabase functions from installation tool and and deploy them to Supabase. For deployment is needed:
     - Docker
     - Supabase CLI
-- Then run installation tool functions (it will seed SQL from repository):
+- Then run installation tool functions (it will seed SQL from the repository):
     - Tables
     - Functions
     - Policies
     - Seed basic values
- 
-##### Email Setup (SMTP)
-- Edit and seed the password reset template.
-- Seed `.env` variables for smtp:
-```
-    supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
-```
 
 ##### Notifications
 - Visit [OneSignal Dashboard](https://dashboard.onesignal.com/)
@@ -36,6 +29,26 @@
 - Upload Apple P8 file.
 - Update Group ID.
 - Add to the same app group with OneSignal.
+
+##### Email Setup (SMTP)
+- Get a SMTP server with SMTP variables (see below).
+- Edit and seed the password reset template.
+
+##### Environment Variables
+- Fill `.env` structure as following:
+```
+    ONESIGNAL_APP_ID=
+    USER_AUTH_KEY=
+    ONESIGNAL_REST_API_KEY=
+    SMTP_HOSTNAME=
+    SMTP_USER_NAME=
+    SMTP_USER_PASSWORD=
+    DEFAULT_EMAIL=
+```
+- Set `.env` to your project:
+```
+    supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
+```
 
 ---
 
