@@ -83,7 +83,7 @@ class _TicketsTabState extends State<TicketsTab> {
             ],
             columns: EshopColumns.generateColumns(context, columnIdentifiers),
           ),
-        ).DataGrid());
+        ));
   }
 
   Future<void> _scanTickets(SingleDataGridController dataGrid) async {

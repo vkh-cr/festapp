@@ -9,7 +9,7 @@ import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class InformationContent extends StatelessWidget {
-  const InformationContent({Key? key}) : super(key: key);
+  const InformationContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -83,6 +83,6 @@ class InformationContent extends StatelessWidget {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

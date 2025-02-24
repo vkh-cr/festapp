@@ -115,6 +115,6 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }
