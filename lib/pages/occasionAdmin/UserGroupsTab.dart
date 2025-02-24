@@ -269,6 +269,6 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

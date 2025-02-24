@@ -93,7 +93,7 @@ class _UsersTabState extends State<UsersTab> {
           ],
           columns: UserColumns.generateColumns(columnIdentifiers),
         ),
-      ).DataGrid(),
+      ),
     );
   }
 }
