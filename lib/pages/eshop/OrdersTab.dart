@@ -23,7 +23,6 @@ class OrdersTab extends StatefulWidget {
 
 class _OrdersTabState extends State<OrdersTab> {
   String? formLink;
-  Key refreshKey = UniqueKey();
 
   @override
   void didChangeDependencies() {
@@ -34,52 +33,43 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> refreshData() async {
-    if (mounted) {
-      setState(() {
-        refreshKey = UniqueKey(); // Properly trigger a rebuild
-      });
-    }
+    controller!.reloadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-        key: refreshKey,
-        child: SingleTableDataGrid<OrderModel>(
-          SingleDataGridController<OrderModel>(
-            context: context,
-            loadData: () => DbOrders.getAllOrders(formLink!),
-            fromPlutoJson: OrderModel.fromPlutoJson,
-            firstColumnType: RightsService.isUnitManager()
-                ? DataGridFirstColumn.deleteAndCheck
-                : DataGridFirstColumn.check,
-            idColumn: TbEshop.orders.id,
-            actionsExtended: DataGridActionsController(
-              areAllActionsEnabled: RightsService.canUpdateUsers,
-              isAddActionPossible: () => false,
-            ),
-            headerChildren: [
-              DataGridAction(
-                name: "Cancel".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => cancelOrders(dataGrid),
-                isEnabled: RightsService.isEditor,
-              ),
-              DataGridAction(
-                name: "Synchronize payments".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => synchronizePayments(),
-                isEnabled: RightsService.isEditor,
-              ),
-              DataGridAction(
-                name: "Send tickets".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => sendTickets(dataGrid),
-                isEnabled: RightsService.isEditor,
-              ),
-            ],
-            columns: EshopColumns.generateColumns(context, columnIdentifiers),
-          ),
-        ).DataGrid()
-
+    controller = SingleDataGridController<OrderModel>(
+      context: context,
+      loadData: () => DbOrders.getAllOrders(formLink!),
+      fromPlutoJson: OrderModel.fromPlutoJson,
+      firstColumnType: RightsService.isUnitManager()
+          ? DataGridFirstColumn.deleteAndCheck
+          : DataGridFirstColumn.check,
+      idColumn: TbEshop.orders.id,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.canUpdateUsers,
+        isAddActionPossible: () => false,
+      ),
+      headerChildren: [
+        DataGridAction(
+          name: "Cancel".tr(),
+          action: (SingleDataGridController dataGrid, [_]) => cancelOrders(dataGrid),
+          isEnabled: RightsService.isEditor,
+        ),
+        DataGridAction(
+          name: "Synchronize payments".tr(),
+          action: (SingleDataGridController dataGrid, [_]) => synchronizePayments(),
+          isEnabled: RightsService.isEditor,
+        ),
+        DataGridAction(
+          name: "Send tickets".tr(),
+          action: (SingleDataGridController dataGrid, [_]) => sendTickets(dataGrid),
+          isEnabled: RightsService.isEditor,
+        ),
+      ],
+      columns: EshopColumns.generateColumns(context, columnIdentifiers),
     );
+      return SingleTableDataGrid<OrderModel>(controller!);
   }
 
   Future<void> synchronizePayments() async {
@@ -213,4 +203,6 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_TRANSACTIONS,
     EshopColumns.ORDER_HISTORY,
   ];
+
+  SingleDataGridController<OrderModel>? controller;
 }

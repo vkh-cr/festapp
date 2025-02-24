@@ -92,7 +92,7 @@ class _ServiceTabState extends State<ServiceTab> {
             },
           ),
         ),
-      ).DataGrid(),
+      ),
     );
   }
 

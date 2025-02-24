@@ -177,6 +177,7 @@ class InformationTb{
   String get data => "data";
   String get data_correct => "correct";
   String get data_correct_reference => "correct_reference";
+  String get data_date => "date";
 }
 class InformationHidden{
   const InformationHidden();

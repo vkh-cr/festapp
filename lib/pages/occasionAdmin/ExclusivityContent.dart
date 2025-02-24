@@ -62,6 +62,6 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

@@ -159,6 +159,6 @@ class _PlacesTabState extends State<PlacesTab> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }
