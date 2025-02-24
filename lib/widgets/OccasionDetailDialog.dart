@@ -7,6 +7,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
 import 'package:fstapp/services/LaunchUrlService.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:intl/intl.dart';
@@ -79,9 +80,7 @@ class OccasionDetailDialog extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    SelectableText(
-                      '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.startTime!)} - '
-                          '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.endTime!)}',
+                    SelectableText(TimeHelper.getMinimalisticDateRange(context, occasion.startTime!, occasion.endTime!),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).hintColor,
                       ),
