@@ -1,91 +1,26 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_348",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,D,E,B={
-csf(d,e,f,g,h){var x=null,w=A.ij(new A.a6(D.dz,A.ch(x,x,x,x,x,A.bN(E.IN,h,x,x),x,x,x,new B.aZ4(e),x,x,x,x,x),x),d===!0)
-return A.a([w,A.ij(new A.a6(D.dz,A.ch(x,x,x,x,x,A.bN(G.j0,g,x,x),x,x,x,new B.aZ5(f),x,x,x,x,x),x),d===!1)],y.p)},
-aZ4:function aZ4(d){this.a=d},
-aZ5:function aZ5(d){this.a=d},
-XC(d,e){var x=0,w=A.l(y.f),v
-var $async$XC=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:v=$.e1()
-x=v.gdH().d!=null?2:3
-break
-case 2:x=4
-return A.c($.h2().bY("event_users_saved").k6(0).cn("event",e).cn("user",v.gdH().c.a),$async$XC)
-case 4:case 3:x=5
-return A.c(B.aus(e),$async$XC)
-case 5:A.bB(d,A.w("Removed from My schedule.",null),C.a3)
-return A.j(null,w)}})
-return A.k($async$XC,w)},
-XA(d,e){var x=0,w=A.l(y.e),v,u
-var $async$XA=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:u=$.e1()
-x=u.gdH().d!=null?3:4
-break
-case 3:x=5
-return A.c($.h2().bY("event_users_saved").jJ(0,A.y(["event",e,"user",u.gdH().c.a],y.g,y.o)),$async$XA)
-case 5:case 4:x=6
-return A.c(B.aup(e),$async$XA)
-case 6:A.bB(d,A.w("Added to My schedule.",null),C.a3)
-v=!0
-x=1
-break
-case 1:return A.j(v,w)}})
-return A.k($async$XA,w)},
-aup(d){var x=0,w=A.l(y.f),v
-var $async$aup=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.c(A.HQ(),$async$aup)
-case 2:v=f
-J.ei(v,d)
-x=3
-return A.c(A.a1D(v),$async$aup)
-case 3:return A.j(null,w)}})
-return A.k($async$aup,w)},
-aus(d){var x=0,w=A.l(y.f),v
-var $async$aus=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.c(A.HQ(),$async$aus)
-case 2:v=f
-J.ol(v,d)
-x=3
-return A.c(A.a1D(v),$async$aus)
-case 3:return A.j(null,w)}})
-return A.k($async$aus,w)},
-aAX(d){return A.D(d).ax.a===C.v?A.D(d).ax.k3:A.D(d).ax.k2},
-cni(d,e){var x
-switch(e){case"music":return C.cV
-case"talk":return C.aQ
-case"other":return F.Gg}x=A.bV(C.aQ)
-x=A.bV(new A.bJ(x.a,x.b,0.4,x.d).c3())
-return new A.bJ(x.a,x.b,x.c,0.1).c3()}},F,G
-J=c[1]
-A=c[0]
-C=c[2]
-D=c[241]
-E=c[349]
-B=a.updateHolder(c[42],B)
-F=c[259]
-G=c[202]
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,D,A={
+bsb(){return new A.awd(null)},
+awd:function awd(d){this.a=d},
+bsc:function bsc(d){this.a=d}},E,F
+B=c[0]
+C=c[228]
+D=c[150]
+A=a.updateHolder(c[108],A)
+E=c[155]
+F=c[195]
+A.awd.prototype={
+A(d){var y=null
+if(F.fD(d,!1).f.GF())return B.ch(y,y,y,y,y,B.bN(C.hE,B.D(d).dg.f,y,24),y,y,y,new A.bsc(d),y,y,y,y,y)
+return D.a5m(y)}}
 var z=a.updateTypes([])
-B.aZ4.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.c(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:1}
-B.aZ5.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.c(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:1};(function inheritance(){var x=a.inheritMany
-x(A.ck,[B.aZ4,B.aZ5])})()
-var y={p:A.z("q<zu>"),o:A.z("E"),g:A.z("e"),e:A.z("x"),f:A.z("~")}};
+A.bsc.prototype={
+$0(){return E.wi(this.a)},
+$S:0};(function inheritance(){var y=a.inherit
+y(A.awd,B.a7)
+y(A.bsc,B.ck)})()
+B.bk(b.typeUniverse,JSON.parse('{"awd":{"a7":[],"d":[]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_348",e:"endPart",h:b})})($__dart_deferred_initializers__,"uMsJxDlXaVLrDdVHgp6h/JYcfMM=");
+a.eventLog.push({p:"main.dart.js_348",e:"endPart",h:b})})($__dart_deferred_initializers__,"BCHd3yCtt7hvkA/GeI1m9IWtiDg=");

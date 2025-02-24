@@ -1,16 +1,25 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_335",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C={
-a6y(d){var x,w=d.cy,v=d.db,u=B.a6x(d),t=d.b
-t.toString
-x=y.c
-return new D.dy(w,v,u,A.y(["leftText",d.aab(),"rightText",d.j(0)],x,x),t,null,null)}},D
-A=c[0]
-B=c[105]
-C=a.updateHolder(c[39],C)
-D=c[120]
-var z=a.updateTypes([])
-var y={c:A.z("e")}};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,A={E_:function E_(d,e){this.a=d
+this.b=e},dy:function dy(d,e,f,g,h,i,j){var _=this
+_.a=d
+_.b=e
+_.c=f
+_.d=g
+_.e=h
+_.f=i
+_.r=j}},C
+B=c[0]
+A=a.updateHolder(c[120],A)
+C=c[304]
+A.E_.prototype={
+J(){return"TimeBlockType."+this.b}}
+A.dy.prototype={
+gbp(d){return this.e}}
+var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
+y(A.E_,B.dT)
+y(A.dy,B.E)})();(function constants(){C.jH=new A.E_(3,"signedIn")
+C.a4F=new A.E_(5,"canSignIn")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_335",e:"endPart",h:b})})($__dart_deferred_initializers__,"uiV/1fUL0anNEiNagIMEnlzPWg4=");
+a.eventLog.push({p:"main.dart.js_335",e:"endPart",h:b})})($__dart_deferred_initializers__,"vM1Svi1x4bC13YgU+Ee1QYwrbMA=");
