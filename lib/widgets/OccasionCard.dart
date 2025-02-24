@@ -8,6 +8,7 @@ import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/SchedulePage.dart';
 import 'package:fstapp/services/LinkModel.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
@@ -42,12 +43,15 @@ class _OccasionCardState extends State<OccasionCard> {
   @override
   Widget build(BuildContext context) {
     final Border? border = widget.isPresent
-        ? Border.all(
-        color: Theme.of(context).primaryColor, width: kPresentBorderWidth)
+        ? Border.all(color: Theme.of(context).primaryColor, width: kPresentBorderWidth)
         : null;
 
     final double innerRadius =
     widget.isPresent ? kCardBorderRadius - kPresentBorderWidth : kCardBorderRadius;
+
+    // Retrieve external price from the 'form' feature, if available.
+    var details = FeatureService.getFeatureDetails(FeatureService.form, fromFeatures: widget.occasion.features);
+    String? externalPrice = details?[FeatureService.formExternalPrice];
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -77,9 +81,7 @@ class _OccasionCardState extends State<OccasionCard> {
                 BoxShadow(
                   color: isHovered ? Colors.black26 : Colors.black12,
                   blurRadius: isHovered ? 8 : 4,
-                  offset: isHovered
-                      ? const Offset(0, 4)
-                      : const Offset(0, 2),
+                  offset: isHovered ? const Offset(0, 4) : const Offset(0, 2),
                 ),
               ],
             ),
@@ -98,6 +100,32 @@ class _OccasionCardState extends State<OccasionCard> {
                     Positioned.fill(
                       child: Container(
                         color: Colors.grey.withOpacity(0.6),
+                      ),
+                    ),
+                  // Display external price badge at top right if available.
+                  if (externalPrice != null && externalPrice.trim().isNotEmpty)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              externalPrice,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   Positioned(
@@ -124,8 +152,11 @@ class _OccasionCardState extends State<OccasionCard> {
                               ),
                               const SizedBox(height: 4),
                               SelectableText(
-                                '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.startTime!)} - '
-                                    '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.endTime!)}',
+                                TimeHelper.getMinimalisticDateRange(
+                                  context,
+                                  widget.occasion.startTime!,
+                                  widget.occasion.endTime!,
+                                ),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -150,8 +181,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         } else {
                           showDialog(
                             context: context,
-                            builder: (context) => OccasionDetailDialog(
-                                occasion: widget.occasion),
+                            builder: (context) => OccasionDetailDialog(occasion: widget.occasion),
                           );
                         }
                       },

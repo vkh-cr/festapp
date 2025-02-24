@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';
 
@@ -85,8 +86,7 @@ class OccasionEditCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             SelectableText(
-                              '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.startTime!)} - '
-                                  '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.endTime!)}',
+                              TimeHelper.getMinimalisticDateRange(context, occasion.startTime!, occasion.endTime!),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
