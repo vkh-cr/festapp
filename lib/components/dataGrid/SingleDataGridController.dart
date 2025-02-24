@@ -32,23 +32,30 @@ class SingleDataGridController<T extends IPlutoRowModel> {
     required this.columns,
     this.headerChildren,
     this.actionsExtended,
-    this.newObject
+    this.newObject,
   });
 
-  Future<void> reloadData() async {
+  // Load data and store it in the rows variable without modifying the grid.
+  Future<void> loadDataOnly() async {
     var defaultRow = {firstColumnTypeId: PlutoCell(value: "delete")};
     final dataList = await loadData();
     var rowList = dataList.map((i) => i.toPlutoRow(context)!).toList();
     for (var element in rowList) {
       element.cells.addAll(defaultRow);
     }
-    stateManager.removeAllRows();
-    stateManager.appendRows(rowList);
+    rows = rowList;
+    // Clear tracking sets
     deletedRows.clear();
     newRows.clear();
     updatedRows.clear();
+  }
 
-    if (stateManager.columns.first.field != firstColumnTypeId &&
+  void applyDataToGrid() async {
+    stateManager.removeAllRows();
+    stateManager.appendRows(rows);
+
+    if (stateManager.columns.isNotEmpty &&
+        stateManager.columns.first.field != firstColumnTypeId &&
         firstColumnType != DataGridFirstColumn.none) {
       var firstColumn = PlutoColumn(
         title: "",
@@ -116,5 +123,10 @@ class SingleDataGridController<T extends IPlutoRowModel> {
       );
       stateManager.insertColumns(0, [firstColumn]);
     }
+  }
+
+  Future<void> reloadData() async {
+    await loadDataOnly();
+    applyDataToGrid();
   }
 }

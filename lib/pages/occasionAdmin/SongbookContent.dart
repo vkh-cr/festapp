@@ -77,6 +77,6 @@ class SongbookContent extends StatelessWidget {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

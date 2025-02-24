@@ -79,6 +79,6 @@ class QuotesTab extends StatelessWidget {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }
