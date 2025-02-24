@@ -10,49 +10,81 @@ import 'AdministrationHeader.dart';
 
 enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
 
-class SingleTableDataGrid<T extends IPlutoRowModel> {
+class SingleTableDataGrid<T extends IPlutoRowModel> extends StatefulWidget {
   final SingleDataGridController<T> controller;
 
-  SingleTableDataGrid(this.controller);
+  const SingleTableDataGrid(this.controller, {super.key});
 
-  Widget DataGrid() {
+  @override
+  _SingleTableDataGridState<T> createState() => _SingleTableDataGridState<T>();
+}
+
+class _SingleTableDataGridState<T extends IPlutoRowModel> extends State<SingleTableDataGrid<T>> {
+  bool isLoading = true;
+  bool isDataGridLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    initialLoad();
+  }
+
+  Future<void> initialLoad() async {
+    await widget.controller.loadDataOnly();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // If still loading, show a loading indicator.
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Otherwise, display the PlutoGrid.
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: ThemeConfig.whiteColor(controller.context),
+        color: ThemeConfig.whiteColor(widget.controller.context),
       ),
       child: PlutoGrid(
-        columns: controller.columns,
-        rows: controller.rows,
+        noRowsWidget: isDataGridLoading ? null : Center(child: Text("Table does not contain any items").tr()),
+        columns: widget.controller.columns,
+        rows: [],
         onChanged: (PlutoGridOnChangedEvent event) {
           if (event.row.state == PlutoRowState.updated) {
-            if (event.row.cells[controller.idColumn]?.value != -1) {
-              controller.deletedRows.remove(event.row);
-              if (!controller.newRows.contains(event.row)) {
-                controller.updatedRows.add(event.row);
+            if (event.row.cells[widget.controller.idColumn]?.value != -1) {
+              widget.controller.deletedRows.remove(event.row);
+              if (!widget.controller.newRows.contains(event.row)) {
+                widget.controller.updatedRows.add(event.row);
               }
             }
           }
-          controller.stateManager.notifyListeners();
+          //widget.controller.stateManager.notifyListeners();
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
-          controller.stateManager = event.stateManager;
+          widget.controller.stateManager = event.stateManager;
           event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
           event.stateManager.setShowColumnFilter(true);
-          controller.reloadData();
+          // With the stateManager now available, apply the loaded data to the grid.
+          widget.controller.applyDataToGrid();
+          isDataGridLoading = false;
+          setState(() { });
         },
         rowColorCallback: (rowContext) {
-          var row = controller.deletedRows.firstWhereOrNull(
+          var row = widget.controller.deletedRows.firstWhereOrNull(
                   (element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.redAccent.withOpacity(0.3);
           }
-          row = controller.updatedRows.firstWhereOrNull(
+          row = widget.controller.updatedRows.firstWhereOrNull(
                   (element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
           }
-          row = controller.newRows.firstWhereOrNull(
+          row = widget.controller.newRows.firstWhereOrNull(
                   (element) => element.key == rowContext.row.key);
           if (row != null) {
             return Colors.orangeAccent.withOpacity(0.3);
@@ -61,10 +93,10 @@ class SingleTableDataGrid<T extends IPlutoRowModel> {
         },
         createHeader: (stateManager) => AdministrationHeader(
           stateManager: stateManager,
-          controller: controller,
+          controller: widget.controller,
         ),
         configuration: AdministrationHeader.defaultPlutoGridConfiguration(
-            controller.context, controller.context.locale.languageCode),
+            widget.controller.context, widget.controller.context.locale.languageCode),
       ),
     );
   }

@@ -78,6 +78,12 @@ class _HtmlViewState extends State<HtmlView> {
             'color': aColor,
           };
         }
+        // quill specific fix
+        else if (tagName == 'li' && element.attributes['data-list'] == 'bullet') {
+          return {
+            'list-style-type': 'disc',
+          };
+        }
         return null;
       },
     );

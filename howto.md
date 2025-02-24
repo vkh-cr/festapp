@@ -10,19 +10,16 @@
 - Visit [supabase.com](https://supabase.com) and start a new project.
 
 ##### Supabase / Database Setup
-- Start a new organization/project.
-- Use the installation tool on [live.festapp.net/#/instanceInstall](https://live.festapp.net/#/instanceInstall) (or your localhost).
+- Launch the installation tool on [live.festapp.net/#/instanceInstall](https://live.festapp.net/#/instanceInstall) (or your build your localhost with Flutter Web).
 - Fill in the correct reference links and connection string with the Database password.
-- Copy generated supabase functions from installation tool and and deploy them to Supabase.
-    - For that you need:
-        - Docker
-        - Supabase CLI
-- In installation tool run:
+- Copy generated supabase functions from installation tool and and deploy them to Supabase. For deployment is needed:
+    - Docker
+    - Supabase CLI
+- Then run installation tool functions (it will seed SQL from the repository):
     - Tables
     - Functions
     - Policies
     - Seed basic values
-
 
 ##### Notifications
 - Visit [OneSignal Dashboard](https://dashboard.onesignal.com/)
@@ -34,11 +31,25 @@
 - Add to the same app group with OneSignal.
 
 ##### Email Setup (SMTP)
+- Get a SMTP server with SMTP variables (see below).
 - Edit and seed the password reset template.
-- Seed `.env` variables for smtp:
+
+##### Environment Variables
+- Fill `.env` file as following:
 ```
-    supabase secrets set --env-file ./supabase/.env --project-ref kjdpmixlnhntmxjedpxh
+ONESIGNAL_APP_ID=
+USER_AUTH_KEY=
+ONESIGNAL_REST_API_KEY=
+SMTP_HOSTNAME=
+SMTP_USER_NAME=
+SMTP_USER_PASSWORD=
+DEFAULT_EMAIL=
 ```
+- Set `.env` to your project:
+```
+supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
+```
+
 ---
 
 ## Frontend Setup
@@ -122,4 +133,3 @@ fvm flutter pub run flutter_launcher_icon
     - 1290×2796 px, 2796×1290 px
     - 1242×2688 px, 2688×1242 px
     - 1284×2778 px, 2778×1284 px
-~~~~markdown

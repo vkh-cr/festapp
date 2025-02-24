@@ -44,6 +44,6 @@ class GameCheckPointsContent extends StatelessWidget {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

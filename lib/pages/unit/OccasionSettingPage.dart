@@ -12,9 +12,11 @@ import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/pages/unit/FeatureForm.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/ImageCompressionHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/HelpWidget.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
@@ -179,31 +181,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 },
               ),
               const SizedBox(height: 16),
-              TextFormField(
-                controller: _linkController,
-                decoration: InputDecoration(
-                  labelText: "Link".tr(),
-                ),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
-                ]),
-                onChanged: (val) {
-                  final fixed = Utilities.sanitizeFullUrl(val);
-                  if (fixed != val) {
-                    _linkController.value = _linkController.value.copyWith(
-                      text: fixed,
-                      selection: TextSelection.collapsed(offset: fixed.length),
-                    );
-                  }
-                  setState(() {
-                    _link = fixed;
-                  });
-                },
-                onSaved: (val) {
-                  _link = _linkController.text;
-                },
-              ),
-              const SizedBox(height: 16),
               TimeDateRangePicker(
                 start: _from,
                 end: _to,
@@ -233,8 +210,9 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 onFileSelected: (file) async {
                   Uint8List imageData = await file.readAsBytes();
                   try {
+                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
                     final publicUrl =
-                    await DbImages.uploadImage(imageData, widget.occasion.id, null);
+                    await DbImages.uploadImage(compressedImageData, widget.occasion.id, null);
                     setState(() {
                       widget.occasion.data?[Tb.occasions.data_image] = publicUrl;
                     });
@@ -293,25 +271,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               SwitchListTile(
                 title: Row(
                   children: [
-                    Expanded(child: Text("Is Open".tr())),
-                    IconButton(
-                      icon: Icon(Icons.help_outline, color: ThemeConfig.blackColor(context),),
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text("Is Open".tr()),
-                            content: Text("Determines whether event details (schedule, info, etc.) are available to the public.".tr()),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: Text("Ok".tr()),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                    Expanded(child: Text("Public".tr())),
+                    HelpWidget(title: "Public".tr(), content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr())
                   ],
                 ),
                 value: _isOpen,
@@ -319,6 +280,31 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                   setState(() {
                     _isOpen = value;
                   });
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _linkController,
+                decoration: InputDecoration(
+                  labelText: "Link".tr(),
+                ),
+                validator: FormBuilderValidators.compose([
+                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
+                ]),
+                onChanged: (val) {
+                  final fixed = Utilities.sanitizeFullUrl(val);
+                  if (fixed != val) {
+                    _linkController.value = _linkController.value.copyWith(
+                      text: fixed,
+                      selection: TextSelection.collapsed(offset: fixed.length),
+                    );
+                  }
+                  setState(() {
+                    _link = fixed;
+                  });
+                },
+                onSaved: (val) {
+                  _link = _linkController.text;
                 },
               ),
               const SizedBox(height: 24),
