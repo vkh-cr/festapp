@@ -48,6 +48,27 @@ class TimeHelper {
       },
     );
   }
+
+  static String getMinimalisticDateRange(BuildContext context, DateTime start, DateTime end) {
+    final locale = Localizations.localeOf(context).languageCode;
+    final fullEnd = DateFormat.yMMMd(locale).format(end);
+    String minimalStart;
+
+    if (start.year == end.year) {
+      if (start.month == end.month) {
+        // Same month & year: show only the day for the start date.
+        minimalStart = DateFormat.d(locale).format(start);
+      } else {
+        // Same year but different months: show day and abbreviated month for start.
+        minimalStart = '${DateFormat.d(locale).format(start)} ${DateFormat.MMM(locale).format(start)}';
+      }
+    } else {
+      // Different years: show full formatted start date.
+      minimalStart = DateFormat.yMMMd(locale).format(start);
+    }
+
+    return '$minimalStart - $fullEnd';
+  }
 }
 
 extension DateTimeExtension on DateTime {

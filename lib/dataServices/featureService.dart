@@ -24,6 +24,7 @@ class FeatureService {
   // New constants for form feature
   static const String formUseExternal = "use_external_form";
   static const String formExternalLink = "external_form_link";
+  static const String formExternalPrice = "external_price";
 
   // New constant for companions feature
   static const String companionsMax = "max_companions";
