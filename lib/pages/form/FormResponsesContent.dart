@@ -76,7 +76,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
               data: {EshopColumns.RESPONSES: formFieldModels},
             ),
           ),
-        ).DataGrid()
+        )
     );
   }
 

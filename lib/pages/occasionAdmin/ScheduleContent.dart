@@ -31,9 +31,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
     loadPlaces();
   }
 
+  bool isLoadedOccasion = false;
+  bool isLoadedPlaces = false;
+
   Future<void> loadOccasion() async {
     // Fetch the occasion based on the current occasion ID
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasionId!);
+    isLoadedOccasion = true;
     setState(() {}); // Update UI after loading occasion data
   }
 
@@ -41,6 +45,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
     var placesRaws = await DbPlaces.getMapPlaces();
     var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouValue); // Add "Without Value" to options
+    isLoadedPlaces = true;
+
     setState(() {
       places.clear();
       places.addAll(placesStrings);
@@ -49,6 +55,9 @@ class _ScheduleContentState extends State<ScheduleContent> {
 
   @override
   Widget build(BuildContext context) {
+    if(!isLoadedOccasion || !isLoadedPlaces){
+      return Center(child: CircularProgressIndicator());
+    }
     return SingleTableDataGrid<EventModel>(
       SingleDataGridController<EventModel>(
         context: context,
@@ -185,6 +194,6 @@ class _ScheduleContentState extends State<ScheduleContent> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }
