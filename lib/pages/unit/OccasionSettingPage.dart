@@ -201,8 +201,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
               ImageArea(
                 hint: "(${ "Image with ratio {width} : {height}".tr(
                   namedArgs: {
-                    "width": kCardWidth.toString(),
-                    "height": kCardHeight.toString(),
+                    "width": OccasionCard.kCardWidth.toString(),
+                    "height": OccasionCard.kCardHeight.toString(),
                   },
                 )
                 })",

@@ -126,6 +126,7 @@ create table if not exists public.occasions (
   features JSONB NULL,
   occasion_hidden BIGINT NULL,
   description TEXT NULL,
+  is_promoted BOOLEAN NOT NULL DEFAULT false,
   CONSTRAINT occasions_pkey PRIMARY KEY (id),
   CONSTRAINT occasions_occasion_hidden_fkey FOREIGN KEY (occasion_hidden) REFERENCES public.occasions_hidden (id),
   CONSTRAINT occasions_unit_fkey FOREIGN KEY (unit) REFERENCES public.units (id),
