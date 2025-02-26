@@ -12,14 +12,12 @@ import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/widgets/LogoWidget.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/widgets/header/UniversalHeader.dart';
 
-// Define some layout constants.
-const double kToolbarHeight = 80.0;
-const double kHorizontalPadding = 16.0;
+// Define layout constant.
 const double kVerticalPadding = 32.0;
 
 @RoutePage()
@@ -49,7 +47,7 @@ class _UnitPageState extends State<UnitPage> {
     final unit = await DbUnits.getUnit(widget.id);
     final occasions = unit.occasions!;
 
-    if(FeatureService.isFeatureEnabled(FeatureService.quotes,
+    if (FeatureService.isFeatureEnabled(FeatureService.quotes,
         fromFeatures: unit.features)) {
       _quote = await DbInformation.getCurrentQuote(widget.id);
     }
@@ -57,7 +55,6 @@ class _UnitPageState extends State<UnitPage> {
       _unit = unit;
       _occasions = occasions;
     });
-
   }
 
   @override
@@ -90,35 +87,13 @@ class _UnitPageState extends State<UnitPage> {
       body: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          // Slim header: a SliverAppBar showing only the logo aligned to the left.
-          SliverAppBar(
-            automaticallyImplyLeading: false,
-            floating: true,
-            snap: true,
-            pinned: false,
-            toolbarHeight: kToolbarHeight,
-            backgroundColor: ThemeConfig.whiteColorDarker(context),
-            elevation: 2,
-            centerTitle: false,
-            titleSpacing: kHorizontalPadding,
-            title: InkWell(
-              onTap: () {
-                _scrollController.animateTo(
-                  0.0,
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              },
-              child: LogoWidget(width: 40, height: 60,)
-            ),
-          ),
+          UniversalHeader(scrollController: _scrollController),
           // Quote section rendered as HTML in a paper-like container.
-          // This section is shown only if the unit's features enable quotes.
           if (_unit != null && _quote != null)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    vertical: kVerticalPadding, horizontal: kHorizontalPadding),
+                    vertical: kVerticalPadding, horizontal: 16.0),
                 child: Center(
                   child: ConstrainedBox(
                     constraints:
@@ -127,7 +102,8 @@ class _UnitPageState extends State<UnitPage> {
                       padding: const EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
                         color: ThemeConfig.whiteColor(context),
-                        border: Border.all(color: ThemeConfig.grey300(context)),
+                        border:
+                        Border.all(color: ThemeConfig.grey300(context)),
                         borderRadius: BorderRadius.circular(8.0),
                         boxShadow: const [
                           BoxShadow(
@@ -138,7 +114,7 @@ class _UnitPageState extends State<UnitPage> {
                         ],
                       ),
                       child: HtmlView(
-                        html: _quote!.description??"",
+                        html: _quote!.description ?? "",
                         isSelectable: true,
                       ),
                     ),
@@ -151,7 +127,7 @@ class _UnitPageState extends State<UnitPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: kHorizontalPadding),
+                    vertical: 16.0, horizontal: 16.0),
                 child: Text(
                   "Happening Now".tr(),
                   style: const TextStyle(
@@ -172,7 +148,7 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: kCardWidth / kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -187,12 +163,12 @@ class _UnitPageState extends State<UnitPage> {
                 ),
               ),
             ),
-          // "Events" title for upcoming events.
+          // "Upcoming Events" title.
           if (upcomingEvents.isNotEmpty)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: kHorizontalPadding),
+                    vertical: 16.0, horizontal: 16.0),
                 child: Text(
                   "Upcoming Events".tr(),
                   style: const TextStyle(
@@ -213,7 +189,7 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: kCardWidth / kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -233,7 +209,7 @@ class _UnitPageState extends State<UnitPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: kHorizontalPadding),
+                    vertical: 16.0, horizontal: 16.0),
                 child: Text(
                   "Past Events".tr(),
                   style: const TextStyle(
@@ -254,7 +230,7 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: kCardWidth / kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {

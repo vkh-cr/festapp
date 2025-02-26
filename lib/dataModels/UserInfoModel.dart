@@ -4,6 +4,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
@@ -22,6 +23,8 @@ class UserInfoModel extends IHasId {
   bool? isEditor = false;
   PlaceModel? accommodationPlace;
   List<UserGroupInfoModel>? userGroups;
+  List<UnitModel>? units;
+
   UserGroupInfoModel? eventUserGroup;
   OccasionUserModel? occasionUser;
   String? roleString;
@@ -43,6 +46,8 @@ class UserInfoModel extends IHasId {
   static const String roleStringColumn = "roleString";
   static const String userCompanionsColumn = "userCompanions";
   static const String companionParentColumn = "companion_parent";
+  static const String unitsField = "units";
+
   static const String scheduleColumn = "schedule";
 
   static const String userInfoOffline = "user_info";
@@ -69,6 +74,7 @@ class UserInfoModel extends IHasId {
      this.roleString,
      this.companions,
      this.companionParent,
+     this.units,
      this.eventIds,
      this.userGroups,
   });  
@@ -86,6 +92,7 @@ class UserInfoModel extends IHasId {
       roleString: json[roleStringColumn],
       companions: json[userCompanionsColumn] != null ? List<CompanionModel>.from(json[userCompanionsColumn]!.map((c)=>CompanionModel.fromJson(c))) : null,
       companionParent: json[companionParentColumn] != null ? UserInfoModel.fromJson(json[companionParentColumn]):null,
+      units: json[unitsField] != null ? List<UnitModel>.from(json[unitsField].map((u)=>UnitModel.fromJson(u))) : null,
       eventIds: json[scheduleColumn] != null ? List<String>.from(json[scheduleColumn]!.map((s)=>s)) : null,
       sex: json[sexColumn],
       //todo remove
@@ -129,6 +136,10 @@ class UserInfoModel extends IHasId {
   UserGroupInfoModel? get getGameUserGroup => userGroups?.firstWhereOrNull((g)=>g.type == InformationModel.gameType);
 
   bool isSignedIn = false;
+
+  List<UnitModel> getUnitsWithEditorAccess() {
+    return units?.where((u)=>u.unitUser?.isEditorView == true).toList() ?? [];
+  }
 
 
   static String sexToLocale(String? sx) {

@@ -105,7 +105,8 @@ class RouterService {
   static Future<bool> updateOccasionFromLink(LinkModel link) async {
     bool canContinue = true;
     var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
-    RightsService.currentOccasionUser = checkedObject.user;
+    RightsService.currentUser = checkedObject.userInfo;
+    RightsService.currentOccasionUser = checkedObject.occasionUser;
     RightsService.currentUnitUser = checkedObject.unitUser;
     RightsService.currentOccasion = checkedObject.occasion;
     RightsService.currentUnit = checkedObject.unit;

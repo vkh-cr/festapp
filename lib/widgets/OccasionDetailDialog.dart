@@ -7,6 +7,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/featureService.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
 import 'package:fstapp/services/LaunchUrlService.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:intl/intl.dart';
@@ -38,6 +39,19 @@ class OccasionDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final unifiedButtonStyle = OutlinedButton.styleFrom(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      textStyle: Theme.of(context)
+          .textTheme
+          .labelLarge
+          ?.copyWith(fontSize: 16),
+      side: BorderSide(
+        color: ThemeConfig.blackColor(context),
+        width: 1.0,
+      ),
+      minimumSize: const Size.fromHeight(50),
+    );
+
     return Dialog(
       elevation: 16,
       shape: RoundedRectangleBorder(
@@ -47,7 +61,7 @@ class OccasionDetailDialog extends StatelessWidget {
         ),
       ),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
+        constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidthMid),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Stack(
@@ -60,14 +74,13 @@ class OccasionDetailDialog extends StatelessWidget {
                     const SizedBox(height: 32), // Space for close button
                     SelectableText(
                       occasion.title ?? '',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    SelectableText(
-                      '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.startTime!)} - '
-                          '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(occasion.endTime!)}',
+                    SelectableText(TimeHelper.getMinimalisticDateRange(context, occasion.startTime!, occasion.endTime!),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).hintColor,
                       ),
@@ -79,9 +92,12 @@ class OccasionDetailDialog extends StatelessWidget {
                       color: Colors.white.withOpacity(0.3),
                     ),
                     const SizedBox(height: 16),
-                    HtmlView(
-                      html: occasion.description ?? '',
-                      isSelectable: true,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: HtmlView(
+                        html: occasion.description ?? '',
+                        isSelectable: true,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     if (occasion.isOpen)
@@ -90,23 +106,11 @@ class OccasionDetailDialog extends StatelessWidget {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () => _onReservePressed(context),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 16),
-                                textStyle:
-                                Theme.of(context).textTheme.labelLarge,
-                                side: BorderSide(
-                                  color: ThemeConfig.blackColor(context),
-                                  width: 1.0,
-                                ),
-                                minimumSize: const Size.fromHeight(40),
-                              ),
+                              style: unifiedButtonStyle,
                               child: Text(
                                 "Reserve a spot",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: ThemeConfig.blackColor(context)),
                               ).tr(),
                             ),
                           ),
@@ -119,23 +123,11 @@ class OccasionDetailDialog extends StatelessWidget {
                                 await RouterService.navigateOccasion(context, "");
                                 Navigator.of(context).pop();
                               },
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 16),
-                                textStyle:
-                                Theme.of(context).textTheme.labelLarge,
-                                side: BorderSide(
-                                  color: ThemeConfig.blackColor(context),
-                                  width: 1.0,
-                                ),
-                                minimumSize: const Size.fromHeight(40),
-                              ),
+                              style: unifiedButtonStyle,
                               child: Text(
                                 "Detail",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: ThemeConfig.blackColor(context)),
                               ).tr(),
                             ),
                           ),
@@ -144,24 +136,14 @@ class OccasionDetailDialog extends StatelessWidget {
                     else
                       OutlinedButton(
                         onPressed: () => _onReservePressed(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 16),
-                          textStyle: Theme.of(context).textTheme.labelLarge,
-                          side: BorderSide(
-                            color: ThemeConfig.blackColor(context),
-                            width: 1.0,
-                          ),
-                          minimumSize: const Size.fromHeight(40),
-                        ),
+                        style: unifiedButtonStyle,
                         child: Text(
                           "Reserve a spot",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style:
-                          TextStyle(color: ThemeConfig.blackColor(context)),
                         ).tr(),
                       ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -169,13 +151,14 @@ class OccasionDetailDialog extends StatelessWidget {
                 top: 0,
                 right: 0,
                 child: IconButton(
-                  icon: Icon(Icons.close,
-                      size: 24,
-                      color: ThemeConfig.blackColor(context)
-                          .withOpacity(0.6)),
+                  icon: Icon(
+                    Icons.close,
+                    size: 24,
+                    color: ThemeConfig.blackColor(context).withOpacity(0.8),
+                  ),
                   splashRadius: 20,
                   onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Close', // Accessibility feature
+                  tooltip: 'Close'.tr(), // Accessibility feature
                 ),
               ),
             ],

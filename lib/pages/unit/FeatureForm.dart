@@ -27,6 +27,7 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? companionsController;
   late bool useExternalForm;
   TextEditingController? externalFormLinkController;
+  TextEditingController? externalPriceController;
 
   @override
   void initState() {
@@ -54,6 +55,9 @@ class _FeatureFormState extends State<FeatureForm> {
     externalFormLinkController = TextEditingController(
       text: widget.feature[FeatureService.formExternalLink] ?? '',
     );
+    externalPriceController = TextEditingController(
+      text: widget.feature[FeatureService.formExternalPrice] ?? '',
+    );
   }
 
   @override
@@ -62,6 +66,7 @@ class _FeatureFormState extends State<FeatureForm> {
     darkColorController?.dispose();
     companionsController?.dispose();
     externalFormLinkController?.dispose();
+    externalPriceController?.dispose();
     super.dispose();
   }
 
@@ -222,6 +227,20 @@ class _FeatureFormState extends State<FeatureForm> {
             ),
             onSaved: (val) {
               widget.feature[FeatureService.formExternalLink] = val;
+            },
+          ),
+        );
+        fields.add(const SizedBox(height: 16));
+        fields.add(
+          TextFormField(
+            controller: externalPriceController,
+            decoration: InputDecoration(
+              labelText: "Price".tr(),
+              helperText:
+              "The price will be displayed on the events page.".tr(),
+            ),
+            onSaved: (val) {
+              widget.feature[FeatureService.formExternalPrice] = val;
             },
           ),
         );
