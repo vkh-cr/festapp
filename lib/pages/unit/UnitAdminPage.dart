@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/pages/unit/UnitUsersScreen.dart';
 import 'package:fstapp/pages/unit/QuotesTab.dart';
@@ -172,7 +173,7 @@ class _SideMenuState extends State<SideMenu> {
                 ),
                 // Conditionally add the Quotes tab if the feature is enabled.
                 if (widget.unit != null &&
-                    FeatureService.isFeatureEnabled(FeatureService.quotes, fromFeatures: widget.unit!.features))
+                    FeatureService.isFeatureEnabled(FeatureConstants.quotes, features: widget.unit!.features))
                   _buildMenuItem(
                     icon: Icons.format_quote,
                     label: "Quotes".tr(),

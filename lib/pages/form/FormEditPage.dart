@@ -3,7 +3,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/user/LoginPage.dart';
 
 @RoutePage()
@@ -23,9 +24,9 @@ class _FormEditPageState extends State<FormEditPage> with SingleTickerProviderSt
   // List of active tabs by name
   final List<String> activeTabNames = [
     AdminTabDefinition.orders,
-    if(FeatureService.isFeatureEnabled(FeatureService.ticket))
+    if(FeatureService.isFeatureEnabled(FeatureConstants.ticket))
     AdminTabDefinition.tickets,
-    if(FeatureService.isFeatureEnabled(FeatureService.blueprint))
+    if(FeatureService.isFeatureEnabled(FeatureConstants.blueprint))
     AdminTabDefinition.blueprint,
     AdminTabDefinition.form,
     AdminTabDefinition.report,
