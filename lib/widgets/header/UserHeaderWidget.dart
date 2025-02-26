@@ -12,7 +12,8 @@ import 'package:fstapp/themeConfig.dart';
 import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
-  const UserHeaderWidget({Key? key}) : super(key: key);
+  final Color? appBarIconColor;
+  const UserHeaderWidget({Key? key, this.appBarIconColor}) : super(key: key);
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();
@@ -112,19 +113,22 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text("Dark",
-                  style: TextStyle(color: ThemeConfig.blackColor(context)))
+                  style: TextStyle(
+                      color: ThemeConfig.blackColor(context)))
                   .tr(),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text("Auto",
-                  style: TextStyle(color: ThemeConfig.blackColor(context)))
+                  style: TextStyle(
+                      color: ThemeConfig.blackColor(context)))
                   .tr(),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: Text("Light",
-                  style: TextStyle(color: ThemeConfig.blackColor(context)))
+                  style: TextStyle(
+                      color: ThemeConfig.blackColor(context)))
                   .tr(),
             ),
           ],
@@ -256,26 +260,26 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                         final units = RightsService.currentUser?.getUnitsWithEditorAccess();
                         if (units == null || units.isEmpty) return SizedBox.shrink();
                         return Column(
-                          children: units.map<Widget>((unit) => ListTile(
-                            leading: Icon(
-                              Icons.edit,
-                              color: Theme.of(context).primaryColor,
+                          children: units
+                              .map<Widget>(
+                                (unit) => ListTile(
+                              title: Text(
+                                unit.title ?? "---",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: ThemeConfig.blackColor(context)),
+                              ),
+                              trailing: Icon(
+                                Icons.chevron_right,
+                                color: ThemeConfig.blackColor(context),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                RouterService.navigate(context, "unit/${unit.id}/edit");
+                              },
                             ),
-                            title: Text(
-                              unit.title??"---",
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: ThemeConfig.blackColor(context)),
-                            ),
-                            trailing: Icon(
-                              Icons.chevron_right,
-                              color: ThemeConfig.blackColor(context),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              RouterService.navigate(context, "unit/${unit.id}/edit");
-                            },
-                          )).toList(),
+                          )
+                              .toList(),
                         );
                       },
                     ),
@@ -297,8 +301,10 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ).tr(),
                       onTap: () async {
                         Navigator.pop(context);
+                        var unit = RightsService.currentUnitUser?.unit;
                         await AuthService.logout();
-                        // Ensure header refreshes after sign out.
+                        await RouterService.goToUnit(context, unit);
+
                         if (mounted) setState(() {});
                       },
                     ),
@@ -346,77 +352,87 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
     );
   }
 
+  /// Unified widget for signed-in state (same for mobile and desktop).
+  Widget _buildSignedInWidget(Color iconColor) {
+    return InkWell(
+      key: _userKey,
+      onTap: _showSignedInPopover,
+      child: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: ThemeConfig.bottomNavSelectedItemColor(context),
+            width: 2,
+          ),
+          color: ThemeConfig.bottomNavSelectedItemColor(context),
+        ),
+        child: Center(
+          child: Text(
+            _getUserInitial(),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool isSignedIn = AuthService.isLoggedIn();
-    bool isMobile = ResponsiveService.isMobile(context);
+    final bool isMobile = ResponsiveService.isMobile(context);
+    final iconColor = widget.appBarIconColor ?? ThemeConfig.blackColor(context);
 
-    if (isMobile) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (!isSignedIn)
-            Row(
-              children: [
-                IconButton(
-                  key: _userKey,
-                  icon: Icon(
-                    Icons.person,
-                    color: ThemeConfig.bottomNavSelectedItemColor(context),
-                    size: 28,
-                  ),
-                  tooltip: "Sign In".tr(),
-                  onPressed: () async {
-                    await RouterService.navigate(context, LoginPage.ROUTE);
-                    setState(() {});
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
-            )
-          else
+    if (isSignedIn) {
+      // Return the same signed-in widget regardless of platform.
+      return _buildSignedInWidget(iconColor);
+    } else {
+      // Non-signed in state remains platform-specific.
+      if (isMobile) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
             IconButton(
               key: _userKey,
-              icon: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: ThemeConfig.bottomNavSelectedItemColor(context),
-                    width: 2,
-                  ),
-                  color: ThemeConfig.bottomNavSelectedItemColor(context),
-                ),
-                child: Center(
-                  child: Text(
-                    _getUserInitial(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
               ),
-              tooltip: "Settings".tr(),
-              onPressed: _showSignedInPopover,
+              icon: Icon(
+                Icons.person,
+                size: 32,
+                color: iconColor,
+              ),
+              tooltip: "Sign In".tr(),
+              onPressed: () async {
+                await RouterService.navigate(context, LoginPage.ROUTE);
+                setState(() {});
+              },
             ),
-          if (!isSignedIn)
+            const SizedBox(width: 8),
             IconButton(
               key: _settingsKey,
-              onPressed: _showSettingsPopover,
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
+              ),
               icon: Icon(
                 Icons.settings,
-                color: ThemeConfig.bottomNavSelectedItemColor(context),
-                size: 28,
+                color: iconColor,
+                size: 32,
               ),
               tooltip: "Settings".tr(),
+              onPressed: _showSettingsPopover,
             ),
-        ],
-      );
-    } else {
-      if (!isSignedIn) {
+          ],
+        );
+      } else {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -427,19 +443,19 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               },
               icon: Icon(
                 Icons.person,
-                color: ThemeConfig.bottomNavSelectedItemColor(context),
+                color: iconColor,
               ),
               label: const Text("Sign in").tr(),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(28),
                 ),
                 side: BorderSide(
-                  color: ThemeConfig.bottomNavSelectedItemColor(context),
+                  color: iconColor,
                 ),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 20, vertical: 16),
-                textStyle: const TextStyle(fontSize: 18),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+                textStyle: const TextStyle(fontSize: 16),
               ),
             ),
             const SizedBox(width: 16),
@@ -448,42 +464,10 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
               onPressed: _showSettingsPopover,
               icon: Icon(
                 Icons.settings,
-                color: ThemeConfig.bottomNavSelectedItemColor(context),
+                color: iconColor,
                 size: 28,
               ),
               tooltip: "Settings".tr(),
-            ),
-          ],
-        );
-      } else {
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              key: _userKey,
-              onTap: _showSignedInPopover,
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: ThemeConfig.bottomNavSelectedItemColor(context),
-                    width: 2,
-                  ),
-                  color: ThemeConfig.bottomNavSelectedItemColor(context),
-                ),
-                child: Center(
-                  child: Text(
-                    _getUserInitial(),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
             ),
           ],
         );
