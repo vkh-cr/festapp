@@ -7,7 +7,8 @@ import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/form/FormEditorContent.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -645,7 +646,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildTicketEditorReadOnly(FormFieldModel ticketField) {
     List<Widget> children = [];
-    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(_buildSpotFieldReadOnly());
       children.add(const SizedBox(height: 8));
     }
@@ -678,7 +679,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildTicketEditor(FormFieldModel ticketField) {
     List<Widget> children = [];
-    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(_buildSpotFieldEditor());
       children.add(const SizedBox(height: 16));
     }

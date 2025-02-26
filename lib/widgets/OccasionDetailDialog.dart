@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
-import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/form/FormPage.dart';
 import 'package:fstapp/services/LaunchUrlService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 
 class OccasionDetailDialog extends StatelessWidget {
@@ -21,11 +20,10 @@ class OccasionDetailDialog extends StatelessWidget {
   /// Unified reserve button logic.
   void _onReservePressed(BuildContext context) async {
     var details = FeatureService.getFeatureDetails(
-      FeatureService.form,
-      fromFeatures: occasion.features,
+      FeatureConstants.form, features: occasion.features,
     );
-    if (details?[FeatureService.formUseExternal] == true) {
-      final externalUrl = details?[FeatureService.formExternalLink];
+    if (details?.formUseExternal == true) {
+      final externalUrl = details?.formExternalLink;
       if (externalUrl != null && externalUrl.isNotEmpty) {
         await LaunchUrlService.launchURL(externalUrl);
       }

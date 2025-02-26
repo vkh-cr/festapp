@@ -11,7 +11,8 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/occasion/GamePage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -84,7 +85,7 @@ class _InfoPageState extends State<InfoPage> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Game button
-                          if(FeatureService.isFeatureEnabled(FeatureService.game))
+                          if(FeatureService.isFeatureEnabled(FeatureConstants.game))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {
@@ -98,7 +99,7 @@ class _InfoPageState extends State<InfoPage> {
                               label: "Game",
                             ),
                           const SizedBox(width: 16),
-                          if(FeatureService.isFeatureEnabled(FeatureService.songbook))
+                          if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                             ButtonsHelper.buildReferenceButton(
                               context: context,
                               onPressed: () {

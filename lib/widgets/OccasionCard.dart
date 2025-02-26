@@ -4,12 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/occasion/EventPage.dart';
-import 'package:fstapp/pages/occasion/SchedulePage.dart';
-import 'package:fstapp/services/LinkModel.dart';
+import 'package:fstapp/services/features/Feature.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
 
@@ -55,10 +53,9 @@ class _OccasionCardState extends State<OccasionCard> {
 
     // Retrieve external price from the 'form' feature, if available.
     var details = FeatureService.getFeatureDetails(
-      FeatureService.form,
-      fromFeatures: widget.occasion.features,
+      FeatureConstants.form, features: widget.occasion.features,
     );
-    String? externalPrice = details?[FeatureService.formExternalPrice];
+    String? externalPrice = details?.formExternalPrice;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -126,7 +123,7 @@ class _OccasionCardState extends State<OccasionCard> {
                               color: Colors.black.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text(
+                            child: SelectableText(
                               externalPrice,
                               style: const TextStyle(
                                 color: Colors.white,
@@ -184,8 +181,8 @@ class _OccasionCardState extends State<OccasionCard> {
                     child: OutlinedButton(
                       onPressed: () async {
                         if (!FeatureService.isFeatureEnabled(
-                            FeatureService.form,
-                            fromFeatures: widget.occasion.features)) {
+                            FeatureConstants.form,
+                            features: widget.occasion.features)) {
                           await RightsService.updateOccasionData(widget.occasion.link!);
                           await RouterService.navigateOccasion(context, "");
                         } else {
