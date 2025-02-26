@@ -15,9 +15,9 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
 
   const AdministrationHeader({
     required this.stateManager,
-    Key? key,
+    super.key,
     required this.controller,
-  }) : super(key: key);
+  });
 
   @override
   _AdministrationHeaderState<T> createState() =>

@@ -17,7 +17,9 @@ import 'package:fstapp/pages/occasionAdmin/ScheduleTab.dart';
 import 'package:fstapp/pages/occasionAdmin/ServiceTab.dart';
 import 'package:fstapp/pages/occasionAdmin/UserGroupsTab.dart';
 import 'package:fstapp/pages/occasionAdmin/UsersTab.dart';
+import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/LogoWidget.dart';
+import 'package:fstapp/widgets/header/UserHeaderWidget.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
@@ -73,22 +75,9 @@ class AdminPageHelper {
         ),
       ),
       actions: [
-        if (currentUser != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.person),
-                const SizedBox(width: 8),
-                Text(
-                  "${currentUser.data?[Tb.occasion_users.data_name]} "
-                      "${currentUser.data?[Tb.occasion_users.data_surname]} "
-                      "(${currentUser.data?[Tb.occasion_users.data_email]})",
-                ),
-              ],
-            ),
-          ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground,))
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(40),
@@ -121,35 +110,34 @@ class AdminPageHelper {
       List<AdminTabDefinition> activeTabs,
       TabController tabController,
       ) {
-    final currentUser = RightsService.currentOccasionUser;
 
     return AppBar(
       toolbarHeight: 60,
+      leadingWidth: 200,
       // The logo is shown as an IconButton.
-      leading: Builder(
-        builder: (context) {
-          return IconButton(
-            icon: LogoWidget(height: 40, forceDark: true,),
-            onPressed: () {
-              if (RightsService.canUserSeeUnitWorkspace()) {
-                RouterService.navigate(
-                  context,
-                  "unit/${RightsService.currentUnitUser?.unit}/edit",
-                );
-              }
-            },
-          );
-        },
+      leading: Align(
+        alignment: Alignment.centerLeft,
+        child: GestureDetector(
+          onTap: () {
+            // Navigate to the unit edit page if the user has rights.
+            if (RightsService.canUserSeeUnitWorkspace()) {
+              RouterService.navigate(
+                context,
+                "unit/${RightsService.currentUnitUser?.unit}/edit",
+              );
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: LogoWidget(height: 40, forceDark: true),
+          ),
+        ),
       ),
       title: Text(title),
       actions: [
-        if (currentUser != null)
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () {
-              // Handle signed-in user actions (e.g., open a profile page or a popup).
-            },
-          ),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground,))
       ],
       // Added TabBar to the mobile AppBar
       bottom: PreferredSize(
