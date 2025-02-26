@@ -160,7 +160,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -203,7 +203,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -245,7 +245,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
