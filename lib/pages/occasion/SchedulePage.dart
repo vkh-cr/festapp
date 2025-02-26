@@ -14,7 +14,8 @@ import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
 import 'package:fstapp/pages/unit/UnitPage.dart';
@@ -175,7 +176,7 @@ class _SchedulePageState extends State<SchedulePage>
                     child: LogoWidget(width: 200,),
                   ),
                   const Spacer(),
-                  if(FeatureService.isFeatureEnabled(FeatureService.mySchedule))
+                  if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
                       onPressed: _schedulePressed,

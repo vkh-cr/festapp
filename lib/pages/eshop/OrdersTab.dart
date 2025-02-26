@@ -5,7 +5,8 @@ import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
 import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
@@ -190,7 +191,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_EMAIL,
-    if(!FeatureService.isFeatureEnabled(FeatureService.ticket))
+    if(!FeatureService.isFeatureEnabled(FeatureConstants.ticket))
     EshopColumns.TICKET_PRODUCTS,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
