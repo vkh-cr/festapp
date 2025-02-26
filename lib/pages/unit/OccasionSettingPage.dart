@@ -8,7 +8,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/pages/unit/FeatureForm.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -22,6 +22,7 @@ import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/services/features/FeatureMetadata.dart';
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;
@@ -41,6 +42,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   String? _description;
   bool _isOpen = false; // new property for open setting
 
+  // For feature search and filtering
+  String _featureSearchQuery = "";
+  late TextEditingController _featureSearchController;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +56,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _linkController = TextEditingController(text: _link);
     _description = widget.occasion.description ?? "";
     _isOpen = widget.occasion.isOpen ?? false; // initialize from model, defaulting to false
+    _featureSearchController = TextEditingController();
 
     // Get the default features
     final defaultFeatures = FeatureService.getDefaultFeatures();
@@ -58,7 +64,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     // Add missing default features
     for (var defaultFeature in defaultFeatures) {
       bool exists = widget.occasion.features.any(
-              (f) => f[FeatureService.metaCode] == defaultFeature[FeatureService.metaCode]);
+              (f) => f.code == defaultFeature.code);
       if (!exists) {
         widget.occasion.features.add(defaultFeature);
       }
@@ -67,9 +73,9 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     // Sort the features according to the order defined in defaultFeatures
     widget.occasion.features.sort((a, b) {
       final aIndex = defaultFeatures.indexWhere(
-              (defaultFeature) => defaultFeature[FeatureService.metaCode] == a[FeatureService.metaCode]);
+              (defaultFeature) => defaultFeature.code == a.code);
       final bIndex = defaultFeatures.indexWhere(
-              (defaultFeature) => defaultFeature[FeatureService.metaCode] == b[FeatureService.metaCode]);
+              (defaultFeature) => defaultFeature.code == b.code);
       return aIndex.compareTo(bIndex);
     });
   }
@@ -77,6 +83,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   @override
   void dispose() {
     _linkController.dispose();
+    _featureSearchController.dispose();
     super.dispose();
   }
 
@@ -151,6 +158,19 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   @override
   Widget build(BuildContext context) {
     final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
+
+    // Filter features based on search query.
+    final filteredFeatures = widget.occasion.features.where((feature) {
+      final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
+      final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
+      final query = _featureSearchQuery.toLowerCase();
+      return query.isEmpty || title.contains(query) || description.contains(query);
+    }).toList();
+
+    // Split features into enabled and disabled.
+    final enabledFeatures = filteredFeatures.where((f) => f.isEnabled).toList();
+    final disabledFeatures = filteredFeatures.where((f) => !f.isEnabled).toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Settings".tr()),
@@ -163,7 +183,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
@@ -272,7 +292,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 title: Row(
                   children: [
                     Expanded(child: Text("Public".tr())),
-                    HelpWidget(title: "Public".tr(), content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr())
+                    HelpWidget(
+                        title: "Public".tr(),
+                        content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
+                    )
                   ],
                 ),
                 value: _isOpen,
@@ -308,11 +331,72 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                 },
               ),
               const SizedBox(height: 24),
-              Text("Features".tr()),
-              const SizedBox(height: 8),
-              ...widget.occasion.features.map<Widget>((feature) {
-                return FeatureForm(feature: feature, occasion: widget.occasion.id!);
-              }),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Features".tr(),
+                        ),
+                        const SizedBox(height: 8),
+                        // Quick search field for filtering features by title/description.
+                        TextField(
+                          controller: _featureSearchController,
+                          decoration: InputDecoration(
+                            labelText: "Search features".tr(),
+                            prefixIcon: const Icon(Icons.search),
+                            border: const OutlineInputBorder(),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _featureSearchQuery = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        // Enabled features section.
+                        if (enabledFeatures.isNotEmpty) ...[
+                          Text(
+                            "Enabled Features".tr(),
+                          ),
+                          const SizedBox(height: 8),
+                          ...enabledFeatures
+                              .map((feature) => FeatureForm(
+                            key: ValueKey(feature),
+                            feature: feature,
+                            occasion: widget.occasion.id!,
+                          ))
+                              .toList(),
+                          const SizedBox(height: 16),
+                        ],
+                        // Disabled features section.
+                        if (disabledFeatures.isNotEmpty) ...[
+                          Text(
+                            "Other Features".tr(),
+                          ),
+                          const SizedBox(height: 8),
+                          ...disabledFeatures
+                              .map((feature) => FeatureForm(
+                            key: ValueKey(feature),
+                            feature: feature,
+                            occasion: widget.occasion.id!,
+                          ))
+                              .toList(),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 80),
               Center(
                 child: TextButton(
