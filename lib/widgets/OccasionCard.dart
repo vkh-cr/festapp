@@ -13,15 +13,15 @@ import 'package:intl/intl.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
 
-const double kCardBorderRadius = 15.0;
-const double kPresentBorderWidth = 4.0;
-const double kMinCardWidth = 300.0;
-const double kMinCardHeight = 150.0;
-const Duration kAnimationDuration = Duration(milliseconds: 200);
-const double kCardWidth = 16.0;
-const double kCardHeight = 9.0;
-
 class OccasionCard extends StatefulWidget {
+  static const double kCardBorderRadius = 15.0;
+  static const double kPresentBorderWidth = 4.0;
+  static const double kMinCardWidth = 300.0;
+  static const double kMinCardHeight = 150.0;
+  static const Duration kAnimationDuration = Duration(milliseconds: 200);
+  static const double kCardWidth = 16.0;
+  static const double kCardHeight = 9.0;
+
   final OccasionModel occasion;
   final bool isPast;
   final bool isPresent;
@@ -43,33 +43,42 @@ class _OccasionCardState extends State<OccasionCard> {
   @override
   Widget build(BuildContext context) {
     final Border? border = widget.isPresent
-        ? Border.all(color: Theme.of(context).primaryColor, width: kPresentBorderWidth)
+        ? Border.all(
+      color: Theme.of(context).primaryColor,
+      width: OccasionCard.kPresentBorderWidth,
+    )
         : null;
 
-    final double innerRadius =
-    widget.isPresent ? kCardBorderRadius - kPresentBorderWidth : kCardBorderRadius;
+    final double innerRadius = widget.isPresent
+        ? OccasionCard.kCardBorderRadius - OccasionCard.kPresentBorderWidth
+        : OccasionCard.kCardBorderRadius;
 
     // Retrieve external price from the 'form' feature, if available.
-    var details = FeatureService.getFeatureDetails(FeatureService.form, fromFeatures: widget.occasion.features);
+    var details = FeatureService.getFeatureDetails(
+      FeatureService.form,
+      fromFeatures: widget.occasion.features,
+    );
     String? externalPrice = details?[FeatureService.formExternalPrice];
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: LayoutBuilder(builder: (context, constraints) {
-        final double widthScale = (constraints.maxWidth / kMinCardWidth).clamp(1.0, 1.5);
-        final double heightScale = (constraints.maxHeight / kMinCardHeight).clamp(1.0, 1.2);
+        final double widthScale =
+        (constraints.maxWidth / OccasionCard.kMinCardWidth).clamp(1.0, 1.5);
+        final double heightScale =
+        (constraints.maxHeight / OccasionCard.kMinCardHeight).clamp(1.0, 1.2);
         final double buttonScale = (widthScale + heightScale) / 2;
 
         return ConstrainedBox(
           constraints: const BoxConstraints(
-            minWidth: kMinCardWidth,
-            minHeight: kMinCardHeight,
+            minWidth: OccasionCard.kMinCardWidth,
+            minHeight: OccasionCard.kMinCardHeight,
           ),
           child: AnimatedContainer(
-            duration: kAnimationDuration,
+            duration: OccasionCard.kAnimationDuration,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(kCardBorderRadius),
+              borderRadius: BorderRadius.circular(OccasionCard.kCardBorderRadius),
               border: border,
               boxShadow: [
                 if (widget.isPresent)
@@ -111,7 +120,8 @@ class _OccasionCardState extends State<OccasionCard> {
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.black.withOpacity(0.6),
                               borderRadius: BorderRadius.circular(12),
@@ -181,7 +191,8 @@ class _OccasionCardState extends State<OccasionCard> {
                         } else {
                           showDialog(
                             context: context,
-                            builder: (context) => OccasionDetailDialog(occasion: widget.occasion),
+                            builder: (context) =>
+                                OccasionDetailDialog(occasion: widget.occasion),
                           );
                         }
                       },
