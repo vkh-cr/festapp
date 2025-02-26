@@ -50,6 +50,7 @@ BEGIN
          LIMIT 1
       )
     )
+    ORDER BY o.start_time DESC
   )
   INTO occasion_data
   FROM public.occasions o
