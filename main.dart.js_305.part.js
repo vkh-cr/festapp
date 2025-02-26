@@ -1,10 +1,24 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_305",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
+cmi(d){var x=null,w=A.z(["id",null],y.g,y.b)
+return new B.arG("MapRoute",new A.Cc(x,d,x),w,C.bT,x,"",x)},
+arG:function arG(d,e,f,g,h,i,j){var _=this
+_.a=d
+_.b=e
+_.c=f
+_.d=g
+_.e=h
+_.f=i
+_.r=j}}
 A=c[0]
-B=c[256]
-var z=a.updateTypes([]);(function constants(){B.J5=new A.aE(58569,"MaterialIcons",null,!1)
-B.nC=new A.at(4,null,null,null)})()};
+C=c[2]
+B=a.updateHolder(c[64],B)
+B.arG.prototype={}
+var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
+x(B.arG,A.jC)})()
+A.bk(b.typeUniverse,JSON.parse('{"arG":{"jC":["Cc"]}}'))
+var y={g:A.y("e"),b:A.y("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_305",e:"endPart",h:b})})($__dart_deferred_initializers__,"dQnwaiVO8ZmyGTgIAstMp1rx3pM=");
+a.eventLog.push({p:"main.dart.js_305",e:"endPart",h:b})})($__dart_deferred_initializers__,"Cf9w6hFerUHqCcIroVNK+By9M68=");
