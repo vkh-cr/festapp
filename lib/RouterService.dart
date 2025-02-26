@@ -5,6 +5,7 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/services/LinkModel.dart';
 
 class RouterService {
@@ -43,10 +44,10 @@ class RouterService {
     return path;
   }
 
-  static void pushReplacementFull<T extends Object?>(
-      BuildContext context, String path) {
+  static Future<void> pushReplacementFull<T extends Object?> (
+      BuildContext context, String path) async {
     path = fixPath(path);
-    context.router.replaceNamed(path);
+    await context.router.replaceNamed(path);
   }
 
   static void pushReplacementOccasion<T extends Object?>(
@@ -84,8 +85,15 @@ class RouterService {
     context.router.popForced(result);
   }
 
+  static Future<void> goToUnit(BuildContext context, int? unitId) async {
+    if(unitId == null){
+      goToInitial(context);
+      return;
+    }
+    await context.router.replace(UnitRoute(id: unitId));
+  }
+
   static void goToInitial(BuildContext context) {
-    //for now initial is home
     navigateOccasion(context, "");
   }
 
