@@ -41,6 +41,9 @@ class AuthService {
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     currentUser = null;
+    RightsService.currentOccasionUser = null;
+    RightsService.currentUnitUser = null;
+    RightsService.currentUnitUser = null;
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {

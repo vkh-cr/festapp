@@ -13,7 +13,6 @@ BEGIN
     );
   END IF;
 
-  -- Build the unit JSON with its associated occasions
   SELECT jsonb_build_object(
     'id', u.id,
     'created_at', u.created_at,
@@ -48,6 +47,7 @@ BEGIN
                 LIMIT 1
              )
            )
+           ORDER BY o.start_time DESC
          ),
          '[]'::jsonb
        )
