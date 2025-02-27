@@ -255,35 +255,34 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     thickness: 1,
                     color: Colors.grey,
                   ),
-                  if (form?.header != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HtmlView(html: form!.header!, isSelectable: true),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.edit),
-                            label: Text("Edit content".tr()),
-                            onPressed: () async {
-                              final result = await RouterService
-                                  .navigatePageInfo(
-                                context,
-                                HtmlEditorRoute(
-                                  content: {
-                                    HtmlEditorPage.parContent: form!.header!
-                                  },
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() =>
-                                form!.header = result as String);
-                              }
-                            },
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      HtmlView(html: form!.header!, isSelectable: true),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.edit),
+                          label: Text("Edit content".tr()),
+                          onPressed: () async {
+                            final result = await RouterService
+                                .navigatePageInfo(
+                              context,
+                              HtmlEditorRoute(
+                                content: {
+                                  HtmlEditorPage.parContent: form!.header!
+                                },
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() =>
+                              form!.header = result as String);
+                            }
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

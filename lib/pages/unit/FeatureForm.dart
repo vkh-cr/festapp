@@ -8,7 +8,6 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/features/FeatureMetadata.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
-import 'package:fstapp/widgets/HelpWidget.dart';
 import 'package:fstapp/themeConfig.dart';
 
 class FeatureForm extends StatefulWidget {
@@ -30,6 +29,8 @@ class _FeatureFormState extends State<FeatureForm> {
   late bool useExternalForm;
   TextEditingController? externalFormLinkController;
   TextEditingController? externalPriceController;
+  // New controller for the custom reserve button title
+  TextEditingController? reserveButtonTitleController;
 
   @override
   void initState() {
@@ -51,13 +52,22 @@ class _FeatureFormState extends State<FeatureForm> {
           text: widget.feature.companionsMax.toString());
     }
 
-    useExternalForm = widget.feature.formUseExternal ?? false;
-    externalFormLinkController = TextEditingController(
-      text: widget.feature.formExternalLink ?? '',
-    );
-    externalPriceController = TextEditingController(
-      text: widget.feature.formExternalPrice ?? '',
-    );
+    // For form feature
+    if (widget.feature.code == FeatureConstants.form) {
+      useExternalForm = widget.feature.formUseExternal ?? false;
+      externalFormLinkController = TextEditingController(
+        text: widget.feature.formExternalLink ?? '',
+      );
+      externalPriceController = TextEditingController(
+        text: widget.feature.formExternalPrice ?? '',
+      );
+      // Initialize the custom reserve button title controller
+      reserveButtonTitleController = TextEditingController(
+        text: widget.feature.reserveButtonTitle ?? '',
+      );
+    } else {
+      useExternalForm = false;
+    }
   }
 
   @override
@@ -67,6 +77,7 @@ class _FeatureFormState extends State<FeatureForm> {
     companionsController?.dispose();
     externalFormLinkController?.dispose();
     externalPriceController?.dispose();
+    reserveButtonTitleController?.dispose();
     super.dispose();
   }
 
@@ -240,8 +251,8 @@ class _FeatureFormState extends State<FeatureForm> {
             controller: externalFormLinkController,
             decoration: InputDecoration(
               labelText: "Reservation Link".tr(),
-              helperText: "Reservation will be done via this external link."
-                  .tr(),
+              helperText:
+              "Reservation will be done via this external link.".tr(),
             ),
             onSaved: (val) {
               widget.feature.formExternalLink = val;
@@ -263,6 +274,27 @@ class _FeatureFormState extends State<FeatureForm> {
           ),
         );
       }
+      // Advanced Settings: Custom Reserve Button Title
+      fields.add(const SizedBox(height: 16));
+      fields.add(
+        ExpansionTile(
+          title: Text("Advanced Settings".tr()),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextFormField(
+                controller: reserveButtonTitleController,
+                decoration: InputDecoration(
+                  labelText: "Reserve Button Title".tr(),
+                ),
+                onSaved: (val) {
+                  widget.feature.reserveButtonTitle = val;
+                },
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     // Add additional feature-specific fields as needed.
