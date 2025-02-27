@@ -9,7 +9,7 @@ import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 import 'package:fstapp/widgets/TransactionsDialog.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -399,7 +399,7 @@ class EshopColumns {
       field: field,
       type: PlutoColumnType.text(),
       textAlign: PlutoColumnTextAlign.end,
-      width: 100,
+      width: 150,
     );
   }
 

@@ -17,7 +17,7 @@ import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/pages/eshop/OrderFinishScreen.dart';
 import 'package:fstapp/pages/eshop/OrderPreviewScreen.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/services/UuidConverter.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
