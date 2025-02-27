@@ -5,7 +5,7 @@ import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 
 class FieldHolder {
   static const String metaIsRequired = "is_required";
@@ -178,7 +178,7 @@ class FormHolder {
           maxTickets: ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
           fields: [],
           isRequired: true);
-    } else if (fieldType == FormHelper.fieldTypeSelectOne) {
+    } else if (fieldType == FormHelper.fieldTypeSelectOne || fieldType == FormHelper.fieldTypeSelectMany) {
       // Safely extract the options list from ffm.data
       List<dynamic> optionsData = ffm.data[FormHelper.metaOptions] ?? [];
 
