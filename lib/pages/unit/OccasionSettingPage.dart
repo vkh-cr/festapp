@@ -40,7 +40,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   DateTime? _to;
   late TextEditingController _linkController;
   String? _description;
-  bool _isOpen = false; // new property for open setting
+  bool _isOpen = false;
 
   // For feature search and filtering
   String _featureSearchQuery = "";
@@ -55,27 +55,20 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
     _description = widget.occasion.description ?? "";
-    _isOpen = widget.occasion.isOpen ?? false; // initialize from model, defaulting to false
+    _isOpen = widget.occasion.isOpen ?? false;
     _featureSearchController = TextEditingController();
 
-    // Get the default features
     final defaultFeatures = FeatureService.getDefaultFeatures();
-
-    // Add missing default features
     for (var defaultFeature in defaultFeatures) {
-      bool exists = widget.occasion.features.any(
-              (f) => f.code == defaultFeature.code);
+      bool exists = widget.occasion.features.any((f) => f.code == defaultFeature.code);
       if (!exists) {
         widget.occasion.features.add(defaultFeature);
       }
     }
 
-    // Sort the features according to the order defined in defaultFeatures
     widget.occasion.features.sort((a, b) {
-      final aIndex = defaultFeatures.indexWhere(
-              (defaultFeature) => defaultFeature.code == a.code);
-      final bIndex = defaultFeatures.indexWhere(
-              (defaultFeature) => defaultFeature.code == b.code);
+      final aIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == a.code);
+      final bIndex = defaultFeatures.indexWhere((defaultFeature) => defaultFeature.code == b.code);
       return aIndex.compareTo(bIndex);
     });
   }
@@ -159,7 +152,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   Widget build(BuildContext context) {
     final imageUrl = widget.occasion.data?[Tb.occasions.data_image];
 
-    // Filter features based on search query.
     final filteredFeatures = widget.occasion.features.where((feature) {
       final title = FeatureMetadata.getTitle(feature.code).toLowerCase();
       final description = FeatureMetadata.getDescription(feature.code).toLowerCase();
@@ -167,7 +159,6 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       return query.isEmpty || title.contains(query) || description.contains(query);
     }).toList();
 
-    // Split features into enabled and disabled.
     final enabledFeatures = filteredFeatures.where((f) => f.isEnabled).toList();
     final disabledFeatures = filteredFeatures.where((f) => !f.isEnabled).toList();
 
@@ -182,173 +173,165 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            children: [
-              TextFormField(
-                initialValue: _title,
-                decoration: InputDecoration(
-                  labelText: "Title".tr(),
-                ),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(errorText: 'Title is required'.tr()),
-                ]),
-                onSaved: (val) {
-                  _title = val;
-                },
-              ),
-              const SizedBox(height: 16),
-              TimeDateRangePicker(
-                start: _from,
-                end: _to,
-                onStartChanged: (dateTime) {
-                  setState(() {
-                    _from = dateTime;
-                  });
-                },
-                onEndChanged: (dateTime) {
-                  setState(() {
-                    _to = dateTime;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              Text("Intro Image".tr()),
-              const SizedBox(height: 8),
-              ImageArea(
-                hint: "(${ "Image with ratio {width} : {height}".tr(
-                  namedArgs: {
-                    "width": OccasionCard.kCardWidth.toString(),
-                    "height": OccasionCard.kCardHeight.toString(),
-                  },
-                )
-                })",
-                imageUrl: imageUrl,
-                onFileSelected: (file) async {
-                  Uint8List imageData = await file.readAsBytes();
-                  try {
-                    var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
-                    final publicUrl =
-                    await DbImages.uploadImage(compressedImageData, widget.occasion.id, null);
-                    setState(() {
-                      widget.occasion.data?[Tb.occasions.data_image] = publicUrl;
-                    });
-                    ToastHelper.Show(context, "File uploaded successfully.".tr());
-                  } catch (e) {
-                    ToastHelper.Show(context, "Failed to upload image.".tr());
-                  }
-                },
-                onRemove: _removeImage,
-              ),
-              const SizedBox(height: 16),
-              Text("Description".tr()),
-              const SizedBox(height: 8),
-              ClipRect(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 400),
-                  child: ShaderMask(
-                    shaderCallback: (bounds) {
-                      return LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.white,
-                          Colors.transparent,
-                        ],
-                        stops: const [0.9, 1.0],
-                      ).createShader(bounds);
+      body: SafeArea(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(8.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextFormField(
+                    initialValue: _title,
+                    decoration: InputDecoration(
+                      labelText: "Title".tr(),
+                    ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: 'Title is required'.tr()),
+                    ]),
+                    onSaved: (val) {
+                      _title = val;
                     },
-                    blendMode: BlendMode.dstIn,
-                    child: HtmlView(
-                      html: _description ?? "",
-                      isSelectable: true,
+                  ),
+                  const SizedBox(height: 16),
+                  TimeDateRangePicker(
+                    start: _from,
+                    end: _to,
+                    onStartChanged: (dateTime) {
+                      setState(() {
+                        _from = dateTime;
+                      });
+                    },
+                    onEndChanged: (dateTime) {
+                      setState(() {
+                        _to = dateTime;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text("Intro Image".tr()),
+                  const SizedBox(height: 8),
+                  ImageArea(
+                    hint: "(${ "Image with ratio {width} : {height}".tr(
+                      namedArgs: {
+                        "width": OccasionCard.kCardWidth.toString(),
+                        "height": OccasionCard.kCardHeight.toString(),
+                      },
+                    )
+                    })",
+                    imageUrl: imageUrl,
+                    onFileSelected: (file) async {
+                      Uint8List imageData = await file.readAsBytes();
+                      try {
+                        var compressedImageData = await ImageCompressionHelper.compress(imageData, 900);
+                        final publicUrl = await DbImages.uploadImage(compressedImageData, widget.occasion.id, null);
+                        setState(() {
+                          widget.occasion.data?[Tb.occasions.data_image] = publicUrl;
+                        });
+                        ToastHelper.Show(context, "File uploaded successfully.".tr());
+                      } catch (e) {
+                        ToastHelper.Show(context, "Failed to upload image.".tr());
+                      }
+                    },
+                    onRemove: _removeImage,
+                  ),
+                  const SizedBox(height: 16),
+                  Text("Description".tr()),
+                  const SizedBox(height: 8),
+                  ClipRect(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 400),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) {
+                          return LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.white,
+                              Colors.transparent,
+                            ],
+                            stops: const [0.9, 1.0],
+                          ).createShader(bounds);
+                        },
+                        blendMode: BlendMode.dstIn,
+                        child: HtmlView(
+                          html: _description ?? "",
+                          isSelectable: true,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    RouterService.navigatePageInfo(
-                      context,
-                      HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
-                    ).then((value) {
-                      if (value != null) {
-                        setState(() {
-                          _description = value as String;
+                  const SizedBox(height: 8),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        RouterService.navigatePageInfo(
+                          context,
+                          HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
+                        ).then((value) {
+                          if (value != null) {
+                            setState(() {
+                              _description = value as String;
+                            });
+                          }
                         });
-                      }
-                    });
-                  },
-                  child: Text("Edit content".tr()),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SwitchListTile(
-                title: Row(
-                  children: [
-                    Expanded(child: Text("Public".tr())),
-                    HelpWidget(
-                        title: "Public".tr(),
-                        content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
-                    )
-                  ],
-                ),
-                value: _isOpen,
-                onChanged: (value) {
-                  setState(() {
-                    _isOpen = value;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _linkController,
-                decoration: InputDecoration(
-                  labelText: "Link".tr(),
-                ),
-                validator: FormBuilderValidators.compose([
-                  FormBuilderValidators.required(errorText: 'Link is required'.tr()),
-                ]),
-                onChanged: (val) {
-                  final fixed = Utilities.sanitizeFullUrl(val);
-                  if (fixed != val) {
-                    _linkController.value = _linkController.value.copyWith(
-                      text: fixed,
-                      selection: TextSelection.collapsed(offset: fixed.length),
-                    );
-                  }
-                  setState(() {
-                    _link = fixed;
-                  });
-                },
-                onSaved: (val) {
-                  _link = _linkController.text;
-                },
-              ),
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Card(
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                      },
+                      child: Text("Edit content".tr()),
+                    ),
                   ),
-                  margin: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: Row(
+                      children: [
+                        Expanded(child: Text("Public".tr())),
+                        HelpWidget(
+                            title: "Public".tr(),
+                            content: "Determines whether event details (schedule, info, etc.) are available to the public.".tr()
+                        )
+                      ],
+                    ),
+                    value: _isOpen,
+                    onChanged: (value) {
+                      setState(() {
+                        _isOpen = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _linkController,
+                    decoration: InputDecoration(
+                      labelText: "Link".tr(),
+                    ),
+                    validator: FormBuilderValidators.compose([
+                      FormBuilderValidators.required(errorText: 'Link is required'.tr()),
+                    ]),
+                    onChanged: (val) {
+                      final fixed = Utilities.sanitizeFullUrl(val);
+                      if (fixed != val) {
+                        _linkController.value = _linkController.value.copyWith(
+                          text: fixed,
+                          selection: TextSelection.collapsed(offset: fixed.length),
+                        );
+                      }
+                      setState(() {
+                        _link = fixed;
+                      });
+                    },
+                    onSaved: (val) {
+                      _link = _linkController.text;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(12.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Features".tr(),
-                        ),
+                        Text("Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                         const SizedBox(height: 8),
-                        // Quick search field for filtering features by title/description.
                         TextField(
                           controller: _featureSearchController,
                           decoration: InputDecoration(
@@ -363,51 +346,37 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                           },
                         ),
                         const SizedBox(height: 16),
-                        // Enabled features section.
                         if (enabledFeatures.isNotEmpty) ...[
-                          Text(
-                            "Enabled Features".tr(),
-                          ),
+                          Text("Enabled Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
-                          ...enabledFeatures
-                              .map((feature) => FeatureForm(
-                            key: ValueKey(feature),
-                            feature: feature,
-                            occasion: widget.occasion.id!,
-                          ))
-                              .toList(),
-                          const SizedBox(height: 16),
+                          ...enabledFeatures.map((feature) =>
+                              FeatureForm(feature: feature, occasion: widget.occasion.id!)
+                          ).toList(),
                         ],
-                        // Disabled features section.
                         if (disabledFeatures.isNotEmpty) ...[
-                          Text(
-                            "Other Features".tr(),
-                          ),
+                          const SizedBox(height: 16),
+                          Text("Other Features".tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
-                          ...disabledFeatures
-                              .map((feature) => FeatureForm(
-                            key: ValueKey(feature),
-                            feature: feature,
-                            occasion: widget.occasion.id!,
-                          ))
-                              .toList(),
+                          ...disabledFeatures.map((feature) =>
+                              FeatureForm(feature: feature, occasion: widget.occasion.id!)
+                          ).toList(),
                         ],
                       ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 80),
-              Center(
-                child: TextButton(
-                  onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
-                  child: Text(
-                    "Delete Event".tr(),
-                    style: TextStyle(color: ThemeConfig.redColor(context)),
+                  const SizedBox(height: 80),
+                  Center(
+                    child: TextButton(
+                      onPressed: RightsService.isUnitManager() ? _confirmDelete : null,
+                      child: Text(
+                        "Delete Event".tr(),
+                        style: TextStyle(color: ThemeConfig.redColor(context)),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
