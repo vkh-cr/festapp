@@ -258,7 +258,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HtmlView(html: form!.header!, isSelectable: true),
+                      HtmlView(html: form!.header ?? "", isSelectable: true),
                       const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton.icon(
@@ -270,7 +270,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                               context,
                               HtmlEditorRoute(
                                 content: {
-                                  HtmlEditorPage.parContent: form!.header!
+                                  HtmlEditorPage.parContent: form!.header ?? ""
                                 },
                               ),
                             );
