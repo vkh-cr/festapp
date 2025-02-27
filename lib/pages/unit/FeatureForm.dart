@@ -8,6 +8,8 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/features/FeatureMetadata.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
+import 'package:fstapp/widgets/HelpWidget.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class FeatureForm extends StatefulWidget {
   final Feature feature;
@@ -45,8 +47,8 @@ class _FeatureFormState extends State<FeatureForm> {
           TextEditingController(text: widget.feature.ticketDarkColor);
     } else if (widget.feature.code == FeatureConstants.companions) {
       widget.feature.companionsMax ??= 1;
-      companionsController =
-          TextEditingController(text: widget.feature.companionsMax.toString());
+      companionsController = TextEditingController(
+          text: widget.feature.companionsMax.toString());
     }
 
     useExternalForm = widget.feature.formUseExternal ?? false;
@@ -93,39 +95,51 @@ class _FeatureFormState extends State<FeatureForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      color: ThemeConfig.whiteColor(context),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
       child: Padding(
-        padding: const EdgeInsets.all(8.0), // reduced padding for a compact look
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(
-                FeatureMetadata.getTitle(widget.feature.code),
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                FeatureMetadata.getDescription(widget.feature.code),
-                style: const TextStyle(fontSize: 13),
-              ),
-              trailing: Switch(
-                value: isEnabled,
-                onChanged: (value) {
-                  setState(() {
-                    isEnabled = value;
-                    widget.feature.isEnabled = value;
-                  });
-                },
-              ),
-            ),
-            if (isEnabled)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  children: _buildFeatureFields(context),
+            // Row with title, description and switch on the right
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        FeatureMetadata.getTitle(widget.feature.code),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        FeatureMetadata.getDescription(widget.feature.code),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeConfig.grey700(context)),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                Switch(
+                  value: isEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      isEnabled = value;
+                      widget.feature.isEnabled = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            if (isEnabled) ..._buildFeatureFields(context),
           ],
         ),
       ),
@@ -148,7 +162,7 @@ class _FeatureFormState extends State<FeatureForm> {
           },
         ),
       );
-      fields.add(const SizedBox(height: 8));
+      fields.add(const SizedBox(height: 16));
       fields.add(
         TextFormField(
           controller: darkColorController,
@@ -160,7 +174,7 @@ class _FeatureFormState extends State<FeatureForm> {
           },
         ),
       );
-      fields.add(const SizedBox(height: 8));
+      fields.add(const SizedBox(height: 16));
       fields.add(
         ImageArea(
           hint: "(1600x900 px)".tr(),
@@ -201,17 +215,15 @@ class _FeatureFormState extends State<FeatureForm> {
             return null;
           },
           onSaved: (val) {
-            widget.feature.companionsMax =
-                int.tryParse(val ?? '1') ?? 1;
+            widget.feature.companionsMax = int.tryParse(val ?? '1') ?? 1;
           },
         ),
       );
     } else if (widget.feature.code == FeatureConstants.form) {
+      // External form option
       fields.add(const Divider());
       fields.add(
         SwitchListTile(
-          dense: true,
-          contentPadding: EdgeInsets.zero,
           title: Text("Use external form".tr()),
           value: useExternalForm,
           onChanged: (value) {
@@ -228,20 +240,22 @@ class _FeatureFormState extends State<FeatureForm> {
             controller: externalFormLinkController,
             decoration: InputDecoration(
               labelText: "Reservation Link".tr(),
-              helperText: "Reservation will be done via this external link.".tr(),
+              helperText: "Reservation will be done via this external link."
+                  .tr(),
             ),
             onSaved: (val) {
               widget.feature.formExternalLink = val;
             },
           ),
         );
-        fields.add(const SizedBox(height: 8));
+        fields.add(const SizedBox(height: 16));
         fields.add(
           TextFormField(
             controller: externalPriceController,
             decoration: InputDecoration(
               labelText: "Price".tr(),
-              helperText: "The price will be displayed on the events page.".tr(),
+              helperText: "The price will be displayed on the events page."
+                  .tr(),
             ),
             onSaved: (val) {
               widget.feature.formExternalPrice = val;
