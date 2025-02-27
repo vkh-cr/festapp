@@ -7,7 +7,8 @@ import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/form/FormEditorContent.dart';
 import 'package:fstapp/services/FormHelper.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -455,20 +456,33 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
         Text('Options'.tr(), style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Column(
-          children: field.options.map((option) {
+          children: field.options.map((FormOptionModel formOption) {
+            // Create a controller for each option to enable editing
+            final optionController =
+            TextEditingController(text: formOption.title);
             return Row(
               children: [
                 Radio<String>(
-                  value: option.title,
+                  value: formOption.title,
                   groupValue: null,
                   onChanged: (_) {},
                 ),
-                Expanded(child: Text(option.title)),
+                Expanded(
+                  child: TextFormField(
+                    controller: optionController,
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      formOption.title = value;
+                    },
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
                     setState(() {
-                      field.options.remove(option);
+                      field.options.remove(formOption);
                     });
                   },
                 ),
@@ -575,7 +589,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               ),
             ),
             Switch(
-              value: !(spotField?.isHidden??true),
+              value: !(spotField?.isHidden ?? true),
               onChanged: (val) {
                 setState(() {
                   if (val) {
@@ -599,7 +613,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                     var field = widget.form.relatedFields!.firstWhereOrNull((f) =>
                     f.isTicketField == true &&
                         f.type == FormHelper.fieldTypeSpot);
-                    if(field != null) {
+                    if (field != null) {
                       field.isHidden = true;
                     }
                   }
@@ -645,7 +659,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildTicketEditorReadOnly(FormFieldModel ticketField) {
     List<Widget> children = [];
-    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(_buildSpotFieldReadOnly());
       children.add(const SizedBox(height: 8));
     }
@@ -678,7 +692,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
   Widget _buildTicketEditor(FormFieldModel ticketField) {
     List<Widget> children = [];
-    if (FeatureService.isFeatureEnabled(FeatureService.blueprint)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.blueprint)) {
       children.add(_buildSpotFieldEditor());
       children.add(const SizedBox(height: 16));
     }
@@ -811,8 +825,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                       children: [
                         Expanded(
                           flex: 3,
-                          child:
-                          Text(product.title ?? '', style: rowStyle),
+                          child: Text(product.title ?? '', style: rowStyle),
                         ),
                         Expanded(
                           flex: 1,

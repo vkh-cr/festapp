@@ -19,7 +19,8 @@ import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/occasion/EventEditPage.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -80,7 +81,7 @@ class _EventPageState extends State<EventPage> {
           leading: ScheduleBackButton(),
           actions:[
             Visibility(
-              visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureService.entryCode),
+              visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureConstants.entryCode),
               child: Padding(
                 padding: const EdgeInsets.all(6),
                 child: IconButton(
@@ -94,7 +95,7 @@ class _EventPageState extends State<EventPage> {
                     )),
               ),
             ),
-            if(FeatureService.isFeatureEnabled(FeatureService.mySchedule))
+            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
             ...ButtonsHelper.getAddToMyProgramButton(
                 _event?.canSaveEventToMyProgram(),
                 addToMySchedule,
@@ -137,7 +138,7 @@ class _EventPageState extends State<EventPage> {
                                           child: const Text("Sign out").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          FeatureService.isFeatureEnabled(FeatureService.companions),
+                                          FeatureService.isFeatureEnabled(FeatureConstants.companions),
                                       child: Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                             8, 0, 0, 0),

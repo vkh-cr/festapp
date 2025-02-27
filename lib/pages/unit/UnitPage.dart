@@ -7,7 +7,8 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbUnits.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -47,8 +48,8 @@ class _UnitPageState extends State<UnitPage> {
     final unit = await DbUnits.getUnit(widget.id);
     final occasions = unit.occasions!;
 
-    if (FeatureService.isFeatureEnabled(FeatureService.quotes,
-        fromFeatures: unit.features)) {
+    if (FeatureService.isFeatureEnabled(FeatureConstants.quotes,
+        features: unit.features)) {
       _quote = await DbInformation.getCurrentQuote(widget.id);
     }
     setState(() {

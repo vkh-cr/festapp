@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/dataServices/DbCompanions.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 
 class CompanionDialog extends StatefulWidget {
