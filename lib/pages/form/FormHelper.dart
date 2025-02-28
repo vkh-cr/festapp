@@ -43,9 +43,6 @@ class FormHelper {
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
 
-  // Field Attribute Constants
-  static const String IS_REQUIRED = "is_required";
-
   // Labels and messages
   static String noteLabel() => "Note".tr();
   static String nameLabel() => "Name".tr();

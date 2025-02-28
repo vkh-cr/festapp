@@ -58,9 +58,10 @@ class OptionsFieldHolder extends FieldHolder {
     required this.options,
     required id,
     required title,
+    required isRequired,
   }) : super(
             defaultValue: value,
-            isRequired: true,
+            isRequired: isRequired,
             title: title,
             id: id);
 
@@ -197,6 +198,7 @@ class FormHolder {
       return OptionsFieldHolder(
         id: ffm.id,
         fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
         options: formOptions,
         title: ffm.title,
       );
@@ -204,6 +206,7 @@ class FormHolder {
       return OptionsFieldHolder(
           id: ffm.id,
           fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
           options: ffm.productType!.products!.map((p) => FormOptionModel(p.id.toString(), p.title!, price: p.price ?? 0, type: ffm.type!)).toList(),
           title: ffm.productType!.title,
       );
