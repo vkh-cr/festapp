@@ -5,7 +5,7 @@ import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 
 class FieldHolder {
   static const String metaIsRequired = "is_required";
@@ -58,9 +58,10 @@ class OptionsFieldHolder extends FieldHolder {
     required this.options,
     required id,
     required title,
+    required isRequired,
   }) : super(
             defaultValue: value,
-            isRequired: true,
+            isRequired: isRequired,
             title: title,
             id: id);
 
@@ -178,7 +179,7 @@ class FormHolder {
           maxTickets: ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
           fields: [],
           isRequired: true);
-    } else if (fieldType == FormHelper.fieldTypeSelectOne) {
+    } else if (fieldType == FormHelper.fieldTypeSelectOne || fieldType == FormHelper.fieldTypeSelectMany) {
       // Safely extract the options list from ffm.data
       List<dynamic> optionsData = ffm.data[FormHelper.metaOptions] ?? [];
 
@@ -197,6 +198,7 @@ class FormHolder {
       return OptionsFieldHolder(
         id: ffm.id,
         fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
         options: formOptions,
         title: ffm.title,
       );
@@ -204,6 +206,7 @@ class FormHolder {
       return OptionsFieldHolder(
           id: ffm.id,
           fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
           options: ffm.productType!.products!.map((p) => FormOptionModel(p.id.toString(), p.title!, price: p.price ?? 0, type: ffm.type!)).toList(),
           title: ffm.productType!.title,
       );
