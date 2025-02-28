@@ -69,8 +69,8 @@ class _InfoPageState extends State<InfoPage> {
             controller: _scrollController,
             child: Column(
               children: [
-                if(SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.GAME) ||
-                    SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureModel.SONGBOOK))
+                if(SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureConstants.game) ||
+                    SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureConstants.songbook))
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),

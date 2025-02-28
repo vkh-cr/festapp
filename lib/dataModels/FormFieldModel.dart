@@ -3,7 +3,7 @@ import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -51,7 +51,7 @@ class FormFieldModel extends IPlutoRowModel {
     var type = json[TbEshop.form_fields.type];
     var data = json[TbEshop.form_fields.data];
     List<FormOptionModel> options = [];
-    if (type == FormHelper.fieldTypeSelectOne && data is Map) {
+    if ((type == FormHelper.fieldTypeSelectOne || type == FormHelper.fieldTypeSelectMany) && data is Map) {
       options = data[FormHelper.metaOptions].map<FormOptionModel>((e) {
         return FormOptionModel.fromJson(e);
       }).toList();

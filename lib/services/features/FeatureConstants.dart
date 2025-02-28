@@ -28,6 +28,7 @@ class FeatureConstants {
   static const String formUseExternal = "use_external_form";
   static const String formExternalLink = "external_form_link";
   static const String formExternalPrice = "external_price";
+  static const String reserveButtonTitle = "reserve_button_title";
 
   // Extra field for companions feature
   static const String companionsMax = "max_companions";

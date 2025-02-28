@@ -49,9 +49,8 @@ class UnitModel {
       Tb.units.id: id,
       Tb.units.title: title,
       Tb.units.data: data,
-      Tb.units.features: features?.map((feature) => feature.toJson()).toList(),
+      Tb.units.features: features,
       Tb.units.organization: organization,
-      Tb.occasions.table: occasions?.map((occasion) => occasion.toJson()).toList(),
       "unit_user": unitUser?.toJson(),
     };
   }
