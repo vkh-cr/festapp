@@ -197,7 +197,7 @@ class EmailTemplateModel {
       case 'TICKET_ORDER_PAYMENT_REMINDER':
         return {
           'title': 'Order Payment Reminder'.tr(),
-          'description': 'This template is used to remind users about pending ticket order payments.'.tr(),
+          'description': 'This template is used to remind customers about pending ticket order payments.'.tr(),
           'subs': substitutionDefinitions['TICKET_ORDER_PAYMENT_REMINDER'] ?? [],
         };
       case 'TICKET_ORDER_STORNO':

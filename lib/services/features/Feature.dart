@@ -21,6 +21,7 @@ class Feature {
   bool? formUseExternal;
   String? formExternalLink;
   String? formExternalPrice;
+  String? reserveButtonTitle; // New field for custom reserve button title
 
   // Companions feature extra field
   int? companionsMax;
@@ -36,6 +37,7 @@ class Feature {
     this.formUseExternal,
     this.formExternalLink,
     this.formExternalPrice,
+    this.reserveButtonTitle, // Added here
     this.companionsMax,
   })  : title = title ?? FeatureMetadata.getTitle(code),
         description = description ?? FeatureMetadata.getDescription(code);
@@ -52,6 +54,7 @@ class Feature {
       formUseExternal: json[FeatureConstants.formUseExternal],
       formExternalLink: json[FeatureConstants.formExternalLink],
       formExternalPrice: json[FeatureConstants.formExternalPrice],
+      reserveButtonTitle: json[FeatureConstants.reserveButtonTitle],
       companionsMax: json[FeatureConstants.companionsMax],
     );
   }
@@ -81,6 +84,9 @@ class Feature {
     }
     if (formExternalPrice != null) {
       data[FeatureConstants.formExternalPrice] = formExternalPrice;
+    }
+    if (reserveButtonTitle != null) {
+      data[FeatureConstants.reserveButtonTitle] = reserveButtonTitle;
     }
     if (companionsMax != null) {
       data[FeatureConstants.companionsMax] = companionsMax;
