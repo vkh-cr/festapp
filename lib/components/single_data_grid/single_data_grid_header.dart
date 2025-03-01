@@ -1,27 +1,27 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
-import 'package:fstapp/components/dataGrid/DataGridAction.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'PlutoAbstract.dart';
+import 'pluto_abstract.dart';
 
-class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
+class SingleDataGridHeader<T extends IPlutoRowModel> extends StatefulWidget {
   final PlutoGridStateManager stateManager;
   final SingleDataGridController<T> controller;
 
-  const AdministrationHeader({
+  const SingleDataGridHeader({
     required this.stateManager,
     super.key,
     required this.controller,
   });
 
   @override
-  _AdministrationHeaderState<T> createState() =>
-      _AdministrationHeaderState<T>(
+  _SingleDataGridHeaderState<T> createState() =>
+      _SingleDataGridHeaderState<T>(
         controller,
       );
 
@@ -46,12 +46,12 @@ class AdministrationHeader<T extends IPlutoRowModel> extends StatefulWidget {
   }
 }
 
-class _AdministrationHeaderState<T extends IPlutoRowModel>
-    extends State<AdministrationHeader<T>> {
+class _SingleDataGridHeaderState<T extends IPlutoRowModel>
+    extends State<SingleDataGridHeader<T>> {
   final SingleDataGridController<T> controller;
   List<Widget> allChildren = [];
 
-  _AdministrationHeaderState(
+  _SingleDataGridHeaderState(
       this.controller);
 
   @override

@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
@@ -68,7 +67,7 @@ class OrderModel extends IPlutoRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  static Color dataGridStateToColor(String state) {
+  static Color single_data_gridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
     switch (firstPart) {
