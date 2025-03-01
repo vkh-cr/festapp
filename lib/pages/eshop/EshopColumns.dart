@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
@@ -84,7 +84,7 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.single_data_gridStateToColor, OrderModel.statesDataGridToUpper),
         width: 120,
         textAlign: PlutoColumnTextAlign.center,
       ),
@@ -193,7 +193,7 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.single_data_gridStateToColor, OrderModel.statesDataGridToUpper),
         textAlign: PlutoColumnTextAlign.center,
         width: 120,
       ),

@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/dataModels/ServiceItemModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
@@ -53,7 +53,7 @@ class UserColumns {
         hide: true,
         title: "Unit".tr(),
         field: Tb.unit_users.unit,
-        type: PlutoColumnType.text(),
+        type: PlutoColumnType.number(),
         readOnly: true,
         width: 50,
       ),

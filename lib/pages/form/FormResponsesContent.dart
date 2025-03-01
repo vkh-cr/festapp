@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridAction.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
@@ -81,9 +81,9 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
   }
 
 
-  List<OrderModel> _getChecked(SingleTableDataGrid dataGrid) {
+  List<OrderModel> _getChecked(SingleTableDataGrid single_data_grid) {
     return List<OrderModel>.from(
-      dataGrid.controller.stateManager.refRows.originalList
+      single_data_grid.controller.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );
