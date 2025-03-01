@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridAction.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
@@ -34,7 +34,7 @@ class _OrdersTabState extends State<OrdersTab> {
   }
 
   Future<void> refreshData() async {
-    controller!.reloadData();
+    await controller!.forceReload();
   }
 
   @override
@@ -54,17 +54,17 @@ class _OrdersTabState extends State<OrdersTab> {
       headerChildren: [
         DataGridAction(
           name: "Cancel".tr(),
-          action: (SingleDataGridController dataGrid, [_]) => cancelOrders(dataGrid),
+          action: (SingleDataGridController single_data_grid, [_]) => cancelOrders(single_data_grid),
           isEnabled: RightsService.isEditor,
         ),
         DataGridAction(
           name: "Synchronize payments".tr(),
-          action: (SingleDataGridController dataGrid, [_]) => synchronizePayments(),
+          action: (SingleDataGridController single_data_grid, [_]) => synchronizePayments(),
           isEnabled: RightsService.isEditor,
         ),
         DataGridAction(
           name: "Send tickets".tr(),
-          action: (SingleDataGridController dataGrid, [_]) => sendTickets(dataGrid),
+          action: (SingleDataGridController single_data_grid, [_]) => sendTickets(single_data_grid),
           isEnabled: RightsService.isEditor,
         ),
       ],
@@ -78,8 +78,8 @@ class _OrdersTabState extends State<OrdersTab> {
     refreshData();
   }
 
-  Future<void> cancelOrders(SingleDataGridController dataGrid) async {
-    var selected = _getChecked(dataGrid);
+  Future<void> cancelOrders(SingleDataGridController single_data_grid) async {
+    var selected = _getChecked(single_data_grid);
     if (selected.isEmpty) {
       return;
     }
@@ -109,8 +109,8 @@ class _OrdersTabState extends State<OrdersTab> {
     }
   }
 
-  Future<void> sendTickets(SingleDataGridController dataGrid) async {
-    var selected = _getChecked(dataGrid);
+  Future<void> sendTickets(SingleDataGridController single_data_grid) async {
+    var selected = _getChecked(single_data_grid);
     if (selected.isEmpty) {
       return;
     }
@@ -178,9 +178,9 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  List<OrderModel> _getChecked(SingleDataGridController dataGrid) {
+  List<OrderModel> _getChecked(SingleDataGridController single_data_grid) {
     return List<OrderModel>.from(
-      dataGrid.stateManager.refRows.originalList
+      single_data_grid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );
