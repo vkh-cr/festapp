@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/components/dataGrid/AdminPageHelper.dart';
+import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';

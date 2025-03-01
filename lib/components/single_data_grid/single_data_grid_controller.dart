@@ -1,11 +1,14 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
-import 'PlutoAbstract.dart';
-import 'DataGridAction.dart';
+import 'pluto_abstract.dart';
+import 'data_grid_action.dart';
+import 'single_data_grid_header.dart';
+
+enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
 
 class SingleDataGridController<T extends IPlutoRowModel> {
+  ValueNotifier<Key> refreshKeyNotifier = ValueNotifier(UniqueKey());
+
   late PlutoGridStateManager stateManager;
   Set<PlutoRow> updatedRows = {};
   Set<PlutoRow> deletedRows = {};
@@ -35,7 +38,7 @@ class SingleDataGridController<T extends IPlutoRowModel> {
     this.newObject,
   });
 
-  // Load data and store it in the rows variable without modifying the grid.
+  /// Loads data and stores it in [rows] without modifying the grid.
   Future<void> loadDataOnly() async {
     var defaultRow = {firstColumnTypeId: PlutoCell(value: "delete")};
     final dataList = await loadData();
@@ -44,12 +47,13 @@ class SingleDataGridController<T extends IPlutoRowModel> {
       element.cells.addAll(defaultRow);
     }
     rows = rowList;
-    // Clear tracking sets
+    // Clear tracking sets.
     deletedRows.clear();
     newRows.clear();
     updatedRows.clear();
   }
 
+  /// Applies [rows] to the grid and inserts the first column if needed.
   void applyDataToGrid() async {
     stateManager.removeAllRows();
     stateManager.appendRows(rows);
@@ -70,50 +74,55 @@ class SingleDataGridController<T extends IPlutoRowModel> {
         enableRowChecked: firstColumnType == DataGridFirstColumn.deleteAndCheck ||
             firstColumnType == DataGridFirstColumn.check,
         cellPadding: EdgeInsets.zero,
-        width: firstColumnType == DataGridFirstColumn.delete ||
-            firstColumnType == DataGridFirstColumn.check
+        width: (firstColumnType == DataGridFirstColumn.delete ||
+            firstColumnType == DataGridFirstColumn.check)
             ? 50
             : 100,
         renderer: (rendererContext) {
           List<Widget> rowChildren = [];
           if (firstColumnType != DataGridFirstColumn.check) {
-            rowChildren.add(IconButton(
+            rowChildren.add(
+              IconButton(
                 onPressed: () async {
                   var row = rendererContext.row;
                   if (deletedRows.contains(row)) {
                     deletedRows.remove(row);
                   } else if (newRows.contains(row)) {
                     newRows.remove(row);
-                    rendererContext.stateManager.removeRows([rendererContext.row]);
+                    rendererContext.stateManager.removeRows([row]);
                   } else {
                     deletedRows.add(row);
                   }
                   row.setState(PlutoRowState.updated);
                   rendererContext.stateManager.notifyListeners();
                 },
-                icon: const Icon(Icons.delete_forever)));
+                icon: const Icon(Icons.delete_forever),
+              ),
+            );
           }
           if (firstColumnType == DataGridFirstColumn.deleteAndDuplicate) {
-            rowChildren.add(IconButton(
-              onPressed: () async {
-                var originRow = rendererContext.row;
-                var newRow = rendererContext.stateManager.getNewRows()[0];
-                var readOnlyColumns = rendererContext.stateManager.columns
-                    .where((element) => element.readOnly)
-                    .map((e) => e.field)
-                    .toList();
-                for (var c in originRow.cells.entries) {
-                  if (readOnlyColumns.contains(c.key)) continue;
-                  newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
-                }
-                var currentIndex =
-                rendererContext.stateManager.rows.indexOf(originRow);
-                rendererContext.stateManager.insertRows(currentIndex + 1, [newRow]);
-                newRows.add(newRow);
-                rendererContext.stateManager.notifyListeners();
-              },
-              icon: const Icon(Icons.add),
-            ));
+            rowChildren.add(
+              IconButton(
+                onPressed: () async {
+                  var originRow = rendererContext.row;
+                  var newRow = rendererContext.stateManager.getNewRows()[0];
+                  var readOnlyColumns = rendererContext.stateManager.columns
+                      .where((element) => element.readOnly)
+                      .map((e) => e.field)
+                      .toList();
+                  for (var c in originRow.cells.entries) {
+                    if (readOnlyColumns.contains(c.key)) continue;
+                    newRow.cells[c.key]?.value = originRow.cells[c.key]?.value;
+                  }
+                  var currentIndex =
+                  rendererContext.stateManager.rows.indexOf(originRow);
+                  rendererContext.stateManager.insertRows(currentIndex + 1, [newRow]);
+                  newRows.add(newRow);
+                  rendererContext.stateManager.notifyListeners();
+                },
+                icon: const Icon(Icons.add),
+              ),
+            );
           }
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -125,8 +134,15 @@ class SingleDataGridController<T extends IPlutoRowModel> {
     }
   }
 
+  /// Reloads the data from the source and applies it to the grid.
   Future<void> reloadData() async {
     await loadDataOnly();
     applyDataToGrid();
+  }
+
+  /// Force-reloads the entire datagrid by updating the key and reloading data.
+  Future<void> forceReload() async {
+    await loadDataOnly();
+    refreshKeyNotifier.value = UniqueKey();
   }
 }

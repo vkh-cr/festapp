@@ -124,13 +124,13 @@ class _FeatureFormState extends State<FeatureForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      SelectableText(
                         FeatureMetadata.getTitle(widget.feature.code),
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      SelectableText(
                         FeatureMetadata.getDescription(widget.feature.code),
                         style: TextStyle(
                             fontSize: 14,

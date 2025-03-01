@@ -1,4 +1,4 @@
-import 'package:fstapp/components/dataGrid/IHasId.dart';
+import 'package:fstapp/components/single_data_grid/i_has_id.dart';
 import 'package:fstapp/dataModels/CompanionModel.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
