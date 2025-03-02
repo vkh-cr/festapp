@@ -53,7 +53,8 @@ BEGIN
                                                     'description', p.description,
                                                     'price', p.price,
                                                     'is_hidden', p.is_hidden,
-                                                    'order', p."order"
+                                                    'order', p."order",
+                                                    'maximum', p.maximum
                                                 ) ORDER BY COALESCE(p."order", 0)
                                             )
                                             FROM eshop.products p

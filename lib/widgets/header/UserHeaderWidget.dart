@@ -237,7 +237,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                     Center(
                       child: Column(
                         children: [
-                          Text(
+                          SelectableText(
                             "$fullName $surname",
                             style: TextStyle(
                                 fontSize: 16,
@@ -245,7 +245,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                                 color: ThemeConfig.blackColor(context)),
                           ),
                           const SizedBox(height: 4),
-                          Text(
+                          SelectableText(
                             email,
                             style: TextStyle(
                                 fontSize: 14,
