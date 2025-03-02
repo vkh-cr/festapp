@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/Feature.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
@@ -46,25 +45,25 @@ class _OccasionCardState extends State<OccasionCard> {
       width: OccasionCard.kPresentBorderWidth,
     )
         : null;
-
     final double innerRadius = widget.isPresent
         ? OccasionCard.kCardBorderRadius - OccasionCard.kPresentBorderWidth
         : OccasionCard.kCardBorderRadius;
 
     // Retrieve external price from the 'form' feature, if available.
-    var details = FeatureService.getFeatureDetails(
-      FeatureConstants.form, features: widget.occasion.features,
+    final details = FeatureService.getFeatureDetails(
+      FeatureConstants.form,
+      features: widget.occasion.features,
     );
-    String? externalPrice = details?.formExternalPrice;
+    final String? externalPrice = details?.formExternalPrice?.trim();
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: LayoutBuilder(builder: (context, constraints) {
-        final double widthScale =
-        (constraints.maxWidth / OccasionCard.kMinCardWidth).clamp(1.0, 1.5);
-        final double heightScale =
-        (constraints.maxHeight / OccasionCard.kMinCardHeight).clamp(1.0, 1.2);
+        final double widthScale = (constraints.maxWidth / OccasionCard.kMinCardWidth)
+            .clamp(1.0, 1.5);
+        final double heightScale = (constraints.maxHeight / OccasionCard.kMinCardHeight)
+            .clamp(1.0, 1.2);
         final double buttonScale = (widthScale + heightScale) / 2;
 
         return ConstrainedBox(
@@ -97,9 +96,11 @@ class _OccasionCardState extends State<OccasionCard> {
                 children: [
                   if (widget.occasion.data?[Tb.occasions.data_image] != null)
                     Positioned.fill(
-                      child: Image.network(
-                        widget.occasion.data?[Tb.occasions.data_image],
-                        fit: BoxFit.cover,
+                      child: RepaintBoundary(
+                        child: Image.network(
+                          widget.occasion.data?[Tb.occasions.data_image]!,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   if (widget.isPast)
@@ -108,27 +109,29 @@ class _OccasionCardState extends State<OccasionCard> {
                         color: Colors.grey.withOpacity(0.6),
                       ),
                     ),
-                  // Display external price badge at top right if available.
-                  if (externalPrice != null && externalPrice.trim().isNotEmpty)
+                  // External price badge.
+                  if (externalPrice != null && externalPrice.isNotEmpty)
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: SelectableText(
-                              externalPrice,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
+                      child: RepaintBoundary(
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: SelectableText(
+                                externalPrice,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
                           ),
@@ -139,37 +142,39 @@ class _OccasionCardState extends State<OccasionCard> {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    child: ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          color: Colors.black.withOpacity(0.4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SelectableText(
-                                widget.occasion.title ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                    child: RepaintBoundary(
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Container(
+                            padding: const EdgeInsets.all(8.0),
+                            color: Colors.black.withOpacity(0.4),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SelectableText(
+                                  widget.occasion.title ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              SelectableText(
-                                TimeHelper.getMinimalisticDateRange(
-                                  context,
-                                  widget.occasion.startTime!,
-                                  widget.occasion.endTime!,
+                                const SizedBox(height: 4),
+                                SelectableText(
+                                  TimeHelper.getMinimalisticDateRange(
+                                    context,
+                                    widget.occasion.startTime!,
+                                    widget.occasion.endTime!,
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -178,34 +183,37 @@ class _OccasionCardState extends State<OccasionCard> {
                   Positioned(
                     bottom: 6 * buttonScale,
                     right: 10 * buttonScale,
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        if (!FeatureService.isFeatureEnabled(
-                            FeatureConstants.form,
-                            features: widget.occasion.features)) {
-                          await RightsService.updateOccasionData(widget.occasion.link!);
-                          await RouterService.navigateOccasion(context, "");
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (context) =>
-                                OccasionDetailDialog(occasion: widget.occasion),
-                          );
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16 * buttonScale,
-                          vertical: 8 * buttonScale,
+                    child: RepaintBoundary(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          if (!FeatureService.isFeatureEnabled(
+                              FeatureConstants.form,
+                              features: widget.occasion.features)) {
+                            await RightsService.updateOccasionData(
+                                widget.occasion.link!);
+                            await RouterService.navigateOccasion(context, "");
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  OccasionDetailDialog(occasion: widget.occasion),
+                            );
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16 * buttonScale,
+                            vertical: 8 * buttonScale,
+                          ),
+                          minimumSize: Size(112 * buttonScale, 36 * buttonScale),
                         ),
-                        minimumSize: Size(112 * buttonScale, 36 * buttonScale),
-                      ),
-                      child: Text(
-                        "Detail".tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14 * buttonScale,
+                        child: Text(
+                          "Detail".tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14 * buttonScale,
+                          ),
                         ),
                       ),
                     ),
