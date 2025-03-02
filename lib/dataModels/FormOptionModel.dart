@@ -1,4 +1,4 @@
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/FormHelper.dart';
 
 class FormOptionModel {
   static const String metaValue = "value";
@@ -7,7 +7,7 @@ class FormOptionModel {
   static const String metaOptionsPrice = "price";
 
   final String type;
-  final String title;
+  String title;
   final String id;
   final double price;
 

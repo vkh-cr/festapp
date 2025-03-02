@@ -1,6 +1,6 @@
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 
-import 'SingleTableDataGrid.dart';
+import 'single_table_data_grid.dart';
 
 class DataGridAction{
   String? name;

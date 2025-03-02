@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
