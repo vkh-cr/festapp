@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';

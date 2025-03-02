@@ -4,10 +4,6 @@ class FeatureModel {
   final String code;
   final bool isEnabled;
 
-  static const String SONGBOOK = "songbook";
-  static const String GAME = "game";
-  static const String REGISTRATION = "registration";
-
   FeatureModel({required this.code, required this.isEnabled});
 
   static FeatureModel fromJson(Map<String, dynamic> json) {
@@ -21,6 +17,4 @@ class FeatureModel {
     Tb.occasions.data_features_code: code,
     Tb.occasions.data_features_is_enabled: isEnabled,
   };
-
-  static List<String> getAvailableCodes() => [SONGBOOK, GAME, REGISTRATION];
 }

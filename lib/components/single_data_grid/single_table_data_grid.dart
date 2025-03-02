@@ -1,25 +1,24 @@
-import 'package:collection/collection.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/themeConfig.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'pluto_abstract.dart';
+import 'single_data_grid_header.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:collection/collection.dart';
+import 'package:fstapp/themeConfig.dart';
 
-import 'PlutoAbstract.dart';
-import 'AdministrationHeader.dart';
-
-enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
+import 'single_data_grid_controller.dart';
 
 class SingleTableDataGrid<T extends IPlutoRowModel> extends StatefulWidget {
   final SingleDataGridController<T> controller;
 
-  const SingleTableDataGrid(this.controller, {super.key});
+  const SingleTableDataGrid(this.controller, {Key? key}) : super(key: key);
 
   @override
   _SingleTableDataGridState<T> createState() => _SingleTableDataGridState<T>();
 }
 
-class _SingleTableDataGridState<T extends IPlutoRowModel> extends State<SingleTableDataGrid<T>> {
+class _SingleTableDataGridState<T extends IPlutoRowModel>
+    extends State<SingleTableDataGrid<T>> {
   bool isLoading = true;
   bool isDataGridLoading = true;
 
@@ -38,19 +37,31 @@ class _SingleTableDataGridState<T extends IPlutoRowModel> extends State<SingleTa
 
   @override
   Widget build(BuildContext context) {
-    // If still loading, show a loading indicator.
+    return ValueListenableBuilder<Key>(
+      valueListenable: widget.controller.refreshKeyNotifier,
+      builder: (context, key, child) {
+        return KeyedSubtree(
+          key: key,
+          child: _buildDataGrid(context),
+        );
+      },
+    );
+  }
+
+  Widget _buildDataGrid(BuildContext context) {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
-    // Otherwise, display the PlutoGrid.
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: ThemeConfig.whiteColor(widget.controller.context),
       ),
       child: PlutoGrid(
-        noRowsWidget: isDataGridLoading ? null : Center(child: Text("Table does not contain any items").tr()),
+        noRowsWidget: isDataGridLoading
+            ? null
+            : Center(child: Text("Table does not contain any items").tr()),
         columns: widget.controller.columns,
         rows: [],
         onChanged: (PlutoGridOnChangedEvent event) {
@@ -62,16 +73,14 @@ class _SingleTableDataGridState<T extends IPlutoRowModel> extends State<SingleTa
               }
             }
           }
-          //widget.controller.stateManager.notifyListeners();
         },
         onLoaded: (PlutoGridOnLoadedEvent event) {
           widget.controller.stateManager = event.stateManager;
           event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
           event.stateManager.setShowColumnFilter(true);
-          // With the stateManager now available, apply the loaded data to the grid.
           widget.controller.applyDataToGrid();
           isDataGridLoading = false;
-          setState(() { });
+          setState(() {});
         },
         rowColorCallback: (rowContext) {
           var row = widget.controller.deletedRows.firstWhereOrNull(
@@ -91,12 +100,14 @@ class _SingleTableDataGridState<T extends IPlutoRowModel> extends State<SingleTa
           }
           return Colors.transparent;
         },
-        createHeader: (stateManager) => AdministrationHeader(
+        createHeader: (stateManager) => SingleDataGridHeader(
           stateManager: stateManager,
           controller: widget.controller,
         ),
-        configuration: AdministrationHeader.defaultPlutoGridConfiguration(
-            widget.controller.context, widget.controller.context.locale.languageCode),
+        configuration: SingleDataGridHeader.defaultPlutoGridConfiguration(
+          widget.controller.context,
+          widget.controller.context.locale.languageCode,
+        ),
       ),
     );
   }

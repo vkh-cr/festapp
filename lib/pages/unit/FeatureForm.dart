@@ -2,17 +2,19 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/Feature.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/features/FeatureMetadata.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
+import 'package:fstapp/themeConfig.dart';
 
 class FeatureForm extends StatefulWidget {
-  final Map<String, dynamic> feature;
+  final Feature feature;
   final int occasion;
 
-  const FeatureForm({Key? key, required this.feature, required this.occasion})
-      : super(key: key);
+  const FeatureForm({super.key, required this.feature, required this.occasion});
 
   @override
   _FeatureFormState createState() => _FeatureFormState();
@@ -22,42 +24,50 @@ class _FeatureFormState extends State<FeatureForm> {
   late bool isEnabled;
   TextEditingController? lightColorController;
   TextEditingController? darkColorController;
-  // Removed backgroundController – use backgroundUrl instead.
   String? backgroundUrl;
   TextEditingController? companionsController;
   late bool useExternalForm;
   TextEditingController? externalFormLinkController;
   TextEditingController? externalPriceController;
+  // New controller for the custom reserve button title
+  TextEditingController? reserveButtonTitleController;
 
   @override
   void initState() {
     super.initState();
-    isEnabled = widget.feature[FeatureService.metaIsEnabled] ?? false;
+    isEnabled = widget.feature.isEnabled;
 
-    if (widget.feature[FeatureService.metaCode] == FeatureService.ticket) {
-      widget.feature[FeatureService.ticketLightColor] ??= 'FFFFFF';
-      widget.feature[FeatureService.ticketDarkColor] ??= '000000';
-      backgroundUrl = widget.feature[FeatureService.ticketBackground];
+    if (widget.feature.code == FeatureConstants.ticket) {
+      widget.feature.ticketLightColor ??= 'FFFFFF';
+      widget.feature.ticketDarkColor ??= '000000';
+      backgroundUrl = widget.feature.ticketBackground;
 
-      lightColorController = TextEditingController(
-          text: widget.feature[FeatureService.ticketLightColor]);
-      darkColorController = TextEditingController(
-          text: widget.feature[FeatureService.ticketDarkColor]);
-    } else if (widget.feature[FeatureService.metaCode] ==
-        FeatureService.companions) {
-      widget.feature[FeatureService.companionsMax] ??= 1;
+      lightColorController =
+          TextEditingController(text: widget.feature.ticketLightColor);
+      darkColorController =
+          TextEditingController(text: widget.feature.ticketDarkColor);
+    } else if (widget.feature.code == FeatureConstants.companions) {
+      widget.feature.companionsMax ??= 1;
       companionsController = TextEditingController(
-          text: widget.feature[FeatureService.companionsMax].toString());
+          text: widget.feature.companionsMax.toString());
     }
 
-    useExternalForm =
-        widget.feature[FeatureService.formUseExternal] ?? false;
-    externalFormLinkController = TextEditingController(
-      text: widget.feature[FeatureService.formExternalLink] ?? '',
-    );
-    externalPriceController = TextEditingController(
-      text: widget.feature[FeatureService.formExternalPrice] ?? '',
-    );
+    // For form feature
+    if (widget.feature.code == FeatureConstants.form) {
+      useExternalForm = widget.feature.formUseExternal ?? false;
+      externalFormLinkController = TextEditingController(
+        text: widget.feature.formExternalLink ?? '',
+      );
+      externalPriceController = TextEditingController(
+        text: widget.feature.formExternalPrice ?? '',
+      );
+      // Initialize the custom reserve button title controller
+      reserveButtonTitleController = TextEditingController(
+        text: widget.feature.reserveButtonTitle ?? '',
+      );
+    } else {
+      useExternalForm = false;
+    }
   }
 
   @override
@@ -67,6 +77,7 @@ class _FeatureFormState extends State<FeatureForm> {
     companionsController?.dispose();
     externalFormLinkController?.dispose();
     externalPriceController?.dispose();
+    reserveButtonTitleController?.dispose();
     super.dispose();
   }
 
@@ -82,7 +93,7 @@ class _FeatureFormState extends State<FeatureForm> {
           await DbImages.removeImage(backgroundUrl!);
           setState(() {
             backgroundUrl = "";
-            widget.feature[FeatureService.ticketBackground] = "";
+            widget.feature.ticketBackground = "";
           });
           ToastHelper.Show(context, "Image removed successfully.".tr());
         } catch (e) {
@@ -95,27 +106,49 @@ class _FeatureFormState extends State<FeatureForm> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      color: ThemeConfig.whiteColor(context),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0.0),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.feature[FeatureService.metaCode]
-                  ?.toString()
-                  .toUpperCase() ??
-                  'UNKNOWN',
-            ),
-            SwitchListTile(
-              title: Text("Enabled".tr()),
-              value: isEnabled,
-              onChanged: (value) {
-                setState(() {
-                  isEnabled = value;
-                  widget.feature[FeatureService.metaIsEnabled] = value;
-                });
-              },
+            // Row with title, description and switch on the right
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectableText(
+                        FeatureMetadata.getTitle(widget.feature.code),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        FeatureMetadata.getDescription(widget.feature.code),
+                        style: TextStyle(
+                            fontSize: 14,
+                            color: ThemeConfig.grey700(context)),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: isEnabled,
+                  onChanged: (value) {
+                    setState(() {
+                      isEnabled = value;
+                      widget.feature.isEnabled = value;
+                    });
+                  },
+                ),
+              ],
             ),
             if (isEnabled) ..._buildFeatureFields(context),
           ],
@@ -124,11 +157,11 @@ class _FeatureFormState extends State<FeatureForm> {
     );
   }
 
-  /// Builds additional fields based on the feature code.
+  /// Builds additional fields based on the feature type.
   List<Widget> _buildFeatureFields(BuildContext context) {
     List<Widget> fields = [];
 
-    if (widget.feature[FeatureService.metaCode] == FeatureService.ticket) {
+    if (widget.feature.code == FeatureConstants.ticket) {
       fields.add(
         TextFormField(
           controller: lightColorController,
@@ -136,7 +169,7 @@ class _FeatureFormState extends State<FeatureForm> {
             labelText: "Background color".tr(),
           ),
           onSaved: (val) {
-            widget.feature[FeatureService.ticketLightColor] = val;
+            widget.feature.ticketLightColor = val;
           },
         ),
       );
@@ -148,12 +181,11 @@ class _FeatureFormState extends State<FeatureForm> {
             labelText: "Font color".tr(),
           ),
           onSaved: (val) {
-            widget.feature[FeatureService.ticketDarkColor] = val;
+            widget.feature.ticketDarkColor = val;
           },
         ),
       );
       fields.add(const SizedBox(height: 16));
-      // Replace the background URL field with an ImageArea widget.
       fields.add(
         ImageArea(
           hint: "(1600x900 px)".tr(),
@@ -161,14 +193,13 @@ class _FeatureFormState extends State<FeatureForm> {
           onFileSelected: (file) async {
             Uint8List imageData = await file.readAsBytes();
             try {
-              final publicUrl = await DbImages.uploadImage(
-                  imageData, widget.occasion, null);
+              final publicUrl =
+              await DbImages.uploadImage(imageData, widget.occasion, null);
               setState(() {
                 backgroundUrl = publicUrl;
-                widget.feature[FeatureService.ticketBackground] = publicUrl;
+                widget.feature.ticketBackground = publicUrl;
               });
-              ToastHelper.Show(
-                  context, "File uploaded successfully.".tr());
+              ToastHelper.Show(context, "File uploaded successfully.".tr());
             } catch (e) {
               ToastHelper.Show(context, "Failed to upload image.".tr());
             }
@@ -176,8 +207,7 @@ class _FeatureFormState extends State<FeatureForm> {
           onRemove: _removeBackgroundImage,
         ),
       );
-    } else if (widget.feature[FeatureService.metaCode] ==
-        FeatureService.companions) {
+    } else if (widget.feature.code == FeatureConstants.companions) {
       fields.add(
         TextFormField(
           controller: companionsController,
@@ -196,12 +226,11 @@ class _FeatureFormState extends State<FeatureForm> {
             return null;
           },
           onSaved: (val) {
-            widget.feature[FeatureService.companionsMax] =
-                int.tryParse(val ?? '1') ?? 1;
+            widget.feature.companionsMax = int.tryParse(val ?? '1') ?? 1;
           },
         ),
       );
-    } else if (widget.feature[FeatureService.metaCode] == FeatureService.form) {
+    } else if (widget.feature.code == FeatureConstants.form) {
       // External form option
       fields.add(const Divider());
       fields.add(
@@ -211,7 +240,7 @@ class _FeatureFormState extends State<FeatureForm> {
           onChanged: (value) {
             setState(() {
               useExternalForm = value;
-              widget.feature[FeatureService.formUseExternal] = value;
+              widget.feature.formUseExternal = value;
             });
           },
         ),
@@ -226,7 +255,7 @@ class _FeatureFormState extends State<FeatureForm> {
               "Reservation will be done via this external link.".tr(),
             ),
             onSaved: (val) {
-              widget.feature[FeatureService.formExternalLink] = val;
+              widget.feature.formExternalLink = val;
             },
           ),
         );
@@ -236,18 +265,39 @@ class _FeatureFormState extends State<FeatureForm> {
             controller: externalPriceController,
             decoration: InputDecoration(
               labelText: "Price".tr(),
-              helperText:
-              "The price will be displayed on the events page.".tr(),
+              helperText: "The price will be displayed on the events page."
+                  .tr(),
             ),
             onSaved: (val) {
-              widget.feature[FeatureService.formExternalPrice] = val;
+              widget.feature.formExternalPrice = val;
             },
           ),
         );
       }
+      // Advanced Settings: Custom Reserve Button Title
+      fields.add(const SizedBox(height: 16));
+      fields.add(
+        ExpansionTile(
+          title: Text("Advanced Settings".tr()),
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: TextFormField(
+                controller: reserveButtonTitleController,
+                decoration: InputDecoration(
+                  labelText: "Reserve Button Title".tr(),
+                ),
+                onSaved: (val) {
+                  widget.feature.reserveButtonTitle = val;
+                },
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
-    // Add other feature-specific fields here if needed.
+    // Add additional feature-specific fields as needed.
     return fields;
   }
 }
