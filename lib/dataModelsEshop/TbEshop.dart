@@ -40,6 +40,7 @@ class ProductsTb {
   String get product_type => "product_type";
   String get occasion => "occasion";
   String get order => "order";
+  String get maximum => "maximum";
 }
 
 class OrderProductTicketTb {
