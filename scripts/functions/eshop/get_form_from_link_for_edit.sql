@@ -49,6 +49,7 @@ BEGIN
                                             SELECT jsonb_agg(
                                                 jsonb_build_object(
                                                     'id', p.id,
+                                                    'occasion', p.occasion,
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,

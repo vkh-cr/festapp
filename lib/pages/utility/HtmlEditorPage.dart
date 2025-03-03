@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,11 @@ class HtmlEditorPage extends StatefulWidget {
   static const String parContent = "content";
   static const String parLoad = "load";
   static const ROUTE = "htmlEditor";
-  Map<String, dynamic>? content;
-  HtmlEditorPage({this.content, super.key});
+
+  final Map<String, dynamic>? content;
+  final int? occasionId;
+
+  HtmlEditorPage({this.content, this.occasionId, Key? key}) : super(key: key);
 
   @override
   _HtmlEditorPageState createState() => _HtmlEditorPageState();
@@ -152,28 +154,25 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: IntrinsicWidth(
-              child: Row(children: [
-                ButtonsHelper.bottomBarButton(
-                  text: "Reset".tr(),
-                  onPressed: _isSaving
-                      ? null
-                      : () async {
-                    await setHtmlText(_originalHtml ?? _html);
-                  },
-                ),
-                ButtonsHelper.bottomBarButton(
-                  text: "Storno".tr(),
-                  onPressed: _isSaving ? null : cancelPressed,
-                ),
-                ButtonsHelper.bottomBarButton(
-                  text: "Save".tr(),
-                  onPressed: _isSaving ? null : savePressed,
-                ),
-                // ButtonsHelper.bottomBarButton(
-                //   text: "Save".tr(),
-                //   onPressed: _isSaving ? null : saveRawPressed, // Save Raw button
-                // ),
-              ],
+              child: Row(
+                children: [
+                  ButtonsHelper.bottomBarButton(
+                    text: "Reset".tr(),
+                    onPressed: _isSaving
+                        ? null
+                        : () async {
+                      await setHtmlText(_originalHtml ?? _html);
+                    },
+                  ),
+                  ButtonsHelper.bottomBarButton(
+                    text: "Storno".tr(),
+                    onPressed: _isSaving ? null : cancelPressed,
+                  ),
+                  ButtonsHelper.bottomBarButton(
+                    text: "Save".tr(),
+                    onPressed: _isSaving ? null : savePressed,
+                  ),
+                ],
               ),
             ),
           ),
@@ -187,6 +186,17 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
     String? htmlTextEdited = await controller.getText();
     var htmlText = HtmlHelper.removeColor(htmlTextEdited);
     htmlText = HtmlHelper.detectAndReplaceLinks(htmlText);
+
+    // New way using storeImagesToOccasion with the occasionId from widget
+    if (widget.occasionId != null) {
+      setState(() {
+        _isSaving = true;
+        _showOverlay = true;
+      });
+      htmlText = await HtmlHelper.storeImagesToOccasion(_originalHtml ?? _html, htmlText, widget.occasionId!);
+      RouterService.goBack(context, htmlText);
+      return;
+    }
 
     setState(() {
       _isSaving = true;

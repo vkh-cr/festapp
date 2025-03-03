@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/pages/form/widgets/option_editor_dialog.dart';
 
 class SelectOneEditor {
   static Widget buildSelectOneReadOnly(BuildContext context, FormFieldModel field) {
@@ -22,6 +23,19 @@ class SelectOneEditor {
               onChanged: null,
             ),
             Text(option.title),
+            if (option.description != null &&
+                option.description!.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Row(
+                  children: [
+                    Tooltip(
+                      message: "Has description".tr(),
+                      child: const Icon(Icons.description, size: 16),
+                    ),
+                  ],
+                ),
+              ),
           ],
         );
       }).toList(),
@@ -37,8 +51,7 @@ class SelectOneEditor {
         const SizedBox(height: 8),
         Column(
           children: field.options.map((FormOptionModel formOption) {
-            final optionController =
-            TextEditingController(text: formOption.title);
+            final optionController = TextEditingController(text: formOption.title);
             return Row(
               children: [
                 Radio<String>(
@@ -49,13 +62,41 @@ class SelectOneEditor {
                 Expanded(
                   child: TextFormField(
                     controller: optionController,
-                    decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
+                    decoration: InputDecoration(
+                      border: const UnderlineInputBorder(),
+                      suffixIcon: formOption.description != null &&
+                          formOption.description!.trim().isNotEmpty
+                          ? Tooltip(
+                        message: "Has description".tr(),
+                        child: Icon(Icons.description, size: 20),
+                      )
+                          : null,
                     ),
                     onChanged: (value) {
                       formOption.title = value;
                     },
                   ),
+                ),
+                // Three-dots popup for additional settings
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'additional_settings') {
+                      showDialog(
+                        context: context,
+                        builder: (context) => OptionDetailEditorDialog(option: formOption),
+                      ).then((_) {
+                        // Refresh the widget when the dialog is closed.
+                        (context as Element).markNeedsBuild();
+                      });
+                    }
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                    PopupMenuItem<String>(
+                      value: 'additional_settings',
+                      child: Text("Additional Settings".tr()),
+                    ),
+                  ],
+                  icon: const Icon(Icons.more_vert),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
