@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets/sex_editor.dart';
 import 'package:fstapp/themeConfig.dart';
 import '../FormEditorContent.dart';
 import 'ticket_editor_widgets.dart';
@@ -122,6 +123,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
     final isSelectOne = (field.type == FormHelper.fieldTypeSelectOne);
     final isSelectMany = (field.type == FormHelper.fieldTypeSelectMany);
+    final isSexType = (field.type == FormHelper.fieldTypeSex);
     final icon = fieldTypeIcons[field.type];
     final requiredStar = (field.isRequired ?? false)
         ? TextSpan(
@@ -177,6 +179,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               context, widget.form, field)
         else if (isSelectOne)
           SelectOneEditor.buildSelectOneReadOnly(context, field)
+        else if (isSexType)
+             SexEditor.buildSexFieldReadOnly(context, field)
         else if (isSelectMany)
             SelectManyEditor.buildSelectManyReadOnly(context, field)
           else
@@ -194,6 +198,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
   Widget _buildFieldItemSelected(FormFieldModel field,
       List<FormFieldModel> displayList, int index) {
     final isTicket = (field.type == FormHelper.fieldTypeTicket);
+    final isSexField = (field.type == FormHelper.fieldTypeSex);
     final isSelectOne = (field.type == FormHelper.fieldTypeSelectOne);
     final isSelectMany = (field.type == FormHelper.fieldTypeSelectMany);
     final isAlwaysRequired = FormHelper.isAlwaysRequired(field.type ?? '');
@@ -244,7 +249,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             onChanged: (value) => field.title = value,
           ),
         ],
-        if (!isTicket && !isSelectOne && !isSelectMany)
+        if (!isTicket && !isSelectOne && !isSelectMany && !isSexField)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: TextFormField(
@@ -255,6 +260,11 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
               ),
               style: Theme.of(context).textTheme.bodyLarge,
             ),
+          ),
+        if (isSexField)
+          Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: SexEditor.buildSexFieldReadOnly(context, field),
           ),
         if (isSelectOne)
           Padding(
