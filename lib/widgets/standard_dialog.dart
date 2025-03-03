@@ -22,7 +22,7 @@ class StandardDialog extends StatelessWidget {
         side: BorderSide(color: Colors.white.withOpacity(0.2)),
       ),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
+        constraints: BoxConstraints(maxWidth: maxWidth, minHeight: 120),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Stack(

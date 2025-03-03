@@ -7,6 +7,13 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/pages/form/check_box_field_builder.dart';
+import 'package:fstapp/pages/form/radio_field_builder.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/standard_dialog.dart';
 import 'form_field_builders.dart';
 
 class FormHelper {
@@ -231,16 +238,16 @@ class FormHelper {
         if (!isRequiredField) {
           sexOptions.insert(0, FormOptionModel(UserInfoModel.sexes[2], notSpecifiedLabel()));
         }
-        return FormFieldBuilders.buildRadioField(context, field, sexOptions, formHolder);
+        return RadioFieldBuilder.buildRadioField(context, field, sexOptions, formHolder);
       case fieldTypeSelectOne:
         var optionsField = field as OptionsFieldHolder;
-        return FormFieldBuilders.buildRadioField(context, optionsField, optionsField.options, formHolder);
+        return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeSelectMany:
         var optionsField = field as OptionsFieldHolder;
-        return FormFieldBuilders.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
+        return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeProductType:
         var optionsField = field as OptionsFieldHolder;
-        return FormFieldBuilders.buildRadioField(context, optionsField, optionsField.options, formHolder);
+        return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthYear:
         field.title = birthYearLabel();
         return FormFieldBuilders.buildBirthYearField(context, field);
@@ -267,4 +274,131 @@ class FormHelper {
     }
     return inputData;
   }
+
+  static Widget buildDescriptionButton(BuildContext context, String title, String description) {
+    return TextButton(
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (context) => StandardDialog(
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    title ?? "Description".tr(),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  HtmlView(
+                    html: description!,
+                    isSelectable: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: Text("View more".tr()),
+    );
+  }
+
+  /// This is the custom UI for each option (both radio & checkbox).
+  /// It is a “card” with a border that highlights when selected.
+  static Widget buildOptionCard({
+    required BuildContext context,
+    required FormOptionModel option,
+    required bool hasDescription,
+    required bool hasAnyDescriptions,
+    required bool isCheckbox,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        border: Border.all(
+          color: Colors.grey.shade300,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // The actual Radio or Checkbox is rendered by FormBuilder inside
+            // the option. Usually, that means FormBuilder places it on the left.
+            // If you want to show it inside your custom widget, you'd set
+            // `optionWidgetBuilder` in the `FormBuilderFieldOption`. But
+            // let's keep it simple, so the default radio/checkbox is to the left
+            // and we just handle text & description to the right:
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title
+                  Text(
+                    buildOptionTitle(context, option),
+                    style: TextStyle(
+                      fontSize: 14.0 * FormHelper.fontSizeFactor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // If there's a description and at least one option in the group
+                  // has a description, show the inline HtmlView.
+                  if (hasAnyDescriptions)
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: hasDescription
+                          ? HtmlView(
+                        html: option.description ?? '',
+                        isSelectable: true,
+                      )
+                          : const SizedBox.shrink(),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Helper to build the text for the option's title, including price if > 0.
+  static String buildOptionTitle(BuildContext context, FormOptionModel option) {
+    if (option.price > 0) {
+      final priceStr = Utilities.formatPrice(context, option.price);
+      return '${option.title} ($priceStr)';
+    } else {
+      return option.title;
+    }
+  }
+
+  /// Example function to build a label with optional “required” star.
+  static Widget buildTitleWidget(
+      String title,
+      bool? isRequired,
+      BuildContext context, {
+        TextStyle? textStyle,
+      }) {
+    final style = textStyle ?? Theme.of(context).textTheme.bodyLarge;
+    return RichText(
+      text: TextSpan(
+        text: title,
+        style: style,
+        children: [
+          if (isRequired == true)
+            TextSpan(
+              text: ' *',
+              style: style?.copyWith(color: ThemeConfig.redColor(context)),
+            ),
+        ],
+      ),
+    );
+  }
+
 }
