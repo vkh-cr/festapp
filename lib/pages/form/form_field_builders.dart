@@ -11,6 +11,8 @@ import 'package:fstapp/pages/form/FormHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
+import 'package:fstapp/widgets/HtmlView.dart';
 
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
@@ -244,71 +246,6 @@ class FormFieldBuilders {
         if (fieldHolder.isRequired) FormBuilderValidators.required(),
         FormBuilderValidators.email(errorText: FormHelper.emailInvalidMessage()),
       ]),
-    );
-  }
-
-  static FormBuilderRadioGroup<FormOptionModel> buildRadioField(
-      BuildContext context, FieldHolder fieldHolder, List<FormOptionModel> optionsIn, FormHolder formHolder) {
-    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn
-        .map(
-          (o) => FormBuilderFieldOption(
-        value: o,
-        child: Text(
-          o.title + (o.price > 0 ? " (${Utilities.formatPrice(context, o.price)})" : ""),
-          style: TextStyle(fontSize: 14.0 * FormHelper.fontSizeFactor),
-        ),
-      ),
-    )
-        .toList();
-    return FormBuilderRadioGroup<FormOptionModel>(
-      onChanged: (v) {
-        formHolder.controller!.updateTotalPrice?.call();
-      },
-      name: fieldHolder.id.toString(),
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context,
-            textStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: ThemeConfig.grey700(context),
-                fontSize: 16 * FormHelper.fontSizeFactor)),
-      ),
-      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-      options: options,
-      initialValue: null,
-      orientation: OptionsOrientation.vertical,
-      wrapDirection: Axis.vertical,
-    );
-  }
-
-  static FormBuilderCheckboxGroup<FormOptionModel> buildSelectManyField(
-      BuildContext context, FieldHolder fieldHolder, List<FormOptionModel> optionsIn, FormHolder formHolder) {
-    List<FormBuilderFieldOption<FormOptionModel>> options = optionsIn
-        .map(
-          (o) => FormBuilderFieldOption(
-        value: o,
-        child: Text(
-          o.title + (o.price > 0 ? " (${Utilities.formatPrice(context, o.price)})" : ""),
-          style: TextStyle(fontSize: 14.0 * FormHelper.fontSizeFactor),
-        ),
-      ),
-    )
-        .toList();
-    return FormBuilderCheckboxGroup<FormOptionModel>(
-      name: fieldHolder.id.toString(),
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context,
-            textStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: ThemeConfig.grey700(context),
-                fontSize: 16 * FormHelper.fontSizeFactor)),
-      ),
-      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-      options: options,
-      orientation: OptionsOrientation.vertical,
-      wrapDirection: Axis.vertical,
-      onChanged: (v) {
-        formHolder.controller!.updateTotalPrice?.call();
-      },
     );
   }
 
