@@ -46,9 +46,6 @@ class FieldHolder {
 }
 
 class OptionsFieldHolder extends FieldHolder {
-  static const String metaLabel = "label";
-  static const String metaOptionsType = "optionsType";
-  static const String metaOptions = "options";
 
   final List<FormOptionModel> options;
 

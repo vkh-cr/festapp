@@ -102,6 +102,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
       if ([
         FormHelper.fieldTypeText,
         FormHelper.fieldTypeSelectOne,
+        FormHelper.fieldTypeSelectMany,
       ].contains(type)) {
         return true;
       }

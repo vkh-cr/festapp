@@ -336,11 +336,16 @@ class GameRouteArgs {
 class HtmlEditorRoute extends _i30.PageRouteInfo<HtmlEditorRouteArgs> {
   HtmlEditorRoute({
     Map<String, dynamic>? content,
+    int? occasionId,
     _i31.Key? key,
     List<_i30.PageRouteInfo>? children,
   }) : super(
          HtmlEditorRoute.name,
-         args: HtmlEditorRouteArgs(content: content, key: key),
+         args: HtmlEditorRouteArgs(
+           content: content,
+           occasionId: occasionId,
+           key: key,
+         ),
          initialChildren: children,
        );
 
@@ -354,22 +359,28 @@ class HtmlEditorRoute extends _i30.PageRouteInfo<HtmlEditorRouteArgs> {
       );
       return _i30.DeferredWidget(
         _i9.loadLibrary,
-        () => _i9.HtmlEditorPage(content: args.content, key: args.key),
+        () => _i9.HtmlEditorPage(
+          content: args.content,
+          occasionId: args.occasionId,
+          key: args.key,
+        ),
       );
     },
   );
 }
 
 class HtmlEditorRouteArgs {
-  const HtmlEditorRouteArgs({this.content, this.key});
+  const HtmlEditorRouteArgs({this.content, this.occasionId, this.key});
 
   final Map<String, dynamic>? content;
+
+  final int? occasionId;
 
   final _i31.Key? key;
 
   @override
   String toString() {
-    return 'HtmlEditorRouteArgs{content: $content, key: $key}';
+    return 'HtmlEditorRouteArgs{content: $content, occasionId: $occasionId, key: $key}';
   }
 }
 
