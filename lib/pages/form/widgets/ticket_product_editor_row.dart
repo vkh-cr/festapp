@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
 import 'product_detail_editor_dialog.dart'; // New dialog file
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
   final VoidCallback onDelete;
   const TicketProductEditorRow({
-    Key? key,
+    super.key,
     required this.product,
     required this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   _TicketProductEditorRowState createState() => _TicketProductEditorRowState();
@@ -57,12 +58,18 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             Row(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 7,
                   child: TextField(
                     controller: _titleController,
                     decoration: InputDecoration(
                       labelText: "Title".tr(),
                       border: const UnderlineInputBorder(),
+                      suffixIcon: (!HtmlHelper.isHtmlEmptyOrNull(widget.product.description))
+                          ? Tooltip(
+                        message: "Has description".tr(),
+                        child: const Icon(Icons.description, size: 20),
+                      )
+                          : null,
                     ),
                   ),
                 ),
@@ -99,13 +106,15 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                     if (value == 'additional_settings') {
                       showDialog(
                         context: context,
-                        builder: (context) => ProductDetailEditorDialog(product: widget.product),
+                        builder: (context) =>
+                            ProductDetailEditorDialog(product: widget.product),
                       ).then((_) {
                         setState(() {}); // Refresh the widget when the dialog is closed.
                       });
                     }
                   },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  itemBuilder: (BuildContext context) =>
+                  <PopupMenuEntry<String>>[
                     PopupMenuItem<String>(
                       value: 'additional_settings',
                       child: Text("Additional Settings".tr()),
@@ -113,7 +122,6 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   ],
                   icon: const Icon(Icons.more_vert),
                 ),
-                const SizedBox(width: 8),
                 if (widget.product.id == null)
                   IconButton(
                     icon: const Icon(Icons.delete),
@@ -123,9 +131,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             ),
             // Additional summary row
             if ((widget.product.maximum != null &&
-                widget.product.maximum != 0) ||
-                (widget.product.description != null &&
-                    widget.product.description!.trim().isNotEmpty))
+                widget.product.maximum != 0))
               Padding(
                 padding: const EdgeInsets.only(top: 4.0),
                 child: Row(
@@ -142,17 +148,6 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                             SelectableText('${widget.product.maximum}'),
                           ],
                         ),
-                      ),
-                    if (widget.product.maximum != null &&
-                        widget.product.maximum != 0 &&
-                        (widget.product.description != null &&
-                            widget.product.description!.trim().isNotEmpty))
-                      const SizedBox(width: 8),
-                    if (widget.product.description != null &&
-                        widget.product.description!.trim().isNotEmpty)
-                      Tooltip(
-                        message: "Has description".tr(),
-                        child: const Icon(Icons.description, size: 16),
                       ),
                   ],
                 ),

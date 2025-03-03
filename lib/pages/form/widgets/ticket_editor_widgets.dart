@@ -6,6 +6,8 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/form/FormHelper.dart';
@@ -26,7 +28,6 @@ class TicketEditorWidgets {
     f.isTicketField == true &&
         f.type == FormHelper.fieldTypeProductType)
         .toList();
-
     if (productTypeFields.isEmpty) {
       children.add(Padding(
         padding: const EdgeInsets.only(top: 8.0),
@@ -106,8 +107,7 @@ class TicketEditorWidgets {
 
   static Widget buildTicketGroupReadOnly(
       BuildContext context, FormFieldModel ptField) {
-    ptField.productType ??=
-        ProductTypeModel(title: ptField.title, products: []);
+    ptField.productType ??= ProductTypeModel(title: ptField.title, products: []);
     final group = ptField.productType!;
     group.products ??= [];
     final groupHidden = ptField.isHidden ?? false;
@@ -125,6 +125,8 @@ class TicketEditorWidgets {
         : Theme.of(context).textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.bold,
     );
+    final showCapacityColumn =
+    group.products!.any((product) => (product.maximum ?? 0) != 0);
     return Card(
       elevation: 3,
       child: Padding(
@@ -150,7 +152,7 @@ class TicketEditorWidgets {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 3,
+                      flex: 12,
                       child: Text(
                         "Title".tr(),
                         style: Theme.of(context)
@@ -160,7 +162,7 @@ class TicketEditorWidgets {
                       ),
                     ),
                     Expanded(
-                      flex: 1,
+                      flex: 3,
                       child: Text(
                         "Price".tr(),
                         style: Theme.of(context)
@@ -169,6 +171,14 @@ class TicketEditorWidgets {
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
+                    if (showCapacityColumn)
+                      Expanded(
+                        flex: 1,
+                        child: Tooltip(
+                          message: "Product Quantity".tr(),
+                          child: const Icon(Icons.stacked_bar_chart, size: 16),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -178,22 +188,46 @@ class TicketEditorWidgets {
                   final rowStyle = productHidden
                       ? const TextStyle(decoration: TextDecoration.lineThrough)
                       : const TextStyle();
+                  final capacityText =
+                  (product.maximum ?? 0) != 0 ? '${product.maximum}' : '';
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 3,
-                          child:
-                          Text(product.title ?? '', style: rowStyle),
+                          flex: 12,
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(product.title ?? '', style: rowStyle),
+                              ),
+                              if (!HtmlHelper.isHtmlEmptyOrNull(product.description))
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: Tooltip(
+                                    message: "Has description".tr(),
+                                    child: const Icon(Icons.description, size: 16),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                         Expanded(
-                          flex: 1,
+                          flex: 3,
                           child: Text(
                             '${product.price ?? 0}',
                             style: rowStyle,
                           ),
                         ),
+                        if (showCapacityColumn)
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              capacityText,
+                              style: rowStyle,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                       ],
                     ),
                   );

@@ -83,7 +83,11 @@ class FormFieldModel extends IPlutoRowModel {
 
     if (options.isNotEmpty) {
       jsonData[FormHelper.metaOptions] = options.map((option) {
-        return {'value': option.title};
+        final optionData = {FormOptionModel.metaValue: option.title};
+        if (option.description != null && option.description!.trim().isNotEmpty) {
+          optionData[FormOptionModel.metaDescription] = option.description!;
+        }
+        return optionData;
       }).toList();
     }
 
