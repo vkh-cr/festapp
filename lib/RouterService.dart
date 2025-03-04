@@ -9,8 +9,8 @@ import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/services/LinkModel.dart';
 
 class RouterService {
-  static const LINK = "link";
-  static const LINK_PATH = "/:$LINK";
+  static const link = "link";
+  static const linkPath = "/:$link";
   static String currentOccasionLink = "";
 
   //todo temporary fix
@@ -47,12 +47,12 @@ class RouterService {
   static Future<void> pushReplacementFull<T extends Object?> (
       BuildContext context, String path) async {
     path = fixPath(path);
-    await context.router.replaceNamed(path);
+    await context.router.replacePath(path);
   }
 
   static void pushReplacementOccasion<T extends Object?>(
       BuildContext context, String path) {
-    context.router.replaceNamed(getCurrentLink() + path);
+    context.router.replacePath(getCurrentLink() + path);
   }
 
   static void popOrHome(BuildContext context) {

@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/AppRouter.dart';
 import 'package:fstapp/dataModels/EmailTemplateModel.dart';
 import 'package:fstapp/dataServices/DbEmailTemplates.dart';
 import 'package:fstapp/pages/eshop/EmailTemplateSettingsPage.dart';
@@ -10,7 +11,7 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/widgets/EmailTemplateCard.dart';
 
 class EmailTemplatesTab extends StatefulWidget {
-  const EmailTemplatesTab({Key? key}) : super(key: key);
+  const EmailTemplatesTab({super.key});
 
   @override
   _EmailTemplatesTabState createState() => _EmailTemplatesTabState();
@@ -20,19 +21,27 @@ class _EmailTemplatesTabState extends State<EmailTemplatesTab> {
   EmailTemplatesResponse? emailTemplatesResponse;
   List<EmailTemplateModel> _templates = [];
   String? formLink;
+  String? occasionLink;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.get("formLink", null);
+      occasionLink = context.routeData.params.get(AppRouter.linkFormatted, null);
     }
     loadData();
   }
 
   Future<void> loadData() async {
-    emailTemplatesResponse =
-    await DbEmailTemplates.getAllEmailTemplatesViaFormLink(formLink!);
+    if(formLink != null){
+      emailTemplatesResponse =
+      await DbEmailTemplates.getAllEmailTemplatesViaFormLink(formLink!);
+    } else if(occasionLink != null) {
+      emailTemplatesResponse =
+      await DbEmailTemplates.getAllEmailTemplatesViaOccasionLink(occasionLink!);
+    }
+
     _templates = emailTemplatesResponse!.templates;
     setState(() {});
   }
