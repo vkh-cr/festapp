@@ -5,7 +5,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/services/LaunchUrlService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';

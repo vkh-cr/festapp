@@ -10,9 +10,9 @@ import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/themeConfig.dart';
-import '../FormEditorContent.dart';
+import '../pages/form_editor_content.dart';
 import 'ticket_product_editor_row.dart';
 
 class TicketEditorWidgets {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 const Map<String, IconData> fieldTypeIcons = {
   FormHelper.fieldTypeText: Icons.text_fields,

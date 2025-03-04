@@ -60,7 +60,7 @@ class TimeHelper {
         minimalStart = DateFormat.d(locale).format(start);
       } else {
         // Same year but different months: show day and abbreviated month for start.
-        minimalStart = '${DateFormat.d(locale).format(start)} ${DateFormat.MMM(locale).format(start)}';
+        minimalStart = DateFormat.MMMd(locale).format(start);
       }
     } else {
       // Different years: show full formatted start date.

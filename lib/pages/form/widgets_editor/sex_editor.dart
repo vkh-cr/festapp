@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class SexEditor {
   static Widget buildSexFieldReadOnly(BuildContext context, FormFieldModel field) {
