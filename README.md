@@ -70,7 +70,6 @@ Under similar names usually available in AppStore and Google Play Store.
 - Install screen updated with enhancements and instructions.
 - Profile button moved to the bottom app bar.
 - Admin page refined with sub-tabs, preparing for dynamic configuration features.
-- Event page sign-in link is now clickable for easier access.
 
 **2024.10**
 - Support for multi-organizations.
