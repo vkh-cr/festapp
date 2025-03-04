@@ -4,8 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class FieldHolder {
   static const String metaIsRequired = "is_required";
@@ -46,9 +45,6 @@ class FieldHolder {
 }
 
 class OptionsFieldHolder extends FieldHolder {
-  static const String metaLabel = "label";
-  static const String metaOptionsType = "optionsType";
-  static const String metaOptions = "options";
 
   final List<FormOptionModel> options;
 
@@ -58,9 +54,10 @@ class OptionsFieldHolder extends FieldHolder {
     required this.options,
     required id,
     required title,
+    required isRequired,
   }) : super(
             defaultValue: value,
-            isRequired: true,
+            isRequired: isRequired,
             title: title,
             id: id);
 
@@ -178,7 +175,7 @@ class FormHolder {
           maxTickets: ffm.data != null ? ffm.data[FormHelper.metaMaxTickets] ?? 1 : 1,
           fields: [],
           isRequired: true);
-    } else if (fieldType == FormHelper.fieldTypeSelectOne) {
+    } else if (fieldType == FormHelper.fieldTypeSelectOne || fieldType == FormHelper.fieldTypeSelectMany) {
       // Safely extract the options list from ffm.data
       List<dynamic> optionsData = ffm.data[FormHelper.metaOptions] ?? [];
 
@@ -187,16 +184,20 @@ class FormHolder {
           .mapIndexed((index, o) {
         // Safely access the 'value' key
         String value = '';
-        if (o is Map<String, dynamic> && o.containsKey('value')) {
-          value = o['value']?.toString() ?? '';
+        if (o is Map<String, dynamic> && o.containsKey(FormOptionModel.metaValue)) {
+          value = o[FormOptionModel.metaValue]?.toString() ?? '';
         }
-        return FormOptionModel(index.toString(), value);
-      })
-          .toList();
+        String description = '';
+        if (o is Map<String, dynamic> && o.containsKey(FormOptionModel.metaDescription)) {
+          description = o[FormOptionModel.metaDescription]?.toString() ?? '';
+        }
+        return FormOptionModel(index.toString(), value, description: description);
+      }).toList();
 
       return OptionsFieldHolder(
         id: ffm.id,
         fieldType: ffm.type!,
+        isRequired: ffm.isRequired ?? false,
         options: formOptions,
         title: ffm.title,
       );
@@ -204,7 +205,13 @@ class FormHolder {
       return OptionsFieldHolder(
           id: ffm.id,
           fieldType: ffm.type!,
-          options: ffm.productType!.products!.map((p) => FormOptionModel(p.id.toString(), p.title!, price: p.price ?? 0, type: ffm.type!)).toList(),
+        isRequired: ffm.isRequired ?? false,
+          options: ffm.productType!.products!.map((p) =>
+              FormOptionModel(
+                  p.id.toString(),
+                  p.title!, price: p.price ?? 0,
+                  type: ffm.type!,
+                  description: p.description)).toList(),
           title: ffm.productType!.title,
       );
     } else {

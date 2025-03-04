@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';

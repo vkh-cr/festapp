@@ -56,33 +56,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch the secret associated with the bank account
-    const { data: bankAccount, error: bankAccountError } = await supabaseAdmin
-      .schema("eshop")
-      .from("bank_accounts")
-      .select("secret")
-      .eq("id", bankAccountId)
-      .single();
+    const { data: secretDetails, error } = await supabaseAdmin.rpc('get_bank_account_secret', {
+      p_bank_account_id: bankAccountId
+    });
 
-    if (bankAccountError || !bankAccount || !bankAccount.secret) {
-      console.error("Bank account or associated secret not found:", bankAccountError);
+    if (error || !secretDetails || !secretDetails.secret) {
+      console.error("Bank account or associated secret not found:", error);
       return new Response(JSON.stringify({ error: "Bank account not found or missing secret" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
-    }
-
-    // Fetch the secret details
-    const { data: secretDetails, error: secretError } = await supabaseAdmin
-      .schema("eshop")
-      .from("secrets")
-      .select("secret, expiry_date")
-      .eq("id", bankAccount.secret)
-      .single();
-
-    if (secretError || !secretDetails || !secretDetails.secret) {
-      console.error("Secret not found or invalid:", secretError);
-      return new Response(JSON.stringify({ error: "Secret not found or expired" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });

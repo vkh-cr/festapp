@@ -12,11 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
   static final _supabase = Supabase.instance.client;
-  static UserInfoModel? get currentUser => UserInfoModel(
-      email: currentOccasionUser!.data?[Tb.occasion_users.data_email],
-      name: currentOccasionUser!.data?[Tb.occasion_users.data_name],
-      surname: currentOccasionUser!.data?[Tb.occasion_users.data_surname]
-  );
+  static UserInfoModel? currentUser;
   static OccasionUserModel? currentOccasionUser;
   static OccasionUserModel? currentUnitUser;
   static int? currentOccasionId;

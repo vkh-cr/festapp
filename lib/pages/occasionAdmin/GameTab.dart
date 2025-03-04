@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/pages/occasionAdmin/GameCheckPointsContent.dart';
 import 'package:fstapp/pages/occasionAdmin/GameSettingsContent.dart';
 import 'package:fstapp/pages/occasionAdmin/GameUserGroupsContent.dart';

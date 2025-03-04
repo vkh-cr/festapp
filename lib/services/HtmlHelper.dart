@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
+import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/services/ImageCompressionHelper.dart';
 import 'package:html/parser.dart' as html_parser;
+import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:html/dom.dart';
 
@@ -171,5 +174,105 @@ class HtmlHelper {
     }
 
     return document.body!.innerHtml;
+  }
+
+  static String stripHtml(String htmlText) {
+    return htmlText.replaceAll(
+        RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false),
+        ''
+    );
+  }
+
+  static bool isHtmlEmptyOrNull(String? htmlText) {
+    if(htmlText == null) {
+      return true;
+    }
+
+    return htmlText.replaceAll(
+        RegExp(r'<(?!img\b)[^>]*>', caseSensitive: false),
+        ''
+    ).trim().isEmpty;
+  }
+
+  static Future<String> storeImagesToOccasion(String oldHtml, String newHtml, int occasionId, { maxWidth = 1200 }) async {
+    // Parse the old and new HTML documents.
+    final oldDocument = html_parser.parse(oldHtml);
+    final newDocument = html_parser.parse(newHtml);
+
+    // Collect image src values from the old HTML.
+    List<String> oldImageUrls = oldDocument.getElementsByTagName('img')
+        .map((img) => img.attributes['src'] ?? '')
+        .where((src) => src.isNotEmpty)
+        .toList();
+
+    // Process each image in the new HTML.
+    List<Element> newImages = newDocument.getElementsByTagName('img');
+    for (var image in newImages) {
+      String? src = image.attributes['src'];
+      if (src == null || src.isEmpty) continue;
+
+      bool isBase64 = src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix);
+
+      // For non-base64 images, check if it has already been uploaded.
+      bool alreadyUploaded = false;
+      if (!isBase64) {
+        alreadyUploaded = await DbImages.isImageUploaded(src, occasionId);
+        if (alreadyUploaded) continue;
+      }
+
+      Uint8List imageData;
+      if (isBase64) {
+        // Decode the base64 image data.
+        String base64Data = src.contains(jpegBase64Prefix)
+            ? src.replaceFirst(jpegBase64Prefix, '')
+            : src.replaceFirst(pngBase64Prefix, '');
+        imageData = base64.decode(base64Data);
+      } else {
+        // For linked images, fetch the image data from the URL.
+        var fetched = await fetchImageData(src);
+        if(fetched == null) {
+          continue;
+        }
+        imageData = fetched;
+      }
+
+
+      var compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      // Upload the compressed image and get the public URL.
+      final publicUrl = await DbImages.uploadImage(compressedImageData, occasionId, null);
+      // Update the image tag's src attribute.
+      image.attributes['src'] = publicUrl;
+    }
+
+    // Collect image src values from the new HTML after processing.
+    List<String> newImageUrls = newDocument.getElementsByTagName('img')
+        .map((img) => img.attributes['src'] ?? '')
+        .where((src) => src.isNotEmpty)
+        .toList();
+
+    // Determine which images have been removed (present in old HTML but not in new HTML).
+    List<String> removedImages = oldImageUrls.where((oldUrl) => !newImageUrls.contains(oldUrl)).toList();
+    // Clean up the removed images from occasion storage.
+    await DbImages.cleanupRemovedImages(removedImages, occasionId);
+
+    return newDocument.outerHtml;
+  }
+
+  static Future<Uint8List?> fetchImageData(String src) async {
+    final client = http.Client();
+    try {
+      final response = await client.get(Uri.parse(src));
+      if (response.statusCode == 200) {
+        return response.bodyBytes;
+      } else {
+        print('Error fetching image: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching image: $e');
+      return null;
+    } finally {
+      client.close();
+    }
   }
 }

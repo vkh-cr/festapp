@@ -1,8 +1,8 @@
 import 'dart:collection';
 
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:flutter/material.dart';

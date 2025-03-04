@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
@@ -31,9 +31,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
     loadPlaces();
   }
 
+  bool isLoadedOccasion = false;
+  bool isLoadedPlaces = false;
+
   Future<void> loadOccasion() async {
     // Fetch the occasion based on the current occasion ID
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasionId!);
+    isLoadedOccasion = true;
     setState(() {}); // Update UI after loading occasion data
   }
 
@@ -41,6 +45,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
     var placesRaws = await DbPlaces.getMapPlaces();
     var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouValue); // Add "Without Value" to options
+    isLoadedPlaces = true;
+
     setState(() {
       places.clear();
       places.addAll(placesStrings);
@@ -49,6 +55,9 @@ class _ScheduleContentState extends State<ScheduleContent> {
 
   @override
   Widget build(BuildContext context) {
+    if(!isLoadedOccasion || !isLoadedPlaces){
+      return Center(child: CircularProgressIndicator());
+    }
     return SingleTableDataGrid<EventModel>(
       SingleDataGridController<EventModel>(
         context: context,
@@ -185,6 +194,6 @@ class _ScheduleContentState extends State<ScheduleContent> {
           ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

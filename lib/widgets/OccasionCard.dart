@@ -4,23 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
-import 'package:fstapp/pages/occasion/EventPage.dart';
-import 'package:fstapp/pages/occasion/SchedulePage.dart';
-import 'package:fstapp/services/LinkModel.dart';
-import 'package:intl/intl.dart';
+import 'package:fstapp/services/features/Feature.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
 
-const double kCardBorderRadius = 15.0;
-const double kPresentBorderWidth = 4.0;
-const double kMinCardWidth = 300.0;
-const double kMinCardHeight = 150.0;
-const Duration kAnimationDuration = Duration(milliseconds: 200);
-const double kCardWidth = 16.0;
-const double kCardHeight = 9.0;
-
 class OccasionCard extends StatefulWidget {
+  static const double kCardBorderRadius = 15.0;
+  static const double kPresentBorderWidth = 4.0;
+  static const double kMinCardWidth = 300.0;
+  static const double kMinCardHeight = 150.0;
+  static const Duration kAnimationDuration = Duration(milliseconds: 200);
+  static const double kCardWidth = 16.0;
+  static const double kCardHeight = 9.0;
+
   final OccasionModel occasion;
   final bool isPast;
   final bool isPresent;
@@ -43,29 +42,40 @@ class _OccasionCardState extends State<OccasionCard> {
   Widget build(BuildContext context) {
     final Border? border = widget.isPresent
         ? Border.all(
-        color: Theme.of(context).primaryColor, width: kPresentBorderWidth)
+      color: Theme.of(context).primaryColor,
+      width: OccasionCard.kPresentBorderWidth,
+    )
         : null;
 
-    final double innerRadius =
-    widget.isPresent ? kCardBorderRadius - kPresentBorderWidth : kCardBorderRadius;
+    final double innerRadius = widget.isPresent
+        ? OccasionCard.kCardBorderRadius - OccasionCard.kPresentBorderWidth
+        : OccasionCard.kCardBorderRadius;
+
+    // Retrieve external price from the 'form' feature, if available.
+    var details = FeatureService.getFeatureDetails(
+      FeatureConstants.form, features: widget.occasion.features,
+    );
+    String? externalPrice = details?.formExternalPrice;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
       child: LayoutBuilder(builder: (context, constraints) {
-        final double widthScale = (constraints.maxWidth / kMinCardWidth).clamp(1.0, 1.5);
-        final double heightScale = (constraints.maxHeight / kMinCardHeight).clamp(1.0, 1.2);
+        final double widthScale =
+        (constraints.maxWidth / OccasionCard.kMinCardWidth).clamp(1.0, 1.5);
+        final double heightScale =
+        (constraints.maxHeight / OccasionCard.kMinCardHeight).clamp(1.0, 1.2);
         final double buttonScale = (widthScale + heightScale) / 2;
 
         return ConstrainedBox(
           constraints: const BoxConstraints(
-            minWidth: kMinCardWidth,
-            minHeight: kMinCardHeight,
+            minWidth: OccasionCard.kMinCardWidth,
+            minHeight: OccasionCard.kMinCardHeight,
           ),
           child: AnimatedContainer(
-            duration: kAnimationDuration,
+            duration: OccasionCard.kAnimationDuration,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(kCardBorderRadius),
+              borderRadius: BorderRadius.circular(OccasionCard.kCardBorderRadius),
               border: border,
               boxShadow: [
                 if (widget.isPresent)
@@ -77,9 +87,7 @@ class _OccasionCardState extends State<OccasionCard> {
                 BoxShadow(
                   color: isHovered ? Colors.black26 : Colors.black12,
                   blurRadius: isHovered ? 8 : 4,
-                  offset: isHovered
-                      ? const Offset(0, 4)
-                      : const Offset(0, 2),
+                  offset: isHovered ? const Offset(0, 4) : const Offset(0, 2),
                 ),
               ],
             ),
@@ -98,6 +106,33 @@ class _OccasionCardState extends State<OccasionCard> {
                     Positioned.fill(
                       child: Container(
                         color: Colors.grey.withOpacity(0.6),
+                      ),
+                    ),
+                  // Display external price badge at top right if available.
+                  if (externalPrice != null && externalPrice.trim().isNotEmpty)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: ClipRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: SelectableText(
+                              externalPrice,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   Positioned(
@@ -124,8 +159,11 @@ class _OccasionCardState extends State<OccasionCard> {
                               ),
                               const SizedBox(height: 4),
                               SelectableText(
-                                '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.startTime!)} - '
-                                    '${DateFormat.yMMMd(Localizations.localeOf(context).languageCode).format(widget.occasion.endTime!)}',
+                                TimeHelper.getMinimalisticDateRange(
+                                  context,
+                                  widget.occasion.startTime!,
+                                  widget.occasion.endTime!,
+                                ),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -143,15 +181,15 @@ class _OccasionCardState extends State<OccasionCard> {
                     child: OutlinedButton(
                       onPressed: () async {
                         if (!FeatureService.isFeatureEnabled(
-                            FeatureService.form,
-                            fromFeatures: widget.occasion.features)) {
+                            FeatureConstants.form,
+                            features: widget.occasion.features)) {
                           await RightsService.updateOccasionData(widget.occasion.link!);
                           await RouterService.navigateOccasion(context, "");
                         } else {
                           showDialog(
                             context: context,
-                            builder: (context) => OccasionDetailDialog(
-                                occasion: widget.occasion),
+                            builder: (context) =>
+                                OccasionDetailDialog(occasion: widget.occasion),
                           );
                         }
                       },
@@ -164,13 +202,7 @@ class _OccasionCardState extends State<OccasionCard> {
                         minimumSize: Size(112 * buttonScale, 36 * buttonScale),
                       ),
                       child: Text(
-                        widget.isPast ||
-                            widget.isPresent ||
-                            !FeatureService.isFeatureEnabled(
-                                FeatureService.form,
-                                fromFeatures: widget.occasion.features)
-                            ? "Detail".tr()
-                            : "Reserve a spot".tr(),
+                        "Detail".tr(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14 * buttonScale,
