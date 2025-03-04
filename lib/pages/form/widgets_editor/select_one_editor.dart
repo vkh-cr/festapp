@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/pages/form/widgets/option_editor_dialog.dart';
+
+import 'option_editor_dialog.dart';
 
 class SelectOneEditor {
   static Widget buildSelectOneReadOnly(BuildContext context, FormFieldModel field) {

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
-import 'package:fstapp/pages/form/widgets/sex_editor.dart';
 import 'package:fstapp/themeConfig.dart';
-import '../FormEditorContent.dart';
+import '../pages/form_editor_content.dart';
+import '../widgets_view/form_helper.dart';
+import 'sex_editor.dart';
 import 'ticket_editor_widgets.dart';
 import 'select_one_editor.dart';
 import 'select_many_editor.dart'; // new import for selectMany functionality
 
 class FormFieldsGenerator extends StatefulWidget {
   final FormModel form;
-  const FormFieldsGenerator({Key? key, required this.form}) : super(key: key);
+  const FormFieldsGenerator({super.key, required this.form});
 
   @override
   _FormFieldsGeneratorState createState() => _FormFieldsGeneratorState();
