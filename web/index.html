@@ -143,22 +143,13 @@
       document.body.style.backgroundColor = color;
     }
   </script>
-  <style>
-    body {
-      height: 100vh !important;
-      position: static !important;
-    }
-
-    flt-glass-pane {
-      position: fixed !important;
-    }
-  </style>
 </head>
 <body>
 
 <script>
   // Disable swipe back gesture globally
   document.body.style.overscrollBehaviorX = "none";
+  document.body.style.overscrollBehaviorY = "none";
 
   let deferredPrompt;
 
