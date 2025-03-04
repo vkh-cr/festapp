@@ -36,7 +36,7 @@ class _ServiceTabState extends State<ServiceTab> {
 
   List<ServiceItemModel>? allFood;
   List<ServiceItemModel>? allAccommodation;
-  Key refreshKey = UniqueKey();
+  SingleDataGridController<OccasionUserModel>? _controller;
 
   @override
   void initState() {
@@ -44,59 +44,72 @@ class _ServiceTabState extends State<ServiceTab> {
     loadData();
   }
 
+  /// Loads service data for food and accommodation and updates the grid.
   Future<void> loadData() async {
     var af = await DbOccasions.getAllServices(DbOccasions.serviceTypeFood);
     var aa = await DbOccasions.getAllServices(DbOccasions.serviceTypeAccommodation);
 
     setState(() {
-      allAccommodation = aa;
       allFood = af;
-      refreshKey = UniqueKey();
+      allAccommodation = aa;
     });
+
+    // If the controller is already created, update its columns and force a reload.
+    if (_controller != null) {
+      _controller!.columns = UserColumns.generateColumns(
+        columnIdentifiers,
+        data: {
+          UserColumns.FOOD: allFood,
+          UserColumns.ACCOMMODATION: allAccommodation,
+        },
+      );
+      _controller!.forceReload();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: refreshKey,
-      child: allFood == null
-          ? Center(child: CircularProgressIndicator())
-          : SingleTableDataGrid<OccasionUserModel>(
-        SingleDataGridController<OccasionUserModel>(
-          context: context,
-          loadData: DbUsers.getOccasionUsersServiceTab,
-          fromPlutoJson: OccasionUserModel.fromPlutoJson,
-          firstColumnType: DataGridFirstColumn.none,
-          idColumn: Tb.occasion_users.user,
-          actionsExtended: DataGridActionsController(
-            areAllActionsEnabled: RightsService.canUpdateUsers,
-            isAddActionPossible: () => false,
-          ),
-          headerChildren: [
-            DataGridAction(
-              name: "Accommodation settings".tr(),
-              action: (SingleDataGridController p0, [_]) => _accommodationDefinition(p0),
-              isEnabled: RightsService.isManager,
-            ),
-            DataGridAction(
-              name: "Food settings".tr(),
-              action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
-              isEnabled: RightsService.isManager,
-            ),
-          ],
-          columns: UserColumns.generateColumns(
-            columnIdentifiers,
-            data: {
-              UserColumns.FOOD: allFood,
-              UserColumns.ACCOMMODATION: allAccommodation,
-            },
-          ),
+    // Show a loading indicator until the data is available.
+    if (allFood == null || allAccommodation == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    // Create the controller only once.
+    _controller ??= SingleDataGridController<OccasionUserModel>(
+      context: context,
+      loadData: DbUsers.getOccasionUsersServiceTab,
+      fromPlutoJson: OccasionUserModel.fromPlutoJson,
+      firstColumnType: DataGridFirstColumn.none,
+      idColumn: Tb.occasion_users.user,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.canUpdateUsers,
+        isAddActionPossible: () => false,
+      ),
+      headerChildren: [
+        DataGridAction(
+          name: "Accommodation settings".tr(),
+          action: (SingleDataGridController p0, [_]) => _accommodationDefinition(p0),
+          isEnabled: RightsService.isManager,
         ),
+        DataGridAction(
+          name: "Food settings".tr(),
+          action: (SingleDataGridController p0, [_]) => _foodDefinition(p0),
+          isEnabled: RightsService.isManager,
+        ),
+      ],
+      columns: UserColumns.generateColumns(
+        columnIdentifiers,
+        data: {
+          UserColumns.FOOD: allFood,
+          UserColumns.ACCOMMODATION: allAccommodation,
+        },
       ),
     );
+
+    return SingleTableDataGrid<OccasionUserModel>(_controller!);
   }
 
-  _accommodationDefinition(SingleDataGridController<IPlutoRowModel> p0) async {
+  _accommodationDefinition(SingleDataGridController<IPlutoRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -109,11 +122,11 @@ class _ServiceTabState extends State<ServiceTab> {
       },
     );
 
-    // Reload data and trigger a full page rebuild
+    // Reload the service data and refresh the grid.
     await loadData();
   }
 
-  _foodDefinition(SingleDataGridController<IPlutoRowModel> p0) async {
+  _foodDefinition(SingleDataGridController<IPlutoRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -126,7 +139,7 @@ class _ServiceTabState extends State<ServiceTab> {
       },
     );
 
-    // Reload data and trigger a full page rebuild
+    // Reload the service data and refresh the grid.
     await loadData();
   }
 }

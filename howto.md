@@ -93,6 +93,7 @@ fvm flutter pub run flutter_launcher_icon
 ##### Web Deployment
 - Set up Netlify from branch.
 - Example Netlify setup for domain `app.festapp.net`:
+
   Type: A  
   Name: app  
   Value: 75.2.60.5

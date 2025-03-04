@@ -295,7 +295,8 @@ BEGIN
                                     data,
                                     is_hidden,
                                     title_short,
-                                    "order"
+                                    "order",
+                                    maximum
                                 )
                                 VALUES (
                                     now_ts,
@@ -308,7 +309,8 @@ BEGIN
                                     product_data->'data',
                                     COALESCE((product_data->>'is_hidden')::BOOLEAN, false),
                                     product_data->>'title_short',
-                                    NULLIF(product_data->>'order','')::BIGINT
+                                    NULLIF(product_data->>'order','')::BIGINT,
+                                    NULLIF(product_data->>'maximum','')::BIGINT
                                 )
                                 RETURNING id INTO product_id;
 
@@ -353,7 +355,8 @@ BEGIN
                                        data = product_data->'data',
                                        is_hidden = COALESCE((product_data->>'is_hidden')::BOOLEAN, false),
                                        title_short = product_data->>'title_short',
-                                       "order" = NULLIF(product_data->>'order','')::BIGINT
+                                       "order" = NULLIF(product_data->>'order','')::BIGINT,
+                                       maximum = NULLIF(product_data->>'maximum','')::BIGINT
                                  WHERE id = product_id
                                    AND product_type = product_type_id;
                             END IF;

@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/pages/eshop/BlueprintEditorTab.dart';
 import 'package:fstapp/pages/eshop/EmailTemplatesTab.dart';
-import 'package:fstapp/pages/form/FormTab.dart';
+import 'package:fstapp/pages/form/pages/form_tab.dart';
 import 'package:fstapp/pages/eshop/OrdersTab.dart';
 import 'package:fstapp/pages/eshop/ReportTab.dart';
 import 'package:fstapp/pages/eshop/TicketsTab.dart';
