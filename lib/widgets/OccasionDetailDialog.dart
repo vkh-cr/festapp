@@ -119,7 +119,6 @@ class OccasionDetailDialog extends StatelessWidget {
                                 await RightsService.updateOccasionData(
                                     occasion.link!);
                                 await RouterService.navigateOccasion(context, "");
-                                Navigator.of(context).pop();
                               },
                               style: unifiedButtonStyle,
                               child: Text(

@@ -22,7 +22,7 @@ class RouterService {
 
   static Future<T?> navigateOccasion<T extends Object?>(
       BuildContext context, String path) {
-    return context.router.pushNamed(getCurrentLink() + path);
+    return context.router.pushPath(getCurrentLink() + path);
   }
 
   static Future<T?> changeOnOccasion<T extends Object?>(
@@ -34,7 +34,7 @@ class RouterService {
 
   static Future<T?> navigate<T extends Object?>(BuildContext context, String path) {
     path = fixPath(path);
-    return context.router.pushNamed(path);
+    return context.router.pushPath(path);
   }
 
   static String fixPath(String path) {
