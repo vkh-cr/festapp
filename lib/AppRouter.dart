@@ -22,7 +22,7 @@ import 'package:fstapp/pages/user/SignupPage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
 import 'package:fstapp/pages/occasion/UserPage.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/utility/InstanceInstallPage.dart';
 
 import 'AppRouter.gr.dart';

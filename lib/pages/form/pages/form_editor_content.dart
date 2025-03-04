@@ -6,15 +6,16 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
-import 'package:fstapp/pages/form/FormFieldWidgets.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:easy_localization/easy_localization.dart';
+
+import '../widgets_editor/form_fields_generator.dart';
 
 
 /// Global constant for hidden item opacity
@@ -24,6 +25,7 @@ const double kHiddenOpacity = 0.5;
 const Map<String, IconData> fieldTypeIcons = {
   FormHelper.fieldTypeText: Icons.text_fields,
   FormHelper.fieldTypeSelectOne: Icons.radio_button_checked,
+  FormHelper.fieldTypeSelectMany: Icons.check_box_outlined,
   FormHelper.fieldTypeEmail: Icons.email,
   FormHelper.fieldTypeName: Icons.person,
   FormHelper.fieldTypeSurname: Icons.person_outline,
@@ -31,13 +33,13 @@ const Map<String, IconData> fieldTypeIcons = {
   FormHelper.fieldTypeCity: Icons.location_city,
   FormHelper.fieldTypeBirthYear: Icons.cake,
   FormHelper.fieldTypeNote: Icons.note,
-  FormHelper.fieldTypeSpot: Icons.place,
+  FormHelper.fieldTypeSpot: Icons.event_seat,
   FormHelper.fieldTypeProductType: Icons.category,
   FormHelper.fieldTypeTicket: Icons.confirmation_number,
 };
 
 class FormEditorContent extends StatefulWidget {
-  const FormEditorContent({Key? key}) : super(key: key);
+  const FormEditorContent({super.key});
 
   @override
   _FormEditorContentState createState() => _FormEditorContentState();
@@ -100,6 +102,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
       if ([
         FormHelper.fieldTypeText,
         FormHelper.fieldTypeSelectOne,
+        FormHelper.fieldTypeSelectMany,
       ].contains(type)) {
         return true;
       }
@@ -255,35 +258,34 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     thickness: 1,
                     color: Colors.grey,
                   ),
-                  if (form?.header != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        HtmlView(html: form!.header!, isSelectable: true),
-                        const SizedBox(height: 16),
-                        Center(
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.edit),
-                            label: Text("Edit content".tr()),
-                            onPressed: () async {
-                              final result = await RouterService
-                                  .navigatePageInfo(
-                                context,
-                                HtmlEditorRoute(
-                                  content: {
-                                    HtmlEditorPage.parContent: form!.header!
-                                  },
-                                ),
-                              );
-                              if (result != null) {
-                                setState(() =>
-                                form!.header = result as String);
-                              }
-                            },
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      HtmlView(html: form!.header ?? "", isSelectable: true),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton.icon(
+                          icon: const Icon(Icons.edit),
+                          label: Text("Edit content".tr()),
+                          onPressed: () async {
+                            final result = await RouterService
+                                .navigatePageInfo(
+                              context,
+                              HtmlEditorRoute(
+                                content: {
+                                  HtmlEditorPage.parContent: form!.header ?? ""
+                                },
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() =>
+                              form!.header = result as String);
+                            }
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

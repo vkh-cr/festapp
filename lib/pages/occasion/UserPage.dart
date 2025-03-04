@@ -12,7 +12,8 @@ import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/MapPage.dart';
 import 'package:fstapp/pages/occasion/SettingsPage.dart';
@@ -161,7 +162,7 @@ class _UserPageState extends State<UserPage> {
                 const SizedBox(height: 15),
 
                 // Show QR code button only if the 'ticket' feature is enabled.
-                if (FeatureService.isFeatureEnabled(FeatureService.entryCode))
+                if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: ButtonsHelper.buildReferenceButton(
@@ -178,7 +179,7 @@ class _UserPageState extends State<UserPage> {
                   ),
 
                 // Show companions only if the 'companions' feature is enabled and there is at least one companion.
-                if (FeatureService.isFeatureEnabled(FeatureService.companions) &&
+                if (FeatureService.isFeatureEnabled(FeatureConstants.companions) &&
                     (userData?.companions?.isNotEmpty ?? false))
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 10),

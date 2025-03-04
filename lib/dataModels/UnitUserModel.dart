@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 
 class UnitUserModel extends IPlutoRowModel {
@@ -67,10 +67,18 @@ class UnitUserModel extends IPlutoRowModel {
     return PlutoRow(cells: cells);
   }
 
+  factory UnitUserModel.newRow(int unitId) {
+    return UnitUserModel(unit: unitId);
+  }
+
   static UnitUserModel fromPlutoJson(Map<String, dynamic> json) {
     return UnitUserModel(
         unit: json[Tb.unit_users.unit],
         user: json["id"],
+        name: json[Tb.occasion_users.data_name],
+        surname: json[Tb.occasion_users.data_surname],
+        sex: json[Tb.occasion_users.data_sex],
+        emailReadonly: json[Tb.occasion_users.data_email],
         isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
         isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
         isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
@@ -81,6 +89,10 @@ class UnitUserModel extends IPlutoRowModel {
   Map toJson() => {
     Tb.unit_users.user: user,
     Tb.unit_users.unit: unit,
+    Tb.user_info.name: name,
+    Tb.user_info.surname: surname,
+    Tb.user_info.sex: sex,
+    Tb.occasion_users.data_email: emailReadonly,
     Tb.unit_users.is_manager: isManager,
     Tb.unit_users.is_editor: isEditor,
     Tb.unit_users.is_editor_view: isEditorView,

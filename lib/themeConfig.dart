@@ -112,6 +112,7 @@ class ThemeConfig {
   static Color grey800(BuildContext context) => isDarkMode(context) ? Colors.grey[200]! : Colors.grey[800]!;
   static Color grey700(BuildContext context) => isDarkMode(context) ? Colors.grey[300]! : Colors.grey[700]!;
   static Color grey600(BuildContext context) => isDarkMode(context) ? Colors.grey[400]! : Colors.grey[600]!;
+  static Color grey500(BuildContext context) => isDarkMode(context) ? Colors.grey[600]! : Colors.grey[500]!;
   static Color grey380(BuildContext context) => Colors.black38;
   static Color grey300(BuildContext context) => isDarkMode(context) ? Colors.grey[800]! : Colors.grey[300]!;
   static Color grey200(BuildContext context) => isDarkMode(context) ? Colors.grey[800]! : Colors.grey[200]!;
