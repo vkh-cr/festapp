@@ -14,24 +14,17 @@ class BirthDateFieldHolder extends FieldHolder {
   final String message;
 
   BirthDateFieldHolder({
-    required int id,
-    required String fieldType,
-    required bool isRequired,
-    dynamic defaultValue,
-    String? title,
-    String? description,
+    required super.id,
+    required super.fieldType,
+    required super.isRequired,
+    super.defaultValue,
+    super.title,
+    super.description,
     this.maxYear,
     this.minYear,
     this.isHard = false,
     this.message = "",
-  }) : super(
-    id: id,
-    fieldType: fieldType,
-    isRequired: isRequired,
-    defaultValue: defaultValue,
-    title: title,
-    description: description,
-  );
+  });
 
   @override
   Map<String, dynamic> toJson() {

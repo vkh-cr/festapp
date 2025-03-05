@@ -46,7 +46,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
 
     return ReorderableListView.builder(
       shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      primary: false,
       buildDefaultDragHandles: false,
       itemCount: topLevelFields.length,
       itemBuilder: (context, index) {

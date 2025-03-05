@@ -11,7 +11,6 @@ import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 
-import '../models/birth_date_field_holder.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import '../models/form_ticket_model.dart';

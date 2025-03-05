@@ -391,29 +391,6 @@ class FormHelper {
     }
   }
 
-  /// Example function to build a label with optional “required” star.
-  static Widget buildTitleWidget(
-      String title,
-      bool? isRequired,
-      BuildContext context, {
-        TextStyle? textStyle,
-      }) {
-    final style = textStyle ?? Theme.of(context).textTheme.bodyLarge;
-    return RichText(
-      text: TextSpan(
-        text: title,
-        style: style,
-        children: [
-          if (isRequired == true)
-            TextSpan(
-              text: ' *',
-              style: style?.copyWith(color: ThemeConfig.redColor(context)),
-            ),
-        ],
-      ),
-    );
-  }
-
   static TextStyle labelTextStyle(BuildContext context) {
     return TextStyle(
       fontWeight: FontWeight.bold,
