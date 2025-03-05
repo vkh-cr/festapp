@@ -71,18 +71,19 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
 
     // Localized date format (using easy_localization).
     final dateFormat = DateFormat.yMd(context.locale.toString());
-
+    FocusNode focusNode = FocusNode();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderDateTimePicker(
+          focusNode: focusNode,
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
           format: dateFormat,
           fieldHintText: dateFormat.pattern,
           decoration: InputDecoration(
-            label: FormHelper.buildLabel(context, widget.fieldHolder.title ?? "Birth Date".tr(), isRequired: widget.fieldHolder.isRequired),
+            label: FormFieldBuilders.buildTitleWidget(widget.fieldHolder.title ?? "Birth Date".tr(), widget.fieldHolder.isRequired, context, focusNode: focusNode),
           ),
           helpText: "Birth Date".tr(),
           firstDate: pickerFirstDate,
