@@ -22,24 +22,11 @@ class OptionFieldHelper {
       label: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            label,
-            style: labelTextStyle(context),
-          ),
-          if (isRequired) Text(' *', style: labelTextStyle(context).copyWith(color: ThemeConfig.redColor(context))),
+          FormHelper.buildLabel(context, label, isRequired: isRequired),
         ],
       ),
       errorText: errorText,
       border: InputBorder.none,
-    );
-  }
-
-  /// Text style used for form-field labels.
-  static TextStyle labelTextStyle(BuildContext context) {
-    return TextStyle(
-      fontWeight: FontWeight.bold,
-      color: ThemeConfig.grey700(context),
-      fontSize: 19 * FormHelper.fontSizeFactor,
     );
   }
 
