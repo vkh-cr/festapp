@@ -22,7 +22,7 @@ import 'package:fstapp/pages/user/SignupPage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
 import 'package:fstapp/pages/occasion/UserPage.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/utility/InstanceInstallPage.dart';
 
 import 'AppRouter.gr.dart';
@@ -31,6 +31,7 @@ import 'pages/occasion/GamePage.dart';
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
   static const String LINK = "occasionLink";
+  static const String linkFormatted = "{$LINK}";
 
   @override
   RouteType get defaultRouteType => const RouteType.material();
@@ -51,18 +52,18 @@ class AppRouter extends RootStackRouter {
     ]),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
     AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
-    AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
-    AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
-    AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
-    AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
-    AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
-    AutoRoute(page: TimetableRoute.page, path: "/:{$LINK}/${TimetablePage.ROUTE}"),
-    AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
-    AutoRoute(page: SongbookRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
-    AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
+    AutoRoute(page: CheckRoute.page, path: "/:$linkFormatted/${CheckPage.ROUTE}/:id"),
+    AutoRoute(page: NewsFormRoute.page, path: "/:$linkFormatted/${NewsFormPage.ROUTE}"),
+    AutoRoute(page: HtmlEditorRoute.page, path: "/:$linkFormatted/${HtmlEditorPage.ROUTE}"),
+    AutoRoute(page: AdminRoute.page, path: "/:$linkFormatted/${AdminPage.ROUTE}"),
+    AutoRoute(page: MyScheduleRoute.page, path: "/:$linkFormatted/${MySchedulePage.ROUTE}"),
+    AutoRoute(page: TimetableRoute.page, path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
+    AutoRoute(page: GameRoute.page, path: "/:$linkFormatted/${GamePage.ROUTE}"),
+    AutoRoute(page: SongbookRoute.page, path: "/:$linkFormatted/${SongbookPage.ROUTE}"),
+    AutoRoute(page: EventEditRoute.page, path: "/:$linkFormatted/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
-    AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
+    AutoRoute(page: OccasionHomeRoute.page, path: "/:$linkFormatted", children: [
       AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
