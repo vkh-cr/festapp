@@ -501,5 +501,16 @@
   "Additional Settings": "Additional Settings",
   "Options": "Options",
   "Has description": "Has description",
+  "Validation Mode:": "Validation Mode:",
+  "Strict": "Strict",
+  "Lenient": "Lenient",
+  "Message": "Message",
+  "Max Age": "Max Age",
+  "Min Age": "Min Age",
+  "Strict Validation": "Strict Validation",
+  "Birth Date": "Birth Date",
+  "You must be between {minAge} and {maxAge} years old.": "You must be between {minAge} and {maxAge} years old.",
+  "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).": "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).",
+  "Max age cannot be lower than min age.": "Max age cannot be lower than min age.",
   "_":"_"
 }
