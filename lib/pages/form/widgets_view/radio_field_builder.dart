@@ -107,7 +107,7 @@ class RadioFieldBuilder {
             );
           },
         ),
-        Divider(thickness: 1, color: ThemeConfig.grey600(context)),
+        Divider(thickness: 1, color: ThemeConfig.grey500(context)),
       ],
     );
   }
