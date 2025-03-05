@@ -1,18 +1,21 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/services.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
+import 'package:fstapp/pages/form/widgets_view/birth_date_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+
+import '../models/birth_date_field_holder.dart';
+import '../models/field_holder.dart';
+import '../models/form_holder.dart';
+import '../models/form_ticket_model.dart';
+import '../models/ticket_holder.dart';
 
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
@@ -250,12 +253,12 @@ class FormFieldBuilders {
   }
 
   static FormBuilderTextField buildBirthYearField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
+    FocusNode focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
-      focusNode: _focusNode,
+      focusNode: focusNode,
       decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
       ),
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
@@ -19,7 +18,6 @@ import 'package:fstapp/pages/eshop/OrderFinishScreen.dart';
 import 'package:fstapp/pages/eshop/OrderPreviewScreen.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/services/UuidConverter.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -27,6 +25,9 @@ import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/SeatReservationWidget.dart';
+
+import '../models/form_holder.dart';
+import '../models/ticket_holder.dart';
 
 @RoutePage()
 class FormPage extends StatefulWidget {

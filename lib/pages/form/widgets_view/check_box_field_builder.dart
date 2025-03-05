@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/themeConfig.dart';
+import '../models/field_holder.dart';
+import '../models/form_holder.dart';
 import 'option_field_helper.dart';
 
 class CheckboxFieldBuilder {
