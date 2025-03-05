@@ -3,7 +3,7 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -83,7 +83,11 @@ class FormFieldModel extends IPlutoRowModel {
 
     if (options.isNotEmpty) {
       jsonData[FormHelper.metaOptions] = options.map((option) {
-        return {'value': option.title};
+        final optionData = {FormOptionModel.metaValue: option.title};
+        if (option.description != null && option.description!.trim().isNotEmpty) {
+          optionData[FormOptionModel.metaDescription] = option.description!;
+        }
+        return optionData;
       }).toList();
     }
 

@@ -46,6 +46,7 @@ class HtmlView extends StatefulWidget {
     required this.html,
     this.fontSize = 18,
     this.isSelectable = false,
+    this.color
   }) : super(key: key);
 
   @override

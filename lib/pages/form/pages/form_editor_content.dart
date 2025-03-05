@@ -6,8 +6,8 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
-import 'package:fstapp/pages/form/FormHelper.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -15,7 +15,7 @@ import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import 'widgets/form_fields_generator.dart';
+import '../widgets_editor/form_fields_generator.dart';
 
 
 /// Global constant for hidden item opacity
@@ -33,7 +33,7 @@ const Map<String, IconData> fieldTypeIcons = {
   FormHelper.fieldTypeCity: Icons.location_city,
   FormHelper.fieldTypeBirthYear: Icons.cake,
   FormHelper.fieldTypeNote: Icons.note,
-  FormHelper.fieldTypeSpot: Icons.place,
+  FormHelper.fieldTypeSpot: Icons.event_seat,
   FormHelper.fieldTypeProductType: Icons.category,
   FormHelper.fieldTypeTicket: Icons.confirmation_number,
 };
@@ -102,6 +102,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
       if ([
         FormHelper.fieldTypeText,
         FormHelper.fieldTypeSelectOne,
+        FormHelper.fieldTypeSelectMany,
       ].contains(type)) {
         return true;
       }

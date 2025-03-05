@@ -13,8 +13,8 @@ import 'package:auto_route/auto_route.dart' as _i30;
 import 'package:flutter/foundation.dart' as _i32;
 import 'package:flutter/material.dart' as _i31;
 import 'package:fstapp/dataModels/PlaceModel.dart' as _i33;
-import 'package:fstapp/pages/form/FormEditPage.dart' deferred as _i6;
-import 'package:fstapp/pages/form/FormPage.dart' deferred as _i7;
+import 'package:fstapp/pages/form/pages/form_edit_page.dart' deferred as _i6;
+import 'package:fstapp/pages/form/pages/form_page.dart' deferred as _i7;
 import 'package:fstapp/pages/occasion/CheckPage.dart' deferred as _i2;
 import 'package:fstapp/pages/occasion/EventEditPage.dart' deferred as _i3;
 import 'package:fstapp/pages/occasion/EventPage.dart' deferred as _i4;
@@ -336,11 +336,16 @@ class GameRouteArgs {
 class HtmlEditorRoute extends _i30.PageRouteInfo<HtmlEditorRouteArgs> {
   HtmlEditorRoute({
     Map<String, dynamic>? content,
+    int? occasionId,
     _i31.Key? key,
     List<_i30.PageRouteInfo>? children,
   }) : super(
          HtmlEditorRoute.name,
-         args: HtmlEditorRouteArgs(content: content, key: key),
+         args: HtmlEditorRouteArgs(
+           content: content,
+           occasionId: occasionId,
+           key: key,
+         ),
          initialChildren: children,
        );
 
@@ -354,22 +359,28 @@ class HtmlEditorRoute extends _i30.PageRouteInfo<HtmlEditorRouteArgs> {
       );
       return _i30.DeferredWidget(
         _i9.loadLibrary,
-        () => _i9.HtmlEditorPage(content: args.content, key: args.key),
+        () => _i9.HtmlEditorPage(
+          content: args.content,
+          occasionId: args.occasionId,
+          key: args.key,
+        ),
       );
     },
   );
 }
 
 class HtmlEditorRouteArgs {
-  const HtmlEditorRouteArgs({this.content, this.key});
+  const HtmlEditorRouteArgs({this.content, this.occasionId, this.key});
 
   final Map<String, dynamic>? content;
+
+  final int? occasionId;
 
   final _i31.Key? key;
 
   @override
   String toString() {
-    return 'HtmlEditorRouteArgs{content: $content, key: $key}';
+    return 'HtmlEditorRouteArgs{content: $content, occasionId: $occasionId, key: $key}';
   }
 }
 

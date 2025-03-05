@@ -87,6 +87,7 @@ class _UnitPageState extends State<UnitPage> {
           : null,
       body: CustomScrollView(
         controller: _scrollController,
+        cacheExtent: 500,
         slivers: [
           UniversalHeader(scrollController: _scrollController),
           // Quote section rendered as HTML in a paper-like container.
@@ -149,15 +150,19 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth /
+                      OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
                     final occasion = presentEvents[index];
-                    return OccasionCard(
-                      occasion: occasion,
-                      isPast: false,
-                      isPresent: true,
+                    // Wrap each card in a RepaintBoundary.
+                    return RepaintBoundary(
+                      child: OccasionCard(
+                        occasion: occasion,
+                        isPast: false,
+                        isPresent: true,
+                      ),
                     );
                   },
                   childCount: presentEvents.length,
@@ -190,15 +195,18 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth /
+                      OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
                     final occasion = upcomingEvents[index];
-                    return OccasionCard(
-                      occasion: occasion,
-                      isPast: false,
-                      isPresent: false,
+                    return RepaintBoundary(
+                      child: OccasionCard(
+                        occasion: occasion,
+                        isPast: false,
+                        isPresent: false,
+                      ),
                     );
                   },
                   childCount: upcomingEvents.length,
@@ -231,15 +239,18 @@ class _UnitPageState extends State<UnitPage> {
                       : 1,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
-                  childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
+                  childAspectRatio: OccasionCard.kCardWidth /
+                      OccasionCard.kCardHeight,
                 ),
                 delegate: SliverChildBuilderDelegate(
                       (context, index) {
                     final occasion = pastEvents[index];
-                    return OccasionCard(
-                      occasion: occasion,
-                      isPast: true,
-                      isPresent: false,
+                    return RepaintBoundary(
+                      child: OccasionCard(
+                        occasion: occasion,
+                        isPast: true,
+                        isPresent: false,
+                      ),
                     );
                   },
                   childCount: pastEvents.length,
