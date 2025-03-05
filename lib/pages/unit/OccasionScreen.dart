@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/occasionAdmin/AdminPage.dart';
 import 'package:fstapp/pages/unit/OccasionSettingPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';

@@ -13,7 +13,7 @@ import 'package:fstapp/services/DialogHelper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class GameUserGroupsContent extends StatefulWidget {
-  const GameUserGroupsContent({Key? key}) : super(key: key);
+  const GameUserGroupsContent({super.key});
 
   @override
   _GameUserGroupsContentState createState() => _GameUserGroupsContentState();
@@ -30,7 +30,6 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
 
   Future<void> loadAllUsers() async {
     _allUsers = await DbUsers.getAllUsersBasics();
-    setState(() {});
   }
 
   @override

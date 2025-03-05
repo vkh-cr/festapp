@@ -7,8 +7,8 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
-import 'package:fstapp/pages/form/check_box_field_builder.dart';
-import 'package:fstapp/pages/form/radio_field_builder.dart';
+import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
+import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -400,5 +400,7 @@ class FormHelper {
       ),
     );
   }
+
+
 
 }

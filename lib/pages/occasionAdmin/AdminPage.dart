@@ -28,6 +28,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.game,
     if(FeatureService.isFeatureEnabled(FeatureConstants.services))
     AdminTabDefinition.service,
+    AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
   ];
 
