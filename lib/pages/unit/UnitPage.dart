@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
@@ -72,6 +73,7 @@ class _UnitPageState extends State<UnitPage> {
         .toList();
     final upcomingEvents =
     _occasions.where((o) => o.startTime!.isAfter(now)).toList();
+    upcomingEvents.sort((a, b) => a.startTime!.compareTo(b.startTime!));
     final pastEvents =
     _occasions.where((o) => o.endTime!.isBefore(now)).toList();
 

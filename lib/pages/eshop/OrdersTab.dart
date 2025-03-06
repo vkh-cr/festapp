@@ -130,7 +130,7 @@ class _OrdersTabState extends State<OrdersTab> {
           "${"Do you want to change orders to paid?".tr()} (${stateChange.length})"
       );
 
-      if (confirm && mounted) {
+      if (confirm) {
         var futures = stateChange.map((s) {
           return () async {
             await DbOrders.updateOrderAndTicketsToPaid(s.id!);
@@ -154,7 +154,7 @@ class _OrdersTabState extends State<OrdersTab> {
         "${"Do you want to send the tickets to orders?".tr()} (${selected.length})"
     );
 
-    if (confirm && mounted) {
+    if (confirm) {
       var futures = selectedFull.map((s) {
         return () async {
           await sendTicketsToEmail(s);

@@ -80,23 +80,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch order => get occasion ID
-    const { data: orderData, error: orderError } = await supabaseAdmin
-      .schema("eshop")
-      .from("orders")
-      .select("occasion")
-      .eq("id", orderId)
-      .single();
+    const { data: occasionId, error: orderError } = await supabaseAdmin.rpc(
+      "get_order_occasion",
+      { order_id: orderId }
+    );
 
-    if (orderError || !orderData) {
-      console.error("Order not found:", orderError);
+    if (orderError || !occasionId) {
+      console.error("Order not found or error occurred:", orderError);
       return new Response(JSON.stringify({ error: "Order not found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
-
-    const occasionId = orderData.occasion;
 
     // Check if user is editor
     const userIsEditor = await isUserEditor(userId, occasionId);
