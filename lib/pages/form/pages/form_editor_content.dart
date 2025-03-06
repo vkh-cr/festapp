@@ -32,6 +32,7 @@ const Map<String, IconData> fieldTypeIcons = {
   FormHelper.fieldTypeSex: Icons.wc,
   FormHelper.fieldTypeCity: Icons.location_city,
   FormHelper.fieldTypeBirthYear: Icons.cake,
+  FormHelper.fieldTypeBirthDate: Icons.cake,
   FormHelper.fieldTypeNote: Icons.note,
   FormHelper.fieldTypeSpot: Icons.event_seat,
   FormHelper.fieldTypeProductType: Icons.category,

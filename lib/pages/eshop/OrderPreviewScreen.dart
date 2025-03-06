@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
+
+import '../form/models/form_holder.dart';
+import '../form/models/ticket_holder.dart';
 
 class OrderPreviewScreen extends StatelessWidget {
   final FormHolder formHolder;

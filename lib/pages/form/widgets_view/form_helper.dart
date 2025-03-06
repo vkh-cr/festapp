@@ -1,7 +1,5 @@
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +7,15 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
-import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 import 'package:fstapp/widgets/standard_dialog.dart';
+import '../models/birth_date_field_holder.dart';
+import '../models/field_holder.dart';
+import '../models/form_holder.dart';
+import '../models/ticket_holder.dart';
+import 'birth_date_field_builder.dart';
 import 'form_field_builders.dart';
 
 class FormHelper {
@@ -30,6 +32,8 @@ class FormHelper {
   static const String fieldTypeSelectOne = "select_one";
   static const String fieldTypeSelectMany = "select_many";
   static const String fieldTypeProductType = "product_type";
+  static const String fieldTypeBirthDate = "birth_date";
+
   static const String fieldTypeTicket = "ticket";
 
   // Additional constant for option delimiter
@@ -55,6 +59,7 @@ class FormHelper {
   static String emailLabel() => "E-mail".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
+  static String birthDateLabel() => "Birth Date".tr();
   static String emailInvalidMessage() => "E-mail is not valid!".tr();
   static String maleLabel() => "Male".tr();
   static String femaleLabel() => "Female".tr();
@@ -101,6 +106,8 @@ class FormHelper {
         return selectManyLabel();
       case fieldTypeProductType:
         return productTypeLabel();
+      case fieldTypeBirthDate:
+        return birthDateLabel();
       default:
         return fieldType.tr();
     }
@@ -165,6 +172,8 @@ class FormHelper {
       return (fieldValue as FormOptionModel).id;
     } else if (fieldHolder.fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
+    } else if (fieldHolder.fieldType == fieldTypeBirthDate) {
+      return (fieldValue is DateTime) ? fieldValue.toIso8601String() : null;
     } else if (fieldHolder.fieldType == fieldTypeSpot) {
       if (fieldValue is SeatModel) {
         return fieldValue.objectModel;
@@ -210,7 +219,7 @@ class FormHelper {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeText:
-        return FormFieldBuilders.buildTextFieldWithDescription(context, field, []);
+        return FormFieldBuilders.buildTextField(context, field, []);
       case fieldTypeNote:
         field.title = noteLabel();
         return FormFieldBuilders.buildTextField(context, field, []);
@@ -248,6 +257,12 @@ class FormHelper {
       case fieldTypeProductType:
         var optionsField = field as OptionsFieldHolder;
         return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
+      case fieldTypeBirthDate:
+        field.title = birthDateLabel();
+        return BirthDateFieldBuilder(
+            fieldHolder: field as BirthDateFieldHolder,
+            formKey: formHolder.controller!.globalKey,
+        );
       case fieldTypeBirthYear:
         field.title = birthYearLabel();
         return FormFieldBuilders.buildBirthYearField(context, field);
@@ -378,29 +393,31 @@ class FormHelper {
     }
   }
 
-  /// Example function to build a label with optional “required” star.
-  static Widget buildTitleWidget(
-      String title,
-      bool? isRequired,
-      BuildContext context, {
-        TextStyle? textStyle,
-      }) {
-    final style = textStyle ?? Theme.of(context).textTheme.bodyLarge;
-    return RichText(
-      text: TextSpan(
-        text: title,
-        style: style,
-        children: [
-          if (isRequired == true)
-            TextSpan(
-              text: ' *',
-              style: style?.copyWith(color: ThemeConfig.redColor(context)),
-            ),
-        ],
-      ),
+  static TextStyle labelTextStyle(BuildContext context) {
+    return TextStyle(
+      fontWeight: FontWeight.bold,
+      color: ThemeConfig.grey700(context),
+      fontSize: 19 * FormHelper.fontSizeFactor,
     );
   }
 
-
+  static Widget buildLabel(BuildContext context, String label, {bool isRequired = false}) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: FormHelper.labelTextStyle(context),
+        ),
+        if (isRequired)
+          Text(
+            ' *',
+            style: FormHelper.labelTextStyle(context).copyWith(
+              color: ThemeConfig.redColor(context),
+            ),
+          ),
+      ],
+    );
+  }
 
 }

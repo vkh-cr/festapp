@@ -501,5 +501,16 @@
   "Additional Settings": "Další nastavení",
   "Options": "Možnosti",
   "Has description": "Má popis",
+  "Validation Mode:": "Režim validace:",
+  "Strict": "Přísný",
+  "Lenient": "Mírný",
+  "Message": "Zpráva",
+  "Max Age": "Maximální věk",
+  "Min Age": "Minimální věk",
+  "Strict Validation": "Přísná validace",
+  "Birth Date": "Datum narození",
+  "You must be between {minAge} and {maxAge} years old.": "Musíte mít mezi {minAge} a {maxAge} roky.",
+  "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).": "Upozornění: Váš věk není v doporučeném rozmezí ({minAge}-{maxAge} roků).",
+  "Max age cannot be lower than min age.": "Maximální věk nemůže být nižší než minimální.",
   "_": "_"
 }
