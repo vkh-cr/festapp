@@ -186,7 +186,9 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         // Back to Form Button
         ElevatedButton(
           onPressed: () {
-            widget.onResetForm();
+            if(_isSuccess) {
+              widget.onResetForm();
+            }
             Navigator.of(context).pop();
           },
           style: ElevatedButton.styleFrom(

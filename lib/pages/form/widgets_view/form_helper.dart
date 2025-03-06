@@ -172,6 +172,8 @@ class FormHelper {
       return (fieldValue as FormOptionModel).id;
     } else if (fieldHolder.fieldType == fieldTypeBirthYear) {
       return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
+    } else if (fieldHolder.fieldType == fieldTypeBirthDate) {
+      return (fieldValue is DateTime) ? fieldValue.toIso8601String() : null;
     } else if (fieldHolder.fieldType == fieldTypeSpot) {
       if (fieldValue is SeatModel) {
         return fieldValue.objectModel;
@@ -217,7 +219,7 @@ class FormHelper {
     final bool isRequiredField = field.isRequired;
     switch (field.fieldType) {
       case fieldTypeText:
-        return FormFieldBuilders.buildTextFieldWithDescription(context, field, []);
+        return FormFieldBuilders.buildTextField(context, field, []);
       case fieldTypeNote:
         field.title = noteLabel();
         return FormFieldBuilders.buildTextField(context, field, []);

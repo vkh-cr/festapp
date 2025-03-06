@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_with_security(order_id bigint)
+CREATE OR REPLACE FUNCTION update_order_and_tickets_to_storno_ws(order_id bigint)
 RETURNS jsonb SECURITY DEFINER AS $$
 DECLARE
     occasion_id bigint;

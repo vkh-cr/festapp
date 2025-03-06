@@ -1,5 +1,3 @@
-// lib/pages/form/builders/birth_date_field_builder.dart
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -13,26 +11,17 @@ import 'package:fstapp/widgets/HtmlView.dart';
 import 'form_field_builders.dart';
 import 'form_helper.dart';
 
-/// A builder widget for a birth date field using [BirthDateFieldHolder].
-///
-/// This widget accepts an optional [eventDate] used to compute the recommended age range.
-/// The recommended range is determined by the minimum and maximum ages provided in the field holder.
-/// If [BirthDateFieldHolder.isHard] is true, the validator will prevent submission if the selected birth date
-/// does not result in an age within the recommended range (displaying the translated error message)
-/// and the date picker is limited to that range.
-/// If false, the picker is not limited, and only a warning is shown (via an HTML view) if the selected date
-/// results in an age outside the recommended range.
 class BirthDateFieldBuilder extends StatefulWidget {
   final BirthDateFieldHolder fieldHolder;
   final DateTime? eventDate;
   final GlobalKey<FormBuilderState> formKey;
 
   const BirthDateFieldBuilder({
-    Key? key,
+    super.key,
     required this.fieldHolder,
     this.eventDate,
     required this.formKey,
-  }) : super(key: key);
+  });
 
   @override
   _BirthDateFieldBuilderState createState() => _BirthDateFieldBuilderState();
@@ -158,10 +147,6 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
   }
 }
 
-/// A custom [TextInputFormatter] that allows only digits and the separator characters
-/// present in the localized date pattern.
-///
-/// Instead of enforcing a rigid mask, this formatter simply filters out unwanted characters.
 class LocaleDateInputFormatter extends TextInputFormatter {
   final String pattern;
   final Set<String> allowedSeparators;

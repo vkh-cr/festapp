@@ -56,7 +56,7 @@ class DbOrders {
 
   static Future<void> stornoOrder(int id) async {
     final response = await _supabase.rpc(
-      'update_order_and_tickets_to_storno_with_security',
+      'update_order_and_tickets_to_storno_ws',
       params: {
         'order_id': id,
       },
@@ -184,7 +184,7 @@ class DbOrders {
 
   static Future<void> updateOrderAndTicketsToPaid(int orderId) async {
     var response = await _supabase.rpc(
-      "update_order_and_tickets_to_paid_with_security",
+      "update_order_and_tickets_to_paid_ws",
       params: {
         "order_id": orderId,
       },
