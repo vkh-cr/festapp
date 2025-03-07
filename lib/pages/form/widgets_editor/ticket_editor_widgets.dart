@@ -152,7 +152,7 @@ class TicketEditorWidgets {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 12,
+                      flex: 10,
                       child: Text(
                         "Title".tr(),
                         style: Theme.of(context)
@@ -162,7 +162,7 @@ class TicketEditorWidgets {
                       ),
                     ),
                     Expanded(
-                      flex: 3,
+                      flex: 2,
                       child: Text(
                         "Price".tr(),
                         style: Theme.of(context)
@@ -173,10 +173,12 @@ class TicketEditorWidgets {
                     ),
                     if (showCapacityColumn)
                       Expanded(
-                        flex: 1,
+                        flex: 2,
                         child: Tooltip(
                           message: "Product Quantity".tr(),
-                          child: const Icon(Icons.stacked_bar_chart, size: 16),
+                          child: Icon(Icons.stacked_bar_chart, size: 16, color: Theme.of(context)
+                              .textTheme
+                              .bodySmall?.color),
                         ),
                       ),
                   ],
@@ -195,15 +197,20 @@ class TicketEditorWidgets {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 12,
+                          flex: 10,
                           child: Row(
                             children: [
                               Flexible(
-                                child: Text(product.title ?? '', style: rowStyle),
+                                child: Text(
+                                  product.title ?? '',
+                                  style: rowStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                               if (!HtmlHelper.isHtmlEmptyOrNull(product.description))
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
+                                  padding: const EdgeInsets.only(left: 8.0, right: 4.0),
                                   child: Tooltip(
                                     message: "Has description".tr(),
                                     child: const Icon(Icons.description, size: 16),
@@ -213,7 +220,7 @@ class TicketEditorWidgets {
                           ),
                         ),
                         Expanded(
-                          flex: 3,
+                          flex: 2,
                           child: Text(
                             '${product.price ?? 0}',
                             style: rowStyle,
@@ -221,11 +228,13 @@ class TicketEditorWidgets {
                         ),
                         if (showCapacityColumn)
                           Expanded(
-                            flex: 1,
+                            flex: 2,
                             child: Text(
                               capacityText,
                               style: rowStyle,
                               textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
                             ),
                           ),
                       ],

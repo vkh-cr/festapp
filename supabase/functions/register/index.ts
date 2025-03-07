@@ -1,6 +1,6 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
-import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
 
     if (orgData.error || !orgData.data) {
       console.error("Organization data not found.");
-      return new Response(JSON.stringify({ error: "Organization data not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
+      return new Response(
+        JSON.stringify({ error: "Organization data not found" }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
     }
 
     const orgConfig = orgData.data.data;
@@ -41,10 +41,7 @@ Deno.serve(async (req) => {
       console.error("Required configuration is missing.");
       return new Response(
         JSON.stringify({ error: "Missing required configuration" }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        }
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       );
     }
 
@@ -56,42 +53,37 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (userData.data != null) {
-      return new Response(JSON.stringify({ "email": userEmail, "code": 409 }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      });
+      return new Response(
+        JSON.stringify({ email: userEmail, code: 409 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      );
     }
 
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { data } = await supabaseAdmin.rpc("create_user_in_organization_with_data", {
+    // Create the user via RPC
+    await supabaseAdmin.rpc("create_user_in_organization_with_data", {
       org: organizationId,
       email: userEmail,
       password: code,
       data: reqData,
     });
 
-    const template = await supabaseAdmin
-      .from("email_templates")
-      .select()
-      .eq("code", "SIGN_IN_CODE")
-      .eq("organization", organizationId)
-      .single();
-
-    if (template.error || !template.data) {
-      console.error("Email template not found.");
-      return new Response(JSON.stringify({ error: "Email template not found" }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404,
-      });
+    // Use the wrapper style to retrieve both the email template and wrapper
+    const templateAndWrapper: any = await getEmailTemplateAndWrapper("SIGN_IN_CODE", { organization: organizationId });
+    if (!templateAndWrapper || !templateAndWrapper.template) {
+      console.error("Template not found for code SIGN_IN_CODE.");
+      return new Response(
+        JSON.stringify({ error: "Template not found" }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 404 }
+      );
     }
 
     const platforms = orgConfig.PLATFORMS || [];
     const defaultLang = orgConfig.DEFAULT_LANGUAGE || "en";
-
     const platformLinksHtml = translatePlatformLinks(platforms, defaultLang);
 
-    // Prepare substitutions
+    // Prepare substitutions for the email template
     const subs = {
       code: code,
       email: userEmail,
@@ -101,30 +93,31 @@ Deno.serve(async (req) => {
 
     await sendEmailWithSubs({
       to: userEmail,
-      subject: template.data.subject,
-      content: template.data.html,
+      subject: templateAndWrapper.template.subject,
+      content: templateAndWrapper.template.html,
       subs,
+      wrapper: templateAndWrapper.wrapper.html,
       from: `${appName} | Festapp <${_DEFAULT_EMAIL}>`,
     });
 
     await supabaseAdmin
       .from("log_emails")
       .insert({
-        "from": _DEFAULT_EMAIL,
-        "to": userEmail,
-        "template": template.data.id,
-        "organization": organizationId
+        from: _DEFAULT_EMAIL,
+        to: userEmail,
+        template: templateAndWrapper.template.id,
+        organization: organizationId,
       });
 
-    return new Response(JSON.stringify({ "email": userEmail, "code": 200 }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({ email: userEmail, code: 200 }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+    );
   } catch (error) {
     console.error("Unexpected error:", error);
-    return new Response(JSON.stringify({ error: "Unexpected error occurred" }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    });
+    return new Response(
+      JSON.stringify({ error: "Unexpected error occurred" }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+    );
   }
 });
