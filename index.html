@@ -149,6 +149,7 @@
 <script>
   // Disable swipe back gesture globally
   document.body.style.overscrollBehaviorX = "none";
+  document.body.style.overscrollBehaviorY = "none";
 
   let deferredPrompt;
 
@@ -198,7 +199,7 @@ _flutter.buildConfig = {"engineRevision":"f73bfc4522dd0bc87bbcdb4bb3088082755c5e
       _flutter.loader.load({
         serviceWorkerSettings: {
           timeoutMillis: 8000,
-          serviceWorkerVersion: "3734246797",
+          serviceWorkerVersion: "1637346051",
         },
         onEntrypointLoaded: async function(engineInitializer) {
           const appRunner = await engineInitializer.initializeEngine({
