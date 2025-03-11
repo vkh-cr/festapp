@@ -443,7 +443,7 @@ class _FormPageState extends State<FormPage> {
         return;
       }
 
-      formHolder = FormHolder.fromFormFieldModel(form!.relatedFields!);
+      formHolder = FormHolder.fromFormFieldModel(form!);
 
       formHolder!.controller = FormHolderController(
           secret: form!.secret,

@@ -72,9 +72,9 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
           format: dateFormat,
           fieldHintText: dateFormat.pattern,
           decoration: InputDecoration(
-            label: FormFieldBuilders.buildTitleWidget(widget.fieldHolder.title ?? "Birth Date".tr(), widget.fieldHolder.isRequired, context, focusNode: focusNode),
+            label: FormFieldBuilders.buildTitleWidget(widget.fieldHolder.title!, widget.fieldHolder.isRequired, context, focusNode: focusNode),
           ),
-          helpText: "Birth Date".tr(),
+          helpText: FormHelper.birthDateLabel(),
           firstDate: pickerFirstDate,
           lastDate: pickerLastDate,
           // Use calendar entry mode.
