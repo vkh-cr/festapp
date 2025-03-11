@@ -5,17 +5,18 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
   const { orderId } = reqData.data;
 
   console.log("Order ID:", orderId);
-  // Fetch the order data
-  const { data: orderData, error: orderError } = await supabaseAdmin
-    .schema("eshop")
-    .from("orders")
-    .select("occasion, data")
-    .eq("id", orderId)
-    .single();
+
+  const { data: orderData, error: orderError } = await supabaseAdmin.rpc(
+    "get_order",
+    { order_id: orderId }
+  );
 
   if (orderError || !orderData) {
-    console.error("Order not found:", orderError);
-    throw new Error("Order not found");
+    console.error("Order not found or error occurred:", orderError);
+    return new Response(JSON.stringify({ error: "Order not found" }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 404,
+    });
   }
 
   const occasionId = orderData.occasion;
@@ -43,22 +44,19 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
     throw new Error("Occasion not found");
   }
 
-  // Fetch order history for non-zero price (latest one)
-  const { data: orderHistory, error: historyError } = await supabaseAdmin
-    .schema("eshop")
-    .from("orders_history")
-    .select("price, currency_code")
-    .eq("\"order\"", orderId)
-    .neq("price", 0)
-    .order("created_at", { ascending: false })
-    .limit(1);
+ // Call the RPC function "get_latest_order_history" which returns the latest order history for non-zero price
+ const { data: orderHistory, error: historyError } = await supabaseAdmin.rpc(
+   "get_latest_order_history",
+   { order_id: orderId }
+ );
 
-  if (historyError || !orderHistory || orderHistory.length === 0) {
-    console.error("No valid order history found:", historyError);
-    throw new Error("Valid order history not found");
-  }
+ if (historyError || !orderHistory) {
+   console.error("No valid order history found:", historyError);
+   throw new Error("Valid order history not found");
+ }
 
-  const { price, currency_code } = orderHistory[0];
+ // Assuming the function returns a row with price and currency_code directly
+ const { price, currency_code } = orderHistory;
 
   // Prepare substitutions with price and currency code
   const subs: Record<string, string> = {

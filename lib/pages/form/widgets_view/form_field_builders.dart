@@ -1,12 +1,10 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/services.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
-import 'package:fstapp/pages/form/widgets_view/birth_date_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
@@ -181,7 +179,7 @@ class FormFieldBuilders {
 
   static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey,
       FormHolder formHolder, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
+    FocusNode focusNode = FocusNode();
     TextEditingController textController = TextEditingController();
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
@@ -194,11 +192,11 @@ class FormFieldBuilders {
         textController.text = seat?.objectModel?.toString() ?? FormHelper.metaEmpty;
         return TextField(
           controller: textController,
-          focusNode: _focusNode,
+          focusNode: focusNode,
           readOnly: true,
           canRequestFocus: true,
           decoration: InputDecoration(
-            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
           ),
@@ -225,24 +223,14 @@ class FormFieldBuilders {
     );
   }
 
-  static Widget buildTextFieldWithDescription(
-      BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTextField(context, fieldHolder, autofillHints),
-      ],
-    );
-  }
-
   static FormBuilderTextField buildEmailField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
+    FocusNode focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
-      focusNode: _focusNode,
+      focusNode: focusNode,
       autofillHints: [AutofillHints.email],
       decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
       ),
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),

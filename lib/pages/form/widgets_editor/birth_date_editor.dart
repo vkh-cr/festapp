@@ -20,9 +20,9 @@ class BirthDateEditor {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Min Age: $minAge"),
-        Text("Max Age: $maxAge"),
-        Text("${"Validation Mode:".tr()} ${isStrict ? "Strict".tr() : "Lenient".tr()}"),
+        Text("${'Min Age'.tr()}: $minAge"),
+        Text("${'Max Age'.tr()}: $maxAge"),
+        Text("${'Validation Mode:'.tr()} ${isStrict ? 'Strict'.tr() : 'Lenient'.tr()}"),
         if (!isStrict)
           Padding(
             padding: const EdgeInsets.only(top: 8),
@@ -80,7 +80,7 @@ class BirthDateEditor {
             TextFormField(
               controller: minAgeController,
               decoration: InputDecoration(
-                labelText: "Min Age".tr(),
+                labelText: "${'Min Age'.tr()}:",
               ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -105,7 +105,7 @@ class BirthDateEditor {
             TextFormField(
               controller: maxAgeController,
               decoration: InputDecoration(
-                labelText: "Max Age".tr(),
+                labelText: "${'Max Age'.tr()}:",
                 errorText: maxAgeError,
               ),
               keyboardType: TextInputType.number,
