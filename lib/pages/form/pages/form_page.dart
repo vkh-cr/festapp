@@ -211,9 +211,11 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
-  void _showOrderPreview() {
+  Future<void> _showOrderPreview(BuildContext scrollContext) async {
     TextInput.finishAutofillContext();
-    if (FormHelper.saveAndValidate(formHolder!))
+    var valid = await FormHelper.saveValidateAndScroll(formHolder!);
+    setState(() {});
+    if (valid)
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -282,50 +284,55 @@ class _FormPageState extends State<FormPage> {
               alignment: Alignment.topCenter,
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: _isLoading
-                        ? const Center(child: CircularProgressIndicator())
-                        : _formNotAvailable
-                        ? _buildFormNotAvailableMessage()
-                        : (formHolder == null
-                        ? const Center(child: CircularProgressIndicator())
-                        : FormBuilder(
-                      key: _formKey,
-                      child: AutofillGroup(
-                        child: Column(
-                          children: [
-                            if (form!.header != null)
-                              Column(
-                                children: [
-                                  HtmlView(
-                                      html: form!.header!,
-                                      isSelectable: true),
-                                  const SizedBox(height: 16),
-                                ],
+                child: Builder(
+                  builder: (scrollContext)
+                  {
+                    return SingleChildScrollView(
+                    controller: _scrollController,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _formNotAvailable
+                          ? _buildFormNotAvailableMessage()
+                          : (formHolder == null
+                          ? const Center(child: CircularProgressIndicator())
+                          : FormBuilder(
+                        key: _formKey,
+                        child: AutofillGroup(
+                          child: Column(
+                            children: [
+                              if (form!.header != null)
+                                Column(
+                                  children: [
+                                    HtmlView(
+                                        html: form!.header!,
+                                        isSelectable: true),
+                                    const SizedBox(height: 16),
+                                  ],
+                                ),
+                              ...FormHelper.getAllFormFields(
+                                  context, _formKey, formHolder!),
+                              const SizedBox(height: 32),
+                              ButtonsHelper.primaryButton(
+                                context: context,
+                                onPressed: _isLoading
+                                    ? null
+                                    : () => _showOrderPreview(scrollContext),
+                                label: "Continue".tr(),
+                                isLoading: _isLoading,
+                                height: 50.0,
+                                width: 250.0,
+                                isEnabled: _totalPrice > 0,
                               ),
-                            ...FormHelper.getAllFormFields(
-                                context, _formKey, formHolder!),
-                            const SizedBox(height: 32),
-                            ButtonsHelper.primaryButton(
-                              context: context,
-                              onPressed: _isLoading
-                                  ? null
-                                  : _showOrderPreview,
-                              label: "Continue".tr(),
-                              isLoading: _isLoading,
-                              height: 50.0,
-                              width: 250.0,
-                              isEnabled: _totalPrice > 0,
-                            ),
-                            const SizedBox(height: 32),
-                          ],
+                              const SizedBox(height: 32),
+                            ],
+                          ),
                         ),
-                      ),
-                    )),
-                  ),
+                      )),
+                    ),
+                  );
+                  },
                 ),
               ),
             ),
