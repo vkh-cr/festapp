@@ -174,9 +174,11 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
                 .fields[widget.fieldHolder.id.toString()]?.validate();
             // Reset the text selection to collapse at the end of the text.
 
-            await Future.delayed(Duration(milliseconds: 50));
-            _dateController.selection =
-                TextSelection.collapsed(offset: _dateController.text.length);
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _dateController.selection =
+                  TextSelection.collapsed(offset: _dateController.text.length);
+              FocusScope.of(context).unfocus();
+            });
           },
         ),
         if (warningMessage != null && !widget.fieldHolder.isHard)
