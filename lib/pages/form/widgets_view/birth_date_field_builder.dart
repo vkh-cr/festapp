@@ -60,6 +60,13 @@ class BirthDateFieldBuilder extends StatefulWidget {
 class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
   DateTime? selectedDate;
   String? warningMessage;
+  final TextEditingController _dateController = TextEditingController();
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,19 +94,17 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
 
     // Localized date format.
     final dateFormat = DateFormat.yMd(context.locale.toString());
-    FocusNode focusNode = FocusNode();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderDateTimePicker(
-          focusNode: focusNode,
+          controller: _dateController, // Provide your custom controller.
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
           format: dateFormat,
           fieldHintText: dateFormat.pattern,
-          // When card design is used, use title as hint text.
           decoration: InputDecoration(
             label: widget.isCardDesign
                 ? null
@@ -107,7 +112,6 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
               widget.fieldHolder.title!,
               widget.fieldHolder.isRequired,
               context,
-              focusNode: focusNode,
             ),
             hintText: widget.isCardDesign ? widget.fieldHolder.title : null,
           ),
@@ -162,15 +166,18 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
             }
             return null;
           },
-          onChanged: (value) {
+          onChanged: (value) async {
             setState(() {
               selectedDate = value;
             });
             widget.formKey.currentState!
                 .fields[widget.fieldHolder.id.toString()]?.validate();
-            FocusScope.of(context).unfocus();
-          },
+            // Reset the text selection to collapse at the end of the text.
 
+            await Future.delayed(Duration(milliseconds: 50));
+            _dateController.selection =
+                TextSelection.collapsed(offset: _dateController.text.length);
+          },
         ),
         if (warningMessage != null && !widget.fieldHolder.isHard)
           Padding(
