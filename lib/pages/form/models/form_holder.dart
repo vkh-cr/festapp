@@ -110,6 +110,7 @@ class FormHolder {
         isRequired: ffm.isRequired ?? false,
         options: formOptions,
         title: ffm.title ?? "",
+        description: ffm.description
       );
     } else if (fieldType == FormHelper.fieldTypeProductType) {
       return OptionsFieldHolder(
@@ -126,6 +127,7 @@ class FormHolder {
         ))
             .toList(),
         title: ffm.productType!.title ?? "",
+        description: ffm.productType!.description
       );
     } else if (fieldType == FormHelper.fieldTypeBirthDate) {
       // Use constants from BirthDateFieldHolder instead of hardcoded strings.

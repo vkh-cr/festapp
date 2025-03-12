@@ -53,11 +53,13 @@ class OptionsFieldHolder extends FieldHolder {
     required int id,
     required String title,
     required bool isRequired,
+    String? description
   }) : super(
     defaultValue: value,
     isRequired: isRequired,
     title: title,
     id: id,
+    description: description
   );
 
   @override

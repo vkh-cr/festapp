@@ -512,5 +512,7 @@
   "You must be between {minAge} and {maxAge} years old.": "You must be between {minAge} and {maxAge} years old.",
   "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).": "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).",
   "Max age cannot be lower than min age.": "Max age cannot be lower than min age.",
+  "Clear selection": "Clear selection",
+  "Add description": "Add description",
   "_":"_"
 }

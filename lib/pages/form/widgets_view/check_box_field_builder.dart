@@ -6,6 +6,7 @@ import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
+import 'form_helper.dart';
 import 'option_field_helper.dart';
 
 class CheckboxFieldBuilder {
@@ -15,10 +16,8 @@ class CheckboxFieldBuilder {
       List<FormOptionModel> optionsIn,
       FormHolder formHolder,
       ) {
-    final anyHasDescription =
-    optionsIn.any((o) => !HtmlHelper.isHtmlEmptyOrNull(o.description));
 
-    if (!anyHasDescription) {
+    if (!FormHelper.isCardDesign(formHolder, fieldHolder)) {
       return _buildBasicSelectManyField(context, fieldHolder, optionsIn, formHolder);
     } else {
       return _buildCardSelectManyField(context, fieldHolder, optionsIn, formHolder);
@@ -48,7 +47,7 @@ class CheckboxFieldBuilder {
       children: [
         FormBuilderCheckboxGroup<FormOptionModel>(
           name: fieldHolder.id.toString(),
-          decoration: OptionFieldHelper.buildInputDecoration(
+          decoration: FormHelper.buildInputDecoration(
             context: context,
             label: fieldHolder.title ?? '',
             isRequired: fieldHolder.isRequired,
@@ -73,39 +72,25 @@ class CheckboxFieldBuilder {
       List<FormOptionModel> optionsIn,
       FormHolder formHolder,
       ) {
-    return Column(
+    return FormHelper.buildCardWrapperDesign(context: context, fieldHolder: fieldHolder, content: Column(
       children: [
-        FormBuilderField<List<FormOptionModel>>(
-          name: fieldHolder.id.toString(),
-          validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-          initialValue: [],
-          builder: (FormFieldState<List<FormOptionModel>> field) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                InputDecorator(
-                  decoration: OptionFieldHelper.buildInputDecoration(
-                    context: context,
-                    label: fieldHolder.title ?? '',
-                    isRequired: fieldHolder.isRequired,
-                    errorText: field.errorText,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox.square(dimension: 12),
-                      ...optionsIn.map(
-                            (o) => _buildOptionCard(context, field, o, formHolder),
-                      ),
-                    ],
-                  ),
+      FormBuilderField<List<FormOptionModel>>(
+      name: fieldHolder.id.toString(),
+        validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+        initialValue: [],
+        builder: (FormFieldState<List<FormOptionModel>> field) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                ...optionsIn.map(
+                      (o) => _buildOptionCard(context, field, o, formHolder),
                 ),
-              ],
-            );
-          },
-        ),
-        Divider(thickness: 1, color: ThemeConfig.grey500(context)),
+            ],
+          );
+        },
+      ),
       ],
-    );
+    ));
   }
 
   static Widget _buildOptionCard(

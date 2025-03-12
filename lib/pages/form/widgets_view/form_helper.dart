@@ -7,6 +7,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
+import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
@@ -259,7 +260,9 @@ class FormHelper {
         return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthDate:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthDateLabel());
-        return BirthDateFieldBuilder(
+        return BirthDateFieldBuilder.buildBirthDateField(
+            context: context,
+            formHolder: formHolder,
             fieldHolder: field as BirthDateFieldHolder,
             formKey: formHolder.controller!.globalKey,
         );
@@ -319,80 +322,6 @@ class FormHelper {
     );
   }
 
-  /// This is the custom UI for each option (both radio & checkbox).
-  /// It is a “card” with a border that highlights when selected.
-  static Widget buildOptionCard({
-    required BuildContext context,
-    required FormOptionModel option,
-    required bool hasDescription,
-    required bool hasAnyDescriptions,
-    required bool isCheckbox,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        border: Border.all(
-          color: Colors.grey.shade300,
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // The actual Radio or Checkbox is rendered by FormBuilder inside
-            // the option. Usually, that means FormBuilder places it on the left.
-            // If you want to show it inside your custom widget, you'd set
-            // `optionWidgetBuilder` in the `FormBuilderFieldOption`. But
-            // let's keep it simple, so the default radio/checkbox is to the left
-            // and we just handle text & description to the right:
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
-                  Text(
-                    buildOptionTitle(context, option),
-                    style: TextStyle(
-                      fontSize: 14.0 * FormHelper.fontSizeFactor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  // If there's a description and at least one option in the group
-                  // has a description, show the inline HtmlView.
-                  if (hasAnyDescriptions)
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: hasDescription
-                          ? HtmlView(
-                        html: option.description ?? '',
-                        isSelectable: true,
-                      )
-                          : const SizedBox.shrink(),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Helper to build the text for the option's title, including price if > 0.
-  static String buildOptionTitle(BuildContext context, FormOptionModel option) {
-    if (option.price > 0) {
-      final priceStr = Utilities.formatPrice(context, option.price);
-      return '${option.title} ($priceStr)';
-    } else {
-      return option.title;
-    }
-  }
-
   static TextStyle labelTextStyle(BuildContext context) {
     return TextStyle(
       fontWeight: FontWeight.bold,
@@ -420,4 +349,99 @@ class FormHelper {
     );
   }
 
+  static Widget buildCardWrapperDesign({
+    required BuildContext context,
+    required FieldHolder fieldHolder,
+    required Widget content,
+  }) {
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Title for all
+            InputDecorator(
+              decoration: buildInputDecoration(
+              context: context,
+                label: fieldHolder.title ?? '',
+                isRequired: fieldHolder.isRequired,
+              ),
+            ),
+            // Optional description rendered via HtmlView if provided
+            if (!HtmlHelper.isHtmlEmptyOrNull(fieldHolder.description))
+              Column(
+                children: [
+                  HtmlView(
+                    color: ThemeConfig.grey600(context),
+                    html: fieldHolder.description!,
+                    fontSize: optionDescriptionFontSize(),
+                    isSelectable: true,
+                  ),
+                  SizedBox.square(dimension: 12)
+                ],
+              ),
+            // Widget content that fills remaining space
+            content,
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Convenience to match the description style size.
+  static double optionDescriptionFontSize() {
+    return 13.0 * FormHelper.fontSizeFactor;
+  }
+
+  /// Text style used for option titles in checkboxes/radios.
+  static TextStyle cardOptionTitleTextStyle() {
+    return TextStyle(fontSize: 15.0 * FormHelper.fontSizeFactor, fontWeight: FontWeight.w400);
+  }
+
+  /// Builds the InputDecoration label (including the required asterisk if needed).
+  static InputDecoration buildInputDecoration({
+    required BuildContext context,
+    required String label,
+    required bool isRequired,
+  }) {
+    return InputDecoration(
+      border: InputBorder.none,
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FormHelper.buildLabel(context, label, isRequired: isRequired),
+        ],
+      ),
+    );
+  }
+
+  static bool anyHasDescription(List<FormOptionModel> options) {
+    return options.any((option) => !HtmlHelper.isHtmlEmptyOrNull(option.description));
+  }
+
+
+  static bool isCardDesign(FormHolder formHolder, FieldHolder field) {
+    if(formHolder.isCardDesign == true) {
+      return true;
+    }
+    if (field is OptionsFieldHolder) {
+      if(anyHasDescription(field.options)){
+        return true;
+      }
+    }
+    return !HtmlHelper.isHtmlEmptyOrNull(field.description);
+  }
+
+  static Widget htmlDescription(String? description){
+    if(HtmlHelper.isHtmlEmptyOrNull(description)){
+      return SizedBox.shrink();
+    }
+    return HtmlView(html: description!, fontSize: 14, isSelectable: true,);
+  }
 }
