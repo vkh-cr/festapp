@@ -28,8 +28,8 @@ class _OrdersTabState extends State<OrdersTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
     }
   }
 
