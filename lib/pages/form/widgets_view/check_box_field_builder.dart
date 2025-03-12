@@ -155,7 +155,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
       );
     }).toList();
 
-    Widget checkboxGroup = Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderCheckboxGroup<FormOptionModel>(
@@ -166,7 +166,9 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
             label: widget.fieldHolder.title ?? '',
             isRequired: widget.fieldHolder.isRequired,
           ),
-          validator: widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          validator: widget.fieldHolder.isRequired
+              ? FormBuilderValidators.required()
+              : null,
           options: options,
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
@@ -181,30 +183,7 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
           thickness: 1,
           color: ThemeConfig.grey500(context),
         ),
-        if (fieldKey.currentState?.errorText != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Text(
-              fieldKey.currentState!.errorText!,
-              style: TextStyle(
-                color: ThemeConfig.redColor(context),
-                fontSize: 12,
-              ),
-            ),
-          ),
       ],
     );
-
-    bool hasError = fieldKey.currentState?.hasError ?? false;
-    if (hasError) {
-      checkboxGroup = Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: ThemeConfig.redColor(context), width: 1),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: checkboxGroup,
-      );
-    }
-    return checkboxGroup;
   }
 }
