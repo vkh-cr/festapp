@@ -87,13 +87,13 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
 
     // Localized date format.
     final dateFormat = DateFormat.yMd(context.locale.toString());
-    FocusNode focusNode = FocusNode();
+    //FocusNode focusNode = FocusNode();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderDateTimePicker(
-          focusNode: focusNode,
+          //focusNode: focusNode,
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
@@ -107,7 +107,7 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
               widget.fieldHolder.title!,
               widget.fieldHolder.isRequired,
               context,
-              focusNode: focusNode,
+              //focusNode: focusNode,
             ),
             hintText: widget.isCardDesign ? widget.fieldHolder.title : null,
           ),

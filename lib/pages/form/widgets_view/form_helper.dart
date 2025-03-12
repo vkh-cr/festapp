@@ -404,7 +404,7 @@ class FormHelper {
     return TextStyle(fontSize: 15.0 * FormHelper.fontSizeFactor, fontWeight: FontWeight.w400);
   }
 
-  /// Builds the InputDecoration label (including the required asterisk if needed).
+  // Modify buildInputDecoration to optionally wrap the label
   static InputDecoration buildInputDecoration({
     required BuildContext context,
     required String label,
@@ -412,11 +412,22 @@ class FormHelper {
   }) {
     return InputDecoration(
       border: InputBorder.none,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FormHelper.buildLabel(context, label, isRequired: isRequired),
-        ],
+      label: Text.rich(
+        TextSpan(
+          text: label,
+          style: FormHelper.labelTextStyle(context),
+          children: isRequired
+              ? [
+            TextSpan(
+              text: ' *',
+              style: FormHelper.labelTextStyle(context).copyWith(
+                color: ThemeConfig.redColor(context),
+              ),
+            )
+          ]
+              : [],
+        ),
+        softWrap: true,
       ),
     );
   }
