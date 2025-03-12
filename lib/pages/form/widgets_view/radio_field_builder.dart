@@ -177,7 +177,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
       );
     }).toList();
 
-    Widget radioGroup = Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderRadioGroup<FormOptionModel>(
@@ -188,7 +188,9 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             label: widget.fieldHolder.title ?? '',
             isRequired: widget.fieldHolder.isRequired,
           ),
-          validator: widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          validator: widget.fieldHolder.isRequired
+              ? FormBuilderValidators.required()
+              : null,
           options: options,
           initialValue: null,
           orientation: OptionsOrientation.vertical,
@@ -199,7 +201,6 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             });
             radioGroupKey.currentState?.validate();
             widget.formHolder.controller?.updateTotalPrice?.call();
-            setState(() {}); // Force rebuild to update visual cues.
           },
         ),
         if (currentSelection != null)
@@ -213,7 +214,6 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
                 });
                 radioGroupKey.currentState?.validate();
                 widget.formHolder.controller?.updateTotalPrice?.call();
-                setState(() {}); // Force rebuild to update visual cues.
               },
               child: Text("Clear selection").tr(),
             ),
@@ -222,30 +222,8 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
           thickness: 1,
           color: ThemeConfig.grey500(context),
         ),
-        if (radioGroupKey.currentState?.errorText != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 4.0),
-            child: Text(
-              radioGroupKey.currentState!.errorText!,
-              style: TextStyle(
-                color: ThemeConfig.redColor(context),
-                fontSize: 12,
-              ),
-            ),
-          ),
       ],
     );
-
-    bool hasError = radioGroupKey.currentState?.hasError ?? false;
-    if (hasError) {
-      radioGroup = Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: ThemeConfig.redColor(context), width: 1),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: radioGroup,
-      );
-    }
-    return radioGroup;
   }
 }
+
