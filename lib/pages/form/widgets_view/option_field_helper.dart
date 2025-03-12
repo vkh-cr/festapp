@@ -36,6 +36,8 @@ class OptionFieldHelper {
     required String? description,
     required VoidCallback onTap,
   }) {
+    final bool hasDescription = !HtmlHelper.isHtmlEmptyOrNull(description);
+
     return InkWell(
       onTap: onTap,
       child: Card(
@@ -53,7 +55,8 @@ class OptionFieldHelper {
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            hasDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
               leading,
               const SizedBox(width: 8),
@@ -65,17 +68,14 @@ class OptionFieldHelper {
                       title,
                       style: FormHelper.cardOptionTitleTextStyle(),
                     ),
-                    if (!HtmlHelper.isHtmlEmptyOrNull(description))
+                    if (hasDescription)
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
-                        child: Material(
-                          type: MaterialType.transparency,
-                          child: HtmlView(
-                            color: ThemeConfig.grey600(context),
-                            html: description!,
-                            fontSize: FormHelper.optionDescriptionFontSize(),
-                            isSelectable: false,
-                          ),
+                        child: HtmlView(
+                          color: ThemeConfig.grey600(context),
+                          html: description!,
+                          fontSize: FormHelper.optionDescriptionFontSize(),
+                          isSelectable: false,
                         ),
                       ),
                   ],
