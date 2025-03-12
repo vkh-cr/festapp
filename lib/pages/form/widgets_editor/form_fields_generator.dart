@@ -269,6 +269,7 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
                   field.description = newDescription;
                 });
               },
+              occasionId: widget.form.occasion!,
             ),
         ],
         if (!isTicket &&

@@ -167,6 +167,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                       widget.ptField.productType!.description = newDescription;
                     });
                   },
+                  occasionId: widget.form.occasion!,
                 ),
               const SizedBox(height: 16),
               // List of product rows
