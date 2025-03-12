@@ -42,26 +42,28 @@ class RadioFieldBuilder {
   }
 
   /// A card-based radio list when at least one option has a description.
+  /// This version uses the FormBuilderField's builder to obtain the live error state.
   static Widget _buildCardDesignRadioField(
       BuildContext context,
       FieldHolder fieldHolder,
       List<FormOptionModel> optionsIn,
       FormHolder formHolder,
       ) {
-    return FormHelper.buildCardWrapperDesign(
-      context: context,
-      fieldHolder: fieldHolder,
-      content: ClipRect(
-        child: AnimatedSize(
-          alignment: Alignment.topCenter,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: FormBuilderField<FormOptionModel?>(
-            name: fieldHolder.id.toString(),
-            validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-            initialValue: null,
-            builder: (field) {
-              return Column(
+    return ClipRect(
+      child: AnimatedSize(
+        alignment: Alignment.topCenter,
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        child: FormBuilderField<FormOptionModel?>(
+          name: fieldHolder.id.toString(),
+          validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          initialValue: null,
+          builder: (field) {
+            // Use the field's error state to update the card wrapper.
+            return FormHelper.buildCardWrapperDesign(
+              context: context,
+              fieldHolder: fieldHolder,
+              content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Build the list of option cards.
@@ -81,16 +83,30 @@ class RadioFieldBuilder {
                         onPressed: () {
                           field.didChange(null);
                           formHolder.controller?.updateTotalPrice?.call();
+                          field.validate();
                         },
                         child: Text("Clear selection").tr(),
                       ),
                     )
                         : SizedBox(key: ValueKey('empty')),
                   ),
+                  // Display error text below the field if there is one.
+                  if (field.errorText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        field.errorText!,
+                        style: TextStyle(
+                          color: ThemeConfig.redColor(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
                 ],
-              );
-            },
-          ),
+              ),
+              hasError: field.hasError,
+            );
+          },
         ),
       ),
     );
@@ -105,7 +121,6 @@ class RadioFieldBuilder {
       ) {
     final title = OptionFieldHelper.buildOptionTitle(context, o);
     final isSelected = (field.value == o);
-
     return OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
@@ -117,11 +132,13 @@ class RadioFieldBuilder {
         onChanged: (val) {
           field.didChange(val);
           formHolder.controller?.updateTotalPrice?.call();
+          field.validate();
         },
       ),
       onTap: () {
         field.didChange(o);
         formHolder.controller?.updateTotalPrice?.call();
+        field.validate();
       },
     );
   }
@@ -134,11 +151,10 @@ class _BasicRadioFieldWidget extends StatefulWidget {
   final FormHolder formHolder;
 
   const _BasicRadioFieldWidget({
-    Key? key,
     required this.fieldHolder,
     required this.optionsIn,
     required this.formHolder,
-  }) : super(key: key);
+  });
 
   @override
   _BasicRadioFieldWidgetState createState() => _BasicRadioFieldWidgetState();
@@ -161,7 +177,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
       );
     }).toList();
 
-    return Column(
+    Widget radioGroup = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderRadioGroup<FormOptionModel>(
@@ -172,9 +188,7 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             label: widget.fieldHolder.title ?? '',
             isRequired: widget.fieldHolder.isRequired,
           ),
-          validator: widget.fieldHolder.isRequired
-              ? FormBuilderValidators.required()
-              : null,
+          validator: widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
           options: options,
           initialValue: null,
           orientation: OptionsOrientation.vertical,
@@ -183,7 +197,9 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
             setState(() {
               currentSelection = val;
             });
+            radioGroupKey.currentState?.validate();
             widget.formHolder.controller?.updateTotalPrice?.call();
+            setState(() {}); // Force rebuild to update visual cues.
           },
         ),
         if (currentSelection != null)
@@ -195,7 +211,9 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
                 setState(() {
                   currentSelection = null;
                 });
+                radioGroupKey.currentState?.validate();
                 widget.formHolder.controller?.updateTotalPrice?.call();
+                setState(() {}); // Force rebuild to update visual cues.
               },
               child: Text("Clear selection").tr(),
             ),
@@ -204,7 +222,30 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
           thickness: 1,
           color: ThemeConfig.grey500(context),
         ),
+        if (radioGroupKey.currentState?.errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              radioGroupKey.currentState!.errorText!,
+              style: TextStyle(
+                color: ThemeConfig.redColor(context),
+                fontSize: 12,
+              ),
+            ),
+          ),
       ],
     );
+
+    bool hasError = radioGroupKey.currentState?.hasError ?? false;
+    if (hasError) {
+      radioGroup = Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: ThemeConfig.redColor(context), width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: radioGroup,
+      );
+    }
+    return radioGroup;
   }
 }
