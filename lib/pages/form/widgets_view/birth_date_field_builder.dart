@@ -27,8 +27,7 @@ class BirthDateFieldBuilder extends StatefulWidget {
     this.isCardDesign = false,
   }) : super(key: key);
 
-  /// Builds the birth date field. When [FormHelper.isCardDesign(formHolder, fieldHolder)]
-  /// returns true, it wraps the field content with a card design.
+  /// Builds the birth date field.
   static Widget buildBirthDateField({
     required BuildContext context,
     required BirthDateFieldHolder fieldHolder,
@@ -36,21 +35,14 @@ class BirthDateFieldBuilder extends StatefulWidget {
     required GlobalKey<FormBuilderState> formKey,
     required FormHolder formHolder,
   }) {
+    // Determine card design based on FormHelper.
     final bool isCardDesign = FormHelper.isCardDesign(formHolder, fieldHolder);
-    final birthDateField = BirthDateFieldBuilder(
+    return BirthDateFieldBuilder(
       fieldHolder: fieldHolder,
       eventDate: eventDate,
       formKey: formKey,
       isCardDesign: isCardDesign,
     );
-    if (isCardDesign) {
-      return FormHelper.buildCardWrapperDesign(
-        context: context,
-        fieldHolder: fieldHolder,
-        content: birthDateField,
-      );
-    }
-    return birthDateField;
   }
 
   @override
@@ -95,11 +87,12 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
     // Localized date format.
     final dateFormat = DateFormat.yMd(context.locale.toString());
 
-    return Column(
+    // Build the form field widget.
+    Widget fieldWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         FormBuilderDateTimePicker(
-          controller: _dateController, // Provide your custom controller.
+          controller: _dateController,
           name: widget.fieldHolder.id.toString(),
           inputType: InputType.date,
           initialDatePickerMode: DatePickerMode.year,
@@ -135,7 +128,8 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
                       "maxAge": effectiveMaxAge.toString()
                     },
                   )
-                      : "You must be between {minAge} and {maxAge} years old.".tr(
+                      : "You must be between {minAge} and {maxAge} years old."
+                      .tr(
                     namedArgs: {
                       "minAge": effectiveMinAge.toString(),
                       "maxAge": effectiveMaxAge.toString()
@@ -150,7 +144,8 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
                         "maxAge": effectiveMaxAge.toString()
                       },
                     )
-                        : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).".tr(
+                        : "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
+                        .tr(
                       namedArgs: {
                         "minAge": effectiveMinAge.toString(),
                         "maxAge": effectiveMaxAge.toString()
@@ -166,14 +161,15 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
             }
             return null;
           },
-          onChanged: (value) async {
+          onChanged: (value) {
             setState(() {
               selectedDate = value;
             });
+            // Revalidate the field to update error state and, consequently, the card wrapper.
             widget.formKey.currentState!
                 .fields[widget.fieldHolder.id.toString()]?.validate();
-            // Reset the text selection to collapse at the end of the text.
 
+            // Update the text selection and unfocus to hide the keyboard.
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _dateController.selection =
                   TextSelection.collapsed(offset: _dateController.text.length);
@@ -193,6 +189,23 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
           ),
       ],
     );
+
+    // If card design is used, wrap the field widget in a card.
+    if (widget.isCardDesign) {
+      // Dynamically check the error state for this field.
+      bool hasError = widget.formKey.currentState
+          ?.fields[widget.fieldHolder.id.toString()]
+          ?.hasError ??
+          false;
+      fieldWidget = FormHelper.buildCardWrapperDesign(
+        context: context,
+        fieldHolder: widget.fieldHolder,
+        content: fieldWidget,
+        hasError: hasError,
+      );
+    }
+
+    return fieldWidget;
   }
 }
 

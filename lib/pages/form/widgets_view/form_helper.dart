@@ -131,15 +131,61 @@ class FormHelper {
         .toList();
   }
 
-  static bool saveAndValidate(FormHolder formHolder) {
-    bool toReturn = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
-    for (var k in formHolder.getTicket()!.tickets) {
-      if (!(k.ticketKey.currentState?.saveAndValidate() ?? false)) {
-        toReturn = false;
+// Helper method to scroll to the first invalid field in a given FormBuilder.
+  static Future<void> scrollToInvalidField(GlobalKey<FormBuilderState> key) async {
+    final fields = key.currentState?.fields;
+    if (fields == null) return;
+    for (final entry in fields.entries) {
+      if (entry.value.hasError) {
+        final fieldContext = entry.value.context;
+        // Animate the scroll until the invalid widget is visible.
+        await Scrollable.ensureVisible(
+          fieldContext,
+          duration: Duration(milliseconds: 500),
+          alignment: 0, // Adjust alignment to bring widget into view.
+        );
+        break;
       }
     }
-    return toReturn;
   }
+
+  static Future<bool> saveValidateAndScroll(FormHolder formHolder) async {
+    // Phase 1: Validate all forms without scrolling immediately.
+    bool mainFormValid = formHolder.controller!.globalKey.currentState?.saveAndValidate() ?? false;
+    bool ticketsValid = true;
+
+    // Store keys of forms that are invalid.
+    final List<GlobalKey<FormBuilderState>> invalidFormKeys = [];
+
+    if (!mainFormValid) {
+      invalidFormKeys.add(formHolder.controller!.globalKey);
+    }
+
+    var ticketHolder = formHolder.getTicket();
+    if (ticketHolder != null) {
+      for (var ticket in ticketHolder.tickets) {
+        bool ticketValid = ticket.ticketKey.currentState?.saveAndValidate() ?? false;
+        if (!ticketValid) {
+          ticketsValid = false;
+          invalidFormKeys.add(ticket.ticketKey);
+        }
+      }
+    }
+
+    // If everything is valid, return true.
+    if (mainFormValid && ticketsValid) {
+      return true;
+    }
+
+    // Phase 2: Scroll to the first invalid field in the first invalid form.
+    // Assumes that the main form is positioned above ticket forms.
+    if (invalidFormKeys.isNotEmpty) {
+      await scrollToInvalidField(invalidFormKeys.first);
+    }
+
+    return false;
+  }
+
 
   static Map<String, dynamic> getDataFromForm(FormHolder formHolder, [bool? returnWithType]) {
     Map<String, dynamic> toReturn = {};
@@ -353,12 +399,16 @@ class FormHelper {
     required BuildContext context,
     required FieldHolder fieldHolder,
     required Widget content,
+    bool hasError = false,
   }) {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
+        side: hasError
+            ? BorderSide(color: ThemeConfig.redColor(context), width: 1)
+            : BorderSide.none,
       ),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -368,7 +418,7 @@ class FormHelper {
             // Title for all
             InputDecorator(
               decoration: buildInputDecoration(
-              context: context,
+                context: context,
                 label: fieldHolder.title ?? '',
                 isRequired: fieldHolder.isRequired,
               ),

@@ -16,54 +16,15 @@ class CheckboxFieldBuilder {
       List<FormOptionModel> optionsIn,
       FormHolder formHolder,
       ) {
-
     if (!FormHelper.isCardDesign(formHolder, fieldHolder)) {
-      return _buildBasicSelectManyField(context, fieldHolder, optionsIn, formHolder);
+      return _BasicCheckboxFieldWidget(
+        fieldHolder: fieldHolder,
+        optionsIn: optionsIn,
+        formHolder: formHolder,
+      );
     } else {
       return _buildCardSelectManyField(context, fieldHolder, optionsIn, formHolder);
     }
-  }
-
-  static Widget _buildBasicSelectManyField(
-      BuildContext context,
-      FieldHolder fieldHolder,
-      List<FormOptionModel> optionsIn,
-      FormHolder formHolder,
-      ) {
-    // Map our options to FormBuilderFieldOption
-    final options = optionsIn.map((o) {
-      final title = OptionFieldHelper.buildOptionTitle(context, o);
-
-      return FormBuilderFieldOption<FormOptionModel>(
-        value: o,
-        child: Text(
-          title,
-          style: OptionFieldHelper.optionTitleTextStyle(),
-        ),
-      );
-    }).toList();
-
-    return Column(
-      children: [
-        FormBuilderCheckboxGroup<FormOptionModel>(
-          name: fieldHolder.id.toString(),
-          decoration: FormHelper.buildInputDecoration(
-            context: context,
-            label: fieldHolder.title ?? '',
-            isRequired: fieldHolder.isRequired,
-          ),
-          validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-          options: options,
-          orientation: OptionsOrientation.vertical,
-          wrapDirection: Axis.vertical,
-          onChanged: (_) {
-            // Update total price on changes, if needed
-            formHolder.controller?.updateTotalPrice?.call();
-          },
-        ),
-        Divider(thickness: 1, color: ThemeConfig.grey500(context)),
-      ],
-    );
   }
 
   static Widget _buildCardSelectManyField(
@@ -72,25 +33,47 @@ class CheckboxFieldBuilder {
       List<FormOptionModel> optionsIn,
       FormHolder formHolder,
       ) {
-    return FormHelper.buildCardWrapperDesign(context: context, fieldHolder: fieldHolder, content: Column(
-      children: [
-      FormBuilderField<List<FormOptionModel>>(
-      name: fieldHolder.id.toString(),
-        validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
-        initialValue: [],
-        builder: (FormFieldState<List<FormOptionModel>> field) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-                ...optionsIn.map(
-                      (o) => _buildOptionCard(context, field, o, formHolder),
-                ),
-            ],
-          );
-        },
+    return FormHelper.buildCardWrapperDesign(
+      context: context,
+      fieldHolder: fieldHolder,
+      content: ClipRect(
+        child: AnimatedSize(
+          alignment: Alignment.topCenter,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: FormBuilderField<List<FormOptionModel>>(
+            name: fieldHolder.id.toString(),
+            validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+            initialValue: [],
+            builder: (FormFieldState<List<FormOptionModel>> field) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ...optionsIn.map(
+                        (o) => _buildOptionCard(context, field, o, formHolder),
+                  ),
+                  // Show error text below the options if validation fails.
+                  if (field.errorText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        field.errorText!,
+                        style: TextStyle(
+                          color: ThemeConfig.redColor(context),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
       ),
-      ],
-    ));
+      hasError: formHolder.controller?.globalKey.currentState
+          ?.fields[fieldHolder.id.toString()]?.hasError ??
+          false,
+    );
   }
 
   static Widget _buildOptionCard(
@@ -100,7 +83,7 @@ class CheckboxFieldBuilder {
       FormHolder formHolder,
       ) {
     final title = OptionFieldHelper.buildOptionTitle(context, o);
-    final isSelected = (field.value?.contains(o)) ?? false;
+    final isSelected = field.value?.contains(o) ?? false;
 
     return OptionFieldHelper.buildOptionCard(
       context: context,
@@ -113,11 +96,13 @@ class CheckboxFieldBuilder {
         onChanged: (val) {
           _toggleItemInFieldValue(field, o, isSelected);
           formHolder.controller?.updateTotalPrice?.call();
+          field.validate();
         },
       ),
       onTap: () {
         _toggleItemInFieldValue(field, o, isSelected);
         formHolder.controller?.updateTotalPrice?.call();
+        field.validate();
       },
     );
   }
@@ -134,5 +119,92 @@ class CheckboxFieldBuilder {
       newValue.add(option);
     }
     field.didChange(newValue);
+  }
+}
+
+/// A stateful widget wrapping the basic checkbox group for multi-selection,
+/// showing live error cues (red border and error text).
+class _BasicCheckboxFieldWidget extends StatefulWidget {
+  final FieldHolder fieldHolder;
+  final List<FormOptionModel> optionsIn;
+  final FormHolder formHolder;
+
+  const _BasicCheckboxFieldWidget({
+    required this.fieldHolder,
+    required this.optionsIn,
+    required this.formHolder,
+  });
+
+  @override
+  _BasicCheckboxFieldWidgetState createState() => _BasicCheckboxFieldWidgetState();
+}
+
+class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
+  final GlobalKey<FormBuilderFieldState> fieldKey = GlobalKey<FormBuilderFieldState>();
+
+  @override
+  Widget build(BuildContext context) {
+    final options = widget.optionsIn.map((o) {
+      final title = OptionFieldHelper.buildOptionTitle(context, o);
+      return FormBuilderFieldOption<FormOptionModel>(
+        value: o,
+        child: Text(
+          title,
+          style: OptionFieldHelper.optionTitleTextStyle(),
+        ),
+      );
+    }).toList();
+
+    Widget checkboxGroup = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormBuilderCheckboxGroup<FormOptionModel>(
+          key: fieldKey,
+          name: widget.fieldHolder.id.toString(),
+          decoration: FormHelper.buildInputDecoration(
+            context: context,
+            label: widget.fieldHolder.title ?? '',
+            isRequired: widget.fieldHolder.isRequired,
+          ),
+          validator: widget.fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+          options: options,
+          orientation: OptionsOrientation.vertical,
+          wrapDirection: Axis.vertical,
+          onChanged: (val) {
+            // Immediately trigger validation on change.
+            fieldKey.currentState?.validate();
+            widget.formHolder.controller?.updateTotalPrice?.call();
+            setState(() {}); // Force rebuild to update visual cues.
+          },
+        ),
+        Divider(
+          thickness: 1,
+          color: ThemeConfig.grey500(context),
+        ),
+        if (fieldKey.currentState?.errorText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              fieldKey.currentState!.errorText!,
+              style: TextStyle(
+                color: ThemeConfig.redColor(context),
+                fontSize: 12,
+              ),
+            ),
+          ),
+      ],
+    );
+
+    bool hasError = fieldKey.currentState?.hasError ?? false;
+    if (hasError) {
+      checkboxGroup = Container(
+        decoration: BoxDecoration(
+          border: Border.all(color: ThemeConfig.redColor(context), width: 1),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: checkboxGroup,
+      );
+    }
+    return checkboxGroup;
   }
 }
