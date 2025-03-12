@@ -8,6 +8,7 @@ import 'package:fstapp/RouterService.dart';
 class DescriptionWithEdit extends StatelessWidget {
   final String description;
   String? defaultDescription;
+  final int occasionId;
   final ValueChanged<String> onDescriptionChanged;
 
   DescriptionWithEdit({
@@ -15,6 +16,7 @@ class DescriptionWithEdit extends StatelessWidget {
     required this.description,
     this.defaultDescription,
     required this.onDescriptionChanged,
+    required this.occasionId,
   });
 
   @override
@@ -42,6 +44,7 @@ class DescriptionWithEdit extends StatelessWidget {
                     HtmlEditorPage.parContent:
                     description == defaultDescription ? "" : description,
                   },
+                  occasionId: occasionId
                 ),
               );
               if (result != null) {
