@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
@@ -21,7 +22,7 @@ class OptionFieldHelper {
       BuildContext context,
       FormOptionModel option,
       ) {
-    if (option.price > 0) {
+    if (option is FormOptionProductModel && option.price > 0) {
       return '${option.title} (${Utilities.formatPrice(context, option.price)})';
     }
     return option.title;
@@ -34,7 +35,7 @@ class OptionFieldHelper {
     required Widget leading,
     required String title,
     required String? description,
-    required VoidCallback onTap,
+    required VoidCallback? onTap,
   }) {
     final bool hasDescription = !HtmlHelper.isHtmlEmptyOrNull(description);
 

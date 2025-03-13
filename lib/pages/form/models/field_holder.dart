@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class FieldHolder {
@@ -49,14 +50,32 @@ class OptionsFieldHolder extends FieldHolder {
     dynamic value,
     required this.options,
     required super.id,
-    required String super.title,
+    required super.title,
     required super.isRequired,
-    super.description
-  }) : super(
-    defaultValue: value
-  );
+    super.description,
+  }) : super(defaultValue: value);
 
   @override
   String toString() =>
       'OptionsFieldHolder(fieldType: $fieldType, title: $title)';
+}
+
+/// New class that extends OptionsFieldHolder to work with product options.
+/// It holds a list of FormOptionProductModel instances.
+class OptionsFieldProductHolder extends OptionsFieldHolder {
+  OptionsFieldProductHolder({
+    required super.fieldType,
+    super.value,
+    required List<FormOptionProductModel> productOptions,
+    required super.id,
+    required String super.title,
+    required super.isRequired,
+    super.description,
+  }) : super(
+    options: productOptions,
+  );
+
+  @override
+  String toString() =>
+      'OptionsFieldProductHolder(fieldType: $fieldType, title: $title, options: $options)';
 }

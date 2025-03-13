@@ -514,5 +514,6 @@
   "Max age cannot be lower than min age.": "Maximální věk nemůže být nižší než minimální.",
   "Clear selection": "Zrušit výběr",
   "Add description": "Přidat popis",
+  "Unavailable": "Nedostupné",
   "_": "_"
 }

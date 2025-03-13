@@ -14,6 +14,13 @@ import '../pages/form_editor_content.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
+  // Helper function to format ordered_count/maximum
+  static String formatOrderedCount(int? orderedCount, int? maximum) {
+    final count = orderedCount ?? 0;
+    final maxStr = (maximum != null && maximum != 0) ? maximum.toString() : '∞';
+    return '$count / $maxStr';
+  }
+
   static Widget buildTicketEditorReadOnly(
       BuildContext context, FormModel form, FormFieldModel ticketField) {
     List<Widget> children = [];
@@ -183,7 +190,7 @@ class TicketEditorWidgets {
                     ),
                     if (showCapacityColumn)
                       Expanded(
-                        flex: 2,
+                        flex: 3,
                         child: Tooltip(
                           message: "Product Quantity".tr(),
                           child: Icon(Icons.stacked_bar_chart, size: 16, color: Theme.of(context)
@@ -200,8 +207,7 @@ class TicketEditorWidgets {
                   final rowStyle = productHidden
                       ? const TextStyle(decoration: TextDecoration.lineThrough)
                       : const TextStyle();
-                  final capacityText =
-                  (product.maximum ?? 0) != 0 ? '${product.maximum}' : '';
+                  final capacityText = formatOrderedCount(product.orderedCount, product.maximum);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
@@ -238,7 +244,7 @@ class TicketEditorWidgets {
                         ),
                         if (showCapacityColumn)
                           Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: Text(
                               capacityText,
                               style: rowStyle,

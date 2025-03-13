@@ -14,11 +14,13 @@ class ProductModel {
   String? productTypeString;
   int? order;
   int? maximum;
+  int? orderedCount;
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
   static const String spotType = "spot";
   static const String metaTypeField = "type";
+  static const String metaOrderedCount = "ordered_count";
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -40,7 +42,8 @@ class ProductModel {
         occasion: json[TbEshop.products.occasion],
         productTypeString: json[metaTypeField],
         order: json[TbEshop.products.order],
-        maximum: json[TbEshop.products.maximum]
+        maximum: json[TbEshop.products.maximum],
+        orderedCount: json[metaOrderedCount]
     );
   }
 
@@ -54,7 +57,7 @@ class ProductModel {
     TbEshop.products.product_type: productType,
     TbEshop.products.occasion: occasion,
     TbEshop.products.order: order,
-    TbEshop.products.maximum: maximum
+    TbEshop.products.maximum: maximum,
   };
 
   String toBasicString() => title ?? id.toString();
@@ -73,5 +76,6 @@ class ProductModel {
     this.productTypeString,
     this.order,
     this.maximum,
+    this.orderedCount,
   });
 }

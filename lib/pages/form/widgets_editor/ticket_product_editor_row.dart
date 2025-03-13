@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
-import 'product_detail_editor_dialog.dart'; // New dialog file
+import 'product_detail_editor_dialog.dart';
+import 'ticket_editor_widgets.dart'; // New dialog file
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -129,29 +130,27 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
                   ),
               ],
             ),
-            // Additional summary row
-            if ((widget.product.maximum != null &&
-                widget.product.maximum != 0))
-              Padding(
-                padding: const EdgeInsets.only(top: 4.0),
-                child: Row(
-                  children: [
-                    if (widget.product.maximum != null &&
-                        widget.product.maximum != 0)
-                      Tooltip(
-                        message: "Product Quantity".tr(),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.stacked_bar_chart, size: 16),
-                            const SizedBox(width: 4),
-                            SelectableText('${widget.product.maximum}'),
-                          ],
+            // Additional summary row: display ordered_count/maximum (or ∞ if maximum is not set)
+            Padding(
+              padding: const EdgeInsets.only(top: 4.0),
+              child: Row(
+                children: [
+                  Tooltip(
+                    message: "Product Quantity".tr(),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.stacked_bar_chart, size: 16),
+                        const SizedBox(width: 4),
+                        SelectableText(
+                          TicketEditorWidgets.formatOrderedCount(widget.product.orderedCount, widget.product.maximum),
                         ),
-                      ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+            ),
           ],
         ),
       ),

@@ -344,7 +344,7 @@ class FormHelper {
         var optionsField = field as OptionsFieldHolder;
         return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeProductType:
-        var optionsField = field as OptionsFieldHolder;
+        var optionsField = field as OptionsFieldProductHolder;
         return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthDate:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthDateLabel());
@@ -397,7 +397,7 @@ class FormHelper {
                   ),
                   const SizedBox(height: 8),
                   HtmlView(
-                    html: description!,
+                    html: description,
                     isSelectable: true,
                   ),
                 ],

@@ -8,6 +8,7 @@ import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 
 /// Builds a single-select field (radio). Decides whether to show
 /// a basic radio group or a card-based option list based on whether
@@ -119,28 +120,40 @@ class RadioFieldBuilder {
       FormOptionModel o,
       FormHolder formHolder,
       ) {
+    // If the option is a product option and is disabled, mark it accordingly.
+    final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
     final title = OptionFieldHelper.buildOptionTitle(context, o);
+    // If disabled, update text style to use the disabled color and append "Unavailable".
+    final effectiveTitle = isDisabled
+        ? "$title (${tr('Unavailable')})"
+        : title;
     final isSelected = (field.value == o);
-    return OptionFieldHelper.buildOptionCard(
+    final optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
-      title: title,
+      title: effectiveTitle,
       description: o.description,
       leading: Radio<FormOptionModel>(
         value: o,
         groupValue: field.value,
-        onChanged: (val) {
+        onChanged: isDisabled
+            ? null
+            : (val) {
           field.didChange(val);
           formHolder.controller?.updateTotalPrice?.call();
           field.validate();
         },
       ),
-      onTap: () {
+      onTap: isDisabled
+          ? null
+          : () {
         field.didChange(o);
         formHolder.controller?.updateTotalPrice?.call();
         field.validate();
       },
     );
+    // Wrap the card in an Opacity widget to grey it out if disabled.
+    return isDisabled ? Opacity(opacity: 0.5, child: optionCard) : optionCard;
   }
 }
 
@@ -167,12 +180,20 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
   @override
   Widget build(BuildContext context) {
     final options = widget.optionsIn.map((o) {
+      // If the option is a product option, check if it's disabled.
+      final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+      final style = OptionFieldHelper.optionTitleTextStyle().copyWith(
+        color: isDisabled ? Theme.of(context).disabledColor : null,
+      );
       final title = OptionFieldHelper.buildOptionTitle(context, o);
+      final effectiveTitle = isDisabled
+          ? "$title (${tr('Unavailable')})"
+          : title;
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
         child: Text(
-          title,
-          style: OptionFieldHelper.optionTitleTextStyle(),
+          effectiveTitle,
+          style: style,
         ),
       );
     }).toList();
@@ -196,6 +217,10 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
           onChanged: (val) {
+            // Prevent selection change if the option is disabled.
+            if (val is FormOptionProductModel && !val.isEnabled) {
+              return;
+            }
             setState(() {
               currentSelection = val;
             });
@@ -226,4 +251,3 @@ class _BasicRadioFieldWidgetState extends State<_BasicRadioFieldWidget> {
     );
   }
 }
-
