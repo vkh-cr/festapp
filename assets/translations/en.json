@@ -514,5 +514,6 @@
   "Max age cannot be lower than min age.": "Max age cannot be lower than min age.",
   "Clear selection": "Clear selection",
   "Add description": "Add description",
+  "Unavailable": "Unavailable",
   "_":"_"
 }
