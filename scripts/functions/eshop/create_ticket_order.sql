@@ -98,13 +98,15 @@ BEGIN
                     RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1016, 'message', 'Invalid form field: ' || key_val.key)::TEXT;
                 END IF;
                 SELECT ff.type INTO field_type FROM public.form_fields ff WHERE ff.id = key_val.key::BIGINT;
-                IF field_type IN ('email', 'name', 'surname') THEN
+                IF field_type IN ('email', 'name', 'surname', 'phone') THEN
                     IF field_type = 'email' THEN
                         input_data := jsonb_set(input_data, '{email}', to_jsonb(key_val.value), true);
                     ELSIF field_type = 'name' THEN
                           input_data := jsonb_set(input_data, '{name}', to_jsonb(key_val.value), true);
                     ELSIF field_type = 'surname' THEN
                         input_data := jsonb_set(input_data, '{surname}', to_jsonb(key_val.value), true);
+                    ELSIF field_type = 'phone' THEN
+                        input_data := jsonb_set(input_data, '{phone}', to_jsonb(key_val.value), true);
                     END IF;
                 END IF;
             END LOOP;
