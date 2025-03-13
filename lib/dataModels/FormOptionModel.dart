@@ -12,9 +12,8 @@ class FormOptionModel {
   String title;
   String? description;
   final String id;
-  final double price;
 
-  FormOptionModel(this.id, this.title, {this.price = 0.0, this.type = FormHelper.fieldTypeSelectOne, this.description});
+  FormOptionModel(this.id, this.title, {this.type = FormHelper.fieldTypeSelectOne, this.description});
 
   @override
   String toString() => title;
@@ -43,7 +42,6 @@ class FormOptionModel {
     return {
       metaOptionsName: title,
       metaOptionsId: id,
-      metaOptionsPrice: price,
     };
   }
 }
