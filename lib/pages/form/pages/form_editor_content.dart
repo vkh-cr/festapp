@@ -21,23 +21,6 @@ import '../widgets_editor/form_fields_generator.dart';
 /// Global constant for hidden item opacity
 const double kHiddenOpacity = 0.5;
 
-/// Global constant for the available field type icons
-const Map<String, IconData> fieldTypeIcons = {
-  FormHelper.fieldTypeText: Icons.text_fields,
-  FormHelper.fieldTypeSelectOne: Icons.radio_button_checked,
-  FormHelper.fieldTypeSelectMany: Icons.check_box_outlined,
-  FormHelper.fieldTypeEmail: Icons.email,
-  FormHelper.fieldTypeName: Icons.person,
-  FormHelper.fieldTypeSurname: Icons.person_outline,
-  FormHelper.fieldTypeSex: Icons.wc,
-  FormHelper.fieldTypeCity: Icons.location_city,
-  FormHelper.fieldTypeBirthYear: Icons.cake,
-  FormHelper.fieldTypeBirthDate: Icons.cake,
-  FormHelper.fieldTypeNote: Icons.note,
-  FormHelper.fieldTypeSpot: Icons.event_seat,
-  FormHelper.fieldTypeProductType: Icons.category,
-  FormHelper.fieldTypeTicket: Icons.confirmation_number,
-};
 
 class FormEditorContent extends StatefulWidget {
   const FormEditorContent({super.key});
@@ -98,7 +81,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
   /// Filter available field types for brand-new fields
   List<String> get _availableFieldTypes {
     final existingTypes = form?.relatedFields?.map((f) => f.type).toList() ?? [];
-    return fieldTypeIcons.keys.where((type) {
+    return FormHelper.fieldTypeIcons.keys.where((type) {
       // These types can appear multiple times
       if ([
         FormHelper.fieldTypeText,
@@ -193,7 +176,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
             onPressed: () => Navigator.pop(context, type),
             child: Row(
               children: [
-                Icon(fieldTypeIcons[type]),
+                Icon(FormHelper.fieldTypeIcons[type]),
                 const SizedBox(width: 12),
                 Text(FormHelper.fieldTypeToLocale(type)),
               ],

@@ -16,11 +16,11 @@ class ProductTypeEditor extends StatefulWidget {
   final VoidCallback refresh;
 
   const ProductTypeEditor({
-    Key? key,
+    super.key,
     required this.form,
     required this.ptField,
     required this.refresh,
-  }) : super(key: key);
+  });
 
   @override
   _ProductTypeEditorState createState() => _ProductTypeEditorState();

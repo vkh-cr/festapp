@@ -53,7 +53,7 @@ class OptionFieldHelper {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             crossAxisAlignment:
             hasDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,

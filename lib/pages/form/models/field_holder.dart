@@ -1,5 +1,3 @@
-// lib/pages/form/models/field_holder.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
@@ -50,16 +48,12 @@ class OptionsFieldHolder extends FieldHolder {
     required super.fieldType,
     dynamic value,
     required this.options,
-    required int id,
-    required String title,
-    required bool isRequired,
-    String? description
+    required super.id,
+    required String super.title,
+    required super.isRequired,
+    super.description
   }) : super(
-    defaultValue: value,
-    isRequired: isRequired,
-    title: title,
-    id: id,
-    description: description
+    defaultValue: value
   );
 
   @override
