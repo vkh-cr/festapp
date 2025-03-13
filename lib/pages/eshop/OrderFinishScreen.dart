@@ -184,14 +184,14 @@ class _FinishOrderScreenState extends State<FinishOrderScreen>
         ),
         const SizedBox(height: 24),
         // Back to Form Button
-        ElevatedButton(
+        OutlinedButton(
           onPressed: () {
             if(_isSuccess) {
               widget.onResetForm();
             }
             Navigator.of(context).pop();
           },
-          style: ElevatedButton.styleFrom(
+          style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(
               vertical: 12,
               horizontal: 32,

@@ -175,7 +175,6 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             children: [
               HtmlView(
                 html: field.description!,
-                isSelectable: true,
                 fontSize: 14,
               ),
               const SizedBox(height: 16),
@@ -235,15 +234,20 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             onChanged: (value) => field.title = value,
           ),
           if (!HtmlHelper.isHtmlEmptyOrNull(field.description))
-            DescriptionWithEdit(
-              description: field.description!,
-              defaultDescription: defaultDescription,
-              onDescriptionChanged: (newDescription) {
-                setState(() {
-                  field.description = newDescription;
-                });
-              },
-              occasionId: widget.form.occasion!,
+            Column(
+              children: [
+                DescriptionWithEdit(
+                  description: field.description!,
+                  defaultDescription: defaultDescription,
+                  onDescriptionChanged: (newDescription) {
+                    setState(() {
+                      field.description = newDescription;
+                    });
+                  },
+                  occasionId: widget.form.occasion!,
+                ),
+                const SizedBox(height: 16),
+              ],
             ),
         ],
         _buildAnswerWidget(context, field, true),
