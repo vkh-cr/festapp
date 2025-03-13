@@ -18,6 +18,7 @@ import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
 import 'birth_date_field_builder.dart';
 import 'form_field_builders.dart';
+import 'option_field_helper.dart';
 
 class FormHelper {
   // Field Type Constants
@@ -25,6 +26,7 @@ class FormHelper {
   static const String fieldTypeSurname = "surname";
   static const String fieldTypeCity = "city";
   static const String fieldTypeEmail = "email";
+  static const String fieldTypePhone = "phone";
   static const String fieldTypeSex = "sex";
   static const String fieldTypeBirthYear = "birth_year";
   static const String fieldTypeNote = "note";
@@ -58,6 +60,7 @@ class FormHelper {
   static String cityLabel() => "City".tr();
   static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
+  static String phoneLabel() => "Phone".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();
@@ -71,6 +74,24 @@ class FormHelper {
   static String selectOneLabel() => "Single Choice".tr();
   static String selectManyLabel() => "Multiple Choice".tr();
   static String productTypeLabel() => "Product Type".tr();
+
+  static const Map<String, IconData> fieldTypeIcons = {
+    FormHelper.fieldTypeText: Icons.text_fields,
+    FormHelper.fieldTypeSelectOne: Icons.radio_button_checked,
+    FormHelper.fieldTypeSelectMany: Icons.check_box_outlined,
+    FormHelper.fieldTypeEmail: Icons.email,
+    FormHelper.fieldTypeName: Icons.person,
+    FormHelper.fieldTypeSurname: Icons.person_outline,
+    FormHelper.fieldTypeSex: Icons.wc,
+    FormHelper.fieldTypeCity: Icons.location_city,
+    FormHelper.fieldTypeBirthYear: Icons.cake,
+    FormHelper.fieldTypeBirthDate: Icons.cake,
+    FormHelper.fieldTypeNote: Icons.note,
+    FormHelper.fieldTypeSpot: Icons.event_seat,
+    FormHelper.fieldTypeProductType: Icons.category,
+    FormHelper.fieldTypeTicket: Icons.confirmation_number,
+    FormHelper.fieldTypePhone: Icons.phone,
+  };
 
   static bool isAlwaysRequired(String? type) {
     return const [
@@ -109,11 +130,29 @@ class FormHelper {
         return productTypeLabel();
       case fieldTypeBirthDate:
         return birthDateLabel();
+      case fieldTypePhone:
+        return phoneLabel();
       default:
-        return fieldType.tr();
+        return fieldType;
     }
   }
 
+  static String fieldTypeValue(BuildContext context, String value, String? fieldType) {
+    switch (fieldType) {
+      case fieldTypeSex:
+        return UserInfoModel.sexToLocale(value);
+      case fieldTypeBirthDate:
+        try {
+          final DateTime parsedDate = DateTime.parse(value);
+          final locale = Localizations.localeOf(context).toString();
+          return DateFormat.yMMMMd(locale).format(parsedDate);
+        } catch (e) {
+          return value;
+        }
+      default:
+        return value;
+    }
+  }
 
   static double fontSizeFactor = 1.2;
 
@@ -285,6 +324,9 @@ class FormHelper {
       case fieldTypeEmail:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, emailLabel());
         return FormFieldBuilders.buildEmailField(context, field);
+      case fieldTypePhone:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, phoneLabel());
+        return FormFieldBuilders.buildPhoneNumber(context, field);
       case fieldTypeSex:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, sexLabel());
         var sexOptions = [

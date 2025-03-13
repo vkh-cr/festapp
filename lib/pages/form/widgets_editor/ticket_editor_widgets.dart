@@ -268,7 +268,7 @@ class TicketEditorWidgets {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeSpot]),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -322,7 +322,7 @@ class TicketEditorWidgets {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeSpot]),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
