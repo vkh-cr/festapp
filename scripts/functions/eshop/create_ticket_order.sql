@@ -186,6 +186,11 @@ BEGIN
 
             -- Process each product from the accumulated products_array
             FOREACH product_id IN ARRAY products_array LOOP
+
+                IF product_id IS NULL THEN
+                    CONTINUE;
+                END IF;
+
                 SELECT i.*, it.type, it.title AS type_title, '' AS spot_title
                 INTO product_data
                 FROM eshop.products i

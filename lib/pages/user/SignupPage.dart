@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/pages/form/models/form_holder.dart';
@@ -47,7 +48,9 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
-    formHolder = FormHolder.fromFormFieldModel(entryForm);
+    var formModel = FormModel();
+    formModel.relatedFields = entryForm;
+    formHolder = FormHolder.fromFormFieldModel(formModel);
     formHolder!.controller = FormHolderController(globalKey: _formKey);
     return Scaffold(
       appBar: AppBar(

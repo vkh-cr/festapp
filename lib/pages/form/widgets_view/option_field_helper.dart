@@ -11,33 +11,9 @@ import 'package:fstapp/widgets/HtmlView.dart';
 class OptionFieldHelper {
   // Adjust as needed; you can also make this configurable if it's dynamic.
 
-  /// Builds the InputDecoration label (including the required asterisk if needed).
-  static InputDecoration buildInputDecoration({
-    required BuildContext context,
-    required String label,
-    required bool isRequired,
-    String? errorText,
-  }) {
-    return InputDecoration(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FormHelper.buildLabel(context, label, isRequired: isRequired),
-        ],
-      ),
-      errorText: errorText,
-      border: InputBorder.none,
-    );
-  }
-
   /// Text style used for option titles in checkboxes/radios.
   static TextStyle optionTitleTextStyle() {
     return TextStyle(fontSize: 14.0 * FormHelper.fontSizeFactor);
-  }
-
-  /// Text style used for option titles in checkboxes/radios.
-  static TextStyle cardOptionTitleTextStyle() {
-    return TextStyle(fontSize: 15.0 * FormHelper.fontSizeFactor, fontWeight: FontWeight.w400);
   }
 
   /// Builds the combined "title (+ price)" string for an option.
@@ -60,6 +36,8 @@ class OptionFieldHelper {
     required String? description,
     required VoidCallback onTap,
   }) {
+    final bool hasDescription = !HtmlHelper.isHtmlEmptyOrNull(description);
+
     return InkWell(
       onTap: onTap,
       child: Card(
@@ -70,14 +48,15 @@ class OptionFieldHelper {
           side: BorderSide(
             color: isSelected
                 ? Theme.of(context).colorScheme.primary
-                : Colors.grey.withOpacity(0.3),
-            width: isSelected ? 2 : 0,
+                : ThemeConfig.grey500(context),
+            width: isSelected ? 2 : 1,
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            hasDescription ? CrossAxisAlignment.start : CrossAxisAlignment.center,
             children: [
               leading,
               const SizedBox(width: 8),
@@ -87,19 +66,16 @@ class OptionFieldHelper {
                   children: [
                     Text(
                       title,
-                      style: cardOptionTitleTextStyle(),
+                      style: FormHelper.cardOptionTitleTextStyle(),
                     ),
-                    if (!HtmlHelper.isHtmlEmptyOrNull(description))
+                    if (hasDescription)
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
-                        child: Material(
-                          type: MaterialType.transparency,
-                          child: HtmlView(
-                            color: ThemeConfig.grey600(context),
-                            html: description!,
-                            fontSize: optionDescriptionFontSize(),
-                            isSelectable: false,
-                          ),
+                        child: HtmlView(
+                          color: ThemeConfig.grey600(context),
+                          html: description!,
+                          fontSize: FormHelper.optionDescriptionFontSize(),
+                          isSelectable: false,
                         ),
                       ),
                   ],
@@ -110,10 +86,5 @@ class OptionFieldHelper {
         ),
       ),
     );
-  }
-
-  /// Convenience to match the description style size.
-  static double optionDescriptionFontSize() {
-    return 13.0 * FormHelper.fontSizeFactor;
   }
 }
