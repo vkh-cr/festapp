@@ -512,5 +512,7 @@
   "You must be between {minAge} and {maxAge} years old.": "Musíte mít mezi {minAge} a {maxAge} roky.",
   "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old).": "Upozornění: Váš věk není v doporučeném rozmezí ({minAge}-{maxAge} roků).",
   "Max age cannot be lower than min age.": "Maximální věk nemůže být nižší než minimální.",
+  "Clear selection": "Zrušit výběr",
+  "Add description": "Přidat popis",
   "_": "_"
 }
