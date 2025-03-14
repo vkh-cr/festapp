@@ -8,6 +8,7 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
@@ -125,7 +126,7 @@ class _FormPageState extends State<FormPage> {
     for (var field in formHolder!.fields) {
       if (field.fieldType == FormHelper.fieldTypeProductType) {
         var selectedOption = field.getValue(formHolder!.controller!.globalKey);
-        if (selectedOption is FormOptionModel) {
+        if (selectedOption is FormOptionProductModel) {
           _totalPrice += selectedOption.price;
         }
       }
@@ -154,7 +155,7 @@ class _FormPageState extends State<FormPage> {
         for (var ticketData in tickets) {
           for (var ticketField in ticketData[FormHelper.metaFields]) {
             for (var fValue in ticketField.values) {
-              if (fValue is FormOptionModel) {
+              if (fValue is FormOptionProductModel) {
                 _totalPrice += fValue.price;
               }
             }

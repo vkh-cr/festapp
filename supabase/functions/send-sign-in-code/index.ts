@@ -1,6 +1,6 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { translatePlatformLinks } from "../_shared/translatePlatformLinks.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { supabaseAdmin, getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 import 'field_holder.dart';
 import 'ticket_holder.dart';
 import 'birth_date_field_holder.dart'; // Import the new holder.
@@ -113,15 +114,17 @@ class FormHolder {
         description: ffm.description
       );
     } else if (fieldType == FormHelper.fieldTypeProductType) {
-      return OptionsFieldHolder(
+      return OptionsFieldProductHolder(
         id: ffm.id!,
         fieldType: ffm.type!,
         isRequired: ffm.isRequired ?? false,
-        options: ffm.productType!.products!
-            .map((p) => FormOptionModel(
+          productOptions: ffm.productType!.products!
+            .map((p) => FormOptionProductModel(
           p.id.toString(),
           p.title!,
           price: p.price ?? 0,
+          maximum: p.maximum,
+          orderedCount: p.orderedCount,
           type: ffm.type!,
           description: p.description,
         ))
