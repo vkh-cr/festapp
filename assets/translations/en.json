@@ -515,5 +515,7 @@
   "Clear selection": "Clear selection",
   "Add description": "Add description",
   "Unavailable": "Unavailable",
+  "The {product_title} is no longer available for order.": "The {product_title} is no longer available for order.",
+  "Please choose a different variant.": "Please choose a different variant.",
   "_":"_"
 }
