@@ -30,47 +30,47 @@ class _OrdersTabState extends State<OrdersTab> {
     super.didChangeDependencies();
     if (formLink == null && context.routeData.params.isNotEmpty) {
       formLink = context.routeData.params.getString("formLink");
+      controller = SingleDataGridController<OrderModel>(
+        context: context,
+        loadData: () => DbOrders.getAllOrders(formLink!),
+        fromPlutoJson: OrderModel.fromPlutoJson,
+        firstColumnType: RightsService.isUnitManager()
+            ? DataGridFirstColumn.deleteAndCheck
+            : DataGridFirstColumn.check,
+        idColumn: TbEshop.orders.id,
+        actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+          isAddActionPossible: () => false,
+        ),
+        headerChildren: [
+          DataGridAction(
+            name: "Cancel".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => cancelOrders(singleDataGrid),
+            isEnabled: RightsService.isEditor,
+          ),
+          DataGridAction(
+            name: "Synchronize payments".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => synchronizePayments(),
+            isEnabled: RightsService.isEditor,
+          ),
+          DataGridAction(
+            name: "Send tickets".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => sendTickets(singleDataGrid),
+            isEnabled: RightsService.isEditor,
+          ),
+        ],
+        columns: EshopColumns.generateColumns(context, columnIdentifiers),
+      );
     }
   }
 
   Future<void> refreshData() async {
-    await controller!.forceReload();
+    await controller!.reloadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    controller = SingleDataGridController<OrderModel>(
-      context: context,
-      loadData: () => DbOrders.getAllOrders(formLink!),
-      fromPlutoJson: OrderModel.fromPlutoJson,
-      firstColumnType: RightsService.isUnitManager()
-          ? DataGridFirstColumn.deleteAndCheck
-          : DataGridFirstColumn.check,
-      idColumn: TbEshop.orders.id,
-      actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
-        isAddActionPossible: () => false,
-      ),
-      headerChildren: [
-        DataGridAction(
-          name: "Cancel".tr(),
-          action: (SingleDataGridController single_data_grid, [_]) => cancelOrders(single_data_grid),
-          isEnabled: RightsService.isEditor,
-        ),
-        DataGridAction(
-          name: "Synchronize payments".tr(),
-          action: (SingleDataGridController single_data_grid, [_]) => synchronizePayments(),
-          isEnabled: RightsService.isEditor,
-        ),
-        DataGridAction(
-          name: "Send tickets".tr(),
-          action: (SingleDataGridController single_data_grid, [_]) => sendTickets(single_data_grid),
-          isEnabled: RightsService.isEditor,
-        ),
-      ],
-      columns: EshopColumns.generateColumns(context, columnIdentifiers),
-    );
-      return SingleTableDataGrid<OrderModel>(controller!);
+    return SingleTableDataGrid<OrderModel>(controller!);
   }
 
   Future<void> synchronizePayments() async {
@@ -78,8 +78,8 @@ class _OrdersTabState extends State<OrdersTab> {
     refreshData();
   }
 
-  Future<void> cancelOrders(SingleDataGridController single_data_grid) async {
-    var selected = _getChecked(single_data_grid);
+  Future<void> cancelOrders(SingleDataGridController singleDataGrid) async {
+    var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
     }
@@ -178,9 +178,9 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  List<OrderModel> _getChecked(SingleDataGridController single_data_grid) {
+  List<OrderModel> _getChecked(SingleDataGridController singleDataGrid) {
     return List<OrderModel>.from(
-      single_data_grid.stateManager.refRows.originalList
+      singleDataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );
