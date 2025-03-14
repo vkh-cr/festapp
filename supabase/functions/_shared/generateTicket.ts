@@ -1,4 +1,5 @@
 import { formatCurrency } from "../_shared/utilities.ts";
+import { supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import QRCode from "npm:qrcode";
 import { PDFDocument, rgb } from "npm:pdf-lib";
@@ -10,11 +11,6 @@ import * as path from "https://deno.land/std/path/mod.ts";
 const CUSTOM_FONT_URL =
   "https://github.com/google/fonts/raw/refs/heads/main/apache/robotoslab/RobotoSlab%5Bwght%5D.ttf";
 const MAX_TEXT_ON_TICKET = 45;
-
-const supabaseAdmin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
 
 export async function fetchTicketResources(ticket: any) {
   // Fetch the occasion data.
@@ -64,37 +60,27 @@ export async function fetchTicketResources(ticket: any) {
     backgroundUrl = "https://kjdpmixlnhntmxjedpxh.supabase.co/storage/v1/object/sign/editor-files/default.jpg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJlZGl0b3ItZmlsZXMvZGVmYXVsdC5qcGciLCJpYXQiOjE3Mzc1NjY2NjcsImV4cCI6MTU5NDE3NTY2NjY3fQ.1WrwHhXQ59VQDentX8vGFyqQiUQFT2enjz-yTQxy854&t=2025-01-22T17%3A24%3A27.380Z";
   }
 
-  // Fetch product types.
-  const { data: productTypes, error: productTypesError } = await supabaseAdmin
-    .schema("eshop")
-    .from("product_types")
-    .select("id, type");
+  // Fetch eshop resources (both product types and products) via RPC.
+  const { data: eshopData, error: eshopError } = await supabaseAdmin.rpc(
+    "get_products_and_types",
+    { p_occasion_id: ticket.occasion }
+  );
 
-  if (productTypesError || !productTypes) {
+  if (eshopError || !eshopData) {
     throw new Error(
-      `Error fetching product types: ${productTypesError?.message}`
+      `Error fetching eshop resources: ${eshopError?.message}`
     );
   }
 
-  // Build a map for product type lookup: product_type_id -> type string.
+  // Extract the product types and products from the returned JSON.
+  const productTypes = eshopData.product_types || [];
+  const products = eshopData.products || [];
+
+  // Build a lookup for product types: product_type_id -> type string.
   const productTypeLookup: Record<number, string> = {};
   productTypes.forEach((pt: any) => {
     productTypeLookup[pt.id] = pt.type;
   });
-
-  // Fetch products related to the ticket.
-  const productIds = ticket.order_product_ticket.map(
-    (opt: any) => opt.product
-  );
-  const { data: products, error: productsError } = await supabaseAdmin
-    .schema("eshop")
-    .from("products")
-    .select(`id, title, title_short, product_type, data`)
-    .eq("occasion", ticket.occasion);
-
-  if (productsError || !products) {
-    throw new Error(`Error fetching products: ${productsError?.message}`);
-  }
 
   // Group products into a map of maps: { [productType: string]: { [productId: number]: product } }
   const productTypeMap: Record<string, Record<number, any>> = {};
