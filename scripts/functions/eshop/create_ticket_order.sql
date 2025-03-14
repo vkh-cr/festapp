@@ -14,6 +14,7 @@ DECLARE
     calculated_price NUMERIC(10,2) := 0;
     spot_secret UUID;
     product_id BIGINT;
+    ordered_count BIGINT;
     used_spots JSONB := '[]'::JSONB;
     occasion_id BIGINT;
     organization_id BIGINT;
@@ -160,7 +161,6 @@ BEGIN
                 WHERE i.id = spot_data.product;
             END IF;
 
-
             -- Generate a ticket symbol and create the ticket record
             ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
             INSERT INTO eshop.tickets (state, occasion, ticket_symbol, note, created_at, updated_at)
@@ -207,6 +207,28 @@ BEGIN
                             'message', 'Product not found or not part of occasion',
                             'details', product_id
                         )::text;
+                END IF;
+
+                -- Check if the product order would exceed its maximum allowed quantity
+                IF product_data.maximum IS NOT NULL THEN
+                    SELECT COUNT(*) INTO ordered_count
+                    FROM eshop.order_product_ticket
+                    WHERE product = product_id;
+                    IF ordered_count + 1 > product_data.maximum THEN
+                        RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(
+                            'code', 1017,
+                            'message', 'Product is overbooked',
+                            'product', jsonb_strip_nulls(JSONB_BUILD_OBJECT(
+                                'id', product_data.id,
+                                'title', product_data.title,
+                                'description', product_data.description,
+                                'price', product_data.price,
+                                'type', product_data.type,
+                                'type_title', product_data.type_title,
+                                'currency_code', product_data.currency_code
+                            ))
+                        )::TEXT;
+                    END IF;
                 END IF;
 
                 IF product_data.type = 'spot' AND spot_product IS NULL THEN
