@@ -236,16 +236,10 @@ Deno.serve(async (req) => {
       input_data: orderDetails,
     });
 
-    // Create a string combining the code and message from the ticketOrder
-    const errorString = `${ticketOrder.code}: ${ticketOrder.message}`;
-
     if (ticketOrder.code !== 200) {
-      console.error("Error creating ticket order:", errorString);
+      console.error("Error creating ticket order:", JSON.stringify(ticketOrder));
       return new Response(
-        JSON.stringify({
-          code: ticketOrder.code,
-          message: ticketOrder.message,
-        }),
+        JSON.stringify(ticketOrder),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,

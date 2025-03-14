@@ -515,5 +515,7 @@
   "Clear selection": "Zrušit výběr",
   "Add description": "Přidat popis",
   "Unavailable": "Nedostupné",
+  "The {product_title} is no longer available for order.": "{product_title} již není k objednání.",
+  "Please choose a different variant.": "Prosím vyberte si jinou variantu.",
   "_": "_"
 }
