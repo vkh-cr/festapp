@@ -4,6 +4,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
+import 'package:fstapp/dataModels/FormModel.dart';
+import 'package:fstapp/dataModels/FormOptionProductModel.dart';
 import 'field_holder.dart';
 import 'ticket_holder.dart';
 import 'birth_date_field_holder.dart'; // Import the new holder.
@@ -36,21 +38,22 @@ class FormHolder {
 
   FormHolderController? controller;
   final List<FieldHolder> fields;
+  final bool isCardDesign;
 
   TicketHolder? getTicket() =>
       fields.firstWhereOrNull((f) => f is TicketHolder) as TicketHolder?;
 
-  FormHolder({required this.fields});
+  FormHolder({required this.fields, required this.isCardDesign});
 
-  factory FormHolder.fromFormFieldModel(List<FormFieldModel> list) {
+  factory FormHolder.fromFormFieldModel(FormModel formModel) {
     // Extract and sort ticket child fields.
-    final ticketChildFields = list
+    final ticketChildFields = formModel.relatedFields!
         .where((f) => f.isTicketField == true)
         .toList()
       ..sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
 
     // Process non-ticket fields.
-    final otherFields = list
+    final otherFields = formModel.relatedFields!
         .where((f) => f.isTicketField != true)
         .map((f) => createFieldHolder(f))
         .toList();
@@ -62,7 +65,7 @@ class FormHolder {
     if (ticket != null) {
       ticket.fields.addAll(ticketChildFields.map((f) => createFieldHolder(f)));
     }
-    return FormHolder(fields: otherFields);
+    return FormHolder(fields: otherFields, isCardDesign: formModel.data?[FormModel.metaIsCardDesign]??false);
   }
 
   /// Creates a [FieldHolder] instance based on the provided [FormFieldModel].
@@ -108,22 +111,26 @@ class FormHolder {
         isRequired: ffm.isRequired ?? false,
         options: formOptions,
         title: ffm.title ?? "",
+        description: ffm.description
       );
     } else if (fieldType == FormHelper.fieldTypeProductType) {
-      return OptionsFieldHolder(
+      return OptionsFieldProductHolder(
         id: ffm.id!,
         fieldType: ffm.type!,
         isRequired: ffm.isRequired ?? false,
-        options: ffm.productType!.products!
-            .map((p) => FormOptionModel(
+          productOptions: ffm.productType!.products!
+            .map((p) => FormOptionProductModel(
           p.id.toString(),
           p.title!,
           price: p.price ?? 0,
+          maximum: p.maximum,
+          orderedCount: p.orderedCount,
           type: ffm.type!,
           description: p.description,
         ))
             .toList(),
         title: ffm.productType!.title ?? "",
+        description: ffm.productType!.description
       );
     } else if (fieldType == FormHelper.fieldTypeBirthDate) {
       // Use constants from BirthDateFieldHolder instead of hardcoded strings.

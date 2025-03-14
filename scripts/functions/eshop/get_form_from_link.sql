@@ -27,7 +27,7 @@ BEGIN
     ) THEN
         -- Retrieve only the header_off when the form is not open
         SELECT jsonb_build_object(
-            'code', 400, -- You can adjust the code as needed
+            'code', 400,
             'data', jsonb_build_object(
                 'header_off', f.header_off
             )
@@ -84,7 +84,13 @@ BEGIN
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,
-                                                    'order', p."order"
+                                                    'order', p."order",
+                                                    'ordered_count', (
+                                                        SELECT count(*)
+                                                        FROM eshop.order_product_ticket opt
+                                                        WHERE opt.product = p.id
+                                                    ),
+                                                    'maximum', p.maximum
                                                 ) ORDER BY COALESCE(p."order", 0)
                                             )
                                             FROM eshop.products p

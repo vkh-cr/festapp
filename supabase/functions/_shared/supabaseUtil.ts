@@ -1,4 +1,4 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 /**
  * Gets the authenticated Supabase user.

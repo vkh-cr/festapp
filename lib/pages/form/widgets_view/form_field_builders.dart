@@ -14,6 +14,8 @@ import '../models/form_holder.dart';
 import '../models/form_ticket_model.dart';
 import '../models/ticket_holder.dart';
 
+import 'text_field_builder.dart';
+
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
       {FocusNode? focusNode, TextStyle? textStyle}) {
@@ -88,6 +90,7 @@ class FormFieldBuilders {
           });
           formHolder.controller!.updateTotalPrice?.call();
         }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -208,34 +211,28 @@ class FormFieldBuilders {
     );
   }
 
-  static FormBuilderTextField buildTextField(
+  static Widget buildTextField(
       BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
-    FocusNode focusNode = FocusNode();
-    return FormBuilderTextField(
-      maxLines: null,
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
       autofillHints: autofillHints,
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
-      ),
-      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+      isEmail: false,
     );
   }
 
-  static FormBuilderTextField buildEmailField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode focusNode = FocusNode();
-    return FormBuilderTextField(
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
+  static Widget buildEmailField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
-      ),
-      validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
-        FormBuilderValidators.email(errorText: FormHelper.emailInvalidMessage()),
-      ]),
+      isEmail: true,
+    );
+  }
+
+  static Widget buildPhoneNumber(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [AutofillHints.telephoneNumber],
+      isPhone: true,
     );
   }
 
