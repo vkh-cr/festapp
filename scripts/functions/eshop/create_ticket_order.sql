@@ -41,6 +41,7 @@ DECLARE
     field_type TEXT;
     key_val RECORD;
     order_data JSONB;
+    local_note TEXT;
 BEGIN
     -- Wrap the entire logic in a subtransaction block to ensure that if any error occurs,
     -- all operations performed inside the block are rolled back.
@@ -103,7 +104,7 @@ BEGIN
                     IF field_type = 'email' THEN
                         input_data := jsonb_set(input_data, '{email}', to_jsonb(key_val.value), true);
                     ELSIF field_type = 'name' THEN
-                          input_data := jsonb_set(input_data, '{name}', to_jsonb(key_val.value), true);
+                        input_data := jsonb_set(input_data, '{name}', to_jsonb(key_val.value), true);
                     ELSIF field_type = 'surname' THEN
                         input_data := jsonb_set(input_data, '{surname}', to_jsonb(key_val.value), true);
                     ELSIF field_type = 'phone' THEN
@@ -127,6 +128,8 @@ BEGIN
             spot_data := NULL;
             spot_product := NULL;
             spot_id := NULL;
+            local_note := NULL;
+
             -- Validate the spot associated with the ticket (if any)
             IF ticket_data->>'spot' IS NOT NULL THEN
 
@@ -161,26 +164,28 @@ BEGIN
                 WHERE i.id = spot_data.product;
             END IF;
 
-            -- Generate a ticket symbol and create the ticket record
-            ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
-            INSERT INTO eshop.tickets (state, occasion, ticket_symbol, note, created_at, updated_at)
-            VALUES ('ordered', occasion_id, ticket_symbol, ticket_data->>'note', now, now)
-            RETURNING id INTO ticket_id;
-
-            -- Reset ticket_products for each ticket
-            ticket_products := '[]'::JSONB;
-
-            -- Build the array of product ids to process from ticket_data->fields.
-            -- We expect each field that contains a key "product_type" to be a product id.
+            -- Extract note from ticket.fields (since note is not directly on ticket)
             products_array := '{}';
             IF ticket_data ? 'fields' THEN
                 FOR field_item IN SELECT * FROM JSONB_ARRAY_ELEMENTS(ticket_data->'fields')
                 LOOP
+                    IF field_item ? 'note' THEN
+                        local_note := field_item->>'note';
+                    END IF;
                     IF field_item ? 'product_type' THEN
                         products_array := products_array || ((field_item->>'product_type')::BIGINT);
                     END IF;
                 END LOOP;
             END IF;
+
+            -- Generate a ticket symbol and create the ticket record using the extracted note
+            ticket_symbol := generate_ticket_symbol(organization_id, occasion_id);
+            INSERT INTO eshop.tickets (state, occasion, ticket_symbol, note, created_at, updated_at)
+            VALUES ('ordered', occasion_id, ticket_symbol, local_note, now, now)
+            RETURNING id INTO ticket_id;
+
+            -- Reset ticket_products for each ticket
+            ticket_products := '[]'::JSONB;
 
             IF spot_id IS NOT NULL THEN
                 products_array := products_array || spot_product.id;
@@ -210,7 +215,7 @@ BEGIN
                 END IF;
 
                 -- Check if the product order would exceed its maximum allowed quantity
-                IF product_data.maximum IS NOT NULL THEN
+                 IF COALESCE(product_data.maximum, 0) > 0 THEN
                     SELECT COUNT(*) INTO ordered_count
                     FROM eshop.order_product_ticket
                     WHERE product = product_id;
@@ -292,11 +297,11 @@ BEGIN
                 RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1015, 'message', 'Spot product is missing in ticket fields')::TEXT;
             END IF;
 
-            -- Append the ticket details (with its products and note) to the overall ticket_details array
+            -- Append the ticket details (with its products and the extracted note) to the overall ticket_details array
             ticket_details := ticket_details || JSONB_BUILD_OBJECT(
                 'id', ticket_id,
                 'ticket_symbol', ticket_symbol,
-                'note', ticket_data->>'note',
+                'note', local_note,
                 'products', ticket_products
             );
         END LOOP;
@@ -351,7 +356,6 @@ BEGIN
 
     EXCEPTION WHEN OTHERS THEN
         -- In case of any error, the inner block is rolled back and we capture the error message.
-        -- We try to interpret the error message as JSON (if it was raised as such), otherwise we build a default JSON error object.
         result := CASE
             WHEN left(SQLERRM, 1) = '{' THEN SQLERRM::JSONB
             ELSE JSONB_BUILD_OBJECT('code', 1013, 'message', SQLERRM)
