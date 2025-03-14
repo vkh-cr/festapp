@@ -4,7 +4,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
-import { getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -12,11 +12,6 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const supabaseAdmin = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-);
 
 // Function to generate QR code as base64
 async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: string): Promise<Uint8Array> {
