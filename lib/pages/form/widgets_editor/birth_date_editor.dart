@@ -8,36 +8,27 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
 
+import 'form_message_widget.dart';
+
 class BirthDateEditor {
   static Widget buildBirthDateReadOnly(BuildContext context, FormFieldModel field) {
     final data = field.data ?? {};
     final maxAge = data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "N/A";
     final minAge = data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "N/A";
-    final isStrict = data[BirthDateFieldHolder.metaIsHard] == true;
     final message = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
     final defaultWarning = "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
         .tr(namedArgs: {"minAge": minAge, "maxAge": maxAge});
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("${'Min Age'.tr()}: $minAge"),
         Text("${'Max Age'.tr()}: $maxAge"),
-        Text("${'Validation Mode:'.tr()} ${isStrict ? 'Strict'.tr() : 'Lenient'.tr()}"),
-        if (!isStrict)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: HtmlView(
-                fontSize: 14,
-                html: message.isNotEmpty ? message : defaultWarning,
-                isSelectable: false,
-              ),
-            ),
+        Text("${'Validation Mode:'.tr()} ${data[BirthDateFieldHolder.metaIsHard] == true ? 'Strict'.tr() : 'Lenient'.tr()}"),
+        if (data[BirthDateFieldHolder.metaIsHard] != true)
+          FormMessageWidget(
+            message: message,
+            defaultMessage: defaultWarning,
           ),
       ],
     );
@@ -141,42 +132,22 @@ class BirthDateEditor {
               ],
             ),
             if (!isStrict)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: HtmlView(
-                          fontSize: 14,
-                          html: currentMessage.isNotEmpty ? currentMessage : defaultWarning,
-                          isSelectable: false,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        final result = await RouterService.navigatePageInfo(
-                          context,
-                          HtmlEditorRoute(content: {HtmlEditorPage.parContent: currentMessage}),
-                        );
-                        if (result != null) {
-                          currentMessage = result as String;
-                          field.data ??= {};
-                          field.data![BirthDateFieldHolder.metaMessage] = currentMessage;
-                          setState(() {});
-                        }
-                      },
-                    ),
-                  ],
-                ),
+              FormMessageWidget(
+                message: currentMessage,
+                defaultMessage: defaultWarning,
+                isEditable: true,
+                onEdit: () async {
+                  final result = await RouterService.navigatePageInfo(
+                    context,
+                    HtmlEditorRoute(content: {HtmlEditorPage.parContent: currentMessage}),
+                  );
+                  if (result != null) {
+                    currentMessage = result as String;
+                    field.data ??= {};
+                    field.data![BirthDateFieldHolder.metaMessage] = currentMessage;
+                    setState(() {});
+                  }
+                },
               ),
           ],
         );

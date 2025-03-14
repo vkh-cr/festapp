@@ -28,8 +28,8 @@ class _OrdersTabState extends State<OrdersTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
     }
   }
 
@@ -109,8 +109,8 @@ class _OrdersTabState extends State<OrdersTab> {
     }
   }
 
-  Future<void> sendTickets(SingleDataGridController single_data_grid) async {
-    var selected = _getChecked(single_data_grid);
+  Future<void> sendTickets(SingleDataGridController singleDataGrid) async {
+    var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
     }
