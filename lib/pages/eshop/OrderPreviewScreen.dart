@@ -42,7 +42,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(seconds: 2),
+          duration: const Duration(seconds: 1),
           curve: Curves.easeInOut,
         );
       }
