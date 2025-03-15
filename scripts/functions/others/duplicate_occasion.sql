@@ -287,11 +287,7 @@ BEGIN
     INSERT INTO public.forms
       (created_at, data, key, occasion, type, bank_account, deadline_duration_seconds, is_open, link, blueprint, header, header_off, updated_at)
     VALUES (now(), rec.data, uuid_generate_v4(), new_occ, rec.type, rec.bank_account, rec.deadline_duration_seconds, rec.is_open,
-            CASE
-              WHEN rec.link IS NOT NULL
-              THEN rec.link || '-copy-' || substring(md5(random()::text) from 1 for 8)
-              ELSE rec.link
-            END,
+            replace(uuid_generate_v4()::text, '-', ''),
             COALESCE(new_bp_id, rec.blueprint), rec.header, rec.header_off, now())
     RETURNING id INTO v_new_id;
 
