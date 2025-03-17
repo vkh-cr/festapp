@@ -202,7 +202,7 @@ class HtmlHelper {
     // Collect image src values from the old HTML.
     List<String> oldImageUrls = oldDocument.getElementsByTagName('img')
         .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty)
+        .where((src) => src.isNotEmpty && !(src.startsWith(jpegBase64Prefix) || src.startsWith(pngBase64Prefix)))
         .toList();
 
     // Process each image in the new HTML.

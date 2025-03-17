@@ -1,7 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts"; // Ensure this path is correct
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.46.2";
-import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { getEmailTemplateAndWrapper, supabaseAdmin, isUserEditor, getSupabaseUser } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -10,30 +10,6 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
-
-/**
- * Checks if the user is an editor for the given occasion.
- * @param userId - The UUID of the user.
- * @param occasionId - The ID of the occasion.
- * @returns A Promise that resolves to a boolean indicating editor status.
- */
-async function isUserEditor(
-  userId: string,
-  occasionId: bigint
-): Promise<boolean> {
-  const { data, error } = await supabaseAdmin
-    .from("occasion_users")
-    .select("is_editor")
-    .eq("user", userId)
-    .eq("occasion", occasionId)
-    .single();
-
-  if (error || !data) {
-    console.error("Error fetching user role:", error);
-    return false;
-  }
-  return data.is_editor;
-}
 
 /**
  * Main function served by Deno. Orchestrates fetching tickets and sending emails.
@@ -45,29 +21,10 @@ Deno.serve(async (req) => {
       return new Response("ok", { headers: corsHeaders });
     }
 
-    // Set up a Supabase client for the requesting user
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
-    );
-
-    // Auth check
-    const { data: user, error: userError } = await supabaseUser.auth.getUser();
-    if (userError || !user) {
-      console.error("User authentication failed:", userError);
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
-
-    const userId = user.user.id;
-    console.log("Authenticated user:", userId);
+   const user = await getSupabaseUser(req.headers.get("Authorization")!);
+   console.log("user:", user);
+   const userId = user.user.id;
+   console.log("Authenticated user:", userId);
 
     // Parse request body
     const reqData = await req.json();
@@ -80,23 +37,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch order => get occasion ID
-    const { data: orderData, error: orderError } = await supabaseAdmin
-      .schema("eshop")
-      .from("orders")
-      .select("occasion")
-      .eq("id", orderId)
-      .single();
+    const { data: occasionId, error: orderError } = await supabaseAdmin.rpc(
+      "get_order_occasion",
+      { order_id: orderId }
+    );
 
-    if (orderError || !orderData) {
-      console.error("Order not found:", orderError);
+    console.log("occasionId:", occasionId);
+    console.log("orderError:", orderError);
+
+    if (orderError || !occasionId) {
+      console.error("Order not found or error occurred:", orderError);
       return new Response(JSON.stringify({ error: "Order not found" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
-
-    const occasionId = orderData.occasion;
 
     // Check if user is editor
     const userIsEditor = await isUserEditor(userId, occasionId);
