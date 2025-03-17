@@ -66,7 +66,6 @@ class ImageCompressionHelper {
           transform: TransformOptions(
               width: width,
               quality: quality,
-              resize: ResizeMode.contain,
               format: RequestImageFormat.origin
           ),
         );

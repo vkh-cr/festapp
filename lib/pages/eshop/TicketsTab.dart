@@ -41,8 +41,8 @@ class _TicketsTabState extends State<TicketsTab> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
       _controller = SingleDataGridController<TicketModel>(
         context: context,
         loadData: () => DbTickets.getAllTickets(formLink!),
@@ -56,14 +56,14 @@ class _TicketsTabState extends State<TicketsTab> {
         headerChildren: [
           DataGridAction(
             name: "Cancel".tr(),
-            action: (SingleDataGridController single_data_grid, [_]) =>
-                _stornoTickets(single_data_grid),
+            action: (SingleDataGridController singleDataGrid, [_]) =>
+                _stornoTickets(singleDataGrid),
             isEnabled: RightsService.isEditor,
           ),
           DataGridAction(
             name: "Scan tickets".tr(),
-            action: (SingleDataGridController single_data_grid, [_]) =>
-                _scanTickets(single_data_grid),
+            action: (SingleDataGridController singleDataGrid, [_]) =>
+                _scanTickets(singleDataGrid),
             isEnabled: RightsService.isEditor,
           ),
         ],
@@ -73,7 +73,7 @@ class _TicketsTabState extends State<TicketsTab> {
   }
 
   Future<void> refreshData() async {
-    await _controller.forceReload();
+    await _controller.reloadData();
   }
 
   @override
@@ -81,7 +81,7 @@ class _TicketsTabState extends State<TicketsTab> {
     return SingleTableDataGrid<TicketModel>(_controller);
   }
 
-  Future<void> _scanTickets(SingleDataGridController single_data_grid) async {
+  Future<void> _scanTickets(SingleDataGridController singleDataGrid) async {
     await TicketCodeHelper.showScanTicketCode(
       context,
       "Scan tickets".tr(),
@@ -89,8 +89,8 @@ class _TicketsTabState extends State<TicketsTab> {
     );
   }
 
-  Future<void> _stornoTickets(SingleDataGridController single_data_grid) async {
-    var selectedTickets = _getCheckedTickets(single_data_grid);
+  Future<void> _stornoTickets(SingleDataGridController singleDataGrid) async {
+    var selectedTickets = _getCheckedTickets(singleDataGrid);
 
     if (selectedTickets.isEmpty) {
       return;
@@ -99,7 +99,7 @@ class _TicketsTabState extends State<TicketsTab> {
     var confirm = await DialogHelper.showConfirmationDialogAsync(
       context,
       "Cancel".tr(),
-      "${"Are you sure you want to storno the selected tickets?".tr()} (${selectedTickets.length})",
+      "${"Do you want to cancel the selected tickets?".tr()} (${selectedTickets.length})",
     );
 
     if (confirm) {
@@ -130,9 +130,9 @@ class _TicketsTabState extends State<TicketsTab> {
     }
   }
 
-  List<TicketModel> _getCheckedTickets(SingleDataGridController single_data_grid) {
+  List<TicketModel> _getCheckedTickets(SingleDataGridController singleDataGrid) {
     return List<TicketModel>.from(
-      single_data_grid.stateManager.refRows.originalList
+      singleDataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => TicketModel.fromPlutoJson(row.toJson())),
     );

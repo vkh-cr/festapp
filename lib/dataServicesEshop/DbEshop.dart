@@ -22,7 +22,6 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbEshop {
-  static final _supabaseEshop = Supabase.instance.client.schema("eshop");
   static final _supabase = Supabase.instance.client;
 
   /// Fetches transactions based on a form link using a Supabase Function.

@@ -1,18 +1,20 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
-import 'package:fstapp/dataModels/FormFields.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
-import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+
+import '../models/field_holder.dart';
+import '../models/form_holder.dart';
+import '../models/form_ticket_model.dart';
+import '../models/ticket_holder.dart';
+
+import 'text_field_builder.dart';
 
 class FormFieldBuilders {
   static Widget buildTitleWidget(String displayTitle, bool isRequired, BuildContext context,
@@ -88,6 +90,7 @@ class FormFieldBuilders {
           });
           formHolder.controller!.updateTotalPrice?.call();
         }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -179,7 +182,7 @@ class FormFieldBuilders {
 
   static Widget buildSpotField(BuildContext context, GlobalKey<FormBuilderState> formKey,
       FormHolder formHolder, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
+    FocusNode focusNode = FocusNode();
     TextEditingController textController = TextEditingController();
     return FormBuilderField<SeatModel>(
       name: fieldHolder.fieldType,
@@ -192,11 +195,11 @@ class FormFieldBuilders {
         textController.text = seat?.objectModel?.toString() ?? FormHelper.metaEmpty;
         return TextField(
           controller: textController,
-          focusNode: _focusNode,
+          focusNode: focusNode,
           readOnly: true,
           canRequestFocus: true,
           decoration: InputDecoration(
-            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+            label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
             suffixIcon: const Icon(Icons.event_seat),
             errorText: field.errorText,
           ),
@@ -208,54 +211,38 @@ class FormFieldBuilders {
     );
   }
 
-  static FormBuilderTextField buildTextField(
+  static Widget buildTextField(
       BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
-    FocusNode focusNode = FocusNode();
-    return FormBuilderTextField(
-      maxLines: null,
-      name: fieldHolder.id.toString(),
-      focusNode: focusNode,
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
       autofillHints: autofillHints,
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
-      ),
-      validator: fieldHolder.isRequired ? FormBuilderValidators.required() : null,
+      isEmail: false,
     );
   }
 
-  static Widget buildTextFieldWithDescription(
-      BuildContext context, FieldHolder fieldHolder, Iterable<String> autofillHints) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        buildTextField(context, fieldHolder, autofillHints),
-      ],
-    );
-  }
-
-  static FormBuilderTextField buildEmailField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
-    return FormBuilderTextField(
-      name: fieldHolder.id.toString(),
-      focusNode: _focusNode,
+  static Widget buildEmailField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
       autofillHints: [AutofillHints.email],
-      decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
-      ),
-      validator: FormBuilderValidators.compose([
-        if (fieldHolder.isRequired) FormBuilderValidators.required(),
-        FormBuilderValidators.email(errorText: FormHelper.emailInvalidMessage()),
-      ]),
+      isEmail: true,
+    );
+  }
+
+  static Widget buildPhoneNumber(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [AutofillHints.telephoneNumber],
+      isPhone: true,
     );
   }
 
   static FormBuilderTextField buildBirthYearField(BuildContext context, FieldHolder fieldHolder) {
-    FocusNode _focusNode = FocusNode();
+    FocusNode focusNode = FocusNode();
     return FormBuilderTextField(
       name: fieldHolder.id.toString(),
-      focusNode: _focusNode,
+      focusNode: focusNode,
       decoration: InputDecoration(
-        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: _focusNode),
+        label: buildTitleWidget(fieldHolder.title!, fieldHolder.isRequired, context, focusNode: focusNode),
       ),
       validator: FormBuilderValidators.compose([
         if (fieldHolder.isRequired) FormBuilderValidators.required(),

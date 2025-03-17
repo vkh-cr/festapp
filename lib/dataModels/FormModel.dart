@@ -20,6 +20,8 @@ class FormModel {
   String? link;
   List<FormFieldModel>? relatedFields;
 
+  static const String metaIsCardDesign = "is_card_design";
+
   FormModel({
     this.id,
     this.createdAt,
