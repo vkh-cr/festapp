@@ -1,6 +1,6 @@
 DO $$
 DECLARE
-  org_id uuid;
+  org_id bigint;
 BEGIN
   SELECT id INTO org_id FROM organizations LIMIT 1;
 
