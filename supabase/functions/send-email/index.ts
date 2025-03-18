@@ -80,10 +80,11 @@ Deno.serve(async (req) => {
     await supabaseAdmin
       .from("log_emails")
       .insert({
-        from: _DEFAULT_EMAIL,
-        to: reqData.email,
-        template: templateAndWrapper.template.id,
-        organization: context.organization,
+         from: _DEFAULT_EMAIL,
+         to: reqData.email,
+         template: templateAndWrapper.template.id,
+         organization: context.organization,
+         occasion: context.occasion,
       });
 
     console.log("Email logged in database.");
