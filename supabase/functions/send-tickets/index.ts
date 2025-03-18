@@ -84,7 +84,10 @@ Deno.serve(async (req) => {
         status: 404,
       });
     }
+
+    console.log(order);
     const occasionId = order.occasion;
+    console.log(occasionId);
 
     // Fetch occasion data for the email template.
     const { data: occasionData, error: occasionError } = await supabaseAdmin
@@ -92,6 +95,9 @@ Deno.serve(async (req) => {
       .select("organization, title, features")
       .eq("id", occasionId)
       .single();
+
+    console.log(occasionData);
+
     if (occasionError || !occasionData) {
       console.error("Occasion not found:", occasionError);
       return new Response(JSON.stringify({ error: "Occasion not found" }), {
