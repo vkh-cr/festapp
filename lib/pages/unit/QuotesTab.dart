@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
@@ -23,7 +23,7 @@ class QuotesTab extends StatelessWidget {
             unitId, InformationModel.quoteType),
         fromPlutoJson: (plutoData) =>
             InformationModel.fromPlutoJsonType(plutoData, InformationModel.quoteType),
-        firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
+        firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.information.id,
         newObject: () => InformationModel.newRow(unitId),
         columns: [
@@ -47,10 +47,10 @@ class QuotesTab extends StatelessWidget {
             width: 50,
           ),
           PlutoColumn(
-            title: "Title".tr(),
+            title: "Date".tr(),
             enableAutoEditing: true,
-            field: Tb.information.title,
-            type: PlutoColumnType.text(),
+            field: Tb.information.data_date,
+            type: PlutoColumnType.date(),
             width: 300,
           ),
           PlutoColumn(
@@ -77,15 +77,8 @@ class QuotesTab extends StatelessWidget {
               );
             },
           ),
-          PlutoColumn(
-            title: "Order".tr(),
-            field: Tb.information.order,
-            type: PlutoColumnType.number(defaultValue: null),
-            applyFormatterInEditing: true,
-            width: 100,
-          ),
         ],
       ),
-    ).DataGrid();
+    );
   }
 }

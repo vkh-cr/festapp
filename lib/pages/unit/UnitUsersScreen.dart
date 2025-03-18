@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataModels/UnitUserModel.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/components/dataGrid/DataGridAction.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/pages/occasionAdmin/UserColumns.dart';
 import 'package:fstapp/pages/occasionAdmin/UsersTabHelper.dart';
@@ -33,66 +33,51 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
     UserColumns.UNIT_EDITOR_VIEW,
   ];
 
-  List<UnitUserModel>? _allUsers;
-  Key refreshKey = UniqueKey();
+
+  SingleDataGridController<UnitUserModel>? controller;
 
   @override
   void initState() {
     super.initState();
-    loadUsers();
   }
 
-  Future<void> loadUsers() async {
-    _allUsers = await DbUsers.getAllUsersFromUnit(widget.unit.id!);
-    setState(() {
-      refreshKey = UniqueKey();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (_allUsers == null) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    return KeyedSubtree(
-      key: refreshKey,
-        child: SingleTableDataGrid<UnitUserModel>(
-          SingleDataGridController<UnitUserModel>(
-            context: context,
-            loadData: () => DbUsers.getAllUsersFromUnit(widget.unit.id!),
-            fromPlutoJson: UnitUserModel.fromPlutoJson,
-            firstColumnType: DataGridFirstColumn.deleteAndCheck,
-            idColumn: Tb.occasion_users.user,
-            actionsExtended: DataGridActionsController(
-              areAllActionsEnabled: RightsService.canUpdateUnitUsers,
-            ),
-            headerChildren: [
-              if (RightsService.isUnitManager())
-                DataGridAction(
-                  name: "Add existing".tr(),
-                  action: (SingleDataGridController p0, [_]) => UsersTabHelper.addExistingToUnit(
-                    context,
-                    p0,
-                    _allUsers!,
-                    DbUsers.getAllUsersBasicsForUnit,
-                    widget.unit.id!,
-                  ),
-                ),
-              DataGridAction(
-                name: "Change password".tr(),
-                action: (SingleDataGridController p0, [_]) =>
-                    UsersTabHelper.setPassword(context, p0),
-                isEnabled: RightsService.canUpdateUnitUsers,
-              ),
-              // DataGridAction(
-              //   name: "Add to group".tr(),
-              //   action: (SingleDataGridController p0, [_]) => UsersTabHelper.addToGroup(context, p0),
-              // ),
-            ],
-            columns: UserColumns.generateColumns(columnIdentifiers),
+    controller = SingleDataGridController<UnitUserModel>(
+      context: context,
+      loadData: () => DbUsers.getAllUsersFromUnit(widget.unit.id!),
+      fromPlutoJson: UnitUserModel.fromPlutoJson,
+      firstColumnType: DataGridFirstColumn.deleteAndCheck,
+      idColumn: Tb.occasion_users.user,
+      actionsExtended: DataGridActionsController(
+        areAllActionsEnabled: RightsService.canUpdateUnitUsers,
+      ),
+      newObject: () => UnitUserModel.newRow(widget.unit.id!),
+      headerChildren: [
+        if (RightsService.isUnitManager())
+          DataGridAction(
+            name: "Add existing".tr(),
+            action: (SingleDataGridController p0, [_]) async {
+              var users = await DbUsers.getAllUsersFromUnit(widget.unit.id!);
+              await UsersTabHelper.addExistingToUnit(
+              context,
+              p0,
+              users,
+              controller!.reloadData,
+              widget.unit.id!,
+            );
+            },
           ),
-        ).DataGrid()
-    );
+        DataGridAction(
+          name: "Change password".tr(),
+          action: (SingleDataGridController p0, [_]) =>
+              UsersTabHelper.setPassword(context, p0),
+          isEnabled: RightsService.canUpdateUnitUsers,
+        ),
+      ],
+      columns: UserColumns.generateColumns(columnIdentifiers));
+
+    return SingleTableDataGrid<UnitUserModel>(controller!);
   }
 }

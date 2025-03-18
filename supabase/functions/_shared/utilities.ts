@@ -1,4 +1,4 @@
-export function formatCurrency(amount, currencyCode) {
+export function formatCurrency(amount, currencyCode = "CZK") {
   return new Intl.NumberFormat("cs-CZ", {
     style: "currency",
     currency: currencyCode,

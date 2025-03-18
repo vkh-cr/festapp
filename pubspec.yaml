@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.12.0+105
+version: 0.12.2+107
 
 environment:
   sdk: '>=2.19.5 <3.22.1'
@@ -43,7 +43,7 @@ dependencies:
   flutter_map_marker_popup: ^7.0.0
 #  flutter_map_marker_popup:
 #    path: ./pckgs/flutter_map_marker_popup-master
-  supabase_flutter: ^2.8.3
+  supabase_flutter: ^2.8.4
   flutter_secure_storage: ^9.2.2
   timelines_plus: ^1.0.6
   intl: ^0.19.0
@@ -52,9 +52,9 @@ dependencies:
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
   geolocator: ^13.0.2
-  flutter_widget_from_html: ^0.15.3
+  flutter_widget_from_html: ^0.16.0
   quill_html_editor: ^2.2.8
-  pluto_grid_plus: ^8.4.3
+  pluto_grid_plus: ^8.4.14
   url_strategy: ^0.3.0
   desktop_drop: ^0.5.0
   csv: ^6.0.0
@@ -62,27 +62,28 @@ dependencies:
   sembast_web: ^2.4.1
   path_provider: ^2.1.5
   select_dialog: ^2.0.1
-  onesignal_flutter: ^5.2.9
-  package_info_plus: ^8.2.1
+  onesignal_flutter: ^5.3.0
+  package_info_plus: ^8.3.0
   flutter_animate: ^4.5.2
   easy_localization: ^3.0.7
   flutter_map_cancellable_tile_provider: ^3.0.2
   simple_shadow: ^0.3.1
   pwa_install: ^0.0.5
-  flutter_form_builder: ^9.7.0
-  form_builder_validators: ^11.1.1
+  flutter_form_builder: ^10.0.0
+  form_builder_validators: ^11.1.2
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
   image_downloader_web: ^2.0.4
-  mobile_scanner: ^6.0.6
+  mobile_scanner: ^6.0.7
   flutter_map_pmtiles: ^1.0.4
   flutter_map_animations: ^0.8.0
-  auto_route: ^9.2.2
+  auto_route: ^10.0.1
   adaptive_theme: ^3.7.0
   connectivity_plus: ^6.1.3
+  http: ^1.3.0
 
 dev_dependencies:
-  auto_route_generator: ^9.0.0
+  auto_route_generator: ^10.0.1
   build_runner: ^2.4.15
   flutter_launcher_icons: ^0.14.3
   flutter_test:

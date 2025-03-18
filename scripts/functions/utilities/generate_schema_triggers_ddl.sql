@@ -17,17 +17,30 @@ WITH aggregated_triggers AS (
 ),
 formatted_triggers AS (
   SELECT
-    'create trigger ' || quote_ident(trigger_name) || E'\n' ||
-    upper(action_timing) || ' ' || lower(events) || ' on ' ||
-      (CASE
-         WHEN event_object_schema = p_schema THEN quote_ident(event_object_table)
+    -- Drop statement
+    'DROP TRIGGER IF EXISTS ' || quote_ident(trigger_name) || ' ON '
+    || CASE
+         WHEN event_object_schema = p_schema
+           THEN quote_ident(event_object_table)
          ELSE quote_ident(event_object_schema) || '.' || quote_ident(event_object_table)
-       END) || E'\nfor each ' || lower(action_orientation) || E'\n' ||
-    CASE
-      WHEN action_condition IS NOT NULL THEN 'when (' || action_condition || ')' || E'\n'
-      ELSE ''
-    END ||
-    'execute ' || action_statement || ';' AS trigger_ddl
+       END || ';' || E'\n'
+    ||
+    -- Create statement
+    'CREATE TRIGGER ' || quote_ident(trigger_name) || E'\n'
+    || upper(action_timing) || ' ' || lower(events) || ' ON '
+    || CASE
+         WHEN event_object_schema = p_schema
+           THEN quote_ident(event_object_table)
+         ELSE quote_ident(event_object_schema) || '.' || quote_ident(event_object_table)
+       END
+    || E'\nFOR EACH ' || lower(action_orientation) || E'\n'
+    || CASE
+         WHEN action_condition IS NOT NULL
+           THEN 'WHEN (' || action_condition || ')' || E'\n'
+         ELSE ''
+       END
+    || 'EXECUTE ' || action_statement || ';'
+    AS trigger_ddl
   FROM aggregated_triggers
 )
 SELECT string_agg(trigger_ddl, E'\n\n') AS ddl_all
