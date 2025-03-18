@@ -21,6 +21,14 @@ class DbEmailTemplates {
     return EmailTemplatesResponse.fromJson(response);
   }
 
+  static Future<EmailTemplatesResponse> getAllEmailTemplatesViaOccasionLink(String link) async {
+    final response = await _supabase.rpc(
+        "get_all_email_templates_via_occasion_link",
+        params: {"occasion_link": link}
+    );
+    return EmailTemplatesResponse.fromJson(response);
+  }
+
   static Future<void> updateEmailTemplate(EmailTemplateModel template) async {
     await _supabase.rpc('update_email_template', params: {"p_data": template});
   }

@@ -1,17 +1,19 @@
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class FormOptionModel {
   static const String metaValue = "value";
+  static const String metaDescription = "description";
+
   static const String metaOptionsId = "id";
   static const String metaOptionsName = "name";
   static const String metaOptionsPrice = "price";
 
   final String type;
-  final String title;
+  String title;
+  String? description;
   final String id;
-  final double price;
 
-  FormOptionModel(this.id, this.title, {this.price = 0.0, this.type = FormHelper.fieldTypeSelectOne});
+  FormOptionModel(this.id, this.title, {this.type = FormHelper.fieldTypeSelectOne, this.description});
 
   @override
   String toString() => title;
@@ -28,7 +30,7 @@ class FormOptionModel {
 
   factory FormOptionModel.fromJson(Map<String, dynamic> json) {
     return FormOptionModel(
-      json[metaValue]!, json[metaValue]!
+      json[metaValue]!, json[metaValue]!, description: json[metaDescription]
     );
   }
 
@@ -40,7 +42,6 @@ class FormOptionModel {
     return {
       metaOptionsName: title,
       metaOptionsId: id,
-      metaOptionsPrice: price,
     };
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/services/features/Feature.dart'; // Import the new Feature class
 
 class OccasionModel {
   int? id;
@@ -16,7 +17,7 @@ class OccasionModel {
   int? organization;
   int? unit;
   FormModel? form;
-  List<Map<String, dynamic>> features;
+  List<Feature> features;
 
   OccasionModel({
     this.id,
@@ -33,7 +34,7 @@ class OccasionModel {
     this.organization,
     this.unit,
     this.form,
-    List<Map<String, dynamic>>? features,
+    List<Feature>? features,
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
@@ -61,7 +62,9 @@ class OccasionModel {
       unit: json[Tb.occasions.unit],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
       features: json[Tb.occasions.features] is List
-          ? List<Map<String, dynamic>>.from(json[Tb.occasions.features])
+          ? List<Feature>.from(
+          (json[Tb.occasions.features] as List)
+              .map((featureJson) => Feature.fromJson(featureJson)))
           : [],
     );
   }

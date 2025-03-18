@@ -199,46 +199,32 @@ BEGIN
                     1
                 );
 
-                INSERT INTO eshop.product_types(
-                    title,
-                    description,
-                    type,
-                    data,
-                    occasion
-                )
-                VALUES (
-                    '',
-                    '',
-                    'spot',
-                    '{}'::jsonb,
-                    occ_id
-                )
-                RETURNING id INTO new_product_type_id;
-
-                INSERT INTO eshop.products(
-                    title,
-                    description,
-                    price,
-                    data,
-                    product_type,
-                    occasion,
-                    is_hidden,
-                    currency_code,
-                    title_short,
-                    "order"
-                )
-                VALUES (
-                    '',
-                    '',
-                    100,
-                    '{}'::jsonb,
-                    new_product_type_id,
-                    occ_id,
-                    false,
-                    'CZK',
-                    '',
-                    0
-                );
+                IF NOT EXISTS (
+                    SELECT 1 FROM eshop.product_types
+                    WHERE occasion = occ_id AND type = 'spot'
+                ) THEN
+                    INSERT INTO eshop.product_types(
+                        title,
+                        description,
+                        type,
+                        data,
+                        occasion
+                    )
+                    VALUES (
+                        '',
+                        '',
+                        'spot',
+                        '{}'::jsonb,
+                        occ_id
+                    )
+                    RETURNING id INTO new_product_type_id;
+                ELSE
+                    SELECT id
+                      INTO new_product_type_id
+                      FROM eshop.product_types
+                     WHERE occasion = occ_id AND type = 'spot'
+                     LIMIT 1;
+                END IF;
 
                 INSERT INTO public.form_fields(
                     title,
@@ -355,7 +341,7 @@ BEGIN
                 "order"
             )
             VALUES (
-                '',
+                'Variant 1',
                 '',
                 100,
                 '{}'::jsonb,

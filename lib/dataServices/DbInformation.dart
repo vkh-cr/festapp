@@ -12,6 +12,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DbInformation {
   static final _supabase = Supabase.instance.client;
 
+  static List<InformationModel> _sortViaDatetime(List<InformationModel> infoList) {
+    infoList.sort((a, b) {
+      final orderComparison = a.getDateTime().compareTo(b.getDateTime());
+      return orderComparison;
+    });
+    return infoList;
+  }
+
   static List<InformationModel> _sortInformationList(List<InformationModel> infoList) {
     infoList.sort((a, b) {
       final orderComparison = a.getOrder().compareTo(b.getOrder());
@@ -73,7 +81,7 @@ class DbInformation {
           .or("${Tb.information.type}.eq.,${Tb.information.type}.is.null");
     }
     var infoList = List<InformationModel>.from(data.map((x) => InformationModel.fromJson(x)));
-    return _sortInformationList(infoList);
+    return _sortViaDatetime(infoList);
   }
 
   static Future<List<InformationModel>> getAllActiveInformation() async {
