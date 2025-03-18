@@ -28,12 +28,12 @@ Deno.serve(async (req) => {
 
   // Destructure parameters and provide a default connection string if none is provided
   const {
-    dbConnectionString = "postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",
+    dbConnectionString,
     repo,
     directory,
     admin_email,
     admin_password,
-    supabase_instance_id,
+    project_url,
   } = body;
 
   if (!repo || !directory) {
@@ -48,11 +48,11 @@ Deno.serve(async (req) => {
 
   // For seed scripts, ensure the additional parameters are provided.
   if (directory === "scripts/seed") {
-    if (!admin_email || !admin_password || !supabase_instance_id) {
+    if (!admin_email || !admin_password || !project_url) {
       return new Response(
         JSON.stringify({
           error:
-            "Missing required parameters for seed: admin_email, admin_password, supabase_instance_id",
+            "Missing required parameters for seed: admin_email, admin_password, project_url",
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     database: dbUrl.pathname.slice(1), // removes the leading '/'
     hostname: dbUrl.hostname,
     port: parseInt(dbUrl.port),
-    tls: { rejectUnauthorized: false }, // adjust as needed for your security requirements
+    tls: { rejectUnauthorized: false },
   });
 
   // Helper function to recursively process directories and execute SQL files.
@@ -119,14 +119,22 @@ Deno.serve(async (req) => {
     // If the seed scripts are being run, call the extra SQL functions.
     if (directory === "scripts/seed") {
       try {
-        console.log("Executing seed_org_with_admin...");
-        // Build the query string directly.
-        const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
-        await client.queryObject(seedQuery);
+        // Only call seed_org_with_admin if both admin_email and admin_password are provided and non-empty.
+        if (admin_email && admin_password) {
+          console.log("Executing seed_org_with_admin...");
+          const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
+          await client.queryObject(seedQuery);
+        } else {
+          console.log("Skipping seed_org_with_admin due to missing admin_email or admin_password.");
+        }
 
         console.log("Executing setup_triggers...");
-        const triggerQuery = `SELECT setup_triggers('${supabase_instance_id}')`;
+        const triggerQuery = `SELECT setup_triggers('${project_url}')`;
         await client.queryObject(triggerQuery);
+
+        console.log("Executing setup_crons...");
+        const cronQuery = `SELECT setup_crons('${project_url}')`;
+        await client.queryObject(cronQuery);
       } catch (err) {
         console.error("Error executing seed functions:", err);
         return new Response(
