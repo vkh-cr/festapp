@@ -2,26 +2,26 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_352",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,H,I,K,L,M,N,O,P,Q,F,R,E,S,T,B={b1v:function b1v(){},b1y:function b1y(){},
-amr(){var x=0,w=A.k(y.x),v,u,t,s
-var $async$amr=A.f(function(d,e){if(d===1)return A.h(e,w)
+ams(){var x=0,w=A.k(y.x),v,u,t,s
+var $async$ams=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.c($.Al().e3("game_get_correctly_guessed_checkpoints",A.z(["oc",$.e2],y.w,u),u),$async$amr)
+return A.c($.Al().e3("game_get_correctly_guessed_checkpoints",A.z(["oc",$.e2],y.w,u),u),$async$ams)
 case 3:t=e
 x=4
-return A.c(y.i.b(t)?t:A.cA(t,u),$async$amr)
+return A.c(y.i.b(t)?t:A.cA(t,u),$async$ams)
 case 4:s=e
 if(s==null||!J.m(J.v(s,"code"),200)){v=A.a([],y.r)
 x=1
-break}v=A.b0(J.hb(J.v(s,"data"),new B.b41()),!0,y.e)
+break}v=A.b0(J.ha(J.v(s,"data"),new B.b41()),!0,y.e)
 x=1
 break
 case 1:return A.i(v,w)}})
-return A.j($async$amr,w)},
+return A.j($async$ams,w)},
 b41:function b41(){},
 cTL(d){return new B.BA(d)},
 BA:function BA(d){this.a=d},
-aJw:function aJw(d,e,f){var _=this
+aJx:function aJx(d,e,f){var _=this
 _.d=d
 _.e=e
 _.f=f
@@ -147,12 +147,12 @@ V=c[192]
 B.b1v.prototype={
 gZC(){return $.cIo().gZC().aab(new B.b1y())}}
 B.BA.prototype={
-M(){return new B.aJw(A.a([],y.p),A.aU(y.e),A.t("Game",null))}}
-B.aJw.prototype={
+M(){return new B.aJx(A.a([],y.p),A.aU(y.e),A.t("Game",null))}}
+B.aJx.prototype={
 Y(){var x,w=this
 w.aj()
-w.Du()
-w.x=A.Kp(D.aiD,new B.bY0(w))
+w.Dt()
+w.x=A.Kp(D.aiE,new B.bY0(w))
 x=$.cvE
 w.as=(x==null?$.cvE=new B.b1v():x).gZC().ee(new B.bY1(w))},
 l(){var x=this,w=x.w
@@ -163,13 +163,13 @@ w=x.as
 w===$&&A.b()
 w.a1(0)
 x.ag()},
-Du(){var x=0,w=A.k(y.v),v=this,u,t,s,r
-var $async$Du=A.f(function(d,e){if(d===1)return A.h(e,w)
+Dt(){var x=0,w=A.k(y.v),v=this,u,t,s,r
+var $async$Dt=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(F.amy(),$async$Du)
+return A.c(F.amz(),$async$Dt)
 case 2:v.r=e
 x=3
-return A.c(A.Y5(),$async$Du)
+return A.c(A.Y5(),$async$Dt)
 case 3:u=e
 t=J.cV(u)
 s=t.eL(u,new B.bY3())
@@ -177,10 +177,10 @@ v.z=s
 if(s)v.B(new B.bY4(v,t.lW(u,new B.bY5())))
 r=B
 x=4
-return A.c(F.xY("game"),$async$Du)
+return A.c(F.xY("game"),$async$Dt)
 case 4:v.B(new r.bY6(v,e))
 x=5
-return A.c(v.Pa(),$async$Du)
+return A.c(v.Pb(),$async$Dt)
 case 5:if(v.r!=null){t=Date.now()
 s=v.r.b
 s.toString
@@ -191,18 +191,18 @@ s=v.r.a
 s.toString
 if(new A.aV(t,0,!1).jp(s)){t=v.r.b
 t.toString
-v.aMm(t)}}return A.i(null,w)}})
-return A.j($async$Du,w)},
-Pa(){var x=0,w=A.k(y.v),v,u=this,t
-var $async$Pa=A.f(function(d,e){if(d===1)return A.h(e,w)
+v.aMl(t)}}return A.i(null,w)}})
+return A.j($async$Dt,w)},
+Pb(){var x=0,w=A.k(y.v),v,u=this,t
+var $async$Pb=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:if(!u.z){x=1
 break}t=B
 x=3
-return A.c(B.amr(),$async$Pa)
+return A.c(B.ams(),$async$Pb)
 case 3:u.B(new t.bY2(u,e))
 case 1:return A.i(v,w)}})
-return A.j($async$Pa,w)},
-aMm(d){this.y=d.iR(new A.aV(Date.now(),0,!1))
+return A.j($async$Pb,w)},
+aMl(d){this.y=d.iR(new A.aV(Date.now(),0,!1))
 this.w=A.Kp(A.cn(0,0,0,0,1),new B.bY9(this,d))},
 A(d){var x,w,v,u,t,s,r=this,q=null,p=new A.aV(Date.now(),0,!1),o=r.r
 if(o!=null){o=o.a
@@ -214,17 +214,17 @@ o.toString
 w=p.jp(o)}else w=!1
 o=A.W(r.f,q,q,q,q,q,q,q,q,q,q,q,q,q)
 o=L.ic(q,q,q,!0,q,q,1,q,q,q,!1,q,!1,q,q,O.tv(new B.bXY(d)),q,!0,q,q,q,q,q,o,q,q,q,1,q)
-v=A.a([new A.cr(C.aD,q,q,new A.cN(new A.aa(0,820,0,1/0),K.apG(q,C.r,D.aZc,new B.bXZ(r),r.d.length,q,C.av,q,C.F,!1),q),q)],y.u)
+v=A.a([new A.cr(C.aD,q,q,new A.cN(new A.aa(0,820,0,1/0),K.apH(q,C.r,D.aZd,new B.bXZ(r),r.d.length,q,C.av,q,C.F,!1),q),q)],y.u)
 if(!r.z)v.push(r.Sz(A.t("For playing the game, you must be assigned to a game group",q)))
 if(r.z&&x)v.push(r.Sz(A.t("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.cl(8)
 t=r.y.a
 s=y.w
-v.push(A.fe(q,A.aE(q,A.W(A.t("Time left: {time}",A.z(["time",""+C.c.b7(t,36e8)+":"+C.e.he(C.c.j(C.c.ao(C.c.b7(t,6e7),60)),2,"0")+":"+C.e.he(C.c.j(C.c.ao(C.c.b7(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,S.a4J,q,q,q,q,q),C.k,q,q,new A.bv(C.aK,q,q,u,q,q,q,C.R),q,q,q,C.av,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Sz(A.t("Game has ended",q)))
+v.push(A.fe(q,A.aE(q,A.W(A.t("Time left: {time}",A.z(["time",""+C.c.b7(t,36e8)+":"+C.e.he(C.c.j(C.c.ao(C.c.b7(t,6e7),60)),2,"0")+":"+C.e.he(C.c.j(C.c.ao(C.c.b7(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,S.a4K,q,q,q,q,q),C.k,q,q,new A.bv(C.aK,q,q,u,q,q,q,C.R),q,q,q,C.av,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Sz(A.t("Game has ended",q)))
 if(r.Q)v.push(r.Sz(A.t("You are offline. Please check your internet connection.",q)))
 return I.f2(o,q,new A.cs(C.ae,q,C.ac,C.z,v,q),q,q,q,q,q)},
 Sz(d){var x=null
-return A.aE(C.J,A.bX(new A.a3(N.aZ,A.W(d,x,x,x,x,x,x,x,Q.a4C,C.ba,x,x,x,x),x),x,x),C.k,C.ar,x,x,x,x,x,x,x,x,x)},
+return A.aE(C.J,A.bX(new A.a3(N.aZ,A.W(d,x,x,x,x,x,x,x,Q.a4C,C.ba,x,x,x,x),x),x,x),C.k,C.as,x,x,x,x,x,x,x,x,x)},
 VC(d,e){return this.bl2(d,e)},
 bl2(d,e){var x=0,w=A.k(y.v),v=this,u,t
 var $async$VC=A.f(function(f,g){if(f===1)return A.h(g,w)
@@ -243,7 +243,7 @@ B.b41.prototype={
 $1(d){return J.v(d,"check_point")},
 $S:48}
 B.bY0.prototype={
-$1(d){this.a.Pa()},
+$1(d){this.a.Pb()},
 $S:110}
 B.bY1.prototype={
 $1(d){var x=this.a
@@ -279,7 +279,7 @@ if(w!=null)w.a1(0)
 x.y=null
 x=x.c
 x.toString
-A.bY(x,!0).PJ(new B.bY7())}},
+A.bY(x,!0).PK(new B.bY7())}},
 $S:0}
 B.bY7.prototype={
 $1(d){return d.gZ4()},
@@ -303,7 +303,7 @@ $1(d){var x,w,v,u=this,t=null,s=y.w
 s=A.W(A.t("Check point {title}",A.z(["title",u.c],s,s)),t,t,t,t,t,t,t,t,t,t,t,t,t)
 x=u.a
 w=y.u
-v=A.am(A.a([E.h4(!0,C.aS,!1,t,!0,C.z,t,E.hu(),t,t,t,t,t,t,2,E.di(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.t("Take a guess",t),t,t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t),C.r,!0,t,!0,t,!1,t,R.aV,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.bXU(x),t,t,t,!1,t,t,!1,t,!0,t,G.b4,t,t,C.aO,C.aJ,t,t,t,t,t,t,t,!0,C.N,t,G.b6,t,t,t,t)],w),C.i,C.f,C.Y,t,C.l)
+v=A.am(A.a([E.h4(!0,C.aS,!1,t,!0,C.z,t,E.hv(),t,t,t,t,t,t,2,E.di(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.t("Take a guess",t),t,t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t),C.r,!0,t,!0,t,!1,t,R.aV,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.bXU(x),t,t,t,!1,t,t,!1,t,!0,t,G.b4,t,t,C.aO,C.aJ,t,t,t,t,t,t,t,!0,C.N,t,G.b6,t,t,t,t)],w),C.i,C.f,C.Y,t,C.l)
 return M.jz(A.a([A.dh(!1,V.bc(D.b4x,t),t,t,t,t,t,t,new B.bXV(x,u.b,u.d,u.e,d),t,t)],w),t,v,t,t,t,s)},
 $S:z+0}
 B.bXU.prototype={
@@ -334,13 +334,13 @@ x(B.b1v,A.E)
 w(A.dn,[B.b1y,B.bXZ])
 w(A.bB,[B.b41,B.bY0,B.bY1,B.bY3,B.bY5,B.bY9,B.bY7,B.bXW,B.bXU])
 x(B.BA,A.F)
-x(B.aJw,A.K)
+x(B.aJx,A.K)
 w(A.ci,[B.bY_,B.bY4,B.bY6,B.bY2,B.bY8,B.bXY,B.bXX,B.bXV,B.bXT])})()
-A.bl(b.typeUniverse,JSON.parse('{"BA":{"F":[],"d":[]},"aJw":{"K":["BA"]}}'))
+A.bl(b.typeUniverse,JSON.parse('{"BA":{"F":[],"d":[]},"aJx":{"K":["BA"]}}'))
 var y=(function rtii(){var x=A.y
-return{i:x("R<@>"),p:x("q<eH>"),u:x("q<d>"),r:x("q<r>"),x:x("A<r>"),w:x("e"),B:x("x"),b:x("@"),e:x("r"),v:x("~")}})();(function constants(){D.aiD=new A.aW(5e6)
-D.aZc=new P.rL(4,8,8,0.75)
+return{i:x("R<@>"),p:x("q<eH>"),u:x("q<d>"),r:x("q<r>"),x:x("A<r>"),w:x("e"),B:x("x"),b:x("@"),e:x("r"),v:x("~")}})();(function constants(){D.aiE=new A.aW(5e6)
+D.aZd=new P.rL(4,8,8,0.75)
 D.b1v=new A.a_(!0,C.n,null,null,null,null,16,C.a3,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4x=new A.c0("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cvE=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_352",e:"endPart",h:b})})($__dart_deferred_initializers__,"Vb2gusVRsoc1Ykp+tWRVpyUntvk=");
+a.eventLog.push({p:"main.dart.js_352",e:"endPart",h:b})})($__dart_deferred_initializers__,"4FK60L0jjaQNY1/vNb/IeEqkqmk=");
