@@ -76,7 +76,7 @@ G=c[209]
 R=c[138]
 C.BX.prototype={
 M(){var x=$.ae()
-return new C.aKl(new E.d_(new B.cH("https://kjdpmixlnhntmxjedpxh.supabase.co",A.aE,A.al),x),new E.d_(new B.cH("postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",A.aE,A.al),x),new E.d_(new B.cH("vkh-cr/festapp",A.aE,A.al),x),B.a([new C.yM("1. Tables","scripts/tables"),new C.yM("2. Functions","scripts/functions"),new C.yM("3. Policies","scripts/policies"),new C.yM("4. Seed","scripts/seed")],y.D))}}
+return new C.aKl(new E.d_(new B.cH("https://kjdpmixlnhntmxjedpxh.supabase.co",A.aE,A.al),x),new E.d_(new B.cH("postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres",A.aE,A.al),x),new E.d_(new B.cH("vkh-cr/festapp",A.aE,A.al),x),B.a([new C.yM("1. Tables","scripts/tables"),new C.yM("2. Functions","scripts/functions"),new C.yM("3. Policies","scripts/policies"),new C.yM("4. Seed","scripts/seed")],y.D))}}
 C.aKl.prototype={
 gbh2(){var x,w,v,u=A.e.cs(this.d.a.a)
 try{x=B.dj(u,0,null)
@@ -225,4 +225,4 @@ D.b4J=new B.c0("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.b4N=new B.c0("Initial",null,P.DL,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4X=new B.c0("Supabase Function Deploy Commands:",null,A4.wK,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_193",e:"endPart",h:b})})($__dart_deferred_initializers__,"au0VF6dmMTWYmZeAMsmVhrn1cgQ=");
+a.eventLog.push({p:"main.dart.js_193",e:"endPart",h:b})})($__dart_deferred_initializers__,"lKZ2TyAx0015tOeizNiJZ7FPe7M=");
