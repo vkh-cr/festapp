@@ -13,9 +13,9 @@ class InstanceInstallPage extends StatefulWidget {
 }
 
 class _InstanceInstallPageState extends State<InstanceInstallPage> {
-  // Common fields for all operations.
-  final TextEditingController _projectRefController = TextEditingController(
-    text: "kjdpmixlnhntmxjedpxh",
+  // Now using a URL instead of just the ref.
+  final TextEditingController _projectUrlController = TextEditingController(
+    text: "https://kjdpmixlnhntmxjedpxh.supabase.co",
   );
   final TextEditingController _dbController = TextEditingController(
     text:
@@ -33,9 +33,24 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
     OperationSectionData(title: "4. Seed", fixedDirectory: "scripts/seed"),
   ];
 
-  /// Generates the deploy commands using the current project ref.
+  /// Helper getter that extracts the project ref from the project URL.
+  /// For example, from "https://kjdpmixlnhntmxjedpxh.supabase.co" it returns "kjdpmixlnhntmxjedpxh".
+  String get _projectRef {
+    final url = _projectUrlController.text.trim();
+    try {
+      final uri = Uri.parse(url);
+      if (uri.host.endsWith(".supabase.co")) {
+        return uri.host.split('.').first;
+      }
+    } catch (_) {
+      // If URL parsing fails, fall back to the raw text.
+    }
+    return url;
+  }
+
+  /// Generates the deploy commands using the extracted project ref.
   String get _deployCommands {
-    final ref = _projectRefController.text.trim();
+    final ref = _projectRef;
     return '''
 supabase functions deploy notify --no-verify-jwt --project-ref $ref
 supabase functions deploy register --no-verify-jwt --project-ref $ref
@@ -47,6 +62,7 @@ supabase functions deploy send-ticket-order --no-verify-jwt --project-ref $ref
 supabase functions deploy send-tickets --no-verify-jwt --project-ref $ref
 supabase functions deploy fetch-transactions --no-verify-jwt --project-ref $ref
 supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
+supabase functions deploy synchronize-orders --no-verify-jwt --project-ref $ref
 ''';
   }
 
@@ -59,15 +75,15 @@ supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Common fields: Supabase Project Ref, Database Connection String, and Repo.
+            // Common fields: Supabase Project URL, Database Connection String, and Repo.
             TextField(
-              controller: _projectRefController,
+              controller: _projectUrlController,
               decoration: const InputDecoration(
-                labelText: 'Supabase Project Ref',
-                hintText: 'Enter your Supabase project reference',
+                labelText: 'Supabase Project URL',
+                hintText: 'Enter your Supabase project URL',
               ),
               onChanged: (_) {
-                // Rebuild to update the deploy commands when project ref changes.
+                // Rebuild to update the deploy commands when project URL changes.
                 setState(() {});
               },
             ),
@@ -142,7 +158,7 @@ supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
                     customDirectory: false,
                     dbController: _dbController,
                     repoController: _repoController,
-                    projectRefController: _projectRefController,
+                    projectUrlController: _projectUrlController,
                   ),
                 );
               }).toList(),
@@ -161,7 +177,7 @@ supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
               initialDirectory: "migrations",
               dbController: _dbController,
               repoController: _repoController,
-              projectRefController: _projectRefController,
+              projectUrlController: _projectUrlController,
             ),
           ],
         ),
@@ -184,14 +200,14 @@ class OperationSectionWidget extends StatefulWidget {
   final String? initialDirectory;
   final TextEditingController dbController;
   final TextEditingController repoController;
-  final TextEditingController projectRefController;
+  final TextEditingController projectUrlController;
 
   const OperationSectionWidget({
     Key? key,
     required this.title,
     required this.dbController,
     required this.repoController,
-    required this.projectRefController,
+    required this.projectUrlController,
     this.fixedDirectory,
     this.customDirectory = false,
     this.initialDirectory,
@@ -215,6 +231,18 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
   // Determines if this operation is the Seed operation.
   bool get _isSeed => widget.fixedDirectory == "scripts/seed";
 
+  /// Extracts the project ref from the project URL.
+  String get _projectRef {
+    final url = widget.projectUrlController.text.trim();
+    try {
+      final uri = Uri.parse(url);
+      if (uri.host.endsWith(".supabase.co")) {
+        return uri.host.split('.').first;
+      }
+    } catch (_) {}
+    return url;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -226,7 +254,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
       _adminEmailController = TextEditingController();
       _adminPasswordController = TextEditingController();
       // Note: Instead of a separate controller for instance id,
-      // we use the common projectRefController from the parent.
+      // we use the project URL (from which the ref is extracted).
     }
   }
 
@@ -251,10 +279,10 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
     if (_isSeed) {
       if (( _adminEmailController?.text.trim().isEmpty ?? true) ||
           ( _adminPasswordController?.text.trim().isEmpty ?? true) ||
-          (widget.projectRefController.text.trim().isEmpty)) {
+          (_projectRef.isEmpty)) {
         setState(() {
           _statusMessage =
-          "Please fill out Admin Email, Admin Password, and Supabase Project Ref.";
+          "Please fill out Admin Email, Admin Password, and ensure a valid Supabase Project URL.";
           _wasSuccess = false;
         });
         return;
@@ -273,7 +301,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
       bodyMap.addAll({
         "admin_email": _adminEmailController!.text.trim(),
         "admin_password": _adminPasswordController!.text.trim(),
-        "supabase_instance_id": widget.projectRefController.text.trim(),
+        "project_url": widget.projectUrlController.text.trim(),
       });
     }
 
@@ -376,11 +404,11 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
                 decoration: const InputDecoration(labelText: 'Admin Password'),
                 obscureText: true,
               ),
-              // Show the common Supabase Project Ref as read-only in the seed section.
+              // Show the common Supabase Project URL as read-only in the seed section.
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
-                  "Supabase Project Ref: ${widget.projectRefController.text}",
+                  "Supabase Project URL: ${widget.projectUrlController.text}",
                   style: const TextStyle(fontStyle: FontStyle.italic),
                 ),
               ),

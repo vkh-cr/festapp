@@ -43,6 +43,7 @@ class EshopColumns {
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
   static const String ORDER_EMAIL = "orderEmail";
+  static const String ORDER_CREATED_AT = "orderCreatedAt";
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
@@ -84,7 +85,7 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.single_data_gridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         width: 120,
         textAlign: PlutoColumnTextAlign.center,
       ),
@@ -193,7 +194,7 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.single_data_gridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         textAlign: PlutoColumnTextAlign.center,
         width: 120,
       ),
@@ -216,6 +217,17 @@ class EshopColumns {
         field: TbEshop.orders.data_email,
         type: PlutoColumnType.text(),
         width: 140,
+      ),
+    ],
+    ORDER_CREATED_AT: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Created".tr(),
+        field: TbEshop.orders.created_at,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 100,
       ),
     ],
     ORDER_DATA_NOTE: [

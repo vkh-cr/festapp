@@ -67,7 +67,7 @@ class OrderModel extends IPlutoRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  static Color single_data_gridStateToColor(String state) {
+  static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
     switch (firstPart) {
@@ -168,6 +168,10 @@ class OrderModel extends IPlutoRowModel {
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
             : "",
       ),
+      TbEshop.orders.created_at: PlutoCell(
+          value: createdAt != null
+              ? DateFormat('yyyy-MM-dd').format(createdAt!)
+              : ""),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
       TbEshop.orders.data_email: PlutoCell(value: data?[TbEshop.orders.data_email]),
       TicketModel.metaTicketsProducts: PlutoCell(
