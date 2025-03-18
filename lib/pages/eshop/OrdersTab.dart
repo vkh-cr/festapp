@@ -193,6 +193,7 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_EMAIL,
     if(!FeatureService.isFeatureEnabled(FeatureConstants.ticket))
     EshopColumns.TICKET_PRODUCTS,
+    EshopColumns.ORDER_CREATED_AT,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
