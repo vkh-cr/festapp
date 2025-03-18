@@ -253,8 +253,6 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
     if (_isSeed) {
       _adminEmailController = TextEditingController();
       _adminPasswordController = TextEditingController();
-      // Note: Instead of a separate controller for instance id,
-      // we use the project URL (from which the ref is extracted).
     }
   }
 
@@ -275,20 +273,6 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
         ? _customDirController.text
         : widget.fixedDirectory ?? '';
 
-    // For seed, validate extra parameters.
-    if (_isSeed) {
-      if (( _adminEmailController?.text.trim().isEmpty ?? true) ||
-          ( _adminPasswordController?.text.trim().isEmpty ?? true) ||
-          (_projectRef.isEmpty)) {
-        setState(() {
-          _statusMessage =
-          "Please fill out Admin Email, Admin Password, and ensure a valid Supabase Project URL.";
-          _wasSuccess = false;
-        });
-        return;
-      }
-    }
-
     // Build the JSON payload.
     final Map<String, dynamic> bodyMap = {
       "dbConnectionString": dbConnectionString,
@@ -296,16 +280,19 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
       "directory": directory,
     };
 
-    // Add extra parameters if this is the seed script.
+    // For seed, optionally add admin credentials if provided.
     if (_isSeed) {
-      bodyMap.addAll({
-        "admin_email": _adminEmailController!.text.trim(),
-        "admin_password": _adminPasswordController!.text.trim(),
-        "project_url": widget.projectUrlController.text.trim(),
-      });
+      final adminEmail = _adminEmailController!.text.trim();
+      final adminPassword = _adminPasswordController!.text.trim();
+      // Include the project URL regardless.
+      bodyMap["project_url"] = widget.projectUrlController.text.trim();
+      if (adminEmail.isNotEmpty && adminPassword.isNotEmpty) {
+        bodyMap.addAll({
+          "admin_email": adminEmail,
+          "admin_password": adminPassword,
+        });
+      }
     }
-
-    final body = jsonEncode(bodyMap);
 
     setState(() {
       _isLoading = true;
@@ -316,7 +303,7 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
     try {
       final response = await _supabase.functions.invoke(
         "instance-install",
-        body: body,
+        body: bodyMap.isNotEmpty ? jsonEncode(bodyMap) : null,
       );
 
       if (response.status != 200) {
@@ -393,6 +380,11 @@ class _OperationSectionWidgetState extends State<OperationSectionWidget> {
                     " - unaccent extension (Database > Extensions)\n"
                     " - pg_cron extension (Database > Extensions)",
                 style: TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                "Admin Email and Password are optional. If left blank, no new admin user will be inserted.",
+                style: TextStyle(fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 8),
               TextField(
