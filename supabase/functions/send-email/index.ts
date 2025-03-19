@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
       .from("log_emails")
       .insert({
          from: _DEFAULT_EMAIL,
-         to: reqData.email,
+         to: receiver,
          template: templateAndWrapper.template.id,
          organization: context.organization,
          occasion: context.occasion,
