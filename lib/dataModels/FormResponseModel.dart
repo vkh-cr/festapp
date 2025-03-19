@@ -4,6 +4,7 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
+import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
@@ -32,6 +33,10 @@ class FormResponseModel extends IPlutoRowModel {
       TbEshop.orders.id: PlutoCell(value: id),
       TbEshop.orders.order_symbol: PlutoCell(value: order!.id),
       TbEshop.orders.state: PlutoCell(value: order!.state),
+      TicketModel.metaTicketsProducts: PlutoCell(
+          value: order!.relatedProducts != null
+              ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              : ""),
     };
 
     for (var f in allFields!) {
