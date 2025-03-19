@@ -110,55 +110,66 @@ class AdminPageHelper {
       List<AdminTabDefinition> activeTabs,
       TabController tabController,
       ) {
-
     return AppBar(
-      toolbarHeight: 60,
-      leadingWidth: 200,
-      // The logo is shown as an IconButton.
-      leading: Align(
-        alignment: Alignment.centerLeft,
-        child: GestureDetector(
-          onTap: () {
-            // Navigate to the unit edit page if the user has rights.
-            if (RightsService.canUserSeeUnitWorkspace()) {
-              RouterService.navigate(
-                context,
-                "unit/${RightsService.currentUnitUser?.unit}/edit",
-              );
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: LogoWidget(height: 40, forceDark: true),
+      automaticallyImplyLeading: false, // Don't imply a leading widget
+      leading: null,                    // Explicitly remove leading
+      leadingWidth: 0,                  // Zero width for leading
+      titleSpacing: 0,                  // Remove default title spacing
+      toolbarHeight: kToolbarHeight,    // Standard AppBar height
+
+      title: Row(
+        children: [
+          // Left logo with a small padding (e.g. 8.0) for consistency with desktop
+          Padding(
+            padding: const EdgeInsets.only(left: 8.0),
+            child: GestureDetector(
+              onTap: () {
+                if (RightsService.canUserSeeUnitWorkspace()) {
+                  RouterService.navigate(
+                    context,
+                    "unit/${RightsService.currentUnitUser?.unit}/edit",
+                  );
+                }
+              },
+              child: LogoWidget(height: 40, forceDark: true),
+            ),
           ),
-        ),
+
+          // Centered title with ellipsis if it overflows
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+          // Right profile with a small padding (e.g. 12.0) for consistency with desktop
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground),
+          ),
+        ],
       ),
-      title: Text(title),
-      actions: [
-        Padding(
-            padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-            child: UserHeaderWidget(appBarIconColor: ThemeConfig.lllBackground,))
-      ],
-      // Added TabBar to the mobile AppBar
+
+      // If you have tabs:
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(40),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: TabBar(
-            controller: tabController,
-            isScrollable: true,
-            tabs: activeTabs.map((tab) {
-              return Row(
-                children: [
-                  Icon(tab.icon),
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(tab.label),
-                  ),
-                ],
-              );
-            }).toList(),
-          ),
+        child: TabBar(
+          controller: tabController,
+          isScrollable: true,
+          tabs: activeTabs.map((tab) {
+            return Row(
+              children: [
+                Icon(tab.icon),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(tab.label),
+                ),
+              ],
+            );
+          }).toList(),
         ),
       ),
     );

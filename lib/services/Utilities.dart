@@ -51,8 +51,10 @@ class Utilities {
     return cleaned.replaceAll(invalidChars, '');
   }
 
-
-
+  static String removeTabsAndNewLines(String input) {
+    final pattern = RegExp(r'[\t\n]+');
+    return input.replaceAll(pattern, '');
+  }
 
   static int naturalCompare(String a, String b) {
     final regex = RegExp(r'\d+|\D+');
