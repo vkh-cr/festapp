@@ -6,6 +6,7 @@ import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class FormResponseModel extends IPlutoRowModel {
@@ -44,8 +45,8 @@ class FormResponseModel extends IPlutoRowModel {
         cells[f.id.toString()] = PlutoCell(value: '');
         continue;
       }
-      var rValue = fields![f.id.toString()];
-      cells[f.id.toString()] = PlutoCell(value: rValue ?? '');
+      var rValue = Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
+      cells[f.id.toString()] = PlutoCell(value: rValue);
     }
 
     return PlutoRow(cells: cells);
