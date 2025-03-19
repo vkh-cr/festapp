@@ -44,6 +44,8 @@ SMTP_HOSTNAME=
 SMTP_USER_NAME=
 SMTP_USER_PASSWORD=
 DEFAULT_EMAIL=
+# url in format https://kjdpmixlnhntmxjedpxh.supabase.co
+PROJECT_URL=
 ```
 - Set `.env` to your project:
 ```
