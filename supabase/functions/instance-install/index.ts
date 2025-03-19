@@ -28,12 +28,12 @@ Deno.serve(async (req) => {
 
   // Destructure parameters and provide a default connection string if none is provided
   const {
-    dbConnectionString = "postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres",
+    dbConnectionString,
     repo,
     directory,
     admin_email,
     admin_password,
-    supabase_instance_id,
+    project_url,
   } = body;
 
   if (!repo || !directory) {
@@ -48,11 +48,11 @@ Deno.serve(async (req) => {
 
   // For seed scripts, ensure the additional parameters are provided.
   if (directory === "scripts/seed") {
-    if (!admin_email || !admin_password || !supabase_instance_id) {
+    if (!project_url) {
       return new Response(
         JSON.stringify({
           error:
-            "Missing required parameters for seed: admin_email, admin_password, supabase_instance_id",
+            "Missing required parameters for seed: project_url",
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
     database: dbUrl.pathname.slice(1), // removes the leading '/'
     hostname: dbUrl.hostname,
     port: parseInt(dbUrl.port),
-    tls: { rejectUnauthorized: false }, // adjust as needed for your security requirements
+    tls: { rejectUnauthorized: false },
   });
 
   // Helper function to recursively process directories and execute SQL files.
@@ -100,14 +100,20 @@ Deno.serve(async (req) => {
         // Recursively process child directories.
         await processDirectory(`${dir}/${item.name}`);
       } else if (item.type === "file" && item.name.endsWith(".sql") && item.download_url) {
-        console.log(`Executing ${dir}/${item.name} ...`);
-        const fileResponse = await fetch(item.download_url);
-        if (!fileResponse.ok) {
-          console.error(`Failed to download ${dir}/${item.name}`);
-          continue;
+        const filePath = `${dir}/${item.name}`;
+        console.log(`Executing ${filePath} ...`);
+        try {
+          const fileResponse = await fetch(item.download_url);
+          if (!fileResponse.ok) {
+            console.error(`Failed to download ${filePath}`);
+            continue;
+          }
+          const sql = await fileResponse.text();
+          await client.queryObject(sql);
+        } catch (err) {
+          console.error(`Error executing SQL file ${filePath}:`, err);
+          throw new Error(`Error in ${filePath}: ${err.toString()}`);
         }
-        const sql = await fileResponse.text();
-        await client.queryObject(sql);
       }
     }
   }
@@ -118,20 +124,63 @@ Deno.serve(async (req) => {
 
     // If the seed scripts are being run, call the extra SQL functions.
     if (directory === "scripts/seed") {
-      try {
-        console.log("Executing seed_org_with_admin...");
-        // Build the query string directly.
-        const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
-        await client.queryObject(seedQuery);
+      // Execute seed_org_with_admin if parameters are provided.
+      if (
+        admin_email != null &&
+        admin_password != null &&
+        admin_email.trim() !== "" &&
+        admin_password.trim() !== ""
+      ) {
+        try {
+          console.log("Executing seed_org_with_admin...");
+          const seedQuery = `SELECT seed_org_with_admin('${admin_email}', '${admin_password}')`;
+          await client.queryObject(seedQuery);
+        } catch (err) {
+          console.error("Error executing seed_org_with_admin:", err);
+          return new Response(
+            JSON.stringify({
+              error: "Error executing seed_org_with_admin",
+              details: err.toString(),
+            }),
+            {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 500,
+            }
+          );
+        }
+      } else {
+        console.log("Skipping seed_org_with_admin due to missing admin_email or admin_password.");
+      }
 
+      // Execute setup_triggers.
+      try {
         console.log("Executing setup_triggers...");
-        const triggerQuery = `SELECT setup_triggers('${supabase_instance_id}')`;
+        const triggerQuery = `SELECT setup_triggers('${project_url}')`;
         await client.queryObject(triggerQuery);
       } catch (err) {
-        console.error("Error executing seed functions:", err);
+        console.error("Error executing setup_triggers:", err);
         return new Response(
           JSON.stringify({
-            error: "Error executing seed functions",
+            error: "Error executing setup_triggers",
+            details: err.toString(),
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          }
+        );
+      }
+
+      // Execute setup_crons.
+      try {
+        console.log("Executing setup_crons...");
+        const cronQuery = `SELECT setup_crons('${project_url}')`;
+        await client.queryObject(cronQuery);
+      } catch (err) {
+        console.error("Error executing setup_crons:", err);
+        return new Response(
+          JSON.stringify({
+            error: "Error executing setup_crons",
             details: err.toString(),
           }),
           {
