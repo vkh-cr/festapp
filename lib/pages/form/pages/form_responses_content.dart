@@ -73,6 +73,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
   static List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
+    EshopColumns.TICKET_PRODUCTS,
     EshopColumns.ORDER_STATE,
     EshopColumns.RESPONSES
   ];

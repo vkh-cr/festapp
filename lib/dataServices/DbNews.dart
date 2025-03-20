@@ -34,13 +34,14 @@ class DbNews {
       for(var u in currentUsers) {
         toBeUpdated.add({
           Tb.user_news.user: u[Tb.user_news.user],
-          Tb.user_news.news_id: lastMes[Tb.news.id]
+          Tb.user_news.news_id: lastMes[Tb.news.id],
+          Tb.user_news.occasion: RightsService.currentOccasionId!
         });
       }
 
       await _supabase
           .from(Tb.user_news.table)
-          .upsert(toBeUpdated).select();
+          .upsert(toBeUpdated);
     }
     else {
       await _supabase
@@ -137,11 +138,12 @@ class DbNews {
         .from(Tb.news.table)
         .select(
         "${Tb.news.id},"
-        "${Tb.user_news.table}!inner(${Tb.user_news.news_id})"
-        )
-        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
-        .eq("${Tb.user_news.table}.${Tb.user_news.user}", AuthService.currentUserId())
-        .maybeSingle();
+            "${Tb.user_news.table}!inner(${Tb.user_news.news_id})"
+    )
+        .match({
+      Tb.news.occasion: RightsService.currentOccasionId!,
+      "${Tb.user_news.table}.${Tb.user_news.user}": AuthService.currentUserId()
+    }).maybeSingle();
     if (lastMessage != null) {
       lastMessageId = lastMessage[Tb.news.id];
     }
