@@ -672,6 +672,13 @@ TO authenticated
 USING ((auth.uid() = "user"))
 WITH CHECK ((auth.uid() = "user"));
 
+DROP POLICY IF EXISTS "Enable all for editors" ON public.user_news;
+CREATE POLICY "Enable all for editors" ON public.user_news
+AS PERMISSIVE FOR ALL
+TO authenticated
+USING (get_is_editor_on_occasion(occasion))
+WITH CHECK (get_is_editor_on_occasion(occasion));
+
 -----------------------------------------------
 --eshop----------------------------------------
 -----------------------------------------------
