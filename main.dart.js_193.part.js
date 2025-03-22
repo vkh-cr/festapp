@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_193",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,A,S,T,U,I,V,L,W,X,Y,Z,A_,C={
-cUN(){return new C.BX(null)},
-czO(d,e,f,g,h,i,j){return new C.a25(j,f,d,g,e,i,h,null)},
+cUP(){return new C.BX(null)},
+czQ(d,e,f,g,h,i,j){return new C.a25(j,f,d,g,e,i,h,null)},
 BX:function BX(d){this.a=d},
 aKl:function aKl(d,e,f,g){var _=this
 _.d=d
@@ -11,11 +11,11 @@ _.e=e
 _.f=f
 _.r=g
 _.c=_.a=null},
-c_C:function c_C(d){this.a=d},
-c_B:function c_B(){},
-c_D:function c_D(d,e){this.a=d
-this.b=e},
 c_E:function c_E(d){this.a=d},
+c_D:function c_D(){},
+c_F:function c_F(d,e){this.a=d
+this.b=e},
+c_G:function c_G(d){this.a=d},
 yM:function yM(d,e){this.a=d
 this.b=e},
 a25:function a25(d,e,f,g,h,i,j,k){var _=this
@@ -33,11 +33,11 @@ _.e=e
 _.f=!1
 _.r=""
 _.c=_.a=_.y=_.x=_.w=null},
-c3X:function c3X(d){this.a=d},
-c3Y:function c3Y(d,e){this.a=d
-this.b=e},
 c3Z:function c3Z(d){this.a=d},
 c4_:function c4_(d,e){this.a=d
+this.b=e},
+c40:function c40(d){this.a=d},
+c41:function c41(d,e){this.a=d
 this.b=e}},D,A0,A1,M,A2,A3,N,K,A4,A5,A6,A7,O,H,E,P,F,Q,G,R
 J=c[1]
 B=c[0]
@@ -78,20 +78,20 @@ C.BX.prototype={
 M(){var x=$.ae()
 return new C.aKl(new E.d_(new B.cH("https://kjdpmixlnhntmxjedpxh.supabase.co",A.aE,A.al),x),new E.d_(new B.cH("postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres",A.aE,A.al),x),new E.d_(new B.cH("vkh-cr/festapp",A.aE,A.al),x),B.a([new C.yM("1. Tables","scripts/tables"),new C.yM("2. Functions","scripts/functions"),new C.yM("3. Policies","scripts/policies"),new C.yM("4. Seed","scripts/seed")],y.D))}}
 C.aKl.prototype={
-gbh2(){var x,w,v,u=A.e.cs(this.d.a.a)
-try{x=B.dj(u,0,null)
-if(A.e.kd(J.cug(x),".supabase.co")){w=A.b.gP(J.cug(x).split("."))
+gbh4(){var x,w,v,u=A.e.cs(this.d.a.a)
+try{x=B.dk(u,0,null)
+if(A.e.kd(J.cui(x),".supabase.co")){w=A.b.gP(J.cui(x).split("."))
 return w}}catch(v){}return u},
-gakO(){var x=this.gbh2()
+gakP(){var x=this.gbh4()
 return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy synchronize-orders --no-verify-jwt --project-ref "+x+"\n"},
 A(d){var x=this,w=null,v=x.d,u=x.e,t=x.f,s=y.u,r=x.r,q=B.X(r).h("O<1,a3>")
-return U.f2(V.ic(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.b4z,w,w,w,1,w),w,A7.dO(B.am(B.a([E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),v,w,w,w,w,w,2,D.anP,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.c_C(x),w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w),G.ar,E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),u,w,w,w,w,w,2,D.anS,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w),G.ar,E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),t,w,w,w,w,w,2,D.anT,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w),K.dn,R.ov(new B.a3(Q.bg,B.am(B.a([B.ax(B.a([D.b4X,B.c1(w,w,w,w,w,w,A5.Jr,w,w,w,new C.c_D(x,d),w,w,w,w,w)],s),A.i,A.bS,A.h,0,w),G.ar,M.h2(x.gakO(),w,D.b21)],s),A.L,A.f,A.h,w,A.l),w),w,2,w,w),K.dn,D.b4N,I.fd,B.am(B.H(new B.O(r,new C.c_E(x),q),!0,q.h("a9.E")),A.i,A.f,A.h,w,A.l),K.dn,D.b4i,I.fd,C.czO(!0,u,w,"migrations",v,t,"Migrations")],s),A.L,A.f,A.h,w,A.l),w,A.r,X.aZ,w,w,A.F),w,w,w,w,w)}}
+return U.f2(V.ic(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.b4z,w,w,w,1,w),w,A7.dO(B.am(B.a([E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),v,w,w,w,w,w,2,D.anP,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.c_E(x),w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w),G.ar,E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),u,w,w,w,w,w,2,D.anS,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w),G.ar,E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),t,w,w,w,w,w,2,D.anT,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w),K.dn,R.ov(new B.a3(Q.bg,B.am(B.a([B.aw(B.a([D.b4X,B.c1(w,w,w,w,w,w,A5.Jr,w,w,w,new C.c_F(x,d),w,w,w,w,w)],s),A.i,A.bS,A.h,0,w),G.ar,M.h2(x.gakP(),w,D.b21)],s),A.L,A.f,A.h,w,A.l),w),w,2,w,w),K.dn,D.b4N,I.fd,B.am(B.H(new B.O(r,new C.c_G(x),q),!0,q.h("a9.E")),A.i,A.f,A.h,w,A.l),K.dn,D.b4i,I.fd,C.czQ(!0,u,w,"migrations",v,t,"Migrations")],s),A.L,A.f,A.h,w,A.l),w,A.r,X.aZ,w,w,A.F),w,w,w,w,w)}}
 C.yM.prototype={
 gdq(d){return this.a}}
 C.a25.prototype={
 M(){var x=$.hx().b
 x===$&&B.b()
-return new C.abH(x,new E.d_(F.aT,$.ae()))},
+return new C.abH(x,new E.d_(F.aU,$.ae()))},
 gdq(d){return this.c}}
 C.abH.prototype={
 Y(){var x,w=this
@@ -100,8 +100,8 @@ x=w.a
 if(x.e){x=x.f
 if(x==null)x=""
 w.e.scp(0,x)}if(w.a.d==="scripts/seed"){x=$.ae()
-w.x=new E.d_(F.aT,x)
-w.y=new E.d_(F.aT,x)}},
+w.x=new E.d_(F.aU,x)
+w.y=new E.d_(F.aU,x)}},
 l(){var x=this,w=x.e,v=w.U$=$.ae()
 w.W$=0
 w=x.x
@@ -123,22 +123,22 @@ n=t.a
 if(n.d==="scripts/seed"){m=A.e.cs(t.x.a.a)
 l=A.e.cs(t.y.a.a)
 J.bT(s,"project_url",A.e.cs(n.x.a.a))
-if(m.length!==0&&l.length!==0)J.ahm(s,B.z(["admin_email",m,"admin_password",l],j,o))}t.B(new C.c3X(t))
+if(m.length!==0&&l.length!==0)J.ahm(s,B.z(["admin_email",m,"admin_password",l],j,o))}t.B(new C.c3Z(t))
 v=3
 j=t.d.Q
 j===$&&B.b()
 x=6
 return B.c(j.mX("instance-install",s.a!==0?A.ax.zu(s,null):null),$async$W8)
 case 6:r=e
-if(r.b!==200)t.B(new C.c3Y(t,r))
-else t.B(new C.c3Z(t))
+if(r.b!==200)t.B(new C.c4_(t,r))
+else t.B(new C.c40(t))
 v=1
 x=5
 break
 case 3:v=2
 g=u.pop()
 q=B.ag(g)
-t.B(new C.c4_(t,q))
+t.B(new C.c41(t,q))
 x=5
 break
 case 2:x=1
@@ -146,66 +146,66 @@ break
 case 5:return B.i(null,w)
 case 1:return B.h(u.at(-1),w)}})
 return B.j($async$W8,w)},
-aWb(){var x,w=null,v=this.w
-if(v==null)return A.cm
+aWd(){var x,w=null,v=this.w
+if(v==null)return A.cl
 if(v){v=B.bW(A2.hc)
 v=B.bW(new B.bL(v.a,v.b,v.c,0.3).c5())
 v=B.br(W.j9,new B.bL(v.a,v.b,0.5,v.d).c5(),w,w)}else{v=this.c
 v.toString
 x=B.br(S.pC,B.C(v).ax.a===A.u?B.bb(4294922834):B.bb(4292030255),w,w)
 v=x}return v},
-A(d){var x=this,w=null,v=y.u,u=B.ax(B.a([B.W(x.a.c,w,w,w,w,w,w,w,A3.a4I,w,w,w,w,w),T.c4,x.aWb()],v),A.i,A.f,A.h,0,w),t=x.a
-u=B.a([u,A_.hm,t.e?E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),x.e,w,w,w,w,w,2,D.anM,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w):new B.a3(L.eo,B.W("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
-if(x.a.d==="scripts/seed")A.b.I(u,B.a([I.fd,D.b4b,G.ar,D.b4F,G.ar,E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),x.x,w,w,w,w,w,2,D.anV,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w),E.h4(!0,A.aS,!1,w,!0,A.z,w,E.hv(),x.y,w,w,w,w,w,2,D.anU,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aO,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b6,w,w,w,w),new B.a3(L.eo,B.W("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,N.a4F,w,w,w,w,w),w)],v))
+A(d){var x=this,w=null,v=y.u,u=B.aw(B.a([B.W(x.a.c,w,w,w,w,w,w,w,A3.a4I,w,w,w,w,w),T.c4,x.aWd()],v),A.i,A.f,A.h,0,w),t=x.a
+u=B.a([u,A_.hm,t.e?E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),x.e,w,w,w,w,w,2,D.anM,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w):new B.a3(L.eo,B.W("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
+if(x.a.d==="scripts/seed")A.b.I(u,B.a([I.fd,D.b4b,G.ar,D.b4F,G.ar,E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),x.x,w,w,w,w,w,2,D.anV,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w),E.h4(!0,A.aT,!1,w,!0,A.z,w,E.hv(),x.y,w,w,w,w,w,2,D.anU,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b4,w,w,A.aP,A.aJ,w,w,w,w,w,w,w,!0,A.N,w,F.b7,w,w,w,w),new B.a3(L.eo,B.W("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,N.a4F,w,w,w,w,w),w)],v))
 u.push(G.ar)
-u.push(B.dp(!1,D.b4J,w,w,w,w,w,w,x.f?w:x.gbnC(),w,w))
+u.push(B.dp(!1,D.b4J,w,w,w,w,w,w,x.f?w:x.gbnE(),w,w))
 u.push(G.ar)
 if(x.f)v=A.cI
 else{v=x.r
-v=v.length!==0?M.h2(v,w,Y.wL):A.cm}u.push(v)
+v=v.length!==0?M.h2(v,w,Y.wL):A.cl}u.push(v)
 return R.ov(new B.a3(Q.bg,B.am(u,A.L,A.f,A.h,w,A.l),w),w,3,w,w)}}
 var z=a.updateTypes(["a3(yM)","R<~>()"])
-C.c_C.prototype={
-$1(d){this.a.B(new C.c_B())},
+C.c_E.prototype={
+$1(d){this.a.B(new C.c_D())},
 $S:11}
-C.c_B.prototype={
+C.c_D.prototype={
 $0(){},
 $S:0}
-C.c_D.prototype={
-$0(){O.tD(new O.np(this.a.gakO()))
-this.b.ad(y.v).f.agq(D.aZj)},
+C.c_F.prototype={
+$0(){O.tD(new O.np(this.a.gakP()))
+this.b.ad(y.v).f.agr(D.aZj)},
 $S:0}
-C.c_E.prototype={
+C.c_G.prototype={
 $1(d){var x=this.a
-return new B.a3(A6.HW,C.czO(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
+return new B.a3(A6.HW,C.czQ(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
 $S:z+0}
-C.c3X.prototype={
+C.c3Z.prototype={
 $0(){var x=this.a
 x.f=!0
 x.r=x.a.c+" operation is running..."
 x.w=null},
 $S:0}
-C.c3Y.prototype={
+C.c4_.prototype={
 $0(){var x=this.a
 x.r="Error: "+B.o(this.b.a)
 x.f=x.w=!1},
 $S:0}
-C.c3Z.prototype={
+C.c40.prototype={
 $0(){var x=this.a
 x.r=x.a.c+" operation completed successfully."
 x.w=!0
 x.f=!1},
 $S:0}
-C.c4_.prototype={
+C.c41.prototype={
 $0(){var x=this.a
 x.r="Unexpected error: "+B.o(this.b)
 x.f=x.w=!1},
 $S:0};(function installTearOffs(){var x=a._instance_0u
-x(C.abH.prototype,"gbnC","W8",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
+x(C.abH.prototype,"gbnE","W8",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(B.F,[C.BX,C.a25])
 x(B.K,[C.aKl,C.abH])
-x(B.bB,[C.c_C,C.c_E])
-x(B.ci,[C.c_B,C.c_D,C.c3X,C.c3Y,C.c3Z,C.c4_])
+x(B.bB,[C.c_E,C.c_G])
+x(B.ci,[C.c_D,C.c_F,C.c3Z,C.c4_,C.c40,C.c41])
 w(C.yM,B.E)})()
 B.bl(b.typeUniverse,JSON.parse('{"a25":{"F":[],"d":[]},"BX":{"F":[],"d":[]},"aKl":{"K":["BX"]},"abH":{"K":["a25"]}}'))
 var y={D:B.y("q<yM>"),u:B.y("q<d>"),w:B.y("e"),v:B.y("ET"),b:B.y("@"),q:B.y("~")};(function constants(){D.anM=new E.oL(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
@@ -225,4 +225,4 @@ D.b4J=new B.c0("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.b4N=new B.c0("Initial",null,P.DL,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b4X=new B.c0("Supabase Function Deploy Commands:",null,A4.wK,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_193",e:"endPart",h:b})})($__dart_deferred_initializers__,"lKZ2TyAx0015tOeizNiJZ7FPe7M=");
+a.eventLog.push({p:"main.dart.js_193",e:"endPart",h:b})})($__dart_deferred_initializers__,"UqNtnoZPJ6T/M+7HqpS0gHPQAWg=");

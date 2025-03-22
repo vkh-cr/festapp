@@ -10,12 +10,12 @@ p=J
 x=2
 return A.c($.h9().bA("events").hh(0,"id, event_users(count)").x9("id",A.H(new A.O(d,new B.b3D(),s),!0,s.h("a9.E"))),$async$G6)
 case 2:r=q.b0(p.c7(f,new B.b3E(),y.b),!0,y.u)
-x=$.dX().gdE().d!=null?3:4
+x=$.dY().gdE().d!=null?3:4
 break
 case 3:x=5
 return A.c(D.amn(r),$async$G6)
 case 5:case 4:for(s=d.length,v=0;v<d.length;d.length===s||(0,A.Q)(d),++v){u=d[v]
-t=C.b.lW(r,new B.b3F(u))
+t=C.b.lX(r,new B.b3F(u))
 u.z=t.z
 u.ax=t.ax}x=6
 return A.c(B.amo(d),$async$G6)
@@ -28,7 +28,7 @@ q=r
 x=2
 return A.c(A.Ny(),$async$amo)
 case 2:q.I(0,f)
-x=$.dX().gdE().d!=null?3:4
+x=$.dY().gdE().d!=null?3:4
 break
 case 3:q=r
 x=5
@@ -48,7 +48,7 @@ case 3:x=5
 return A.c(A.Ny(),$async$G5)
 case 5:u=f
 t=A.H(u,!0,A.p(u).h("cU.E"))
-u=$.dX()
+u=$.dY()
 if(u.gdE().d==null){u=A.a(t.slice(0),A.X(t))
 v=u
 x=1
@@ -58,8 +58,8 @@ x=6
 return A.c(A.XZ(),$async$G5)
 case 6:o.I(n,f)
 s=$.h9()
-u=s.bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cg("event_users.user",u.gdE().c.a).cg("is_hidden",!1)
-r=$.e2
+u=s.bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event,event_users!inner(*)").cl("event_users.user",u.gdE().c.a).cl("is_hidden",!1)
+r=$.dU
 r.toString
 q=y.b
 p=y.u
@@ -68,31 +68,31 @@ n=t
 m=A
 l=J
 x=7
-return A.c(u.cg("occasion",r).rF(0,"start_time",!0).rF(0,"max_participants",!1),$async$G5)
+return A.c(u.cl("occasion",r).rF(0,"start_time",!0).rF(0,"max_participants",!1),$async$G5)
 case 7:o.I(n,m.b0(l.c7(f,new B.b3u(),q),!0,p))
-x=E.cmP()?8:9
+x=E.cmR()?8:9
 break
-case 8:u=s.bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cg("is_group_event",!0).cg("is_hidden",!1)
-s=$.e2
+case 8:u=s.bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event").cl("is_group_event",!0).cl("is_hidden",!1)
+s=$.dU
 s.toString
 o=C.b
 n=t
 m=A
 l=J
 x=10
-return A.c(u.cg("occasion",s).rF(0,"start_time",!0),$async$G5)
+return A.c(u.cl("occasion",s).rF(0,"start_time",!0),$async$G5)
 case 10:o.I(n,m.b0(l.c7(f,new B.b3v(),q),!0,p))
 case 9:u=A.a(t.slice(0),A.X(t))
 v=u
 x=1
 break
-case 4:u=$.h9().bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cg("is_hidden",!1)
-s=$.e2
+case 4:u=$.h9().bA("events").hh(0,"id,title,start_time,end_time,place,type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cl("is_hidden",!1)
+s=$.dU
 s.toString
 o=A
 n=J
 x=11
-return A.c(u.cg("occasion",s).rF(0,"start_time",!0).rF(0,"max_participants",!1),$async$G5)
+return A.c(u.cl("occasion",s).rF(0,"start_time",!0).rF(0,"max_participants",!1),$async$G5)
 case 11:v=o.b0(n.c7(f,new B.b3w(),y.b),!0,y.u)
 x=1
 break
@@ -155,10 +155,10 @@ B=a.updateHolder(c[75],B)
 var z=a.updateTypes([])
 B.b3D.prototype={
 $1(d){return d.b},
-$S:153}
+$S:134}
 B.b3E.prototype={
 $1(d){return A.r0(d)},
-$S:60}
+$S:56}
 B.b3F.prototype={
 $1(d){return d.b==this.a.b},
 $S:41}
@@ -167,13 +167,13 @@ $1(d){return d.b==this.a.b},
 $S:41}
 B.b3u.prototype={
 $1(d){return A.r0(d)},
-$S:60}
+$S:56}
 B.b3v.prototype={
 $1(d){return A.r0(d)},
-$S:60}
+$S:56}
 B.b3w.prototype={
 $1(d){return A.r0(d)},
-$S:60}
+$S:56}
 B.b3N.prototype={
 $1(d){return d.b==this.a.b},
 $S:41}
@@ -193,9 +193,9 @@ x.toString
 w=e.as
 w.toString
 v=C.e.bX(x,w)}return v},
-$S:975};(function inheritance(){var x=a.inheritMany,w=a.inherit
+$S:976};(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(A.bB,[B.b3D,B.b3E,B.b3F,B.b3J,B.b3u,B.b3v,B.b3w,B.b3N,B.b3O,B.b3M])
 w(B.b3P,A.dn)})()
 var y={u:A.y("dB"),F:A.y("q<dB>"),c:A.y("A<dB>"),p:A.y("em"),b:A.y("@"),v:A.y("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_333",e:"endPart",h:b})})($__dart_deferred_initializers__,"y8PcQZzsgH+RCFAsi1TwmFUzx4w=");
+a.eventLog.push({p:"main.dart.js_333",e:"endPart",h:b})})($__dart_deferred_initializers__,"LatSGJVodkUj5SUvVGgcIr0Kpw8=");
