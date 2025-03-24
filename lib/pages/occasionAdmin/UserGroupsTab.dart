@@ -25,6 +25,7 @@ class UserGroupsTab extends StatefulWidget {
 
 class _UserGroupsTabState extends State<UserGroupsTab> {
   List<UserInfoModel> _allUsers = [];
+  SingleDataGridController<UserGroupInfoModel>? controller;
 
   @override
   void initState() {
@@ -38,9 +39,9 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<UserGroupInfoModel>(
-      SingleDataGridController<UserGroupInfoModel>(
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<UserGroupInfoModel>(
         context: context,
         loadData: DbGroups.getAllUserGroupInfo,
         fromPlutoJson: UserGroupInfoModel.fromPlutoJson,
@@ -230,16 +231,14 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                   var title = rendererContext.row
                       .cells[Tb.user_group_info.title]?.value;
                   var placeModel = rendererContext.row
-                      .cells[Tb.user_group_info.place]?.value
-                  as PlaceModel?;
+                      .cells[Tb.user_group_info.place]?.value as PlaceModel?;
                   placeModel ??= PlaceModel(
                     id: null,
                     title: title,
                     description: "",
                     type: "group",
                     isHidden: true,
-                    latLng: SynchroService
-                        .globalSettingsModel!.defaultMapLocation,
+                    latLng: SynchroService.globalSettingsModel!.defaultMapLocation,
                   );
                   RouterService.navigatePageInfo(
                     context,
@@ -268,7 +267,11 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
             },
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<UserGroupInfoModel>(controller!);
   }
 }

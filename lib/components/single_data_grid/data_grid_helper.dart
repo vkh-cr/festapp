@@ -7,6 +7,7 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
@@ -144,6 +145,43 @@ class DataGridHelper
       color: getBackground(value),
       child: Center(child: Text(textValue)));
   }
+
+  static Widget orderState(BuildContext context, rendererContext, Color Function(String) getBackground, [Function(String)? processText]) {
+    String value = rendererContext.cell.value;
+    String firstPart = value.split(";")[0];
+    String textValue = processText?.call(value) ?? value;
+
+    return Container(
+      color: getBackground(value),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              textValue,
+            ),
+            if (firstPart == OrderModel.expiredState)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Tooltip(
+                  message: 'Expired Order',
+                  child: CircleAvatar(
+                    radius: 12,
+                    backgroundColor: ThemeConfig.redColor(context),
+                    child: Icon(
+                      Icons.error_outline,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
