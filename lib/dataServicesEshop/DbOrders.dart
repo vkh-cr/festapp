@@ -122,6 +122,10 @@ class DbOrders {
           products!.where((p) => orderProductIds.contains(p.id)).toList();
 
       order.paymentInfoModel = paymentMap[order.paymentInfo];
+
+      if (order.isExpired()) {
+        order.state = OrderModel.expiredState;
+      }
     }
 
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));

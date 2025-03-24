@@ -8,16 +8,24 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class SongbookContent extends StatelessWidget {
+class SongbookContent extends StatefulWidget {
   const SongbookContent({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<InformationModel>(
-      SingleDataGridController<InformationModel>(
+  _SongbookContentState createState() => _SongbookContentState();
+}
+
+class _SongbookContentState extends State<SongbookContent> {
+  SingleDataGridController<InformationModel>? controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<InformationModel>(
         context: context,
         loadData: () => DbInformation.getAllInformationForDataGrid(InformationModel.songType),
-        fromPlutoJson: (plutoData) => InformationModel.fromPlutoJsonType(plutoData, InformationModel.songType),
+        fromPlutoJson: (plutoData) =>
+            InformationModel.fromPlutoJsonType(plutoData, InformationModel.songType),
         firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
         idColumn: Tb.information.id,
         columns: [
@@ -76,7 +84,11 @@ class SongbookContent extends StatelessWidget {
             width: 100,
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<InformationModel>(controller!);
   }
 }
