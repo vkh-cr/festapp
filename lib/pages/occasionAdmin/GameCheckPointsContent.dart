@@ -8,13 +8,20 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class GameCheckPointsContent extends StatelessWidget {
-  const GameCheckPointsContent({Key? key}) : super(key: key);
+class GameCheckPointsContent extends StatefulWidget {
+  const GameCheckPointsContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<InformationModel>(
-      SingleDataGridController<InformationModel>(
+  _GameCheckPointsContentState createState() => _GameCheckPointsContentState();
+}
+
+class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
+  SingleDataGridController<InformationModel>? controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<InformationModel>(
         context: context,
         loadData: () => DbInformation.getAllInformationForDataGrid(InformationModel.gameType),
         fromPlutoJson: InformationModel.fromPlutoJsonGame,
@@ -43,7 +50,11 @@ class GameCheckPointsContent extends StatelessWidget {
             type: PlutoColumnType.text(),
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<InformationModel>(controller!);
   }
 }

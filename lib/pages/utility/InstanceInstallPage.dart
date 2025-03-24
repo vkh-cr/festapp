@@ -18,8 +18,7 @@ class _InstanceInstallPageState extends State<InstanceInstallPage> {
     text: "https://kjdpmixlnhntmxjedpxh.supabase.co",
   );
   final TextEditingController _dbController = TextEditingController(
-    text:
-    'postgresql://postgres.kjdpmixlnhntmxjedpxh:somepassword@aws-0-eu-central-1.pooler.supabase.com:6543/postgres',
+    text: 'postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres',
   );
   final TextEditingController _repoController =
   TextEditingController(text: 'vkh-cr/festapp');

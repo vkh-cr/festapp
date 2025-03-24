@@ -1,13 +1,19 @@
 CREATE OR REPLACE FUNCTION get_latest_order_history(order_id bigint)
-RETURNS TABLE(price numeric, currency_code text)
+RETURNS jsonb
 LANGUAGE plpgsql
 AS $$
+DECLARE
+  result jsonb;
 BEGIN
-  RETURN QUERY
-  SELECT price, currency_code
-  FROM eshop.orders_history
-  WHERE "order" = order_id AND price <> 0
-  ORDER BY created_at DESC
+  SELECT to_jsonb(o)
+    INTO result
+  FROM eshop.orders_history o
+  WHERE o."order" = order_id AND o.price <> 0
+  ORDER BY o.created_at DESC
   LIMIT 1;
+
+  RETURN result;
 END;
 $$;
+
+DROP FUNCTION get_latest_order_history(bigint)

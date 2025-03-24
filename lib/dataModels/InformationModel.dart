@@ -94,7 +94,7 @@ class InformationModel extends IPlutoRowModel {
   }
 
   static InformationModel fromPlutoJsonType(Map<String, dynamic> json, String type) {
-    var quoteDate = json[Tb.information.data_date] != null ? DateFormat("yyyy-MM-dd").parse(json[Tb.information.data_date]) : null;
+    var quoteDate = type == quoteType && json[Tb.information.data_date] != null ? DateFormat("yyyy-MM-dd").parse(json[Tb.information.data_date]) : null;
     return InformationModel(
       id: json[Tb.information.id] == -1 ? null : json[Tb.information.id],
       title: json[Tb.information.title],

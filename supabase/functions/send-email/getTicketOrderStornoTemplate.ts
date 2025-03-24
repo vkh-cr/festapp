@@ -58,6 +58,10 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
  // Assuming the function returns a row with price and currency_code directly
  const { price, currency_code } = orderHistory;
 
+  console.log(orderHistory);
+  console.log(price);
+
+
   // Prepare substitutions with price and currency code
   const subs: Record<string, string> = {
     occasionTitle: occasionData.title,

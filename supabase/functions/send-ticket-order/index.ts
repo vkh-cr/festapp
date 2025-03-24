@@ -13,6 +13,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function encodeSPDMessage(message: string): string {
+  // Normalize the string to NFC form.
+  const normalized = message.normalize("NFC");
+  // Use encodeURIComponent to encode the string into UTF‑8 percent‑encoded format.
+  return encodeURIComponent(normalized);
+}
+
+function generateSpdString(paymentInfo: any, orderData: any): string {
+    const message = `${orderData.name} ${orderData.surname}`;
+    const messageCompliant = encodeSPDMessage(message);
+    return `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(2)}*CC:${paymentInfo.currency_code}*MSG:${messageCompliant}*X-VS:${paymentInfo.variable_symbol}`;
+}
+
 // Function to generate QR code as base64
 async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: string): Promise<Uint8Array> {
   console.log("Starting QR code generation with text...");
@@ -30,10 +43,8 @@ async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: s
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, 500, 700);
 
-  // Generate QR code
-  const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
-    2
-  )}*CC:${paymentInfo.currency_code}*MSG:${orderData.name} ${orderData.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  // Generate QR code using SPD-compliant string
+  const qrData = generateSpdString(paymentInfo, orderData);
   console.log("Generated QR data string:", qrData);
 
   const base64QrCode = await qrcode(qrData, { size: 500 });

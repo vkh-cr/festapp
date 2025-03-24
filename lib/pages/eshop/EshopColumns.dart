@@ -194,9 +194,9 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         textAlign: PlutoColumnTextAlign.center,
-        width: 120,
+        width: 140,
       ),
     ],
     ORDER_DATA: [
@@ -275,7 +275,7 @@ class EshopColumns {
         },
       ),
     ],
-    ORDER_TRANSACTIONS: [
+    ORDER_TRANSACTIONS: (Map<String, dynamic> data) => [
       PlutoColumn(
         enableAutoEditing: false,
         title: "Transactions".tr(),
@@ -287,6 +287,10 @@ class EshopColumns {
             onPressed: () async {
               var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
               await _showOrderTransactions(context, id);
+              var transactionsAfterFunction = data[ORDER_TRANSACTIONS];
+              if(transactionsAfterFunction is Future<void> Function()?) {
+                transactionsAfterFunction?.call();
+              }
             },
             child: Row(
               children: [
