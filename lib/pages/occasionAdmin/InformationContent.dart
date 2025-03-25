@@ -8,13 +8,20 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class InformationContent extends StatelessWidget {
+class InformationContent extends StatefulWidget {
   const InformationContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<InformationModel>(
-      SingleDataGridController<InformationModel>(
+  _InformationContentState createState() => _InformationContentState();
+}
+
+class _InformationContentState extends State<InformationContent> {
+  SingleDataGridController<InformationModel>? controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<InformationModel>(
         context: context,
         loadData: DbInformation.getAllInformationForDataGrid,
         fromPlutoJson: InformationModel.fromPlutoJson,
@@ -38,8 +45,8 @@ class InformationContent extends StatelessWidget {
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, Tb.information.is_hidden),
           ),
           PlutoColumn(
             title: "Title".tr(),
@@ -59,7 +66,8 @@ class InformationContent extends StatelessWidget {
                 loadContent: () async {
                   var id = rendererContext.row.cells[Tb.information.id]!.value;
                   if (id != null) {
-                    var infoDescription = await DbInformation.getInfosDescription([id]);
+                    var infoDescription =
+                    await DbInformation.getInfosDescription([id]);
                     if (infoDescription.isNotEmpty) {
                       return infoDescription[0].description;
                     }
@@ -82,7 +90,11 @@ class InformationContent extends StatelessWidget {
             type: PlutoColumnType.text(),
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<InformationModel>(controller!);
   }
 }
