@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:auto_route/auto_route.dart';
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
@@ -8,6 +7,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/DbUnits.dart';
+import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/ResponsiveService.dart';
@@ -46,8 +46,13 @@ class _UnitPageState extends State<UnitPage> {
   }
 
   Future<void> _loadUnitAndOccasions() async {
+    _occasions = await OfflineDataService.getAllOccasions();
+    setState(() {});
+
     final unit = await DbUnits.getUnit(widget.id);
+
     final occasions = unit.occasions!;
+    OfflineDataService.saveAllOccasions(occasions);
 
     if (FeatureService.isFeatureEnabled(FeatureConstants.quotes,
         features: unit.features)) {
