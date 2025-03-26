@@ -20,6 +20,8 @@ class RightsService{
   static UnitModel? currentUnit;
 
   static String? currentLink;
+  static bool useOfflineVersion = false;
+
   static bool? isAdminField;
   static List<int>? bankAccountAdmin;
 

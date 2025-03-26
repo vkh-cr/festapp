@@ -59,7 +59,7 @@ class _OrdersTabState extends State<OrdersTab> {
             isEnabled: RightsService.isEditor,
           ),
         ],
-        columns: EshopColumns.generateColumns(context, columnIdentifiers),
+        columns: EshopColumns.generateColumns(context, columnIdentifiers, data: { EshopColumns.ORDER_TRANSACTIONS: refreshData },),
       );
     }
   }
