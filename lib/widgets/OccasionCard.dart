@@ -183,7 +183,11 @@ class _OccasionCardState extends State<OccasionCard> {
                         if (!FeatureService.isFeatureEnabled(
                             FeatureConstants.form,
                             features: widget.occasion.features)) {
-                          await RightsService.updateOccasionData(widget.occasion.link!);
+                          try{
+                            await RightsService.updateOccasionData(widget.occasion.link!);
+                          } catch(e) {
+                            // empty
+                          }
                           await RouterService.navigateOccasion(context, "");
                         } else {
                           showDialog(
