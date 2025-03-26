@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_180",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,K,L,G,M,N,O,C={
-cUV(){return new C.BX(null)},
+cUX(){return new C.BX(null)},
 BX:function BX(d){this.a=d},
 aaU:function aaU(d,e){var _=this
 _.f=_.e=_.d=!1
@@ -52,31 +52,31 @@ A0=c[161]
 A1=c[274]
 A2=c[231]
 C.BX.prototype={
-M(){return new C.aaU(new W.d_(I.aU,$.ae()),A.a([new F.Gz(),new F.Gz(),new F.Gz()],y.h))}}
+M(){return new C.aaU(new W.d_(I.aU,$.ad()),A.a([new F.Gz(),new F.Gz(),new F.Gz()],y.h))}}
 C.aaU.prototype={
 aT(){var x=this
 x.c8()
-x.r=$.cti().aI4()
+x.r=$.ctj().aI4()
 x.q4()
 x.B(new C.c_z())},
 q4(){var x=0,w=A.k(y.f),v=this,u
 var $async$q4=A.f(function(d,e){if(d===1)return A.h(e,w)
-while(true)switch(x){case 0:u=$.tk().b.e
+while(true)switch(x){case 0:u=$.tl().b.e
 v.B(new C.c_B(v,u))
 return A.i(null,w)}})
 return A.j($async$q4,w)},
 x3(){var x=0,w=A.k(y.f),v=this,u
 var $async$x3=A.f(function(d,e){if(d===1)return A.h(e,w)
-while(true)switch(x){case 0:try{if($.tk().a)self.promptInstall()
+while(true)switch(x){case 0:try{if($.tl().a)self.promptInstall()
 else A.a6("This platform or browser does not support the PWA install prompt")}catch(t){v.B(new C.c_A(v))}x=2
 return A.c(v.q4(),$async$x3)
 case 2:return A.i(null,w)}})
 return A.j($async$x3,w)},
 b4r(d){this.B(new C.c_u(this,d))},
 A(d){var x,w,v,u=null,t=E.bc(D.b4Q,u)
-t=N.ic(u,u,u,!0,u,u,1,u,u,u,!1,u,!1,u,u,V.tv(new C.c_y(d)),u,!0,u,u,u,u,u,t,u,u,u,1,u)
+t=N.ic(u,u,u,!0,u,u,1,u,u,u,!1,u,!1,u,u,V.tw(new C.c_y(d)),u,!0,u,u,u,u,u,t,u,u,u,1,u)
 x=A.cl(12)
-x=A.aC(u,u,B.k,u,u,new A.bv(u,A0.cwd(B.J,A2.m2,new K.Fv("assets/icons/fstappicon.png",u,u),u,A1.eP),u,x,u,u,u,B.R),u,64,u,u,u,u,64)
+x=A.aC(u,u,B.k,u,u,new A.bv(u,A0.cwe(B.J,A2.m2,new K.Fv("assets/icons/fstappicon.png",u,u),u,A1.eP),u,x,u,u,u,B.R),u,64,u,u,u,u,64)
 w=y.g
 w=A.t("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.y(["title","Festapp"],w,w))
 v=y.e
@@ -97,10 +97,10 @@ if(t)s=!r.d&&!r.f&&r.e
 else s=!0
 v=A.a([Y.MB(s?B.cr:B.bF,d,50,!0,v,u,B.n,250)],n)
 if(r.d)v.push(new A.a3(G.dh,E.bc(A.W("The app is already installed.",q,q,q,q,q,q,q,A.aB(q,q,B.cr,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.b6,q,q,q,q),q),q))
-if(t&&r.f)v.push(new A.a3(G.dh,A.am(A.a([E.bc(D.b4P,q),Z.ar,A.aw(A.a([A.bJ(U.h5(q,!1,r.w,I.anR,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.N,q,q),1,q),L.c4,Q.Ke(A.bp(T.pz,q,q,q),q,E.bc(A.W("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.c_w(r,d),q)],n),B.i,B.f,B.h,0,q)],n),B.i,B.f,B.h,q,B.l),q))
+if(t&&r.f)v.push(new A.a3(G.dh,A.am(A.a([E.bc(D.b4P,q),Z.ar,A.aw(A.a([A.bJ(U.h6(q,!1,r.w,I.anR,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.N,q,q),1,q),L.c4,Q.Ke(A.bp(T.pz,q,q,q),q,E.bc(A.W("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.c_w(r,d),q)],n),B.i,B.f,B.h,0,q)],n),B.i,B.f,B.h,q,B.l),q))
 w.push(new A.a3(B.cs,A.am(v,B.i,B.f,B.h,q,B.l),q))
 w.push(X.a5)
-return F.Zs(w,p,q,o,new C.c_x(r,h),q,q,x,q)},
+return F.Zt(w,p,q,o,new C.c_x(r,h),q,q,x,q)},
 bs1(d,e,f,g,h,i){return this.a8w(d,e,f,g,h,i,null)},
 bs2(d,e,f,g,h,i){return this.a8w(d,e,f,g,h,!1,i)},
 bs0(d,e,f,g,h){return this.a8w(d,e,f,g,h,!1,null)}}
@@ -117,7 +117,7 @@ C.c_A.prototype={
 $0(){var x=this.a
 x.f=!0
 x=x.w
-x.scp(0,A.rZ().j(0))
+x.scp(0,A.t_().j(0))
 x.sxY(A.eY(B.D,0,x.a.a.length,!1))},
 $S:0}
 C.c_u.prototype={
@@ -127,19 +127,19 @@ if(!u.ay)u.a6X()}else{u=x[v].a
 if(u.ay)u.a6X()}},
 $S:0}
 C.c_y.prototype={
-$0(){return A_.ayU(this.a)},
+$0(){return A_.ayV(this.a)},
 $S:0}
 C.c_x.prototype={
 $1(d){if(d)this.a.b4r(this.b)},
 $S:20}
 C.c_v.prototype={
-$0(){$.cti()
+$0(){$.ctj()
 var x=window.open(this.a,"_blank")
-A.cDL(x)
+A.cDN(x)
 return null},
 $S:0}
 C.c_w.prototype={
-$0(){H.tD(new H.np(this.a.w.a.a))
+$0(){H.tE(new H.nq(this.a.w.a.a))
 A.bG(this.b,A.t("Copied to clipboard",null),B.a4)},
 $S:0};(function installTearOffs(){var x=a._instance_0u
 x(C.aaU.prototype,"gab7","x3",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
@@ -155,6 +155,6 @@ D.amG=new A.aF(984254,"MaterialIcons",null,!1)
 D.aZ_=new A.at(22,null,null,null)
 D.b4P=new A.c0("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,O.wM,null,B.b6,null,null,null,null,null,null,null,null,null,null)
 D.b4Q=new A.c0("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dhH","cti",()=>new A.Pl())})()};
+x($,"dhL","ctj",()=>new A.Pl())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_180",e:"endPart",h:b})})($__dart_deferred_initializers__,"mOzuaKRgrD+SZVmHyhxy0DH6dBg=");
+a.eventLog.push({p:"main.dart.js_180",e:"endPart",h:b})})($__dart_deferred_initializers__,"KTVf1eyEXqnTgFvgvnJHnYs4ylE=");
