@@ -16,6 +16,8 @@ class ExclusivityContent extends StatefulWidget {
 }
 
 class _ExclusivityContentState extends State<ExclusivityContent> {
+  SingleDataGridController<ExclusiveGroupModel>? controller;
+
   @override
   void initState() {
     super.initState();
@@ -28,9 +30,9 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<ExclusiveGroupModel>(
-      SingleDataGridController<ExclusiveGroupModel>(
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<ExclusiveGroupModel>(
         context: context,
         loadData: DbEvents.getAllExclusiveGroups,
         fromPlutoJson: ExclusiveGroupModel.fromPlutoJson,
@@ -61,7 +63,11 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
             width: 500,
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<ExclusiveGroupModel>(controller!);
   }
 }
