@@ -517,5 +517,18 @@
   "Unavailable": "Nedostupné",
   "The {product_title} is no longer available for order.": "{product_title} již není k objednání.",
   "Please choose a different variant.": "Prosím vyberte si jinou variantu.",
+  "Various settings for map inside the app.": "Různá nastavení mapy v aplikaci.",
+  "Map Zoom": "Přiblížení mapy",
+  "Latitude": "Zeměpisná šířka",
+  "Longitude": "Zeměpisná délka",
+  "Map Layer Logo": "Logo mapové vrstvy",
+  "Map Layer Text": "Text mapové vrstvy",
+  "Map Layer Logo Link": "Odkaz na logo mapové vrstvy",
+  "Map Layer Text Link": "Odkaz na text mapové vrstvy",
+  "Map Layer URL": "URL mapové vrstvy",
+  "Offline Map Package URL": "URL offline balíčku map",
+  "Offline Map Style URL": "URL stylu offline mapy",
+  "Map Layer Settings": "Nastavení mapových vrstev",
+  "Offline Map Settings": "Nastavení offline mapy",
   "_": "_"
 }
