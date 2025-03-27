@@ -55,7 +55,7 @@ class _OccasionCardState extends State<OccasionCard> {
     var details = FeatureService.getFeatureDetails(
       FeatureConstants.form, features: widget.occasion.features,
     );
-    String? externalPrice = details?.formExternalPrice;
+    String? externalPrice = details is FormFeature ? details.formExternalPrice : null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),

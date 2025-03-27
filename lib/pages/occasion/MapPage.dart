@@ -19,17 +19,19 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:fstapp/components/map/MapDescriptionPopup.dart';
 import 'package:fstapp/components/map/MapLocationPinHelper.dart';
 import 'package:fstapp/components/map/MapMarkerWithText.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/services/features/Feature.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
 
 @RoutePage()
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
-   int? id;
+  int? id;
   final PlaceModel? place;
 
   MapPage({@pathParam this.id, this.place, super.key});
@@ -39,8 +41,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
-
-  static const double singlePlaceZoom = 17.7;
+  // Use the animated map controller as before.
   late final _animatedMapController = AnimatedMapController(vsync: this);
 
   List<IconModel> _icons = [];
@@ -57,25 +58,43 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   FlutterMap? _map;
   LatLng? _mapCenter;
 
+  late final MapFeature _mapFeature;
+
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    if(widget.id == null && context.routeData.hasPendingChildren){
+
+    // Get the map feature via the feature service.
+    final feature = FeatureService.getFeatureDetails(FeatureConstants.map);
+    if (feature == null || feature is! MapFeature) {
+      _mapFeature = MapFeature.getDefault();
+    } else{
+      _mapFeature = feature;
+    }
+
+    if (widget.id == null && context.routeData.hasPendingChildren) {
       widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
     }
+
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
-        : LatLng(SynchroService.globalSettingsModel!.defaultMapLocation["lat"],
-        SynchroService.globalSettingsModel!.defaultMapLocation["lng"]);
-    //reset static values
+        : LatLng(
+      _mapFeature.defaultMapLocation.lat,
+      _mapFeature.defaultMapLocation.lng,
+    );
+
+    // Reset static values.
     selectedMarker = null;
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
       loadPlaces(placeId: widget.id);
     } else {
-      //new place
+      // For a new place, if no location is set, use the default from MapFeature.
       if (placeModel.latLng.toString().isEmpty) {
-        placeModel.latLng = SynchroService.globalSettingsModel!.defaultMapLocation;
+        placeModel.latLng = {
+          "lat": _mapFeature.defaultMapLocation.lat,
+          "lng": _mapFeature.defaultMapLocation.lng
+        };
       }
       pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
@@ -98,9 +117,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           offlinePlaces.where((element) => !element.isHidden).toList();
     }
 
-    if(placeId != null) {
-      var p = offlinePlaces.firstWhereOrNull((p)=>p.id == placeId);
-      if(p != null) {
+    if (placeId != null) {
+      var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
         mapOfflinePlaces.add(p);
       }
     }
@@ -108,9 +127,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     await addEventsToPlace(mapOfflinePlaces);
     addPlacesToMap(mapOfflinePlaces);
 
-    if(placeId != null) {
-      var p = mapOfflinePlaces.firstWhereOrNull((p)=>p.id == placeId);
-      if(p!=null){
+    if (placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
       }
     }
@@ -130,14 +149,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
     } else {
       mapPlaces = await DbPlaces.getAllPlaces();
-      showMapPlaces = mapPlaces.where((p)=>!p.isHidden).toList();
+      showMapPlaces = mapPlaces.where((p) => !p.isHidden).toList();
       showMapPlaces.sortPlaces(false);
       await OfflineDataService.saveAllPlaces(mapPlaces);
     }
 
-    if(placeId != null) {
-      var p = mapPlaces.firstWhereOrNull((p)=>p.id == placeId);
-      if(p != null) {
+    if (placeId != null) {
+      var p = mapPlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
         showMapPlaces.add(p);
       }
     }
@@ -148,7 +167,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       addPlacesToMap(showMapPlaces);
     }
 
-    if(placeId != null) {
+    if (placeId != null) {
       var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
@@ -157,7 +176,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   }
 
   void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
-    var m = _markers.firstWhere((m)=>m.place.id == placeId);
+    var m = _markers.firstWhere((m) => m.place.id == placeId);
     _markers.remove(m);
     _markers.add(m);
     focusedMarker = m;
@@ -176,7 +195,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_map != null) {
-      _animatedMapController.animateTo(dest: _mapCenter!, zoom: singlePlaceZoom);
+      _animatedMapController.animateTo(
+          dest: _mapCenter!, zoom: _mapFeature.defaultMapZoom);
     }
   }
 
@@ -189,7 +209,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         point: mapPlace.latLng,
         width: 60,
         height: 60,
-        icon: isIconVisible(place) ? MapLocationPinHelper.type2icon(context, mapPlace, _icons) : null,
+        icon: isIconVisible(place)
+            ? MapLocationPinHelper.type2icon(context, mapPlace, _icons)
+            : null,
         alignment: Alignment.topCenter,
         editAction: runEditPositionMode,
       );
@@ -215,11 +237,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         title: Text(pageTitle),
-          leading: PopButton(),
+        leading: PopButton(),
       ),
       body: Stack(
         children: [
-          _mapCenter == null ? const SizedBox.shrink() : _map = FlutterMap(
+          _mapCenter == null
+              ? const SizedBox.shrink()
+              : _map = FlutterMap(
             mapController: _animatedMapController.mapController,
             options: MapOptions(
                 interactionOptions: const InteractionOptions(
@@ -229,8 +253,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   InteractiveFlag.pinchZoom |
                   InteractiveFlag.flingAnimation |
                   InteractiveFlag.drag |
-                  InteractiveFlag.scrollWheelZoom),
-                initialZoom: SynchroService.globalSettingsModel!.defaultMapZoom,
+                  InteractiveFlag.scrollWheelZoom,
+                ),
+                initialZoom: _mapFeature.defaultMapZoom,
                 maxZoom: 19,
                 initialCenter: _mapCenter!,
                 onTap: (_, location) => onMapTap(location)),
@@ -238,38 +263,43 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
               TileLayer(
                 tileProvider: CancellableNetworkTileProvider(),
                 maxZoom: 19,
-                urlTemplate: SynchroService.globalSettingsModel!.mapLayerLayerLink ?? 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: _mapFeature.mapLayer!.layerLink,
                 fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               ),
-              if(SynchroService.globalSettingsModel!.mapLayerLogo != null || SynchroService.globalSettingsModel!.mapLayerText != null)
-              RichAttributionWidget(
-                showFlutterMapAttribution: false,
-                animationConfig: const ScaleRAWA(),
-                attributions: [
-                  if (SynchroService.globalSettingsModel!.mapLayerLogo != null)
-                    LogoSourceAttribution(
-                      SvgPicture.network(
-                        SynchroService.globalSettingsModel!.mapLayerLogo!,
-                        height: 28,
+              if ((_mapFeature.mapLayer!.logo?.isNotEmpty ?? false) ||
+                      (_mapFeature.mapLayer!.text?.isNotEmpty ?? false))
+                RichAttributionWidget(
+                  showFlutterMapAttribution: false,
+                  animationConfig: const ScaleRAWA(),
+                  attributions: [
+                    if (_mapFeature.mapLayer!.logo?.isNotEmpty??false)
+                      LogoSourceAttribution(
+                        SvgPicture.network(
+                          _mapFeature.mapLayer!.logo!,
+                          height: 28,
+                        ),
+                        onTap: _mapFeature.mapLayer!.logoLink?.isNotEmpty??false
+                            ? () => launchUrl(
+                            Uri.parse(_mapFeature.mapLayer!.logoLink!))
+                            : null,
                       ),
-                      onTap: SynchroService.globalSettingsModel!.mapLayerLogoLink != null
-                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerLogoLink!))
-                          : null,
-                    ),
-                  if (SynchroService.globalSettingsModel!.mapLayerText != null)
-                    TextSourceAttribution(
-                      SynchroService.globalSettingsModel!.mapLayerText!,
-                      onTap: SynchroService.globalSettingsModel!.mapLayerTextLink != null
-                          ? () => launchUrl(Uri.parse(SynchroService.globalSettingsModel!.mapLayerTextLink!))
-                          : null,
-                    ),
-                ],
-              ),
+                    if (_mapFeature.mapLayer!.text?.isNotEmpty??false)
+                      TextSourceAttribution(
+                        _mapFeature.mapLayer!.text!,
+                        onTap: _mapFeature.mapLayer!.textLink?.isNotEmpty??false
+                            ? () => launchUrl(
+                            Uri.parse(_mapFeature.mapLayer!.textLink!))
+                            : null,
+                      ),
+                  ],
+                ),
               CurrentLocationLayer(),
               PopupMarkerLayer(
                 options: PopupMarkerLayerOptions(
                   popupController: _popupLayerController,
-                  markers: selectedMarker != null ? _selectedMarkers : _markers,
+                  markers: selectedMarker != null
+                      ? _selectedMarkers
+                      : _markers,
                   popupDisplayOptions: PopupDisplayOptions(
                       snap: PopupSnap.markerTop,
                       builder: (BuildContext context, Marker marker) {
@@ -310,8 +340,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                 ),
                 Container(
                   color: Colors.white,
-                  child: const Text(
-                          "You can change location by tapping on the map.")
+                  child: const Text("You can change location by tapping on the map.")
                       .tr(),
                 ),
                 Expanded(child: Container()),
@@ -346,9 +375,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         selectedMarker!.point.latitude, selectedMarker!.point.longitude);
     ToastHelper.Show(context, "Place has been changed.".tr());
 
-    var markerToRemove =
-        _markers.firstWhere((m) => m.place.id == selectedMarker!.place.id);
-    //var newMarker = selectedMarker!.cloneWithNewPoint(selectedMarker!.point!);
+    var markerToRemove = _markers
+        .firstWhere((m) => m.place.id == selectedMarker!.place.id);
     _markers.remove(markerToRemove);
     _markers.add(selectedMarker!);
 

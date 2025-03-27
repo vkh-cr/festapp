@@ -53,7 +53,10 @@ dependencies:
   flutter_map_location_marker: ^9.1.1
   geolocator: ^13.0.3
   flutter_widget_from_html: ^0.16.0
-  quill_html_editor: ^2.2.8
+  quill_html_editor:
+    git:
+      url: https://github.com/the-airbender/quill_html_editor.git
+      ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
   pluto_grid_plus: ^8.4.14
   url_strategy: ^0.3.0
   desktop_drop: ^0.5.0
