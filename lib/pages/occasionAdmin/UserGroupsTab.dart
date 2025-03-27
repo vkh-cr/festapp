@@ -14,6 +14,7 @@ import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class UserGroupsTab extends StatefulWidget {
@@ -238,7 +239,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     description: "",
                     type: "group",
                     isHidden: true,
-                    latLng: SynchroService.globalSettingsModel!.defaultMapLocation,
+                    latLng: FeatureService.getDefaultLocation()
                   );
                   RouterService.navigatePageInfo(
                     context,

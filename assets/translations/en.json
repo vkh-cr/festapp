@@ -517,5 +517,18 @@
   "Unavailable": "Unavailable",
   "The {product_title} is no longer available for order.": "The {product_title} is no longer available for order.",
   "Please choose a different variant.": "Please choose a different variant.",
+  "Various settings for map inside the app.": "Various settings for map inside the app.",
+  "Map Zoom": "Map Zoom",
+  "Latitude": "Latitude",
+  "Longitude": "Longitude",
+  "Map Layer Logo": "Map Layer Logo",
+  "Map Layer Text": "Map Layer Text",
+  "Map Layer Logo Link": "Map Layer Logo Link",
+  "Map Layer Text Link": "Map Layer Text Link",
+  "Map Layer URL": "Map Layer URL",
+  "Offline Map Package URL": "Offline Map Package URL",
+  "Offline Map Style URL": "Offline Map Style URL",
+  "Map Layer Settings": "Map Layer Settings",
+  "Offline Map Settings": "Offline Map Settings",
   "_":"_"
 }
