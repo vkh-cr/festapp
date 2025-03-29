@@ -55,7 +55,7 @@ class _OccasionCardState extends State<OccasionCard> {
     var details = FeatureService.getFeatureDetails(
       FeatureConstants.form, features: widget.occasion.features,
     );
-    String? externalPrice = details?.formExternalPrice;
+    String? externalPrice = details is FormFeature ? details.formExternalPrice : null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -183,7 +183,11 @@ class _OccasionCardState extends State<OccasionCard> {
                         if (!FeatureService.isFeatureEnabled(
                             FeatureConstants.form,
                             features: widget.occasion.features)) {
-                          await RightsService.updateOccasionData(widget.occasion.link!);
+                          try{
+                            await RightsService.updateOccasionData(widget.occasion.link!);
+                          } catch(e) {
+                            // empty
+                          }
                           await RouterService.navigateOccasion(context, "");
                         } else {
                           showDialog(

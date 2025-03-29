@@ -85,6 +85,10 @@ class AppRouter extends RootStackRouter {
   ];
 
   static String getDefaultLink() {
+
+    if(RightsService.useOfflineVersion){
+      return "/${RightsService.currentLink}";
+    }
     if(RightsService.currentLink != null){
       return "/${RightsService.currentLink}";
     }

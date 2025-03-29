@@ -82,7 +82,7 @@ class RouterService {
   }
 
   static void goBack(BuildContext context, [dynamic result]) {
-    context.router.popForced(result);
+    context.router.pop(result);
   }
 
   static Future<void> goToUnit(BuildContext context, int? unitId) async {

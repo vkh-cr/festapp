@@ -1,4 +1,4 @@
-// file: feature_constants.dart
+// FeatureConstants.dart
 class FeatureConstants {
   // Core keys
   static const String metaIsEnabled = "is_enabled";
@@ -15,6 +15,7 @@ class FeatureConstants {
   static const String entryCode = "entry_code";
   static const String companions = "companions";
   static const String blueprint = "blueprint";
+  static const String map = "map";
 
   // Feature codes for unit
   static const String quotes = "quotes";
@@ -33,4 +34,22 @@ class FeatureConstants {
   // Extra field for companions feature
   static const String companionsMax = "max_companions";
 
+  // Extra fields for map feature
+  static const String onlineMapLayer = "map_layer";
+  static const String offlineMapLayer = "map_layer_offline";
+  static const String defaultMapZoom = "defaultMapZoom";
+  static const String defaultMapLocation = "defaultMapLocation";
+
+  // Offline map extra fields (for offline map layer)
+  static const String offlineMapPackageURL = "offlineMapPackageURL";
+  static const String offlineMapStyleURL = "offlineMapStyleURL";
+  static const String offlineMapLayerName = "offlineMapLayerName";
+  static const String forceOfflineMap = "forceOfflineMap";
+
+  // MapLayer inner keys (for online map layer)
+  static const String mapLogo = "logo";
+  static const String mapText = "text";
+  static const String mapLogoLink = "logo_link";
+  static const String mapTextLink = "text_link";
+  static const String mapLayerLink = "layer_link";
 }
