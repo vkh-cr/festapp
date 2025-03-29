@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
@@ -43,6 +44,21 @@ class FormResponseModel extends IPlutoRowModel {
     for (var f in allFields!) {
       if(fields == null) {
         cells[f.id.toString()] = PlutoCell(value: '');
+        continue;
+      }
+      if(f.type == FormHelper.fieldTypeSex){
+        cells[f.id.toString()] = PlutoCell(value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
+        continue;
+      }
+      if (f.type == FormHelper.fieldTypeBirthDate) {
+        // Parse the ISO datetime string into a DateTime object.
+        var dt = DateTime.tryParse(fields![f.id.toString()] ?? "");
+
+        // Format the DateTime into a "year-month-day" string.
+        String formattedDate = dt == null ? "" : '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+
+        // Assign the formatted date string to the cell.
+        cells[f.id.toString()] = PlutoCell(value: formattedDate);
         continue;
       }
       var rValue = Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
