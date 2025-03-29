@@ -529,8 +529,8 @@
   "Offline Map Package URL": "Offline Map Package URL",
   "Offline Map Style URL": "Offline Map Style URL",
   "Map Layer Settings": "Map Layer Settings",
-  "Offline Map Settings": "Offline Map Settings",
-  "Use offline maps automatically": "Use offline maps automatically",
+  "Offline Map Layer Settings": "Offline Map Layer Settings",
+  "Auto-download offline map": "Auto-download offline map",
   "Offline Map Layer Name": "Offline Map Layer Name",
   "_":"_"
 }
