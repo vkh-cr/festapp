@@ -1,242 +1,228 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_196",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-cDP(d){var x=d.xD(!1)
-return new B.aQM(d,new A.ck(x,C.ao,C.ae),$.a8())},
-cYf(d,e){return D.aVD(e)},
-aQM:function aQM(d,e,f){var _=this
-_.ax=d
-_.a=e
-_.T$=0
-_.S$=f
-_.b3$=_.bb$=0},
-aOZ:function aOZ(d,e){var _=this
-_.w=d
-_.a=e
-_.b=!0
-_.c=!1
-_.e=_.d=0
-_.f=null
-_.r=!1},
-Jt:function Jt(d,e,f,g,h){var _=this
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,A,S,T,U,I,V,L,W,X,Y,Z,A_,C={
+cUy(){return new C.BR(null)},
+czI(d,e,f,g,h,i,j){return new C.a28(j,f,d,g,e,i,h,null)},
+BR:function BR(d){this.a=d},
+aKq:function aKq(d,e,f,g){var _=this
+_.d=d
+_.e=e
+_.f=f
+_.r=g
+_.c=_.a=null},
+c_p:function c_p(d){this.a=d},
+c_o:function c_o(){},
+c_q:function c_q(d,e){this.a=d
+this.b=e},
+c_r:function c_r(d){this.a=d},
+yG:function yG(d,e){this.a=d
+this.b=e},
+a28:function a28(d,e,f,g,h,i,j,k){var _=this
 _.c=d
 _.d=e
-_.f=f
-_.at=g
-_.a=h},
-adc:function adc(d){var _=this
-_.d=$
-_.e=null
+_.e=f
+_.f=g
+_.r=h
+_.w=i
+_.x=j
+_.a=k},
+abK:function abK(d,e){var _=this
+_.d=d
+_.e=e
 _.f=!1
-_.w=_.r=$
-_.x=d
-_.c=_.a=null},
-c8B:function c8B(d,e){this.a=d
+_.r=""
+_.c=_.a=_.y=_.x=_.w=null},
+c3M:function c3M(d){this.a=d},
+c3N:function c3N(d,e){this.a=d
 this.b=e},
-c8A:function c8A(d,e){this.a=d
-this.b=e},
-c8C:function c8C(d){this.a=d}},F,G,H,D,E
+c3O:function c3O(d){this.a=d},
+c3P:function c3P(d,e){this.a=d
+this.b=e}},D,A0,A1,M,A2,A3,N,K,A4,A5,A6,A7,O,H,E,P,F,Q,G,R
 J=c[1]
-A=c[0]
-C=c[2]
-B=a.updateHolder(c[125],B)
-F=c[381]
-G=c[193]
-H=c[237]
-D=c[186]
-E=c[226]
-B.aQM.prototype={
-awF(d,e,f){return A.d9(A.a([this.ax],y.i),null,null,e,null)}}
-B.aOZ.prototype={
-ZY(d){if(!this.a.gnf())return
-this.aPh(d)
-this.w.a.toString}}
-B.Jt.prototype={
-M(){return new B.adc(new A.aJ(null,y.m))}}
-B.adc.prototype={
-gBP(){var x,w=null
-this.a.toString
-x=this.e
-if(x==null){x=A.eT(!0,w,!0,!0,w,w,!0)
-this.e=x}return x},
-gaaN(){var x=this.w
-x===$&&A.b()
-return x},
-gnf(){this.a.toString
-return!0},
-X(){var x,w,v=this,u=null
-v.aj()
-v.r=new B.aOZ(v,v)
-x=v.a
-w=x.d
-x=B.cDP(w==null?A.d9(u,u,u,u,x.c):w)
-v.d=x
-x.a6(0,v.gapI())
-v.gBP().a6(0,v.gas2())},
-aX(d){var x,w,v,u=this,t=null
-u.bg(d)
-x=u.a
-if(x.c!=d.c||!J.m(x.d,d.d)){x=u.d
-x===$&&A.b()
-w=u.gapI()
-x.N(0,w)
-x=u.d
-x.S$=$.a8()
-x.T$=0
-x=u.a
-v=x.d
-x=B.cDP(v==null?A.d9(t,t,t,t,x.c):v)
-u.d=x
-x.a6(0,w)}u.a.toString
-if(u.gBP().gdc()){x=u.d
-x===$&&A.b()
-x=x.a.b
-x=x.a===x.b}else x=!1
-if(x)u.f=!1
-else u.f=!0},
-l(){var x,w=this
-w.gBP().N(0,w.gas2())
-x=w.e
-if(x!=null)x.l()
-x=w.d
-x===$&&A.b()
-x.S$=$.a8()
-x.T$=0
-w.ag()},
-bcn(){var x,w,v=this
-if(v.gBP().gdc()){x=v.d
-x===$&&A.b()
-x=x.a.b
-w=x.a!==x.b}else w=!0
-if(w===v.f)return
-v.B(new B.c8B(v,w))},
-bjD(){if(!this.gBP().gdc()&&$.dE.k3$===C.e_){var x=this.d
-x===$&&A.b()
-x.jA(0,new A.ck(x.a.a,C.ao,C.ae))}},
-bjF(d,e){var x,w=this,v=w.bjI(e)
-if(v!==w.f)w.B(new B.c8A(w,v))
-w.a.toString
-x=w.c
-x.toString
-switch(A.C(x).w.a){case 2:case 4:if(e===E.dm){x=w.x.gW()
-if(x!=null)x.pI(d.gwz())}return
-case 0:case 1:case 3:case 5:break}},
-bjH(){var x=this.d
-x===$&&A.b()
-x=x.a.b
-if(x.a===x.b)this.x.gW().adI()},
-bjI(d){var x,w=this.r
-w===$&&A.b()
-if(!w.b)return!1
-w=this.d
-w===$&&A.b()
-w=w.a
-x=w.b
-if(x.a===x.b)return!1
-if(d===C.bO)return!1
-if(d===E.dm)return!0
-if(w.a.length!==0)return!0
-return!1},
-A(d){var x,w,v,u,t,s,r,q,p,o,n,m,l,k,j,i,h=this,g=null,f=A.C(d),e=d.ad(y.d)
-if(e==null)e=C.hG
-x=h.gBP()
-h.a.toString
-w=!0
-v=!0
-u=g
-t=g
-switch(f.w.a){case 2:s=G.qR(d)
-h.w=!0
-r=$.clI()
-h.a.toString
-q=e.w
-if(q==null)q=s.gjT()
-p=e.x
-if(p==null)p=s.gjT().O(0.4)
-u=new A.n(-2/A.ax(d,C.f6,y.h).w.b,0)
-t=C.eE
+B=c[0]
+A=c[2]
+S=c[207]
+T=c[287]
+U=c[202]
+I=c[211]
+V=c[191]
+L=c[220]
+W=c[206]
+X=c[212]
+Y=c[300]
+Z=c[303]
+A_=c[317]
+C=a.updateHolder(c[14],C)
+D=c[340]
+A0=c[92]
+A1=c[290]
+M=c[118]
+A2=c[205]
+A3=c[324]
+N=c[341]
+K=c[251]
+A4=c[234]
+A5=c[250]
+A6=c[196]
+A7=c[342]
+O=c[194]
+H=c[238]
+E=c[187]
+P=c[335]
+F=c[227]
+Q=c[221]
+G=c[210]
+R=c[139]
+C.BR.prototype={
+M(){var x=$.a8()
+return new C.aKq(new E.cu(new B.ck("https://kjdpmixlnhntmxjedpxh.supabase.co",A.ao,A.ad),x),new E.cu(new B.ck("postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres",A.ao,A.ad),x),new E.cu(new B.ck("vkh-cr/festapp",A.ao,A.ad),x),B.a([new C.yG("1. Tables","scripts/tables"),new C.yG("2. Functions","scripts/functions"),new C.yG("3. Policies","scripts/policies"),new C.yG("4. Seed","scripts/seed")],y.D))}}
+C.aKq.prototype={
+gbgT(){var x,w,v,u=A.e.cg(this.d.a.a)
+try{x=B.dg(u,0,null)
+if(A.e.lb(J.cua(x),".supabase.co")){w=A.b.gR(J.cua(x).split("."))
+return w}}catch(v){}return u},
+gakF(){var x=this.gbgT()
+return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy synchronize-orders --no-verify-jwt --project-ref "+x+"\n"},
+A(d){var x=this,w=null,v=x.d,u=x.e,t=x.f,s=y.u,r=x.r,q=B.X(r).h("O<1,a3>")
+return U.f2(V.ia(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.b4C,w,w,w,1,w),w,A6.dO(B.am(B.a([E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),v,w,w,w,w,w,2,D.anQ,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.c_p(x),w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w),G.ak,E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),u,w,w,w,w,w,2,D.anT,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w),G.ak,E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),t,w,w,w,w,w,2,D.anU,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w),K.dn,R.ox(new B.a3(Q.bg,B.am(B.a([B.aw(B.a([D.b5_,B.c1(w,w,w,w,w,w,A5.Ju,w,w,w,new C.c_q(x,d),w,w,w,w,w)],s),A.i,A.bR,A.h,0,w),G.ak,M.h4(x.gakF(),w,D.b24)],s),A.M,A.f,A.h,w,A.l),w),w,2,w,w),K.dn,D.b4Q,I.fe,B.am(B.H(new B.O(r,new C.c_r(x),q),!0,q.h("ab.E")),A.i,A.f,A.h,w,A.l),K.dn,D.b4l,I.fe,C.czI(!0,u,w,"migrations",v,t,"Migrations")],s),A.M,A.f,A.h,w,A.l),w,A.r,X.aZ,w,w,A.F),w,w,w,w,w)}}
+C.yG.prototype={
+gdq(d){return this.a}}
+C.a28.prototype={
+M(){var x=$.hB().b
+x===$&&B.b()
+return new C.abK(x,new E.cu(F.ax,$.a8()))},
+gdq(d){return this.c}}
+C.abK.prototype={
+X(){var x,w=this
+w.am()
+x=w.a
+if(x.e){x=x.f
+if(x==null)x=""
+w.e.scr(0,x)}if(w.a.d==="scripts/seed"){x=$.a8()
+w.x=new E.cu(F.ax,x)
+w.y=new E.cu(F.ax,x)}},
+l(){var x=this,w=x.e,v=w.S$=$.a8()
+w.T$=0
+w=x.x
+if(w!=null){w.S$=v
+w.T$=0}w=x.y
+if(w!=null){w.S$=v
+w.T$=0}x.ai()},
+W1(){var x=0,w=B.k(y.q),v=1,u=[],t=this,s,r,q,p,o,n,m,l,k,j,i,h,g
+var $async$W1=B.f(function(d,e){if(d===1){u.push(e)
+x=v}while(true)switch(x){case 0:j=t.a
+i=j.r.a.a
+h=j.w.a.a
+if(j.e)p=t.e.a.a
+else{j=j.d
+p=j==null?"":j}j=y.w
+o=y.b
+s=B.y(["dbConnectionString",i,"repo",h,"directory",p],j,o)
+n=t.a
+if(n.d==="scripts/seed"){m=A.e.cg(t.x.a.a)
+l=A.e.cg(t.y.a.a)
+J.bT(s,"project_url",A.e.cg(n.x.a.a))
+if(m.length!==0&&l.length!==0)J.ahm(s,B.y(["admin_email",m,"admin_password",l],j,o))}t.B(new C.c3M(t))
+v=3
+j=t.d.Q
+j===$&&B.b()
+x=6
+return B.c(j.mZ("instance-install",s.a!==0?A.az.zs(s,null):null),$async$W1)
+case 6:r=e
+if(r.b!==200)t.B(new C.c3N(t,r))
+else t.B(new C.c3O(t))
+v=1
+x=5
 break
-case 4:s=G.qR(d)
-h.w=!1
-r=$.clH()
-h.a.toString
-q=e.w
-if(q==null)q=s.gjT()
-p=e.x
-if(p==null)p=s.gjT().O(0.4)
-u=new A.n(-2/A.ax(d,C.f6,y.h).w.b,0)
-t=C.eE
+case 3:v=2
+g=u.pop()
+q=B.ah(g)
+t.B(new C.c3P(t,q))
+x=5
 break
-case 0:case 1:h.w=!1
-r=$.clM()
-q=e.w
-if(q==null)q=f.ax.b
-p=e.x
-if(p==null)p=f.ax.b.O(0.4)
-w=!1
-v=!1
+case 2:x=1
 break
-case 3:case 5:h.w=!1
-r=$.aVe()
-q=e.w
-if(q==null)q=f.ax.b
-p=e.x
-if(p==null)p=f.ax.b.O(0.4)
-w=!1
-v=!1
-break
-default:p=g
-q=p
-v=q
-w=v
-r=w}o=d.ad(y.p)
-if(o==null)o=C.mC
-n=h.a.f
-m=n==null
-if(m||n.a){if(m){m=h.d
-m===$&&A.b()
-m=m.ax.a}else m=n
-n=o.w.e8(m)}m=h.a
-m.toString
-$label0$1:{break $label0$1}l=h.f
-k=h.d
-k===$&&A.b()
-j=o.x
-if(j==null)j=C.H
-m=m.at
-if(m==null)m=o.Q
-i=$.clx()
-m=D.cwh(!0,g,g,g,!1,C.kp,C.z,g,B.dcK(),k,q,g,u,v,t,2,C.r,!0,!0,!0,!1,x,!1,H.aV,g,h.x,C.b3,g,i,m,g,g,!1,"\u2022",g,g,g,h.gbjE(),h.gbjG(),g,g,g,w,!0,!0,g,!0,g,g,E.b4,g,p,r,C.aQ,C.aK,!1,l,g,g,g,F.aZy,n,!0,j,E.b7,g,o.at,g,g,o.as,g,g)
-h.a.toString
-l=h.r
-l===$&&A.b()
-m=l.aws(C.dB,new A.jj(m,g))
-return new A.bQ(A.c3(g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,new B.c8C(h),g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g,g),!1,!1,!1,!1,m,g)},
-gb_(){return this.x}}
-var z=a.updateTypes(["~()","~(zg)","~(l1,p5?)","d(M,nu)"])
-B.c8B.prototype={
-$0(){this.a.f=this.b},
+case 5:return B.i(null,w)
+case 1:return B.h(u.at(-1),w)}})
+return B.j($async$W1,w)},
+aW2(){var x,w=null,v=this.w
+if(v==null)return A.cn
+if(v){v=B.bW(A2.hd)
+v=B.bW(new B.bN(v.a,v.b,v.c,0.3).c5())
+v=B.bp(W.ja,new B.bN(v.a,v.b,0.5,v.d).c5(),w,w)}else{v=this.c
+v.toString
+x=B.bp(S.pG,B.C(v).ax.a===A.t?B.b9(4294922834):B.b9(4292030255),w,w)
+v=x}return v},
+A(d){var x=this,w=null,v=y.u,u=B.aw(B.a([B.W(x.a.c,w,w,w,w,w,w,w,A3.a4L,w,w,w,w,w),T.c4,x.aW2()],v),A.i,A.f,A.h,0,w),t=x.a
+u=B.a([u,A_.hn,t.e?E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),x.e,w,w,w,w,w,2,D.anN,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w):new B.a3(L.eo,B.W("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
+if(x.a.d==="scripts/seed")A.b.I(u,B.a([I.fe,D.b4e,G.ak,D.b4I,G.ak,E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),x.x,w,w,w,w,w,2,D.anW,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w),E.h6(!0,A.aU,!1,w,!0,A.z,w,E.hz(),x.y,w,w,w,w,w,2,D.anV,A.r,!0,w,!0,w,!1,w,H.aV,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.b5,w,w,A.aQ,A.aK,w,w,w,w,w,w,w,!0,A.H,w,F.b8,w,w,w,w),new B.a3(L.eo,B.W("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,N.a4I,w,w,w,w,w),w)],v))
+u.push(G.ak)
+u.push(B.dk(!1,D.b4M,w,w,w,w,w,w,x.f?w:x.gbns(),w,w))
+u.push(G.ak)
+if(x.f)v=A.cI
+else{v=x.r
+v=v.length!==0?M.h4(v,w,Y.wP):A.cn}u.push(v)
+return R.ox(new B.a3(Q.bg,B.am(u,A.M,A.f,A.h,w,A.l),w),w,3,w,w)}}
+var z=a.updateTypes(["a3(yG)","T<~>()"])
+C.c_p.prototype={
+$1(d){this.a.B(new C.c_o())},
+$S:11}
+C.c_o.prototype={
+$0(){},
 $S:0}
-B.c8A.prototype={
-$0(){this.a.f=this.b},
+C.c_q.prototype={
+$0(){O.tB(new O.nq(this.a.gakF()))
+this.b.ae(y.v).f.agh(D.aZm)},
 $S:0}
-B.c8C.prototype={
-$0(){this.a.gBP().fY()},
-$S:0};(function installTearOffs(){var x=a._static_2,w=a._instance_1u,v=a._instance_0u,u=a._instance_2u
-x(B,"dcK","cYf",3)
-w(B.aOZ.prototype,"gaCQ","ZY",1)
-var t
-v(t=B.adc.prototype,"gapI","bcn",0)
-v(t,"gas2","bjD",0)
-u(t,"gbjE","bjF",2)
-v(t,"gbjG","bjH",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.aQM,D.cx)
-x(B.aOZ,D.Ss)
-x(B.Jt,A.F)
-x(B.adc,A.K)
-w(A.ci,[B.c8B,B.c8A,B.c8C])})()
-A.bm(b.typeUniverse,JSON.parse('{"Jt":{"F":[],"d":[]},"aQM":{"bS":["ck"],"aq":[]},"adc":{"K":["Jt"]}}'))
-var y={d:A.z("tI"),p:A.z("tJ"),i:A.z("q<zk>"),m:A.z("aJ<nu>"),h:A.z("fp")};(function constants(){F.aZy=new A.K_(null,null,null,null,null,null,null,null,null,null)})()};
+C.c_r.prototype={
+$1(d){var x=this.a
+return new B.a3(A7.HZ,C.czI(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
+$S:z+0}
+C.c3M.prototype={
+$0(){var x=this.a
+x.f=!0
+x.r=x.a.c+" operation is running..."
+x.w=null},
+$S:0}
+C.c3N.prototype={
+$0(){var x=this.a
+x.r="Error: "+B.o(this.b.a)
+x.f=x.w=!1},
+$S:0}
+C.c3O.prototype={
+$0(){var x=this.a
+x.r=x.a.c+" operation completed successfully."
+x.w=!0
+x.f=!1},
+$S:0}
+C.c3P.prototype={
+$0(){var x=this.a
+x.r="Unexpected error: "+B.o(this.b)
+x.f=x.w=!1},
+$S:0};(function installTearOffs(){var x=a._instance_0u
+x(C.abK.prototype,"gbns","W1",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
+x(B.F,[C.BR,C.a28])
+x(B.K,[C.aKq,C.abK])
+x(B.bC,[C.c_p,C.c_r])
+x(B.ci,[C.c_o,C.c_q,C.c3M,C.c3N,C.c3O,C.c3P])
+w(C.yG,B.E)})()
+B.bl(b.typeUniverse,JSON.parse('{"a28":{"F":[],"d":[]},"BR":{"F":[],"d":[]},"aKq":{"K":["BR"]},"abK":{"K":["a28"]}}'))
+var y={D:B.z("q<yG>"),u:B.z("q<d>"),w:B.z("e"),v:B.z("EO"),b:B.z("@"),q:B.z("~")};(function constants(){D.anN=new E.oM(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.anQ=new E.oM(null,null,null,"Supabase Project URL",null,null,null,null,null,null,"Enter your Supabase project URL",null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.anT=new E.oM(null,null,null,"Database Connection String",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.anU=new E.oM(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.anV=new E.oM(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.anW=new E.oM(null,null,null,"Admin Email",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+D.b4T=new B.c0("Copied to clipboard",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.aZm=new A0.DL(D.b4T,null,null,null,null,null,null,null,null,null,null,null,null,A1.HQ,null,null,null,A.z,null)
+D.b24=new B.a_(!0,null,null,"monospace",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4e=new B.c0("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)\n - pg_cron extension (Database > Extensions)",null,Z.wQ,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4l=new B.c0("Migrations",null,P.DP,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4C=new B.c0("Instance Installation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4I=new B.c0("Admin Email and Password are optional. If left blank, no new admin user will be inserted.",null,N.a4I,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4M=new B.c0("Run Scripts",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b4Q=new B.c0("Initial",null,P.DP,null,null,null,null,null,null,null,null,null,null,null,null)
+D.b5_=new B.c0("Supabase Function Deploy Commands:",null,A4.wO,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_196",e:"endPart",h:b})})($__dart_deferred_initializers__,"vg6pdZHhmH9HfoW9Or+qiqHi4us=");
+a.eventLog.push({p:"main.dart.js_196",e:"endPart",h:b})})($__dart_deferred_initializers__,"VEWPtDI6F8VL18MaU75z9DoHBsk=");
