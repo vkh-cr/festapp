@@ -12,6 +12,7 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class PlacesTab extends StatefulWidget {
@@ -101,6 +102,7 @@ class _PlacesTabState extends State<PlacesTab> {
                 PlaceModel.WithouValue;
           },
           type: PlutoColumnType.select(
+            defaultValue: null,
             mapIcons,
             builder: (icon) {
               return DataGridHelper.iconToRow(context, icon, svgIcons);
@@ -117,7 +119,7 @@ class _PlacesTabState extends State<PlacesTab> {
           enableSorting: false,
           field: Tb.places.coordinates,
           type: PlutoColumnType.text(
-            defaultValue: SynchroService.globalSettingsModel!.defaultMapLocation,
+            defaultValue: FeatureService.getDefaultLocation(),
           ),
           renderer: (rendererContext) {
             return ElevatedButton(

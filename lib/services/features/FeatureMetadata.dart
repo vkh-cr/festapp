@@ -44,6 +44,10 @@ class FeatureMetadata {
       'title': 'Blueprint',
       'description': 'This feature lets you create a seating blueprint with a limited number of seats for the reservation form. For example, you can design a seating chart for a bus or a layout of a hall with assigned seats.',
     },
+    FeatureConstants.map: {
+      'title': 'Map',
+      'description': 'Various settings for map inside the app.',
+    },
   };
 
   /// Returns the translated title for the given feature code.
