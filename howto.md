@@ -78,7 +78,7 @@ supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
 - Add PNG icon to `assets`.
 - Run:
 ```
-fvm flutter pub run flutter_launcher_icon
+fvm dart run flutter_launcher_icons
 ```
 - Set label (short name, max 30 chars).
 - Set App ID in 3 places.
