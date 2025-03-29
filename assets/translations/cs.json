@@ -529,8 +529,8 @@
   "Offline Map Package URL": "URL offline balíčku map",
   "Offline Map Style URL": "URL stylu offline mapy",
   "Map Layer Settings": "Nastavení mapových vrstev",
-  "Offline Map Settings": "Nastavení offline mapy",
-  "Use offline maps automatically": "Automaticky používat offline mapy",
+  "Offline Map Layer Settings": "Nastavení offline mapových vrstev",
+  "Auto-download offline map": "Automaticky stáhnout offline mapy",
   "Offline Map Layer Name": "Název vrstvy offline mapy",
   "_": "_"
 }

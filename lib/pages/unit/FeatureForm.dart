@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/services/features/Feature.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/features/FeatureMetadata.dart';
@@ -31,7 +30,7 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? externalPriceController;
   TextEditingController? reserveButtonTitleController;
 
-  // Controllers for MapFeature
+  // Controllers for MapFeature (Online Map Layer)
   TextEditingController? zoomController;
   TextEditingController? latController;
   TextEditingController? lngController;
@@ -40,11 +39,19 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? mapLogoLinkController;
   TextEditingController? mapTextLinkController;
   TextEditingController? mapLayerLinkController;
+
+  // Controllers for MapFeature (Offline Map Layer Basic Properties)
+  TextEditingController? offlineMapLogoController;
+  TextEditingController? offlineMapTextController;
+  TextEditingController? offlineMapLogoLinkController;
+  TextEditingController? offlineMapTextLinkController;
+  // (Offline Map Layer URL is hidden)
+
+  // Controllers for MapFeature (Offline Map Layer Extra Fields)
   TextEditingController? mapOfflineMapPackageURLController;
   TextEditingController? mapOfflineMapStyleURLController;
-  TextEditingController? mapOfflineMapLayerNameController; // Newly added
-
-  bool forceOfflineMap = false;
+  TextEditingController? mapOfflineMapLayerNameController;
+  bool autoDownloadOfflineMap = false;
 
   @override
   void initState() {
@@ -75,17 +82,28 @@ class _FeatureFormState extends State<FeatureForm> {
       latController = TextEditingController(text: mapFeature.defaultMapLocation.lat.toString());
       lngController = TextEditingController(text: mapFeature.defaultMapLocation.lng.toString());
 
-      mapLogoController = TextEditingController(text: mapFeature.mapLayer?.logo);
-      mapTextController = TextEditingController(text: mapFeature.mapLayer?.text);
-      mapLogoLinkController = TextEditingController(text: mapFeature.mapLayer?.logoLink);
-      mapTextLinkController = TextEditingController(text: mapFeature.mapLayer?.textLink);
-      mapLayerLinkController = TextEditingController(text: mapFeature.mapLayer?.layerLink);
+      // Online Map Layer controllers
+      mapLogoController = TextEditingController(text: mapFeature.onlineMapLayer.logo);
+      mapTextController = TextEditingController(text: mapFeature.onlineMapLayer.text);
+      mapLogoLinkController = TextEditingController(text: mapFeature.onlineMapLayer.logoLink);
+      mapTextLinkController = TextEditingController(text: mapFeature.onlineMapLayer.textLink);
+      mapLayerLinkController = TextEditingController(text: mapFeature.onlineMapLayer.layerLink);
+
+      // Offline Map Layer basic property controllers (using same titles as online)
+      offlineMapLogoController = TextEditingController(text: mapFeature.offlineMapLayer.logo);
+      offlineMapTextController = TextEditingController(text: mapFeature.offlineMapLayer.text);
+      offlineMapLogoLinkController = TextEditingController(text: mapFeature.offlineMapLayer.logoLink);
+      offlineMapTextLinkController = TextEditingController(text: mapFeature.offlineMapLayer.textLink);
+      // Offline Map Layer URL is kept hidden.
+
+      // Offline Map Layer extra field controllers
       mapOfflineMapPackageURLController =
-          TextEditingController(text: mapFeature.mapLayer?.offlineMapPackageURL);
+          TextEditingController(text: mapFeature.offlineMapLayer.offlineMapPackageURL);
       mapOfflineMapStyleURLController =
-          TextEditingController(text: mapFeature.mapLayer?.offlineMapStyleURL);
+          TextEditingController(text: mapFeature.offlineMapLayer.offlineMapStyleURL);
       mapOfflineMapLayerNameController =
-          TextEditingController(text: mapFeature.mapLayer?.offlineMapLayerName); // New field initialization
+          TextEditingController(text: mapFeature.offlineMapLayer.offlineMapLayerName);
+      autoDownloadOfflineMap = mapFeature.offlineMapLayer.autoDownloadOfflineMap;
     } else {
       useExternalForm = false;
     }
@@ -107,23 +125,14 @@ class _FeatureFormState extends State<FeatureForm> {
     mapLogoLinkController?.dispose();
     mapTextLinkController?.dispose();
     mapLayerLinkController?.dispose();
+    offlineMapLogoController?.dispose();
+    offlineMapTextController?.dispose();
+    offlineMapLogoLinkController?.dispose();
+    offlineMapTextLinkController?.dispose();
     mapOfflineMapPackageURLController?.dispose();
     mapOfflineMapStyleURLController?.dispose();
-    mapOfflineMapLayerNameController?.dispose(); // Dispose new controller
+    mapOfflineMapLayerNameController?.dispose();
     super.dispose();
-  }
-
-  /// Returns a default (empty) MapLayer.
-  MapLayer _getDefaultMapLayer() {
-    return MapLayer(
-      logo: "",
-      text: "",
-      logoLink: "",
-      textLink: "",
-      layerLink: "",
-      offlineMapStyleURL: "", // New property added to default
-      offlineMapLayerName: "", // New property added to default
-    );
   }
 
   Future<void> _removeBackgroundImage() async {
@@ -333,61 +342,93 @@ class _FeatureFormState extends State<FeatureForm> {
           ),
         ],
       ));
-      // Advanced settings for map layer details split into two sections.
+      // Online Map Layer Advanced Settings
       fields.add(const SizedBox(height: 16));
       fields.add(ExpansionTile(
-        title: Text("Advanced Settings".tr()),
+        title: Text("Map Layer Settings".tr()),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Map layer settings
-                Text("Map Layer Settings".tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: mapLogoController,
                   decoration: InputDecoration(labelText: "Map Layer Logo".tr()),
-                  onSaved: (val) => mapFeature.mapLayer?.logo = val ?? "",
+                  onSaved: (val) => mapFeature.onlineMapLayer.logo = val ?? "",
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: mapTextController,
                   decoration: InputDecoration(labelText: "Map Layer Text".tr()),
-                  onSaved: (val) => mapFeature.mapLayer?.text = val ?? "",
+                  onSaved: (val) => mapFeature.onlineMapLayer.text = val ?? "",
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: mapLogoLinkController,
                   decoration: InputDecoration(labelText: "Map Layer Logo Link".tr()),
-                  onSaved: (val) => mapFeature.mapLayer?.logoLink = val ?? "",
+                  onSaved: (val) => mapFeature.onlineMapLayer.logoLink = val ?? "",
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: mapTextLinkController,
                   decoration: InputDecoration(labelText: "Map Layer Text Link".tr()),
-                  onSaved: (val) => mapFeature.mapLayer?.textLink = val ?? "",
+                  onSaved: (val) => mapFeature.onlineMapLayer.textLink = val ?? "",
                 ),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: mapLayerLinkController,
                   decoration: InputDecoration(labelText: "Map Layer URL".tr()),
-                  onSaved: (val) => mapFeature.mapLayer?.layerLink = val ?? "",
+                  onSaved: (val) => mapFeature.onlineMapLayer.layerLink = val ?? "",
+                ),
+              ],
+            ),
+          ),
+        ],
+      ));
+      // Offline Map Layer Advanced Settings
+      fields.add(const SizedBox(height: 16));
+      fields.add(ExpansionTile(
+        title: Text("Offline Map Layer Settings".tr()),
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Offline basic properties (using same titles as online)
+                TextFormField(
+                  controller: offlineMapLogoController,
+                  decoration: InputDecoration(labelText: "Map Layer Logo".tr()),
+                  onSaved: (val) => mapFeature.offlineMapLayer.logo = val ?? "",
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: offlineMapTextController,
+                  decoration: InputDecoration(labelText: "Map Layer Text".tr()),
+                  onSaved: (val) => mapFeature.offlineMapLayer.text = val ?? "",
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: offlineMapLogoLinkController,
+                  decoration: InputDecoration(labelText: "Map Layer Logo Link".tr()),
+                  onSaved: (val) => mapFeature.offlineMapLayer.logoLink = val ?? "",
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: offlineMapTextLinkController,
+                  decoration: InputDecoration(labelText: "Map Layer Text Link".tr()),
+                  onSaved: (val) => mapFeature.offlineMapLayer.textLink = val ?? "",
                 ),
                 const SizedBox(height: 16),
-                // Offline Map settings section
-                Text("Offline Map Settings".tr(),
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
+                // Extra offline settings (without showing offline map layer URL)
                 SwitchListTile(
-                  title: Text("Use offline maps automatically".tr()),
-                  value: forceOfflineMap,
+                  title: Text("Auto-download offline map".tr()),
+                  value: autoDownloadOfflineMap,
                   onChanged: (value) {
                     setState(() {
-                      forceOfflineMap = value;
-                      mapFeature.mapLayer?.forceOfflineMap = value;
+                      autoDownloadOfflineMap = value;
+                      mapFeature.offlineMapLayer.autoDownloadOfflineMap = value;
                     });
                   },
                 ),
@@ -395,22 +436,17 @@ class _FeatureFormState extends State<FeatureForm> {
                 TextFormField(
                   controller: mapOfflineMapPackageURLController,
                   decoration: InputDecoration(labelText: "Offline Map Package URL".tr()),
-                  onSaved: (val) =>
-                  mapFeature.mapLayer?.offlineMapPackageURL = val ?? "",
+                  onSaved: (val) => mapFeature.offlineMapLayer.offlineMapPackageURL = val ?? "",
                   validator: (value) {
-                    final package =
-                        mapOfflineMapPackageURLController?.text.trim() ?? "";
-                    final style =
-                        mapOfflineMapStyleURLController?.text.trim() ?? "";
-                    final layer =
-                        mapOfflineMapLayerNameController?.text.trim() ?? "";
+                    final package = mapOfflineMapPackageURLController?.text.trim() ?? "";
+                    final style = mapOfflineMapStyleURLController?.text.trim() ?? "";
+                    final layer = mapOfflineMapLayerNameController?.text.trim() ?? "";
                     if ((package.isNotEmpty || style.isNotEmpty || layer.isNotEmpty) &&
                         (package.isEmpty || style.isEmpty || layer.isEmpty)) {
                       return "Fill all offline fields or leave all empty.".tr();
                     }
-                    if (forceOfflineMap && package.isEmpty) {
-                      return "All offline fields are required when offline maps are enabled."
-                          .tr();
+                    if (autoDownloadOfflineMap && package.isEmpty) {
+                      return "All offline fields are required when offline maps are enabled.".tr();
                     }
                     return null;
                   },
@@ -419,22 +455,17 @@ class _FeatureFormState extends State<FeatureForm> {
                 TextFormField(
                   controller: mapOfflineMapStyleURLController,
                   decoration: InputDecoration(labelText: "Offline Map Style URL".tr()),
-                  onSaved: (val) =>
-                  mapFeature.mapLayer?.offlineMapStyleURL = val ?? "",
+                  onSaved: (val) => mapFeature.offlineMapLayer.offlineMapStyleURL = val ?? "",
                   validator: (value) {
-                    final package =
-                        mapOfflineMapPackageURLController?.text.trim() ?? "";
-                    final style =
-                        mapOfflineMapStyleURLController?.text.trim() ?? "";
-                    final layer =
-                        mapOfflineMapLayerNameController?.text.trim() ?? "";
+                    final package = mapOfflineMapPackageURLController?.text.trim() ?? "";
+                    final style = mapOfflineMapStyleURLController?.text.trim() ?? "";
+                    final layer = mapOfflineMapLayerNameController?.text.trim() ?? "";
                     if ((package.isNotEmpty || style.isNotEmpty || layer.isNotEmpty) &&
                         (package.isEmpty || style.isEmpty || layer.isEmpty)) {
                       return "Fill all offline fields or leave all empty.".tr();
                     }
-                    if (forceOfflineMap && style.isEmpty) {
-                      return "All offline fields are required when offline maps are enabled."
-                          .tr();
+                    if (autoDownloadOfflineMap && style.isEmpty) {
+                      return "All offline fields are required when offline maps are enabled.".tr();
                     }
                     return null;
                   },
@@ -442,24 +473,18 @@ class _FeatureFormState extends State<FeatureForm> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: mapOfflineMapLayerNameController,
-                  decoration:
-                  InputDecoration(labelText: "Offline Map Layer Name".tr()),
-                  onSaved: (val) =>
-                  mapFeature.mapLayer?.offlineMapLayerName = val ?? "",
+                  decoration: InputDecoration(labelText: "Offline Map Layer Name".tr()),
+                  onSaved: (val) => mapFeature.offlineMapLayer.offlineMapLayerName = val ?? "",
                   validator: (value) {
-                    final package =
-                        mapOfflineMapPackageURLController?.text.trim() ?? "";
-                    final style =
-                        mapOfflineMapStyleURLController?.text.trim() ?? "";
-                    final layer =
-                        mapOfflineMapLayerNameController?.text.trim() ?? "";
+                    final package = mapOfflineMapPackageURLController?.text.trim() ?? "";
+                    final style = mapOfflineMapStyleURLController?.text.trim() ?? "";
+                    final layer = mapOfflineMapLayerNameController?.text.trim() ?? "";
                     if ((package.isNotEmpty || style.isNotEmpty || layer.isNotEmpty) &&
                         (package.isEmpty || style.isEmpty || layer.isEmpty)) {
                       return "Fill all offline fields or leave all empty.".tr();
                     }
-                    if (forceOfflineMap && layer.isEmpty) {
-                      return "All offline fields are required when offline maps are enabled."
-                          .tr();
+                    if (autoDownloadOfflineMap && layer.isEmpty) {
+                      return "All offline fields are required when offline maps are enabled.".tr();
                     }
                     return null;
                   },

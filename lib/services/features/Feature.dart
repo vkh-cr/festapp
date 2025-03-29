@@ -1,3 +1,4 @@
+// Feature.dart
 import 'FeatureConstants.dart';
 import 'FeatureMetadata.dart';
 
@@ -201,10 +202,11 @@ class MapLayer {
   String? logoLink;
   String? textLink;
   String? layerLink;
+  // Offline extra fields (for offline map layer)
   String? offlineMapPackageURL;
   String? offlineMapStyleURL;
   String? offlineMapLayerName;
-  bool forceOfflineMap;
+  bool autoDownloadOfflineMap;
 
   MapLayer({
     this.logo,
@@ -215,7 +217,7 @@ class MapLayer {
     this.offlineMapPackageURL,
     this.offlineMapStyleURL,
     this.offlineMapLayerName,
-    this.forceOfflineMap = false,
+    this.autoDownloadOfflineMap = false,
   });
 
   factory MapLayer.fromJson(Map<String, dynamic> json) {
@@ -229,7 +231,7 @@ class MapLayer {
       offlineMapPackageURL: json[FeatureConstants.offlineMapPackageURL] as String?,
       offlineMapStyleURL: json[FeatureConstants.offlineMapStyleURL] as String?,
       offlineMapLayerName: json[FeatureConstants.offlineMapLayerName] as String?,
-      forceOfflineMap: json[FeatureConstants.forceOfflineMap] as bool? ?? false,
+      autoDownloadOfflineMap: json[FeatureConstants.forceOfflineMap] as bool? ?? false,
     );
   }
 
@@ -240,7 +242,7 @@ class MapLayer {
       FeatureConstants.mapLogoLink: logoLink,
       FeatureConstants.mapTextLink: textLink,
       FeatureConstants.mapLayerLink: layerLink,
-      FeatureConstants.forceOfflineMap: forceOfflineMap,
+      FeatureConstants.forceOfflineMap: autoDownloadOfflineMap,
     };
     if (offlineMapPackageURL != null) {
       data[FeatureConstants.offlineMapPackageURL] = offlineMapPackageURL!;
@@ -280,10 +282,11 @@ class MapLocation {
   }
 }
 
-/// Feature for maps with extra fields.
+/// Feature for maps with separate online and offline map layers.
 class MapFeature extends Feature {
   static const MapLocation defaultLocation = MapLocation(lat: 49.1038023, lng: 17.3947819);
-  MapLayer? mapLayer = MapLayer();
+  MapLayer onlineMapLayer;
+  MapLayer offlineMapLayer;
   double defaultMapZoom;
   MapLocation defaultMapLocation;
 
@@ -292,23 +295,31 @@ class MapFeature extends Feature {
     super.isEnabled,
     super.title,
     super.description,
-    this.mapLayer,
+    MapLayer? onlineMapLayer,
+    MapLayer? offlineMapLayer,
     this.defaultMapZoom = 17.0,
     this.defaultMapLocation = defaultLocation,
-  });
+  })  : onlineMapLayer = onlineMapLayer ?? MapLayer(),
+        offlineMapLayer = offlineMapLayer ?? MapLayer();
 
   factory MapFeature.getDefault() {
-    return MapFeature(mapLayer: MapLayer());
+    return MapFeature(
+      onlineMapLayer: MapLayer(),
+      offlineMapLayer: MapLayer(),
+    );
   }
 
   factory MapFeature.fromJson(Map<String, dynamic> json) {
     return MapFeature(
       code: json[FeatureConstants.metaCode],
       isEnabled: json[FeatureConstants.metaIsEnabled] ?? false,
-      mapLayer: json[FeatureConstants.mapLayer] != null
-          ? MapLayer.fromJson(json[FeatureConstants.mapLayer])
-          : null,
-      defaultMapZoom: json[FeatureConstants.defaultMapZoom].toDouble() ?? 17.0,
+      onlineMapLayer: json[FeatureConstants.onlineMapLayer] != null
+          ? MapLayer.fromJson(json[FeatureConstants.onlineMapLayer])
+          : MapLayer(),
+      offlineMapLayer: json[FeatureConstants.offlineMapLayer] != null
+          ? MapLayer.fromJson(json[FeatureConstants.offlineMapLayer])
+          : MapLayer(),
+      defaultMapZoom: json[FeatureConstants.defaultMapZoom]?.toDouble() ?? 17.0,
       defaultMapLocation: json[FeatureConstants.defaultMapLocation] != null
           ? MapLocation.fromJson(json[FeatureConstants.defaultMapLocation])
           : const MapLocation(lat: 49.1038023, lng: 17.3947819),
@@ -317,15 +328,13 @@ class MapFeature extends Feature {
 
   @override
   Map<String, dynamic> toJson() {
-    final data = {
+    return {
       FeatureConstants.metaCode: code,
       FeatureConstants.metaIsEnabled: isEnabled,
       FeatureConstants.defaultMapZoom: defaultMapZoom,
-      FeatureConstants.defaultMapLocation: defaultMapLocation.toJson(),
+      FeatureConstants.defaultMapLocation: defaultMapLocation,
+      FeatureConstants.onlineMapLayer: onlineMapLayer,
+      FeatureConstants.offlineMapLayer: offlineMapLayer,
     };
-    if (mapLayer != null) {
-      data[FeatureConstants.mapLayer] = mapLayer!.toJson();
-    }
-    return data;
   }
 }

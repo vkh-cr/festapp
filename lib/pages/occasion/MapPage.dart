@@ -108,16 +108,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     // Enable offline functionality only on non-web and only if all offline fields are set.
     if (!PlatformHelper.isWeb && _isOfflineMapConfigured()) {
       // Use a fixed URL.
-      _mapFeature.mapLayer!.offlineMapPackageURL =
+      _mapFeature.offlineMapLayer.offlineMapPackageURL =
       'https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/maps/roma.mbtiles';
       _offlinePackagePath = await OfflineMapHelper.getOfflinePackagePath(
-          _mapFeature.mapLayer!.offlineMapPackageURL!);
+          _mapFeature.offlineMapLayer.offlineMapPackageURL!);
       if (await File(_offlinePackagePath!).exists()) {
         _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
         _theme = await OfflineMapHelper.loadOfflineMapStyle(
-            _mapFeature.mapLayer!.offlineMapStyleURL!);
+            _mapFeature.offlineMapLayer.offlineMapStyleURL!);
       } else {
-        if (_mapFeature.mapLayer!.forceOfflineMap == true) {
+        if (_mapFeature.offlineMapLayer.autoDownloadOfflineMap == true) {
           // Start download in background (after a short delay) so online map is first shown.
           Future.delayed(Duration(seconds: 1), () => _downloadOfflinePackage());
         }
@@ -157,11 +157,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   /// Returns true if all three offline map configuration fields are non-empty.
   bool _isOfflineMapConfigured() {
-    final layer = _mapFeature.mapLayer;
-    return layer != null &&
-        (layer.offlineMapPackageURL?.isNotEmpty ?? false) &&
-        (layer.offlineMapStyleURL?.isNotEmpty ?? false) &&
-        (layer.offlineMapLayerName?.isNotEmpty ?? false);
+    final offlineLayer = _mapFeature.offlineMapLayer;
+    return (offlineLayer.offlineMapPackageURL?.isNotEmpty ?? false) &&
+        (offlineLayer.offlineMapStyleURL?.isNotEmpty ?? false) &&
+        (offlineLayer.offlineMapLayerName?.isNotEmpty ?? false);
   }
 
   Future<void> _downloadOfflinePackage() async {
@@ -175,7 +174,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     try {
       // Download the MBTiles package.
       await OfflineMapHelper.downloadOfflinePackage(
-          _mapFeature.mapLayer!.offlineMapPackageURL!,
+          _mapFeature.offlineMapLayer.offlineMapPackageURL!,
           _offlinePackagePath!, (progress) {
         setState(() {
           _downloadProgress = progress;
@@ -183,9 +182,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       // After downloading the package, also download the style file.
       final offlineStylePath = await OfflineMapHelper.getOfflineStyleFilePath(
-          _mapFeature.mapLayer!.offlineMapStyleURL!);
+          _mapFeature.offlineMapLayer.offlineMapStyleURL!);
       await OfflineMapHelper.downloadOfflineStyle(
-          _mapFeature.mapLayer!.offlineMapStyleURL!,
+          _mapFeature.offlineMapLayer.offlineMapStyleURL!,
           offlineStylePath, (progress) {
         // Optionally handle style download progress.
       });
@@ -195,7 +194,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
       _theme = await OfflineMapHelper.loadOfflineMapStyle(
-          _mapFeature.mapLayer!.offlineMapStyleURL!);
+          _mapFeature.offlineMapLayer.offlineMapStyleURL!);
       ToastHelper.Show(context, "Offline map downloaded and ready for offline use".tr());
       // Display check icon for 2 seconds.
       Timer(Duration(seconds: 2), () {
@@ -460,8 +459,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   ),
                   Container(
                     color: Colors.white,
-                    child: const Text("You can change location by tapping on the map.")
-                        .tr(),
+                    child: const Text("You can change location by tapping on the map.").tr(),
                   ),
                   Expanded(child: Container()),
                 ],
@@ -494,30 +492,30 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         fm.TileLayer(
           tileProvider: CancellableNetworkTileProvider(),
           maxZoom: 18,
-          urlTemplate: _mapFeature.mapLayer!.layerLink,
+          urlTemplate: _mapFeature.onlineMapLayer.layerLink,
           fallbackUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         ),
-        if ((_mapFeature.mapLayer!.logo?.isNotEmpty ?? false) ||
-            (_mapFeature.mapLayer!.text?.isNotEmpty ?? false))
+        if ((_mapFeature.onlineMapLayer.logo?.isNotEmpty ?? false) ||
+            (_mapFeature.onlineMapLayer.text?.isNotEmpty ?? false))
           fm.RichAttributionWidget(
             showFlutterMapAttribution: false,
             animationConfig: const fm.ScaleRAWA(),
             attributions: [
-              if (_mapFeature.mapLayer!.logo?.isNotEmpty ?? false)
+              if (_mapFeature.onlineMapLayer.logo?.isNotEmpty ?? false)
                 fm.LogoSourceAttribution(
                   SvgPicture.network(
-                    _mapFeature.mapLayer!.logo!,
+                    _mapFeature.onlineMapLayer.logo!,
                     height: 28,
                   ),
-                  onTap: _mapFeature.mapLayer!.logoLink?.isNotEmpty ?? false
-                      ? () => launchUrl(Uri.parse(_mapFeature.mapLayer!.logoLink!))
+                  onTap: _mapFeature.onlineMapLayer.logoLink?.isNotEmpty ?? false
+                      ? () => launchUrl(Uri.parse(_mapFeature.onlineMapLayer.logoLink!))
                       : null,
                 ),
-              if (_mapFeature.mapLayer!.text?.isNotEmpty ?? false)
+              if (_mapFeature.onlineMapLayer.text?.isNotEmpty ?? false)
                 fm.TextSourceAttribution(
-                  _mapFeature.mapLayer!.text!,
-                  onTap: _mapFeature.mapLayer!.textLink?.isNotEmpty ?? false
-                      ? () => launchUrl(Uri.parse(_mapFeature.mapLayer!.textLink!))
+                  _mapFeature.onlineMapLayer.text!,
+                  onTap: _mapFeature.onlineMapLayer.textLink?.isNotEmpty ?? false
+                      ? () => launchUrl(Uri.parse(_mapFeature.onlineMapLayer.textLink!))
                       : null,
                 ),
             ],
@@ -565,12 +563,39 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         vmt.VectorTileLayer(
           theme: _theme,
           tileProviders: vmt.TileProviders({
-            _mapFeature.mapLayer!.offlineMapLayerName!: vmtm.MbTilesVectorTileProvider(
+            _mapFeature.offlineMapLayer.offlineMapLayerName!:
+            vmtm.MbTilesVectorTileProvider(
               mbtiles: _mbtiles!,
             ),
           }),
           maximumZoom: 18,
         ),
+        // Show attributions on offline map too, if available.
+        if ((_mapFeature.offlineMapLayer.logo?.isNotEmpty ?? false) ||
+            (_mapFeature.offlineMapLayer.text?.isNotEmpty ?? false))
+          fm.RichAttributionWidget(
+            showFlutterMapAttribution: false,
+            animationConfig: const fm.ScaleRAWA(),
+            attributions: [
+              if (_mapFeature.offlineMapLayer.logo?.isNotEmpty ?? false)
+                fm.LogoSourceAttribution(
+                  SvgPicture.network(
+                    _mapFeature.offlineMapLayer.logo!,
+                    height: 28,
+                  ),
+                  onTap: _mapFeature.offlineMapLayer.logoLink?.isNotEmpty ?? false
+                      ? () => launchUrl(Uri.parse(_mapFeature.offlineMapLayer.logoLink!))
+                      : null,
+                ),
+              if (_mapFeature.offlineMapLayer.text?.isNotEmpty ?? false)
+                fm.TextSourceAttribution(
+                  _mapFeature.offlineMapLayer.text!,
+                  onTap: _mapFeature.offlineMapLayer.textLink?.isNotEmpty ?? false
+                      ? () => launchUrl(Uri.parse(_mapFeature.offlineMapLayer.textLink!))
+                      : null,
+                ),
+            ],
+          ),
         CurrentLocationLayer(),
         PopupMarkerLayer(
           options: PopupMarkerLayerOptions(
