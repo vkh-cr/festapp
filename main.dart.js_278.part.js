@@ -1,12 +1,12 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_278",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,D,E,F,G,B={an2:function an2(d,e,f){this.c=d
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,D,E,F,G,B={an3:function an3(d,e,f){this.c=d
 this.a=e
 this.b=f},
-czl(d,e,f){return new B.a1y(d,f,e,null)},
-cVO(d,e){},
-a1y:function a1y(d,e,f,g){var _=this
+czr(d,e,f){return new B.a1z(d,f,e,null)},
+cVU(d,e){},
+a1z:function a1z(d,e,f,g){var _=this
 _.c=d
 _.d=e
 _.r=f
@@ -14,13 +14,13 @@ _.a=g},
 aLg:function aLg(){var _=this
 _.d=$
 _.c=_.a=_.f=_.e=null},
-c1R:function c1R(d){this.a=d},
-c1Q:function c1Q(d,e){this.a=d
+c1W:function c1W(d){this.a=d},
+c1V:function c1V(d,e){this.a=d
 this.b=e},
 aT8:function aT8(){},
-czm(d,e){var x=null,w=d===C.ahV?250:0
-return new B.a1B(d,w,e,new A.eL(x,x,y.n),new B.Cm(x,D.yG,x,!1,!1,D.X,D.iJ,1),$.a8())},
-a1B:function a1B(d,e,f,g,h,i){var _=this
+czs(d,e){var x=null,w=d===C.ahV?250:0
+return new B.a1C(d,w,e,new A.eL(x,x,y.n),new B.Cn(x,D.yG,x,!1,!1,D.X,D.iJ,1),$.a8())},
+a1C:function a1C(d,e,f,g,h,i){var _=this
 _.y=d
 _.z=e
 _.as=f
@@ -29,13 +29,13 @@ _.cy=_.cx=_.CW=null
 _.db=!1
 _.a=h
 _.T$=0
-_.S$=i
+_.R$=i
 _.b4$=_.bd$=0},
-bnK:function bnK(d){this.a=d},
 bnL:function bnL(d){this.a=d},
 bnM:function bnM(d){this.a=d},
 bnN:function bnN(d){this.a=d},
-Cm:function Cm(d,e,f,g,h,i,j,k){var _=this
+bnO:function bnO(d){this.a=d},
+Cn:function Cn(d,e,f,g,h,i,j,k){var _=this
 _.a=d
 _.b=e
 _.c=f
@@ -44,7 +44,7 @@ _.e=h
 _.f=i
 _.r=j
 _.w=k},
-bCI:function bCI(d,e,f,g,h,i,j,k){var _=this
+bCJ:function bCJ(d,e,f,g,h,i,j,k){var _=this
 _.a=d
 _.b=e
 _.c=f
@@ -53,14 +53,14 @@ _.e=h
 _.f=i
 _.r=j
 _.w=k},
-bCJ:function bCJ(){},
-cyv(d){var x,w=A.X(d),v=new J.el(d,d.length,w.h("el<1>"))
+bCK:function bCK(){},
+cyA(d){var x,w=A.X(d),v=new J.el(d,d.length,w.h("el<1>"))
 if(v.q()){x=v.d
 return x==null?w.c.a(x):x}return null},
 pU(){var x=0,w=A.k(y.f)
 var $async$pU=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
-return A.c(D.cf.fP("HapticFeedback.vibrate","HapticFeedbackType.lightImpact",y.f),$async$pU)
+return A.c(D.cg.fP("HapticFeedback.vibrate","HapticFeedbackType.lightImpact",y.f),$async$pU)
 case 2:return A.i(null,w)}})
 return A.j($async$pU,w)}},C,H
 J=c[1]
@@ -72,9 +72,9 @@ G=c[133]
 B=a.updateHolder(c[36],B)
 C=c[228]
 H=c[197]
-B.an2.prototype={
+B.an3.prototype={
 J(){return"DetectionSpeed."+this.b}}
-B.a1y.prototype={
+B.a1z.prototype={
 M(){return new B.aLg()}}
 B.aLg.prototype={
 glT(d){var x,w=this.d
@@ -84,12 +84,12 @@ this.d=x
 w=x}return w},
 bbD(d,e){this.a.toString
 return},
-A(d){return new G.iK(this.glT(0),new B.c1R(this),null,null,y.i)},
+A(d){return new G.iK(this.glT(0),new B.c1W(this),null,null,y.i)},
 X(){var x,w=this
 w.a.toString
 $.av.e5$.push(w)
 x=w.glT(0).ch
-w.f=new A.cF(x,A.p(x).h("cF<1>")).P3(w.a.d,!1,B.dcF())
+w.f=new A.cG(x,A.p(x).h("cG<1>")).P3(w.a.d,!1,B.dcO())
 w.glT(0)
 w.glT(0).l7(0)
 w.am()},
@@ -104,11 +104,11 @@ w.a.toString},
 r2(d){this.a.toString
 return}}
 B.aT8.prototype={}
-B.a1B.prototype={
+B.a1C.prototype={
 bky(){var x=this
-x.CW=$.Ai().gawe().P3(new B.bnK(x),!1,new B.bnL(x))
-x.cx=$.Ai().gaF8().ej(new B.bnM(x))
-x.cy=$.Ai().gaGl().ej(new B.bnN(x))},
+x.CW=$.Aj().gawe().P3(new B.bnL(x),!1,new B.bnM(x))
+x.cx=$.Aj().gaF8().ej(new B.bnN(x))
+x.cy=$.Aj().gaGl().ej(new B.bnO(x))},
 blY(){var x=this,w=x.a
 if(!w.d||!w.e||x.db)return!1
 w=x.CW
@@ -126,11 +126,11 @@ var $async$l7=A.f(function(e,f){if(e===1){t.push(f)
 x=u}while(true)switch(x){case 0:if(s.db)throw A.l(C.aNv)
 if(s.a.e){x=1
 break}r=D.yG
-q=new B.bCI(r,null,s.y,s.z,s.as,!1,!1,!1)
+q=new B.bCJ(r,null,s.y,s.z,s.as,!1,!1,!1)
 u=4
 s.bky()
 x=7
-return A.c($.Ai().ni(0,q),$async$l7)
+return A.c($.Aj().ni(0,q),$async$l7)
 case 7:p=f
 if(!s.db)s.sp(0,s.a.buK(p.b,r,!0,!0,p.c,p.a))
 u=2
@@ -154,7 +154,7 @@ var $async$dK=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:x=v.blY()?2:3
 break
 case 2:x=4
-return A.c($.Ai().dK(0),$async$dK)
+return A.c($.Aj().dK(0),$async$dK)
 case 4:case 3:return A.i(null,w)}})
 return A.j($async$dK,w)},
 vD(d){return this.bK1(d)},
@@ -162,7 +162,7 @@ bK1(d){var x=0,w=A.k(y.f),v,u=this
 var $async$vD=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:if(u.db||!u.a.d){x=1
 break}x=3
-return A.c($.Ai().vD(d),$async$vD)
+return A.c($.Aj().vD(d),$async$vD)
 case 3:case 1:return A.i(v,w)}})
 return A.j($async$vD,w)},
 l(){var x=0,w=A.k(y.f),v,u=this
@@ -172,12 +172,12 @@ break}u.db=!0
 u.ch.ar(0)
 u.ff()
 x=3
-return A.c($.Ai().l(),$async$l)
+return A.c($.Aj().l(),$async$l)
 case 3:case 1:return A.i(v,w)}})
 return A.j($async$l,w)}}
-B.Cm.prototype={
+B.Cn.prototype={
 Nz(d,e,f,g,h,i,j,k){var x=this,w=d==null?x.a:d,v=e==null?x.b:e,u=g==null?x.d:g,t=h==null?x.e:h,s=i==null?x.f:i,r=j==null?x.r:j
-return new B.Cm(w,v,f,u,t,s,r,k==null?x.w:k)},
+return new B.Cn(w,v,f,u,t,s,r,k==null?x.w:k)},
 buK(d,e,f,g,h,i){return this.Nz(d,e,null,f,g,h,i,null)},
 buN(d,e,f,g,h,i,j){return this.Nz(null,d,e,f,g,h,i,j)},
 buc(d){var x=null
@@ -186,24 +186,24 @@ bu9(d){var x=null
 return this.Nz(x,x,x,x,x,x,d,x)},
 bup(d,e){var x=null
 return this.Nz(x,x,x,x,d,x,e,x)}}
-B.bCI.prototype={
+B.bCJ.prototype={
 fw(){var x,w,v=this,u=A.I(y.g,y.a)
 u.m(0,"facing",v.a.c)
 x=v.e
 if(x.length!==0){w=A.X(x).h("O<1,t>")
-u.m(0,"formats",A.H(new A.O(x,new B.bCJ(),w),!0,w.h("ab.E")))}u.m(0,"returnImage",!1)
+u.m(0,"formats",A.H(new A.O(x,new B.bCK(),w),!0,w.h("ab.E")))}u.m(0,"returnImage",!1)
 u.m(0,"speed",v.c.c)
 u.m(0,"timeout",v.d)
 u.m(0,"torch",!1)
 u.m(0,"useNewCameraSelector",!1)
 return u}}
-var z=a.updateTypes(["d(M,Cm,d?)","T<~>()","~(E,dG)"])
-B.c1R.prototype={
+var z=a.updateTypes(["d(M,Cn,d?)","T<~>()","~(E,dG)"])
+B.c1W.prototype={
 $3(d,e,f){if(!e.d){this.a.a.toString
 return C.agP}if(e.c!=null){this.a.a.toString
-return C.agQ}return new A.i2(new B.c1Q(this.a,e),null)},
+return C.agQ}return new A.i2(new B.c1V(this.a,e),null)},
 $S:z+0}
-B.c1Q.prototype={
+B.c1V.prototype={
 $2(d,e){var x,w,v,u=this.a,t=this.b
 u.bbD(t,e)
 u=u.a
@@ -211,63 +211,63 @@ u.toString
 x=t.f
 t=A.Z(1/0,e.a,e.b)
 w=A.Z(1/0,e.c,e.d)
-v=A.lK(H.uA(F.ZD(D.L,new A.at(x.a,x.b,$.Ai().awr(),null),D.k,u.r),new A.R(t,w)),D.z,null)
+v=A.lK(H.uA(F.ZE(D.L,new A.at(x.a,x.b,$.Aj().awr(),null),D.k,u.r),new A.R(t,w)),D.z,null)
 return v},
 $S:95}
-B.bnK.prototype={
+B.bnL.prototype={
 $1(d){var x=this.a.ch
 if((x.c&4)!==0||d==null)return
 x.t(0,d)},
 $S:982}
-B.bnL.prototype={
+B.bnM.prototype={
 $1(d){var x=this.a.ch
 if((x.c&4)!==0)return
 x.kq(d)},
 $S:92}
-B.bnM.prototype={
+B.bnN.prototype={
 $1(d){var x=this.a
 if(x.db)return
 x.sp(0,x.a.bu9(d))},
 $S:983}
-B.bnN.prototype={
+B.bnO.prototype={
 $1(d){var x=this.a
 if(x.db)return
 x.sp(0,x.a.buc(d))},
 $S:117}
-B.bCJ.prototype={
+B.bCK.prototype={
 $1(d){return d.c},
 $S:984};(function installTearOffs(){var x=a._static_2,w=a._instance_0u
-x(B,"dcF","cVO",2)
-w(B.a1B.prototype,"gf9","l",1)})();(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
-w(B.an2,A.e3)
-w(B.a1y,A.F)
+x(B,"dcO","cVU",2)
+w(B.a1C.prototype,"gf9","l",1)})();(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
+w(B.an3,A.e3)
+w(B.a1z,A.F)
 w(B.aT8,A.K)
 w(B.aLg,B.aT8)
-v(A.bC,[B.c1R,B.bnK,B.bnL,B.bnM,B.bnN,B.bCJ])
-w(B.c1Q,A.dj)
-w(B.a1B,A.bS)
-v(A.E,[B.Cm,B.bCI])
-x(B.aT8,A.eA)})()
-A.bl(b.typeUniverse,JSON.parse('{"a1y":{"F":[],"d":[]},"aLg":{"K":["a1y"],"eA":[]},"a1B":{"bS":["Cm"],"aq":[]}}'))
-var y={g:A.z("e"),i:A.z("iK<Cm>"),n:A.z("eL<lH>"),a:A.z("E?"),f:A.z("~")};(function constants(){var x=a.makeConstList
+v(A.bC,[B.c1W,B.bnL,B.bnM,B.bnN,B.bnO,B.bCK])
+w(B.c1V,A.dj)
+w(B.a1C,A.bS)
+v(A.E,[B.Cn,B.bCJ])
+x(B.aT8,A.eB)})()
+A.bl(b.typeUniverse,JSON.parse('{"a1z":{"F":[],"d":[]},"aLg":{"K":["a1z"],"eB":[]},"a1C":{"bS":["Cn"],"aq":[]}}'))
+var y={g:A.z("e"),i:A.z("iK<Cn>"),n:A.z("eL<lH>"),a:A.z("E?"),f:A.z("~")};(function constants(){var x=a.makeConstList
 C.agP=new A.nr(D.p,null,null)
 C.amQ=new A.dm(E.pG,null,D.n,null,null)
 C.acK=new A.kH(D.L,null,null,C.amQ,null)
 C.agQ=new A.nr(D.p,C.acK,null)
-C.HA=new B.an2(0,0,"noDuplicates")
-C.ahV=new B.an2(1,1,"normal")
+C.HA=new B.an3(0,0,"noDuplicates")
+C.ahV=new B.an3(1,1,"normal")
 C.I1=new A.ao(0,24,0,12)
 C.IZ=new A.aE(57657,"MaterialIcons",null,!1)
-C.bdm=A.a(x([]),A.z("q<jd>"))
+C.bdn=A.a(x([]),A.z("q<jd>"))
 C.afQ=new A.U(1,0.5098039215686274,0.6941176470588235,1,D.j)
 C.afJ=new A.U(1,0.26666666666666666,0.5411764705882353,1,D.j)
 C.afk=new A.U(1,0.1607843137254902,0.4745098039215686,1,D.j)
 C.agu=new A.U(1,0.1607843137254902,0.3843137254901961,1,D.j)
 C.aGr=new A.cX([100,C.afQ,200,C.afJ,400,C.afk,700,C.agu],A.z("cX<t,U>"))
-C.XY=new A.HF(C.aGr,1,0.26666666666666666,0.5411764705882353,1,D.j)
-C.aNi=new A.HO(1,"controllerDisposed")
+C.XY=new A.HH(C.aGr,1,0.26666666666666666,0.5411764705882353,1,D.j)
+C.aNi=new A.HQ(1,"controllerDisposed")
 C.aNn=new A.w9(null,"The MobileScannerController was used after it has been disposed.")
 C.aNv=new A.q5(C.aNi,C.aNn)
 C.a4J=new A.a_(!0,D.p,null,null,null,null,16,D.a4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"f36A9m08jMZ1Akadg6oIGso0jBk=");
+a.eventLog.push({p:"main.dart.js_278",e:"endPart",h:b})})($__dart_deferred_initializers__,"d0lyQg6KHD0QdQsFSm4tPkRzDyc=");
