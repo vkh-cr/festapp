@@ -203,7 +203,8 @@ class MapLayer {
   String? layerLink;
   String? offlineMapPackageURL;
   String? offlineMapStyleURL;
-
+  String? offlineMapLayerName;
+  bool forceOfflineMap;
 
   MapLayer({
     this.logo,
@@ -213,16 +214,22 @@ class MapLayer {
     this.layerLink = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     this.offlineMapPackageURL,
     this.offlineMapStyleURL,
+    this.offlineMapLayerName,
+    this.forceOfflineMap = false,
   });
 
   factory MapLayer.fromJson(Map<String, dynamic> json) {
     return MapLayer(
-      logo: json[FeatureConstants.mapLogo] as String,
-      text: json[FeatureConstants.mapText] as String,
-      logoLink: json[FeatureConstants.mapLogoLink] as String,
-      textLink: json[FeatureConstants.mapTextLink] as String,
-      layerLink: json[FeatureConstants.mapLayerLink] as String,
+      logo: json[FeatureConstants.mapLogo] as String?,
+      text: json[FeatureConstants.mapText] as String?,
+      logoLink: json[FeatureConstants.mapLogoLink] as String?,
+      textLink: json[FeatureConstants.mapTextLink] as String?,
+      layerLink: json[FeatureConstants.mapLayerLink] as String? ??
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       offlineMapPackageURL: json[FeatureConstants.offlineMapPackageURL] as String?,
+      offlineMapStyleURL: json[FeatureConstants.offlineMapStyleURL] as String?,
+      offlineMapLayerName: json[FeatureConstants.offlineMapLayerName] as String?,
+      forceOfflineMap: json[FeatureConstants.forceOfflineMap] as bool? ?? false,
     );
   }
 
@@ -233,9 +240,16 @@ class MapLayer {
       FeatureConstants.mapLogoLink: logoLink,
       FeatureConstants.mapTextLink: textLink,
       FeatureConstants.mapLayerLink: layerLink,
+      FeatureConstants.forceOfflineMap: forceOfflineMap,
     };
     if (offlineMapPackageURL != null) {
       data[FeatureConstants.offlineMapPackageURL] = offlineMapPackageURL!;
+    }
+    if (offlineMapStyleURL != null) {
+      data[FeatureConstants.offlineMapStyleURL] = offlineMapStyleURL!;
+    }
+    if (offlineMapLayerName != null) {
+      data[FeatureConstants.offlineMapLayerName] = offlineMapLayerName!;
     }
     return data;
   }
@@ -268,7 +282,6 @@ class MapLocation {
 
 /// Feature for maps with extra fields.
 class MapFeature extends Feature {
-
   static const MapLocation defaultLocation = MapLocation(lat: 49.1038023, lng: 17.3947819);
   MapLayer? mapLayer = MapLayer();
   double defaultMapZoom;
@@ -281,11 +294,11 @@ class MapFeature extends Feature {
     super.description,
     this.mapLayer,
     this.defaultMapZoom = 17.0,
-    this.defaultMapLocation = MapFeature.defaultLocation,
+    this.defaultMapLocation = defaultLocation,
   });
 
   factory MapFeature.getDefault() {
-      return MapFeature(mapLayer: MapLayer());
+    return MapFeature(mapLayer: MapLayer());
   }
 
   factory MapFeature.fromJson(Map<String, dynamic> json) {

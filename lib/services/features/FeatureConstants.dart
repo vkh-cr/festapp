@@ -38,6 +38,9 @@ class FeatureConstants {
   static const String defaultMapZoom = "defaultMapZoom";
   static const String defaultMapLocation = "defaultMapLocation";
   static const String offlineMapPackageURL = "offlineMapPackageURL";
+  static const String offlineMapStyleURL = "offlineMapStyleURL";
+  static const String offlineMapLayerName = "offlineMapLayerName"; // Newly added
+  static const String forceOfflineMap = "forceOfflineMap"; // New constant
 
   // MapLayer inner keys
   static const String mapLogo = "logo";
