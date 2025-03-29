@@ -15,38 +15,54 @@ class FeatureService {
   /// Returns a default list of features.
   static List<Feature> getDefaultFeatures() {
     return [
-      Feature(code: FeatureConstants.form, isEnabled: false),
-      Feature(
+      // Use FormFeature for the form feature.
+      FormFeature(code: FeatureConstants.form, isEnabled: false),
+      // Use TicketFeature for ticket-specific properties.
+      TicketFeature(
         code: FeatureConstants.ticket,
         isEnabled: false,
         ticketLightColor: 'FFFFFF',
         ticketDarkColor: '000000',
         ticketBackground: '',
       ),
-      Feature(code: FeatureConstants.blueprint, isEnabled: false),
-      Feature(code: FeatureConstants.songbook, isEnabled: false),
-      Feature(code: FeatureConstants.game, isEnabled: false),
-      Feature(code: FeatureConstants.mySchedule, isEnabled: false),
-      Feature(code: FeatureConstants.services, isEnabled: false),
-      Feature(code: FeatureConstants.userGroups, isEnabled: false),
-      Feature(code: FeatureConstants.entryCode, isEnabled: false),
-      Feature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
+      // Use SimpleFeature for features with no extra properties.
+      SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
+      MapFeature(code: FeatureConstants.map, isEnabled: true),
+      SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.game, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.mySchedule, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.services, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
+      // Use CompanionsFeature for companion-related properties.
+      CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
     ];
   }
 
-
+  /// Retrieves a feature based on its [featureCode].
   static Feature? getFeatureDetails(String featureCode, {List<Feature>? features}) {
     if (RightsService.currentOccasion == null) return null;
     var featuresList = features ?? RightsService.currentOccasion?.features;
-    if(featuresList == null){
+    if (featuresList == null) {
       return null;
     }
     return featuresList.firstWhereOrNull((feature) => feature.code == featureCode);
   }
 
+  static dynamic getDefaultLocation() {
+    final mapFeature = getFeatureDetails(FeatureConstants.map);
+    if (mapFeature is MapFeature) {
+      return {"lat": mapFeature.defaultMapLocation.lat, "lng": mapFeature.defaultMapLocation.lng };
+    }
+    return {"lat": MapFeature.defaultLocation.lat, "lng": MapFeature.defaultLocation.lng };
+  }
+
   /// Returns the maximum number of companions allowed.
   static int? getMaxCompanions() {
     final companionFeature = getFeatureDetails(FeatureConstants.companions);
-    return companionFeature?.companionsMax;
+    if (companionFeature is CompanionsFeature) {
+      return companionFeature.companionsMax;
+    }
+    return null;
   }
 }

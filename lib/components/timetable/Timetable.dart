@@ -24,9 +24,11 @@ class Timetable extends StatefulWidget {
     super.key,
     required this.items,
     required this.timetablePlaces,
+    this.occasionEnd,
     this.controller
   });
 
+  final DateTime? occasionEnd;
   final List<TimeBlockItem> items;
   final List<TimeBlockPlace> timetablePlaces;
 
@@ -343,11 +345,13 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   Widget buildTimeNow() {
     var now = TimeHelper.now();
     Widget container;
-    if (now.isAfter(endTime!)) {
+    if(widget.occasionEnd != null && now.isAfter(widget.occasionEnd!)) {
+      container = const SizedBox.shrink();
+    } else if (now.isAfter(endTime!)) {
       container = Container(
         width: getTimetableWidth(),
         height: getTimetableHeight(),
-        color: ThemeConfig.blackColor(context).withValues(alpha: 0.2),
+        color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
       container = Container(
