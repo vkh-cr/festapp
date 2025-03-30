@@ -5,11 +5,12 @@ import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/dataServices/AppConfigService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
+import 'package:fstapp/pages/unit/UnitPage.dart';
 import 'package:fstapp/services/LinkModel.dart';
 
 class RouterService {
-  static const LINK = "link";
-  static const LINK_PATH = "/:$LINK";
+  static const link = "link";
+  static const linkPath = "/:$link";
   static String currentOccasionLink = "";
 
   //todo temporary fix
@@ -21,7 +22,7 @@ class RouterService {
 
   static Future<T?> navigateOccasion<T extends Object?>(
       BuildContext context, String path) {
-    return context.router.pushNamed(getCurrentLink() + path);
+    return context.router.pushPath(getCurrentLink() + path);
   }
 
   static Future<T?> changeOnOccasion<T extends Object?>(
@@ -33,7 +34,7 @@ class RouterService {
 
   static Future<T?> navigate<T extends Object?>(BuildContext context, String path) {
     path = fixPath(path);
-    return context.router.pushNamed(path);
+    return context.router.pushPath(path);
   }
 
   static String fixPath(String path) {
@@ -43,15 +44,15 @@ class RouterService {
     return path;
   }
 
-  static void pushReplacementFull<T extends Object?>(
-      BuildContext context, String path) {
+  static Future<void> pushReplacementFull<T extends Object?> (
+      BuildContext context, String path) async {
     path = fixPath(path);
-    context.router.replaceNamed(path);
+    await context.router.replacePath(path);
   }
 
   static void pushReplacementOccasion<T extends Object?>(
       BuildContext context, String path) {
-    context.router.replaceNamed(getCurrentLink() + path);
+    context.router.replacePath(getCurrentLink() + path);
   }
 
   static void popOrHome(BuildContext context) {
@@ -81,11 +82,18 @@ class RouterService {
   }
 
   static void goBack(BuildContext context, [dynamic result]) {
-    context.router.popForced(result);
+    context.router.pop(result);
+  }
+
+  static Future<void> goToUnit(BuildContext context, int? unitId) async {
+    if(unitId == null){
+      goToInitial(context);
+      return;
+    }
+    await context.router.replace(UnitRoute(id: unitId));
   }
 
   static void goToInitial(BuildContext context) {
-    //for now initial is home
     navigateOccasion(context, "");
   }
 
@@ -105,7 +113,8 @@ class RouterService {
   static Future<bool> updateOccasionFromLink(LinkModel link) async {
     bool canContinue = true;
     var checkedObject = await SynchroService.getAppConfig(occasionLink: link.occasionLink, formLink: link.formLink);
-    RightsService.currentOccasionUser = checkedObject.user;
+    RightsService.currentUser = checkedObject.userInfo;
+    RightsService.currentOccasionUser = checkedObject.occasionUser;
     RightsService.currentUnitUser = checkedObject.unitUser;
     RightsService.currentOccasion = checkedObject.occasion;
     RightsService.currentUnit = checkedObject.unit;

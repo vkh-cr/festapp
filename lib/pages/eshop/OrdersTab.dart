@@ -1,11 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridAction.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
@@ -23,63 +24,53 @@ class OrdersTab extends StatefulWidget {
 
 class _OrdersTabState extends State<OrdersTab> {
   String? formLink;
-  Key refreshKey = UniqueKey();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
+      controller = SingleDataGridController<OrderModel>(
+        context: context,
+        loadData: () => DbOrders.getAllOrders(formLink!),
+        fromPlutoJson: OrderModel.fromPlutoJson,
+        firstColumnType: RightsService.isUnitManager()
+            ? DataGridFirstColumn.deleteAndCheck
+            : DataGridFirstColumn.check,
+        idColumn: TbEshop.orders.id,
+        actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+          isAddActionPossible: () => false,
+        ),
+        headerChildren: [
+          DataGridAction(
+            name: "Cancel".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => cancelOrders(singleDataGrid),
+            isEnabled: RightsService.isEditor,
+          ),
+          DataGridAction(
+            name: "Synchronize payments".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => synchronizePayments(),
+            isEnabled: RightsService.isEditor,
+          ),
+          DataGridAction(
+            name: "Send tickets".tr(),
+            action: (SingleDataGridController singleDataGrid, [_]) => sendTickets(singleDataGrid),
+            isEnabled: RightsService.isEditor,
+          ),
+        ],
+        columns: EshopColumns.generateColumns(context, columnIdentifiers, data: { EshopColumns.ORDER_TRANSACTIONS: refreshData },),
+      );
     }
   }
 
   Future<void> refreshData() async {
-    if (mounted) {
-      setState(() {
-        refreshKey = UniqueKey(); // Properly trigger a rebuild
-      });
-    }
+    await controller!.reloadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-        key: refreshKey,
-        child: SingleTableDataGrid<OrderModel>(
-          SingleDataGridController<OrderModel>(
-            context: context,
-            loadData: () => DbOrders.getAllOrders(formLink!),
-            fromPlutoJson: OrderModel.fromPlutoJson,
-            firstColumnType: RightsService.isUnitManager()
-                ? DataGridFirstColumn.deleteAndCheck
-                : DataGridFirstColumn.check,
-            idColumn: TbEshop.orders.id,
-            actionsExtended: DataGridActionsController(
-              areAllActionsEnabled: RightsService.canUpdateUsers,
-              isAddActionPossible: () => false,
-            ),
-            headerChildren: [
-              DataGridAction(
-                name: "Cancel".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => cancelOrders(dataGrid),
-                isEnabled: RightsService.isEditor,
-              ),
-              DataGridAction(
-                name: "Synchronize payments".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => synchronizePayments(),
-                isEnabled: RightsService.isEditor,
-              ),
-              DataGridAction(
-                name: "Send tickets".tr(),
-                action: (SingleDataGridController dataGrid, [_]) => sendTickets(dataGrid),
-                isEnabled: RightsService.isEditor,
-              ),
-            ],
-            columns: EshopColumns.generateColumns(context, columnIdentifiers),
-          ),
-        ).DataGrid()
-
-    );
+    return SingleTableDataGrid<OrderModel>(controller!);
   }
 
   Future<void> synchronizePayments() async {
@@ -87,8 +78,8 @@ class _OrdersTabState extends State<OrdersTab> {
     refreshData();
   }
 
-  Future<void> cancelOrders(SingleDataGridController dataGrid) async {
-    var selected = _getChecked(dataGrid);
+  Future<void> cancelOrders(SingleDataGridController singleDataGrid) async {
+    var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
     }
@@ -118,8 +109,8 @@ class _OrdersTabState extends State<OrdersTab> {
     }
   }
 
-  Future<void> sendTickets(SingleDataGridController dataGrid) async {
-    var selected = _getChecked(dataGrid);
+  Future<void> sendTickets(SingleDataGridController singleDataGrid) async {
+    var selected = _getChecked(singleDataGrid);
     if (selected.isEmpty) {
       return;
     }
@@ -139,7 +130,7 @@ class _OrdersTabState extends State<OrdersTab> {
           "${"Do you want to change orders to paid?".tr()} (${stateChange.length})"
       );
 
-      if (confirm && mounted) {
+      if (confirm) {
         var futures = stateChange.map((s) {
           return () async {
             await DbOrders.updateOrderAndTicketsToPaid(s.id!);
@@ -163,7 +154,7 @@ class _OrdersTabState extends State<OrdersTab> {
         "${"Do you want to send the tickets to orders?".tr()} (${selected.length})"
     );
 
-    if (confirm && mounted) {
+    if (confirm) {
       var futures = selectedFull.map((s) {
         return () async {
           await sendTicketsToEmail(s);
@@ -187,9 +178,9 @@ class _OrdersTabState extends State<OrdersTab> {
     );
   }
 
-  List<OrderModel> _getChecked(SingleDataGridController dataGrid) {
+  List<OrderModel> _getChecked(SingleDataGridController singleDataGrid) {
     return List<OrderModel>.from(
-      dataGrid.stateManager.refRows.originalList
+      singleDataGrid.stateManager.refRows.originalList
           .where((row) => row.checked == true)
           .map((row) => OrderModel.fromPlutoJson(row.toJson())),
     );
@@ -200,8 +191,9 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_SYMBOL,
     EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_EMAIL,
-    if(!FeatureService.isFeatureEnabled(FeatureService.ticket))
+    if(!FeatureService.isFeatureEnabled(FeatureConstants.ticket))
     EshopColumns.TICKET_PRODUCTS,
+    EshopColumns.ORDER_CREATED_AT,
     EshopColumns.ORDER_STATE,
     EshopColumns.ORDER_PRICE,
     EshopColumns.PAYMENT_INFO_PAID,
@@ -213,4 +205,6 @@ class _OrdersTabState extends State<OrdersTab> {
     EshopColumns.ORDER_TRANSACTIONS,
     EshopColumns.ORDER_HISTORY,
   ];
+
+  SingleDataGridController<OrderModel>? controller;
 }

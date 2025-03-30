@@ -1,7 +1,9 @@
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
+import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
@@ -10,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
   static final _supabase = Supabase.instance.client;
+  static UserInfoModel? currentUser;
   static OccasionUserModel? currentOccasionUser;
   static OccasionUserModel? currentUnitUser;
   static int? currentOccasionId;
@@ -17,6 +20,8 @@ class RightsService{
   static UnitModel? currentUnit;
 
   static String? currentLink;
+  static bool useOfflineVersion = false;
+
   static bool? isAdminField;
   static List<int>? bankAccountAdmin;
 
@@ -38,11 +43,13 @@ class RightsService{
         throw Exception("Cannot continue.");
       }
 
-      RouterService.currentOccasionLink = currentLink!;
+      RouterService.currentOccasionLink = currentLink??"";
       var globalSettings = await SynchroService.loadOrInitOccasionSettings();
       await OfflineDataService.saveGlobalSettings(globalSettings);
 
-      SynchroService.refreshOfflineData();
+      if(RightsService.currentOccasion?.id != null){
+        SynchroService.refreshOfflineData();
+      }
     }
     return true;
   }

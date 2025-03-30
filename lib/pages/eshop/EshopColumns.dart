@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/widgets/TransactionsDialog.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
@@ -43,6 +43,7 @@ class EshopColumns {
   static const String ORDER_SYMBOL = "orderSymbol";
   static const String ORDER_DATA = "orderData";
   static const String ORDER_EMAIL = "orderEmail";
+  static const String ORDER_CREATED_AT = "orderCreatedAt";
   static const String ORDER_DATA_NOTE = "orderDataNote";
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
@@ -84,7 +85,7 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         width: 120,
         textAlign: PlutoColumnTextAlign.center,
       ),
@@ -193,9 +194,9 @@ class EshopColumns {
         type: PlutoColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.dataGridStateToColor, OrderModel.statesDataGridToUpper),
+        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         textAlign: PlutoColumnTextAlign.center,
-        width: 120,
+        width: 140,
       ),
     ],
     ORDER_DATA: [
@@ -216,6 +217,17 @@ class EshopColumns {
         field: TbEshop.orders.data_email,
         type: PlutoColumnType.text(),
         width: 140,
+      ),
+    ],
+    ORDER_CREATED_AT: [
+      PlutoColumn(
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Created".tr(),
+        field: TbEshop.orders.created_at,
+        type: PlutoColumnType.text(),
+        textAlign: PlutoColumnTextAlign.end,
+        width: 100,
       ),
     ],
     ORDER_DATA_NOTE: [
@@ -263,7 +275,7 @@ class EshopColumns {
         },
       ),
     ],
-    ORDER_TRANSACTIONS: [
+    ORDER_TRANSACTIONS: (Map<String, dynamic> data) => [
       PlutoColumn(
         enableAutoEditing: false,
         title: "Transactions".tr(),
@@ -275,6 +287,10 @@ class EshopColumns {
             onPressed: () async {
               var id = rendererContext.row.cells[TbEshop.orders.id]!.value;
               await _showOrderTransactions(context, id);
+              var transactionsAfterFunction = data[ORDER_TRANSACTIONS];
+              if(transactionsAfterFunction is Future<void> Function()?) {
+                transactionsAfterFunction?.call();
+              }
             },
             child: Row(
               children: [
@@ -399,7 +415,7 @@ class EshopColumns {
       field: field,
       type: PlutoColumnType.text(),
       textAlign: PlutoColumnTextAlign.end,
-      width: 100,
+      width: 150,
     );
   }
 

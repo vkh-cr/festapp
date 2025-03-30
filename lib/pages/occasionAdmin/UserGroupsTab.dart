@@ -2,9 +2,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
@@ -14,6 +14,7 @@ import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class UserGroupsTab extends StatefulWidget {
@@ -25,6 +26,7 @@ class UserGroupsTab extends StatefulWidget {
 
 class _UserGroupsTabState extends State<UserGroupsTab> {
   List<UserInfoModel> _allUsers = [];
+  SingleDataGridController<UserGroupInfoModel>? controller;
 
   @override
   void initState() {
@@ -38,9 +40,9 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<UserGroupInfoModel>(
-      SingleDataGridController<UserGroupInfoModel>(
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<UserGroupInfoModel>(
         context: context,
         loadData: DbGroups.getAllUserGroupInfo,
         fromPlutoJson: UserGroupInfoModel.fromPlutoJson,
@@ -230,16 +232,14 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                   var title = rendererContext.row
                       .cells[Tb.user_group_info.title]?.value;
                   var placeModel = rendererContext.row
-                      .cells[Tb.user_group_info.place]?.value
-                  as PlaceModel?;
+                      .cells[Tb.user_group_info.place]?.value as PlaceModel?;
                   placeModel ??= PlaceModel(
                     id: null,
                     title: title,
                     description: "",
                     type: "group",
                     isHidden: true,
-                    latLng: SynchroService
-                        .globalSettingsModel!.defaultMapLocation,
+                    latLng: FeatureService.getDefaultLocation()
                   );
                   RouterService.navigatePageInfo(
                     context,
@@ -268,7 +268,11 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
             },
           ),
         ],
-      ),
-    ).DataGrid();
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<UserGroupInfoModel>(controller!);
   }
 }

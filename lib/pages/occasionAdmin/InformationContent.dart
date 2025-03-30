@@ -1,20 +1,27 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
-class InformationContent extends StatelessWidget {
-  const InformationContent({Key? key}) : super(key: key);
+class InformationContent extends StatefulWidget {
+  const InformationContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<InformationModel>(
-      SingleDataGridController<InformationModel>(
+  _InformationContentState createState() => _InformationContentState();
+}
+
+class _InformationContentState extends State<InformationContent> {
+  SingleDataGridController<InformationModel>? controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<InformationModel>(
         context: context,
         loadData: DbInformation.getAllInformationForDataGrid,
         fromPlutoJson: InformationModel.fromPlutoJson,
@@ -38,8 +45,8 @@ class InformationContent extends StatelessWidget {
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, Tb.information.is_hidden),
           ),
           PlutoColumn(
             title: "Title".tr(),
@@ -59,7 +66,8 @@ class InformationContent extends StatelessWidget {
                 loadContent: () async {
                   var id = rendererContext.row.cells[Tb.information.id]!.value;
                   if (id != null) {
-                    var infoDescription = await DbInformation.getInfosDescription([id]);
+                    var infoDescription =
+                    await DbInformation.getInfosDescription([id]);
                     if (infoDescription.isNotEmpty) {
                       return infoDescription[0].description;
                     }
@@ -82,7 +90,11 @@ class InformationContent extends StatelessWidget {
             type: PlutoColumnType.text(),
           ),
         ],
-      ),
-    ).DataGrid();
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<InformationModel>(controller!);
   }
 }

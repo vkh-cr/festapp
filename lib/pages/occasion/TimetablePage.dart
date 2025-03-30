@@ -9,6 +9,9 @@ import 'package:fstapp/dataServices/DataExtensions.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/MySchedulePage.dart';
 import 'package:fstapp/services/TimeHelper.dart';
@@ -171,6 +174,7 @@ class _TimetablePageState extends State<TimetablePage>
             }),
           ),
           actions: [
+            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
             Padding(
               padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
               child: TextButton(
@@ -199,7 +203,8 @@ class _TimetablePageState extends State<TimetablePage>
         body: _days.isEmpty || _events.isEmpty ? SizedBox.shrink() : Timetable(
             controller: timetableController,
             items: _days[_currentIndex??0].events,
-            timetablePlaces: _timetablePlaces));
+            timetablePlaces: _timetablePlaces,
+            occasionEnd: RightsService.currentOccasion!.endTime,));
   }
 
   final List<EventModel> _events = [];

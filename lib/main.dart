@@ -92,6 +92,7 @@ Future<void> initializeEverything() async {
     print('Occasion loaded');
   } catch (e) {
     print('Occasion loading failed: $e');
+    RightsService.useOfflineVersion = true;
   }
 
   print('Notification helper initializing');

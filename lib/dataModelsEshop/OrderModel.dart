@@ -1,13 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:intl/intl.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
@@ -31,16 +31,18 @@ class OrderModel extends IPlutoRowModel {
   List<ProductModel>? relatedProducts;
   PaymentInfoModel? paymentInfoModel;
 
+  static const String expiredState = "expired";
   static const String orderedState = "ordered";
   static const String paidState = "paid";
   static const String sentState = "sent";
   static const String usedState = "used";
   static const String stornoState = "storno";
-  static const orderStates = [orderedState, paidState, sentState, usedState, stornoState];
+  static const orderStates = [expiredState, orderedState, paidState, sentState, usedState, stornoState];
 
   static String stateToLocale(String state) {
     switch (state) {
       case orderedState:
+      case expiredState:
         return 'Ordered'.tr();
       case paidState:
         return 'Paid'.tr();
@@ -68,10 +70,13 @@ class OrderModel extends IPlutoRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  static Color dataGridStateToColor(String state) {
+  bool isExpired() => (state == orderedState && paymentInfoModel != null && paymentInfoModel!.deadline != null ? paymentInfoModel!.deadline!.isBefore(TimeHelper.now()) : false);
+
+  static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
     switch (firstPart) {
+      case expiredState:
       case orderedState:
         color = Colors.green[100]!; // Blue for ordered
         break;
@@ -169,6 +174,10 @@ class OrderModel extends IPlutoRowModel {
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
             : "",
       ),
+      TbEshop.orders.created_at: PlutoCell(
+          value: createdAt != null
+              ? DateFormat('yyyy-MM-dd').format(createdAt!)
+              : ""),
       TbEshop.orders.data: PlutoCell(value: toCustomerData()),
       TbEshop.orders.data_email: PlutoCell(value: data?[TbEshop.orders.data_email]),
       TicketModel.metaTicketsProducts: PlutoCell(

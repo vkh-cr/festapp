@@ -1,5 +1,5 @@
 import 'package:fstapp/AppRouter.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 
 class LinkModel {
   String? formLink;
