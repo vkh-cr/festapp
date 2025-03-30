@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/occasionAdmin/AdminPage.dart';
 import 'package:fstapp/pages/unit/OccasionSettingPage.dart';
 import 'package:fstapp/services/OccasionCreationHelper.dart';
@@ -14,6 +14,7 @@ import 'package:fstapp/services/ResponsiveService.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
+import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/OccasionEditCard.dart';
 
@@ -53,22 +54,12 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   /// Opens the settings dialog for the given occasion.
   Future<void> _openSettingsDialog(OccasionModel occasion) async {
-    await showDialog(
+    await DialogHelper.showCustomDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          insetPadding: const EdgeInsets.all(16.0),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: ResponsiveService.isDesktop(context) ? 600 : double.infinity,
-            ),
-            padding: const EdgeInsets.all(16.0),
-            child: OccasionSettingsPage(occasion: occasion),
-          ),
-        );
-      },
+      child: OccasionSettingsPage(occasion: occasion),
     );
   }
+
 
   /// Handles viewing an occasion.
   Future<void> _handleView(OccasionModel occasion) async {
@@ -169,7 +160,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -212,7 +203,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {
@@ -254,7 +245,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
                         : 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: kCardWidth / kCardHeight,
+                    childAspectRatio: OccasionCard.kCardWidth / OccasionCard.kCardHeight,
                   ),
                   delegate: SliverChildBuilderDelegate(
                         (context, index) {

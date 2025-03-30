@@ -10,7 +10,7 @@ import 'package:fstapp/pages/user/LoginPage.dart';
 import 'package:fstapp/pages/user/SignupPasswordPage.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/pages/occasion/InfoPage.dart';
-import 'package:fstapp/pages/occasion/InstallPage.dart';
+import 'package:fstapp/pages/utility/InstallPage.dart';
 import 'package:fstapp/pages/occasion/MapPage.dart';
 import 'package:fstapp/pages/occasion/NewsFormPage.dart';
 import 'package:fstapp/pages/occasion/NewsPage.dart';
@@ -22,7 +22,8 @@ import 'package:fstapp/pages/user/SignupPage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/pages/occasion/TimetablePage.dart';
 import 'package:fstapp/pages/occasion/UserPage.dart';
-import 'package:fstapp/pages/form/FormPage.dart';
+import 'package:fstapp/pages/form/pages/form_page.dart';
+import 'package:fstapp/pages/utility/InstanceInstallPage.dart';
 
 import 'AppRouter.gr.dart';
 import 'pages/occasion/GamePage.dart';
@@ -30,6 +31,7 @@ import 'pages/occasion/GamePage.dart';
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
 class AppRouter extends RootStackRouter {
   static const String LINK = "occasionLink";
+  static const String linkFormatted = "{$LINK}";
 
   @override
   RouteType get defaultRouteType => const RouteType.material();
@@ -42,25 +44,26 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: SignupRoute.page, path: sl(SignupPage.ROUTE)),
     AutoRoute(page: SettingsRoute.page, path: sl(SettingsPage.ROUTE)),
     AutoRoute(page: InstallRoute.page, path: sl(InstallPage.ROUTE)),
-    AutoRoute(page: UnitAdminRoute.page, path: "/unit/:id/edit"),
+    AutoRoute(page: InstanceInstallRoute.page, path: sl(InstanceInstallPage.ROUTE)),
+    AutoRoute(page: UnitAdminRoute.page, path: "/${UnitPage.ROUTE}/:id/edit"),
     AutoRoute(page: UnitRoute.page, path: "/${UnitPage.ROUTE}/:id"),
     AutoRoute(page: ScanRoute.page, path: "/${ScanPage.ROUTE}", children: [
       AutoRoute(path: ':scanCode', page: ScanRoute.page,),
     ]),
     AutoRoute(page: FormRoute.page, path: "/${FormPage.ROUTE}/:formLink"),
     AutoRoute(page: FormEditRoute.page, path: "/${FormPage.ROUTE}/:formLink/edit"),
-    AutoRoute(page: CheckRoute.page, path: "/:{$LINK}/${CheckPage.ROUTE}/:id"),
-    AutoRoute(page: NewsFormRoute.page, path: "/:{$LINK}/${NewsFormPage.ROUTE}"),
-    AutoRoute(page: HtmlEditorRoute.page, path: "/:{$LINK}/${HtmlEditorPage.ROUTE}"),
-    AutoRoute(page: AdminRoute.page, path: "/:{$LINK}/${AdminPage.ROUTE}"),
-    AutoRoute(page: MyScheduleRoute.page, path: "/:{$LINK}/${MySchedulePage.ROUTE}"),
-    AutoRoute(page: TimetableRoute.page, path: "/:{$LINK}/${TimetablePage.ROUTE}"),
-    AutoRoute(page: GameRoute.page, path: "/:{$LINK}/${GamePage.ROUTE}"),
-    AutoRoute(page: SongbookRoute.page, path: "/:{$LINK}/${SongbookPage.ROUTE}"),
-    AutoRoute(page: EventEditRoute.page, path: "/:{$LINK}/${EventEditPage.ROUTE}", children: [
+    AutoRoute(page: CheckRoute.page, path: "/:$linkFormatted/${CheckPage.ROUTE}/:id"),
+    AutoRoute(page: NewsFormRoute.page, path: "/:$linkFormatted/${NewsFormPage.ROUTE}"),
+    AutoRoute(page: HtmlEditorRoute.page, path: "/:$linkFormatted/${HtmlEditorPage.ROUTE}"),
+    AutoRoute(page: AdminRoute.page, path: "/:$linkFormatted/${AdminPage.ROUTE}"),
+    AutoRoute(page: MyScheduleRoute.page, path: "/:$linkFormatted/${MySchedulePage.ROUTE}"),
+    AutoRoute(page: TimetableRoute.page, path: "/:$linkFormatted/${TimetablePage.ROUTE}"),
+    AutoRoute(page: GameRoute.page, path: "/:$linkFormatted/${GamePage.ROUTE}"),
+    AutoRoute(page: SongbookRoute.page, path: "/:$linkFormatted/${SongbookPage.ROUTE}"),
+    AutoRoute(page: EventEditRoute.page, path: "/:$linkFormatted/${EventEditPage.ROUTE}", children: [
       AutoRoute(path: ':id', page: EventEditRoute.page,),
     ]),
-    AutoRoute(page: OccasionHomeRoute.page, path: "/:{$LINK}", children: [
+    AutoRoute(page: OccasionHomeRoute.page, path: "/:$linkFormatted", children: [
       AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
                   AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
@@ -77,8 +80,20 @@ class AppRouter extends RootStackRouter {
         ),
       ]),
     ]),
-    RedirectRoute(path: '*', redirectTo: "/${RightsService.currentLink}"),
+
+    RedirectRoute(path: '*', redirectTo: getDefaultLink()),
   ];
+
+  static String getDefaultLink() {
+
+    if(RightsService.useOfflineVersion){
+      return "/${RightsService.currentLink}";
+    }
+    if(RightsService.currentLink != null){
+      return "/${RightsService.currentLink}";
+    }
+    return "/${UnitPage.ROUTE}/${RightsService.currentUnit?.id??1}";
+  }
 
   static void Function()? regenerateRoutes;
 

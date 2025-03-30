@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/DataGridHelper.dart';
-import 'package:fstapp/components/dataGrid/SingleDataGridController.dart';
-import 'package:fstapp/components/dataGrid/SingleTableDataGrid.dart';
+import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
+import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
@@ -16,6 +16,8 @@ class ExclusivityContent extends StatefulWidget {
 }
 
 class _ExclusivityContentState extends State<ExclusivityContent> {
+  SingleDataGridController<ExclusiveGroupModel>? controller;
+
   @override
   void initState() {
     super.initState();
@@ -28,9 +30,9 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<ExclusiveGroupModel>(
-      SingleDataGridController<ExclusiveGroupModel>(
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<ExclusiveGroupModel>(
         context: context,
         loadData: DbEvents.getAllExclusiveGroups,
         fromPlutoJson: ExclusiveGroupModel.fromPlutoJson,
@@ -61,7 +63,11 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
             width: 500,
           ),
         ],
-      ),
-    ).DataGrid();
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<ExclusiveGroupModel>(controller!);
   }
 }

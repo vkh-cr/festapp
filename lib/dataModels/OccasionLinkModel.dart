@@ -1,12 +1,14 @@
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/OccasionUserModel.dart';
 import 'package:fstapp/dataModels/UnitModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 
 class OccasionLinkModel {
   int? code;
   OccasionModel? occasion;
   UnitModel? unit;
-  OccasionUserModel? user;
+  UserInfoModel? userInfo;
+  OccasionUserModel? occasionUser;
   OccasionUserModel? unitUser;
   List<int>? bankAccountsAdmin;
   bool? isAdmin = false;
@@ -19,10 +21,12 @@ class OccasionLinkModel {
   factory OccasionLinkModel.fromJson(Map<String, dynamic> json) {
     var unitUser = json["unit_user"] != null ? OccasionUserModel.fromJson(json["unit_user"]) : null;
     var occasionUser = json["occasion_user"] != null ? OccasionUserModel.fromJson(json["occasion_user"]) : null;
+    var userInfo = json["user_info"] != null ? UserInfoModel.fromJson(json["user_info"]) : null;
     return OccasionLinkModel(
       code: json["code"],
+      userInfo: userInfo,
       unitUser: unitUser,
-      user: occasionUser,
+      occasionUser: occasionUser,
       bankAccountsAdmin: List<int>.from(json["bank_accounts_admin"]??[]),
       occasion: json["occasion"] != null ? OccasionModel.fromJson(json["occasion"]) : null,
       unit: json["unit"] != null ? UnitModel.fromJson(json["unit"]) : null,
@@ -33,7 +37,8 @@ class OccasionLinkModel {
 
   OccasionLinkModel({
     this.code,
-    this.user,
+    this.userInfo,
+    this.occasionUser,
     this.unitUser,
     this.bankAccountsAdmin,
     this.occasion,

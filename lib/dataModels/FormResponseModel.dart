@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/dataGrid/PlutoAbstract.dart';
+import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
+import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/services/FormHelper.dart';
+import 'package:fstapp/dataModelsEshop/TicketModel.dart';
+import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 
 class FormResponseModel extends IPlutoRowModel {
@@ -32,6 +35,10 @@ class FormResponseModel extends IPlutoRowModel {
       TbEshop.orders.id: PlutoCell(value: id),
       TbEshop.orders.order_symbol: PlutoCell(value: order!.id),
       TbEshop.orders.state: PlutoCell(value: order!.state),
+      TicketModel.metaTicketsProducts: PlutoCell(
+          value: order!.relatedProducts != null
+              ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
+              : ""),
     };
 
     for (var f in allFields!) {
@@ -39,8 +46,23 @@ class FormResponseModel extends IPlutoRowModel {
         cells[f.id.toString()] = PlutoCell(value: '');
         continue;
       }
-      var rValue = fields![f.id.toString()];
-      cells[f.id.toString()] = PlutoCell(value: rValue ?? '');
+      if(f.type == FormHelper.fieldTypeSex){
+        cells[f.id.toString()] = PlutoCell(value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
+        continue;
+      }
+      if (f.type == FormHelper.fieldTypeBirthDate) {
+        // Parse the ISO datetime string into a DateTime object.
+        var dt = DateTime.tryParse(fields![f.id.toString()] ?? "");
+
+        // Format the DateTime into a "year-month-day" string.
+        String formattedDate = dt == null ? "" : '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+
+        // Assign the formatted date string to the cell.
+        cells[f.id.toString()] = PlutoCell(value: formattedDate);
+        continue;
+      }
+      var rValue = Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
+      cells[f.id.toString()] = PlutoCell(value: rValue);
     }
 
     return PlutoRow(cells: cells);

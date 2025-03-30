@@ -1,7 +1,10 @@
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
+import 'package:fstapp/services/features/Feature.dart'; // Import the new Feature class
 
 class OccasionModel {
+  static const String occasionsOffline = "occasionsOffline";
+
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -15,9 +18,8 @@ class OccasionModel {
   Map<String, dynamic>? data;
   int? organization;
   int? unit;
-  int? placeId;
   FormModel? form;
-  List<Map<String, dynamic>> features;
+  List<Feature> features;
 
   OccasionModel({
     this.id,
@@ -33,9 +35,8 @@ class OccasionModel {
     this.data,
     this.organization,
     this.unit,
-    this.placeId,
     this.form,
-    List<Map<String, dynamic>>? features,
+    List<Feature>? features,
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
@@ -53,18 +54,19 @@ class OccasionModel {
       endTime: json[Tb.occasions.end_time] != null
           ? DateTime.parse(json[Tb.occasions.end_time])
           : null,
-      isOpen: json[Tb.occasions.is_open],
-      isHidden: json[Tb.occasions.is_hidden],
+      isOpen: json[Tb.occasions.is_open] ?? false,
+      isHidden: json[Tb.occasions.is_hidden] ?? false,
       link: json[Tb.occasions.link],
       title: json[Tb.occasions.title],
       description: json[Tb.occasions.description],
       data: json[Tb.occasions.data] ?? {},
       organization: json[Tb.occasions.organization],
       unit: json[Tb.occasions.unit],
-      placeId: json[Tb.occasions.place],
       form: json["form"] != null ? FormModel.fromJson(json["form"]) : null,
       features: json[Tb.occasions.features] is List
-          ? List<Map<String, dynamic>>.from(json[Tb.occasions.features])
+          ? List<Feature>.from(
+          (json[Tb.occasions.features] as List)
+              .map((featureJson) => Feature.fromJson(featureJson)))
           : [],
     );
   }
@@ -82,7 +84,6 @@ class OccasionModel {
       Tb.occasions.data: data,
       Tb.occasions.organization: organization,
       Tb.occasions.unit: unit,
-      Tb.occasions.place: placeId,
       Tb.occasions.features: features,
     };
   }

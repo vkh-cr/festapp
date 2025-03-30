@@ -23,6 +23,10 @@ class StylesConfig {
   // Dimensions
   static const double appMaxWidth = 820;
   static const double formMaxWidth = 680;
+  static const double formMaxWidthMid = 580;
+
+  static const double kToolbarHeight = 80.0;
+  static const double kHorizontalPadding = 16.0;
 
   static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 

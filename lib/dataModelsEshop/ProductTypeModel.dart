@@ -4,7 +4,7 @@ import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 class ProductTypeModel {
   final int? id;
   String? title;
-  final String? description;
+  String? description;
   final String? type;
   Map<String, dynamic>? data;
   final int? occasion;

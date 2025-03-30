@@ -4,19 +4,17 @@ import { formatCurrency } from "../_shared/utilities.ts";
 export async function getTicketOrderStornoTemplate(reqData: any, authorizationHeader: string) {
   const { orderId } = reqData.data;
 
-console.log(orderId);
-  // Fetch the order data
-  const { data: orderData, error: orderError } = await supabaseAdmin
-    .schema("eshop")
-    .from("orders")
-    .select("occasion, data")
-    .eq("id", orderId)
-    .single();
+  console.log("Order ID:", orderId);
+
+  const { data: orderData, error: orderError } = await supabaseAdmin.rpc(
+    "get_order",
+    { order_id: orderId }
+  );
 
   if (orderError || !orderData) {
-    console.error("Order not found:", orderError);
+    console.error("Order not found or error occurred:", orderError);
     return new Response(JSON.stringify({ error: "Order not found" }), {
-      headers: { "Content-Type": "application/json" },
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 404,
     });
   }
@@ -31,10 +29,7 @@ console.log(orderId);
   const isEditor = await isUserEditor(userId, occasionId);
   if (!isEditor) {
     console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
-    return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 403,
-    });
+    throw new Error("Forbidden: Not an editor");
   }
 
   // Fetch occasion data
@@ -46,55 +41,42 @@ console.log(orderId);
 
   if (occasionError || !occasionData) {
     console.error("Occasion not found:", occasionError);
-    return new Response(JSON.stringify({ error: "Occasion not found" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 404,
-    });
+    throw new Error("Occasion not found");
   }
 
-  const { data: orderHistory, error: historyError } = await supabaseAdmin
-    .schema("eshop")
-    .from("orders_history")
-    .select("price, currency_code")
-    .eq("\"order\"", orderId)
-    .neq("price", 0) // Filter out records where price is 0
-    .order("created_at", { ascending: false }) // Latest first
-    .limit(1); // Get only the latest one with a non-zero price
+ // Call the RPC function "get_latest_order_history" which returns the latest order history for non-zero price
+ const { data: orderHistory, error: historyError } = await supabaseAdmin.rpc(
+   "get_latest_order_history",
+   { order_id: orderId }
+ );
 
-  if (historyError || !orderHistory || orderHistory.length === 0) {
-    console.error("No valid order history found:", historyError);
-    return new Response(JSON.stringify({ error: "Valid order history not found" }), {
-      headers: { "Content-Type": "application/json" },
-      status: 404,
-    });
-  }
+ if (historyError || !orderHistory) {
+   console.error("No valid order history found:", historyError);
+   throw new Error("Valid order history not found");
+ }
 
-  const { price, currency_code } = orderHistory[0];
+ // Assuming the function returns a row with price and currency_code directly
+ const { price, currency_code } = orderHistory;
 
-  // Fetch the email template
-  const templateData = await supabaseAdmin
-    .from("email_templates")
-    .select()
-    .eq("code", reqData.templateCode)
-    .eq("organization", occasionData.organization)
-    .eq("occasion", occasionId)
-    .single();
+  console.log(orderHistory);
+  console.log(price);
 
-  if (templateData.error || !templateData.data) {
-    console.error("Template not found for the specified organization.");
-    throw new Error("Template not found");
-  }
 
   // Prepare substitutions with price and currency code
-  let subs: Record<string, string> = {};
-  subs = {
+  const subs: Record<string, string> = {
     occasionTitle: occasionData.title,
-    amount: formatCurrency(price, currency_code), // Use the fetched price and currency_code
+    amount: formatCurrency(price, currency_code),
   };
 
   // Add sender and receiver information
   const sender = occasionData.title;
   const receiver = orderData.data.email;
 
-  return { templateData: templateData.data, subs, sender, receiver };
+  // Build a context object for template selection.
+  const context = {
+    occasion: occasionId,
+    organization: occasionData.organization,
+  };
+
+  return { subs, sender, receiver, context };
 }

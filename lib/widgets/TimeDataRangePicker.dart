@@ -95,7 +95,7 @@ class TimeDateRangePicker extends StatelessWidget {
                       ),
                     ),
                     controller: TextEditingController(
-                      text: start != null ? DateFormat.yMd().format(start!) : "",
+                      text: start != null ? DateFormat.yMd(context.locale.toString()).format(start!) : "",
                     ),
                     onTap: () async {
                       final pickedDate = await showDatePicker(
@@ -185,7 +185,7 @@ class TimeDateRangePicker extends StatelessWidget {
                       ),
                     ),
                     controller: TextEditingController(
-                      text: end != null ? DateFormat.yMd().format(end!) : "",
+                      text: end != null ? DateFormat.yMd(context.locale.toString()).format(end!) : "",
                     ),
                     onTap: () async {
                       final pickedDate = await showDatePicker(

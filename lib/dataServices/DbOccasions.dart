@@ -5,7 +5,9 @@ import 'package:fstapp/dataModels/ServiceItemModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/featureService.dart';
+import 'package:fstapp/services/features/Feature.dart';
+import 'package:fstapp/services/features/FeatureConstants.dart';
+import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOccasions {
@@ -130,12 +132,12 @@ class DbOccasions {
 
     var occasion = await getOccasion(ocId);
 
-    var ticketDetails = FeatureService.getFeatureDetails(FeatureService.ticket, fromFeatures: occasion.features);
-    if(ticketDetails != null && ticketDetails[FeatureService.ticketBackground].isNotEmpty)
-    {
-      var cpy = await DbImages.createCopyOfImage(ticketDetails[FeatureService.ticketBackground], ocId, unit);
-      ticketDetails[FeatureService.ticketBackground] = cpy;
+    var ticketDetails = FeatureService.getFeatureDetails(FeatureConstants.ticket, features: occasion.features);
+    if (ticketDetails is TicketFeature && ticketDetails.ticketBackground != null && ticketDetails.ticketBackground!.isNotEmpty) {
+      var cpy = await DbImages.createCopyOfImage(ticketDetails.ticketBackground!, ocId, unit);
+      ticketDetails.ticketBackground = cpy;
     }
+
 
     var ocImage = occasion.data?["image"];
     if(ocImage != null)

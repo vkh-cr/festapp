@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
 import 'package:fstapp/appConfig.dart';
+import 'package:fstapp/services/LaunchUrlService.dart';
 import 'package:fstapp/services/PlatformHelper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AppConfigService {
   static String? versionRecommended;
@@ -59,17 +59,11 @@ class AppConfigService {
 
   static void _redirectToUpdate() {
     if (PlatformHelper.isWeb) {
-      _launchURL(AppConfig.webLink);
+      LaunchUrlService.launchURL(AppConfig.webLink, true);
     } else if (PlatformHelper.isAndroid) {
-      _launchURL(AppConfig.playStoreLaunchLink);
+      LaunchUrlService.launchURL(AppConfig.playStoreLaunchLink, true);
     } else if (PlatformHelper.isIOS) {
-      _launchURL(AppConfig.appStoreLink);
-    }
-  }
-
-  static Future<void> _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication, webOnlyWindowName: "_self");
+      LaunchUrlService.launchURL(AppConfig.appStoreLink, true);
     }
   }
 }

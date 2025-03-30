@@ -46,6 +46,7 @@ class HtmlView extends StatefulWidget {
     required this.html,
     this.fontSize = 18,
     this.isSelectable = false,
+    this.color
   }) : super(key: key);
 
   @override
@@ -76,6 +77,12 @@ class _HtmlViewState extends State<HtmlView> {
         if (tagName == 'a') {
           return {
             'color': aColor,
+          };
+        }
+        // quill specific fix
+        else if (tagName == 'li' && element.attributes['data-list'] == 'bullet') {
+          return {
+            'list-style-type': 'disc',
           };
         }
         return null;

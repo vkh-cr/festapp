@@ -8,7 +8,7 @@ const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL") || "";
 /**
  * Sanitize HTML to avoid Gmail-specific issues
  */
-export function sanitizeHtml(html) {
+export function sanitizeHtml(html: string) {
   return html.replace(/(\r\n|\n|\r)/gm, "").replace(/ {2,}/g, " ").trim();
 }
 
@@ -16,7 +16,7 @@ export function sanitizeHtml(html) {
  * Create a reusable transporter object using SMTP transport.
  *
  * Note: This may fail at runtime in Deno Edge Functions because
- * Nodemailer depends on Node APIs. See the note above.
+ * Nodemailer depends on Node APIs.
  */
 const transporter = nodemailer.createTransport({
   host: _SMTP_HOSTNAME,
@@ -34,6 +34,17 @@ export async function sendEmail({
   html,
   attachments = [],
   from = _DEFAULT_EMAIL,
+}: {
+  to: string;
+  subject: string;
+  html: string;
+  attachments?: Array<{
+    filename: string;
+    content: any;
+    contentType: string;
+    encoding: string;
+  }>;
+  from?: string;
 }) {
   try {
     await transporter.sendMail({
@@ -61,8 +72,22 @@ export async function sendEmailWithSubs({
   subs,
   attachments = [],
   from = _DEFAULT_EMAIL,
+  wrapper = null,
+}: {
+  to: string;
+  subject: string;
+  content: string;
+  subs: Record<string, string>;
+  attachments?: Array<{
+    filename: string;
+    content: any;
+    contentType: string;
+    encoding: string;
+  }>;
+  from?: string;
+  wrapper?: string | null;
 }) {
-  // Replace placeholders in content with values from subs
+  // Replace placeholders in subject and content with values from subs
   let processedSubject = subject;
   let processedHtml = content;
 
@@ -72,10 +97,15 @@ export async function sendEmailWithSubs({
     processedSubject = processedSubject.replaceAll(placeholder, value);
   }
 
+  // If a wrapper is provided, inject the processedHtml into the wrapper
+  if (wrapper) {
+    processedHtml = wrapper.replace("{{content}}", processedHtml);
+  }
+
   // Sanitize the processed HTML content
   const sanitizedHtml = sanitizeHtml(processedHtml);
 
-  // Use the sendEmail function to send the processed and sanitized email
+  // Send the email using the processed and sanitized content
   await sendEmail({
     to,
     subject: processedSubject,
