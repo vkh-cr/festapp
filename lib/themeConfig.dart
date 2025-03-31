@@ -44,8 +44,8 @@ class ThemeConfig {
   static Color surfaceColor(BuildContext context) => grey200(context);
   static Color seed1 = const Color(0xFF53707f);
   static Color seed2 = const Color(0xFFf8c04f);
-  static Color seed3 = const Color(0xFFe9dabb);
-  static Color seed4 = const Color(0xFFde703e);
+  static Color seed3 = const Color(0xFFde703e);
+  static Color seed4 = const Color(0xFFe9dabb);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
