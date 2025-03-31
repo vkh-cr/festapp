@@ -115,8 +115,7 @@ flutter:
   fonts:
     - family: Futura
       fonts:
-        - asset: fonts/NimbusSanL-Bol.otf
-        - asset: fonts/NimbusSanL-Reg.otf
+        - asset: fonts/Agrandir-Narrow.ttf
   assets:
     - assets/icons/
     - assets/translations/

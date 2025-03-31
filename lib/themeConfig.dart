@@ -4,7 +4,7 @@ class ThemeConfig {
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
 
   // Base theme to hold common properties
-  static final fontFamily = "NimbusSanL";
+  static final fontFamily = "Agrandir-Narrow";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -16,7 +16,7 @@ class ThemeConfig {
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
-      appBarTheme: AppBarTheme(color: seed2),
+      appBarTheme: AppBarTheme(color: appBarColor()),
       tabBarTheme: TabBarTheme(indicatorColor: lllPrimary)
   );
 
@@ -86,7 +86,7 @@ class ThemeConfig {
   static Color profileButtonColor(BuildContext context) => appBarColor();
   static Color profileButtonTextColor(BuildContext context) => isDarkMode(context) ? darkColor(context) : Colors.grey;
 
-  static Color appBarColor() => seed1.changeColorSaturation(0.4).changeColorLightness(0.10);
+  static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
   static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
