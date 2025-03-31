@@ -532,5 +532,7 @@
   "Offline Map Layer Settings": "Nastavení offline mapových vrstev",
   "Auto-download offline map": "Automaticky stáhnout offline mapy",
   "Offline Map Layer Name": "Název vrstvy offline mapy",
+  "Allows displaying the program in a table.": "Umožní zobrazení programu v tabulce.",
+  "Timetable": "Program v tabulce",
   "_": "_"
 }
