@@ -1,7 +1,7 @@
 {
   "name": "Slunovrat",
   "short_name": "Slunovrat",
-  "description": "Mobile app for festivals, conferences or events.",
+  "description": "Mobilní aplikace pro Festival Slunovrat.",
   "start_url": ".",
   "orientation": "portrait-primary",
   "icons": [
