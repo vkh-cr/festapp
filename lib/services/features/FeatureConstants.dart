@@ -15,6 +15,7 @@ class FeatureConstants {
   static const String entryCode = "entry_code";
   static const String companions = "companions";
   static const String blueprint = "blueprint";
+  static const String timetable = "timetable";
   static const String map = "map";
 
   // Feature codes for unit

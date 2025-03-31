@@ -140,6 +140,11 @@ class _SchedulePageState extends State<SchedulePage>
         .then((value) => loadData());
   }
 
+  void _mySchedulePressed() {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
+        .then((value) => loadData());
+  }
+
   void _eventPressed(int id) {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
         .then((_) => loadData());
@@ -178,6 +183,16 @@ class _SchedulePageState extends State<SchedulePage>
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      CircularButton(
+                        onPressed: _mySchedulePressed,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
+                        child: Icon(Icons.favorite,
+                            color: ThemeConfig.profileButtonTextColor(context)),
+                      ),
+                      Text("My schedule".tr()),
+                    ]),
+                  if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
                       onPressed: _schedulePressed,
@@ -185,7 +200,7 @@ class _SchedulePageState extends State<SchedulePage>
                       child: Icon(Icons.calendar_month,
                           color: ThemeConfig.profileButtonTextColor(context)),
                     ),
-                    Text("My schedule".tr()),
+                    Text("Schedule".tr()),
                   ]),
                 ]),
           ),

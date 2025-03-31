@@ -173,32 +173,6 @@ class _TimetablePageState extends State<TimetablePage>
               );
             }),
           ),
-          actions: [
-            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-            Padding(
-              padding: const EdgeInsets.fromLTRB(6, 6, 6, 0),
-              child: TextButton(
-                onPressed: () async {
-                  RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
-                      .then((value) => loadData());
-                },
-                child: FittedBox(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                       Icon(
-                        Icons.schedule,
-                        color: ThemeConfig.upperNavText(context),
-                      ),
-                      Text("My schedule".tr(),
-                          style: TextStyle(
-                              color:  ThemeConfig.upperNavText(context), fontSize: 9)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
         ),
         body: _days.isEmpty || _events.isEmpty ? SizedBox.shrink() : Timetable(
             controller: timetableController,
