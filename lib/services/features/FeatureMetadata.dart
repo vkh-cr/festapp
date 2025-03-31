@@ -48,6 +48,10 @@ class FeatureMetadata {
       'title': 'Map',
       'description': 'Various settings for map inside the app.',
     },
+    FeatureConstants.timetable: {
+      'title': 'Timetable',
+      'description': 'Allows displaying the program in a table.',
+    },
   };
 
   /// Returns the translated title for the given feature code.

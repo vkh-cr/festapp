@@ -34,6 +34,7 @@ class FeatureService {
       SimpleFeature(code: FeatureConstants.services, isEnabled: false),
       SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
       SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
       // Use CompanionsFeature for companion-related properties.
       CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
     ];
