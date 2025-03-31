@@ -532,5 +532,7 @@
   "Offline Map Layer Settings": "Offline Map Layer Settings",
   "Auto-download offline map": "Auto-download offline map",
   "Offline Map Layer Name": "Offline Map Layer Name",
+  "Allows displaying the program in a table.": "Allows displaying the program in a table.",
+  "Timetable": "Timetable",
   "_":"_"
 }
