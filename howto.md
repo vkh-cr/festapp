@@ -110,7 +110,7 @@ fvm dart run flutter_launcher_icons
 - Import data types as CSV from Festapp standard csv file or fill them.
 - Upload assets:
     - Icon: 512×512 px
-    - Feature Graphic: 1,024×500 px
+    - Feature Graphic: 1024×500 px
 - Fill in:
     - Short description
     - Long description

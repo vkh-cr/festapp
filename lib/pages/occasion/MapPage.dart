@@ -27,6 +27,7 @@ import 'package:fstapp/services/features/Feature.dart';
 import 'package:fstapp/services/features/FeatureConstants.dart';
 import 'package:fstapp/services/features/FeatureService.dart';
 import 'package:fstapp/services/offline_map_helper.dart';
+import 'package:fstapp/services/offline_map_style_helper.dart';
 import 'package:fstapp/widgets/PopButton.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
@@ -52,88 +53,59 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
-  // Single animated map controller for both online and offline maps.
+  // --- Controllers & Variables ---
   late final _animatedMapController = AnimatedMapController(vsync: this);
+  final PopupController _popupLayerController = PopupController();
 
   List<IconModel> _icons = [];
   final List<MapMarkerWithText> _markers = [];
   final List<MapMarkerWithText> _selectedMarkers = [];
   static MapMarkerWithText? focusedMarker;
   static MapMarkerWithText? selectedMarker;
+
   String pageTitle = AppConfig.mapTitle;
   bool isOnlyEditMode = false;
 
-  /// Controller for popups.
-  final PopupController _popupLayerController = PopupController();
-
-  fm.FlutterMap? _map;
   LatLng? _mapCenter;
+
   late final MapFeature _mapFeature;
 
-  // --- Variables for Offline Map support ---
+  // Offline Map variables
   bool _useOffline = false;
   bool _isDownloading = false;
   double _downloadProgress = 0.0;
   bool _downloadCompleted = false;
   String? _offlinePackagePath;
+  bool _isMapLoaded = false;
   MbTiles? _mbtiles;
-  var _theme;
+  dynamic _style;
 
+  // --- Lifecycle Methods ---
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
 
-    // Get map feature.
+    // Set up map feature and initial map center.
     final feature = FeatureService.getFeatureDetails(FeatureConstants.map);
     _mapFeature = (feature == null || feature is! MapFeature)
         ? MapFeature.getDefault()
         : feature;
-
     _mapCenter = widget.place != null
         ? LatLng(widget.place!.getLat(), widget.place!.getLng())
-        : LatLng(
-      _mapFeature.defaultMapLocation.lat,
-      _mapFeature.defaultMapLocation.lng,
-    );
+        : LatLng(_mapFeature.defaultMapLocation.lat, _mapFeature.defaultMapLocation.lng);
 
-    // Check connectivity; if connected, default to online; otherwise, use offline.
-    List<ConnectivityResult> connectivityResult =
-    await Connectivity().checkConnectivity();
-    bool hasConnection = connectivityResult.isNotEmpty &&
-        !connectivityResult.contains(ConnectivityResult.none);
-    setState(() {
-      _useOffline = !hasConnection;
-    });
-
-    // Enable offline functionality only on non-web and only if all offline fields are set.
+    // Initialize offline map if configured.
     if (!PlatformHelper.isWeb && _isOfflineMapConfigured()) {
-      // Use a fixed URL.
-      _mapFeature.offlineMapLayer.offlineMapPackageURL =
-      'https://lwfpdjxsdmkfyrzqbrlk.supabase.co/storage/v1/object/public/public-files/maps/roma.mbtiles';
-      _offlinePackagePath = await OfflineMapHelper.getOfflinePackagePath(
-          _mapFeature.offlineMapLayer.offlineMapPackageURL!);
-      if (await File(_offlinePackagePath!).exists()) {
-        _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
-        _theme = await OfflineMapHelper.loadOfflineMapStyle(
-            _mapFeature.offlineMapLayer.offlineMapStyleURL!);
-      } else {
-        if (_mapFeature.offlineMapLayer.autoDownloadOfflineMap == true) {
-          // Start download in background (after a short delay) so online map is first shown.
-          Future.delayed(Duration(seconds: 1), () => _downloadOfflinePackage());
-        }
-      }
-    } else {
-      // If offline fields are not properly configured, always use online.
-      setState(() {
-        _useOffline = false;
-      });
+      _useOffline = true;
+      await _initOfflineMap();
     }
 
+    // If no id is provided, try to get it from route data.
     if (widget.id == null && context.routeData.hasPendingChildren) {
       widget.id = context.routeData.pendingChildren[0].params.getInt("id");
     }
 
-    // Set up places.
+    // Setup places and markers.
     selectedMarker = null;
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
@@ -147,7 +119,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       }
       pageTitle = placeModel.title ?? AppConfig.mapTitle;
       addPlacesToMap([placeModel]);
-      // Ensure _markers is not empty before calling runEditPositionMode.
       if (_markers.isNotEmpty) {
         runEditPositionMode(_markers.single);
       }
@@ -155,7 +126,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
   }
 
-  /// Returns true if all three offline map configuration fields are non-empty.
+  // --- Initialization Helpers ---
+  /// Returns true if all required offline map configuration fields are set.
   bool _isOfflineMapConfigured() {
     final offlineLayer = _mapFeature.offlineMapLayer;
     return (offlineLayer.offlineMapPackageURL?.isNotEmpty ?? false) &&
@@ -163,6 +135,43 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         (offlineLayer.offlineMapLayerName?.isNotEmpty ?? false);
   }
 
+  /// Initialize offline map settings.
+  Future<void> _initOfflineMap() async {
+    // Load the offline style.
+    try {
+      _style = await StyleReader(uri: _mapFeature.offlineMapLayer.offlineMapStyleURL!).read();
+    } catch (e) {
+      debugPrint("Failed to load style: $e");
+    }
+
+    _offlinePackagePath = await OfflineMapHelper.getOfflinePackagePath(
+        _mapFeature.offlineMapLayer.offlineMapPackageURL!);
+    bool fileExists = await File(_offlinePackagePath!).exists();
+    if (fileExists) {
+      _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
+    }
+
+    // If autoDownloadOfflineMap is true, default to offline map and start download if needed.
+    if (_mapFeature.offlineMapLayer.autoDownloadOfflineMap == true) {
+      setState(() {
+        _useOffline = true;
+      });
+      if (!fileExists) {
+        Future.delayed(Duration(seconds: 1), () => _downloadOfflinePackage());
+      }
+    } else {
+      // Otherwise, check connectivity to decide.
+      List<ConnectivityResult> connectivityResult =
+      await Connectivity().checkConnectivity();
+      bool hasConnection = connectivityResult.isNotEmpty &&
+          !connectivityResult.contains(ConnectivityResult.none);
+      setState(() {
+        _useOffline = !hasConnection;
+      });
+    }
+  }
+
+  // --- Download Offline Package ---
   Future<void> _downloadOfflinePackage() async {
     if (!_isOfflineMapConfigured() || _offlinePackagePath == null) {
       return;
@@ -173,30 +182,40 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     });
     try {
       // Download the MBTiles package.
-      await OfflineMapHelper.downloadOfflinePackage(
+      final mbtilesFile = await OfflineMapHelper.getOfflineMapPackage(
           _mapFeature.offlineMapLayer.offlineMapPackageURL!,
-          _offlinePackagePath!, (progress) {
+          _offlinePackagePath!,
+              (progress) {
+            setState(() {
+              _downloadProgress = progress;
+            });
+          });
+      if (mbtilesFile == null) {
         setState(() {
-          _downloadProgress = progress;
+          _isDownloading = false;
         });
-      });
-      // After downloading the package, also download the style file.
+        return;
+      }
+      // Download the style file.
       final offlineStylePath = await OfflineMapHelper.getOfflineStyleFilePath(
           _mapFeature.offlineMapLayer.offlineMapStyleURL!);
-      await OfflineMapHelper.downloadOfflineStyle(
+      final styleFile = await OfflineMapHelper.getOrDownloadFile(
           _mapFeature.offlineMapLayer.offlineMapStyleURL!,
-          offlineStylePath, (progress) {
-        // Optionally handle style download progress.
-      });
+          offlineStylePath,
+              (progress) {});
+      if (styleFile == null) {
+        setState(() {
+          _isDownloading = false;
+        });
+        return;
+      }
       setState(() {
         _isDownloading = false;
         _downloadCompleted = true;
       });
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
-      _theme = await OfflineMapHelper.loadOfflineMapStyle(
-          _mapFeature.offlineMapLayer.offlineMapStyleURL!);
       ToastHelper.Show(context, "Offline map downloaded and ready for offline use".tr());
-      // Display check icon for 2 seconds.
+      // Briefly show a check icon then reset.
       Timer(Duration(seconds: 2), () {
         setState(() {
           _downloadCompleted = false;
@@ -211,140 +230,27 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
-    _markers.clear();
-    List<PlaceModel> mapOfflinePlaces = [];
-    var offlinePlaces = await OfflineDataService.getAllPlaces();
-    _icons = await OfflineDataService.getAllIcons();
-    offlinePlaces.sortPlaces(false);
-    mapOfflinePlaces = loadOtherGroups
-        ? offlinePlaces
-        : offlinePlaces.where((element) => !element.isHidden).toList();
-    if (placeId != null) {
-      var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null) mapOfflinePlaces.add(p);
-    }
-    await addEventsToPlace(mapOfflinePlaces);
-    addPlacesToMap(mapOfflinePlaces);
-    if (placeId != null) {
-      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null) setMapToOnePlaceAndShowPopup(placeId, p);
-    }
-    _icons = await DbPlaces.getAllIcons();
-    List<PlaceModel> mapPlaces = [];
-    List<PlaceModel> showMapPlaces = [];
-    if (loadOtherGroups) {
-      var groups = await DbGroups.getGroupsWithPlaces();
-      for (var element in groups) {
-        if (element.place == null) continue;
-        element.place!.title = element.title;
-        mapPlaces.add(element.place!);
-      }
-    } else {
-      mapPlaces = await DbPlaces.getAllPlaces();
-      showMapPlaces = mapPlaces.where((p) => !p.isHidden).toList();
-      showMapPlaces.sortPlaces(false);
-      await OfflineDataService.saveAllPlaces(mapPlaces);
-    }
-    if (placeId != null) {
-      var p = mapPlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null) showMapPlaces.add(p);
-    }
-    if (showMapPlaces.isNotEmpty) {
-      _markers.clear();
-      await addEventsToPlace(showMapPlaces);
-      addPlacesToMap(showMapPlaces);
-    }
-    if (placeId != null) {
-      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
-      if (p != null) setMapToOnePlaceAndShowPopup(placeId, p);
-    }
-  }
-
-  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
-    var m = _markers.firstWhere((m) => m.place.id == placeId);
-    _markers.remove(m);
-    _markers.add(m);
-    focusedMarker = m;
-    _popupLayerController.showPopupsOnlyFor([m]);
-    setMapToOnePlace(p);
-  }
-
-  Future<void> addEventsToPlace(List<PlaceModel> places) async {
-    var events = await OfflineDataService.getAllEvents();
-    for (var p in places) {
-      var matches = events.where((e) => e.place?.id == p.id);
-      p.events.addAll(matches);
-    }
-  }
-
-  void setMapToOnePlace(PlaceModel place) {
-    _mapCenter = LatLng(place.getLat(), place.getLng());
-    _animatedMapController.animateTo(
-        dest: _mapCenter!, zoom: _mapFeature.defaultMapZoom);
-  }
-
-  void addPlacesToMap(List<PlaceModel> places) {
-    var mappedMarkers = places.map((place) {
-      var mapPlace = MapPlaceModel.fromPlaceModel(place);
-      return MapMarkerWithText(
-        context: context,
-        place: mapPlace,
-        point: mapPlace.latLng,
-        width: 60,
-        height: 60,
-        icon: isIconVisible(place)
-            ? MapLocationPinHelper.type2icon(context, mapPlace, _icons)
-            : null,
-        alignment: Alignment.topCenter,
-        editAction: runEditPositionMode,
-      );
-    }).toList();
-    setState(() {
-      _markers.addAll(mappedMarkers);
-    });
-  }
-
-  void runEditPositionMode(MapMarkerWithText marker) {
-    _popupLayerController.hideAllPopups();
-    marker.oldPoint = marker.point;
-    setState(() {
-      selectedMarker = marker;
-    });
-    _selectedMarkers.clear();
-    _selectedMarkers.add(selectedMarker!);
-  }
-
+  // --- Building the UI ---
   @override
   Widget build(BuildContext context) {
-    // Show online map during download; if not downloading and offline is enabled, show offline.
-    Widget mapWidget;
-    if (_isDownloading) {
-      mapWidget = _buildOnlineMap();
-    } else if (_useOffline && _mbtiles != null && _theme != null) {
-      mapWidget = _buildOfflineMap();
-    } else {
-      mapWidget = _buildOnlineMap();
-    }
+    // Choose the map widget based on offline mode.
+    Widget mapWidget = _useOffline ? _buildOfflineMap() : _buildOnlineMap();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(pageTitle),
         leading: PopButton(),
         actions: [
-          // Only show the offline switch if on non-web and all offline fields are configured.
           if (!PlatformHelper.isWeb && _isOfflineMapConfigured())
             Row(
               children: [
-                Icon(_useOffline ? Icons.landscape : Icons.cloud,
-                    color: Colors.grey),
+                Icon(_useOffline ? Icons.landscape : Icons.cloud, color: Colors.grey),
                 Switch(
                   onChanged: _isDownloading
                       ? null
                       : (value) async {
-                    final currentCenter =
-                        _animatedMapController.mapController.camera.center;
-                    final currentZoom =
-                        _animatedMapController.mapController.camera.zoom;
+                    final currentCenter = _animatedMapController.mapController.camera.center;
+                    final currentZoom = _animatedMapController.mapController.camera.zoom;
                     if (value) {
                       if (_offlinePackagePath != null &&
                           !(await File(_offlinePackagePath!).exists())) {
@@ -368,8 +274,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                         _useOffline = false;
                       });
                     }
-                    _animatedMapController.animateTo(
-                        dest: currentCenter, zoom: currentZoom);
+                    _animatedMapController.animateTo(dest: currentCenter, zoom: currentZoom);
                   },
                   value: _useOffline,
                   activeColor: Colors.grey[600],
@@ -383,94 +288,63 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       ),
       body: Stack(
         children: [
-          (_mapCenter == null || (_useOffline && _theme == null))
+          (_mapCenter == null || (_useOffline && _style == null))
               ? const SizedBox.shrink()
               : mapWidget,
-          // Download progress overlay, aligned to top-right with padding.
-          if (_isDownloading || _downloadCompleted)
-            IgnorePointer(
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 16, right: 16),
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.black45,
-                      shape: BoxShape.circle,
-                    ),
-                    child: _isDownloading
-                        ? Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 3,
-                            value: _downloadProgress,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white),
-                          ),
-                        ),
-                        Text(
-                          "${(_downloadProgress * 100).toInt()}%",
-                          style: TextStyle(
-                              color: Colors.white, fontSize: 10),
-                        ),
-                      ],
-                    )
-                        : Icon(Icons.check, size: 18, color: Colors.white),
-                  ),
-                ),
-              ),
-            ),
-          // Edit marker UI – only visible when a marker is selected.
-          if (selectedMarker != null)
-            Visibility(
-              visible: selectedMarker != null,
-              child: Column(
-                children: [
-                  Container(
-                    color: Colors.white,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: cancelNewPosition,
-                          child: const Text("Storno").tr(),
-                        ),
-                        const Padding(padding: EdgeInsets.all(16.0)),
-                        Visibility(
-                          visible: !isOnlyEditMode,
-                          child: ElevatedButton(
-                            onPressed: showAllGroups,
-                            child: const Text("Show groups").tr(),
-                          ),
-                        ),
-                        const Padding(padding: EdgeInsets.all(16.0)),
-                        ElevatedButton(
-                          onPressed: saveNewPosition,
-                          child: const Text("Save location").tr(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: const Text("You can change location by tapping on the map.").tr(),
-                  ),
-                  Expanded(child: Container()),
-                ],
-              ),
-            ),
+          // Show universal progress indicator when downloading or after download completion.
+          if (_isDownloading || _downloadCompleted) _buildProgressIndicator(),
+          if (selectedMarker != null) _buildEditControls()
         ],
       ),
     );
   }
 
+  /// Universal progress indicator which positions itself differently based on map mode.
+  Widget _buildProgressIndicator() {
+    // Align in the center for offline map, top-right for online.
+    Alignment alignment = _useOffline ? Alignment.center : Alignment.topRight;
+    EdgeInsets padding = _useOffline ? EdgeInsets.zero : const EdgeInsets.only(top: 16, right: 16);
+    return IgnorePointer(
+      child: Align(
+        alignment: alignment,
+        child: Padding(
+          padding: padding,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: const BoxDecoration(
+              color: Colors.black45,
+              shape: BoxShape.circle,
+            ),
+            child: _isDownloading
+                ? Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 40,
+                  height: 40,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    value: _downloadProgress,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+                Text(
+                  "${(_downloadProgress * 100).toInt()}%",
+                  style: const TextStyle(color: Colors.white, fontSize: 10),
+                ),
+              ],
+            )
+                : const Icon(Icons.check, size: 18, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build the online map widget.
   Widget _buildOnlineMap() {
+    _isMapLoaded = true;
     return fm.FlutterMap(
       mapController: _animatedMapController.mapController,
       options: fm.MapOptions(
@@ -540,7 +414,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     );
   }
 
+  /// Build the offline map widget.
   Widget _buildOfflineMap() {
+    if(_style == null || _mbtiles == null){
+      return SizedBox.shrink();
+    }
+    _isMapLoaded = true;
     return fm.FlutterMap(
       mapController: _animatedMapController.mapController,
       options: fm.MapOptions(
@@ -560,8 +439,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         ),
       ),
       children: [
+        // Use offline MBTiles provider for vector tiles.
         vmt.VectorTileLayer(
-          theme: _theme,
+          theme: _style?.theme,
+          sprites: _style?.sprites,
           tileProviders: vmt.TileProviders({
             _mapFeature.offlineMapLayer.offlineMapLayerName!:
             vmtm.MbTilesVectorTileProvider(
@@ -570,7 +451,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           }),
           maximumZoom: 18,
         ),
-        // Show attributions on offline map too, if available.
         if ((_mapFeature.offlineMapLayer.logo?.isNotEmpty ?? false) ||
             (_mapFeature.offlineMapLayer.text?.isNotEmpty ?? false))
           fm.RichAttributionWidget(
@@ -628,6 +508,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     }
   }
 
+  void runEditPositionMode(MapMarkerWithText marker) {
+    _popupLayerController.hideAllPopups();
+    marker.oldPoint = marker.point;
+    setState(() {
+      selectedMarker = marker;
+    });
+    _selectedMarkers
+      ..clear()
+      ..add(selectedMarker!);
+  }
+
   Future<void> saveNewPosition() async {
     if (isOnlyEditMode) {
       RouterService.goBack(context, {
@@ -636,8 +527,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       });
       return;
     }
-    await DbPlaces.saveLocation(selectedMarker!.place.id!,
-        selectedMarker!.point.latitude, selectedMarker!.point.longitude);
+    await DbPlaces.saveLocation(
+        selectedMarker!.place.id!, selectedMarker!.point.latitude, selectedMarker!.point.longitude);
     ToastHelper.Show(context, "Place has been changed.".tr());
     var markerToRemove =
     _markers.firstWhere((m) => m.place.id == selectedMarker!.place.id);
@@ -664,7 +555,144 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     cancelNewPosition();
   }
 
+  Future<void> loadPlaces({int? placeId, bool loadOtherGroups = false}) async {
+    _markers.clear();
+    List<PlaceModel> mapOfflinePlaces = [];
+    var offlinePlaces = await OfflineDataService.getAllPlaces();
+    _icons = await OfflineDataService.getAllIcons();
+    offlinePlaces.sortPlaces(false);
+    mapOfflinePlaces = loadOtherGroups
+        ? offlinePlaces
+        : offlinePlaces.where((element) => !element.isHidden).toList();
+    if (placeId != null) {
+      var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) mapOfflinePlaces.add(p);
+    }
+    await addEventsToPlace(mapOfflinePlaces);
+    addPlacesToMap(mapOfflinePlaces);
+    if (placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) setMapToOnePlaceAndShowPopup(placeId, p);
+    }
+    _icons = await DbPlaces.getAllIcons();
+    List<PlaceModel> mapPlaces = [];
+    List<PlaceModel> showMapPlaces = [];
+    if (loadOtherGroups) {
+      var groups = await DbGroups.getGroupsWithPlaces();
+      for (var element in groups) {
+        if (element.place == null) continue;
+        element.place!.title = element.title;
+        mapPlaces.add(element.place!);
+      }
+    } else {
+      mapPlaces = await DbPlaces.getAllPlaces();
+      showMapPlaces = mapPlaces.where((p) => !p.isHidden).toList();
+      showMapPlaces.sortPlaces(false);
+      await OfflineDataService.saveAllPlaces(mapPlaces);
+    }
+    if (placeId != null) {
+      var p = mapPlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) showMapPlaces.add(p);
+    }
+    if (showMapPlaces.isNotEmpty) {
+      _markers.clear();
+      await addEventsToPlace(showMapPlaces);
+      addPlacesToMap(showMapPlaces);
+    }
+    if (placeId != null) {
+      var p = mapOfflinePlaces.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) setMapToOnePlaceAndShowPopup(placeId, p);
+    }
+  }
+
+  Future<void> addEventsToPlace(List<PlaceModel> places) async {
+    var events = await OfflineDataService.getAllEvents();
+    for (var p in places) {
+      var matches = events.where((e) => e.place?.id == p.id);
+      p.events.addAll(matches);
+    }
+  }
+
+  void addPlacesToMap(List<PlaceModel> places) {
+    var mappedMarkers = places.map((place) {
+      var mapPlace = MapPlaceModel.fromPlaceModel(place);
+      return MapMarkerWithText(
+        context: context,
+        place: mapPlace,
+        point: mapPlace.latLng,
+        width: 60,
+        height: 60,
+        icon: isIconVisible(place)
+            ? MapLocationPinHelper.type2icon(context, mapPlace, _icons)
+            : null,
+        alignment: Alignment.topCenter,
+        editAction: runEditPositionMode,
+      );
+    }).toList();
+    setState(() {
+      _markers.addAll(mappedMarkers);
+    });
+  }
+
+  void setMapToOnePlaceAndShowPopup(int placeId, PlaceModel p) {
+    var m = _markers.firstWhere((m) => m.place.id == placeId);
+    _markers.remove(m);
+    _markers.add(m);
+    focusedMarker = m;
+    _popupLayerController.showPopupsOnlyFor([m]);
+    setMapToOnePlace(p);
+  }
+
+  void setMapToOnePlace(PlaceModel place) {
+    _mapCenter = LatLng(place.getLat(), place.getLng());
+    if(_isMapLoaded) {
+      _animatedMapController.animateTo(
+      dest: _mapCenter!);
+    }
+  }
+
   bool isIconVisible(PlaceModel place) {
     return true;
+  }
+
+  /// Build the marker editing controls that appear when a marker is selected.
+  Widget _buildEditControls() {
+    return Visibility(
+      visible: selectedMarker != null,
+      child: Column(
+        children: [
+          Container(
+            color: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: cancelNewPosition,
+                  child: const Text("Storno").tr(),
+                ),
+                const Padding(padding: EdgeInsets.all(16.0)),
+                Visibility(
+                  visible: !isOnlyEditMode,
+                  child: ElevatedButton(
+                    onPressed: showAllGroups,
+                    child: const Text("Show groups").tr(),
+                  ),
+                ),
+                const Padding(padding: EdgeInsets.all(16.0)),
+                ElevatedButton(
+                  onPressed: saveNewPosition,
+                  child: const Text("Save location").tr(),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: const Text("You can change location by tapping on the map.").tr(),
+          ),
+          Expanded(child: Container()),
+        ],
+      ),
+    );
   }
 }
