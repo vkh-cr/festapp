@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/Feature.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
+
+import 'feature.dart';
+import 'feature_constants.dart';
 
 class FeatureService {
   /// Checks whether the feature with [featureCode] is enabled.
@@ -27,6 +28,7 @@ class FeatureService {
       ),
       // Use SimpleFeature for features with no extra properties.
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
+      WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
       MapFeature(code: FeatureConstants.map, isEnabled: true),
       SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
       SimpleFeature(code: FeatureConstants.game, isEnabled: false),
@@ -34,7 +36,7 @@ class FeatureService {
       SimpleFeature(code: FeatureConstants.services, isEnabled: false),
       SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
       SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
-      // Use CompanionsFeature for companion-related properties.
+      SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
       CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
     ];
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/components/timetable/TimetableEventWidget.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timetable/timetable_event_widget.dart';
 import 'package:fstapp/themeConfig.dart';
 
 class TimetableItemsWidget extends StatefulWidget {

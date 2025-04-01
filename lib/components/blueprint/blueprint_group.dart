@@ -1,4 +1,4 @@
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 
 class BlueprintGroupModel {
   static const String metaId = "id";

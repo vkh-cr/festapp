@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class ResponsiveService extends StatelessWidget {
   final Widget mobile;
   final Widget tablet;

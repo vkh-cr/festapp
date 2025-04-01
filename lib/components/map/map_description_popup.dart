@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/components/map/MapMarkerWithText.dart';
+import 'package:fstapp/components/map/map_marker_with_text.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
   final MapMarkerWithText marker;

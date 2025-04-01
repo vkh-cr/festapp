@@ -1,15 +1,15 @@
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart' as schedule_tab_view;
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/themeConfig.dart';
-import 'ScheduleTimeline.dart';
+import 'schedule_timeline.dart';
 
 class ScheduleTabView extends StatefulWidget {
   final Function(int)? onEventPressed;
-  final List<TimeBlockItem> events;
-  final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
+  final List<schedule_tab_view.TimeBlockItem> events;
+  final Function(BuildContext, List<schedule_tab_view.TimeBlockGroup>, schedule_tab_view.TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
 
   ScheduleTabView({
@@ -25,21 +25,21 @@ class ScheduleTabView extends StatefulWidget {
 }
 
 class _ScheduleTabViewState extends State<ScheduleTabView> {
-  List<TimeBlockGroup> datedEvents = [];
+  List<schedule_tab_view.TimeBlockGroup> datedEvents = [];
 
   @override
   Widget build(BuildContext context) {
     List<Widget> programLineChildren = [];
 
     // Group events by date
-    datedEvents = TimeBlockHelper.splitTimeBlocksByDate(
+    datedEvents = schedule_tab_view.TimeBlockHelper.splitTimeBlocksByDate(
       widget.events,
       context,
       AppConfig.daySplitHour,
     );
 
     for (var eventsByDay in datedEvents) {
-      var eventGroups = TimeBlockHelper.splitTimeBlocks(eventsByDay.events);
+      var eventGroups = schedule_tab_view.TimeBlockHelper.splitTimeBlocks(eventsByDay.events);
       var timeline = ScheduleTimeline(
         eventGroups: eventGroups,
         onEventPressed: widget.onEventPressed,

@@ -1,8 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fstapp/components/seatReservation/utils/SeatState.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
+import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
+import 'package:fstapp/components/blueprint/blueprint_group.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';

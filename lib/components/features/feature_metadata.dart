@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'FeatureConstants.dart';
+import 'feature_constants.dart';
 
 class FeatureMetadata {
   // Store the raw translation keys without immediately invoking .tr()
@@ -47,6 +47,14 @@ class FeatureMetadata {
     FeatureConstants.map: {
       'title': 'Map',
       'description': 'Various settings for map inside the app.',
+    },
+    FeatureConstants.timetable: {
+      'title': 'Timetable',
+      'description': 'Allows displaying the program in a table.',
+    },
+    FeatureConstants.workshops: {
+      'title': 'Workshops',
+      'description': 'Indicates the start time from when people can sign in for workshops.',
     },
   };
 

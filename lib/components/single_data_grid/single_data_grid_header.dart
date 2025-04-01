@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -9,8 +9,8 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'pluto_abstract.dart';
 
-class SingleDataGridHeader<T extends IPlutoRowModel> extends StatefulWidget {
-  final PlutoGridStateManager stateManager;
+class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
+  final TrinaGridStateManager stateManager;
   final SingleDataGridController<T> controller;
 
   const SingleDataGridHeader({
@@ -25,28 +25,28 @@ class SingleDataGridHeader<T extends IPlutoRowModel> extends StatefulWidget {
         controller,
       );
 
-  static PlutoGridConfiguration defaultPlutoGridConfiguration(
+  static TrinaGridConfiguration defaultTrinaGridConfiguration(
       BuildContext context, String langCode) {
-    return PlutoGridConfiguration(
-      scrollbar: const PlutoGridScrollbarConfig(
-        scrollbarThickness: 16.0,
+    return TrinaGridConfiguration(
+      scrollbar: const TrinaGridScrollbarConfig(
+        thickness: 12.0,
       ),
       localeText: DataGridHelper.getPlutoLocaleFromLangCode(langCode),
       style: ThemeConfig.isDarkMode(context)
-          ? PlutoGridStyleConfig.dark(
+          ? TrinaGridStyleConfig.dark(
         rowHeight: 36,
         cellColorInReadOnlyState: Colors.white24,
         cellTextStyle: TextStyle(color: ThemeConfig.blackColor(context)),
         columnTextStyle:
         TextStyle(color: ThemeConfig.blackColor(context)),
       )
-          : PlutoGridStyleConfig(
+          : TrinaGridStyleConfig(
           rowHeight: 36, cellColorInReadOnlyState: Colors.white70),
     );
   }
 }
 
-class _SingleDataGridHeaderState<T extends IPlutoRowModel>
+class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     extends State<SingleDataGridHeader<T>> {
   final SingleDataGridController<T> controller;
   List<Widget> allChildren = [];
@@ -125,7 +125,7 @@ class _SingleDataGridHeaderState<T extends IPlutoRowModel>
 
     if(controller.newObject != null){
       var obj = controller.newObject!();
-      PlutoRow<dynamic> newRowReal = obj.toPlutoRow(context)!;
+      TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context)!;
       for (var c in newRowReal.cells.entries) {
         newRowsGenerated[0].cells[c.key] = newRowReal.cells[c.key]!;
       }

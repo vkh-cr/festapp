@@ -12,7 +12,7 @@ import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/MouseDetector.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 import 'package:intl/intl.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 
 class AddNewEventDialog {
   static Future<void> showAddEventDialog(

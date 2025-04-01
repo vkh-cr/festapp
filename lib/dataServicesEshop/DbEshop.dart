@@ -4,9 +4,9 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_helper.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
@@ -60,7 +60,6 @@ class DbEshop {
       'get_transactions_for_order_all_available',
       params: {'payment_info_id': paymentInfoId},
     );
-
 
     if (response != null) {
       return List<TransactionModel>.from(response.map((x) => TransactionModel.fromJson(x)));

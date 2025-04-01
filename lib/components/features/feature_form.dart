@@ -2,12 +2,13 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
-import 'package:fstapp/services/features/Feature.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/services/features/FeatureMetadata.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
 import 'package:fstapp/themeConfig.dart';
+
+import 'feature.dart';
+import 'feature_metadata.dart';
 
 class FeatureForm extends StatefulWidget {
   final Feature feature;
@@ -52,6 +53,9 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? mapOfflineMapStyleURLController;
   TextEditingController? mapOfflineMapLayerNameController;
   bool autoDownloadOfflineMap = false;
+
+  // New controller for WorkshopsFeature startTime
+  TextEditingController? startTimeController;
 
   @override
   void initState() {
@@ -104,8 +108,22 @@ class _FeatureFormState extends State<FeatureForm> {
       mapOfflineMapLayerNameController =
           TextEditingController(text: mapFeature.offlineMapLayer.offlineMapLayerName);
       autoDownloadOfflineMap = mapFeature.offlineMapLayer.autoDownloadOfflineMap;
+    } else if (widget.feature is WorkshopsFeature) {
+      // Initialize with an empty string. The formatted value will be set in didChangeDependencies.
+      startTimeController = TextEditingController(text: "");
     } else {
       useExternalForm = false;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (widget.feature is WorkshopsFeature) {
+      final workshopsFeature = widget.feature as WorkshopsFeature;
+      if (workshopsFeature.startTime != null && startTimeController!.text.isEmpty) {
+        startTimeController!.text = DateFormat.yMd(context.locale.toString()).add_jm().format(workshopsFeature.startTime!.toLocal());
+      }
     }
   }
 
@@ -132,6 +150,7 @@ class _FeatureFormState extends State<FeatureForm> {
     mapOfflineMapPackageURLController?.dispose();
     mapOfflineMapStyleURLController?.dispose();
     mapOfflineMapLayerNameController?.dispose();
+    startTimeController?.dispose();
     super.dispose();
   }
 
@@ -494,6 +513,56 @@ class _FeatureFormState extends State<FeatureForm> {
           ),
         ],
       ));
+    } else if (widget.feature is WorkshopsFeature) {
+      final workshopsFeature = widget.feature as WorkshopsFeature;
+      fields.add(
+        TextFormField(
+          controller: startTimeController,
+          decoration: InputDecoration(
+            labelText: "Workshop Registration Start Time".tr(),
+            hintText: "Select start time".tr(),
+          ),
+          readOnly: true,
+          onTap: () async {
+            final initialLocal = workshopsFeature.startTime?.toLocal() ?? DateTime.now();
+            DateTime? date = await showDatePicker(
+              context: context,
+              initialDate: initialLocal,
+              firstDate: DateTime(2000),
+              lastDate: DateTime(2100),
+              locale: context.locale,
+            );
+            if (date != null) {
+              TimeOfDay? time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.fromDateTime(initialLocal),
+              );
+              if (time != null) {
+                final selectedLocal = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                  time.hour,
+                  time.minute,
+                );
+                final dateFormat = DateFormat.yMd(context.locale.toString()).add_jm();
+                final formattedTime = dateFormat.format(selectedLocal);
+                print('Selected time: $formattedTime');  // Debug print
+                setState(() {
+                  startTimeController!.text = formattedTime;
+                });
+              }
+            }
+          },
+          onSaved: (val) {
+            if (val != null && val.isNotEmpty) {
+              final dateFormat = DateFormat.yMd(context.locale.toString()).add_jm();
+              final parsedLocal = dateFormat.parse(val);
+              workshopsFeature.startTime = parsedLocal.toUtc();
+            }
+          },
+        ),
+      );
     }
 
     return fields;

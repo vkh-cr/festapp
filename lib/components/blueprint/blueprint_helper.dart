@@ -1,7 +1,7 @@
-import 'package:fstapp/components/seatReservation/utils/SeatState.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
+import 'package:fstapp/components/blueprint/blueprint_group.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';

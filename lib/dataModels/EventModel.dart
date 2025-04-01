@@ -7,10 +7,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-
-class EventModel extends IPlutoRowModel {
+class EventModel extends ITrinaRowModel {
 
   String startTimeString() => DateFormat.Hm().format(startTime);
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
@@ -190,7 +189,6 @@ class EventModel extends IPlutoRowModel {
   static const String isSignedInColumn = "isSignedIn";
   static const String isEventInMyProgramColumn = "isEventInMyProgram";
 
-
   static EventModel fromPlutoJson(Map<String, dynamic> json) {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
     var endTimeString = json[endDateColumn]+"-"+json[endTimeColumn];
@@ -230,24 +228,24 @@ class EventModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      idColumn: PlutoCell(value: id),
-      isHiddenColumn: PlutoCell(value: isHidden.toString()),
-      titleColumn: PlutoCell(value: title),
-      descriptionColumn: PlutoCell(value: description),
-      startDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
-      startTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(startTime)),
-      endDateColumn: PlutoCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
-      endTimeColumn: PlutoCell(value: DateFormat('HH:mm').format(endTime)),
-      maxParticipantsColumn: PlutoCell(value: maxParticipants),
-      placeColumn: PlutoCell(value: place == null ? PlaceModel.WithouValue : place!.toPlutoSelectString()),
-      Tb.events.type: PlutoCell(value: type ?? ""),
-      splitForMenWomenColumn: PlutoCell(value: splitForMenWomen.toString()),
-      isGroupEventColumn: PlutoCell(value: isGroupEvent.toString()),
-      parentEventColumn: PlutoCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_roles.role: PlutoCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_users.table: PlutoCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0)
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      idColumn: TrinaCell(value: id),
+      isHiddenColumn: TrinaCell(value: isHidden.toString()),
+      titleColumn: TrinaCell(value: title),
+      descriptionColumn: TrinaCell(value: description),
+      startDateColumn: TrinaCell(value: DateFormat('yyyy-MM-dd').format(startTime)),
+      startTimeColumn: TrinaCell(value: DateFormat('HH:mm').format(startTime)),
+      endDateColumn: TrinaCell(value: DateFormat('yyyy-MM-dd').format(endTime)),
+      endTimeColumn: TrinaCell(value: DateFormat('HH:mm').format(endTime)),
+      maxParticipantsColumn: TrinaCell(value: maxParticipants),
+      placeColumn: TrinaCell(value: place == null ? PlaceModel.WithouValue : place!.toPlutoSelectString()),
+      Tb.events.type: TrinaCell(value: type ?? ""),
+      splitForMenWomenColumn: TrinaCell(value: splitForMenWomen.toString()),
+      isGroupEventColumn: TrinaCell(value: isGroupEvent.toString()),
+      parentEventColumn: TrinaCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
+      Tb.event_roles.role: TrinaCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
+      Tb.event_users.table: TrinaCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0)
     });
   }
 
@@ -270,7 +268,6 @@ class EventModel extends IPlutoRowModel {
 
   @override
   String toBasicString() => "$title";
-
 
   Map toJson() =>
   {
