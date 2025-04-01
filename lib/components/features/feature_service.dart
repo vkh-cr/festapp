@@ -28,6 +28,7 @@ class FeatureService {
       ),
       // Use SimpleFeature for features with no extra properties.
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
+      WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
       MapFeature(code: FeatureConstants.map, isEnabled: true),
       SimpleFeature(code: FeatureConstants.songbook, isEnabled: false),
       SimpleFeature(code: FeatureConstants.game, isEnabled: false),
@@ -36,7 +37,6 @@ class FeatureService {
       SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
       SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
       SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
-      // Use CompanionsFeature for companion-related properties.
       CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
     ];
   }

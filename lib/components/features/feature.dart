@@ -29,6 +29,8 @@ abstract class Feature {
         return CompanionsFeature.fromJson(json);
       case FeatureConstants.map:
         return MapFeature.fromJson(json);
+      case FeatureConstants.workshops:
+        return WorkshopsFeature.fromJson(json);
       default:
         return SimpleFeature.fromJson(json);
     }
@@ -335,6 +337,35 @@ class MapFeature extends Feature {
       FeatureConstants.defaultMapLocation: defaultMapLocation,
       FeatureConstants.onlineMapLayer: onlineMapLayer,
       FeatureConstants.offlineMapLayer: offlineMapLayer,
+    };
+  }
+}
+
+class WorkshopsFeature extends Feature {
+  DateTime? startTime;
+
+  WorkshopsFeature({
+    super.code = FeatureConstants.workshops,
+    super.isEnabled = true,
+    super.title,
+    super.description,
+    this.startTime,
+  });
+
+  factory WorkshopsFeature.fromJson(Map<String, dynamic> json) {
+    return WorkshopsFeature(
+      code: json[FeatureConstants.metaCode],
+      isEnabled: json[FeatureConstants.metaIsEnabled] ?? true,
+      startTime: DateTime.parse(json['start_time'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      FeatureConstants.metaCode: code,
+      FeatureConstants.metaIsEnabled: isEnabled,
+      'start_time': startTime?.toIso8601String(),
     };
   }
 }

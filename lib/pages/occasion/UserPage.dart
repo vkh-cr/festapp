@@ -316,6 +316,7 @@ class _UserPageState extends State<UserPage> {
                     userData?.occasionUser?.data![Tb.occasion_users.data_email] ?? ""),
                 buildTextField("I am".tr(),
                     UserInfoModel.sexToLocale(userData?.occasionUser?.data![Tb.occasion_users.data_sex])),
+                if(FeatureService.isFeatureEnabled(FeatureConstants.services))
                 Padding(
                   padding: const EdgeInsets.all(12),
                   child: Column(

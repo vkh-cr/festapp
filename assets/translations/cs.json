@@ -534,5 +534,9 @@
   "Offline Map Layer Name": "Název vrstvy offline mapy",
   "Allows displaying the program in a table.": "Umožní zobrazení programu v tabulce.",
   "Timetable": "Program v tabulce",
+  "Workshop Registration Start Time": "Čas zahájení registrace workshopu",
+  "Select start time": "Vyberte čas zahájení",
+  "Workshops": "Workshopy",
+  "Indicates the start time from when people can sign in for workshops.": "Ukazuje čas, od kdy se mohou lidé přihlásit na workshopy.",
   "_": "_"
 }

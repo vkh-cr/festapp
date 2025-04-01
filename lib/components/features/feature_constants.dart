@@ -16,9 +16,8 @@ class FeatureConstants {
   static const String blueprint = "blueprint";
   static const String timetable = "timetable";
   static const String map = "map";
-
-  // Feature codes for unit
   static const String quotes = "quotes";
+  static const String workshops = "workshops";
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";

@@ -52,6 +52,10 @@ class FeatureMetadata {
       'title': 'Timetable',
       'description': 'Allows displaying the program in a table.',
     },
+    FeatureConstants.workshops: {
+      'title': 'Workshops',
+      'description': 'Indicates the start time from when people can sign in for workshops.',
+    },
   };
 
   /// Returns the translated title for the given feature code.

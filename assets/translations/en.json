@@ -534,5 +534,9 @@
   "Offline Map Layer Name": "Offline Map Layer Name",
   "Allows displaying the program in a table.": "Allows displaying the program in a table.",
   "Timetable": "Timetable",
+  "Workshop Registration Start Time": "Workshop Registration Start Time",
+  "Select start time": "Select start time",
+  "Workshops": "Workshops",
+  "Indicates the start time from when people can sign in for workshops.": "Indicates the start time from when people can sign in for workshops.",
   "_":"_"
 }
