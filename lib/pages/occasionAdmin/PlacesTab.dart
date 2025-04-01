@@ -13,7 +13,7 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class PlacesTab extends StatefulWidget {
   const PlacesTab({Key? key}) : super(key: key);
@@ -62,38 +62,38 @@ class _PlacesTabState extends State<PlacesTab> {
       firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
       idColumn: Tb.places.id,
       columns: [
-        PlutoColumn(
+        TrinaColumn(
           title: "Id".tr(),
           field: Tb.places.id,
-          type: PlutoColumnType.number(defaultValue: -1),
+          type: TrinaColumnType.number(defaultValue: -1),
           readOnly: true,
           width: 50,
           renderer: (rendererContext) =>
               DataGridHelper.idRenderer(rendererContext),
         ),
-        PlutoColumn(
+        TrinaColumn(
           title: "Hide".tr(),
           field: Tb.places.is_hidden,
-          type: PlutoColumnType.select([]),
+          type: TrinaColumnType.select([]),
           applyFormatterInEditing: true,
           enableEditingMode: false,
           width: 100,
           renderer: (rendererContext) =>
               DataGridHelper.checkBoxRenderer(rendererContext, Tb.places.is_hidden),
         ),
-        PlutoColumn(
+        TrinaColumn(
           title: "Title".tr(),
           field: Tb.places.title,
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           width: 300,
         ),
-        PlutoColumn(
+        TrinaColumn(
           title: "Content".tr(),
           field: Tb.places.description,
-          type: PlutoColumnType.text(),
+          type: TrinaColumnType.text(),
           width: 300,
         ),
-        PlutoColumn(
+        TrinaColumn(
           title: "Icon".tr(),
           field: Tb.places.icon,
           applyFormatterInEditing: true,
@@ -101,7 +101,7 @@ class _PlacesTabState extends State<PlacesTab> {
             return svgIcons.firstWhereOrNull((i) => i.id == d)?.link ??
                 PlaceModel.WithouValue;
           },
-          type: PlutoColumnType.select(
+          type: TrinaColumnType.select(
             defaultValue: null,
             mapIcons,
             builder: (icon) {
@@ -111,14 +111,14 @@ class _PlacesTabState extends State<PlacesTab> {
           renderer: (rendererContext) =>
               DataGridHelper.mapIconRenderer(context, rendererContext, svgIcons),
         ),
-        PlutoColumn(
+        TrinaColumn(
           width: 150,
           title: "Location on map".tr(),
           enableFilterMenuItem: false,
           enableContextMenu: false,
           enableSorting: false,
           field: Tb.places.coordinates,
-          type: PlutoColumnType.text(
+          type: TrinaColumnType.text(
             defaultValue: FeatureService.getDefaultLocation(),
           ),
           renderer: (rendererContext) {
@@ -147,10 +147,10 @@ class _PlacesTabState extends State<PlacesTab> {
             );
           },
         ),
-        PlutoColumn(
+        TrinaColumn(
           title: "Order".tr(),
           field: Tb.places.order,
-          type: PlutoColumnType.number(defaultValue: null),
+          type: TrinaColumnType.number(defaultValue: null),
           applyFormatterInEditing: true,
           width: 100,
         ),

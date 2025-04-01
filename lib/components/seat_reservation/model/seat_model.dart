@@ -2,7 +2,6 @@ import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 
 import '../utils/seat_state.dart';
 
-
 class SeatModel {
   SeatState seatState;
   final int rowI;

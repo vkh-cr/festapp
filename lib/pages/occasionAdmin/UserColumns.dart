@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class UserColumns {
   // Column identifier constants
@@ -39,140 +39,140 @@ class UserColumns {
   // Define columns statically or through functions if they need data
   static Map<String, dynamic> get columnBuilders => {
     ID: [
-      PlutoColumn(
+      TrinaColumn(
         hide: true,
         title: "Id".tr(),
         field: Tb.occasion_users.user,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         width: 50,
       ),
     ],
     UNIT: [
-      PlutoColumn(
+      TrinaColumn(
         hide: true,
         title: "Unit".tr(),
         field: Tb.unit_users.unit,
-        type: PlutoColumnType.number(),
+        type: TrinaColumnType.number(),
         readOnly: true,
         width: 50,
       ),
     ],
     EMAIL: [
-      PlutoColumn(
+      TrinaColumn(
         title: "E-mail".tr(),
         field: Tb.occasion_users.data_email,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         checkReadOnly: (row, cell) => row.cells[Tb.occasion_users.user]?.value != null,
         width: 200,
       ),
     ],
     NAME: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Name".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.user_info_public.name,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 120,
       ),
     ],
     SURNAME: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Surname".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.user_info_public.surname,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 120,
       ),
     ],
     SEX: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Sex".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.user_info_public.sex,
-        type: PlutoColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
+        type: TrinaColumnType.select(UserInfoModel.sexes, defaultValue: UserInfoModel.sexes.first),
         formatter: (value) => DataGridHelper.textTransform(value, UserInfoModel.sexes, UserInfoModel.sexToLocale),
         applyFormatterInEditing: true,
         width: 100,
       ),
     ],
     PHONE: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Phone".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_phone,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 100,
       ),
     ],
     BIRTHDAY: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Birthday".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_birthDate,
-        type: PlutoColumnType.date(defaultValue: DateTime.now()),
+        type: TrinaColumnType.date(defaultValue: DateTime.now()),
         width: 140,
       ),
     ],
     ROLE: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Role".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.user_info.role,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 100,
       ),
     ],
     TEXT1: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Text1".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text1,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 100,
       ),
     ],
     TEXT2: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Text2".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text2,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 100,
       ),
     ],
     TEXT3: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Číslo týmu (hra)",
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_text3,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 100,
       ),
     ],
     NOTE: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Note".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_note,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     DIET: [
-      PlutoColumn(
+      TrinaColumn(
         title: "Diet".tr(),
         enableEditingMode: RightsService.canUpdateUsers(),
         field: Tb.occasion_users.data_diet,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     FOOD: (Map<String, dynamic> data) {
       if(data[FOOD] == null){
-        return <PlutoColumn>[];
+        return <TrinaColumn>[];
       }
-      var columns = <PlutoColumn>[];
+      var columns = <TrinaColumn>[];
       for(var f in (data[FOOD]) as List<ServiceItemModel>){
         var cc = _foodColumn(f.title!, DbOccasions.serviceTypeFood+f.code);
         columns.add(cc);
@@ -185,10 +185,10 @@ class UserColumns {
       select ??= [];
       select.add("");
       return [
-        PlutoColumn(
+        TrinaColumn(
         title: "Accommodation".tr(),
         field: DbOccasions.serviceTypeAccommodation,
-        type: PlutoColumnType.select(select),
+        type: TrinaColumnType.select(select),
         applyFormatterInEditing: true,
         enableEditingMode: RightsService.canUpdateUsers(),
         width: 100
@@ -207,25 +207,25 @@ class UserColumns {
 
   /// Generates columns based on a list of column identifiers.
   /// Optional `data` map is used for columns that require extra configuration.
-  static List<PlutoColumn> generateColumns(List<String> identifiers, {Map<String, dynamic>? data}) {
+  static List<TrinaColumn> generateColumns(List<String> identifiers, {Map<String, dynamic>? data}) {
     return identifiers
         .where((id) => columnBuilders.containsKey(id)) // Ensure the identifier exists in columnBuilders
         .expand((id) {
       var columnEntry = columnBuilders[id];
-      if (columnEntry is List<PlutoColumn>) {
+      if (columnEntry is List<TrinaColumn>) {
         return columnEntry; // Static columns
       } else if (columnEntry is Function) {
-        return (columnEntry(data ?? {}) as List<PlutoColumn>); // Cast to List<PlutoColumn>
+        return (columnEntry(data ?? {}) as List<TrinaColumn>); // Cast to List<TrinaColumn>
       }
-      return <PlutoColumn>[]; // Return empty list if no match
+      return <TrinaColumn>[]; // Return empty list if no match
     }).toList();
   }
 
-  static PlutoColumn _statusColumn(String title, String field, {bool Function()? canUpdateUser}) {
-    return PlutoColumn(
+  static TrinaColumn _statusColumn(String title, String field, {bool Function()? canUpdateUser}) {
+    return TrinaColumn(
       title: title,
       field: field,
-      type: PlutoColumnType.select([]),
+      type: TrinaColumnType.select([]),
       applyFormatterInEditing: true,
       enableEditingMode: false,
       width: 100,
@@ -234,11 +234,11 @@ class UserColumns {
     );
   }
 
-  static PlutoColumn _foodColumn(String title, String field) {
-    return PlutoColumn(
+  static TrinaColumn _foodColumn(String title, String field) {
+    return TrinaColumn(
       title: title,
       field: field,
-      type: PlutoColumnType.select([]),
+      type: TrinaColumnType.select([]),
       applyFormatterInEditing: true,
       enableEditingMode: false,
       cellPadding: EdgeInsets.all(0),

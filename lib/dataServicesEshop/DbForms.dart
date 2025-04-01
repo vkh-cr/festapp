@@ -149,5 +149,4 @@ class DbForms {
     return formFields;
   }
 
-
 }

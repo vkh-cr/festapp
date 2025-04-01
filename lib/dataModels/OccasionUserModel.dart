@@ -7,9 +7,9 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class OccasionUserModel extends IPlutoRowModel {
+class OccasionUserModel extends ITrinaRowModel {
   static const String birthDateJsonFormat = "yyyy-MM-dd";
 
   DateTime? createdAt;
@@ -106,16 +106,16 @@ class OccasionUserModel extends IPlutoRowModel {
     };
   }
 
-  Map<String, PlutoCell> serviceToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
-    Map<String, PlutoCell> serviceCells = {};
+  Map<String, TrinaCell> serviceToOneColumnTrinaRow(Map<String, dynamic>? services, String serviceType) {
+    Map<String, TrinaCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.key] = TrinaCell(value: entry.value);
     }
     return serviceCells;
   }
 
-  Map<String, PlutoCell> servicesToOneColumnPlutoRow(Map<String, dynamic>? services, String serviceType) {
-    PlutoCell cell = PlutoCell(value: "");
+  Map<String, TrinaCell> servicesToOneColumnTrinaRow(Map<String, dynamic>? services, String serviceType) {
+    TrinaCell cell = TrinaCell(value: "");
     var emptyResult = { serviceType : cell };
     if(services?[serviceType] == null) {
       return emptyResult;
@@ -125,14 +125,14 @@ class OccasionUserModel extends IPlutoRowModel {
       return emptyResult;
     }
     var first = value.first.key;
-    cell = PlutoCell(value: first);
+    cell = TrinaCell(value: first);
     return { serviceType : cell };
   }
 
-  Map<String, PlutoCell> servicesToPlutoRow(Map<String, dynamic>? services, String serviceType) {
-    Map<String, PlutoCell> serviceCells = {};
+  Map<String, TrinaCell> servicesToTrinaRow(Map<String, dynamic>? services, String serviceType) {
+    Map<String, TrinaCell> serviceCells = {};
     for (var entry in services?[serviceType]?.entries ?? []) {
-      serviceCells[serviceType + entry.key] = PlutoCell(value: entry.value);
+      serviceCells[serviceType + entry.key] = TrinaCell(value: entry.value);
     }
     return serviceCells;
   }
@@ -146,34 +146,34 @@ class OccasionUserModel extends IPlutoRowModel {
   String toBasicString() => data?[Tb.occasion_users.data_email] ?? "";
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    Map<String, PlutoCell> json = {};
-    Map<String, PlutoCell> foodServices = servicesToPlutoRow(services, DbOccasions.serviceTypeFood);
+  TrinaRow toTrinaRow(BuildContext context) {
+    Map<String, TrinaCell> json = {};
+    Map<String, TrinaCell> foodServices = servicesToTrinaRow(services, DbOccasions.serviceTypeFood);
     json.addAll(foodServices);
-    json.addAll(servicesToOneColumnPlutoRow(services, DbOccasions.serviceTypeAccommodation));
+    json.addAll(servicesToOneColumnTrinaRow(services, DbOccasions.serviceTypeAccommodation));
     json.addAll({
-      Tb.occasion_users.user: PlutoCell(value: user),
-      Tb.occasion_users.is_editor: PlutoCell(value: isEditor.toString()),
-      Tb.occasion_users.is_editor_view: PlutoCell(value: isEditorView.toString()),
-      Tb.occasion_users.is_manager: PlutoCell(value: isManager.toString()),
-      Tb.occasion_users.is_approved: PlutoCell(value: isApproved.toString()),
-      Tb.occasion_users.is_approver: PlutoCell(value: isApprover.toString()),
-      Tb.occasion_users.role: PlutoCell(value: role?.toString() ?? ""),
-      Tb.occasion_users.data_email: PlutoCell(value: data?[Tb.occasion_users.data_email] ?? ""),
-      Tb.occasion_users.data_name: PlutoCell(value: data?[Tb.occasion_users.data_name] ?? ""),
-      Tb.occasion_users.data_surname: PlutoCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
-      Tb.occasion_users.data_sex: PlutoCell(value: data?[Tb.occasion_users.data_sex]),
-      Tb.occasion_users.data_phone: PlutoCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
-      Tb.occasion_users.data_birthDate: PlutoCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
-      Tb.occasion_users.data_isInvited: PlutoCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
-      Tb.occasion_users.data_note: PlutoCell(value: data?[Tb.occasion_users.data_note] ?? ""),
-      Tb.occasion_users.data_diet: PlutoCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
-      Tb.occasion_users.data_text1: PlutoCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
-      Tb.occasion_users.data_text2: PlutoCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
-      Tb.occasion_users.data_text3: PlutoCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
-      Tb.occasion_users.data_text4: PlutoCell(value: data?[Tb.occasion_users.data_text4] ?? ""),
+      Tb.occasion_users.user: TrinaCell(value: user),
+      Tb.occasion_users.is_editor: TrinaCell(value: isEditor.toString()),
+      Tb.occasion_users.is_editor_view: TrinaCell(value: isEditorView.toString()),
+      Tb.occasion_users.is_manager: TrinaCell(value: isManager.toString()),
+      Tb.occasion_users.is_approved: TrinaCell(value: isApproved.toString()),
+      Tb.occasion_users.is_approver: TrinaCell(value: isApprover.toString()),
+      Tb.occasion_users.role: TrinaCell(value: role?.toString() ?? ""),
+      Tb.occasion_users.data_email: TrinaCell(value: data?[Tb.occasion_users.data_email] ?? ""),
+      Tb.occasion_users.data_name: TrinaCell(value: data?[Tb.occasion_users.data_name] ?? ""),
+      Tb.occasion_users.data_surname: TrinaCell(value: data?[Tb.occasion_users.data_surname] ?? ""),
+      Tb.occasion_users.data_sex: TrinaCell(value: data?[Tb.occasion_users.data_sex]),
+      Tb.occasion_users.data_phone: TrinaCell(value: data?[Tb.occasion_users.data_phone] ?? ""),
+      Tb.occasion_users.data_birthDate: TrinaCell(value: DateTime.tryParse(data?[Tb.occasion_users.data_birthDate] ?? "") ?? DateTime.fromMicrosecondsSinceEpoch(0)),
+      Tb.occasion_users.data_isInvited: TrinaCell(value: data?[Tb.occasion_users.data_isInvited].toString()),
+      Tb.occasion_users.data_note: TrinaCell(value: data?[Tb.occasion_users.data_note] ?? ""),
+      Tb.occasion_users.data_diet: TrinaCell(value: data?[Tb.occasion_users.data_diet] ?? ""),
+      Tb.occasion_users.data_text1: TrinaCell(value: data?[Tb.occasion_users.data_text1] ?? ""),
+      Tb.occasion_users.data_text2: TrinaCell(value: data?[Tb.occasion_users.data_text2] ?? ""),
+      Tb.occasion_users.data_text3: TrinaCell(value: data?[Tb.occasion_users.data_text3] ?? ""),
+      Tb.occasion_users.data_text4: TrinaCell(value: data?[Tb.occasion_users.data_text4] ?? ""),
     });
-    return PlutoRow(cells: json);
+    return TrinaRow(cells: json);
   }
 
   static void mapOneToServices(Map<String, dynamic> services, String serviceType, String? key, String value) {

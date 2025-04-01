@@ -176,7 +176,6 @@ Future<Uint8List> _cachedLoadBinary(String url) async {
   throw Exception("Failed to load binary from $url");
 }
 
-
 class StyleUriMapper {
   final String? _key;
 

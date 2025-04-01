@@ -16,7 +16,6 @@ import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:collection/collection.dart';
 
-
 import '../../components/seat_reservation/model/seat_layout_state_model.dart';
 import '../../components/seat_reservation/model/seat_model.dart';
 import '../../components/seat_reservation/utils/seat_state.dart';
@@ -200,7 +199,6 @@ class _BlueprintTabState extends State<BlueprintTab> {
       ),
     );
   }
-
 
   Widget buildGroupsSection() {
     return blueprint == null
@@ -689,6 +687,5 @@ class _BlueprintTabState extends State<BlueprintTab> {
     setState(() {});
   }
 }
-
 
 enum selectionMode { none, emptyArea, addBlack, addAvailable }

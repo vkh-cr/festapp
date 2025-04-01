@@ -4,13 +4,13 @@ import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'OrderModel.dart';
 import '../components/blueprint/blueprint_object_model.dart';
 import 'ProductModel.dart';
 import 'package:intl/intl.dart';
 
-class TicketModel extends IPlutoRowModel {
+class TicketModel extends ITrinaRowModel {
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -70,34 +70,34 @@ class TicketModel extends IPlutoRowModel {
   };
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      TbEshop.tickets.id: PlutoCell(value: id ?? 0),
-      TbEshop.tickets.created_at: PlutoCell(
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      TbEshop.tickets.id: TrinaCell(value: id ?? 0),
+      TbEshop.tickets.created_at: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
-      TbEshop.tickets.ticket_symbol: PlutoCell(value: ticketSymbol ?? ""),
-      TbEshop.tickets.state: PlutoCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
-      TbEshop.tickets.note: PlutoCell(value: note ?? ""),
-      TbEshop.tickets.note_hidden: PlutoCell(value: noteHidden ?? ""),
-      TbEshop.orders.order_symbol: PlutoCell(
+      TbEshop.tickets.ticket_symbol: TrinaCell(value: ticketSymbol ?? ""),
+      TbEshop.tickets.state: TrinaCell(value: OrderModel.formatState(state ?? OrderModel.orderedState)),
+      TbEshop.tickets.note: TrinaCell(value: note ?? ""),
+      TbEshop.tickets.note_hidden: TrinaCell(value: noteHidden ?? ""),
+      TbEshop.orders.order_symbol: TrinaCell(
           value: relatedOrder != null
               ? relatedOrder!.toBasicString()
               : ""),
-      TbEshop.orders.data: PlutoCell(
+      TbEshop.orders.data: TrinaCell(
           value: relatedOrder != null
               ? relatedOrder!.toCustomerData()
               : ""),
-      metaTicketsProducts: PlutoCell(
+      metaTicketsProducts: TrinaCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
-      metaSpot: PlutoCell(
+      metaSpot: TrinaCell(
           value: relatedSpot != null
               ? relatedSpot?.toShortString()
               : ""),
-      metaPrice: PlutoCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
+      metaPrice: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
     });
   }
 

@@ -203,7 +203,6 @@ class _InfoPageState extends State<InfoPage> {
       }
     }
 
-
     if (_informationList![panelIndex].description == null &&
         !_isItemLoading[panelIndex]!) {
       await loadItemDescription(panelIndex);

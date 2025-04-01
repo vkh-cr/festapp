@@ -225,7 +225,6 @@ class FormHelper {
     return false;
   }
 
-
   static Map<String, dynamic> getDataFromForm(FormHolder formHolder, [bool? returnWithType]) {
     Map<String, dynamic> toReturn = {};
     for (var k in formHolder.fields) {
@@ -527,7 +526,6 @@ class FormHelper {
   static bool anyHasDescription(List<FormOptionModel> options) {
     return options.any((option) => !HtmlHelper.isHtmlEmptyOrNull(option.description));
   }
-
 
   static bool isCardDesign(FormHolder formHolder, FieldHolder field) {
     if(formHolder.isCardDesign == true) {

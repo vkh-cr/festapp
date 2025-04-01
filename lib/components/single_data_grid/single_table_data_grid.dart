@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -8,7 +8,7 @@ import 'package:fstapp/themeConfig.dart';
 
 import 'single_data_grid_controller.dart';
 
-class SingleTableDataGrid<T extends IPlutoRowModel> extends StatefulWidget {
+class SingleTableDataGrid<T extends ITrinaRowModel> extends StatefulWidget {
   final SingleDataGridController<T> controller;
 
   const SingleTableDataGrid(this.controller, {Key? key}) : super(key: key);
@@ -17,7 +17,7 @@ class SingleTableDataGrid<T extends IPlutoRowModel> extends StatefulWidget {
   _SingleTableDataGridState<T> createState() => _SingleTableDataGridState<T>();
 }
 
-class _SingleTableDataGridState<T extends IPlutoRowModel>
+class _SingleTableDataGridState<T extends ITrinaRowModel>
     extends State<SingleTableDataGrid<T>> {
   bool isLoading = true;
   bool isDataGridLoading = true;
@@ -58,14 +58,14 @@ class _SingleTableDataGridState<T extends IPlutoRowModel>
       decoration: BoxDecoration(
         color: ThemeConfig.whiteColor(widget.controller.context),
       ),
-      child: PlutoGrid(
+      child: TrinaGrid(
         noRowsWidget: isDataGridLoading
             ? null
             : Center(child: Text("Table does not contain any items").tr()),
         columns: widget.controller.columns,
         rows: [],
-        onChanged: (PlutoGridOnChangedEvent event) {
-          if (event.row.state == PlutoRowState.updated) {
+        onChanged: (TrinaGridOnChangedEvent event) {
+          if (event.row.state == TrinaRowState.updated) {
             if (event.row.cells[widget.controller.idColumn]?.value != -1) {
               widget.controller.deletedRows.remove(event.row);
               if (!widget.controller.newRows.contains(event.row)) {
@@ -74,9 +74,9 @@ class _SingleTableDataGridState<T extends IPlutoRowModel>
             }
           }
         },
-        onLoaded: (PlutoGridOnLoadedEvent event) {
+        onLoaded: (TrinaGridOnLoadedEvent event) {
           widget.controller.stateManager = event.stateManager;
-          event.stateManager.setSelectingMode(PlutoGridSelectingMode.cell);
+          event.stateManager.setSelectingMode(TrinaGridSelectingMode.cell);
           event.stateManager.setShowColumnFilter(true);
           widget.controller.applyDataToGrid();
           isDataGridLoading = false;
@@ -104,7 +104,7 @@ class _SingleTableDataGridState<T extends IPlutoRowModel>
           stateManager: stateManager,
           controller: widget.controller,
         ),
-        configuration: SingleDataGridHeader.defaultPlutoGridConfiguration(
+        configuration: SingleDataGridHeader.defaultTrinaGridConfiguration(
           widget.controller.context,
           widget.controller.context.locale.languageCode,
         ),

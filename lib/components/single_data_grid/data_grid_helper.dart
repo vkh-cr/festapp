@@ -12,14 +12,14 @@ import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class DataGridHelper
 {
   static Widget buildHtmlEditorButton({
     required BuildContext context,
     required String field,
-    required PlutoColumnRendererContext rendererContext,
+    required TrinaColumnRendererContext rendererContext,
     required Future<String?> Function() loadContent,
   }) {
     String? textToEdit;
@@ -182,7 +182,6 @@ class DataGridHelper
     );
   }
 
-
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
     return iconToRow(context, value, icons);
@@ -218,13 +217,13 @@ class DataGridHelper
     return Text(value);
   }
 
-  static PlutoGridLocaleText getPlutoLocaleFromLangCode(String langCode)
+  static TrinaGridLocaleText getPlutoLocaleFromLangCode(String langCode)
   {
     switch(langCode)
     {
-      case "cs": return const PlutoGridLocaleText.czech();
-      case "de": return const PlutoGridLocaleText.german();
-      case "sk": return const PlutoGridLocaleText(
+      case "cs": return const TrinaGridLocaleText.czech();
+      case "de": return const TrinaGridLocaleText.german();
+      case "sk": return const TrinaGridLocaleText(
           // Column menu
           unfreezeColumn: 'Odomknúť stĺpec',
           freezeColumnToStart: 'Zmraziť stĺpec na začiatok',
@@ -263,7 +262,7 @@ class DataGridHelper
           // Common
           loadingText: 'Načíta sa',
       );
-      case "pl": return const PlutoGridLocaleText(
+      case "pl": return const TrinaGridLocaleText(
         // Column menu
         unfreezeColumn: 'Odblokuj kolumnę',
         freezeColumnToStart: 'Zamroź kolumnę na początku',
@@ -302,7 +301,7 @@ class DataGridHelper
         // Common
         loadingText: 'Ładowanie',
       );
-      case "uk": return const PlutoGridLocaleText(
+      case "uk": return const TrinaGridLocaleText(
         unfreezeColumn: 'Розблокувати стовпець',
         freezeColumnToStart: 'Заморозити стовпець на початок',
         freezeColumnToEnd: 'Заморозити стовпець на кінець',
@@ -337,7 +336,7 @@ class DataGridHelper
       );
     }
 
-    return const PlutoGridLocaleText();
+    return const TrinaGridLocaleText();
   }
 
   static textTransform(String? value, List<String> allValues, String Function(String?) transform) {

@@ -25,7 +25,6 @@ class AuthService {
   static const REFRESH_TOKEN_KEY = 'refresh';
   static const metaLang = 'lang';
 
-
   static Future<void> login(String email, String password) async {
     var data = await _supabase.auth
         .signInWithPassword(email: email, password: password);

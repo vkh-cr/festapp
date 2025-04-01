@@ -132,7 +132,6 @@ class DbOrders {
     return orders;
   }
 
-
   static Future<void> deleteOrder(OrderModel model) async {
     final response = await _supabase.rpc(
       'delete_order',

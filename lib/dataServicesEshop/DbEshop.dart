@@ -61,7 +61,6 @@ class DbEshop {
       params: {'payment_info_id': paymentInfoId},
     );
 
-
     if (response != null) {
       return List<TransactionModel>.from(response.map((x) => TransactionModel.fromJson(x)));
     }

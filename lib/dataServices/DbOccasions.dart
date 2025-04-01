@@ -138,7 +138,6 @@ class DbOccasions {
       ticketDetails.ticketBackground = cpy;
     }
 
-
     var ocImage = occasion.data?["image"];
     if(ocImage != null)
     {
