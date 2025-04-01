@@ -1,12 +1,12 @@
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
+import 'package:fstapp/components/blueprint/blueprint_group.dart';
+import 'package:fstapp/components/blueprint/blueprint_helper.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
-import 'BlueprintConfiguration.dart';
-import 'BlueprintObjectModel.dart';
+import 'blueprint_configuration.dart';
+import 'blueprint_object_model.dart';
 
 class BlueprintModel {
   static const String metaSpots = "spots";

@@ -1,10 +1,10 @@
 import 'package:flutter/gestures.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timetable/TimelineWidget.dart';
-import 'package:fstapp/components/timetable/TimetableItemsWidget.dart';
+import 'package:fstapp/components/timetable/timeline_widget.dart';
+import 'package:fstapp/components/timetable/timetable_items_widget.dart';
 import 'package:fstapp/themeConfig.dart';
 
 class TimetableController {

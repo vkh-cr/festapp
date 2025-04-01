@@ -1,3 +1,4 @@
+import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/dataModels/GameSettingsModel.dart';
 import 'package:fstapp/dataModels/ImageModel.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
@@ -5,9 +6,8 @@ import 'package:fstapp/dataModels/ServiceItemModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/Feature.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOccasions {

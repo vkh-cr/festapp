@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/themeConfig.dart';
 
-import '../utils/SeatState.dart';
+import '../utils/seat_state.dart';
 
 class SeatWidgetHelper {
   static const double padding = 2.5;

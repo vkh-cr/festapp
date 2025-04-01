@@ -1,6 +1,6 @@
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 
-import '../utils/SeatState.dart';
+import '../utils/seat_state.dart';
 
 
 class SeatModel {

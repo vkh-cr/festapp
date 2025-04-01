@@ -1,6 +1,6 @@
-// Feature.dart
-import 'FeatureConstants.dart';
-import 'FeatureMetadata.dart';
+// feature.dart
+import 'feature_constants.dart';
+import 'feature_metadata.dart';
 
 /// Base abstract class for all features.
 abstract class Feature {

@@ -6,7 +6,7 @@ import 'package:fstapp/dataServicesEshop/DbTickets.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:pluto_grid_plus/pluto_grid_plus.dart';
 import 'OrderModel.dart';
-import 'BlueprintObjectModel.dart';
+import '../components/blueprint/blueprint_object_model.dart';
 import 'ProductModel.dart';
 import 'package:intl/intl.dart';
 

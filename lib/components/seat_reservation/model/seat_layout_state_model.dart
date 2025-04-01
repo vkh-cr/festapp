@@ -1,5 +1,5 @@
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
-import 'SeatModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'seat_model.dart';
 
 class SeatLayoutStateModel {
   final int rows;

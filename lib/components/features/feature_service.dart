@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/Feature.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
+
+import 'feature.dart';
+import 'feature_constants.dart';
 
 class FeatureService {
   /// Checks whether the feature with [featureCode] is enabled.

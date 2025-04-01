@@ -1,4 +1,3 @@
-// FeatureConstants.dart
 class FeatureConstants {
   // Core keys
   static const String metaIsEnabled = "is_enabled";

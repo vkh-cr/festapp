@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/components/map/MapPlaceModel.dart';
+import 'package:fstapp/components/map/map_place_model.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
 import 'package:fstapp/themeConfig.dart';
 

@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'FeatureConstants.dart';
+import 'feature_constants.dart';
 
 class FeatureMetadata {
   // Store the raw translation keys without immediately invoking .tr()

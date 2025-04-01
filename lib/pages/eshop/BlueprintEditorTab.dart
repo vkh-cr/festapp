@@ -1,10 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/seatReservation/widgets/SeatWidget.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintGroup.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/seat_reservation/widgets/seat_widget.dart';
+import 'package:fstapp/components/blueprint/blueprint_group.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
@@ -13,14 +13,14 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
-import 'package:fstapp/widgets/SeatReservationWidget.dart';
+import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
 import 'package:collection/collection.dart';
 
 
-import '../../components/seatReservation/model/SeatLayoutStateModel.dart';
-import '../../components/seatReservation/model/SeatModel.dart';
-import '../../components/seatReservation/utils/SeatState.dart';
-import '../../components/seatReservation/widgets/SeatLayoutWidget.dart';
+import '../../components/seat_reservation/model/seat_layout_state_model.dart';
+import '../../components/seat_reservation/model/seat_model.dart';
+import '../../components/seat_reservation/utils/seat_state.dart';
+import '../../components/seat_reservation/widgets/seat_layout_widget.dart';
 
 class BlueprintTab extends StatefulWidget {
 

@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbForms.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
@@ -9,10 +9,10 @@ import 'package:fstapp/services/ToastHelper.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
 import 'package:fstapp/widgets/ButtonsHelper.dart';
 
-import '../components/seatReservation/model/SeatLayoutStateModel.dart';
-import '../components/seatReservation/model/SeatModel.dart';
-import '../components/seatReservation/utils/SeatState.dart';
-import '../components/seatReservation/widgets/SeatLayoutWidget.dart';
+import '../model/seat_layout_state_model.dart';
+import '../model/seat_model.dart';
+import '../utils/seat_state.dart';
+import 'seat_layout_widget.dart';
 
 class SeatReservationWidget extends StatefulWidget {
   static const int boxSize = 15;

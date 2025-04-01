@@ -2,12 +2,13 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
-import 'package:fstapp/services/features/Feature.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/services/features/FeatureMetadata.dart';
 import 'package:fstapp/widgets/ImageArea.dart';
 import 'package:fstapp/themeConfig.dart';
+
+import 'feature.dart';
+import 'feature_metadata.dart';
 
 class FeatureForm extends StatefulWidget {
   final Feature feature;

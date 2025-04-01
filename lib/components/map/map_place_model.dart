@@ -1,4 +1,4 @@
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:latlong2/latlong.dart';
 
