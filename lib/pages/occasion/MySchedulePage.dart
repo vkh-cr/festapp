@@ -5,8 +5,8 @@ import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
-import 'package:fstapp/components/timeline/ScheduleTimeline.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 
 import 'package:fstapp/styles/StylesConfig.dart';

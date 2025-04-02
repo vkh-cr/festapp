@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-abstract class IPlutoRowModel {
+abstract class ITrinaRowModel {
   dynamic get id;
 
-  PlutoRow? toPlutoRow(BuildContext context);
+  TrinaRow? toTrinaRow(BuildContext context);
   Future<void> deleteMethod();
   Future<void> updateMethod();
   String toBasicString();

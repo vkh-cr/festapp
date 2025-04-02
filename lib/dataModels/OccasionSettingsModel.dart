@@ -6,7 +6,6 @@ import 'package:fstapp/dataModels/Tb.dart';
 class OccasionSettingsModel {
   DateTime? eventStartTime;
   DateTime? eventEndTime;
-  DateTime? eventsRegistrationTime;
   Map<String, dynamic>? services;
 
   // Game fields
@@ -21,7 +20,6 @@ class OccasionSettingsModel {
   OccasionSettingsModel({
     this.eventStartTime,
     this.eventEndTime,
-    this.eventsRegistrationTime,
     this.services,
     this.gameStartTime,
     this.gameEndTime,
@@ -49,9 +47,6 @@ class OccasionSettingsModel {
       eventEndTime: json[Tb.occasions.end_time] != null
           ? DateTime.tryParse(json[Tb.occasions.end_time])
           : null,
-      eventsRegistrationTime: dataPart[Tb.occasions.data_events_registration_start] != null
-          ? DateTime.tryParse(dataPart[Tb.occasions.data_events_registration_start])
-          : null,
       gameStartTime: gameSettings[Tb.occasions.data_game_start] != null
           ? DateTime.tryParse(gameSettings[Tb.occasions.data_game_start])
           : null,
@@ -66,7 +61,6 @@ class OccasionSettingsModel {
   Map<String, dynamic> toJson() => {
     Tb.occasions.services: services,
     Tb.occasions.data: {
-      Tb.occasions.data_events_registration_start: eventsRegistrationTime?.toIso8601String(),
       Tb.occasions.data_game: {
         Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
         Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),

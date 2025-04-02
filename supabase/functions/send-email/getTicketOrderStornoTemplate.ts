@@ -1,4 +1,4 @@
-import { getSupabaseUser, isUserEditor, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
 
 export async function getTicketOrderStornoTemplate(reqData: any, authorizationHeader: string) {
@@ -26,7 +26,7 @@ export async function getTicketOrderStornoTemplate(reqData: any, authorizationHe
   const userId = user.user.id;
 
   // Check if the user is an editor for the occasion
-  const isEditor = await isUserEditor(userId, occasionId);
+  const isEditor = await isUserEditorOrder(userId, occasionId);
   if (!isEditor) {
     console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
     throw new Error("Forbidden: Not an editor");

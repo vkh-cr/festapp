@@ -6,7 +6,7 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/ExclusiveGroupModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class ExclusivityContent extends StatefulWidget {
   const ExclusivityContent({Key? key}) : super(key: key);
@@ -39,27 +39,27 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.exclusive_groups.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.exclusive_groups.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             enableEditingMode: false,
             width: 50,
             renderer: (rendererContext) =>
                 DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Name".tr(),
             field: Tb.exclusive_groups.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 300,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Events".tr(),
             field: ExclusiveGroupModel.eventsColumn,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 500,
           ),
         ],
