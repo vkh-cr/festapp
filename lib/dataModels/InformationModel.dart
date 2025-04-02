@@ -3,10 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-
-class InformationModel extends IPlutoRowModel {
+class InformationModel extends ITrinaRowModel {
   static const String gameType = "game";
   static const String songType = "song";
   static const String quoteType = "quote";
@@ -27,7 +26,6 @@ class InformationModel extends IPlutoRowModel {
   bool isExpanded = false;
 
   static const String informationOffline = "information";
-
 
   factory InformationModel.fromJson(Map<String, dynamic> json) {
     return InformationModel(
@@ -108,18 +106,18 @@ class InformationModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      Tb.information.id: PlutoCell(value: id ?? -1),
-      Tb.information.title: PlutoCell(value: title ?? ""),
-      Tb.information.description: PlutoCell(value: description),
-      Tb.information.type: PlutoCell(value: type ?? ""),
-      Tb.information.is_hidden: PlutoCell(value: isHidden.toString()),
-      Tb.information.order: PlutoCell(value: order),
-      Tb.information.unit: PlutoCell(value: unit),
-      Tb.information.data_correct: PlutoCell(value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
-      Tb.information.data_correct_reference: PlutoCell(value: informationHidden?.id),
-      Tb.information.data_date: PlutoCell(value:
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      Tb.information.id: TrinaCell(value: id ?? -1),
+      Tb.information.title: TrinaCell(value: title ?? ""),
+      Tb.information.description: TrinaCell(value: description),
+      Tb.information.type: TrinaCell(value: type ?? ""),
+      Tb.information.is_hidden: TrinaCell(value: isHidden.toString()),
+      Tb.information.order: TrinaCell(value: order),
+      Tb.information.unit: TrinaCell(value: unit),
+      Tb.information.data_correct: TrinaCell(value: informationHidden?.data?[Tb.information.data_correct] ?? ""),
+      Tb.information.data_correct_reference: TrinaCell(value: informationHidden?.id),
+      Tb.information.data_date: TrinaCell(value:
         data?[Tb.information.data_date] != null ?
         DateFormat('yyyy-MM-dd').format(DateTime.parse(data?[Tb.information.data_date])) : DateTime.now()),
     });

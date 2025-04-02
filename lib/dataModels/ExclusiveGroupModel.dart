@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataServices/DbEvents.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class ExclusiveGroupModel extends IPlutoRowModel {
+class ExclusiveGroupModel extends ITrinaRowModel {
 
   int? id;
   String? title;
@@ -23,15 +23,12 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   );
   }
 
-
   static const String idColumn = "id";
   static const String titleColumn = "title";
   static const String eventsColumn = "events";
   static const String exclusiveGroupsTable = "exclusive_groups";
   static const String exclusiveEventsTable = "exclusive_events";
   static const String exclusiveEventsGroupColumn = "group";
-
-
 
   static ExclusiveGroupModel fromPlutoJson(Map<String, dynamic> json) {
 
@@ -49,11 +46,11 @@ class ExclusiveGroupModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      idColumn: PlutoCell(value: id),
-      titleColumn: PlutoCell(value: title),
-      eventsColumn: PlutoCell(value: events?.map((e) => e.toString()).join(",")??"")
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      idColumn: TrinaCell(value: id),
+      titleColumn: TrinaCell(value: title),
+      eventsColumn: TrinaCell(value: events?.map((e) => e.toString()).join(",")??"")
     });
   }
 

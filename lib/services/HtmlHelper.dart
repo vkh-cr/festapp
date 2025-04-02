@@ -236,7 +236,6 @@ class HtmlHelper {
         imageData = fetched;
       }
 
-
       var compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
       // Upload the compressed image and get the public URL.
       final publicUrl = await DbImages.uploadImage(compressedImageData, occasionId, null);

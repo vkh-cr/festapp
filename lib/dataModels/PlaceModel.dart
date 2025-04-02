@@ -3,10 +3,9 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-
-class PlaceModel extends IPlutoRowModel {
+class PlaceModel extends ITrinaRowModel {
   dynamic latLng;
   int? id;
   String? title;
@@ -22,7 +21,6 @@ class PlaceModel extends IPlutoRowModel {
   static const String placeObjectColumn = "placeObject";
 
   List<EventModel> events = [];
-
 
   double getLat() => latLng["lat"];
   double getLng() => latLng["lng"];
@@ -88,16 +86,16 @@ class PlaceModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      Tb.places.id: PlutoCell(value: id),
-      Tb.places.title: PlutoCell(value: title),
-      Tb.places.description: PlutoCell(value: description ?? ""),
-      Tb.places.coordinates: PlutoCell(value: latLng),
-      Tb.places.type: PlutoCell(value: type ?? WithouValue),
-      Tb.places.is_hidden: PlutoCell(value: isHidden.toString()),
-      Tb.places.order: PlutoCell(value: order),
-      Tb.places.icon: PlutoCell(value: icon),
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      Tb.places.id: TrinaCell(value: id),
+      Tb.places.title: TrinaCell(value: title),
+      Tb.places.description: TrinaCell(value: description ?? ""),
+      Tb.places.coordinates: TrinaCell(value: latLng),
+      Tb.places.type: TrinaCell(value: type ?? WithouValue),
+      Tb.places.is_hidden: TrinaCell(value: isHidden.toString()),
+      Tb.places.order: TrinaCell(value: order),
+      Tb.places.icon: TrinaCell(value: icon),
     });
   }
 

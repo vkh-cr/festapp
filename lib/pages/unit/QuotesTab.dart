@@ -7,7 +7,7 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class QuotesTab extends StatelessWidget {
   final int unitId;
@@ -27,37 +27,37 @@ class QuotesTab extends StatelessWidget {
         idColumn: Tb.information.id,
         newObject: () => InformationModel.newRow(unitId),
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.information.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
             renderer: (rendererContext) =>
                 DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Unit".tr(),
             field: Tb.information.unit,
-            type: PlutoColumnType.number(
+            type: TrinaColumnType.number(
                 defaultValue: RightsService.currentUnit!.id!),
             readOnly: true,
             width: 50,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Date".tr(),
             enableAutoEditing: true,
             field: Tb.information.data_date,
-            type: PlutoColumnType.date(),
+            type: TrinaColumnType.date(),
             width: 300,
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Content".tr(),
             field: Tb.information.description,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,

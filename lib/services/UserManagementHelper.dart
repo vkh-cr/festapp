@@ -149,7 +149,6 @@ class UserManagementHelper{
 
     if (!proceed) return;
 
-
     await DialogHelper.showProgressDialogAsync(
       context,
       "Removing users".tr(),

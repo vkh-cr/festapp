@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
+import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'field_holder.dart';
 
 class FormTicketModel {
