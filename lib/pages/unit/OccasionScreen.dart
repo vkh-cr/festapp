@@ -60,7 +60,6 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
     );
   }
 
-
   /// Handles viewing an occasion.
   Future<void> _handleView(OccasionModel occasion) async {
     await RightsService.updateOccasionData(occasion.link!);

@@ -382,9 +382,6 @@ class DbEvents {
         }
         return;
       }
-      case 403:
-        ToastHelper.Show(context, "Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
-        return;
       case 100: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"Event is over.".tr()}", severity: ToastSeverity.NotOk); return;
       case 101: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"Event is full.".tr()}", severity: ToastSeverity.NotOk); return;
       case 102: {
@@ -441,6 +438,10 @@ class DbEvents {
       }
       case 105: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"There is already the maximum of men.".tr()}", severity: ToastSeverity.NotOk); return;
       case 106: ToastHelper.Show(context, "${"Cannot sign in!".tr()} ${"There is already the maximum of women.".tr()}", severity: ToastSeverity.NotOk); return;
+      //403, 108
+      default:
+        ToastHelper.Show(context, "Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
+        return;
     }
   }
 

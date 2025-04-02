@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 
-class UnitUserModel extends IPlutoRowModel {
+class UnitUserModel extends ITrinaRowModel {
   int? unit;
   String? user;
   String? name;
@@ -50,21 +50,21 @@ class UnitUserModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    final Map<String, PlutoCell> cells = {
-      "id": PlutoCell(value: user),
-      Tb.unit_users.user: PlutoCell(value: user),
-      Tb.unit_users.unit: PlutoCell(value: unit),
-      Tb.occasion_users.data_name: PlutoCell(value: name ?? ""),
-      Tb.occasion_users.data_surname: PlutoCell(value: surname ?? ""),
-      Tb.occasion_users.data_sex: PlutoCell(value: sex ?? ""),
-      Tb.occasion_users.data_email: PlutoCell(value: emailReadonly ?? ""),
-      Tb.occasion_users.is_manager: PlutoCell(value: isManager.toString()),
-      Tb.occasion_users.is_editor: PlutoCell(value: isEditor.toString()),
-      Tb.occasion_users.is_editor_view: PlutoCell(value: isEditorView.toString()),
+  TrinaRow toTrinaRow(BuildContext context) {
+    final Map<String, TrinaCell> cells = {
+      "id": TrinaCell(value: user),
+      Tb.unit_users.user: TrinaCell(value: user),
+      Tb.unit_users.unit: TrinaCell(value: unit),
+      Tb.occasion_users.data_name: TrinaCell(value: name ?? ""),
+      Tb.occasion_users.data_surname: TrinaCell(value: surname ?? ""),
+      Tb.occasion_users.data_sex: TrinaCell(value: sex ?? ""),
+      Tb.occasion_users.data_email: TrinaCell(value: emailReadonly ?? ""),
+      Tb.occasion_users.is_manager: TrinaCell(value: isManager.toString()),
+      Tb.occasion_users.is_editor: TrinaCell(value: isEditor.toString()),
+      Tb.occasion_users.is_editor_view: TrinaCell(value: isEditorView.toString()),
     };
 
-    return PlutoRow(cells: cells);
+    return TrinaRow(cells: cells);
   }
 
   factory UnitUserModel.newRow(int unitId) {

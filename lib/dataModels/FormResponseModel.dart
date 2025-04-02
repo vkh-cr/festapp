@@ -8,9 +8,9 @@ import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class FormResponseModel extends IPlutoRowModel {
+class FormResponseModel extends ITrinaRowModel {
   int? id;
   OrderModel? order;
   Map<String, dynamic>? fields;
@@ -29,13 +29,13 @@ class FormResponseModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
+  TrinaRow toTrinaRow(BuildContext context) {
     // Initialize the cells with fixed fields
-    Map<String, PlutoCell> cells = {
-      TbEshop.orders.id: PlutoCell(value: id),
-      TbEshop.orders.order_symbol: PlutoCell(value: order!.id),
-      TbEshop.orders.state: PlutoCell(value: order!.state),
-      TicketModel.metaTicketsProducts: PlutoCell(
+    Map<String, TrinaCell> cells = {
+      TbEshop.orders.id: TrinaCell(value: id),
+      TbEshop.orders.order_symbol: TrinaCell(value: order!.id),
+      TbEshop.orders.state: TrinaCell(value: order!.state),
+      TicketModel.metaTicketsProducts: TrinaCell(
           value: order!.relatedProducts != null
               ? order!.relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
@@ -43,11 +43,11 @@ class FormResponseModel extends IPlutoRowModel {
 
     for (var f in allFields!) {
       if(fields == null) {
-        cells[f.id.toString()] = PlutoCell(value: '');
+        cells[f.id.toString()] = TrinaCell(value: '');
         continue;
       }
       if(f.type == FormHelper.fieldTypeSex){
-        cells[f.id.toString()] = PlutoCell(value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
+        cells[f.id.toString()] = TrinaCell(value: UserInfoModel.sexToLocale(fields![f.id.toString()]));
         continue;
       }
       if (f.type == FormHelper.fieldTypeBirthDate) {
@@ -58,14 +58,14 @@ class FormResponseModel extends IPlutoRowModel {
         String formattedDate = dt == null ? "" : '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
 
         // Assign the formatted date string to the cell.
-        cells[f.id.toString()] = PlutoCell(value: formattedDate);
+        cells[f.id.toString()] = TrinaCell(value: formattedDate);
         continue;
       }
       var rValue = Utilities.removeTabsAndNewLines(fields![f.id.toString()] ?? "");
-      cells[f.id.toString()] = PlutoCell(value: rValue);
+      cells[f.id.toString()] = TrinaCell(value: rValue);
     }
 
-    return PlutoRow(cells: cells);
+    return TrinaRow(cells: cells);
   }
 
   factory FormResponseModel.fromOrder(OrderModel order, List<FormFieldModel> allFields) {

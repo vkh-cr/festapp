@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'pluto_abstract.dart';
 import 'data_grid_action.dart';
 import 'single_data_grid_header.dart';
 
 enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
 
-class SingleDataGridController<T extends IPlutoRowModel> {
+class SingleDataGridController<T extends ITrinaRowModel> {
   ValueNotifier<Key> refreshKeyNotifier = ValueNotifier(UniqueKey());
 
-  late PlutoGridStateManager stateManager;
-  Set<PlutoRow> updatedRows = {};
-  Set<PlutoRow> deletedRows = {};
-  Set<PlutoRow> newRows = {};
-  List<PlutoRow> rows = [];
-  List<PlutoColumn> columns = [];
+  late TrinaGridStateManager stateManager;
+  Set<TrinaRow> updatedRows = {};
+  Set<TrinaRow> deletedRows = {};
+  Set<TrinaRow> newRows = {};
+  List<TrinaRow> rows = [];
+  List<TrinaColumn> columns = [];
   final Future<List<T>> Function() loadData;
   final DataGridFirstColumn firstColumnType;
   final String idColumn;
@@ -40,9 +40,9 @@ class SingleDataGridController<T extends IPlutoRowModel> {
 
   /// Loads data and stores it in [rows] without modifying the grid.
   Future<void> loadDataOnly() async {
-    var defaultRow = {firstColumnTypeId: PlutoCell(value: "delete")};
+    var defaultRow = {firstColumnTypeId: TrinaCell(value: "delete")};
     final dataList = await loadData();
-    var rowList = dataList.map((i) => i.toPlutoRow(context)!).toList();
+    var rowList = dataList.map((i) => i.toTrinaRow(context)!).toList();
     for (var element in rowList) {
       element.cells.addAll(defaultRow);
     }
@@ -61,10 +61,10 @@ class SingleDataGridController<T extends IPlutoRowModel> {
     if (stateManager.columns.isNotEmpty &&
         stateManager.columns.first.field != firstColumnTypeId &&
         firstColumnType != DataGridFirstColumn.none) {
-      var firstColumn = PlutoColumn(
+      var firstColumn = TrinaColumn(
         title: "",
         field: firstColumnTypeId,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         readOnly: true,
         enableFilterMenuItem: false,
         enableSorting: false,
@@ -93,7 +93,7 @@ class SingleDataGridController<T extends IPlutoRowModel> {
                   } else {
                     deletedRows.add(row);
                   }
-                  row.setState(PlutoRowState.updated);
+                  row.setState(TrinaRowState.updated);
                   rendererContext.stateManager.notifyListeners();
                 },
                 icon: const Icon(Icons.delete_forever),

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/components/timeline/ScheduleTabView.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_tab_view.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/dataModels/EventModel.dart';
 import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataServices/AuthService.dart';
@@ -14,8 +14,9 @@ import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/OfflineDataService.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/pages/occasion/MySchedulePage.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/EventPage.dart';
 import 'package:fstapp/pages/occasion/MySchedulePage.dart';
 import 'package:fstapp/pages/unit/UnitPage.dart';
@@ -139,6 +140,11 @@ class _SchedulePageState extends State<SchedulePage>
         .then((value) => loadData());
   }
 
+  void _mySchedulePressed() {
+    RouterService.navigateOccasion(context, MySchedulePage.ROUTE)
+        .then((value) => loadData());
+  }
+
   void _eventPressed(int id) {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
         .then((_) => loadData());
@@ -177,6 +183,16 @@ class _SchedulePageState extends State<SchedulePage>
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+                    Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
+                      CircularButton(
+                        onPressed: _mySchedulePressed,
+                        backgroundColor: ThemeConfig.profileButtonColor(context),
+                        child: Icon(Icons.favorite,
+                            color: ThemeConfig.profileButtonTextColor(context)),
+                      ),
+                      Text("My schedule".tr()),
+                    ]),
+                  if(FeatureService.isFeatureEnabled(FeatureConstants.timetable))
                   Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
                     CircularButton(
                       onPressed: _mySchedulePressed,
@@ -184,7 +200,7 @@ class _SchedulePageState extends State<SchedulePage>
                       child: Icon(Icons.favorite,
                           color: ThemeConfig.profileButtonTextColor(context)),
                     ),
-                    Text("My schedule".tr()),
+                    Text("Schedule".tr()),
                   ]),
                 ]),
           ),
