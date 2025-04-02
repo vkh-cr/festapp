@@ -28,7 +28,7 @@ BEGIN
 
   -- If an occasion is provided, perform the permission check.
   IF v_occ IS NOT NULL THEN
-    IF (SELECT get_is_editor_view_on_occasion(oc)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(oc)) <> TRUE THEN
+    IF (SELECT get_is_editor_view_on_occasion(v_occ)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(v_occ)) <> TRUE THEN
        RAISE EXCEPTION 'User is not editor view.';
     END IF;
   END IF;
