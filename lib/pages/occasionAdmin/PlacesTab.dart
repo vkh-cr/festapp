@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/dataModels/IconModel.dart';
@@ -11,12 +10,11 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PlacesTab extends StatefulWidget {
-  const PlacesTab({Key? key}) : super(key: key);
+  const PlacesTab({super.key});
 
   @override
   _PlacesTabState createState() => _PlacesTabState();
@@ -55,7 +53,7 @@ class _PlacesTabState extends State<PlacesTab> {
   }
 
   void initController() {
-    controller = SingleDataGridController<PlaceModel>(
+    controller ??= SingleDataGridController<PlaceModel>(
       context: context,
       loadData: DbPlaces.getAllPlaces,
       fromPlutoJson: PlaceModel.fromPlutoJson,
@@ -74,7 +72,7 @@ class _PlacesTabState extends State<PlacesTab> {
         TrinaColumn(
           title: "Hide".tr(),
           field: Tb.places.is_hidden,
-          type: TrinaColumnType.select([]),
+          type: TrinaColumnType.text(),
           applyFormatterInEditing: true,
           enableEditingMode: false,
           width: 100,
@@ -114,6 +112,8 @@ class _PlacesTabState extends State<PlacesTab> {
         TrinaColumn(
           width: 150,
           title: "Location on map".tr(),
+          applyFormatterInEditing: true,
+          enableEditingMode: false,
           enableFilterMenuItem: false,
           enableContextMenu: false,
           enableSorting: false,
@@ -125,15 +125,15 @@ class _PlacesTabState extends State<PlacesTab> {
             return ElevatedButton(
               onPressed: () async {
                 var placeModel = PlaceModel.fromPlutoJson(rendererContext.row.toJson());
-                RouterService.navigatePageInfo(
+                var value = await RouterService.navigatePageInfo(
                   context,
                   MapRoute(place: placeModel),
-                ).then((value) async {
-                  if (value != null) {
-                    var cell = rendererContext.row.cells[Tb.places.coordinates]!;
-                    rendererContext.stateManager.changeCellValue(cell, value, force: true);
-                  }
-                });
+                );
+                if (value != null) {
+                  var cell = rendererContext.row.cells[Tb.places.coordinates]!;
+                  rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
+                  rendererContext.cell.value = value;
+                }
               },
               child: Row(
                 children: [

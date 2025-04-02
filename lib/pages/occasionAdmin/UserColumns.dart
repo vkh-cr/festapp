@@ -237,7 +237,7 @@ class UserColumns {
     return TrinaColumn(
       title: title,
       field: field,
-      type: TrinaColumnType.select([]),
+      type: TrinaColumnType.text(),
       applyFormatterInEditing: true,
       enableEditingMode: false,
       cellPadding: EdgeInsets.all(0),
