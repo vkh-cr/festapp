@@ -12,7 +12,9 @@ BEGIN
     END IF;
 
     -- Verify if the user is an editor on the occasion
-    PERFORM public.check_is_editor_view_on_occasion(occasion_id);
+    IF (SELECT get_is_editor_order_on_occasion(oc)) <> TRUE THEN
+        RAISE EXCEPTION 'User is not editor.';
+    END IF;
 
     -- Call the original function to update the order and tickets
     RETURN update_order_and_tickets_to_storno(order_id);

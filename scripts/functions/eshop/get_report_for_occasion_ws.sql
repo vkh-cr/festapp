@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION get_report_for_occasion_with_security(form_link TEXT)
+CREATE OR REPLACE FUNCTION get_report_for_occasion_ws(form_link TEXT)
 RETURNS jsonb SECURITY DEFINER AS $$
 DECLARE
     occasion_id bigint;
@@ -16,7 +16,7 @@ BEGIN
     END IF;
 
     -- Verify if the user is an editor on the occasion
-    IF NOT get_is_editor_view_on_occasion(occasion_id) THEN
+    IF NOT get_is_editor_order_view_on_occasion(occasion_id) THEN
         RAISE EXCEPTION 'User is not authorized to edit this occasion.';
     END IF;
 

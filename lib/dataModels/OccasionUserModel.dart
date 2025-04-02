@@ -20,6 +20,8 @@ class OccasionUserModel extends ITrinaRowModel {
 
   bool? isEditor = false;
   bool? isEditorView = false;
+  bool? isEditorOrder = false;
+  bool? isEditorOrderView = false;
   bool? isManager = false;
   bool? isApprover = false;
   bool? isApproved = false;
@@ -27,7 +29,7 @@ class OccasionUserModel extends ITrinaRowModel {
   Map<String, dynamic>? data;
   Map<String, dynamic>? services;
   OccasionUserModel({this.createdAt, this.occasion, this.user, this.data, this.role,
-    this.isEditor, this.isEditorView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
+    this.isEditor, this.isEditorView, this.isEditorOrder, this.isEditorOrderView, this.isManager, this.isApprover, this.isApproved, this.services, this.unit});
 
   factory OccasionUserModel.fromJson(Map<String, dynamic> json) {
     return OccasionUserModel(
@@ -37,6 +39,8 @@ class OccasionUserModel extends ITrinaRowModel {
         unit: json[Tb.unit_users.unit],
         isEditor: json[Tb.occasion_users.is_editor],
         isEditorView: json[Tb.occasion_users.is_editor_view],
+        isEditorOrder: json[Tb.occasion_users.is_editor_order],
+        isEditorOrderView: json[Tb.occasion_users.is_editor_order_view],
         isApprover: json[Tb.occasion_users.is_approver],
         isApproved: json[Tb.occasion_users.is_approved],
         isManager: json[Tb.occasion_users.is_manager],
@@ -51,6 +55,8 @@ class OccasionUserModel extends ITrinaRowModel {
     Tb.occasion_users.user: user,
     Tb.occasion_users.is_editor: isEditor ?? false,
     Tb.occasion_users.is_editor_view: isEditorView ?? false,
+    Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
+    Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
     Tb.occasion_users.is_approver: isApprover ?? false,
     Tb.occasion_users.is_approved: isApproved ?? false,
     Tb.occasion_users.is_manager: isManager ?? false,
@@ -155,6 +161,8 @@ class OccasionUserModel extends ITrinaRowModel {
       Tb.occasion_users.user: TrinaCell(value: user),
       Tb.occasion_users.is_editor: TrinaCell(value: isEditor.toString()),
       Tb.occasion_users.is_editor_view: TrinaCell(value: isEditorView.toString()),
+      Tb.occasion_users.is_editor_order: TrinaCell(value: isEditorOrder.toString()),
+      Tb.occasion_users.is_editor_order_view: TrinaCell(value: isEditorOrderView.toString()),
       Tb.occasion_users.is_manager: TrinaCell(value: isManager.toString()),
       Tb.occasion_users.is_approved: TrinaCell(value: isApproved.toString()),
       Tb.occasion_users.is_approver: TrinaCell(value: isApprover.toString()),
@@ -218,6 +226,8 @@ class OccasionUserModel extends ITrinaRowModel {
       isManager: json[Tb.occasion_users.is_manager] == "true" ? true : false,
       isEditor: json[Tb.occasion_users.is_editor] == "true" ? true : false,
       isEditorView: json[Tb.occasion_users.is_editor_view] == "true" ? true : false,
+      isEditorOrder: json[Tb.occasion_users.is_editor_order] == "true" ? true : false,
+      isEditorOrderView: json[Tb.occasion_users.is_editor_order_view] == "true" ? true : false,
       role: int.tryParse(json[Tb.occasion_users.role] ?? ""),
       services: services,
       data: {
