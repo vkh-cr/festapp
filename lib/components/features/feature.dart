@@ -356,7 +356,7 @@ class WorkshopsFeature extends Feature {
     return WorkshopsFeature(
       code: json[FeatureConstants.metaCode],
       isEnabled: json[FeatureConstants.metaIsEnabled] ?? true,
-      startTime: DateTime.parse(json['start_time'] as String),
+      startTime: json['start_time'] != null ? DateTime.parse(json['start_time'] as String) : null,
     );
   }
 
