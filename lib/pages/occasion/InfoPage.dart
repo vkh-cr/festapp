@@ -11,8 +11,8 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/GamePage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -48,7 +48,7 @@ class _InfoPageState extends State<InfoPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if(widget.id == null && context.routeData.hasPendingChildren){
-      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+      widget.id = context.routeData.pendingChildren[0].params.getInt("id");
     }
     loadData();
   }
@@ -69,8 +69,8 @@ class _InfoPageState extends State<InfoPage> {
             controller: _scrollController,
             child: Column(
               children: [
-                if(SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureConstants.game) ||
-                    SynchroService.globalSettingsModel!.isFeatureEnabled(FeatureConstants.songbook))
+                if(FeatureService.isFeatureEnabled(FeatureConstants.game) ||
+                    FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(24),
@@ -98,6 +98,7 @@ class _InfoPageState extends State<InfoPage> {
                               icon: Icons.gamepad,
                               label: "Game",
                             ),
+                          if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                           const SizedBox(width: 16),
                           if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
                             ButtonsHelper.buildReferenceButton(
@@ -201,7 +202,6 @@ class _InfoPageState extends State<InfoPage> {
         jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
       }
     }
-
 
     if (_informationList![panelIndex].description == null &&
         !_isItemLoading[panelIndex]!) {

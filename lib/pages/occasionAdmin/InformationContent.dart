@@ -6,51 +6,58 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class InformationContent extends StatelessWidget {
+class InformationContent extends StatefulWidget {
   const InformationContent({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return SingleTableDataGrid<InformationModel>(
-      SingleDataGridController<InformationModel>(
+  _InformationContentState createState() => _InformationContentState();
+}
+
+class _InformationContentState extends State<InformationContent> {
+  SingleDataGridController<InformationModel>? controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<InformationModel>(
         context: context,
         loadData: DbInformation.getAllInformationForDataGrid,
         fromPlutoJson: InformationModel.fromPlutoJson,
         firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
         idColumn: Tb.information.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.information.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
             renderer: (rendererContext) =>
                 DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Hide".tr(),
             field: Tb.information.is_hidden,
-            type: PlutoColumnType.select([]),
+            type: TrinaColumnType.select([]),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, Tb.information.is_hidden),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Title".tr(),
             field: Tb.information.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Content".tr(),
             field: Tb.information.description,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
@@ -59,7 +66,8 @@ class InformationContent extends StatelessWidget {
                 loadContent: () async {
                   var id = rendererContext.row.cells[Tb.information.id]!.value;
                   if (id != null) {
-                    var infoDescription = await DbInformation.getInfosDescription([id]);
+                    var infoDescription =
+                    await DbInformation.getInfosDescription([id]);
                     if (infoDescription.isNotEmpty) {
                       return infoDescription[0].description;
                     }
@@ -69,20 +77,24 @@ class InformationContent extends StatelessWidget {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Order".tr(),
             field: Tb.information.order,
-            type: PlutoColumnType.number(defaultValue: null),
+            type: TrinaColumnType.number(defaultValue: null),
             applyFormatterInEditing: true,
             width: 100,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Type".tr(),
             field: Tb.information.type,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
         ],
-      ),
-    );
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleTableDataGrid<InformationModel>(controller!);
   }
 }

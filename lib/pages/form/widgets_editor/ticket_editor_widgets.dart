@@ -4,18 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/themeConfig.dart';
 import '../pages/form_editor_content.dart';
-import 'ticket_product_editor_row.dart';
+import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
+  // Helper function to format ordered_count/maximum
+  static String formatOrderedCount(int? orderedCount, int? maximum) {
+    final count = orderedCount ?? 0;
+    final maxStr = (maximum != null && maximum != 0) ? maximum.toString() : '∞';
+    return '$count / $maxStr';
+  }
+
   static Widget buildTicketEditorReadOnly(
       BuildContext context, FormModel form, FormFieldModel ticketField) {
     List<Widget> children = [];
@@ -68,7 +73,7 @@ class TicketEditorWidgets {
     ));
     children.add(const SizedBox(height: 8));
     for (var ptField in productTypeFields) {
-      children.add(buildTicketGroupEditor(context, form, ptField, refresh));
+      children.add(ProductTypeEditor(form: form, ptField: ptField, refresh: refresh));
       children.add(const SizedBox(height: 16));
     }
     children.add(Row(
@@ -134,14 +139,26 @@ class TicketEditorWidgets {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            RichText(
-              text: TextSpan(
-                text: ptField.title ?? group.title ?? '',
-                style: groupTitleStyle,
-                children: [
-                  if (requiredStar != null) requiredStar,
-                ],
-              ),
+            Row(
+              children: [
+                RichText(
+                  text: TextSpan(
+                    text: ptField.productType?.title ?? group.title ?? '',
+                    style: groupTitleStyle,
+                    children: [
+                      if (requiredStar != null) requiredStar,
+                    ],
+                  ),
+                ),
+                if (!HtmlHelper.isHtmlEmptyOrNull(ptField.productType?.description))
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0, right: 4.0),
+                    child: Tooltip(
+                      message: "Has description".tr(),
+                      child: const Icon(Icons.description, size: 16),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             if (group.products!.isEmpty)
@@ -152,7 +169,7 @@ class TicketEditorWidgets {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 12,
+                      flex: 10,
                       child: Text(
                         "Title".tr(),
                         style: Theme.of(context)
@@ -162,7 +179,7 @@ class TicketEditorWidgets {
                       ),
                     ),
                     Expanded(
-                      flex: 3,
+                      flex: 2,
                       child: Text(
                         "Price".tr(),
                         style: Theme.of(context)
@@ -173,10 +190,12 @@ class TicketEditorWidgets {
                     ),
                     if (showCapacityColumn)
                       Expanded(
-                        flex: 1,
+                        flex: 3,
                         child: Tooltip(
                           message: "Product Quantity".tr(),
-                          child: const Icon(Icons.stacked_bar_chart, size: 16),
+                          child: Icon(Icons.stacked_bar_chart, size: 16, color: Theme.of(context)
+                              .textTheme
+                              .bodySmall?.color),
                         ),
                       ),
                   ],
@@ -188,22 +207,26 @@ class TicketEditorWidgets {
                   final rowStyle = productHidden
                       ? const TextStyle(decoration: TextDecoration.lineThrough)
                       : const TextStyle();
-                  final capacityText =
-                  (product.maximum ?? 0) != 0 ? '${product.maximum}' : '';
+                  final capacityText = formatOrderedCount(product.orderedCount, product.maximum);
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 12,
+                          flex: 10,
                           child: Row(
                             children: [
                               Flexible(
-                                child: Text(product.title ?? '', style: rowStyle),
+                                child: Text(
+                                  product.title ?? '',
+                                  style: rowStyle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                               if (!HtmlHelper.isHtmlEmptyOrNull(product.description))
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
+                                  padding: const EdgeInsets.only(left: 8.0, right: 4.0),
                                   child: Tooltip(
                                     message: "Has description".tr(),
                                     child: const Icon(Icons.description, size: 16),
@@ -213,7 +236,7 @@ class TicketEditorWidgets {
                           ),
                         ),
                         Expanded(
-                          flex: 3,
+                          flex: 2,
                           child: Text(
                             '${product.price ?? 0}',
                             style: rowStyle,
@@ -221,11 +244,13 @@ class TicketEditorWidgets {
                         ),
                         if (showCapacityColumn)
                           Expanded(
-                            flex: 1,
+                            flex: 3,
                             child: Text(
                               capacityText,
                               style: rowStyle,
                               textAlign: TextAlign.center,
+                              maxLines: 1,
+                              overflow: TextOverflow.visible,
                             ),
                           ),
                       ],
@@ -240,117 +265,6 @@ class TicketEditorWidgets {
     );
   }
 
-  static Widget buildTicketGroupEditor(BuildContext context, FormModel form,
-      FormFieldModel ptField, VoidCallback refresh) {
-    ptField.productType ??=
-        ProductTypeModel(title: ptField.title, products: []);
-    final group = ptField.productType!;
-    group.products ??= [];
-    final groupTitleController =
-    TextEditingController(text: ptField.title ?? group.title);
-    final groupIsRequired = ptField.isRequired ?? false;
-    final groupIsHidden = ptField.isHidden ?? false;
-    final effectiveOpacity = groupIsHidden ? kHiddenOpacity : 1.0;
-    return Opacity(
-      opacity: effectiveOpacity,
-      child: Card(
-        elevation: 3,
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: groupTitleController,
-                      decoration: InputDecoration(
-                        labelText: "Product Type Title".tr(),
-                        border: const UnderlineInputBorder(),
-                      ),
-                      onChanged: (val) {
-                        ptField.title = val;
-                        group.title = val;
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    children: [
-                      Text("Required".tr(),
-                          style: Theme.of(context).textTheme.bodySmall),
-                      Checkbox(
-                        value: groupIsRequired,
-                        onChanged: (val) {
-                          ptField.isRequired = val;
-                          refresh();
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    children: [
-                      Text("Show".tr(),
-                          style: Theme.of(context).textTheme.bodySmall),
-                      Switch(
-                        value: !groupIsHidden,
-                        onChanged: (val) {
-                          ptField.isHidden = !val;
-                          refresh();
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 12),
-                  if (ptField.id == null)
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () {
-                        form.relatedFields!.remove(ptField);
-                        refresh();
-                      },
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              for (int i = 0; i < group.products!.length; i++)
-                TicketProductEditorRow(
-                  product: group.products![i],
-                  onDelete: () {
-                    group.products!.removeAt(i);
-                    refresh();
-                  },
-                ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton.icon(
-                  onPressed: () {
-                    group.products!.add(
-                      ProductModel(
-                        title: "New Product".tr(),
-                        price: 0.0,
-                        isHidden: false,
-                        order: (group.products!.isNotEmpty
-                            ? group.products!.last.order ?? 0
-                            : 0) +
-                            1,
-                      ),
-                    );
-                    refresh();
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text("Add Product".tr()),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   static Widget buildSpotFieldEditor(BuildContext context, FormModel form, VoidCallback refresh) {
     var spotField = form.relatedFields!.firstWhereOrNull((f) =>
     f.isTicketField == true && f.type == FormHelper.fieldTypeSpot);
@@ -360,7 +274,7 @@ class TicketEditorWidgets {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeSpot]),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -414,7 +328,7 @@ class TicketEditorWidgets {
         padding: const EdgeInsets.all(12.0),
         child: Row(
           children: [
-            Icon(fieldTypeIcons[FormHelper.fieldTypeSpot]),
+            Icon(FormHelper.fieldTypeIcons[FormHelper.fieldTypeSpot]),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

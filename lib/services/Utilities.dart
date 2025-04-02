@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Utilities {
+  static String replaceIfNullOrEmpty(String? original, String replacement){
+    if(original == null){
+      return replacement;
+    }
+    if(original.trim().isEmpty){
+      return replacement;
+    }
+    return original;
+  }
+
   static String formatPrice(BuildContext context, double price, {String? currencyCode, int? decimalDigits = 0}) {
     final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
     final currency = currencyCode ?? 'CZK';
@@ -41,8 +51,10 @@ class Utilities {
     return cleaned.replaceAll(invalidChars, '');
   }
 
-
-
+  static String removeTabsAndNewLines(String input) {
+    final pattern = RegExp(r'[\t\n]+');
+    return input.replaceAll(pattern, '');
+  }
 
   static int naturalCompare(String a, String b) {
     final regex = RegExp(r'\d+|\D+');

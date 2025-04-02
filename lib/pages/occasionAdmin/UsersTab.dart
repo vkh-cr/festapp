@@ -8,8 +8,8 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasionAdmin/UserColumns.dart';
 import 'package:fstapp/pages/occasionAdmin/UsersTabHelper.dart';
 
@@ -27,8 +27,8 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.NAME,
     UserColumns.SURNAME,
     UserColumns.SEX,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.services))
-    UserColumns.ACCOMMODATION,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.services))
+      UserColumns.ACCOMMODATION,
     UserColumns.BIRTHDAY,
     UserColumns.TEXT1,
     UserColumns.TEXT2,
@@ -36,10 +36,14 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.MANAGER,
     UserColumns.EDITOR,
     UserColumns.EDITOR_VIEW,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
-    UserColumns.APPROVER,
-    if(FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
-    UserColumns.APPROVED,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.form))
+      UserColumns.EDITOR_ORDER,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.form))
+      UserColumns.EDITOR_ORDER_VIEW,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
+      UserColumns.APPROVER,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
+      UserColumns.APPROVED,
     UserColumns.INVITED
   ];
 
@@ -50,45 +54,56 @@ class _UsersTabState extends State<UsersTab> {
   }
 
   @override
-  Widget build(BuildContext context) {
-
-    controller = SingleDataGridController<OccasionUserModel>(
-      context: context,
-      loadData: DbUsers.getOccasionUsers,
-      fromPlutoJson: OccasionUserModel.fromPlutoJson,
-      firstColumnType: DataGridFirstColumn.deleteAndCheck,
-      idColumn: Tb.occasion_users.user,
-      actionsExtended: DataGridActionsController(
-        areAllActionsEnabled: RightsService.canUpdateUsers,
-      ),
-      headerChildren: [
-        if (RightsService.isManager())
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    controller ??= SingleDataGridController<OccasionUserModel>(
+        context: context,
+        loadData: DbUsers.getOccasionUsers,
+        fromPlutoJson: OccasionUserModel.fromPlutoJson,
+        firstColumnType: DataGridFirstColumn.deleteAndCheck,
+        idColumn: Tb.occasion_users.user,
+        actionsExtended: DataGridActionsController(
+          areAllActionsEnabled: RightsService.canUpdateUsers,
+        ),
+        headerChildren: [
+          if (RightsService.isManager())
+            DataGridAction(
+              name: "Add existing".tr(),
+              action: (SingleDataGridController p0, [_]) async =>
+                  UsersTabHelper.addExisting(
+                      context,
+                      p0,
+                      (await DbUsers.getAllUsersBasics()).cast<IHasId>(),
+                      refreshData),
+            ),
           DataGridAction(
-            name: "Add existing".tr(),
-            action: (SingleDataGridController p0, [_]) async => UsersTabHelper.addExisting(
-                context, p0, (await DbUsers.getAllUsersBasics()).cast<IHasId>(), refreshData),
+            name: "Invite".tr(),
+            action: (SingleDataGridController p0, [_]) =>
+                UsersTabHelper.invite(context, p0, refreshData),
+            isEnabled: RightsService.canUpdateUsers,
           ),
-        DataGridAction(
-          name: "Invite".tr(),
-          action: (SingleDataGridController p0, [_]) =>
-              UsersTabHelper.invite(context, p0, refreshData),
-          isEnabled: RightsService.canUpdateUsers,
-        ),
-        DataGridAction(
-          name: "Change password".tr(),
-          action: (SingleDataGridController p0, [_]) =>
-              UsersTabHelper.setPassword(context, p0),
-          isEnabled: RightsService.canUpdateUsers,
-        ),
-        DataGridAction(
-          name: "Add to group".tr(),
-          action: (SingleDataGridController p0, [_]) =>
-              UsersTabHelper.addToGroup(context, p0),
-        ),
-      ],
-      columns: UserColumns.generateColumns(columnIdentifiers),
+          DataGridAction(
+            name: "Change password".tr(),
+            action: (SingleDataGridController p0, [_]) =>
+                UsersTabHelper.setPassword(context, p0),
+            isEnabled: RightsService.canUpdateUsers,
+          ),
+          DataGridAction(
+            name: "Add to group".tr(),
+            action: (SingleDataGridController p0, [_]) =>
+                UsersTabHelper.addToGroup(context, p0),
+          ),
+        ],
+        columns: UserColumns.generateColumns(columnIdentifiers),
     );
+  }
 
+  @override
+  Widget build(BuildContext context) {
+    if (controller == null) {
+      // Should rarely happen since initController is called once both are loaded.
+      return Center(child: CircularProgressIndicator());
+    }
     return SingleTableDataGrid<OccasionUserModel>(controller!);
   }
 }

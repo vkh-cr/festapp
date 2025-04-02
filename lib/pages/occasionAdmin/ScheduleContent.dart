@@ -11,7 +11,7 @@ import 'package:fstapp/dataServices/DbEvents.dart';
 import 'package:fstapp/dataServices/DbPlaces.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class ScheduleContent extends StatefulWidget {
   const ScheduleContent({Key? key}) : super(key: key);
@@ -23,6 +23,10 @@ class ScheduleContent extends StatefulWidget {
 class _ScheduleContentState extends State<ScheduleContent> {
   OccasionModel? occasionModel;
   List<String> places = [];
+  bool isLoadedOccasion = false;
+  bool isLoadedPlaces = false;
+
+  SingleDataGridController<EventModel>? controller;
 
   @override
   void initState() {
@@ -31,13 +35,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
     loadPlaces();
   }
 
-  bool isLoadedOccasion = false;
-  bool isLoadedPlaces = false;
-
   Future<void> loadOccasion() async {
     // Fetch the occasion based on the current occasion ID
     occasionModel = await DbUsers.getOccasion(RightsService.currentOccasionId!);
     isLoadedOccasion = true;
+    if (isLoadedOccasion && isLoadedPlaces) {
+      initController();
+    }
     setState(() {}); // Update UI after loading occasion data
   }
 
@@ -46,99 +50,100 @@ class _ScheduleContentState extends State<ScheduleContent> {
     var placesStrings = placesRaws.map((p) => p.toPlutoSelectString()).toList();
     placesStrings.add(PlaceModel.WithouValue); // Add "Without Value" to options
     isLoadedPlaces = true;
-
     setState(() {
       places.clear();
       places.addAll(placesStrings);
     });
+    if (isLoadedOccasion && isLoadedPlaces) {
+      initController();
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if(!isLoadedOccasion || !isLoadedPlaces){
-      return Center(child: CircularProgressIndicator());
-    }
-    return SingleTableDataGrid<EventModel>(
-      SingleDataGridController<EventModel>(
+  void initController() {
+    if (controller == null) {
+      controller = SingleDataGridController<EventModel>(
         context: context,
         loadData: DbEvents.getAllEventsForDatagrid,
         fromPlutoJson: EventModel.fromPlutoJson,
         firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
         idColumn: Tb.events.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             title: "Id".tr(),
             field: Tb.events.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
-            renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
+            renderer: (rendererContext) =>
+                DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Hide".tr(),
             field: Tb.events.is_hidden,
-            type: PlutoColumnType.select([]),
+            type: TrinaColumnType.select([]),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 60,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(rendererContext, Tb.events.is_hidden),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, Tb.events.is_hidden),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Interest".tr(),
             field: Tb.event_users.table,
             readOnly: true,
-            type: PlutoColumnType.number(negative: false, defaultValue: 0),
+            type:
+            TrinaColumnType.number(negative: false, defaultValue: 0),
             width: 80,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Title".tr(),
             field: EventModel.titleColumn,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 250,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Start date".tr(),
             field: EventModel.startDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: TrinaColumnType.date(defaultValue: occasionModel?.startTime),
             width: 110,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Start".tr(),
             field: EventModel.startTimeColumn,
-            type: PlutoColumnType.time(),
+            type: TrinaColumnType.time(),
             width: 80,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "End date".tr(),
             field: EventModel.endDateColumn,
-            type: PlutoColumnType.date(defaultValue: occasionModel?.startTime),
+            type: TrinaColumnType.date(defaultValue: occasionModel?.startTime),
             width: 110,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "End".tr(),
             field: EventModel.endTimeColumn,
-            type: PlutoColumnType.time(),
+            type: TrinaColumnType.time(),
             width: 80,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Max".tr(),
             field: EventModel.maxParticipantsColumn,
-            type: PlutoColumnType.number(negative: false, defaultValue: null),
+            type: TrinaColumnType.number(negative: false, defaultValue: null),
             width: 70,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Place".tr(),
             field: EventModel.placeColumn,
-            type: PlutoColumnType.select(places),
+            type: TrinaColumnType.select(places),
             applyFormatterInEditing: true,
-            formatter: DataGridHelper.GetValueFromFormatted,
+            formatter: DataGridHelper.getValueFromFormatted,
             width: 140,
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Content".tr(),
             field: Tb.events.description,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
@@ -155,45 +160,58 @@ class _ScheduleContentState extends State<ScheduleContent> {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "M/F 50/50".tr(),
             field: EventModel.splitForMenWomenColumn,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, EventModel.splitForMenWomenColumn),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, EventModel.splitForMenWomenColumn),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Group".tr(),
             field: EventModel.isGroupEventColumn,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
-            renderer: (rendererContext) =>
-                DataGridHelper.checkBoxRenderer(rendererContext, EventModel.isGroupEventColumn),
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, EventModel.isGroupEventColumn),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Show inside event".tr(),
             field: EventModel.parentEventColumn,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 300,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Roles".tr(),
             field: Tb.event_roles.role,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 100,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Type".tr(),
             field: Tb.events.type,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
         ],
-      ),
-    );
+      );
+      setState(() {});
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!isLoadedOccasion || !isLoadedPlaces) {
+      return Center(child: CircularProgressIndicator());
+    }
+    if (controller == null) {
+      // Should rarely happen since initController is called once both are loaded.
+      return Center(child: CircularProgressIndicator());
+    }
+    return SingleTableDataGrid<EventModel>(controller!);
   }
 }

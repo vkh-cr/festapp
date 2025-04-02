@@ -4,9 +4,9 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_helper.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
@@ -21,34 +21,7 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbOrders {
-  static final _supabaseEshop = Supabase.instance.client.schema("eshop");
   static final _supabase = Supabase.instance.client;
-
-  static Future<List<ProductTypeModel>> getProducts(BuildContext context, int currentOccasion) async {
-    var data = await _supabaseEshop
-        .from(TbEshop.product_types.table)
-        .select(
-        "${TbEshop.product_types.id},"
-            "${TbEshop.product_types.type},"
-            "${TbEshop.product_types.title},"
-            "${TbEshop.products.table}(${TbEshop.products.id},${TbEshop.products.title},${TbEshop.products.price},${TbEshop.products.order})"
-    )
-        .eq(TbEshop.product_types.occasion, currentOccasion)
-        .eq("${TbEshop.products.table}.${TbEshop.products.is_hidden}", false);
-
-    var infoList = List<ProductTypeModel>.from(
-        data.map((x) {
-          var toReturn = ProductTypeModel.fromJson(x);
-          toReturn.products = toReturn.products?.sortedBy((i) => i.title ?? "");
-          toReturn.products = toReturn.products?.sortedBy<num>((i) => i.order ?? 0);
-          for (ProductModel v in toReturn.products??[]){
-            v.title = v.price != null && v.price! > 0 ? "${v.title} (${Utilities.formatPrice(context, v.price!)})" : v.title;
-          }
-          return toReturn;
-        }));
-
-    return infoList;
-  }
 
   static Future<FunctionResponse> sendTicketOrder(Map<String, dynamic> data) async {
     return await _supabase.functions.invoke("send-ticket-order", body: {"orderDetails": data});
@@ -56,7 +29,7 @@ class DbOrders {
 
   static Future<void> stornoOrder(int id) async {
     final response = await _supabase.rpc(
-      'update_order_and_tickets_to_storno_with_security',
+      'update_order_and_tickets_to_storno_ws',
       params: {
         'order_id': id,
       },
@@ -149,12 +122,15 @@ class DbOrders {
           products!.where((p) => orderProductIds.contains(p.id)).toList();
 
       order.paymentInfoModel = paymentMap[order.paymentInfo];
+
+      if (order.isExpired()) {
+        order.state = OrderModel.expiredState;
+      }
     }
 
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     return orders;
   }
-
 
   static Future<void> deleteOrder(OrderModel model) async {
     final response = await _supabase.rpc(
@@ -184,7 +160,7 @@ class DbOrders {
 
   static Future<void> updateOrderAndTicketsToPaid(int orderId) async {
     var response = await _supabase.rpc(
-      "update_order_and_tickets_to_paid_with_security",
+      "update_order_and_tickets_to_paid_ws",
       params: {
         "order_id": orderId,
       },

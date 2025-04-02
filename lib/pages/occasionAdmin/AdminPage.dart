@@ -1,9 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
-
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 
 @RoutePage()
 class AdminPage extends StatefulWidget {
@@ -28,6 +27,7 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.game,
     if(FeatureService.isFeatureEnabled(FeatureConstants.services))
     AdminTabDefinition.service,
+    AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
   ];
 

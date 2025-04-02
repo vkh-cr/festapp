@@ -9,7 +9,7 @@ import 'package:fstapp/widgets/standard_dialog.dart';
 
 class OptionDetailEditorDialog extends StatefulWidget {
   final FormOptionModel option;
-  const OptionDetailEditorDialog({Key? key, required this.option}) : super(key: key);
+  const OptionDetailEditorDialog({super.key, required this.option});
 
   @override
   _OptionDetailEditorDialogState createState() => _OptionDetailEditorDialogState();

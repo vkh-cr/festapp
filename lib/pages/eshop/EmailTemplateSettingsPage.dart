@@ -17,10 +17,10 @@ class EmailTemplateSettingsPage extends StatefulWidget {
   final EmailTemplatesResponse emailTemplatesResponse;
 
   const EmailTemplateSettingsPage({
-    Key? key,
+    super.key,
     required this.template,
     required this.emailTemplatesResponse,
-  }) : super(key: key);
+  });
 
   @override
   _EmailTemplateSettingsPageState createState() =>
