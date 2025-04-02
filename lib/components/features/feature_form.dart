@@ -30,6 +30,8 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? externalFormLinkController;
   TextEditingController? externalPriceController;
   TextEditingController? reserveButtonTitleController;
+  // New variable for ticket type
+  String? ticketType;
 
   // Controllers for MapFeature (Online Map Layer)
   TextEditingController? zoomController;
@@ -69,6 +71,8 @@ class _FeatureFormState extends State<FeatureForm> {
       backgroundUrl = ticketFeature.ticketBackground;
       lightColorController = TextEditingController(text: ticketFeature.ticketLightColor);
       darkColorController = TextEditingController(text: ticketFeature.ticketDarkColor);
+      // Initialize ticketType with the current value or default to "named"
+      ticketType = ticketFeature.type ?? 'named';
     } else if (widget.feature is CompanionsFeature) {
       final companionsFeature = widget.feature as CompanionsFeature;
       companionsFeature.companionsMax ??= 1;
@@ -233,36 +237,58 @@ class _FeatureFormState extends State<FeatureForm> {
 
     if (widget.feature is TicketFeature) {
       final ticketFeature = widget.feature as TicketFeature;
-      fields.add(TextFormField(
-        controller: lightColorController,
-        decoration: InputDecoration(labelText: "Background color".tr()),
-        onSaved: (val) => ticketFeature.ticketLightColor = val,
-      ));
-      fields.add(const SizedBox(height: 16));
-      fields.add(TextFormField(
-        controller: darkColorController,
-        decoration: InputDecoration(labelText: "Font color".tr()),
-        onSaved: (val) => ticketFeature.ticketDarkColor = val,
-      ));
-      fields.add(const SizedBox(height: 16));
-      fields.add(ImageArea(
-        hint: "(1600x900 px)".tr(),
-        imageUrl: backgroundUrl,
-        onFileSelected: (file) async {
-          Uint8List imageData = await file.readAsBytes();
-          try {
-            final publicUrl = await DbImages.uploadImage(imageData, widget.occasion, null);
-            setState(() {
-              backgroundUrl = publicUrl;
-              ticketFeature.ticketBackground = publicUrl;
-            });
-            ToastHelper.Show(context, "File uploaded successfully.".tr());
-          } catch (e) {
-            ToastHelper.Show(context, "Failed to upload image.".tr());
-          }
+      // Always show the ticket type dropdown.
+      fields.add(DropdownButtonFormField<String>(
+        value: ticketType,
+        decoration: InputDecoration(labelText: "Ticket Type".tr()),
+        items: <String>["named", "wide"].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            ticketType = newValue;
+          });
         },
-        onRemove: _removeBackgroundImage,
+        onSaved: (val) => ticketFeature.type = val,
       ));
+
+      // Only show additional fields if ticket type is "wide"
+      if (ticketType == "wide") {
+        fields.add(const SizedBox(height: 16));
+        fields.add(TextFormField(
+          controller: lightColorController,
+          decoration: InputDecoration(labelText: "Background color".tr()),
+          onSaved: (val) => ticketFeature.ticketLightColor = val,
+        ));
+        fields.add(const SizedBox(height: 16));
+        fields.add(TextFormField(
+          controller: darkColorController,
+          decoration: InputDecoration(labelText: "Font color".tr()),
+          onSaved: (val) => ticketFeature.ticketDarkColor = val,
+        ));
+        fields.add(const SizedBox(height: 16));
+        fields.add(ImageArea(
+          hint: "(1600x900 px)".tr(),
+          imageUrl: backgroundUrl,
+          onFileSelected: (file) async {
+            Uint8List imageData = await file.readAsBytes();
+            try {
+              final publicUrl = await DbImages.uploadImage(imageData, widget.occasion, null);
+              setState(() {
+                backgroundUrl = publicUrl;
+                ticketFeature.ticketBackground = publicUrl;
+              });
+              ToastHelper.Show(context, "File uploaded successfully.".tr());
+            } catch (e) {
+              ToastHelper.Show(context, "Failed to upload image.".tr());
+            }
+          },
+          onRemove: _removeBackgroundImage,
+        ));
+      }
     } else if (widget.feature is CompanionsFeature) {
       final companionsFeature = widget.feature as CompanionsFeature;
       fields.add(TextFormField(
