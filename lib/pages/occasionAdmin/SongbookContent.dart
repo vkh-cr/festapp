@@ -41,7 +41,7 @@ class _SongbookContentState extends State<SongbookContent> {
           TrinaColumn(
             title: "Hide".tr(),
             field: Tb.information.is_hidden,
-            type: TrinaColumnType.select([]),
+            type: TrinaColumnType.text(),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
