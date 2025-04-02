@@ -10,7 +10,7 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class GameUserGroupsContent extends StatefulWidget {
   const GameUserGroupsContent({super.key});
@@ -42,33 +42,33 @@ class _GameUserGroupsContentState extends State<GameUserGroupsContent> {
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.user_group_info.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.user_group_info.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             enableEditingMode: false,
             width: 50,
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Name".tr(),
             field: Tb.user_group_info.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 200,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Progress".tr(),
             field: UserGroupInfoModel.progressColumn,
             readOnly: true,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 200,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Participants".tr(),
             field: UserGroupInfoModel.participantsColumn,
-            type: PlutoColumnType.text(defaultValue: <UserInfoModel>{}),
+            type: TrinaColumnType.text(defaultValue: <UserInfoModel>{}),
             enableEditingMode: false,
             width: 600,
             renderer: (rendererContext) {

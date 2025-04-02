@@ -11,7 +11,7 @@ import 'package:fstapp/dataServicesEshop/DbOrders.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/widgets/TransactionsDialog.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 
 class EshopColumns {
@@ -54,109 +54,109 @@ class EshopColumns {
   // Define columns
   static Map<String, dynamic> columnBuilders(BuildContext context) => {
     TICKET_ID: [
-      PlutoColumn(
+      TrinaColumn(
         hide: true,
         readOnly: true,
         enableEditingMode: false,
         title: "Id".tr(),
         field: TbEshop.tickets.id,
-        type: PlutoColumnType.number(defaultValue: -1),
+        type: TrinaColumnType.number(defaultValue: -1),
         width: 50,
         renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
       ),
     ],
     TICKET_SYMBOL: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Ticket Symbol".tr(),
         field: TbEshop.tickets.ticket_symbol,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 120,
       ),
     ],
     TICKET_STATE: [
-      PlutoColumn(
+      TrinaColumn(
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
         field: TbEshop.tickets.state,
-        type: PlutoColumnType.select(
+        type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
         renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
         width: 120,
-        textAlign: PlutoColumnTextAlign.center,
+        textAlign: TrinaColumnTextAlign.center,
       ),
     ],
     TICKET_TOTAL_PRICE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Price".tr(),
         field: TicketModel.metaPrice,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 100,
       ),
     ],
     TICKET_CREATED_AT: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
         title: "Created".tr(),
         field: TbEshop.tickets.created_at,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 100,
       ),
     ],
     TICKET_PRODUCTS: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Products".tr(),
         field: TicketModel.metaTicketsProducts,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 300,
       ),
     ],
     TICKET_NOTE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.tickets.note,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     TICKET_NOTE_HIDDEN: [
-      PlutoColumn(
+      TrinaColumn(
         enableAutoEditing: true,
         title: "Hidden note".tr(),
         field: TbEshop.tickets.note_hidden,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     TICKET_SPOT: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Spot".tr(),
         field: TicketModel.metaSpot,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 60,
       ),
     ],
     ORDER_ID: [
-      PlutoColumn(
+      TrinaColumn(
         hide: true,
         title: "Id".tr(),
         field: TbEshop.orders.id,
-        type: PlutoColumnType.number(defaultValue: -1),
+        type: TrinaColumnType.number(defaultValue: -1),
         readOnly: true,
         enableEditingMode: false,
         width: 50,
@@ -164,97 +164,97 @@ class EshopColumns {
       ),
     ],
     ORDER_SYMBOL: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Order Symbol".tr(),
         field: TbEshop.orders.order_symbol,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 120,
       ),
     ],
     ORDER_PRICE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.orders.price,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 100,
       ),
     ],
     ORDER_STATE: [
-      PlutoColumn(
+      TrinaColumn(
         cellPadding: EdgeInsets.zero,
         readOnly: true,
         enableEditingMode: false,
         title: "State".tr(),
         field: TbEshop.orders.state,
-        type: PlutoColumnType.select(
+        type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
         renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
-        textAlign: PlutoColumnTextAlign.center,
+        textAlign: TrinaColumnTextAlign.center,
         width: 140,
       ),
     ],
     ORDER_DATA: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Customer".tr(),
         field: TbEshop.orders.data,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 150,
       ),
     ],
     ORDER_EMAIL: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Email".tr(),
         field: TbEshop.orders.data_email,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 140,
       ),
     ],
     ORDER_CREATED_AT: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
         title: "Created".tr(),
         field: TbEshop.orders.created_at,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 100,
       ),
     ],
     ORDER_DATA_NOTE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Note".tr(),
         field: TbEshop.orders.data_note,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     ORDER_NOTE_HIDDEN: [
-      PlutoColumn(
+      TrinaColumn(
         enableAutoEditing: true,
         title: "Hidden note".tr(),
         field: TbEshop.orders.note_hidden,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     ORDER_HISTORY: [
-      PlutoColumn(
+      TrinaColumn(
         enableAutoEditing: false,
         title: "History".tr(),
         field: TbEshop.orders_history.table,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 150,
         renderer: (rendererContext) {
           return ElevatedButton(
@@ -276,11 +276,11 @@ class EshopColumns {
       ),
     ],
     ORDER_TRANSACTIONS: (Map<String, dynamic> data) => [
-      PlutoColumn(
+      TrinaColumn(
         enableAutoEditing: false,
         title: "Transactions".tr(),
         field: TbEshop.transactions.table,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 150,
         renderer: (rendererContext) {
           return ElevatedButton(
@@ -306,11 +306,11 @@ class EshopColumns {
       ),
     ],
     PRODUCT_ID: [
-      PlutoColumn(
+      TrinaColumn(
         hide: true,
         title: "Id".tr(),
         field: TbEshop.products.id,
-        type: PlutoColumnType.number(defaultValue: -1),
+        type: TrinaColumnType.number(defaultValue: -1),
         readOnly: true,
         enableEditingMode: false,
         width: 50,
@@ -318,86 +318,86 @@ class EshopColumns {
       ),
     ],
     PRODUCT_TITLE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Title".tr(),
         field: TbEshop.products.title,
-        type: PlutoColumnType.text(),
+        type: TrinaColumnType.text(),
         width: 200,
       ),
     ],
     PRODUCT_PRICE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Price".tr(),
         field: TbEshop.products.price,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 80,
       ),
     ],
     PAYMENT_INFO_AMOUNT: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Amount".tr(),
         field: TbEshop.payment_info.amount,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 80,
       ),
     ],
     PAYMENT_INFO_PAID: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Paid".tr(),
         field: TbEshop.payment_info.paid,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 80,
       ),
     ],
     PAYMENT_INFO_RETURNED: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Returned".tr(),
         field: TbEshop.payment_info.returned,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 80,
       ),
     ],
     PAYMENT_INFO_VARIABLE_SYMBOL: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
         title: "Variable symbol".tr(),
         field: TbEshop.payment_info.variable_symbol,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 80,
       ),
     ],
     PAYMENT_INFO_DEADLINE: [
-      PlutoColumn(
+      TrinaColumn(
         readOnly: true,
         enableEditingMode: false,
         title: "Deadline".tr(),
         field: TbEshop.payment_info.deadline,
-        type: PlutoColumnType.text(),
-        textAlign: PlutoColumnTextAlign.end,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
         width: 100,
       ),
     ],
     RESPONSES: (Map<String, dynamic> data) {
       if(data[RESPONSES] == null){
-        return <PlutoColumn>[];
+        return <TrinaColumn>[];
       }
-      var columns = <PlutoColumn>[];
+      var columns = <TrinaColumn>[];
       for(FormFieldModel f in (data[RESPONSES]) as List<FormFieldModel>){
         var title = f.title?.trim();
         var cc = genericTextColumn((title == null || title.isEmpty ? FormHelper.fieldTypeToLocale(f.type!) : title), f.id.toString());
@@ -407,32 +407,32 @@ class EshopColumns {
     },
   };
 
-  static PlutoColumn genericTextColumn(String title, String field) {
-    return PlutoColumn(
+  static TrinaColumn genericTextColumn(String title, String field) {
+    return TrinaColumn(
       readOnly: true,
       enableEditingMode: true,
       title: title,
       field: field,
-      type: PlutoColumnType.text(),
-      textAlign: PlutoColumnTextAlign.end,
+      type: TrinaColumnType.text(),
+      textAlign: TrinaColumnTextAlign.end,
       width: 150,
     );
   }
 
   /// Generates columns based on a list of column identifiers.
   /// Optional `data` map is used for columns that require extra configuration.
-  static List<PlutoColumn> generateColumns(BuildContext context, List<String> identifiers, {Map<String, dynamic>? data}) {
+  static List<TrinaColumn> generateColumns(BuildContext context, List<String> identifiers, {Map<String, dynamic>? data}) {
     var columns = columnBuilders(context);
     return identifiers
         .where((id) => columns.containsKey(id))
         .expand((id) {
       var columnEntry = columns[id];
-      if (columnEntry is List<PlutoColumn>) {
+      if (columnEntry is List<TrinaColumn>) {
         return columnEntry; // Static columns
       } else if (columnEntry is Function) {
-        return (columnEntry(data ?? {}) as List<PlutoColumn>);
+        return (columnEntry(data ?? {}) as List<TrinaColumn>);
       }
-      return <PlutoColumn>[];
+      return <TrinaColumn>[];
     }).toList();
   }
 

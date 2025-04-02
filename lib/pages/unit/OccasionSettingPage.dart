@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/AppRouter.gr.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/components/features/feature_metadata.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
-import 'package:fstapp/pages/unit/FeatureForm.dart';
+import 'package:fstapp/components/features/feature_form.dart';
 import 'package:fstapp/services/DialogHelper.dart';
 import 'package:fstapp/services/ImageCompressionHelper.dart';
 import 'package:fstapp/services/ToastHelper.dart';
@@ -22,7 +23,6 @@ import 'package:fstapp/widgets/OccasionCard.dart';
 import 'package:fstapp/widgets/TimeDataRangePicker.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/services/features/FeatureMetadata.dart';
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;

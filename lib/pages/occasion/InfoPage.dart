@@ -11,8 +11,8 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/RouterService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/GamePage.dart';
 import 'package:fstapp/pages/occasion/SongPage.dart';
 import 'package:fstapp/styles/StylesConfig.dart';
@@ -202,7 +202,6 @@ class _InfoPageState extends State<InfoPage> {
         jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
       }
     }
-
 
     if (_informationList![panelIndex].description == null &&
         !_isItemLoading[panelIndex]!) {

@@ -17,10 +17,8 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets_editor/form_fields_generator.dart';
 
-
 /// Global constant for hidden item opacity
 const double kHiddenOpacity = 0.5;
-
 
 class FormEditorContent extends StatefulWidget {
   const FormEditorContent({super.key});

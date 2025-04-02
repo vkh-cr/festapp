@@ -12,7 +12,6 @@ class TbEshop {
   static TransactionsTb transactions = const TransactionsTb();
 }
 
-
 class ProductTypesTb {
   const ProductTypesTb();
   String get table => "product_types";

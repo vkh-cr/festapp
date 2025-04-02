@@ -9,7 +9,6 @@ class TimeHelper {
 
   static void Function()? toggleTimeTravel;
 
-
   static DateTime now(){
     if(currentTime != null){
       return currentTime!;
