@@ -18,7 +18,9 @@ BEGIN
   v_code := p_data ->> 'code';
 
   -- Check if the current user is allowed to view/edit this occasion.
-  PERFORM public.check_is_editor_view_on_occasion(v_occ);
+  IF (SELECT get_is_editor_on_occasion(oc)) <> TRUE AND (SELECT get_is_editor_order_on_occasion(oc)) <> TRUE THEN
+     RAISE EXCEPTION 'User is not editor view.';
+  END IF;
 
   -- Try to find an existing email template matching the given context and code.
   SELECT id

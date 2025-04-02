@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class GameCheckPointsContent extends StatefulWidget {
   const GameCheckPointsContent({super.key});
@@ -28,26 +28,26 @@ class _GameCheckPointsContentState extends State<GameCheckPointsContent> {
         firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
         idColumn: Tb.information.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.information.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Title".tr(),
             enableAutoEditing: true,
             field: Tb.information.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
-          PlutoColumn(
+          TrinaColumn(
             enableAutoEditing: true,
             title: "Correct answer".tr(),
             field: Tb.information.data_correct,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
         ],
       );

@@ -8,8 +8,8 @@ import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasionAdmin/UserColumns.dart';
 import 'package:fstapp/pages/occasionAdmin/UsersTabHelper.dart';
 
@@ -32,6 +32,10 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.MANAGER,
     UserColumns.EDITOR,
     UserColumns.EDITOR_VIEW,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.form))
+      UserColumns.EDITOR_ORDER,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.form))
+      UserColumns.EDITOR_ORDER_VIEW,
     if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
       UserColumns.APPROVER,
     if (FeatureService.isFeatureEnabled(FeatureConstants.entryCode))
@@ -82,11 +86,15 @@ class _UsersTabState extends State<UsersTab> {
           ),
         ],
         columns: UserColumns.generateColumns(columnIdentifiers),
-      );
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    if (controller == null) {
+      // Should rarely happen since initController is called once both are loaded.
+      return Center(child: CircularProgressIndicator());
+    }
     return SingleTableDataGrid<OccasionUserModel>(controller!);
   }
 }

@@ -1,4 +1,4 @@
-import { getSupabaseUser, isUserEditor, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { getSupabaseUser, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const userId = user.user.id;
 
     // Check if the user is an editor for the occasion
-    const isEditor = await isUserEditor(userId, occasionId);
+    const isEditor = await isUserEditorOrder(userId, occasionId);
     if (!isEditor) {
       console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
       return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {

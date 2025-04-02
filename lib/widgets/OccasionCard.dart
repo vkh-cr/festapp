@@ -2,11 +2,11 @@ import 'dart:ui';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/Feature.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/widgets/OccasionDetailDialog.dart';
@@ -55,7 +55,7 @@ class _OccasionCardState extends State<OccasionCard> {
     var details = FeatureService.getFeatureDetails(
       FeatureConstants.form, features: widget.occasion.features,
     );
-    String? externalPrice = details?.formExternalPrice;
+    String? externalPrice = details is FormFeature ? details.formExternalPrice : null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
@@ -183,7 +183,11 @@ class _OccasionCardState extends State<OccasionCard> {
                         if (!FeatureService.isFeatureEnabled(
                             FeatureConstants.form,
                             features: widget.occasion.features)) {
-                          await RightsService.updateOccasionData(widget.occasion.link!);
+                          try{
+                            await RightsService.updateOccasionData(widget.occasion.link!);
+                          } catch(e) {
+                            // empty
+                          }
                           await RouterService.navigateOccasion(context, "");
                         } else {
                           showDialog(

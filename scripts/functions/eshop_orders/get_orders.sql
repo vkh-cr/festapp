@@ -25,7 +25,7 @@ BEGIN
     END IF;
 
     -- Authorization check
-    IF (SELECT get_is_editor_view_on_occasion(occasion_id)) <> TRUE THEN
+    IF (SELECT get_is_editor_order_view_on_occasion(occasion_id)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to access this occasion');
     END IF;
 

@@ -3,10 +3,10 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataServicesEshop/DbEshop.dart';
 import 'package:fstapp/services/Utilities.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
 
-class TransactionModel extends IPlutoRowModel {
+class TransactionModel extends ITrinaRowModel {
   int? id;
   int? transactionId;
   DateTime? date;
@@ -101,66 +101,65 @@ class TransactionModel extends IPlutoRowModel {
     );
   }
 
-
-  /// Converts the TransactionModel instance to a PlutoRow for the data grid.
+  /// Converts the TransactionModel instance to a TrinaRow for the data grid.
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      TbEshop.transactions.id: PlutoCell(value: id ?? 0),
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      TbEshop.transactions.id: TrinaCell(value: id ?? 0),
       TbEshop.transactions.transaction_id:
-      PlutoCell(value: transactionId ?? 0),
-      TbEshop.transactions.date: PlutoCell(
+      TrinaCell(value: transactionId ?? 0),
+      TbEshop.transactions.date: TrinaCell(
           value: date != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss').format(date!)
               : ""),
       TbEshop.transactions.amount:
-      PlutoCell(value: amount != null ? Utilities.formatPrice(context, amount!) : ""),
+      TrinaCell(value: amount != null ? Utilities.formatPrice(context, amount!) : ""),
       TbEshop.transactions.currency:
-      PlutoCell(value: currency ?? ""),
+      TrinaCell(value: currency ?? ""),
       TbEshop.transactions.counter_account:
-      PlutoCell(value: counterAccount ?? ""),
+      TrinaCell(value: counterAccount ?? ""),
       TbEshop.transactions.bank_code:
-      PlutoCell(value: bankCode ?? ""),
+      TrinaCell(value: bankCode ?? ""),
       TbEshop.transactions.bank_name:
-      PlutoCell(value: bankName ?? ""),
-      TbEshop.transactions.ks: PlutoCell(value: ks ?? ""),
-      TbEshop.transactions.vs: PlutoCell(value: vs ?? ""),
-      TbEshop.transactions.ss: PlutoCell(value: ss ?? ""),
+      TrinaCell(value: bankName ?? ""),
+      TbEshop.transactions.ks: TrinaCell(value: ks ?? ""),
+      TbEshop.transactions.vs: TrinaCell(value: vs ?? ""),
+      TbEshop.transactions.ss: TrinaCell(value: ss ?? ""),
       TbEshop.transactions.user_identification:
-      PlutoCell(value: userIdentification ?? ""),
+      TrinaCell(value: userIdentification ?? ""),
       TbEshop.transactions.transaction_type:
-      PlutoCell(value: transactionType ?? ""),
+      TrinaCell(value: transactionType ?? ""),
       TbEshop.transactions.performed_by:
-      PlutoCell(value: performedBy ?? ""),
+      TrinaCell(value: performedBy ?? ""),
       TbEshop.transactions.comment:
-      PlutoCell(value: comment ?? ""),
+      TrinaCell(value: comment ?? ""),
       TbEshop.transactions.command_id:
-      PlutoCell(value: commandId ?? 0),
+      TrinaCell(value: commandId ?? 0),
       TbEshop.transactions.bank_account_id:
-      PlutoCell(value: bankAccountId ?? 0),
+      TrinaCell(value: bankAccountId ?? 0),
       TbEshop.transactions.payment_info:
-      PlutoCell(value: paymentInfo ?? 0),
-      TbEshop.transactions.created_at: PlutoCell(
+      TrinaCell(value: paymentInfo ?? 0),
+      TbEshop.transactions.created_at: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss').format(createdAt!)
               : ""),
       TbEshop.transactions.message_for_recipient:
-      PlutoCell(value: messageForRecipient ?? ""),
+      TrinaCell(value: messageForRecipient ?? ""),
       TbEshop.transactions.counter_account_name:
-      PlutoCell(value: counterAccountName ?? ""),
+      TrinaCell(value: counterAccountName ?? ""),
       // Add related entities if necessary
-      // metaRelatedBankAccount: PlutoCell(
+      // metaRelatedBankAccount: TrinaCell(
       //     value: relatedBankAccount != null
       //         ? relatedBankAccount!.toBasicString()
       //         : ""),
-      // metaRelatedPaymentInfo: PlutoCell(
+      // metaRelatedPaymentInfo: TrinaCell(
       //     value: relatedPaymentInfo != null
       //         ? relatedPaymentInfo!.toBasicString()
       //         : ""),
     });
   }
 
-  /// Factory method to create a TransactionModel from a PlutoRow JSON.
+  /// Factory method to create a TransactionModel from a TrinaRow JSON.
   static TransactionModel fromPlutoJson(Map<String, dynamic> json) {
     return TransactionModel(
       id: json[TbEshop.transactions.id] == -1 ? null : json[TbEshop.transactions.id],

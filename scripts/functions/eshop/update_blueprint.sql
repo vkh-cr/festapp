@@ -29,7 +29,7 @@ BEGIN
 
     occasion_id := (input_data->>'occasion')::BIGINT;
 
-    IF (SELECT get_is_editor_on_occasion(occasion_id)) <> TRUE THEN
+    IF (SELECT get_is_editor_order_on_occasion(occasion_id)) <> TRUE THEN
         RETURN jsonb_build_object('code', 403, 'message', 'User is not authorized to edit this occasion');
     END IF;
 

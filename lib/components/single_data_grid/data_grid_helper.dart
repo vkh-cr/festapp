@@ -12,14 +12,14 @@ import 'package:fstapp/dataServices/DbOccasions.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class DataGridHelper
 {
   static Widget buildHtmlEditorButton({
     required BuildContext context,
     required String field,
-    required PlutoColumnRendererContext rendererContext,
+    required TrinaColumnRendererContext rendererContext,
     required Future<String?> Function() loadContent,
   }) {
     String? textToEdit;
@@ -79,7 +79,7 @@ class DataGridHelper
     return value as T?;
   }
 
-  static String GetValueFromFormatted(dynamic value) {
+  static String getValueFromFormatted(dynamic value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)
     {
@@ -97,7 +97,7 @@ class DataGridHelper
     return UserInfoModel.sexToLocale(value);
   }
 
-  static int? GetIdFromFormatted(String value) {
+  static int? getIdFromFormatted(String value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)
     {
@@ -108,10 +108,10 @@ class DataGridHelper
     return res;
   }
 
-  static Widget checkBoxRenderer(rendererContext, String idString, [bool Function()? isEnabled]) {
-    var value = rendererContext.cell.value == "true" ? "true" : "false";
+  static Checkbox checkBoxRenderer(TrinaColumnRendererContext rendererContext, String idString, [bool Function()? isEnabled]) {
+    var value = rendererContext.cell.value == "true" ? true : false;
     return Checkbox(
-      value: bool.parse(value),
+      value: value,
       onChanged: isEnabled != null && isEnabled() == false ? null : (bool? value) {
         var cell = rendererContext.row.cells[idString]!;
         rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
@@ -133,6 +133,7 @@ class DataGridHelper
         var cell = rendererContext.row.cells[idString]!;
         rendererContext.stateManager.changeCellValue(cell, newState, force: true);
         rendererContext.cell.value = newState;
+        rendererContext.stateManager.notifyListeners();
       },
       isEnabled: isEnabled == null || isEnabled(),
     );
@@ -182,7 +183,6 @@ class DataGridHelper
     );
   }
 
-
   static Widget mapIconRenderer(BuildContext context, rendererContext, List<IconModel> icons) {
     int? value = rendererContext.cell.value;
     return iconToRow(context, value, icons);
@@ -218,13 +218,13 @@ class DataGridHelper
     return Text(value);
   }
 
-  static PlutoGridLocaleText getPlutoLocaleFromLangCode(String langCode)
+  static TrinaGridLocaleText getPlutoLocaleFromLangCode(String langCode)
   {
     switch(langCode)
     {
-      case "cs": return const PlutoGridLocaleText.czech();
-      case "de": return const PlutoGridLocaleText.german();
-      case "sk": return const PlutoGridLocaleText(
+      case "cs": return const TrinaGridLocaleText.czech();
+      case "de": return const TrinaGridLocaleText.german();
+      case "sk": return const TrinaGridLocaleText(
           // Column menu
           unfreezeColumn: 'Odomknúť stĺpec',
           freezeColumnToStart: 'Zmraziť stĺpec na začiatok',
@@ -263,7 +263,7 @@ class DataGridHelper
           // Common
           loadingText: 'Načíta sa',
       );
-      case "pl": return const PlutoGridLocaleText(
+      case "pl": return const TrinaGridLocaleText(
         // Column menu
         unfreezeColumn: 'Odblokuj kolumnę',
         freezeColumnToStart: 'Zamroź kolumnę na początku',
@@ -302,7 +302,7 @@ class DataGridHelper
         // Common
         loadingText: 'Ładowanie',
       );
-      case "uk": return const PlutoGridLocaleText(
+      case "uk": return const TrinaGridLocaleText(
         unfreezeColumn: 'Розблокувати стовпець',
         freezeColumnToStart: 'Заморозити стовпець на початок',
         freezeColumnToEnd: 'Заморозити стовпець на кінець',
@@ -337,7 +337,7 @@ class DataGridHelper
       );
     }
 
-    return const PlutoGridLocaleText();
+    return const TrinaGridLocaleText();
   }
 
   static textTransform(String? value, List<String> allValues, String Function(String?) transform) {

@@ -1,8 +1,10 @@
+import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/services/features/Feature.dart'; // Import the new Feature class
 
 class OccasionModel {
+  static const String occasionsOffline = "occasionsOffline";
+
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
