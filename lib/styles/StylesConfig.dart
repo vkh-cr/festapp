@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/ScheduleTimelineHelper.dart';
+import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/themeConfig.dart';
 import 'package:intl/intl.dart';

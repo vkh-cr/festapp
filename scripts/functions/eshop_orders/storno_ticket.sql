@@ -25,8 +25,7 @@ BEGIN
         RETURN JSONB_BUILD_OBJECT('code', 1001, 'message', 'Ticket not found');
     END IF;
 
-    -- Check permissions using get_is_editor_on_occasion
-    IF NOT get_is_editor_on_occasion(ticket_record.occasion) THEN
+    IF NOT get_is_editor_order_on_occasion(ticket_record.occasion) THEN
         RETURN JSONB_BUILD_OBJECT('code', 1002, 'message', 'Permission denied');
     END IF;
 

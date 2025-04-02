@@ -22,7 +22,7 @@ BEGIN
     WHERE o.payment_info = p_payment_info_id
     LIMIT 1;
 
-    PERFORM public.check_is_editor_on_occasion(occasion_id);
+    PERFORM public.check_is_editor_order_on_occasion(occasion_id);
 
     -- Call the original function to add the transaction
     PERFORM public.add_transaction_to_payment_info(p_transaction_id, p_payment_info_id);

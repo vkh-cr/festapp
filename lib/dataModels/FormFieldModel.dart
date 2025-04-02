@@ -5,9 +5,9 @@ import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class FormFieldModel extends IPlutoRowModel {
+class FormFieldModel extends ITrinaRowModel {
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -106,20 +106,20 @@ class FormFieldModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      TbEshop.form_fields.id: PlutoCell(value: id ?? 0),
-      TbEshop.form_fields.created_at: PlutoCell(
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      TbEshop.form_fields.id: TrinaCell(value: id ?? 0),
+      TbEshop.form_fields.created_at: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
-      TbEshop.form_fields.title: PlutoCell(value: title ?? ""),
-      TbEshop.form_fields.description: PlutoCell(value: description ?? ""),
-      TbEshop.form_fields.type: PlutoCell(value: type ?? ""),
-      metaRequired: PlutoCell(value: isRequired.toString()),
-      metaHidden: PlutoCell(value: isHidden.toString()),
-      TbEshop.form_fields.is_ticket_field: PlutoCell(value: isTicketField.toString()),
-      TbEshop.form_fields.order: PlutoCell(value: order ?? 0),
+      TbEshop.form_fields.title: TrinaCell(value: title ?? ""),
+      TbEshop.form_fields.description: TrinaCell(value: description ?? ""),
+      TbEshop.form_fields.type: TrinaCell(value: type ?? ""),
+      metaRequired: TrinaCell(value: isRequired.toString()),
+      metaHidden: TrinaCell(value: isHidden.toString()),
+      TbEshop.form_fields.is_ticket_field: TrinaCell(value: isTicketField.toString()),
+      TbEshop.form_fields.order: TrinaCell(value: order ?? 0),
     });
   }
 
