@@ -51,13 +51,13 @@ dependencies:
   badges: ^3.1.1
   collection: ^1.18.0
   flutter_map_location_marker: ^9.1.1
-  geolocator: ^13.0.3
+  geolocator: ^13.0.4
   flutter_widget_from_html: ^0.16.0
   quill_html_editor:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
       ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
-  pluto_grid_plus: ^8.4.14
+  trina_grid: ^1.6.6
   url_strategy: ^0.3.0
   desktop_drop: ^0.5.0
   csv: ^6.0.0
@@ -85,8 +85,7 @@ dependencies:
   http: ^1.3.0
   vector_map_tiles_mbtiles: ^1.2.0
   vector_map_tiles: ^8.0.0
-  mbtiles: ^0.4.2
-  sqlite3_flutter_libs: ^0.5.32
+  mbtiles: ^0.4.0
 
 dev_dependencies:
   auto_route_generator: ^10.0.1

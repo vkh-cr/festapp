@@ -25,7 +25,6 @@ class RightsService{
   static bool? isAdminField;
   static List<int>? bankAccountAdmin;
 
-
   static Future<bool> updateOccasionData([String? link]) async {
     if (currentOccasionId == null || link != currentLink) {
       LinkModel model = LinkModel(occasionLink: link);
@@ -53,8 +52,6 @@ class RightsService{
     }
     return true;
   }
-
-
 
   static Future<bool> getIsAdmin() async {
     var data = await _supabase.rpc("get_is_admin_on_occasion",

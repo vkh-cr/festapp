@@ -81,9 +81,8 @@ class UsersTabHelper {
     }, nonAdded, "Add".tr());
   }
 
-
   static Future<void> addExistingToUnit(BuildContext context,
-      SingleDataGridController single_data_grid, List<IPlutoRowModel> currentUsers,
+      SingleDataGridController single_data_grid, List<ITrinaRowModel> currentUsers,
       Future<void> Function() reloadUsers, int unit) async {
     var existing = await DbUsers.getAllUsersBasicsForUnit();
     var nonAdded =

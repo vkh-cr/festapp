@@ -1,4 +1,4 @@
-import { getSupabaseUser, isUserEditor, supabaseAdmin } from "../_shared/supabaseUtil.ts";
+import { getSupabaseUser, isUserEditor, isUserEditorOrder, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
@@ -49,7 +49,11 @@ Deno.serve(async (req) => {
 
     // Verify that the user is an editor for the occasion specified in the template.
     const userId = user.user.id;
-    const isEditor = await isUserEditor(userId, template.occasion);
+    var isEditor = await isUserEditor(userId, template.occasion);
+    if (!isEditor) {
+        isEditor = await isUserEditorOrder(userId, template.occasion);
+    }
+
     if (!isEditor) {
       console.error(`User ${userId} is not an editor for occasion ${template.occasion}`);
       return new Response(
