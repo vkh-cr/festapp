@@ -9,7 +9,6 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class UserColumns {
-  // Column identifier constants
   static const String ID = "id";
   static const String UNIT = "unit";
   static const String EMAIL = "email";
@@ -28,6 +27,8 @@ class UserColumns {
   static const String MANAGER = "manager";
   static const String EDITOR = "editor";
   static const String EDITOR_VIEW = "editorView";
+  static const String EDITOR_ORDER = "editorOrder";
+  static const String EDITOR_ORDER_VIEW = "editorOrderView";
   static const String UNIT_MANAGER = "unitManager";
   static const String UNIT_EDITOR = "unitEditor";
   static const String UNIT_EDITOR_VIEW = "unitEditorView";
@@ -36,7 +37,6 @@ class UserColumns {
   static const String INVITED = "invited";
   static const String FOOD = "food";
 
-  // Define columns statically or through functions if they need data
   static Map<String, dynamic> get columnBuilders => {
     ID: [
       TrinaColumn(
@@ -177,7 +177,6 @@ class UserColumns {
         var cc = _foodColumn(f.title!, DbOccasions.serviceTypeFood+f.code);
         columns.add(cc);
       }
-
       return columns;
     },
     ACCOMMODATION: (Map<String, dynamic> data) {
@@ -186,17 +185,19 @@ class UserColumns {
       select.add("");
       return [
         TrinaColumn(
-        title: "Accommodation".tr(),
-        field: DbOccasions.serviceTypeAccommodation,
-        type: TrinaColumnType.select(select),
-        applyFormatterInEditing: true,
-        enableEditingMode: RightsService.canUpdateUsers(),
-        width: 100
-      )];
+            title: "Accommodation".tr(),
+            field: DbOccasions.serviceTypeAccommodation,
+            type: TrinaColumnType.select(select),
+            applyFormatterInEditing: true,
+            enableEditingMode: RightsService.canUpdateUsers(),
+            width: 100
+        )];
     },
     MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
     EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view)],
+    EDITOR_ORDER: [_statusColumn("Edit Orders".tr(), Tb.occasion_users.is_editor_order)],
+    EDITOR_ORDER_VIEW: [_statusColumn("Read Orders".tr(), Tb.occasion_users.is_editor_order_view)],
     UNIT_MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager, canUpdateUser: RightsService.canUpdateUnitUsers)],
     UNIT_EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor, canUpdateUser: RightsService.canUpdateUnitUsers)],
     UNIT_EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view, canUpdateUser: RightsService.canUpdateUnitUsers)],
@@ -205,19 +206,17 @@ class UserColumns {
     INVITED: [_statusColumn("Invited".tr(), Tb.occasion_users.data_isInvited)],
   };
 
-  /// Generates columns based on a list of column identifiers.
-  /// Optional `data` map is used for columns that require extra configuration.
   static List<TrinaColumn> generateColumns(List<String> identifiers, {Map<String, dynamic>? data}) {
     return identifiers
-        .where((id) => columnBuilders.containsKey(id)) // Ensure the identifier exists in columnBuilders
+        .where((id) => columnBuilders.containsKey(id))
         .expand((id) {
       var columnEntry = columnBuilders[id];
       if (columnEntry is List<TrinaColumn>) {
-        return columnEntry; // Static columns
+        return columnEntry;
       } else if (columnEntry is Function) {
-        return (columnEntry(data ?? {}) as List<TrinaColumn>); // Cast to List<TrinaColumn>
+        return (columnEntry(data ?? {}) as List<TrinaColumn>);
       }
-      return <TrinaColumn>[]; // Return empty list if no match
+      return <TrinaColumn>[];
     }).toList();
   }
 
@@ -225,7 +224,7 @@ class UserColumns {
     return TrinaColumn(
       title: title,
       field: field,
-      type: TrinaColumnType.select([]),
+      type: TrinaColumnType.text(),
       applyFormatterInEditing: true,
       enableEditingMode: false,
       width: 100,

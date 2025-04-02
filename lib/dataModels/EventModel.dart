@@ -193,7 +193,7 @@ class EventModel extends ITrinaRowModel {
     var startTimeString = json[startDateColumn]+"-"+json[startTimeColumn];
     var endTimeString = json[endDateColumn]+"-"+json[endTimeColumn];
 
-    var placeId = DataGridHelper.GetIdFromFormatted(json[placeColumn]);
+    var placeId = DataGridHelper.getIdFromFormatted(json[placeColumn]);
     var dateFormat = DateFormat("yyyy-MM-dd-HH:mm");
 
     List<int> parentEvents = [];

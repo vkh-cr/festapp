@@ -76,7 +76,7 @@ BEGIN
         END IF;
 
         -- Ensure user is authorized to edit this occasion
-        IF (SELECT get_is_editor_on_occasion(occasion_id)) <> TRUE THEN
+        IF (SELECT get_is_editor_order_on_occasion(occasion_id)) <> TRUE THEN
             RAISE EXCEPTION '%',
                 JSONB_BUILD_OBJECT('code', 403, 'message', 'User is not authorized to edit this occasion')::TEXT;
         END IF;

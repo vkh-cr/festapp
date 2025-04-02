@@ -136,7 +136,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             field: EventModel.placeColumn,
             type: TrinaColumnType.select(places),
             applyFormatterInEditing: true,
-            formatter: DataGridHelper.GetValueFromFormatted,
+            formatter: DataGridHelper.getValueFromFormatted,
             width: 140,
           ),
           TrinaColumn(

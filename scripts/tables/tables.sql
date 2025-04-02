@@ -591,6 +591,8 @@ create table if not exists public.occasion_users (
   role BIGINT NULL,
   services JSONB NULL,
   is_editor_view BOOLEAN NOT NULL DEFAULT false,
+  is_editor_order boolean NOT NULL DEFAULT false,
+  is_editor_order_view boolean NOT NULL DEFAULT false,
   CONSTRAINT public_occasion_users_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   CONSTRAINT public_occasion_users_role_fkey FOREIGN KEY (role) REFERENCES public.role_info (id),
   CONSTRAINT occasion_users_pkey PRIMARY KEY (occasion, "user")

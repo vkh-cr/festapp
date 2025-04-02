@@ -79,7 +79,7 @@ class DataGridHelper
     return value as T?;
   }
 
-  static String GetValueFromFormatted(dynamic value) {
+  static String getValueFromFormatted(dynamic value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)
     {
@@ -97,7 +97,7 @@ class DataGridHelper
     return UserInfoModel.sexToLocale(value);
   }
 
-  static int? GetIdFromFormatted(String value) {
+  static int? getIdFromFormatted(String value) {
     final startIndex = value.indexOf(":");
     if(startIndex == -1)
     {
@@ -108,10 +108,10 @@ class DataGridHelper
     return res;
   }
 
-  static Widget checkBoxRenderer(rendererContext, String idString, [bool Function()? isEnabled]) {
-    var value = rendererContext.cell.value == "true" ? "true" : "false";
+  static Checkbox checkBoxRenderer(TrinaColumnRendererContext rendererContext, String idString, [bool Function()? isEnabled]) {
+    var value = rendererContext.cell.value == "true" ? true : false;
     return Checkbox(
-      value: bool.parse(value),
+      value: value,
       onChanged: isEnabled != null && isEnabled() == false ? null : (bool? value) {
         var cell = rendererContext.row.cells[idString]!;
         rendererContext.stateManager.changeCellValue(cell, value.toString(), force: true);
@@ -133,6 +133,7 @@ class DataGridHelper
         var cell = rendererContext.row.cells[idString]!;
         rendererContext.stateManager.changeCellValue(cell, newState, force: true);
         rendererContext.cell.value = newState;
+        rendererContext.stateManager.notifyListeners();
       },
       isEnabled: isEnabled == null || isEnabled(),
     );

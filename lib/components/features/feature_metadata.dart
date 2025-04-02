@@ -38,7 +38,7 @@ class FeatureMetadata {
     },
     FeatureConstants.entryCode: {
       'title': 'Entry Code',
-      'description': 'It is posible to verify users via QR code on workshops or other limited events.',
+      'description': 'It is possible to verify users via QR code on workshops or other limited events.',
     },
     FeatureConstants.blueprint: {
       'title': 'Blueprint',

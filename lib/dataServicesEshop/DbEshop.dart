@@ -31,7 +31,7 @@ class DbEshop {
 
   static Future<String> getReportForOccasion(String link) async {
     final response = await _supabase
-        .rpc('get_report_for_occasion_with_security', params: {'form_link': link});
+        .rpc('get_report_for_occasion_ws', params: {'form_link': link});
 
     if(response["code"] == 200){
       return response["data"];

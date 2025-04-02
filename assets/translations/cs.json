@@ -489,7 +489,7 @@
   "Services": "Služby",
   "Allows assigning accommodations to a user and displaying them on the user profile.": "Možnost zadat ubytování uživateli a jeho zobrazení v profilu uživatele.",
   "Entry Code": "Vstupní kód",
-  "It is posible to verify users via QR code on workshops or other limited events.": "Uživatele je možné ověřovat pomocí QR kódu (počtově omezený program). Je také možné určit schvalovatele.",
+  "It is possible to verify users via QR code on workshops or other limited events.": "Uživatele je možné ověřovat pomocí QR kódu (počtově omezený program). Je také možné určit schvalovatele.",
   "This feature lets you create a seating blueprint with a limited number of seats for the reservation form. For example, you can design a seating chart for a bus or a layout of a hall with assigned seats.": "Funkce umožňuje vytvořit plán sedadel s omezeným počtem míst v rezervačním formuláři. Například můžete navrhnout plán sedadel v autobusu nebo rozvržení sálu s přidělenými místy.",
   "Enabled": "Povoleno",
   "Search features": "Hledat funkce",
@@ -538,5 +538,7 @@
   "Select start time": "Vyberte čas zahájení",
   "Workshops": "Workshopy",
   "Indicates the start time from when people can sign in for workshops.": "Ukazuje čas, od kdy se mohou lidé přihlásit na workshopy.",
+  "Edit Orders": "Měnit objednávky",
+  "Read Orders": "Číst objednávky",
   "_": "_"
 }
