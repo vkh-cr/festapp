@@ -10,6 +10,8 @@ import 'package:fstapp/dataModels/PlaceModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/services/StorageHelper.dart';
 
+import '../dataModels/OccasionModel.dart';
+
 class OfflineDataService {
   static const String myScheduleOffline = "mySchedule";
   static const String eventsOfflineStorage = "events";
@@ -70,6 +72,12 @@ class OfflineDataService {
       }
     }
   }
+
+  static Future<void> saveAllOccasions(List<OccasionModel> toSave) =>
+      saveAllOffline(OccasionModel.occasionsOffline, toSave);
+
+  static Future<List<OccasionModel>> getAllOccasions() =>
+      getAllOffline(OccasionModel.occasionsOffline, OccasionModel.fromJson);
 
   static Future<void> saveAllMessages(List<NewsModel> toSave) =>
       saveAllOffline(NewsModel.newsOffline, toSave);

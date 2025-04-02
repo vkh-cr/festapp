@@ -61,6 +61,10 @@ class ThemeConfig {
   static Color greenColor() => Colors.green.changeColorLightness(0.3).changeColorSaturation(0.5);
   static Color blueColor() => Colors.deepPurple.changeColorLightness(0.3).changeColorSaturation(0.5);
   static Color redColor(BuildContext context) => isDarkMode(context) ? Color(0xFFff5252) : Color(0xFFd32f2f);
+  static Color warningColor(BuildContext context) =>
+      isDarkMode(context)
+          ? seed3
+          : seed3;
   static Color darkColor(BuildContext context) => isDarkMode(context) ? dddText : seed1;
   static Color blackColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.black;
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
@@ -152,7 +156,6 @@ class ThemeConfig {
   }
 }
 
-
 extension ColorExtensions on Color {
   /// Returns a [MaterialColor] from a [Color] object
   MaterialColor getMaterialColorFromColor() {
@@ -176,11 +179,11 @@ extension ColorExtensions on Color {
 
     final adjustedFactor = (factor * 1.4).clamp(0.0, 1.0);
 
-    final int r = (red * adjustedFactor).round();
-    final int g = (green * adjustedFactor).round();
-    final int b = (blue * adjustedFactor).round();
+    final int rr = (r * adjustedFactor).round();
+    final int gg = (g * adjustedFactor).round();
+    final int bb = (b * adjustedFactor).round();
 
-    return Color.fromARGB(alpha, r, g, b);
+    return Color.fromARGB(a.toInt(), rr, gg, bb);
   }
 
   Color withOpacityWhite(double factor) {
@@ -188,11 +191,11 @@ extension ColorExtensions on Color {
 
     final adjustedFactor = 1 - factor;
 
-    final int r = red + ((255 - red) * adjustedFactor).round();
-    final int g = green + ((255 - green) * adjustedFactor).round();
-    final int b = blue + ((255 - blue) * adjustedFactor).round();
+    final double rr = r + ((255 - r) * adjustedFactor).round();
+    final double gg = g + ((255 - g) * adjustedFactor).round();
+    final double bb = b + ((255 - b) * adjustedFactor).round();
 
-    return Color.fromARGB(alpha, r, g, b);
+    return Color.fromARGB(a.toInt(), rr.toInt(), gg.toInt(), bb.toInt());
   }
 
   Color withOpacityUniversal(BuildContext context, double factor) {

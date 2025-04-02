@@ -45,7 +45,7 @@ BEGIN
     ELSE
         UPDATE eshop.payment_info
         SET returned = COALESCE(returned, 0) + ABS(transaction_amount)
-        WHERE id = p_payment_info_id;
+        WHERE id = payment_info_id;
     END IF;
 
     -- Fetch the updated payment_info record

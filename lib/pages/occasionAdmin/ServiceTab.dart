@@ -109,7 +109,7 @@ class _ServiceTabState extends State<ServiceTab> {
     return SingleTableDataGrid<OccasionUserModel>(_controller!);
   }
 
-  _accommodationDefinition(SingleDataGridController<IPlutoRowModel> controller) async {
+  _accommodationDefinition(SingleDataGridController<ITrinaRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -126,7 +126,7 @@ class _ServiceTabState extends State<ServiceTab> {
     await loadData();
   }
 
-  _foodDefinition(SingleDataGridController<IPlutoRowModel> controller) async {
+  _foodDefinition(SingleDataGridController<ITrinaRowModel> controller) async {
     await showDialog(
       context: context,
       builder: (BuildContext context) {

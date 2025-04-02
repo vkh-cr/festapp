@@ -4,14 +4,15 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModelsEshop/TbEshop.dart';
 import 'package:fstapp/dataModelsEshop/TicketModel.dart';
 import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
 import 'package:fstapp/dataServicesEshop/DbOrders.dart';
+import 'package:fstapp/services/TimeHelper.dart';
 import 'package:fstapp/services/Utilities.dart';
 import 'package:intl/intl.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
-class OrderModel extends IPlutoRowModel {
+class OrderModel extends ITrinaRowModel {
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -30,16 +31,18 @@ class OrderModel extends IPlutoRowModel {
   List<ProductModel>? relatedProducts;
   PaymentInfoModel? paymentInfoModel;
 
+  static const String expiredState = "expired";
   static const String orderedState = "ordered";
   static const String paidState = "paid";
   static const String sentState = "sent";
   static const String usedState = "used";
   static const String stornoState = "storno";
-  static const orderStates = [orderedState, paidState, sentState, usedState, stornoState];
+  static const orderStates = [expiredState, orderedState, paidState, sentState, usedState, stornoState];
 
   static String stateToLocale(String state) {
     switch (state) {
       case orderedState:
+      case expiredState:
         return 'Ordered'.tr();
       case paidState:
         return 'Paid'.tr();
@@ -67,10 +70,13 @@ class OrderModel extends IPlutoRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  static Color single_data_gridStateToColor(String state) {
+  bool isExpired() => (state == orderedState && paymentInfoModel != null && paymentInfoModel!.deadline != null ? paymentInfoModel!.deadline!.isBefore(TimeHelper.now()) : false);
+
+  static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
     switch (firstPart) {
+      case expiredState:
       case orderedState:
         color = Colors.green[100]!; // Blue for ordered
         break;
@@ -153,31 +159,35 @@ class OrderModel extends IPlutoRowModel {
   };
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
-    return PlutoRow(cells: {
-      TbEshop.orders.id: PlutoCell(value: id ?? 0),
-      TbEshop.orders.order_symbol: PlutoCell(value: id ?? 0),
-      TbEshop.orders.price: PlutoCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
-      TbEshop.orders.state: PlutoCell(value: OrderModel.formatState(state ?? orderedState)),
-      TbEshop.payment_info.amount: PlutoCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
-      TbEshop.payment_info.paid: PlutoCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
-      TbEshop.payment_info.returned: PlutoCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!) : ""),
-      TbEshop.payment_info.variable_symbol: PlutoCell(value: paymentInfoModel?.variableSymbol ?? 0),
-      TbEshop.payment_info.deadline: PlutoCell(
+  TrinaRow toTrinaRow(BuildContext context) {
+    return TrinaRow(cells: {
+      TbEshop.orders.id: TrinaCell(value: id ?? 0),
+      TbEshop.orders.order_symbol: TrinaCell(value: id ?? 0),
+      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
+      TbEshop.orders.state: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
+      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
+      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
+      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!) : ""),
+      TbEshop.payment_info.variable_symbol: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
+      TbEshop.payment_info.deadline: TrinaCell(
         value: paymentInfoModel?.deadline != null
             ? DateFormat('yyyy-MM-dd').format(paymentInfoModel!.deadline!)
             : "",
       ),
-      TbEshop.orders.data: PlutoCell(value: toCustomerData()),
-      TbEshop.orders.data_email: PlutoCell(value: data?[TbEshop.orders.data_email]),
-      TicketModel.metaTicketsProducts: PlutoCell(
+      TbEshop.orders.created_at: TrinaCell(
+          value: createdAt != null
+              ? DateFormat('yyyy-MM-dd').format(createdAt!)
+              : ""),
+      TbEshop.orders.data: TrinaCell(value: toCustomerData()),
+      TbEshop.orders.data_email: TrinaCell(value: data?[TbEshop.orders.data_email]),
+      TicketModel.metaTicketsProducts: TrinaCell(
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
-      TbEshop.orders.data_note: PlutoCell(value: toCustomerNote()),
-      TbEshop.orders.note_hidden: PlutoCell(value: noteHidden ?? ""),
-      TbEshop.orders_history.table: PlutoCell(value: ""),
-      TbEshop.transactions.table: PlutoCell(value: ""),
+      TbEshop.orders.data_note: TrinaCell(value: toCustomerNote()),
+      TbEshop.orders.note_hidden: TrinaCell(value: noteHidden ?? ""),
+      TbEshop.orders_history.table: TrinaCell(value: ""),
+      TbEshop.transactions.table: TrinaCell(value: ""),
     });
   }
 

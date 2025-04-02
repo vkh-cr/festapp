@@ -4,9 +4,9 @@ import 'package:fstapp/dataModels/FormFieldModel.dart';
 import 'package:fstapp/dataModels/FormModel.dart';
 import 'package:fstapp/dataModels/FormResponseModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintHelper.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintModel.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_helper.dart';
+import 'package:fstapp/components/blueprint/blueprint_model.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dataModelsEshop/OrderModel.dart';
 import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
 import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
@@ -22,7 +22,6 @@ import 'package:fstapp/services/Utilities.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DbEshop {
-  static final _supabaseEshop = Supabase.instance.client.schema("eshop");
   static final _supabase = Supabase.instance.client;
 
   /// Fetches transactions based on a form link using a Supabase Function.
@@ -32,7 +31,7 @@ class DbEshop {
 
   static Future<String> getReportForOccasion(String link) async {
     final response = await _supabase
-        .rpc('get_report_for_occasion_with_security', params: {'form_link': link});
+        .rpc('get_report_for_occasion_ws', params: {'form_link': link});
 
     if(response["code"] == 200){
       return response["data"];
@@ -61,7 +60,6 @@ class DbEshop {
       'get_transactions_for_order_all_available',
       params: {'payment_info_id': paymentInfoId},
     );
-
 
     if (response != null) {
       return List<TransactionModel>.from(response.map((x) => TransactionModel.fromJson(x)));

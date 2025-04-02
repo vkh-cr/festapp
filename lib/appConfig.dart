@@ -31,7 +31,6 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
-
   static const bool isSplitByPlace = false;
 
   static const int offsetHours = -1;

@@ -28,7 +28,7 @@ BEGIN
      WHERE o.payment_info = p_payment_info_id
      LIMIT 1;
 
-     PERFORM public.check_is_editor_on_occasion(occasion_id);
+     PERFORM public.check_is_editor_order_on_occasion(occasion_id);
     
     -- Check if the transaction is linked to the specified payment_info
     IF NOT EXISTS (

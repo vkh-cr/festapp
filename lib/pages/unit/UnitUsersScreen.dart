@@ -33,14 +33,12 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
     UserColumns.UNIT_EDITOR_VIEW,
   ];
 
-
   SingleDataGridController<UnitUserModel>? controller;
 
   @override
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {

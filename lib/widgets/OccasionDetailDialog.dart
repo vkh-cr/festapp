@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/dataModels/OccasionModel.dart';
 import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/services/features/FeatureConstants.dart';
-import 'package:fstapp/services/features/FeatureService.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/services/LaunchUrlService.dart';
 import 'package:fstapp/services/TimeHelper.dart';
@@ -20,23 +21,34 @@ class OccasionDetailDialog extends StatelessWidget {
   /// Unified reserve button logic.
   void _onReservePressed(BuildContext context) async {
     var details = FeatureService.getFeatureDetails(
-      FeatureConstants.form, features: occasion.features,
+      FeatureConstants.form,
+      features: occasion.features,
     );
-    if (details?.formUseExternal == true) {
-      final externalUrl = details?.formExternalLink;
-      if (externalUrl != null && externalUrl.isNotEmpty) {
-        await LaunchUrlService.launchURL(externalUrl);
+    if (details is FormFeature) {
+      if (details.formUseExternal == true) {
+        final externalUrl = details.formExternalLink;
+        if (externalUrl != null && externalUrl.isNotEmpty) {
+          await LaunchUrlService.launchURL(externalUrl);
+          return;
+        }
       }
-    } else {
-      RouterService.navigate(
-        context,
-        "${FormPage.ROUTE}/${occasion.form!.link!}",
-      );
     }
+    // Fallback to internal form page navigation.
+    RouterService.navigate(
+      context,
+      "${FormPage.ROUTE}/${occasion.form!.link!}",
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final formDetails = FeatureService.getFeatureDetails(
+      FeatureConstants.form,
+      features: occasion.features,
+    );
+    final reserveTitle = formDetails is FormFeature
+        ? formDetails.reserveButtonTitle ?? "Reserve a spot".tr()
+        : "Reserve a spot".tr();
     final unifiedButtonStyle = OutlinedButton.styleFrom(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       textStyle: Theme.of(context)
@@ -78,7 +90,12 @@ class OccasionDetailDialog extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 8),
-                    SelectableText(TimeHelper.getMinimalisticDateRange(context, occasion.startTime!, occasion.endTime!),
+                    SelectableText(
+                      TimeHelper.getMinimalisticDateRange(
+                        context,
+                        occasion.startTime!,
+                        occasion.endTime!,
+                      ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Theme.of(context).hintColor,
                       ),
@@ -106,7 +123,7 @@ class OccasionDetailDialog extends StatelessWidget {
                               onPressed: () => _onReservePressed(context),
                               style: unifiedButtonStyle,
                               child: Text(
-                                FeatureService.getFeatureDetails(FeatureConstants.form, features: occasion.features)?.reserveButtonTitle ?? "Reserve a spot".tr(),
+                                reserveTitle,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -119,14 +136,13 @@ class OccasionDetailDialog extends StatelessWidget {
                                 await RightsService.updateOccasionData(
                                     occasion.link!);
                                 await RouterService.navigateOccasion(context, "");
-                                Navigator.of(context).pop();
                               },
                               style: unifiedButtonStyle,
                               child: Text(
-                                "Detail",
+                                "Detail".tr(),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                              ).tr(),
+                              ),
                             ),
                           ),
                         ],
@@ -136,7 +152,7 @@ class OccasionDetailDialog extends StatelessWidget {
                         onPressed: () => _onReservePressed(context),
                         style: unifiedButtonStyle,
                         child: Text(
-                          FeatureService.getFeatureDetails(FeatureConstants.form, features: occasion.features)?.reserveButtonTitle ?? "Reserve a spot".tr(),
+                          reserveTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),

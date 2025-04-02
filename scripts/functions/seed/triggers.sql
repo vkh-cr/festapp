@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION setup_triggers(p_supabase_id TEXT)
+CREATE OR REPLACE FUNCTION setup_triggers(p_project_url TEXT)
 RETURNS VOID
 LANGUAGE plpgsql
 AS $func$
@@ -66,19 +66,20 @@ BEGIN
     EXECUTE FUNCTION moddatetime(''updated_at'')
   ';
 
+  -- log_notifications HTTP trigger
   EXECUTE 'DROP TRIGGER IF EXISTS push_log_notifications ON log_notifications';
   EXECUTE format($trg$
     CREATE TRIGGER push_log_notifications
     AFTER INSERT ON log_notifications
     FOR EACH ROW
     EXECUTE FUNCTION supabase_functions.http_request(
-      'https://%s.supabase.co/functions/v1/notify',
+      '%s/functions/v1/notify',
       'POST',
       '{"Content-type": "application/json"}',
       '{}',
       '1000'
     )
-  $trg$, p_supabase_id);
+  $trg$, p_project_url);
 
 END;
 $func$;
