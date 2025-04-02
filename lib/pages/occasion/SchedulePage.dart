@@ -179,7 +179,9 @@ class _SchedulePageState extends State<SchedulePage>
                         });
                       }
                     },
-                    child: LogoWidget(width: 200,),
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: LogoWidget(height: 60,)),
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
