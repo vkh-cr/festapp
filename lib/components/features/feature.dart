@@ -66,10 +66,13 @@ class SimpleFeature extends Feature {
 }
 
 /// Feature for tickets with extra UI color fields.
+/// Feature for tickets with extra UI color fields.
 class TicketFeature extends Feature {
   String? ticketLightColor;
   String? ticketDarkColor;
   String? ticketBackground;
+  // New field to specify type ("named" or "wide")
+  String? type;
 
   TicketFeature({
     required super.code,
@@ -79,6 +82,7 @@ class TicketFeature extends Feature {
     this.ticketLightColor,
     this.ticketDarkColor,
     this.ticketBackground,
+    this.type,
   });
 
   factory TicketFeature.fromJson(Map<String, dynamic> json) {
@@ -88,6 +92,7 @@ class TicketFeature extends Feature {
       ticketLightColor: json[FeatureConstants.ticketLightColor],
       ticketDarkColor: json[FeatureConstants.ticketDarkColor],
       ticketBackground: json[FeatureConstants.ticketBackground],
+      type: json[FeatureConstants.ticketType],
     );
   }
 
@@ -106,6 +111,9 @@ class TicketFeature extends Feature {
     }
     if (ticketBackground != null) {
       data[FeatureConstants.ticketBackground] = ticketBackground!;
+    }
+    if (type != null) {
+      data[FeatureConstants.ticketType] = type!;
     }
     return data;
   }
