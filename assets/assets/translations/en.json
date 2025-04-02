@@ -489,7 +489,7 @@
   "Services": "Services",
   "Allows assigning accommodations to a user and displaying them on the user profile.": "Allows assigning accommodations to a user and displaying them on the user profile.",
   "Entry Code": "Entry Code",
-  "It is posible to verify users via QR code on workshops or other limited events.": "It is posible to verify users via QR code on workshops or other limited events.",
+  "It is possible to verify users via QR code on workshops or other limited events.": "It is possible to verify users via QR code on workshops or other limited events.",
   "This feature lets you create a seating blueprint with a limited number of seats for the reservation form. For example, you can design a seating chart for a bus or a layout of a hall with assigned seats.": "This feature lets you create a seating blueprint with a limited number of seats for the reservation form. For example, you can design a seating chart for a bus or a layout of a hall with assigned seats.",
   "Enabled": "Enabled",
   "Search features": "Search features",
@@ -538,5 +538,7 @@
   "Select start time": "Select start time",
   "Workshops": "Workshops",
   "Indicates the start time from when people can sign in for workshops.": "Indicates the start time from when people can sign in for workshops.",
+  "Edit Orders": "Edit Orders",
+  "Read Orders": "Read Orders",
   "_":"_"
 }
