@@ -78,7 +78,7 @@ supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
 - Add PNG icon to `assets`.
 - Run:
 ```
-fvm flutter pub run flutter_launcher_icon
+fvm dart run flutter_launcher_icons
 ```
 - Set label (short name, max 30 chars).
 - Set App ID in 3 places.
@@ -110,7 +110,7 @@ fvm flutter pub run flutter_launcher_icon
 - Import data types as CSV from Festapp standard csv file or fill them.
 - Upload assets:
     - Icon: 512×512 px
-    - Feature Graphic: 1,024×500 px
+    - Feature Graphic: 1024×500 px
 - Fill in:
     - Short description
     - Long description

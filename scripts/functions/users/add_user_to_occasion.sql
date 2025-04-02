@@ -79,7 +79,9 @@ BEGIN
            SET data           = user_data,
                is_manager     = unit_is_manager,
                is_editor      = unit_is_editor,
-               is_editor_view = unit_is_editor_view
+               is_editor_view = unit_is_editor_view,
+               is_editor_order = unit_is_editor,
+               is_editor_order_view = unit_is_editor_view
          WHERE occasion = oc AND "user" = usr;
     ELSE
         -- Insert a new row into occasion_users, using the unit-level role flags.
