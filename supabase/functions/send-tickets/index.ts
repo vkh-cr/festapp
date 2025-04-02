@@ -1,7 +1,7 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { generateTicketImage, fetchTicketResources } from "../_shared/generateTicket.ts";
 import { generateNamedTicketImage, fetchNamedTicketResources } from "../_shared/generateNamedTicket.ts";
-import { getEmailTemplateAndWrapper, supabaseAdmin, isUserEditor, getSupabaseUser } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin, isUserEditorOrder, getSupabaseUser } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
         });
       }
       const occasionId = orderForCheck.occasion;
-      const userIsEditor = await isUserEditor(userId, occasionId);
+      const userIsEditor = await isUserEditorOrder(userId, occasionId);
       if (!userIsEditor) {
         console.error(`User ${userId} is not an editor for occasion ${occasionId}`);
         return new Response(JSON.stringify({ error: "Forbidden: Not an editor" }), {
