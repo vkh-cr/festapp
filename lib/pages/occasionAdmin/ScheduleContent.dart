@@ -14,7 +14,7 @@ import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class ScheduleContent extends StatefulWidget {
-  const ScheduleContent({Key? key}) : super(key: key);
+  const ScheduleContent({super.key});
 
   @override
   _ScheduleContentState createState() => _ScheduleContentState();
@@ -80,7 +80,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
           TrinaColumn(
             title: "Hide".tr(),
             field: Tb.events.is_hidden,
-            type: TrinaColumnType.select([]),
+            type: TrinaColumnType.text(),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 60,
