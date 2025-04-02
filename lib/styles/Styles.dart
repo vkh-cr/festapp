@@ -69,7 +69,6 @@ class SvgIconButton extends StatelessWidget {
   final double splashRadius;
   final double iconSize;
 
-
   const SvgIconButton({
     required this.onPressed,
     required this.iconPath,
@@ -95,7 +94,6 @@ class SvgIconButton extends StatelessWidget {
     );
   }
 }
-
 
 //coffee
 // static const primaryColor = 0xFF122640;
@@ -123,7 +121,6 @@ class SvgIconButton extends StatelessWidget {
 // static const color3 = Color(0xFFF29D52);
 // static const color4 = Color(0xFF731702);
 // static const attentionColor = Color(0xFF8B0000);
-
 
 //galaxy
 // static const primaryColor = 0xFF023059;

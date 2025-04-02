@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/components/seatReservation/model/SeatModel.dart';
+import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/dataModels/FormOptionModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/dataModelsEshop/BlueprintObjectModel.dart';
+import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
 import 'package:fstapp/services/HtmlHelper.dart';
@@ -224,7 +224,6 @@ class FormHelper {
 
     return false;
   }
-
 
   static Map<String, dynamic> getDataFromForm(FormHolder formHolder, [bool? returnWithType]) {
     Map<String, dynamic> toReturn = {};
@@ -527,7 +526,6 @@ class FormHelper {
   static bool anyHasDescription(List<FormOptionModel> options) {
     return options.any((option) => !HtmlHelper.isHtmlEmptyOrNull(option.description));
   }
-
 
   static bool isCardDesign(FormHolder formHolder, FieldHolder field) {
     if(formHolder.isCardDesign == true) {

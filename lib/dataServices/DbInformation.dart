@@ -131,7 +131,6 @@ class DbInformation {
   static Future<void> updateInformation(InformationModel info) async {
     if(info.type == InformationModel.gameType){
 
-
       Map<String, dynamic> upsertObj = {
         Tb.information_hidden.data: info.informationHidden?.data,
         Tb.information_hidden.occasion: RightsService.currentOccasionId!

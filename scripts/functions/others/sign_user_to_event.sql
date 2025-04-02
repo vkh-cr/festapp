@@ -14,9 +14,10 @@ declare
   b_split_for_men_women boolean;
   is_current_user_male boolean;
 
-  events_registration_start TIMESTAMP;
-  event_start_time TIMESTAMP;
-  event_end_time TIMESTAMP;
+  registration_start timestamp;
+  event_start_time timestamp;
+  event_end_time timestamp;
+  workshops_feature jsonb;
   e RECORD;
 
 begin
@@ -50,55 +51,71 @@ begin
       END IF;
   END IF;
 
-  SELECT (data->>'events_registration_start')::timestamp INTO events_registration_start
-  FROM occasions
-  WHERE id = (select occasion from events where events.id = ev);
+  -- Check registration start time from occasions.features for the "workshops" feature
+  SELECT elem
+  INTO workshops_feature
+  FROM occasions,
+       jsonb_array_elements(features) elem
+  WHERE id = (SELECT occasion FROM events WHERE id = ev)
+    AND elem->>'code' = 'workshops'
+  LIMIT 1;
 
-  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < events_registration_start then
-    RETURN json_build_object(
-      'code', 104,
-      'events_registration_start', events_registration_start AT TIME ZONE 'UTC');
-  end if;
+  IF workshops_feature IS NOT NULL THEN
+    -- If the workshops feature is not enabled, do not allow sign in
+    IF (workshops_feature->>'is_enabled')::boolean IS NOT TRUE THEN
+      RETURN json_build_object('code', 108, 'message', 'Registration for workshops is not enabled');
+    END IF;
+    -- If start_time is provided, enforce registration start time
+    registration_start := (workshops_feature->>'start_time')::timestamp;
+    IF registration_start IS NOT NULL THEN
+      IF CURRENT_TIMESTAMP AT TIME ZONE 'UTC' < registration_start THEN
+        RETURN json_build_object('code', 104, 'events_registration_start', registration_start AT TIME ZONE 'UTC');
+      END IF;
+    END IF;
+  END IF;
+  -- If the workshops feature is not present or its start_time is null, sign in is enabled
 
   SELECT start_time, end_time INTO event_start_time, event_end_time
   FROM events
   WHERE id = ev;
 
-  if CURRENT_TIMESTAMP AT TIME ZONE 'UTC' > event_end_time then
+  IF CURRENT_TIMESTAMP AT TIME ZONE 'UTC' > event_end_time THEN
     RETURN json_build_object('code', 100);
-  end if;
+  END IF;
 
-  select count(*) from event_users eu where eu.event = ev and eu."user" = usr into already_in_count;
-  if already_in_count > 0 then
+  SELECT count(*) FROM event_users eu WHERE eu.event = ev AND eu."user" = usr INTO already_in_count;
+  IF already_in_count > 0 THEN
     RETURN json_build_object('code', 103);
-  end if;
+  END IF;
 
-  select count(*) from exclusive_events where event = ev into event_group_count;
-  if event_group_count > 0 then
-    select "group" from exclusive_events where event = ev into event_group;
-    select count(*) from exclusive_events ee join event_users eu on ee.event = eu.event
-    where ee."group" = event_group and eu."user" = usr into exclusive_event_count;
-    if exclusive_event_count > 0 then
+  SELECT count(*) FROM exclusive_events WHERE event = ev INTO event_group_count;
+  IF event_group_count > 0 THEN
+    SELECT "group" FROM exclusive_events WHERE event = ev INTO event_group;
+    SELECT count(*) FROM exclusive_events ee JOIN event_users eu ON ee.event = eu.event
+      WHERE ee."group" = event_group AND eu."user" = usr INTO exclusive_event_count;
+    IF exclusive_event_count > 0 THEN
       RETURN json_build_object('code', 102);
-    end if;
-  end if;
+    END IF;
+  END IF;
 
-  -- Check if event_table doesnt have more records with ev than is in table event in column max_participants
-  select max_participants from events where id = ev into i_max_participants;
-  select split_for_men_women from events where id = ev into b_split_for_men_women;
+  -- Check if the event already has the maximum number of participants
+  SELECT max_participants FROM events WHERE id = ev INTO i_max_participants;
+  SELECT split_for_men_women FROM events WHERE id = ev INTO b_split_for_men_women;
 
-  if b_split_for_men_women then
-    select exists (select sex from user_info where id = usr and sex = 'male') into is_current_user_male;
-    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = ev and ei.sex = 'male' into current_men_participants;
-    select count(*) from event_users eu join user_info ei on eu."user" = ei.id where event = ev and ei.sex <> 'male' into current_women_participants;
-    if is_current_user_male and current_men_participants >= (i_max_participants / 2) then
+  IF b_split_for_men_women THEN
+    SELECT exists (SELECT sex FROM user_info WHERE id = usr AND sex = 'male') INTO is_current_user_male;
+    SELECT count(*) FROM event_users eu JOIN user_info ei ON eu."user" = ei.id
+      WHERE event = ev AND ei.sex = 'male' INTO current_men_participants;
+    SELECT count(*) FROM event_users eu JOIN user_info ei ON eu."user" = ei.id
+      WHERE event = ev AND ei.sex <> 'male' INTO current_women_participants;
+    IF is_current_user_male AND current_men_participants >= (i_max_participants / 2) THEN
       RETURN json_build_object('code', 105);
-    elsif not is_current_user_male and current_women_participants >= (i_max_participants / 2) then
+    ELSIF NOT is_current_user_male AND current_women_participants >= (i_max_participants / 2) THEN
       RETURN json_build_object('code', 106);
-    end if;
-  end if;
+    END IF;
+  END IF;
 
-  -- Loop through user_events to check for conflicts
+  -- Loop through user_events to check for scheduling conflicts
   FOR e IN
       SELECT events.id, events.start_time, events.end_time
       FROM events
@@ -113,27 +130,24 @@ begin
       END IF;
   END LOOP;
 
-
-  select count(*) from event_users where event = ev into current_participants;
-
-  select count(*) from event_users where event = ev into current_participants;
-  if current_participants >= i_max_participants then
-    -- If it is more return false
+  SELECT count(*) FROM event_users WHERE event = ev INTO current_participants;
+  IF current_participants >= i_max_participants THEN
     RETURN json_build_object('code', 101);
-  else
-    -- otherwise return true
-    insert into event_users (event, "user") values (ev, usr);
+  ELSE
+    INSERT INTO event_users (event, "user") VALUES (ev, usr);
     RETURN json_build_object('code', 200);
-  end if;
-end;
+  END IF;
+END;
 $$;
 
---200 ok
---100 event is over
---101 full
---102 exclusive already taken
---103 already signed in
---104 not time yet
---105 enough male
---106 enough female
---107 conflicting event
+-- Error Codes:
+-- 200: OK
+-- 100: Event is over
+-- 101: Event is full
+-- 102: Exclusive event already taken
+-- 103: Already signed in
+-- 104: Registration not started yet (workshops_registration_start in response)
+-- 105: Maximum male participants reached
+-- 106: Maximum female participants reached
+-- 107: Conflicting event schedule
+-- 108: Registration for workshops is not enabled

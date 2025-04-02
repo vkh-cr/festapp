@@ -5,7 +5,6 @@ import 'package:fstapp/dataModels/UserInfoModel.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 class ImportService {
   static final _supabase = Supabase.instance.client;
 

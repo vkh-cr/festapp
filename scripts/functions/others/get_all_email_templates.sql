@@ -28,7 +28,9 @@ BEGIN
 
   -- If an occasion is provided, perform the permission check.
   IF v_occ IS NOT NULL THEN
-    PERFORM public.check_is_editor_view_on_occasion(v_occ);
+    IF (SELECT get_is_editor_view_on_occasion(oc)) <> TRUE AND (SELECT get_is_editor_order_view_on_occasion(oc)) <> TRUE THEN
+       RAISE EXCEPTION 'User is not editor view.';
+    END IF;
   END IF;
 
   -- Retrieve email templates while ensuring only one template per code is returned.

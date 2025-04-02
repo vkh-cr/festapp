@@ -4,11 +4,11 @@ import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 import 'PlaceModel.dart';
 import 'UserInfoModel.dart';
 
-class UserGroupInfoModel extends IPlutoRowModel {
+class UserGroupInfoModel extends ITrinaRowModel {
   Map<int, String> checkpointTitlesDict = {};
 
   static const String progressColumn = "progress";
@@ -93,7 +93,7 @@ class UserGroupInfoModel extends IPlutoRowModel {
   }
 
   @override
-  PlutoRow toPlutoRow(BuildContext context) {
+  TrinaRow toTrinaRow(BuildContext context) {
     var checkpoints = (data?["game"] ?? [])
         .where((item) => checkpointTitlesDict.containsKey(item["check_point"])) // Filter out non-existent checkpoints
         .map((item) => checkpointTitlesDict[item["check_point"]])
@@ -103,15 +103,15 @@ class UserGroupInfoModel extends IPlutoRowModel {
 
     var progressText = "${checkpoints.length} [${checkpoints.join(",")}]";
 
-    return PlutoRow(cells: {
-      Tb.user_group_info.id: PlutoCell(value: id),
-      Tb.user_group_info.title: PlutoCell(value: title),
-      Tb.user_group_info.leader: PlutoCell(value: leader),
-      Tb.user_group_info.description: PlutoCell(value: description),
-      Tb.user_group_info.place: PlutoCell(value: place),
-      Tb.user_group_info.type: PlutoCell(value: type ?? ""),
-      participantsColumn: PlutoCell(value: participants),
-      progressColumn: PlutoCell(value: progressText),
+    return TrinaRow(cells: {
+      Tb.user_group_info.id: TrinaCell(value: id),
+      Tb.user_group_info.title: TrinaCell(value: title),
+      Tb.user_group_info.leader: TrinaCell(value: leader),
+      Tb.user_group_info.description: TrinaCell(value: description),
+      Tb.user_group_info.place: TrinaCell(value: place),
+      Tb.user_group_info.type: TrinaCell(value: type ?? ""),
+      participantsColumn: TrinaCell(value: participants),
+      progressColumn: TrinaCell(value: progressText),
     });
   }
 

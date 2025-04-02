@@ -14,7 +14,8 @@ import 'package:fstapp/dataServices/DbUsers.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class UserGroupsTab extends StatefulWidget {
   const UserGroupsTab({Key? key}) : super(key: key);
@@ -48,27 +49,27 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.user_group_info.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.user_group_info.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             enableEditingMode: false,
             width: 50,
             renderer: (rendererContext) =>
                 DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Name".tr(),
             field: Tb.user_group_info.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             width: 200,
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Moderator".tr(),
             field: Tb.user_group_info.leader,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             enableEditingMode: false,
             width: 200,
             renderer: (rendererContext) {
@@ -111,10 +112,10 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Participants".tr(),
             field: UserGroupInfoModel.participantsColumn,
-            type: PlutoColumnType.text(
+            type: TrinaColumnType.text(
               defaultValue: <UserInfoModel>{},
             ),
             enableEditingMode: false,
@@ -172,14 +173,14 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Content".tr(),
             enableFilterMenuItem: false,
             enableContextMenu: false,
             enableSorting: false,
             field: Tb.user_group_info.description,
-            type: PlutoColumnType.text(defaultValue: null),
+            type: TrinaColumnType.text(defaultValue: null),
             renderer: (rendererContext) {
               return ElevatedButton(
                 onPressed: () async {
@@ -217,14 +218,14 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Place".tr(),
             enableFilterMenuItem: false,
             enableContextMenu: false,
             enableSorting: false,
             field: Tb.user_group_info.place,
-            type: PlutoColumnType.text(defaultValue: null),
+            type: TrinaColumnType.text(defaultValue: null),
             renderer: (rendererContext) {
               return ElevatedButton(
                 onPressed: () async {
@@ -238,7 +239,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                     description: "",
                     type: "group",
                     isHidden: true,
-                    latLng: SynchroService.globalSettingsModel!.defaultMapLocation,
+                    latLng: FeatureService.getDefaultLocation()
                   );
                   RouterService.navigatePageInfo(
                     context,

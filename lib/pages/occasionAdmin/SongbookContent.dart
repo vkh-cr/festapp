@@ -6,7 +6,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
-import 'package:pluto_grid_plus/pluto_grid_plus.dart';
+import 'package:trina_grid/trina_grid.dart';
 
 class SongbookContent extends StatefulWidget {
   const SongbookContent({Key? key}) : super(key: key);
@@ -29,35 +29,35 @@ class _SongbookContentState extends State<SongbookContent> {
         firstColumnType: DataGridFirstColumn.deleteAndDuplicate,
         idColumn: Tb.information.id,
         columns: [
-          PlutoColumn(
+          TrinaColumn(
             hide: true,
             title: "Id".tr(),
             field: Tb.information.id,
-            type: PlutoColumnType.number(defaultValue: -1),
+            type: TrinaColumnType.number(defaultValue: -1),
             readOnly: true,
             width: 50,
             renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Hide".tr(),
             field: Tb.information.is_hidden,
-            type: PlutoColumnType.select([]),
+            type: TrinaColumnType.select([]),
             applyFormatterInEditing: true,
             enableEditingMode: false,
             width: 100,
             renderer: (rendererContext) =>
                 DataGridHelper.checkBoxRenderer(rendererContext, Tb.information.is_hidden),
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Title".tr(),
             field: Tb.information.title,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
           ),
-          PlutoColumn(
+          TrinaColumn(
             width: 150,
             title: "Content".tr(),
             field: Tb.information.description,
-            type: PlutoColumnType.text(),
+            type: TrinaColumnType.text(),
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
@@ -76,10 +76,10 @@ class _SongbookContentState extends State<SongbookContent> {
               );
             },
           ),
-          PlutoColumn(
+          TrinaColumn(
             title: "Order".tr(),
             field: Tb.information.order,
-            type: PlutoColumnType.number(defaultValue: null),
+            type: TrinaColumnType.number(defaultValue: null),
             applyFormatterInEditing: true,
             width: 100,
           ),
