@@ -15,5 +15,3 @@ BEGIN
   RETURN result;
 END;
 $$;
-
-DROP FUNCTION get_latest_order_history(bigint)
