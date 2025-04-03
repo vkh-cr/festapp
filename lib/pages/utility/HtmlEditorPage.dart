@@ -193,6 +193,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
         _isSaving = true;
         _showOverlay = true;
       });
+      await Future.delayed(const Duration(milliseconds: 50));
       htmlText = await HtmlHelper.storeImagesToOccasion(_originalHtml ?? _html, htmlText, widget.occasionId!);
       RouterService.goBack(context, htmlText);
       return;
@@ -202,7 +203,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
       _isSaving = true;
       _showOverlay = true;
     });
-    await Future.delayed(const Duration(milliseconds: 200));
+    await Future.delayed(const Duration(milliseconds: 50));
 
     imagesToProcess = HtmlHelper.detectImagesToProcess(htmlText);
     bool hasLargeImages = imagesToProcess.isNotEmpty;
