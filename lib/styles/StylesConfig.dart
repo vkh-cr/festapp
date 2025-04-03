@@ -21,7 +21,7 @@ class StylesConfig {
   static const double normalClickableFontSize = 18;
 
   // Dimensions
-  static const double appMaxWidth = 680;
+  static const double appMaxWidth = 720;
   static const double formMaxWidth = 680;
   static const double formMaxWidthMid = 580;
 
