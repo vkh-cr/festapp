@@ -149,6 +149,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                     context,
                     HtmlEditorRoute(
                       content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
+                      occasionId: form!.occasion
                     ),
                   );
                   if (result != null) {
@@ -257,6 +258,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                                 content: {
                                   HtmlEditorPage.parContent: form!.header ?? ""
                                 },
+                                occasionId: form!.occasion
                               ),
                             );
                             if (result != null) {

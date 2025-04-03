@@ -392,17 +392,17 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
             context, widget.form, field);
       case FormHelper.fieldTypeSelectOne:
         return isEditable
-            ? SelectOneEditor.buildSelectOneEditor(context, field)
+            ? SelectOneEditor.buildSelectOneEditor(context, field, widget.form.occasion)
             : SelectOneEditor.buildSelectOneReadOnly(context, field);
       case FormHelper.fieldTypeSelectMany:
         return isEditable
-            ? SelectManyEditor.buildSelectManyEditor(context, field)
+            ? SelectManyEditor.buildSelectManyEditor(context, field, widget.form.occasion)
             : SelectManyEditor.buildSelectManyReadOnly(context, field);
       case FormHelper.fieldTypeSex:
         return SexEditor.buildSexFieldReadOnly(context, field);
       case FormHelper.fieldTypeBirthDate:
         return isEditable
-            ? BirthDateEditor.buildBirthDateEditor(context, field)
+            ? BirthDateEditor.buildBirthDateEditor(context, field, widget.form.occasion)
             : BirthDateEditor.buildBirthDateReadOnly(context, field);
       default:
         if (isEditable) {

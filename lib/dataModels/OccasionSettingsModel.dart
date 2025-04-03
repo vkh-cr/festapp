@@ -32,7 +32,7 @@ class OccasionSettingsModel {
     var dataPart = json[Tb.occasions.data] as Map<String, dynamic>?;
 
     if (dataPart == null) {
-      var defaultSettings = OccasionSettingsModel.DefaultSettings;
+      var defaultSettings = OccasionSettingsModel.defaultSettings;
       defaultSettings.services = servicesPart;
       return defaultSettings;
     }
@@ -69,7 +69,7 @@ class OccasionSettingsModel {
     }
   };
 
-  static OccasionSettingsModel DefaultSettings = OccasionSettingsModel(
+  static OccasionSettingsModel defaultSettings = OccasionSettingsModel(
   );
 
   FeatureModel? getFeatureByCode(String code) =>

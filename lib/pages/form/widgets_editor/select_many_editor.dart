@@ -37,7 +37,7 @@ class SelectManyEditor {
     );
   }
 
-  static Widget buildSelectManyEditor(BuildContext context, FormFieldModel field) {
+  static Widget buildSelectManyEditor(BuildContext context, FormFieldModel field, int? occasionId) {
     final optionsController = TextEditingController();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +76,7 @@ class SelectManyEditor {
                     if (value == 'additional_settings') {
                       showDialog(
                         context: context,
-                        builder: (context) => OptionDetailEditorDialog(option: formOption),
+                        builder: (context) => OptionDetailEditorDialog(option: formOption, occasionId: occasionId,),
                       ).then((_) {
                         // Refresh the widget when the dialog is closed.
                         (context as Element).markNeedsBuild();

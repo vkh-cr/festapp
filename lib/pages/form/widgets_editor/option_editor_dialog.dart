@@ -9,7 +9,9 @@ import 'package:fstapp/widgets/standard_dialog.dart';
 
 class OptionDetailEditorDialog extends StatefulWidget {
   final FormOptionModel option;
-  const OptionDetailEditorDialog({super.key, required this.option});
+  final int? occasionId;
+
+  const OptionDetailEditorDialog({super.key, required this.option, this.occasionId});
 
   @override
   _OptionDetailEditorDialogState createState() => _OptionDetailEditorDialogState();
@@ -27,7 +29,10 @@ class _OptionDetailEditorDialogState extends State<OptionDetailEditorDialog> {
   Future<void> _editContent() async {
     RouterService.navigatePageInfo(
       context,
-      HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
+      HtmlEditorRoute(
+          content: {HtmlEditorPage.parContent: _description},
+          occasionId: widget.occasionId,
+      ),
     ).then((value) {
       if (value != null) {
         setState(() {
