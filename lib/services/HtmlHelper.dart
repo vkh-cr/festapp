@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:fstapp/appConfig.dart';
 import 'package:fstapp/dataServices/DbImages.dart';
 import 'package:fstapp/services/ImageCompressionHelper.dart';
 import 'package:html/parser.dart' as html_parser;
@@ -197,7 +199,12 @@ class HtmlHelper {
     ).trim().isEmpty;
   }
 
-  static Future<String> storeImagesToOccasion(String oldHtml, String newHtml, int occasionId, { maxWidth = 1200 }) async {
+  static Future<String> storeImagesToOccasion(
+      String oldHtml,
+      String newHtml,
+      int occasionId,
+      { int maxWidth = AppConfig.imagesMaxWidth,
+        int maxBytes = AppConfig.imagesMaxBytes }) async {
     // Parse the old and new HTML documents.
     final oldDocument = html_parser.parse(oldHtml);
     final newDocument = html_parser.parse(newHtml);
@@ -242,8 +249,29 @@ class HtmlHelper {
       // Only use resize parameter if the image is bigger than given width.
       Uint8List compressedImageData;
       var decodedImage = img.decodeImage(imageData);
-      if (decodedImage != null && decodedImage.width > maxWidth) {
-        compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      if (decodedImage != null) {
+        // Determine the target width: use maxWidth if the image is too wide,
+        // otherwise keep the original width.
+        int targetWidth = decodedImage.width > maxWidth ? maxWidth : decodedImage.width;
+        // Calculate the scaling factor.
+        double scale = targetWidth / decodedImage.width;
+        // Estimate the new file size at 100% quality after scaling.
+        int estimatedSizeQuality100 = (decodedImage.lengthInBytes * scale * scale).floor();
+
+        int dynamicQuality = 100;
+        if (estimatedSizeQuality100 > maxBytes) {
+          // Compute the ratio of the desired size to the estimated size.
+          double ratio = maxBytes / estimatedSizeQuality100;
+          // Use an exponent of 2 for more aggressive compression.
+          dynamicQuality = (pow(ratio, 2) * 100).floor();
+          dynamicQuality = dynamicQuality.clamp(1, 100);
+        }
+
+        compressedImageData = await ImageCompressionHelper.compress(
+          imageData,
+          targetWidth,
+          quality: dynamicQuality,
+        );
       } else {
         compressedImageData = imageData;
       }
