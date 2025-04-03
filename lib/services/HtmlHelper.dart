@@ -230,13 +230,21 @@ class HtmlHelper {
       } else {
         // For linked images, fetch the image data from the URL.
         var fetched = await fetchImageData(src);
-        if(fetched == null) {
+        if (fetched == null) {
           continue;
         }
         imageData = fetched;
       }
 
-      var compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      // Only use resize parameter if the image is bigger than given width.
+      Uint8List compressedImageData;
+      var decodedImage = img.decodeImage(imageData);
+      if (decodedImage != null && decodedImage.width > maxWidth) {
+        compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      } else {
+        compressedImageData = imageData;
+      }
+
       // Upload the compressed image and get the public URL.
       final publicUrl = await DbImages.uploadImage(compressedImageData, occasionId, null);
       // Update the image tag's src attribute.

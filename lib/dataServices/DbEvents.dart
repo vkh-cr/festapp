@@ -259,8 +259,9 @@ class DbEvents {
     var data = await _supabase
         .from(Tb.events.table)
         .select(
-        "${Tb.events.id},"
+            "${Tb.events.id},"
             "${Tb.events.updated_at},"
+            "${Tb.events.occasion},"
             "${Tb.events.title},"
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"

@@ -282,6 +282,7 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
                             context,
                             HtmlEditorRoute(
                               content: {HtmlEditorPage.parContent: _htmlContent},
+                              occasionId: widget.template.occasion
                             ),
                           );
                           if (result != null && result is String) {

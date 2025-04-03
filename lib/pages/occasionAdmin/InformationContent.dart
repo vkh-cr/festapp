@@ -6,6 +6,7 @@ import 'package:fstapp/dataModels/InformationModel.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
 import 'package:fstapp/dataModels/Tb.dart';
 import 'package:fstapp/dataServices/DbInformation.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class InformationContent extends StatefulWidget {
@@ -61,6 +62,7 @@ class _InformationContentState extends State<InformationContent> {
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
+                occasionId: RightsService.currentOccasionId,
                 field: Tb.information.description,
                 rendererContext: rendererContext,
                 loadContent: () async {
