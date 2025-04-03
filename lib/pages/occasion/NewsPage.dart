@@ -183,7 +183,10 @@ class _NewsPageState extends State<NewsPage> {
                           await DbNews.deleteNewsMessage(message);
                           ToastHelper.Show(context, "Message has been removed.".tr());
                         } else {
-                          await RouterService.navigatePageInfo(context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: message.message})).then((value) async {
+                          await RouterService.navigatePageInfo(context, HtmlEditorRoute(
+                              content: {HtmlEditorPage.parContent: message.message},
+                              occasionId: RightsService.currentOccasionId
+                          )).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;

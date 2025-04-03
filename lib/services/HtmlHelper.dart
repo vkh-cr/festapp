@@ -8,6 +8,9 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:html/dom.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'PlatformHelper.dart';
 
 class HtmlHelper {
   static const int jpegThreshold = 1200;
@@ -230,13 +233,21 @@ class HtmlHelper {
       } else {
         // For linked images, fetch the image data from the URL.
         var fetched = await fetchImageData(src);
-        if(fetched == null) {
+        if (fetched == null) {
           continue;
         }
         imageData = fetched;
       }
 
-      var compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      // Only use resize parameter if the image is bigger than given width.
+      Uint8List compressedImageData;
+      var decodedImage = img.decodeImage(imageData);
+      if (decodedImage != null && decodedImage.width > maxWidth) {
+        compressedImageData = await ImageCompressionHelper.compress(imageData, maxWidth);
+      } else {
+        compressedImageData = imageData;
+      }
+
       // Upload the compressed image and get the public URL.
       final publicUrl = await DbImages.uploadImage(compressedImageData, occasionId, null);
       // Update the image tag's src attribute.
@@ -258,6 +269,26 @@ class HtmlHelper {
   }
 
   static Future<Uint8List?> fetchImageData(String src) async {
+    if (PlatformHelper.isWeb) {
+      final response = await Supabase.instance.client.functions.invoke(
+        "fetch-http-data",
+        body: {"targetUrl": src},
+      );
+      if (response.data != null && response.data is Map) {
+        final mapData = response.data as Map;
+        final base64String = mapData["data"];
+        if (base64String is String) {
+          return base64.decode(base64String);
+        } else {
+          print("Error: Data is not a string.");
+          return null;
+        }
+      } else {
+        print("Error: No data returned from supabase function.");
+        return null;
+      }
+    }
+
     final client = http.Client();
     try {
       final response = await client.get(Uri.parse(src));

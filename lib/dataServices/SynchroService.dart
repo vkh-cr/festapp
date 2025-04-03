@@ -14,12 +14,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SynchroService {
   static final _supabase = Supabase.instance.client;
-  static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.DefaultSettings;
+  static OccasionSettingsModel? globalSettingsModel = OccasionSettingsModel.defaultSettings;
 
   static Future<OccasionSettingsModel> loadOrInitOccasionSettings() async {
     OccasionSettingsModel toReturn;
     if(RightsService.currentOccasionId == null) {
-      toReturn =  OccasionSettingsModel.DefaultSettings;
+      toReturn =  OccasionSettingsModel.defaultSettings;
     }
     else{
       var data = await _supabase

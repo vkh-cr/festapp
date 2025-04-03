@@ -17,7 +17,7 @@ class HtmlEditorPage extends StatefulWidget {
   final Map<String, dynamic>? content;
   final int? occasionId;
 
-  HtmlEditorPage({this.content, this.occasionId, Key? key}) : super(key: key);
+  const HtmlEditorPage({this.content, this.occasionId, super.key});
 
   @override
   _HtmlEditorPageState createState() => _HtmlEditorPageState();
