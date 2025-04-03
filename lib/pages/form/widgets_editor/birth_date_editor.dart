@@ -34,7 +34,7 @@ class BirthDateEditor {
     );
   }
 
-  static Widget buildBirthDateEditor(BuildContext context, FormFieldModel field) {
+  static Widget buildBirthDateEditor(BuildContext context, FormFieldModel field, int? occasionId) {
     final TextEditingController minAgeController = TextEditingController(
       text: field.data != null && field.data![BirthDateFieldHolder.metaMinYear] != null
           ? field.data![BirthDateFieldHolder.metaMinYear].toString()
@@ -139,7 +139,10 @@ class BirthDateEditor {
                 onEdit: () async {
                   final result = await RouterService.navigatePageInfo(
                     context,
-                    HtmlEditorRoute(content: {HtmlEditorPage.parContent: currentMessage}),
+                    HtmlEditorRoute(
+                        content: {HtmlEditorPage.parContent: currentMessage},
+                        occasionId: occasionId
+                    ),
                   );
                   if (result != null) {
                     currentMessage = result as String;

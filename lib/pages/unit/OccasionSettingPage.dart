@@ -269,7 +269,10 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                       onPressed: () async {
                         RouterService.navigatePageInfo(
                           context,
-                          HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
+                          HtmlEditorRoute(
+                              content: {HtmlEditorPage.parContent: _description},
+                              occasionId: widget.occasion.id
+                          ),
                         ).then((value) {
                           if (value != null) {
                             setState(() {
