@@ -21,6 +21,7 @@ class DataGridHelper
     required String field,
     required TrinaColumnRendererContext rendererContext,
     required Future<String?> Function() loadContent,
+    int? occasionId
   }) {
     String? textToEdit;
     String? oldText = rendererContext.row.cells[field]?.value;
@@ -35,7 +36,7 @@ class DataGridHelper
           HtmlEditorPage.parLoad: loadContent,
         };
 
-        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
+        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
           if (value != null) {
             var newText = value as String;
             if (newText != textToEdit) {

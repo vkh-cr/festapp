@@ -11,6 +11,7 @@ import 'package:fstapp/dataModels/UserGroupInfoModel.dart';
 import 'package:fstapp/dataModels/UserInfoModel.dart';
 import 'package:fstapp/dataServices/DbGroups.dart';
 import 'package:fstapp/dataServices/DbUsers.dart';
+import 'package:fstapp/dataServices/RightsService.dart';
 import 'package:fstapp/dataServices/SynchroService.dart';
 import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
 import 'package:fstapp/services/DialogHelper.dart';
@@ -192,6 +193,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       content: {
                         HtmlEditorPage.parContent: oldText,
                       },
+                      occasionId: RightsService.currentOccasionId
                     ),
                   ).then((value) async {
                     if (value != null) {

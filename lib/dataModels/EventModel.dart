@@ -40,10 +40,12 @@ class EventModel extends ITrinaRowModel {
   bool isMyGroupEvent = false;
 
   bool? isEventInMySchedule;
+  int? occasionId;
+
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
-          !isGroupEvent &&
-          (childEventIds == null || childEventIds!.isEmpty);
+        !isGroupEvent &&
+        (childEventIds == null || childEventIds!.isEmpty);
     if(!canSave){
       return null;
     }
@@ -72,7 +74,9 @@ class EventModel extends ITrinaRowModel {
     this.currentUsersSaved,
     required this.isSignedIn,
     required this.isGroupEvent,
-    this.isEventInMySchedule});
+    this.isEventInMySchedule,
+    this.occasionId
+  });
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
@@ -110,27 +114,28 @@ class EventModel extends ITrinaRowModel {
     }
 
     return EventModel(
-      startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
-      endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
-      id: json[idColumn],
-      isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
-      updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
-      title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-      description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
-      maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
-      place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
+        startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
+        endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
+        id: json[idColumn],
+        isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
+        updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
+        title: json.containsKey(titleColumn) ? json[titleColumn] : null,
+        description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
+        maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
+        place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
         json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
-      type: json[Tb.events.type],
-      splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
-      isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
-      isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
-      isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
-      childEventIds: childEvents,
-      parentEventIds: parentEvents,
-      eventRolesIds: eventRoles,
-      currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
-      currentUsersSaved: json[Tb.event_users_saved.table] != null ? json[Tb.event_users_saved.table][0]["count"] : null,
-  );
+        type: json[Tb.events.type],
+        splitForMenWomen: json.containsKey(splitForMenWomenColumn) ? json[splitForMenWomenColumn] : false,
+        isSignedIn: json.containsKey(isSignedInColumn) ? json[isSignedInColumn] : false,
+        isGroupEvent: json.containsKey(isGroupEventColumn) ? json[isGroupEventColumn] : false,
+        isEventInMySchedule: json.containsKey(isEventInMyProgramColumn) ? json[isEventInMyProgramColumn] : false,
+        childEventIds: childEvents,
+        parentEventIds: parentEvents,
+        eventRolesIds: eventRoles,
+        currentParticipants: json.containsKey(eventUsersTable) ? json[eventUsersTable][0]["count"] : json.containsKey(currentParticipantsColumn) ? json[currentParticipantsColumn] : null,
+        currentUsersSaved: json[Tb.event_users_saved.table] != null ? json[Tb.event_users_saved.table][0]["count"] : null,
+        occasionId: json.containsKey(Tb.events.occasion) ? json[Tb.events.occasion] : null
+    );
   }
 
   bool isFull() => currentParticipants !>= maxParticipants!;
@@ -153,6 +158,7 @@ class EventModel extends ITrinaRowModel {
     childEventIds = event.childEventIds;
     place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
     type = event.type;
+    occasionId = event.occasionId;
   }
 
   static const String startDateColumn = "startDate";
@@ -209,21 +215,22 @@ class EventModel extends ITrinaRowModel {
     }
 
     return EventModel(
-      startTime: dateFormat.parse(startTimeString),
-      endTime: dateFormat.parse(endTimeString),
-      id: json[idColumn] == -1 ? null : json[idColumn],
-      isHidden: json[isHiddenColumn] == "true" ? true : false,
-      updatedAt: json[updatedAtColumn],
-      title: json[titleColumn],
-      description: json[descriptionColumn],
-      maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
-      place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
-      type: json[Tb.events.type],
-      splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
-      parentEventIds: parentEvents,
-      eventRolesIds: eventRoles,
-      isSignedIn: false,
-      isGroupEvent: json[isGroupEventColumn] == "true" ? true : false,
+        startTime: dateFormat.parse(startTimeString),
+        endTime: dateFormat.parse(endTimeString),
+        id: json[idColumn] == -1 ? null : json[idColumn],
+        isHidden: json[isHiddenColumn] == "true" ? true : false,
+        updatedAt: json[updatedAtColumn],
+        title: json[titleColumn],
+        description: json[descriptionColumn],
+        maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+        place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
+        type: json[Tb.events.type],
+        splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
+        parentEventIds: parentEvents,
+        eventRolesIds: eventRoles,
+        isSignedIn: false,
+        isGroupEvent: json[isGroupEventColumn] == "true" ? true : false,
+        occasionId: json.containsKey(Tb.events.occasion) ? json[Tb.events.occasion] : null
     );
   }
 
@@ -270,23 +277,24 @@ class EventModel extends ITrinaRowModel {
   String toBasicString() => "$title";
 
   Map toJson() =>
-  {
-    idColumn: id,
-    updatedAtColumn: updatedAt?.toIso8601String(),
-    startTimeColumn: startTime.toIso8601String(),
-    endTimeColumn: endTime.toIso8601String(),
-    isHiddenColumn: isHidden,
-    titleColumn: title,
-    descriptionColumn: description,
-    maxParticipantsColumn: maxParticipants,
-    currentParticipantsColumn: currentParticipants,
-    isSignedInColumn: isSignedIn,
-    isEventInMyProgramColumn: isEventInMySchedule,
-    isGroupEventColumn: isGroupEvent,
-    placeColumn: place?.id,
-    Tb.events.type: type,
-    childEventsList: childEventIds
-  };
+      {
+        idColumn: id,
+        updatedAtColumn: updatedAt?.toIso8601String(),
+        startTimeColumn: startTime.toIso8601String(),
+        endTimeColumn: endTime.toIso8601String(),
+        isHiddenColumn: isHidden,
+        titleColumn: title,
+        descriptionColumn: description,
+        maxParticipantsColumn: maxParticipants,
+        currentParticipantsColumn: currentParticipants,
+        isSignedInColumn: isSignedIn,
+        isEventInMyProgramColumn: isEventInMySchedule,
+        isGroupEventColumn: isGroupEvent,
+        placeColumn: place?.id,
+        Tb.events.type: type,
+        childEventsList: childEventIds,
+        Tb.events.occasion: occasionId
+      };
 
   static HashSet<EventModel> CreateEventModelSet() {
     return HashSet<EventModel>(

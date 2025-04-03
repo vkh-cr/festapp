@@ -147,6 +147,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
+                occasionId: RightsService.currentOccasionId,
                 field: Tb.events.description,
                 rendererContext: rendererContext,
                 loadContent: () async {

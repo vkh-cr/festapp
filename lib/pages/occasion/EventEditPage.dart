@@ -51,7 +51,7 @@ class _EventEditPageState extends State<EventEditPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id = context.routeData.pendingChildren[0].pathParams.getInt("id");
+      widget.id = context.routeData.pendingChildren[0].params.getInt("id");
     }
     loadEventData();
   }
@@ -283,7 +283,10 @@ class _EventEditPageState extends State<EventEditPage> {
                           onPressed: () async {
                             RouterService.navigatePageInfo(
                               context,
-                              HtmlEditorRoute(content: {HtmlEditorPage.parContent: content}),
+                              HtmlEditorRoute(
+                                  content: {HtmlEditorPage.parContent: content},
+                                  occasionId: originalEvent!.occasionId
+                              ),
                             ).then((value) {
                               if (value != null) {
                                 setState(() {

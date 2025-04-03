@@ -140,7 +140,10 @@ class _InfoPageState extends State<InfoPage> {
                             ElevatedButton(
                               onPressed: () async {
                                 var result = await RouterService.navigatePageInfo(
-                                    context, HtmlEditorRoute(content: {HtmlEditorPage.parContent: item.description}));
+                                    context, HtmlEditorRoute(
+                                    content: {HtmlEditorPage.parContent: item.description},
+                                    occasionId: RightsService.currentOccasionId
+                                ));
                                 if (result != null) {
                                   setState(() {
                                     item.description = result as String;
