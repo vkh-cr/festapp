@@ -8,6 +8,9 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
 import 'package:html/dom.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'PlatformHelper.dart';
 
 class HtmlHelper {
   static const int jpegThreshold = 1200;
@@ -266,6 +269,26 @@ class HtmlHelper {
   }
 
   static Future<Uint8List?> fetchImageData(String src) async {
+    if (PlatformHelper.isWeb) {
+      final response = await Supabase.instance.client.functions.invoke(
+        "fetch-http-data",
+        body: {"targetUrl": src},
+      );
+      if (response.data != null && response.data is Map) {
+        final mapData = response.data as Map;
+        final base64String = mapData["data"];
+        if (base64String is String) {
+          return base64.decode(base64String);
+        } else {
+          print("Error: Data is not a string.");
+          return null;
+        }
+      } else {
+        print("Error: No data returned from supabase function.");
+        return null;
+      }
+    }
+
     final client = http.Client();
     try {
       final response = await client.get(Uri.parse(src));

@@ -62,6 +62,7 @@ supabase functions deploy send-tickets --no-verify-jwt --project-ref $ref
 supabase functions deploy fetch-transactions --no-verify-jwt --project-ref $ref
 supabase functions deploy instance-install --no-verify-jwt --project-ref $ref
 supabase functions deploy synchronize-orders --no-verify-jwt --project-ref $ref
+supabase functions deploy fetch-http-data --no-verify-jwt --project-ref $ref
 ''';
   }
 
