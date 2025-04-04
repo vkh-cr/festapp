@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 
 import '../utils/seat_state.dart';
 

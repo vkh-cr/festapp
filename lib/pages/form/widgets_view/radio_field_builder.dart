@@ -1,14 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import 'form_helper.dart';
 import 'option_field_helper.dart';
-import 'package:fstapp/dataModels/FormOptionProductModel.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart';
 
 /// Builds a single-select field (radio). Decides whether to show
 /// a basic radio group or a card-based option list based on whether
