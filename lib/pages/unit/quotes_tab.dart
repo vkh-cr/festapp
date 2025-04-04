@@ -25,7 +25,7 @@ class QuotesTab extends StatelessWidget {
             InformationModel.fromPlutoJsonType(plutoData, InformationModel.quoteType),
         firstColumnType: DataGridFirstColumn.delete,
         idColumn: Tb.information.id,
-        newObject: () => InformationModel.newRow(unitId),
+        getNewObject: () => InformationModel.newRow(unitId),
         columns: [
           TrinaColumn(
             hide: true,

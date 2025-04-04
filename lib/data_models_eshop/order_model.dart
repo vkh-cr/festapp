@@ -70,8 +70,15 @@ class OrderModel extends ITrinaRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  bool isExpired() => (state == orderedState && paymentInfoModel != null && paymentInfoModel!.deadline != null ? paymentInfoModel!.deadline!.isBefore(TimeHelper.now()) : false);
-
+  bool isExpired() {
+    if (state != orderedState || paymentInfoModel == null || paymentInfoModel!.deadline == null) {
+      return false;
+    }
+    // Create date-only objects for now and for the deadline.
+    final nowDate = DateTime(TimeHelper.now().year, TimeHelper.now().month, TimeHelper.now().day);
+    final deadlineDate = DateTime(paymentInfoModel!.deadline!.year, paymentInfoModel!.deadline!.month, paymentInfoModel!.deadline!.day);
+    return nowDate.isAfter(deadlineDate);
+  }
   static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
