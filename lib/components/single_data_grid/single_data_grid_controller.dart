@@ -60,10 +60,14 @@ class SingleDataGridController<T extends ITrinaRowModel> {
       ignoreFixedRows: false,
       separator: ',',
     );
-    // Save CSV file using FileSaver in UTF-8 format, using the provided file name if available.
+
+    // Add BOM (Byte Order Mark) to ensure proper UTF-8 recognition
+    final List<int> dataBytes = [0xEF, 0xBB, 0xBF, ...utf8.encode(csvData)];
+
+    // Save CSV file using FileSaver with correct encoding
     await FileSaver.instance.saveFile(
       name: exportOptions?.fileName ?? 'grid-export',
-      bytes: Uint8List.fromList(utf8.encode(csvData)),
+      bytes: Uint8List.fromList(dataBytes),
       ext: 'csv',
       mimeType: MimeType.csv,
     );
