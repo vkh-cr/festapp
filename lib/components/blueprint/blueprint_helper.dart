@@ -2,12 +2,12 @@ import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/dataModelsEshop/OrderModel.dart';
-import 'package:fstapp/dataModelsEshop/OrderProductTicketModel.dart';
-import 'package:fstapp/dataModelsEshop/PaymentInfoModel.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/dataModelsEshop/TicketModel.dart';
+import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
+import 'package:fstapp/data_models_eshop/payment_info_model.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:collection/collection.dart';
 
 class BlueprintHelper {

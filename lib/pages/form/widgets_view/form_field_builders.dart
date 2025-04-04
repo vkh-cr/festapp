@@ -4,10 +4,10 @@ import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/dataServicesEshop/DbOrders.dart';
+import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
 
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';

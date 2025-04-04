@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/single_data_grid/admin_page_helper.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
+import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
-import 'package:fstapp/pages/user/LoginPage.dart';
+import 'package:fstapp/pages/user/login_page.dart';
 
 @RoutePage()
 class FormEditPage extends StatefulWidget {

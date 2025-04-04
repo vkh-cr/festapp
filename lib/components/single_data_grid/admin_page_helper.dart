@@ -1,25 +1,23 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/Tb.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/pages/eshop/BlueprintEditorTab.dart';
-import 'package:fstapp/pages/eshop/EmailTemplatesTab.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
+import 'package:fstapp/pages/eshop/email_templates_tab.dart';
 import 'package:fstapp/pages/form/pages/form_tab.dart';
-import 'package:fstapp/pages/eshop/OrdersTab.dart';
-import 'package:fstapp/pages/eshop/ReportTab.dart';
-import 'package:fstapp/pages/eshop/TicketsTab.dart';
-import 'package:fstapp/pages/occasionAdmin/GameTab.dart';
-import 'package:fstapp/pages/occasionAdmin/InformationTab.dart';
-import 'package:fstapp/pages/occasionAdmin/PlacesTab.dart';
-import 'package:fstapp/pages/occasionAdmin/ScheduleTab.dart';
-import 'package:fstapp/pages/occasionAdmin/ServiceTab.dart';
-import 'package:fstapp/pages/occasionAdmin/UserGroupsTab.dart';
-import 'package:fstapp/pages/occasionAdmin/UsersTab.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/LogoWidget.dart';
-import 'package:fstapp/widgets/header/UserHeaderWidget.dart';
+import 'package:fstapp/pages/eshop/orders_tab.dart';
+import 'package:fstapp/pages/eshop/report_tab.dart';
+import 'package:fstapp/pages/eshop/tickets_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/game_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/information_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/places_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/schedule_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/service_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/user_groups_tab.dart';
+import 'package:fstapp/pages/occasionAdmin/users_tab.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/logo_widget.dart';
+import 'package:fstapp/widgets/header/user_header_widget.dart';
 
 class AdminPageHelper {
   /// This method returns an adaptive AppBar based on the screen width.
@@ -50,7 +48,6 @@ class AdminPageHelper {
       TabController tabController,
       String title,
       ) {
-    final currentUser = RightsService.currentOccasionUser;
 
     return AppBar(
       toolbarHeight: 60,

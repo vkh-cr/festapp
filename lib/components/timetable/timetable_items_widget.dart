@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
 import 'package:fstapp/components/timetable/timetable_event_widget.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 
 class TimetableItemsWidget extends StatefulWidget {
   final List<TimeBlockItem> usedItems;
