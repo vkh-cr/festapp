@@ -42,10 +42,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF0D0D0D);
-  static Color seed2 = const Color(0xFF80BDF2);
-  static Color seed3 = const Color(0xFF4465A6);
-  static Color seed4 = const Color(0xFF253759);
+  static Color seed1 = const Color(0xFF253759);
+  static Color seed2 = const Color(0xFF80BDF2); // brighter
+  static Color seed3 = const Color(0xFF4465A6); // darker
+  static Color seed4 = const Color(0xFF0D0D0D);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
@@ -176,26 +176,28 @@ extension ColorExtensions on Color {
 
   Color withOpacityBlack(double factor) {
     assert(factor >= 0 && factor <= 1, 'Factor must be between 0 and 1');
-
+    // Multiply factor by 1.4 and clamp between 0 and 1.
     final adjustedFactor = (factor * 1.4).clamp(0.0, 1.0);
 
-    final int rr = (r * adjustedFactor).round();
-    final int gg = (g * adjustedFactor).round();
-    final int bb = (b * adjustedFactor).round();
+    // Since r, g, b are doubles between 0 and 1, apply the adjusted factor and scale to 255.
+    final int newR = (r * adjustedFactor * 255).round();
+    final int newG = (g * adjustedFactor * 255).round();
+    final int newB = (b * adjustedFactor * 255).round();
 
-    return Color.fromARGB(a.toInt(), rr, gg, bb);
+    // Convert the alpha (a) from normalized value to 0-255.
+    return Color.fromARGB((a * 255).round(), newR, newG, newB);
   }
 
   Color withOpacityWhite(double factor) {
     assert(factor >= 0 && factor <= 1, 'Factor must be between 0 and 1');
+    // Here, factor controls the blend with white: factor==0 gives pure white, factor==1 gives no change.
+    // Compute the new normalized color by blending with white (1.0).
+    final double newR = r + (1 - r) * (1 - factor);
+    final double newG = g + (1 - g) * (1 - factor);
+    final double newB = b + (1 - b) * (1 - factor);
 
-    final adjustedFactor = 1 - factor;
-
-    final double rr = r + ((255 - r) * adjustedFactor).round();
-    final double gg = g + ((255 - g) * adjustedFactor).round();
-    final double bb = b + ((255 - b) * adjustedFactor).round();
-
-    return Color.fromARGB(a.toInt(), rr.toInt(), gg.toInt(), bb.toInt());
+    // Scale the blended normalized values to 0-255 and convert alpha similarly.
+    return Color.fromARGB((a * 255).round(), (newR * 255).round(), (newG * 255).round(), (newB * 255).round());
   }
 
   Color withOpacityUniversal(BuildContext context, double factor) {
