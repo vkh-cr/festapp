@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/dataServices/DbImages.dart';
-import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/widgets/ImageArea.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/data_services/db_images.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/widgets/image_area.dart';
+import 'package:fstapp/theme_config.dart';
 
 import 'feature.dart';
 import 'feature_metadata.dart';

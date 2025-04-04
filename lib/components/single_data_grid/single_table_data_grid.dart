@@ -4,7 +4,7 @@ import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 
 import 'single_data_grid_controller.dart';
 

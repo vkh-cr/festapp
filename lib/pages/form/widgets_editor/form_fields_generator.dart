@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import '../pages/form_editor_content.dart';
 import '../widgets_view/form_helper.dart';
 import 'birth_date_editor.dart';
