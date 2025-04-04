@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
 
 import 'option_editor_dialog.dart';
 
