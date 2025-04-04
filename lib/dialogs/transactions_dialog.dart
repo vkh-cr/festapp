@@ -6,7 +6,7 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/search_transactions_screen.dart';
