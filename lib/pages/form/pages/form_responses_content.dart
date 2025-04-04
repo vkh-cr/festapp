@@ -51,6 +51,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
           columnIdentifiers,
           data: {EshopColumns.RESPONSES: formFieldModels},
         ),
+        exportOptions: ExportOptions(fileName: "${formLink??""}-responses")
       );
     });
   }
