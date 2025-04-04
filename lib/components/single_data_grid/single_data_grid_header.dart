@@ -117,24 +117,28 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
       );
     }
 
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Wrap(
-            spacing: 10,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: leftActions,
-          ),
-          if (rightActions.isNotEmpty)
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        // Remove the fixed width constraint to allow content to expand
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Use min to allow the row to shrink
+          children: [
             Wrap(
               spacing: 10,
               crossAxisAlignment: WrapCrossAlignment.center,
-              children: rightActions,
+              children: leftActions,
             ),
-        ],
+            const SizedBox(width: 10), // Minimal space between left and right actions
+            if (rightActions.isNotEmpty)
+              Wrap(
+                spacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: rightActions,
+              ),
+          ],
+        ),
       ),
     );
   }
