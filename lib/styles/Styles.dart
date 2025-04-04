@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 
 class MainPageButton extends StatelessWidget {

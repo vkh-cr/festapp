@@ -1,9 +1,9 @@
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart' as schedule_tab_view;
-import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
+import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/theme_config.dart';
 import 'schedule_timeline.dart';
 
 class ScheduleTabView extends StatefulWidget {

@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServicesEshop/DbForms.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets_editor/form_fields_generator.dart';
@@ -34,8 +34,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
     }
     loadData();
   }
