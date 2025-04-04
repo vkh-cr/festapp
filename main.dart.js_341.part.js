@@ -92,7 +92,7 @@ v.c.fM()}return A.i(null,w)}})
 return A.j($async$p5,w)},
 bcg(d){var x=this.c
 x.toString
-H.k8(x,"event/"+d,y.q).aY(0,new B.c2z(this),y.v)}}
+H.k8(x,"event/"+d,y.q).aZ(0,new B.c2z(this),y.v)}}
 var z=a.updateTypes(["@(t)"])
 B.c2F.prototype={
 $0(){var x=0,w=A.k(y.v),v=this,u,t,s
@@ -156,4 +156,4 @@ var y={u:A.z("dC"),F:A.z("q<dC>"),j:A.z("q<dE>"),p:A.z("ej"),q:A.z("E?"),v:A.z("
 D.b3D=new A.c0("My schedule",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3I=new A.c0("There will appear your events.",null,L.lH,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_341",e:"endPart",h:b})})($__dart_deferred_initializers__,"IqWE9Huk24PJOjoFtWhzF7qrjiw=");
+a.eventLog.push({p:"main.dart.js_341",e:"endPart",h:b})})($__dart_deferred_initializers__,"v2QZcX0jGv9lt5A64eTTb9cKukw=");

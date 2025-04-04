@@ -164,7 +164,7 @@ if(u!=null)u.$0()
 v.e=!0
 case 5:case 3:return A.i(null,w)}})
 return A.j($async$KH,w)},
-bkI(d){H.k8(d,"newsForm",y.X).aY(0,new B.c2N(this,d),y.P)},
+bkI(d){H.k8(d,"newsForm",y.X).aZ(0,new B.c2N(this,d),y.P)},
 Za(){var x=0,w=A.k(y.H),v=this,u
 var $async$Za=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=B
@@ -284,7 +284,7 @@ x=3
 break
 case 4:u=Q.pV(A.y(["content",t.b],y.N,y.z),$.dg)
 x=6
-return A.c(A0.eX(s,!1).f.ii(u,y.X).aY(0,new B.c2O(t,s),y.P),$async$$1)
+return A.c(A0.eX(s,!1).f.ii(u,y.X).aZ(0,new B.c2O(t,s),y.P),$async$$1)
 case 6:case 3:x=7
 return A.c(v.a.ba(),$async$$1)
 case 7:return A.i(null,w)}})
@@ -327,4 +327,4 @@ D.amP=new A.dn(T.Ja,null,null,null,null)
 D.b3x=new A.c0("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.b3W=new A.c0("News",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_367",e:"endPart",h:b})})($__dart_deferred_initializers__,"P4X4fEM+OEvmtt78O92sSt1AMKs=");
+a.eventLog.push({p:"main.dart.js_367",e:"endPart",h:b})})($__dart_deferred_initializers__,"pkE74DjYrqgTxAxYdM91Skol73s=");

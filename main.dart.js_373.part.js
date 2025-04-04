@@ -173,13 +173,13 @@ case 7:return A.i(null,w)}})
 return A.j($async$nL,w)},
 biX(){var x=this.c
 x.toString
-F.k8(x,"timetable",y.X).aY(0,new B.c8j(this),y.H)},
+F.k8(x,"timetable",y.X).aZ(0,new B.c8j(this),y.H)},
 bce(){var x=this.c
 x.toString
-F.k8(x,"myschedule",y.X).aY(0,new B.c8i(this),y.H)},
+F.k8(x,"myschedule",y.X).aZ(0,new B.c8i(this),y.H)},
 bj4(d){var x=this.c
 x.toString
-F.k8(x,"event/"+d,y.X).aY(0,new B.c8h(this),y.H)},
+F.k8(x,"event/"+d,y.X).aZ(0,new B.c8h(this),y.H)},
 A(d){var x,w,v=this,u=null,t=y.p,s=A.a([A.cY(u,P.bjx(u,u,60),C.r,!1,u,new B.c8m(v,d),u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,u,new B.c8n(d),u,u,u,u,u,u,!1,C.aa),Z.iD],t)
 if(A.h1("my_schedule",u)){x=A.bT(C.aM)
 x=A.bT(new A.bL(x.a,x.b,0.4,x.d).c2())
@@ -291,7 +291,7 @@ $0(){var x=$.crj
 if(x!=null)x.$0()},
 $S:0}
 B.c8o.prototype={
-$3(d,e,f){return W.VT(d,e,null).aY(0,new B.c8k(this.a),y.H)},
+$3(d,e,f){return W.VT(d,e,null).aZ(0,new B.c8k(this.a),y.H)},
 $S:z+4}
 B.c8k.prototype={
 $1(d){return this.a.ba()},
@@ -319,4 +319,4 @@ D.aY3=new A.R(70,50)
 D.aY4=new A.R(80,60)
 D.aY6=new A.R(1/0,46)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_373",e:"endPart",h:b})})($__dart_deferred_initializers__,"kAsLomGdO08Iucis3YbY87zNK3g=");
+a.eventLog.push({p:"main.dart.js_373",e:"endPart",h:b})})($__dart_deferred_initializers__,"H1123p4f0Ryq/V2yztZrtCze4Lk=");
