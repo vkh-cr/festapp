@@ -2,12 +2,12 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/dataServicesEshop/DbEshop.dart';
-import 'package:fstapp/dataServicesEshop/DbForms.dart';
-import 'package:fstapp/dataServicesEshop/DbOrders.dart';
-import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
 
 import '../model/seat_layout_state_model.dart';
 import '../model/seat_model.dart';
@@ -26,7 +26,7 @@ class SeatReservationWidget extends StatefulWidget {
   final int? maxTickets;
 
   SeatReservationWidget({
-    Key? key,
+    super.key,
     required this.blueprintId,
     required this.secret,
     required this.formDataKey,
@@ -34,7 +34,7 @@ class SeatReservationWidget extends StatefulWidget {
     this.maxTickets,
     this.onSelectionChanged,
     this.onCloseSeatReservation,
-  }) : super(key: key);
+  });
 
   @override
   State<SeatReservationWidget> createState() => _SeatReservationWidgetState();

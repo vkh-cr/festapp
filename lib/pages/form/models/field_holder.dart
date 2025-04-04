@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModels/FormOptionProductModel.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class FieldHolder {

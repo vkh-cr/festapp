@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/pages/form/models/birth_date_field_holder.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:intl/intl.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/html_view.dart';
 
 import 'form_field_builders.dart';
 import 'form_helper.dart';
