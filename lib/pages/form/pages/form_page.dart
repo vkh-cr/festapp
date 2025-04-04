@@ -4,27 +4,27 @@ import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModels/FormOptionProductModel.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
-import 'package:fstapp/dataModelsEshop/ProductTypeModel.dart';
-import 'package:fstapp/dataServicesEshop/DbEshop.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServicesEshop/DbForms.dart';
-import 'package:fstapp/dataServicesEshop/DbOrders.dart';
-import 'package:fstapp/pages/eshop/OrderFinishScreen.dart';
-import 'package:fstapp/pages/eshop/OrderPreviewScreen.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
+import 'package:fstapp/data_services_eshop/db_eshop.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
+import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/pages/eshop/order_finish_screen.dart';
+import 'package:fstapp/pages/eshop/order_preview_screen.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/ButtonsHelper.dart';
+import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:flutter/services.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
 
 import '../models/form_holder.dart';
@@ -58,7 +58,7 @@ class _FormPageState extends State<FormPage> {
   Future<void> didChangeDependencies() async {
     if (widget.formLink == null && context.routeData.hasPendingChildren) {
       widget.formLink =
-          context.routeData.pendingChildren[0].pathParams.getString("formLink");
+          context.routeData.pendingChildren[0].params.getString("formLink");
     }
 
     await loadData();

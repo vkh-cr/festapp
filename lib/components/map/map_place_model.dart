@@ -1,5 +1,5 @@
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
-import 'package:fstapp/dataModels/PlaceModel.dart';
+import 'package:fstapp/data_models/place_model.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapPlaceModel {

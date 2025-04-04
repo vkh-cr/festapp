@@ -3,9 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/dataModelsEshop/TbEshop.dart';
-import 'package:fstapp/services/Utilities.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/services/utilities.dart';
 import 'package:collection/collection.dart';
 
 class BlueprintObjectModel {
