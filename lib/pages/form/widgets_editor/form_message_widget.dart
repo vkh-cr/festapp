@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
+import 'package:fstapp/widgets/html_view.dart';
 
 class FormMessageWidget extends StatelessWidget {
   final String message;

@@ -1,10 +1,21 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'pluto_abstract.dart';
 import 'data_grid_action.dart';
-import 'single_data_grid_header.dart';
+import 'package:file_saver/file_saver.dart';
 
 enum DataGridFirstColumn { none, delete, deleteAndDuplicate, deleteAndCheck, check }
+
+/// Options for CSV export.
+class ExportOptions {
+  final bool visible;
+  final String fileName;
+
+  ExportOptions({this.visible = true, required this.fileName});
+}
 
 class SingleDataGridController<T extends ITrinaRowModel> {
   ValueNotifier<Key> refreshKeyNotifier = ValueNotifier(UniqueKey());
@@ -19,10 +30,11 @@ class SingleDataGridController<T extends ITrinaRowModel> {
   final DataGridFirstColumn firstColumnType;
   final String idColumn;
   final T Function(Map<String, dynamic>) fromPlutoJson;
-  final T Function()? newObject;
+  final T Function()? getNewObject;
   final BuildContext context;
   final DataGridActionsController? actionsExtended;
   final List<DataGridAction>? headerChildren;
+  final ExportOptions? exportOptions;
 
   String firstColumnTypeId = "delete0";
 
@@ -35,8 +47,27 @@ class SingleDataGridController<T extends ITrinaRowModel> {
     required this.columns,
     this.headerChildren,
     this.actionsExtended,
-    this.newObject,
+    this.getNewObject,
+    this.exportOptions,
   });
+
+  /// Private method to export grid data as CSV and save it using FileSaver.
+  Future<void> downloadCsv() async {
+    final csvExport = TrinaGridExportCsv();
+    final String csvData = await csvExport.export(
+      stateManager: stateManager,
+      includeHeaders: true,
+      ignoreFixedRows: false,
+      separator: ',',
+    );
+    // Save CSV file using FileSaver in UTF-8 format, using the provided file name if available.
+    await FileSaver.instance.saveFile(
+      name: exportOptions?.fileName ?? 'grid-export',
+      bytes: Uint8List.fromList(utf8.encode(csvData)),
+      ext: 'csv',
+      mimeType: MimeType.csv,
+    );
+  }
 
   /// Loads data and stores it in [rows] without modifying the grid.
   Future<void> loadDataOnly() async {

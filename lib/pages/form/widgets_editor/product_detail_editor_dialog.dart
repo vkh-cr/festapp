@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/dataModelsEshop/ProductModel.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
-import 'package:fstapp/widgets/standard_dialog.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/dialogs/standard_dialog.dart';
+import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
 
 class ProductDetailEditorDialog extends StatefulWidget {
   final ProductModel product;
