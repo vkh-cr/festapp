@@ -1,8 +1,8 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
-a[b][c].push({p:"main.dart.js_308",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
+a[b][c].push({p:"main.dart.js_311",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-cwR(d){var x=y.u
+cwV(d){var x=y.u
 return B.arc(B.arc(d,new B.b2C(),x,y.w),new B.b2D(),x,y.f)},
 b2C:function b2C(){},
 b2D:function b2D(){},
@@ -12,11 +12,11 @@ while(true)switch(x){case 0:s=e?"event_groups!event_groups_event_child_fkey(even
 r=$.hd()
 m=A
 x=3
-return A.c(r.bB("events").hg(0,"id,updated_at,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).co("id",d).lo(0),$async$pN)
-case 3:q=m.r2(g)
+return A.c(r.bB("events").hg(0,"id,updated_at,occasion,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).co("id",d).lo(0),$async$pN)
+case 3:q=m.r1(g)
 p=y.u
 x=4
-return A.c(A.oW(C.c.j(d),A.Bi(),"events",p),$async$pN)
+return A.c(A.oW(C.c.j(d),A.F6(),"events",p),$async$pN)
 case 4:o=g
 n=o==null
 if(n)u=null
@@ -68,12 +68,12 @@ k=A
 j=J
 x=17
 return A.c(r.x7("id",u).co("is_hidden",!1),$async$pN)
-case 17:m.r=l.cwR(k.b8(j.c5(g,new B.b3B(),y.b),!0,p))
+case 17:m.r=l.cwV(k.b8(j.c5(g,new B.b3B(),y.b),!0,p))
 x=n.gdD().d!=null?18:19
 break
 case 18:x=20
 return A.c(D.amw(q.r),$async$pN)
-case 20:case 19:case 16:if(q.ch&&E.cnF())q.CW=!0
+case 20:case 19:case 16:if(q.ch&&E.cnI())q.CW=!0
 v=q
 x=1
 break
@@ -91,29 +91,29 @@ return A.j($async$b3I,w)},
 b3J(d){var x=0,w=A.k(y.e),v
 var $async$b3J=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:x=3
-return A.c($.hd().bB("event_users_saved").io(0).co("event",d).co("user",$.dZ().gdD().c.a).Pj(),$async$b3J)
+return A.c($.hd().bB("event_users_saved").io(0).co("event",d).co("user",$.dZ().gdD().c.a).Pi(),$async$b3J)
 case 3:v=f!=null
 x=1
 break
 case 1:return A.i(v,w)}})
 return A.j($async$b3J,w)},
 b3B:function b3B(){},
-ddL(d,e,f){var x,w,v,u=A.f9(0,null,d.length,null,null)
+ddF(d,e,f){var x,w,v,u=A.f9(0,null,d.length,null,null)
 if(u<2)return
-if(u<32){A.csJ(d,e,f,0,u,d,0)
+if(u<32){A.csM(d,e,f,0,u,d,0)
 return}x=C.c.S(u,1)
 w=u-x
 v=C.b.f6(d,0,w)
-B.cjS(d,e,f,x,u,v,0)
-B.cjS(d,e,f,0,x,d,w)
+B.cjU(d,e,f,x,u,v,0)
+B.cjU(d,e,f,0,x,d,w)
 B.cGO(e,f,d,w,u,v,0,w,d,0)},
-cjS(d,e,f,g,h,i,j){var x,w,v,u=h-g
-if(u<32){A.csJ(d,e,f,g,h,i,j)
+cjU(d,e,f,g,h,i,j){var x,w,v,u=h-g
+if(u<32){A.csM(d,e,f,g,h,i,j)
 return}x=g+C.c.S(u,1)
 w=x-g
 v=j+w
-B.cjS(d,e,f,x,h,i,v)
-B.cjS(d,e,f,g,x,d,x)
+B.cjU(d,e,f,x,h,i,v)
+B.cjU(d,e,f,g,x,d,x)
 B.cGO(e,f,d,x,x+w,i,v,v+(h-x),i,j)},
 cGO(d,e,f,g,h,i,j,k,l,m){var x,w,v,u=g+1,t=f[g],s=d.$1(t),r=j+1,q=i[j],p=d.$1(q)
 for(;!0;m=x){x=m+1
@@ -133,14 +133,14 @@ return}u=w}x=m+1
 l[m]=q
 C.b.e3(l,x,x+(k-r),i,r)},
 arc(d,e,f,g){var x=A.H(d,!0,f)
-B.ddL(x,e,A.cId(A.cJc(),g))
+B.ddF(x,e,A.cId(A.cJf(),g))
 return x},
 av8(d){var x=0,w=A.k(y.e),v,u
 var $async$av8=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:u=J
 x=3
-return A.c(A.I5(),$async$av8)
-case 3:v=u.lG(f,d)
+return A.c(A.I3(),$async$av8)
+case 3:v=u.lH(f,d)
 x=1
 break
 case 1:return A.i(v,w)}})
@@ -148,21 +148,21 @@ return A.j($async$av8,w)}},D,E
 J=c[1]
 A=c[0]
 C=c[2]
-B=a.updateHolder(c[96],B)
-D=c[131]
-E=c[140]
+B=a.updateHolder(c[95],B)
+D=c[130]
+E=c[139]
 var z=a.updateTypes([])
 B.b2C.prototype={
 $1(d){var x=d.as
 return x==null?"":x},
-$S:969}
-B.b2D.prototype={
-$1(d){return d.cy},
 $S:970}
+B.b2D.prototype={
+$1(d){return d.db},
+$S:971}
 B.b3B.prototype={
-$1(d){return A.r2(d)},
-$S:57};(function inheritance(){var x=a.inheritMany
+$1(d){return A.r1(d)},
+$S:56};(function inheritance(){var x=a.inheritMany
 x(A.bC,[B.b2C,B.b2D,B.b3B])})()
-var y={f:A.z("aV"),u:A.z("dB"),r:A.z("q<t>"),w:A.z("e"),e:A.z("x"),b:A.z("@")}};
+var y={f:A.z("aV"),u:A.z("dC"),r:A.z("q<t>"),w:A.z("e"),e:A.z("x"),b:A.z("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_308",e:"endPart",h:b})})($__dart_deferred_initializers__,"87RBbBHFr2v5tG2Ds6rYZDFc0DM=");
+a.eventLog.push({p:"main.dart.js_311",e:"endPart",h:b})})($__dart_deferred_initializers__,"B9WoWyA23BK33hi5Nv3R+KWNW1M=");

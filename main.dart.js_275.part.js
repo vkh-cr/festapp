@@ -1,10 +1,27 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_275",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,A,C
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,D,E,A={
+bjx(d,e,f){return new A.as1(e,f,d,null)},
+as1:function as1(d,e,f,g){var _=this
+_.d=d
+_.e=e
+_.f=f
+_.a=g}},F,G
 B=c[0]
-A=c[2]
-C=c[261]
-var z=a.updateTypes([]);(function constants(){C.a4o=new B.a_(!0,A.n,null,null,null,null,24,A.a4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+C=c[2]
+D=c[229]
+E=c[155]
+A=a.updateHolder(c[81],A)
+F=c[125]
+G=c[151]
+A.as1.prototype={
+A(d){var y,x=null,w=B.C(d).ax.a===C.t||this.f===!0?"assets/icons/fstapplogo.dark.svg":"assets/icons/fstapplogo.svg",v=this.d,u=this.e
+if(C.e.lc(w.toLowerCase(),".svg"))y=new E.JO(u,v,D.hz,new G.Sa(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
+else y=F.a_J(w,x,v,x,u)
+return B.k0(!1,x,!0,y,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x)}}
+var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
+y(A.as1,B.a7)})()
+B.bo(b.typeUniverse,JSON.parse('{"as1":{"a7":[],"d":[]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"PA/EZguU6B6NTIc01MetBWb8pPU=");
+a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"g8VUzxp9KTNtIncBHTgaVFPOYy8=");
