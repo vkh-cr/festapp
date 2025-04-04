@@ -8,7 +8,7 @@ import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 

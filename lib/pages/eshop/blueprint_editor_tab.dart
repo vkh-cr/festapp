@@ -10,7 +10,7 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/auto_resize_interactive_viewer_controller.dart';
 import 'package:fstapp/components/seat_reservation/widgets/seat_reservation_widget.dart';
