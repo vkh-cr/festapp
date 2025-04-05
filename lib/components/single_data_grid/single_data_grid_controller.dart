@@ -51,14 +51,23 @@ class SingleDataGridController<T extends ITrinaRowModel> {
     this.exportOptions,
   });
 
-  /// Private method to export grid data as CSV and save it using FileSaver.
-  Future<void> downloadCsv() async {
+  String getCsvSeparator(Locale locale) {
+    if (locale.countryCode == 'US' || locale.countryCode == 'CA') {
+      return ',';
+    }
+    return ';';
+  }
+
+  Future<void> downloadCsv(BuildContext context) async {
+    final locale = Localizations.localeOf(context);
+    final separator = getCsvSeparator(locale);
+
     final csvExport = TrinaGridExportCsv();
     final String csvData = await csvExport.export(
       stateManager: stateManager,
       includeHeaders: true,
       ignoreFixedRows: false,
-      separator: ',',
+      separator: separator,
     );
 
     // Add BOM (Byte Order Mark) to ensure proper UTF-8 recognition
