@@ -110,7 +110,7 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     if (controller.exportOptions?.visible == true) {
       rightActions.add(
         ElevatedButton.icon(
-          onPressed: () => controller.downloadCsv(), // ensure downloadCsv() is public in controller
+          onPressed: () => controller.downloadCsv(context),
           icon: const Icon(Icons.file_download),
           label: Text("Download Table".tr()),
         ),
