@@ -52,10 +52,8 @@ class SingleDataGridController<T extends ITrinaRowModel> {
   });
 
   String getCsvSeparator(Locale locale) {
-    if (locale.countryCode == 'US' || locale.countryCode == 'CA') {
-      return ',';
-    }
-    return ';';
+    final format = NumberFormat.decimalPattern(locale.toString());
+    return (format.symbols.DECIMAL_SEP == ',') ? ';' : ',';
   }
 
   Future<void> downloadCsv(BuildContext context) async {
