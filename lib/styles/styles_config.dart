@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:intl/intl.dart';
 
 class StylesConfig {
   // Text styles
