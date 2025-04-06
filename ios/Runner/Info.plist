@@ -41,8 +41,12 @@
 		<string>sms</string>
 		<string>tel</string>
 	</array>
-	<key>LSMinimumSystemVersion</key>
-	<string>11.0</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>11.0</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+    <key>UIFileSharingEnabled</key>
+    <true/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

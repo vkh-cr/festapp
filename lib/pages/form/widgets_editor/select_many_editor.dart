@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
 
 import 'option_editor_dialog.dart';
 
@@ -37,7 +37,7 @@ class SelectManyEditor {
     );
   }
 
-  static Widget buildSelectManyEditor(BuildContext context, FormFieldModel field) {
+  static Widget buildSelectManyEditor(BuildContext context, FormFieldModel field, int? occasionId) {
     final optionsController = TextEditingController();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,7 +76,7 @@ class SelectManyEditor {
                     if (value == 'additional_settings') {
                       showDialog(
                         context: context,
-                        builder: (context) => OptionDetailEditorDialog(option: formOption),
+                        builder: (context) => OptionDetailEditorDialog(option: formOption, occasionId: occasionId,),
                       ).then((_) {
                         // Refresh the widget when the dialog is closed.
                         (context as Element).markNeedsBuild();
