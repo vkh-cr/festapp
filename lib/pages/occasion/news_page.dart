@@ -148,7 +148,7 @@ class _NewsPageState extends State<NewsPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).colorScheme.surface,
+                        color: Theme.of(context).colorScheme.surface.changeColorLightness(0.92),
                       ),
                       child: Column(
                         children: [
