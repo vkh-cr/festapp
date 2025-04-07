@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ThemeConfig {
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+  static bool isDarkModeEnabled = false;
 
   // Base theme to hold common properties
   static final fontFamily = "Futura";
