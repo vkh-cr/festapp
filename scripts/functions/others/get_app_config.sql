@@ -21,6 +21,7 @@ DECLARE
     bank_account_ids bigint[];
     occasion_json jsonb;
     unit_json jsonb;
+    user_info_json jsonb;
 BEGIN
     -- Log the request details in log_app_config table
     INSERT INTO public.log_app_config (organization, platform)
@@ -227,6 +228,23 @@ BEGIN
         unit_json := '{}'::jsonb;
     END IF;
 
+    -- Fetch user information along with associated units.
+    -- For each unit the user is part of, include unit fields and an extra field "unit_user".
+    SELECT row_to_json(ui)::jsonb || jsonb_build_object(
+            'units',
+            (
+                SELECT json_agg(
+                          row_to_json(u)::jsonb || jsonb_build_object('unit_user', row_to_json(uu))
+                    )
+                FROM public.units u
+                JOIN public.unit_users uu ON uu.unit = u.id
+                WHERE uu."user" = ui.id
+            )
+          )
+      INTO user_info_json
+    FROM public.user_info ui
+    WHERE ui.id = auth.uid();
+
     RETURN json_build_object(
         'code', 200,
         'is_admin', is_admin_bool,
@@ -235,7 +253,8 @@ BEGIN
         'occasion', COALESCE(occasion_json, '{}'::jsonb),
         'unit', COALESCE(unit_json, '{}'::jsonb),
         'version_recommended', version_recommended,
-        'bank_accounts_admin', COALESCE(bank_account_ids, '{}')
+        'bank_accounts_admin', COALESCE(bank_account_ids, '{}'),
+        'user_info', COALESCE(user_info_json, '{}'::jsonb)
     );
 END;
 $$;

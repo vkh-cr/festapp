@@ -332,33 +332,20 @@ USING (true);
 ----------------------------------------------------------------
 
 DROP POLICY IF EXISTS "Enable select for editors" ON public.images;
-CREATE POLICY "Enable select for editors" ON public.images
-AS PERMISSIVE FOR SELECT
-TO authenticated
-USING (get_is_editor_view_on_occasion(occasion));
-
 DROP POLICY IF EXISTS "Enable delete for editors" ON public.images;
-CREATE POLICY "Enable delete for editors" ON public.images
-AS PERMISSIVE FOR DELETE
-TO authenticated
-USING (get_is_editor_on_occasion(occasion));
-
 DROP POLICY IF EXISTS "Enable insert for editors" ON public.images;
-CREATE POLICY "Enable insert for editors" ON public.images
-AS PERMISSIVE FOR INSERT
-TO authenticated
-WITH CHECK (get_is_editor_on_occasion(occasion));
+DROP POLICY IF EXISTS "Enable update for editors" ON public.images;
 
 DROP POLICY IF EXISTS "Enable all for unit editors" ON public.images;
 CREATE POLICY "Enable all for unit editors" ON public.images
 AS PERMISSIVE FOR ALL
 TO authenticated
-USING (get_is_editor_on_unit(unit))
-WITH CHECK (get_is_editor_on_unit(unit));
+USING (get_is_editor_on_unit((select unit from occasions where id = occasion)))
+WITH CHECK (get_is_editor_on_unit((select unit from occasions where id = occasion)));
 
-DROP POLICY IF EXISTS "Enable update for editors" ON public.images;
-CREATE POLICY "Enable update for editors" ON public.images
-AS PERMISSIVE FOR UPDATE
+DROP POLICY IF EXISTS "Enable all for editors" ON public.images;
+CREATE POLICY "Enable all for editors" ON public.images
+AS PERMISSIVE FOR ALL
 TO authenticated
 USING (get_is_editor_on_occasion(occasion))
 WITH CHECK (get_is_editor_on_occasion(occasion));
@@ -685,62 +672,20 @@ TO authenticated
 USING ((auth.uid() = "user"))
 WITH CHECK ((auth.uid() = "user"));
 
+DROP POLICY IF EXISTS "Enable all for editors" ON public.user_news;
+CREATE POLICY "Enable all for editors" ON public.user_news
+AS PERMISSIVE FOR ALL
+TO authenticated
+USING (get_is_editor_on_occasion(occasion))
+WITH CHECK (get_is_editor_on_occasion(occasion));
+
 -----------------------------------------------
 --eshop----------------------------------------
 -----------------------------------------------
 
-----------------------------------------------------------------
--- eshop.blueprints
-----------------------------------------------------------------
-
 DROP POLICY IF EXISTS "Enable all for editors" ON eshop.blueprints;
-CREATE POLICY "Enable all for editors" ON eshop.blueprints
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING (get_is_editor_on_occasion(occasion))
-WITH CHECK (get_is_editor_on_occasion(occasion));
-
-----------------------------------------------------------------
--- eshop.product_types
-----------------------------------------------------------------
-
 DROP POLICY IF EXISTS "Enable all for editors" ON eshop.product_types;
-CREATE POLICY "Enable all for editors" ON eshop.product_types
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING (get_is_editor_on_occasion(occasion))
-WITH CHECK (get_is_editor_on_occasion(occasion));
-
 DROP POLICY IF EXISTS "Enable read for all" ON eshop.product_types;
-CREATE POLICY "Enable read for all" ON eshop.product_types
-AS PERMISSIVE FOR SELECT
-TO public
-USING (true);
-
-----------------------------------------------------------------
--- eshop.products
-----------------------------------------------------------------
-
 DROP POLICY IF EXISTS "Enable all for editors" ON eshop.products;
-CREATE POLICY "Enable all for editors" ON eshop.products
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING (get_is_editor_on_occasion(occasion))
-WITH CHECK (get_is_editor_on_occasion(occasion));
-
 DROP POLICY IF EXISTS "Enable read for all" ON eshop.products;
-CREATE POLICY "Enable read for all" ON eshop.products
-AS PERMISSIVE FOR SELECT
-TO public
-USING (true);
-
-----------------------------------------------------------------
--- eshop.spots
-----------------------------------------------------------------
-
 DROP POLICY IF EXISTS "Enable all for editors" ON eshop.spots;
-CREATE POLICY "Enable all for editors" ON eshop.spots
-AS PERMISSIVE FOR ALL
-TO authenticated
-USING (get_is_editor_on_occasion(occasion))
-WITH CHECK (get_is_editor_on_occasion(occasion));

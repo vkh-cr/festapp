@@ -4,7 +4,7 @@ DECLARE
     allData JSON;
 BEGIN
 
-    PERFORM check_is_editor_view_via_form_link(form_link);
+    PERFORM check_is_editor_order_view_via_form_link(form_link);
 
     SELECT jsonb_build_object(
         'code', 200,
@@ -49,11 +49,18 @@ BEGIN
                                             SELECT jsonb_agg(
                                                 jsonb_build_object(
                                                     'id', p.id,
+                                                    'occasion', p.occasion,
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,
                                                     'is_hidden', p.is_hidden,
-                                                    'order', p."order"
+                                                    'order', p."order",
+                                                    'ordered_count', (
+                                                        SELECT count(*)
+                                                        FROM eshop.order_product_ticket opt
+                                                        WHERE opt.product = p.id
+                                                    ),
+                                                    'maximum', p.maximum
                                                 ) ORDER BY COALESCE(p."order", 0)
                                             )
                                             FROM eshop.products p
