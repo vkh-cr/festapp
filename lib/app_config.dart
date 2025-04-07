@@ -13,9 +13,9 @@ class AppConfig {
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = false;
   static const bool isWebNotificationsSupported = true;
-  static const String oneSignalAppId = '5aeb8117-54fc-43fc-8bab-e8a01ecda2a6';
+  static const String oneSignalAppId = '';
 
-  static const int organization = 1;
+  static const int organization = 6;
   //setup occasion id to force occasion
   static const String? forceOccasionLink = "jm2025";
   static const bool isPublicNotificationSendingDisabled = false;
