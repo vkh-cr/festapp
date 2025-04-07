@@ -8,7 +8,7 @@ import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
@@ -70,8 +70,15 @@ class OrderModel extends ITrinaRowModel {
     return "$state;${OrderModel.stateToLocale(state)}";
   }
 
-  bool isExpired() => (state == orderedState && paymentInfoModel != null && paymentInfoModel!.deadline != null ? paymentInfoModel!.deadline!.isBefore(TimeHelper.now()) : false);
-
+  bool isExpired() {
+    if (state != orderedState || paymentInfoModel == null || paymentInfoModel!.deadline == null) {
+      return false;
+    }
+    // Create date-only objects for now and for the deadline.
+    final nowDate = DateTime(TimeHelper.now().year, TimeHelper.now().month, TimeHelper.now().day);
+    final deadlineDate = DateTime(paymentInfoModel!.deadline!.year, paymentInfoModel!.deadline!.month, paymentInfoModel!.deadline!.day);
+    return nowDate.isAfter(deadlineDate);
+  }
   static Color singleDataGridStateToColor(String state) {
     Color color;
     String firstPart = state.split(";")[0];
