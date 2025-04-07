@@ -18,7 +18,7 @@ import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/pages/eshop/order_finish_screen.dart';
 import 'package:fstapp/pages/eshop/order_preview_screen.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';

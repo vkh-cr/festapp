@@ -92,9 +92,9 @@ class HtmlView extends StatelessWidget {
 
   String colorToRgbString(Color? color) {
     if (color != null) {
-      final int r = color.r.toInt();
-      final int g = color.g.toInt();
-      final int b = color.b.toInt();
+      final int r = (color.r * 255).round();
+      final int g = (color.g * 255).round();
+      final int b = (color.b * 255).round();
       return 'rgb($r, $g, $b)';
     } else {
       return "";

@@ -4,7 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';

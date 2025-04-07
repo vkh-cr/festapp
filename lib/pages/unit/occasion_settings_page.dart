@@ -15,7 +15,7 @@ import 'package:fstapp/components/features/feature_form.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/utilities.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/help_widget.dart';
 import 'package:fstapp/widgets/image_area.dart';
