@@ -35,9 +35,9 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   int _messageCount = 0;
 
   final List<String> visibleTabKeys = [
+    OccasionTab.map,
     OccasionTab.home,
     OccasionTab.news,
-    OccasionTab.map,
     OccasionTab.more,
     OccasionTab.user,
   ];
@@ -181,9 +181,9 @@ class OccasionTab {
   static final Map<String, OccasionTab> availableTabs = {
     home: OccasionTab(
       key: home,
-      label: "Home".tr(),
-      icon: Icons.home_outlined,
-      activeIcon: Icons.home,
+      label: "Schedule".tr(),
+      icon: Icons.calendar_month_outlined,
+      activeIcon: Icons.calendar_month,
       route: ScheduleNavigationRoute(),
     ),
     news: OccasionTab(
