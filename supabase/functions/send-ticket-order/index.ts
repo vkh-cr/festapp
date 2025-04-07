@@ -1,10 +1,10 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.46.2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { qrcode } from 'https://deno.land/x/qrcode/mod.ts';
 import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
-import { getEmailTemplateAndWrapper } from "../_shared/supabaseUtil.ts";
+import { getEmailTemplateAndWrapper, supabaseAdmin } from "../_shared/supabaseUtil.ts";
 
 const _DEFAULT_EMAIL = Deno.env.get("DEFAULT_EMAIL")!;
 
@@ -13,10 +13,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const supabaseAdmin = createClient(
-  Deno.env.get('SUPABASE_URL')!,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-);
+function encodeSPDMessage(message: string): string {
+  // Normalize the string to NFC form.
+  const normalized = message.normalize("NFC");
+  // Use encodeURIComponent to encode the string into UTF‑8 percent‑encoded format.
+  return encodeURIComponent(normalized);
+}
+
+function generateSpdString(paymentInfo: any, orderData: any): string {
+    const message = `${orderData.name} ${orderData.surname}`;
+    const messageCompliant = encodeSPDMessage(message);
+    return `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(2)}*CC:${paymentInfo.currency_code}*MSG:${messageCompliant}*X-VS:${paymentInfo.variable_symbol}`;
+}
 
 // Function to generate QR code as base64
 async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: string): Promise<Uint8Array> {
@@ -35,10 +43,8 @@ async function generateQrCode(paymentInfo: any, orderData: any, occasionTitle: s
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, 500, 700);
 
-  // Generate QR code
-  const qrData = `SPD*1.0*ACC:${paymentInfo.account_number}*AM:${paymentInfo.amount.toFixed(
-    2
-  )}*CC:${paymentInfo.currency_code}*MSG:${orderData.name} ${orderData.surname}*X-VS:${paymentInfo.variable_symbol}`;
+  // Generate QR code using SPD-compliant string
+  const qrData = generateSpdString(paymentInfo, orderData);
   console.log("Generated QR data string:", qrData);
 
   const base64QrCode = await qrcode(qrData, { size: 500 });
@@ -79,52 +85,147 @@ function formatDatetime(datetime: string): string {
   }).format(date);
 }
 
-function generateFullOrder(orderData: any, tickets: any[]): string {
-  const { name, surname, email, note } = orderData;
+// Helper to wrap text by word boundaries so that lines don’t exceed a set length.
+function wrapTextByWords(text: string, maxLen: number): string[] {
+  const words = text.split(/\s+/);
+  let lines: string[] = [];
+  let currentLine = "";
 
-  const orderHeader = `
-    <div style="border-radius:10px;border:2px solid #122640;font-size:16px;margin:20px 0;padding:20px;text-align:center;">
-      <p style="text-align:center;"><strong>Rekapitulace Vaší objednávky:</strong></p>
-      <p style="text-align:left;">
-        <span style="display:block; margin-left:20px;">Jméno: ${name}</span>
-        <span style="display:block; margin-left:20px;">Příjmení: ${surname}</span>
-        <span style="display:block; margin-left:20px;">E-mail: ${email}</span>
-        ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
-      </p><p></p>
-  `;
+  words.forEach((word) => {
+    // +1 for the space we’ll need to add
+    if ((currentLine + word).length + 1 > maxLen) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = currentLine ? currentLine + " " + word : word;
+    }
+  });
 
-  const ticketsDetails = tickets
-    .map((ticket) => {
-      const ticketSymbol = ticket.ticket_symbol;
-      const spotProduct = ticket.products.find((p: any) => p.type === "spot");
-      const spot = spotProduct?.spot_title || spotProduct?.title;
-      const spot_type_title = spotProduct?.type_tile || "Místo";
-      const food = ticket.products.find((p: any) => p.type === "food")?.title;
-      const taxi = ticket.products.find((p: any) => p.type === "taxi")?.title;
-      const note = ticket.note || "";
-
-      const accumulatedPrice = ticket.products.reduce(
-        (total: number, product: any) => total + Number(product.price || 0),
-        0
-      );
-
-      const price = formatCurrency(accumulatedPrice, ticket.products[0].currency_code);
-
-      return `
-        <p style="text-align:left;">
-          <span style="display:block; margin-left:20px;"><strong>Vstupenka ${ticketSymbol}</strong></span>
-          <span style="display:block; margin-left:20px;">${spot_type_title}: ${spot}</span>
-          ${food ? `<span style="display:block; margin-left:20px;">Večeře: ${food}</span>` : ""}
-          ${taxi ? `<span style="display:block; margin-left:20px;">Odvoz: ${taxi}</span>` : ""}
-          ${note ? `<span style="display:block; margin-left:20px;">Poznámka: ${note}</span>` : ""}
-          <span style="display:block; margin-left:20px;">Cena: ${price}</span>
-        </p>
-      `;
-    })
-    .join("");
-
-  return `${orderHeader}${ticketsDetails}</div>`;
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  return lines;
 }
+
+function generateFullOrder(orderData: any, tickets: any[]): string {
+  const { name, surname, email, phone, note } = orderData;
+
+  // Build personal info section
+  let personalInfo = "";
+  if (name) {
+    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Jméno: ${name}</div>`;
+  }
+  if (surname) {
+    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Příjmení: ${surname}</div>`;
+  }
+  if (email) {
+    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">E-mail: ${email}</div>`;
+  }
+  if (phone) {
+    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Telefon: ${phone}</div>`;
+  }
+  if (note) {
+    personalInfo += `<div style="margin-bottom:4px; margin-left:12px;">Poznámka: ${note}</div>`;
+  }
+
+  // Start the order container - using table-based layout for better email compatibility
+  const orderHeader =
+    `<table cellspacing="0" cellpadding="0" border="0" style="width:100%; max-width:600px; margin:20px auto; border-collapse: separate; border-spacing: 0;">
+      <tr>
+        <td style="padding:20px; border:2px solid #122640; border-radius:10px;">
+          <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
+            <tr>
+              <td align="center" style="padding-bottom:15px;">
+                <strong>Rekapitulace Vaší objednávky:</strong>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                ${personalInfo}
+              </td>
+            </tr>`;
+
+  let overallTotal = 0;
+  const ticketsDetails = tickets.map((ticket) => {
+    const ticketSymbol = ticket.ticket_symbol;
+
+    const productsRows = ticket.products
+      .map((product: any) => {
+        const price = Number(product.price || 0);
+        overallTotal += price;
+        const formattedPrice = formatCurrency(
+          price,
+          product.currency_code || ticket.products[0].currency_code
+        );
+
+        // Product entry using table for better alignment
+        return `<tr>
+                  <td valign="top" colspan="3" style="padding-top:8px;">
+                    <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
+                      <tr>
+                        <td style="padding-left:12px; padding-right:8px; vertical-align:top;">
+                          ${product.type_title}: ${product.title}
+                        </td>
+                        <td width="80" style="text-align:right; white-space:nowrap; vertical-align:bottom; padding-right:12px;">
+                          ${formattedPrice}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2" style="padding:0 12px;">
+                          <div style="border-bottom:1px dotted #ccc; margin:2px 0 4px 0;"></div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>`;
+      })
+      .join("");
+
+    return `<tr>
+              <td style="padding-top:20px;">
+                <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
+                  <tr>
+                    <td style="padding-left:12px; padding-bottom:8px;">
+                      <strong>Vstupenka ${ticketSymbol}</strong>
+                    </td>
+                  </tr>
+                  ${productsRows}
+                  ${ticket.note ?
+                    `<tr>
+                      <td style="padding:5px 12px 0;">Poznámka: ${ticket.note}</td>
+                    </tr>` :
+                    ""}
+                </table>
+              </td>
+            </tr>`;
+  }).join("");
+
+  const currencyCode =
+    tickets &&
+    tickets.length > 0 &&
+    tickets[0].products &&
+    tickets[0].products.length > 0
+      ? tickets[0].products[0].currency_code
+      : "";
+  const formattedOverallTotal = formatCurrency(overallTotal, currencyCode);
+
+  const totalSection =
+    `<tr>
+      <td style="padding-top:20px; padding-right:12px; text-align:right;">
+        <strong>Celková cena: ${formattedOverallTotal}</strong>
+      </td>
+    </tr>`;
+
+  const orderFooter =
+    `      </table>
+        </td>
+      </tr>
+    </table>`;
+
+  return `${orderHeader}${ticketsDetails}${totalSection}${orderFooter}`;
+}
+
+
 
 Deno.serve(async (req) => {
   try {
@@ -141,16 +242,10 @@ Deno.serve(async (req) => {
       input_data: orderDetails,
     });
 
-    // Create a string combining the code and message from the ticketOrder
-    const errorString = `${ticketOrder.code}: ${ticketOrder.message}`;
-
     if (ticketOrder.code !== 200) {
-      console.error("Error creating ticket order:", errorString);
+      console.error("Error creating ticket order:", JSON.stringify(ticketOrder));
       return new Response(
-        JSON.stringify({
-          code: ticketOrder.code,
-          message: ticketOrder.message,
-        }),
+        JSON.stringify(ticketOrder),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 200,
