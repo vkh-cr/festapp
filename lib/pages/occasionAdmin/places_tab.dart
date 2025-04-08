@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
@@ -86,10 +87,22 @@ class _PlacesTabState extends State<PlacesTab> {
           width: 300,
         ),
         TrinaColumn(
-          title: "Content".tr(),
+          width: 150,
+          title: "Description".tr(),
           field: Tb.places.description,
           type: TrinaColumnType.text(),
-          width: 300,
+          renderer: (rendererContext) {
+            return DataGridHelper.buildHtmlEditorButton(
+              context: context,
+              occasionId: RightsService.currentOccasionId,
+              field: Tb.events.description,
+              rendererContext: rendererContext,
+              loadContent: () async {
+                var description = rendererContext.row.cells[Tb.places.description]!.value;
+                return description;
+              },
+            );
+          },
         ),
         TrinaColumn(
           title: "Icon".tr(),
