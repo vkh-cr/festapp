@@ -203,7 +203,7 @@ class HtmlHelper {
       String oldHtml,
       String newHtml,
       int occasionId,
-      { int maxWidth = AppConfig.imagesMaxWidth,
+      { int? maxWidth,
         int maxBytes = AppConfig.imagesMaxBytes }) async {
     // Parse the old and new HTML documents.
     final oldDocument = html_parser.parse(oldHtml);
@@ -248,30 +248,35 @@ class HtmlHelper {
 
       // Only use resize parameter if the image is bigger than given width.
       Uint8List compressedImageData;
-      var decodedImage = img.decodeImage(imageData);
-      if (decodedImage != null) {
-        // Determine the target width: use maxWidth if the image is too wide,
-        // otherwise keep the original width.
-        int targetWidth = decodedImage.width > maxWidth ? maxWidth : decodedImage.width;
-        // Calculate the scaling factor.
-        double scale = targetWidth / decodedImage.width;
-        // Estimate the new file size at 100% quality after scaling.
-        int estimatedSizeQuality100 = (decodedImage.lengthInBytes * scale * scale).floor();
 
-        int dynamicQuality = 100;
-        if (estimatedSizeQuality100 > maxBytes) {
-          // Compute the ratio of the desired size to the estimated size.
-          double ratio = maxBytes / estimatedSizeQuality100;
-          // Use an exponent of 2 for more aggressive compression.
-          dynamicQuality = (pow(ratio, 2) * 100).floor();
-          dynamicQuality = dynamicQuality.clamp(1, 100);
+      if(imageData.lengthInBytes > maxBytes) {
+        var decodedImage = img.decodeImage(imageData);
+        if (decodedImage != null) {
+          // Determine the target width: use maxWidth if the image is too wide,
+          // otherwise keep the original width.
+          int targetWidth = maxWidth != null && decodedImage.width > maxWidth ? maxWidth : decodedImage.width;
+          // Calculate the scaling factor.
+          double scale = targetWidth / decodedImage.width;
+          // Estimate the new file size at 100% quality after scaling.
+          int estimatedSizeQuality100 = (decodedImage.lengthInBytes * scale * scale).floor();
+
+          int dynamicQuality = 100;
+          if (estimatedSizeQuality100 > maxBytes) {
+            // Compute the ratio of the desired size to the estimated size.
+            double ratio = maxBytes / estimatedSizeQuality100;
+            // Use an exponent of 2 for more aggressive compression.
+            dynamicQuality = (pow(ratio, 2) * 100).floor();
+            dynamicQuality = dynamicQuality.clamp(1, 100);
+          }
+
+          compressedImageData = await ImageCompressionHelper.compress(
+            imageData,
+            targetWidth,
+            quality: dynamicQuality,
+          );
+        } else {
+          compressedImageData = imageData;
         }
-
-        compressedImageData = await ImageCompressionHelper.compress(
-          imageData,
-          targetWidth,
-          quality: dynamicQuality,
-        );
       } else {
         compressedImageData = imageData;
       }
