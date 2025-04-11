@@ -287,17 +287,6 @@ class HtmlHelper {
       image.attributes['src'] = publicUrl;
     }
 
-    // Collect image src values from the new HTML after processing.
-    List<String> newImageUrls = newDocument.getElementsByTagName('img')
-        .map((img) => img.attributes['src'] ?? '')
-        .where((src) => src.isNotEmpty)
-        .toList();
-
-    // Determine which images have been removed (present in old HTML but not in new HTML).
-    List<String> removedImages = oldImageUrls.where((oldUrl) => !newImageUrls.contains(oldUrl)).toList();
-    // Clean up the removed images from occasion storage.
-    await DbImages.cleanupRemovedImages(removedImages, occasionId);
-
     return newDocument.outerHtml;
   }
 
