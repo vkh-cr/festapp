@@ -9,9 +9,7 @@ import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/data_models/form_option_product_model.dart';
-import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
@@ -157,6 +155,10 @@ class _FormPageState extends State<FormPage> {
             for (var fValue in ticketField.values) {
               if (fValue is FormOptionProductModel) {
                 _totalPrice += fValue.price;
+              } else if (fValue is Iterable) {
+                // Convert the JSArray (or any iterable) to a Dart list and sum the prices.
+                var products = List<FormOptionProductModel>.from(fValue);
+                _totalPrice += products.fold(0, (sum, product) => sum + product.price);
               }
             }
           }
