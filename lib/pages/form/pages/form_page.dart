@@ -326,7 +326,7 @@ class _FormPageState extends State<FormPage> {
                                 isLoading: _isLoading,
                                 height: 50.0,
                                 width: 250.0,
-                                isEnabled: _totalPrice > 0,
+                                //isEnabled: _totalPrice > 0,
                               ),
                               const SizedBox(height: 32),
                             ],
