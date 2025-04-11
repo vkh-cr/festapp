@@ -189,6 +189,7 @@ class _OrdersTabState extends State<OrdersTab> {
   static List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
+    EshopColumns.ORDER_FORM,
     EshopColumns.ORDER_DATA,
     EshopColumns.ORDER_EMAIL,
     if(!FeatureService.isFeatureEnabled(FeatureConstants.ticket))
