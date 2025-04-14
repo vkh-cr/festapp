@@ -8,7 +8,6 @@ class TbEshop {
   static BlueprintTb blueprints = const BlueprintTb();
   static SpotsTb spots = const SpotsTb();
   static PaymentInfoTb payment_info = const PaymentInfoTb();
-  static FormFieldsTb form_fields = const FormFieldsTb();
   static TransactionsTb transactions = const TransactionsTb();
 }
 
@@ -65,6 +64,7 @@ class OrdersTb {
   String get order_symbol => "order_symbol";
   String get payment_info => "payment_info";
   String get currency_code => "currency_code";
+  String get data_form => "form";
   String get data_note => "note";
   String get data_email => "email";
   String get note_hidden => "note_hidden";
@@ -136,24 +136,6 @@ class OrdersHistoryTb {
   String get state => "state";
   String get price => "price";
   String get currency_code => "currency_code";
-}
-
-class FormFieldsTb {
-  const FormFieldsTb();
-  String get table => "form_fields";
-  String get id => "id";
-  String get created_at => "created_at";
-  String get title => "title";
-  String get description => "description";
-  String get data => "data";
-  String get type => "type";
-  String get is_required => "is_required";
-  String get form => "form";
-  String get is_hidden => "is_hidden";
-  String get order => "order";
-  String get product_type => "product_type";
-  String get product_type_data => "product_type_data";
-  String get is_ticket_field => "is_ticket_field";
 }
 
 class TransactionsTb {

@@ -13,7 +13,9 @@ DECLARE
     ordersData JSONB;
     orderProductTicketsData JSONB;
     paymentInfoData JSONB;
+    formsData JSONB;  -- New variable for forms data
 BEGIN
+    -- Get the occasion_id based on the provided form_link
     SELECT occasion
     INTO occasion_id
     FROM public.forms
@@ -124,7 +126,28 @@ BEGIN
         FROM jsonb_array_elements(ordersData) order_obj
     );
 
-    -- Return combined data
+    -- Fetch forms linked to the occasion
+    SELECT jsonb_agg(jsonb_build_object(
+        'id', f.id,
+        'created_at', f.created_at,
+        'data', f.data,
+        'key', f.key,
+        'occasion', f.occasion,
+        'type', f.type,
+        'bank_account', f.bank_account,
+        'deadline_duration_seconds', f.deadline_duration_seconds,
+        'is_open', f.is_open,
+        'link', f.link,
+        'blueprint', f.blueprint,
+        'header', f.header,
+        'header_off', f.header_off,
+        'updated_at', f.updated_at
+    ))
+    INTO formsData
+    FROM public.forms f
+    WHERE f.occasion = occasion_id;
+
+    -- Return combined data, including the new forms key
     RETURN jsonb_build_object(
         'code', 200,
         'data', jsonb_build_object(
@@ -133,7 +156,8 @@ BEGIN
             'tickets', COALESCE(ticketsData, '[]'::jsonb),
             'orders', COALESCE(ordersData, '[]'::jsonb),
             'order_product_ticket', COALESCE(orderProductTicketsData, '[]'::jsonb),
-            'payment_info', COALESCE(paymentInfoData, '[]'::jsonb)
+            'payment_info', COALESCE(paymentInfoData, '[]'::jsonb),
+            'forms', COALESCE(formsData, '[]'::jsonb)
         )
     );
 END;

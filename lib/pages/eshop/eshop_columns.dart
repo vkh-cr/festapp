@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
@@ -48,6 +49,8 @@ class EshopColumns {
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
   static const String ORDER_TRANSACTIONS = "orderTransactions";
+
+  static const String ORDER_FORM = "orderForm";
 
   static const String RESPONSES = "responses";
 
@@ -391,6 +394,17 @@ class EshopColumns {
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.end,
         width: 100,
+      ),
+    ],
+    ORDER_FORM: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Form".tr(),
+        field: Tb.forms.table,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 120,
       ),
     ],
     RESPONSES: (Map<String, dynamic> data) {

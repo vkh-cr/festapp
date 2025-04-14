@@ -1,5 +1,5 @@
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
-import 'package:fstapp/components/blueprint/blueprint_helper.dart';
+import 'package:fstapp/components/blueprint/get_orders_helper.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
@@ -31,17 +31,17 @@ class BlueprintModel {
   List<OrderProductTicketModel>? orderProductTickets;
 
   factory BlueprintModel.fromJson(Map<String, dynamic> json) {
-    final List<BlueprintGroupModel> groups = BlueprintHelper.parseGroups(json);
-    final List<BlueprintObjectModel>? rawObjects = BlueprintHelper.parseObjects(json);
-    final List<BlueprintObjectModel>? spots = BlueprintHelper.parseSpots(json);
-    final List<ProductModel>? products = BlueprintHelper.parseProducts(json);
-    final List<TicketModel>? tickets = BlueprintHelper.parseTickets(json);
-    final List<OrderModel>? orders = BlueprintHelper.parseOrders(json);
-    final List<OrderProductTicketModel>? orderProductTickets = BlueprintHelper.parseOrderProductTickets(json);
+    final List<BlueprintGroupModel> groups = GetOrdersHelper.parseGroups(json);
+    final List<BlueprintObjectModel>? rawObjects = GetOrdersHelper.parseObjects(json);
+    final List<BlueprintObjectModel>? spots = GetOrdersHelper.parseSpots(json);
+    final List<ProductModel>? products = GetOrdersHelper.parseProducts(json);
+    final List<TicketModel>? tickets = GetOrdersHelper.parseTickets(json);
+    final List<OrderModel>? orders = GetOrdersHelper.parseOrders(json);
+    final List<OrderProductTicketModel>? orderProductTickets = GetOrdersHelper.parseOrderProductTickets(json);
 
-    final List<BlueprintObjectModel>? enrichedObjects = BlueprintHelper.enrichObjects(rawObjects, spots, products);
+    final List<BlueprintObjectModel>? enrichedObjects = GetOrdersHelper.enrichObjects(rawObjects, spots, products);
 
-    BlueprintHelper.assignObjectsToGroups(enrichedObjects, groups);
+    GetOrdersHelper.assignObjectsToGroups(enrichedObjects, groups);
 
     return BlueprintModel(
       id: json[TbEshop.blueprints.id],

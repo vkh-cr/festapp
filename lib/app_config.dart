@@ -19,6 +19,7 @@ class AppConfig {
   //setup occasion id to force occasion
   static const String? forceOccasionLink = "jm2025";
   static const bool isPublicNotificationSendingDisabled = false;
+  static const bool isAllUnit = false;
 
   static const String webLink = "https://jubileum2025.netlify.app";
   static const String appStoreLink = "";
