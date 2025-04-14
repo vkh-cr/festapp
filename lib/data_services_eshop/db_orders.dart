@@ -55,20 +55,23 @@ class DbOrders {
     if (response["code"] != 200) return [];
     final json = response["data"];
 
+    // Parse the individual pieces from JSON.
     final spots = GetOrdersHelper.parseSpots(json);
     final products = GetOrdersHelper.parseProducts(json);
+    final productTypes = GetOrdersHelper.parseProductTypes(json); // New parsing for product types.
     final tickets = GetOrdersHelper.parseTickets(json);
     final orders = GetOrdersHelper.parseOrders(json)!;
     final payments = GetOrdersHelper.parsePaymentInfo(json);
     final forms = GetOrdersHelper.parseForms(json);
     final orderProductTickets = GetOrdersHelper.parseOrderProductTickets(json);
 
-    // Precompute maps
-    final ticketMap = {for (var t in tickets!) t.id: t};
-    final productMap = {for (var p in products!) p.id: p};
-    final paymentMap = {for (var p in payments!) p.id: p};
-    final spotByOptId = {for (var s in spots!) s.orderProductTicket: s};
+    // Precompute maps for lookup.
+    final ticketMap = { for (var t in tickets!) t.id: t };
+    final productMap = { for (var p in products!) p.id: p };
+    final paymentMap = { for (var p in payments!) p.id: p };
+    final spotByOptId = { for (var s in spots!) s.orderProductTicket: s };
 
+    // Build maps to link orders, tickets and order-product-ticket entries.
     final Map<int, List<OrderProductTicketModel>> orderToOpt = {};
     final Map<int, List<OrderProductTicketModel>> ticketToOpt = {};
     for (var opt in orderProductTickets!) {
@@ -76,13 +79,15 @@ class DbOrders {
       ticketToOpt.putIfAbsent(opt.ticketId!, () => []).add(opt);
     }
 
+    // Process orders.
     for (var order in orders) {
       final orderOpts = orderToOpt[order.id] ?? [];
       final ticketIds = orderOpts.map((opt) => opt.ticketId).toSet();
       final relatedTickets = ticketIds.map((id) => ticketMap[id]).whereType<TicketModel>().toList();
       order.relatedTickets = relatedTickets;
-      order.form = forms?.firstWhereOrNull((f)=>f.formKey == order.formKey);
+      order.form = forms?.firstWhereOrNull((f) => f.formKey == order.formKey);
 
+      // Process tickets attached to the order.
       for (var ticket in relatedTickets) {
         final ticketOpts = ticketToOpt[ticket.id] ?? [];
         for (var opt in ticketOpts) {
@@ -120,6 +125,7 @@ class DbOrders {
     orders.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
     return orders;
   }
+
 
   static Future<void> deleteOrder(OrderModel model) async {
     final response = await _supabase.rpc(
