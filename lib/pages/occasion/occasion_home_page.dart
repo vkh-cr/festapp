@@ -22,9 +22,9 @@ import 'package:fstapp/app_router.gr.dart';
 
 @RoutePage()
 class OccasionHomePage extends StatefulWidget {
-  static const HOME_PAGE = AppConfig.appName;
+  static const homePageTitle = AppConfig.appName;
 
-  const OccasionHomePage({Key? key}) : super(key: key);
+  const OccasionHomePage({super.key});
 
   @override
   State<OccasionHomePage> createState() => _OccasionHomePageState();
@@ -35,7 +35,10 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   int _messageCount = 0;
 
   final List<String> visibleTabKeys = [
-    OccasionTab.home,
+    if(AppConfig.isAllUnit)
+      OccasionTab.unit,
+    if(!AppConfig.isAllUnit)
+      OccasionTab.home,
     OccasionTab.news,
     OccasionTab.map,
     OccasionTab.more,
@@ -172,6 +175,7 @@ class OccasionTab {
     this.requiresLogin = false,
   });
 
+  static const String unit = "unit";
   static const String home = "home";
   static const String news = "news";
   static const String map = "map";
@@ -179,6 +183,13 @@ class OccasionTab {
   static const String user = "user";
 
   static final Map<String, OccasionTab> availableTabs = {
+    unit: OccasionTab(
+      key: unit,
+      label: "Home".tr(),
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home,
+      route: UnitRoute(),
+    ),
     home: OccasionTab(
       key: home,
       label: "Home".tr(),

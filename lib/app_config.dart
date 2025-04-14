@@ -19,6 +19,7 @@ class AppConfig {
   //setup occasion id to force occasion
   static const String? forceOccasionLink = null;
   static const bool isPublicNotificationSendingDisabled = false;
+  static const bool isAllUnit = false;
 
   static const String webLink = "https://app.absolventskyvelehrad.cz";
   static const String appStoreLink = "";

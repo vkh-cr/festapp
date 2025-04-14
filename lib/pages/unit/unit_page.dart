@@ -25,9 +25,9 @@ const double kVerticalPadding = 32.0;
 @RoutePage()
 class UnitPage extends StatefulWidget {
   static const ROUTE = "unit";
-  final int id;
+  final int? id;
 
-  const UnitPage({@pathParam required this.id, Key? key}) : super(key: key);
+  const UnitPage({@pathParam this.id, super.key});
 
   @override
   _UnitPageState createState() => _UnitPageState();
@@ -38,6 +38,7 @@ class _UnitPageState extends State<UnitPage> {
   List<OccasionModel> _occasions = [];
   InformationModel? _quote;
   final ScrollController _scrollController = ScrollController();
+  int? _initialId;
 
   @override
   void initState() {
@@ -49,14 +50,16 @@ class _UnitPageState extends State<UnitPage> {
     _occasions = await OfflineDataService.getAllOccasions();
     setState(() {});
 
-    final unit = await DbUnits.getUnit(widget.id);
+    _initialId= widget.id ?? RightsService.currentUnit!.id!;
+
+    final unit = await DbUnits.getUnit(_initialId!);
 
     final occasions = unit.occasions!;
     OfflineDataService.saveAllOccasions(occasions);
 
     if (FeatureService.isFeatureEnabled(FeatureConstants.quotes,
         features: unit.features)) {
-      _quote = await DbInformation.getCurrentQuote(widget.id);
+      _quote = await DbInformation.getCurrentQuote(_initialId!);
     }
     setState(() {
       _unit = unit;
@@ -86,7 +89,7 @@ class _UnitPageState extends State<UnitPage> {
       floatingActionButton: RightsService.canUserSeeUnitWorkspace()
           ? FloatingActionButton(
         onPressed: () {
-          RouterService.navigate(context, "unit/${widget.id}/edit")
+          RouterService.navigate(context, "unit/$_initialId/edit")
               .then((_) => _loadUnitAndOccasions());
         },
         child: const Icon(Icons.edit),
