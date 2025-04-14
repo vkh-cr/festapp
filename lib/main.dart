@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        title: OccasionHomePage.HOME_PAGE,
+        title: OccasionHomePage.homePageTitle,
         theme: theme,
         darkTheme: darkTheme,
       ).animate().fadeIn(
