@@ -44,7 +44,7 @@ class FeatureService {
   /// Retrieves a feature based on its [featureCode].
   static Feature? getFeatureDetails(String featureCode, {List<Feature>? features}) {
     if (RightsService.currentOccasion == null) return null;
-    var featuresList = features ?? RightsService.currentOccasion?.features;
+    var featuresList = features ?? RightsService.currentOccasion?.features ?? RightsService.currentUnit?.features;
     if (featuresList == null) {
       return null;
     }
