@@ -7,6 +7,8 @@ import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/dialogs/transactions_dialog.dart';
@@ -24,6 +26,8 @@ class EshopColumns {
   static const String TICKET_NOTE_HIDDEN = "ticketNoteHidden";
   static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
   static const String TICKET_PRODUCTS = "ticketProducts";
+  static const String TICKET_PRODUCTS_EXTENDED = "ticketProductsExtended";
+
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
   static const String TICKET_SPOT = "ticketSpot";
 
@@ -407,6 +411,17 @@ class EshopColumns {
         width: 120,
       ),
     ],
+    TICKET_PRODUCTS_EXTENDED: (Map<String, dynamic> data) {
+      if(data[TICKET_PRODUCTS_EXTENDED] == null){
+        return <TrinaColumn>[];
+      }
+      var columns = <TrinaColumn>[];
+      for(var f in (data[TICKET_PRODUCTS_EXTENDED]) as List<String>){
+        var cc = genericTextColumn(ProductModel.typeToLocale(f), f, false);
+        columns.add(cc);
+      }
+      return columns;
+    },
     RESPONSES: (Map<String, dynamic> data) {
       if(data[RESPONSES] == null){
         return <TrinaColumn>[];
@@ -421,14 +436,14 @@ class EshopColumns {
     },
   };
 
-  static TrinaColumn genericTextColumn(String title, String field) {
+  static TrinaColumn genericTextColumn(String title, String field, [bool alignToEnd = true]) {
     return TrinaColumn(
       readOnly: true,
       enableEditingMode: true,
       title: title,
       field: field,
       type: TrinaColumnType.text(),
-      textAlign: TrinaColumnTextAlign.end,
+      textAlign: alignToEnd ? TrinaColumnTextAlign.end : TrinaColumnTextAlign.start,
       width: 150,
     );
   }
