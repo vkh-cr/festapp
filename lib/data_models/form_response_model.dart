@@ -20,7 +20,7 @@ class FormResponseModel extends ITrinaRowModel {
   List<FormFieldModel>? allFields;
 
   //last field is automatic if previous categories are not contained
-  static const List<String> productCategories = ["others"];
+  static const List<String> productCategories = ["spot", "food", "others"];
 
   FormResponseModel({
     this.id,
