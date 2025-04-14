@@ -67,8 +67,11 @@ BEGIN
         END IF;
 
     ELSE
-        -- No link or form_link provided: first try to get the default occasion
-        SELECT (data->>'DEFAULT_OCCASION')::bigint
+        -- No link or form_link provided: first try to get the representative or default occasion
+        SELECT COALESCE(
+                 (data->>'REPRESENTATIVE_OCCASION')::bigint,
+                 (data->>'DEFAULT_OCCASION')::bigint
+               )
           INTO occasionId
         FROM organizations
         WHERE id = org_id;
