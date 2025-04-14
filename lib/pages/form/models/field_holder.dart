@@ -63,10 +63,13 @@ class OptionsFieldHolder extends FieldHolder {
 /// New class that extends OptionsFieldHolder to work with product options.
 /// It holds a list of FormOptionProductModel instances.
 class OptionsFieldProductHolder extends OptionsFieldHolder {
+  final OptionsFieldProductSelectionType selectionType;
+
   OptionsFieldProductHolder({
     required super.fieldType,
     super.value,
     required List<FormOptionProductModel> productOptions,
+    required this.selectionType,
     required super.id,
     required String super.title,
     required super.isRequired,
@@ -79,3 +82,5 @@ class OptionsFieldProductHolder extends OptionsFieldHolder {
   String toString() =>
       'OptionsFieldProductHolder(fieldType: $fieldType, title: $title, options: $options)';
 }
+
+enum OptionsFieldProductSelectionType { selectOne, selectMany }

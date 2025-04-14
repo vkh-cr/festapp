@@ -7,6 +7,7 @@ import 'package:fstapp/theme_config.dart';
 import 'schedule_timeline.dart';
 
 class ScheduleTabView extends StatefulWidget {
+  final DateTime? defaultDateTime;
   final Function(int)? onEventPressed;
   final List<schedule_tab_view.TimeBlockItem> events;
   final Function(BuildContext, List<schedule_tab_view.TimeBlockGroup>, schedule_tab_view.TimeBlockItem? parentEventId)? onAddNewEvent;
@@ -18,6 +19,7 @@ class ScheduleTabView extends StatefulWidget {
     this.onAddNewEvent,
     this.showAddNewEventButton,
     this.onEventPressed,
+    this.defaultDateTime,
   });
 
   @override
@@ -31,12 +33,16 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
   Widget build(BuildContext context) {
     List<Widget> programLineChildren = [];
 
-    // Group events by date
     datedEvents = schedule_tab_view.TimeBlockHelper.splitTimeBlocksByDate(
       widget.events,
       context,
       AppConfig.daySplitHour,
     );
+
+    if(datedEvents.isEmpty){
+      DateTime defaultTime = widget.defaultDateTime ?? TimeHelper.now();
+      datedEvents.add(schedule_tab_view.TimeBlockGroup(title: defaultTime.weekdayToString(context), events: [], dateTime: defaultTime));
+    }
 
     for (var eventsByDay in datedEvents) {
       var eventGroups = schedule_tab_view.TimeBlockHelper.splitTimeBlocks(eventsByDay.events);

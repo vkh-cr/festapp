@@ -125,8 +125,8 @@ class _MyAppState extends State<MyApp> {
     var baseTheme = ThemeConfig.baseTheme();
     return AdaptiveTheme(
       light: ThemeConfig.baseTheme(),
-      dark: ThemeConfig.darkTheme(baseTheme),
-      initial: AdaptiveThemeMode.system,
+      dark: ThemeConfig.isDarkModeEnabled ? ThemeConfig.darkTheme(baseTheme) : baseTheme,
+      initial: ThemeConfig.isDarkModeEnabled ? AdaptiveThemeMode.system : AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
         debugShowCheckedModeBanner: false,
