@@ -847,16 +847,13 @@ class UnitAdminRouteArgs {
 /// generated route for
 /// [_i28.UnitPage]
 class UnitRoute extends _i30.PageRouteInfo<UnitRouteArgs> {
-  UnitRoute({
-    required int id,
-    _i31.Key? key,
-    List<_i30.PageRouteInfo>? children,
-  }) : super(
-         UnitRoute.name,
-         args: UnitRouteArgs(id: id, key: key),
-         rawPathParams: {'id': id},
-         initialChildren: children,
-       );
+  UnitRoute({int? id, _i31.Key? key, List<_i30.PageRouteInfo>? children})
+    : super(
+        UnitRoute.name,
+        args: UnitRouteArgs(id: id, key: key),
+        rawPathParams: {'id': id},
+        initialChildren: children,
+      );
 
   static const String name = 'UnitRoute';
 
@@ -865,7 +862,7 @@ class UnitRoute extends _i30.PageRouteInfo<UnitRouteArgs> {
     builder: (data) {
       final pathParams = data.inheritedPathParams;
       final args = data.argsAs<UnitRouteArgs>(
-        orElse: () => UnitRouteArgs(id: pathParams.getInt('id')),
+        orElse: () => UnitRouteArgs(id: pathParams.optInt('id')),
       );
       return _i30.DeferredWidget(
         _i28.loadLibrary,
@@ -876,9 +873,9 @@ class UnitRoute extends _i30.PageRouteInfo<UnitRouteArgs> {
 }
 
 class UnitRouteArgs {
-  const UnitRouteArgs({required this.id, this.key});
+  const UnitRouteArgs({this.id, this.key});
 
-  final int id;
+  final int? id;
 
   final _i31.Key? key;
 

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
@@ -70,6 +71,7 @@ class AppRouter extends RootStackRouter {
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}", maintainState: false),
+      AutoRoute(page: UnitRoute.page, path: "${UnitPage.ROUTE}", maintainState: false),
       AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", maintainState: false, children: [
         AutoRoute(path: ':id', page: MapRoute.page,),
       ]),
@@ -92,6 +94,11 @@ class AppRouter extends RootStackRouter {
     if(RightsService.currentLink != null){
       return "/${RightsService.currentLink}";
     }
+
+    if(AppConfig.isAllUnit) {
+      return "/${RightsService.currentLink}";
+    }
+
     return "/${UnitPage.ROUTE}/${RightsService.currentUnit?.id??1}";
   }
 
