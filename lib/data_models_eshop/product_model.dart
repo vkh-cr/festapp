@@ -1,4 +1,6 @@
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class ProductModel {
   int? id;
@@ -9,7 +11,8 @@ class ProductModel {
   String? description;
   double? price;
   Map<String, dynamic>? data;
-  int? productType;
+  int? productTypeId;
+  ProductTypeModel? productType;
   int? occasion;
   String? productTypeString;
   int? order;
@@ -24,29 +27,30 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-        id: json[TbEshop.products.id],
-        createdAt: json[TbEshop.products.created_at] != null
-            ? DateTime.parse(json[TbEshop.products.created_at])
-            : null,
-        updatedAt: json[TbEshop.products.updated_at] != null
-            ? DateTime.parse(json[TbEshop.products.updated_at])
-            : null,
-        title: json[TbEshop.products.title],
-        isHidden: json[TbEshop.products.is_hidden],
-        description: json[TbEshop.products.description],
-        price: json[TbEshop.products.price] != null
-            ? double.tryParse(json[TbEshop.products.price].toString())
-            : null,
-        data: json[TbEshop.products.data],
-        productType: json[TbEshop.products.product_type],
-        occasion: json[TbEshop.products.occasion],
-        productTypeString: json[metaTypeField],
-        order: json[TbEshop.products.order],
-        maximum: json[TbEshop.products.maximum],
-        orderedCount: json[metaOrderedCount]
+      id: json[TbEshop.products.id],
+      createdAt: json[TbEshop.products.created_at] != null
+          ? DateTime.parse(json[TbEshop.products.created_at])
+          : null,
+      updatedAt: json[TbEshop.products.updated_at] != null
+          ? DateTime.parse(json[TbEshop.products.updated_at])
+          : null,
+      title: json[TbEshop.products.title],
+      isHidden: json[TbEshop.products.is_hidden],
+      description: json[TbEshop.products.description],
+      price: json[TbEshop.products.price] != null
+          ? double.tryParse(json[TbEshop.products.price].toString())
+          : null,
+      data: json[TbEshop.products.data],
+      productTypeId: json[TbEshop.products.product_type],
+      occasion: json[TbEshop.products.occasion],
+      productTypeString: json[metaTypeField],
+      order: json[TbEshop.products.order],
+      maximum: json[TbEshop.products.maximum],
+      orderedCount: json[metaOrderedCount],
     );
   }
 
+  // Convert the object to JSON
   Map<String, dynamic> toJson() => {
     TbEshop.products.id: id,
     TbEshop.products.title: title,
@@ -54,13 +58,25 @@ class ProductModel {
     TbEshop.products.description: description,
     TbEshop.products.price: price,
     TbEshop.products.data: data,
-    TbEshop.products.product_type: productType,
+    TbEshop.products.product_type: productTypeId,
     TbEshop.products.occasion: occasion,
     TbEshop.products.order: order,
     TbEshop.products.maximum: maximum,
   };
 
+  // Basic string representation for the product
   String toBasicString() => title ?? id.toString();
+
+  static String typeToLocale(String type) {
+    switch (type) {
+      case foodType:
+        return 'Food'.tr();
+      case spotType:
+        return 'Spot'.tr();
+      default:
+        return 'Products'.tr();
+    }
+  }
 
   ProductModel({
     this.id,
@@ -71,7 +87,7 @@ class ProductModel {
     this.description,
     this.price,
     this.data,
-    this.productType,
+    this.productTypeId,
     this.occasion,
     this.productTypeString,
     this.order,
