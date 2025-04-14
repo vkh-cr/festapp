@@ -354,6 +354,7 @@ class FormFieldsTb {
   String get is_hidden => "is_hidden";
   String get order => "order";
   String get product_type => "product_type";
+  String get product_type_data => "product_type_data";
   String get is_ticket_field => "is_ticket_field";
 }
 

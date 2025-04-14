@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/option_field_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -219,7 +220,17 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
             s = OptionFieldHelper.buildOptionTitle(
                 context, entry.getValue(ticket.ticketKey));
           } else {
-            s = value.toString();
+            if(value is Iterable && value.isNotEmpty && value.first is FormOptionProductModel)
+            {
+              var sectionPrice = 0.0;
+              var products = List<FormOptionProductModel>.from(value);
+              sectionPrice += products.fold(0, (sum, product) => sum + product.price);
+              s = "$value (${Utilities.formatPrice(context, sectionPrice)})";
+            } else if (value.isEmpty) {
+              s = "";
+            } else {
+              s = value.toString();
+            }
           }
           return _buildInfoRow(context, entry.title!, s, entry.fieldType);
         }).toList();

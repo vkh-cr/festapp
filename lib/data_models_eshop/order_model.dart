@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
@@ -21,11 +23,12 @@ class OrderModel extends ITrinaRowModel {
   Map<String, dynamic>? data;
   int? occasion;
   int? paymentInfo;
-  int? form;
+  String? formKey;
   String? currencyCode;
   String? noteHidden;
 
   // Relating tickets, spots, products, and payment info to the order
+  FormModel? form;
   List<TicketModel>? relatedTickets;
   List<BlueprintObjectModel>? relatedSpots;
   List<ProductModel>? relatedProducts;
@@ -116,7 +119,7 @@ class OrderModel extends ITrinaRowModel {
     this.data,
     this.occasion,
     this.paymentInfo,
-    this.form,
+    this.formKey,
     this.currencyCode,
     this.relatedTickets,
     this.relatedSpots,
@@ -138,6 +141,9 @@ class OrderModel extends ITrinaRowModel {
           ? double.tryParse(json[TbEshop.orders.price].toString())
           : null,
       state: json[TbEshop.orders.state],
+      formKey: json[TbEshop.orders.data] != null
+          ? json[TbEshop.orders.data][TbEshop.orders.data_form]
+          : null,
       data: json[TbEshop.orders.data],
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
@@ -195,6 +201,7 @@ class OrderModel extends ITrinaRowModel {
       TbEshop.orders.note_hidden: TrinaCell(value: noteHidden ?? ""),
       TbEshop.orders_history.table: TrinaCell(value: ""),
       TbEshop.transactions.table: TrinaCell(value: ""),
+      Tb.forms.table: TrinaCell(value: form?.link ?? ""),
     });
   }
 

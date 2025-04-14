@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -48,8 +48,8 @@ class FormFieldModel extends ITrinaRowModel {
   }) : options = options ?? [];
 
   factory FormFieldModel.fromJson(Map<String, dynamic> json) {
-    var type = json[TbEshop.form_fields.type];
-    var data = json[TbEshop.form_fields.data];
+    var type = json[Tb.form_fields.type];
+    var data = json[Tb.form_fields.data];
     List<FormOptionModel> options = [];
     if ((type == FormHelper.fieldTypeSelectOne || type == FormHelper.fieldTypeSelectMany) && data is Map) {
       options = data[FormHelper.metaOptions].map<FormOptionModel>((e) {
@@ -57,22 +57,22 @@ class FormFieldModel extends ITrinaRowModel {
       }).toList();
     }
     return FormFieldModel(
-        id: json[TbEshop.form_fields.id],
-        createdAt: json[TbEshop.form_fields.created_at] != null
-            ? DateTime.parse(json[TbEshop.form_fields.created_at])
+        id: json[Tb.form_fields.id],
+        createdAt: json[Tb.form_fields.created_at] != null
+            ? DateTime.parse(json[Tb.form_fields.created_at])
             : null,
-        title: json[TbEshop.form_fields.title],
-        description: json[TbEshop.form_fields.description],
+        title: json[Tb.form_fields.title],
+        description: json[Tb.form_fields.description],
         type: type,
-        isRequired: json[TbEshop.form_fields.is_required],
-        isHidden: json[TbEshop.form_fields.is_hidden],
-        isTicketField: json[TbEshop.form_fields.is_ticket_field],
-        form: json[TbEshop.form_fields.form],
-        order: json[TbEshop.form_fields.order],
+        isRequired: json[Tb.form_fields.is_required],
+        isHidden: json[Tb.form_fields.is_hidden],
+        isTicketField: json[Tb.form_fields.is_ticket_field],
+        form: json[Tb.form_fields.form],
+        order: json[Tb.form_fields.order],
         data: data,
-        productTypeId: json[TbEshop.form_fields.product_type],
-        productType: json[TbEshop.form_fields.product_type_data] != null
-            ? ProductTypeModel.fromJson(json[TbEshop.form_fields.product_type_data])
+        productTypeId: json[Tb.form_fields.product_type],
+        productType: json[Tb.form_fields.product_type_data] != null
+            ? ProductTypeModel.fromJson(json[Tb.form_fields.product_type_data])
             : null,
         options: options
     );
@@ -92,42 +92,42 @@ class FormFieldModel extends ITrinaRowModel {
     }
 
     return {
-      TbEshop.form_fields.id: id,
-      TbEshop.form_fields.title: title,
-      TbEshop.form_fields.description: description,
-      TbEshop.form_fields.type: type,
-      TbEshop.form_fields.is_required: isRequired,
-      TbEshop.form_fields.is_hidden: isHidden,
-      TbEshop.form_fields.is_ticket_field: isTicketField,
-      TbEshop.form_fields.order: order,
-      TbEshop.form_fields.data: jsonData.isNotEmpty ? jsonData : null,
-      TbEshop.form_fields.product_type: productType,
+      Tb.form_fields.id: id,
+      Tb.form_fields.title: title,
+      Tb.form_fields.description: description,
+      Tb.form_fields.type: type,
+      Tb.form_fields.is_required: isRequired,
+      Tb.form_fields.is_hidden: isHidden,
+      Tb.form_fields.is_ticket_field: isTicketField,
+      Tb.form_fields.order: order,
+      Tb.form_fields.data: jsonData.isNotEmpty ? jsonData : null,
+      Tb.form_fields.product_type: productType,
     };
   }
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
-      TbEshop.form_fields.id: TrinaCell(value: id ?? 0),
-      TbEshop.form_fields.created_at: TrinaCell(
+      Tb.form_fields.id: TrinaCell(value: id ?? 0),
+      Tb.form_fields.created_at: TrinaCell(
           value: createdAt != null
               ? DateFormat('yyyy-MM-dd').format(createdAt!)
               : ""),
-      TbEshop.form_fields.title: TrinaCell(value: title ?? ""),
-      TbEshop.form_fields.description: TrinaCell(value: description ?? ""),
-      TbEshop.form_fields.type: TrinaCell(value: type ?? ""),
+      Tb.form_fields.title: TrinaCell(value: title ?? ""),
+      Tb.form_fields.description: TrinaCell(value: description ?? ""),
+      Tb.form_fields.type: TrinaCell(value: type ?? ""),
       metaRequired: TrinaCell(value: isRequired.toString()),
       metaHidden: TrinaCell(value: isHidden.toString()),
-      TbEshop.form_fields.is_ticket_field: TrinaCell(value: isTicketField.toString()),
-      TbEshop.form_fields.order: TrinaCell(value: order ?? 0),
+      Tb.form_fields.is_ticket_field: TrinaCell(value: isTicketField.toString()),
+      Tb.form_fields.order: TrinaCell(value: order ?? 0),
     });
   }
 
   static FormFieldModel fromPlutoJson(Map<String, dynamic> json) {
     return FormFieldModel(
-      id: json[TbEshop.form_fields.id] == -1 ? null : json[TbEshop.form_fields.id],
-      isHidden: json[TbEshop.form_fields.is_hidden],
-      isTicketField: json[TbEshop.form_fields.is_ticket_field],
+      id: json[Tb.form_fields.id] == -1 ? null : json[Tb.form_fields.id],
+      isHidden: json[Tb.form_fields.is_hidden],
+      isTicketField: json[Tb.form_fields.is_ticket_field],
     );
   }
 

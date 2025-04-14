@@ -2,6 +2,8 @@ import 'package:fstapp/components/seat_reservation/utils/seat_state.dart';
 import 'package:fstapp/components/blueprint/blueprint_group.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
@@ -10,7 +12,7 @@ import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:collection/collection.dart';
 
-class BlueprintHelper {
+class GetOrdersHelper {
   static List<BlueprintGroupModel> parseGroups(Map<String, dynamic> json) {
     return json[TbEshop.blueprints.groups] != null
         ? List<BlueprintGroupModel>.from(
@@ -64,6 +66,13 @@ class BlueprintHelper {
     return json[TbEshop.payment_info.table] != null
         ? List<PaymentInfoModel>.from(
         json[TbEshop.payment_info.table].map((g) => PaymentInfoModel.fromJson(g)))
+        : [];
+  }
+
+  static List<FormModel>? parseForms(Map<String, dynamic> json) {
+    return json[Tb.forms.table] != null
+        ? List<FormModel>.from(
+        json[Tb.forms.table].map((g) => FormModel.fromJson(g)))
         : [];
   }
 
