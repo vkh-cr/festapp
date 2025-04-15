@@ -111,6 +111,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
         .toList();
     final upcomingEvents = _occasions.where((o) => o.startTime!.isAfter(now)).toList();
+    upcomingEvents.sort((a, b) => a.startTime!.compareTo(b.startTime!));
     final pastEvents = _occasions.where((o) => o.endTime!.isBefore(now)).toList();
 
     return Scaffold(
