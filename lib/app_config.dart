@@ -13,7 +13,7 @@ class AppConfig {
   static const bool isOwnProgramSupported = true;
   static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const String oneSignalAppId = '';
+  static const String oneSignalAppId = '7837e2c3-6e5e-463c-9672-4db6c55888da';
 
   static const int organization = 5;
   //setup occasion id to force occasion
