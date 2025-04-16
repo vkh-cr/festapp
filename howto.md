@@ -37,9 +37,6 @@
 ##### Environment Variables
 - Fill `.env` file as following:
 ```
-ONESIGNAL_APP_ID=
-USER_AUTH_KEY=
-ONESIGNAL_REST_API_KEY=
 SMTP_HOSTNAME=
 SMTP_USER_NAME=
 SMTP_USER_PASSWORD=
@@ -123,16 +120,11 @@ fvm dart run flutter_launcher_icons
 
 ##### iOS Deployment
 - Create a new app on App Store Connect.
-- Upload 3 types of screenshots.
+- Upload 3 screenshots for iPhone and iPad.
 - Complete privacy settings.
 
 ##### Screenshots
 - Use [App Mockup Studio](https://studio.app-mockup.com/).
-- Devices:
-    - iPhone 11 Pro Max
-    - iPad Pro 12.9 (6th Gen)
-- Recommended Resolutions:
-    - 1320×2868 px, 2868×1320 px
-    - 1290×2796 px, 2796×1290 px
-    - 1242×2688 px, 2688×1242 px
-    - 1284×2778 px, 2778×1284 px
+- Devices (Simulator and Mockup Studio):
+    - iPhone 16 Pro Max
+    - iPad Pro 12.9

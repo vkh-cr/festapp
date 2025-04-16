@@ -18,12 +18,31 @@ class ProductModel {
   int? order;
   int? maximum;
   int? orderedCount;
+  String? currencyCode;
 
   static const String foodType = "food";
   static const String taxiType = "taxi";
   static const String spotType = "spot";
   static const String metaTypeField = "type";
   static const String metaOrderedCount = "ordered_count";
+
+  ProductModel({
+    this.id,
+    this.createdAt,
+    this.updatedAt,
+    this.title,
+    this.isHidden,
+    this.description,
+    this.price,
+    this.data,
+    this.productTypeId,
+    this.occasion,
+    this.productTypeString,
+    this.order,
+    this.maximum,
+    this.orderedCount,
+    this.currencyCode,
+  });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
@@ -40,6 +59,7 @@ class ProductModel {
       price: json[TbEshop.products.price] != null
           ? double.tryParse(json[TbEshop.products.price].toString())
           : null,
+      currencyCode: json[TbEshop.products.currency_code],
       data: json[TbEshop.products.data],
       productTypeId: json[TbEshop.products.product_type],
       occasion: json[TbEshop.products.occasion],
@@ -57,6 +77,7 @@ class ProductModel {
     TbEshop.products.is_hidden: isHidden,
     TbEshop.products.description: description,
     TbEshop.products.price: price,
+    TbEshop.products.currency_code: currencyCode,
     TbEshop.products.data: data,
     TbEshop.products.product_type: productTypeId,
     TbEshop.products.occasion: occasion,
@@ -77,21 +98,4 @@ class ProductModel {
         return 'Products'.tr();
     }
   }
-
-  ProductModel({
-    this.id,
-    this.createdAt,
-    this.updatedAt,
-    this.title,
-    this.isHidden,
-    this.description,
-    this.price,
-    this.data,
-    this.productTypeId,
-    this.occasion,
-    this.productTypeString,
-    this.order,
-    this.maximum,
-    this.orderedCount,
-  });
 }
