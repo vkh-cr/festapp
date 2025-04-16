@@ -70,21 +70,21 @@ class _LoginPageState extends State<LoginPage> {
                     const SizedBox(
                       height: 200,
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text("First time?".tr(), style: TextStyle(fontSize: 18)),
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            TextButton(
-                                onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
-                                child: Text("Sign up", style: StylesConfig.normalTextStyle).tr())
-                          ]
-                      ),
-                    ),
+                    // Container(
+                    //   padding: const EdgeInsets.all(12.0),
+                    //   child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: [
+                    //         Text("First time?".tr(), style: TextStyle(fontSize: 18)),
+                    //         const SizedBox(
+                    //           width: 16,
+                    //         ),
+                    //         TextButton(
+                    //             onPressed: () => RouterService.navigate(context, SignupPage.ROUTE),
+                    //             child: Text("Sign up", style: StylesConfig.normalTextStyle).tr())
+                    //       ]
+                    //   ),
+                    // ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       child: InternalFormFields.email(_emailController),
