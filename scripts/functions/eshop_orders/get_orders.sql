@@ -54,6 +54,7 @@ BEGIN
         'id', p.id,
         'title', p.title,
         'price', p.price,
+        'currency_code', p.currency_code,
         'type', pt.type,
         'description', pt.description
     ))
@@ -146,7 +147,6 @@ BEGIN
         'key', f.key,
         'occasion', f.occasion,
         'type', f.type,
-        'bank_account', f.bank_account,
         'deadline_duration_seconds', f.deadline_duration_seconds,
         'is_open', f.is_open,
         'link', f.link,

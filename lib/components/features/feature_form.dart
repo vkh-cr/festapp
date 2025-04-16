@@ -72,7 +72,7 @@ class _FeatureFormState extends State<FeatureForm> {
       lightColorController = TextEditingController(text: ticketFeature.ticketLightColor);
       darkColorController = TextEditingController(text: ticketFeature.ticketDarkColor);
       // Initialize ticketType with the current value or default to "named"
-      ticketType = ticketFeature.type ?? 'named';
+      ticketType = ticketFeature.ticketType ?? 'named';
     } else if (widget.feature is CompanionsFeature) {
       final companionsFeature = widget.feature as CompanionsFeature;
       companionsFeature.companionsMax ??= 1;
@@ -252,7 +252,7 @@ class _FeatureFormState extends State<FeatureForm> {
             ticketType = newValue;
           });
         },
-        onSaved: (val) => ticketFeature.type = val,
+        onSaved: (val) => ticketFeature.ticketType = val,
       ));
 
       // Only show additional fields if ticket type is "wide"
