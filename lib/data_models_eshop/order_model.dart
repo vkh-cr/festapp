@@ -140,6 +140,7 @@ class OrderModel extends ITrinaRowModel {
       price: json[TbEshop.orders.price] != null
           ? double.tryParse(json[TbEshop.orders.price].toString())
           : null,
+      currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
       formKey: json[TbEshop.orders.data] != null
           ? json[TbEshop.orders.data][TbEshop.orders.data_form]
@@ -147,7 +148,6 @@ class OrderModel extends ITrinaRowModel {
       data: json[TbEshop.orders.data],
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
-      currencyCode: json[TbEshop.orders.currency_code],
       noteHidden: json[TbEshop.orders.note_hidden],
     );
   }
@@ -176,11 +176,11 @@ class OrderModel extends ITrinaRowModel {
     return TrinaRow(cells: {
       TbEshop.orders.id: TrinaCell(value: id ?? 0),
       TbEshop.orders.order_symbol: TrinaCell(value: id ?? 0),
-      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
+      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : ""),
       TbEshop.orders.state: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
-      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
-      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
-      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!) : ""),
+      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
       TbEshop.payment_info.variable_symbol: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
       TbEshop.payment_info.deadline: TrinaCell(
         value: paymentInfoModel?.deadline != null

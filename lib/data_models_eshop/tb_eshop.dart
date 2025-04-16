@@ -9,6 +9,7 @@ class TbEshop {
   static SpotsTb spots = const SpotsTb();
   static PaymentInfoTb payment_info = const PaymentInfoTb();
   static TransactionsTb transactions = const TransactionsTb();
+  static BankAccountsTb bank_accounts = const BankAccountsTb();
 }
 
 class ProductTypesTb {
@@ -34,6 +35,7 @@ class ProductsTb {
   String get title => "title";
   String get description => "description";
   String get price => "price";
+  String get currency_code => "currency_code";
   String get data => "data";
   String get product_type => "product_type";
   String get occasion => "occasion";
@@ -163,4 +165,20 @@ class TransactionsTb {
   String get created_at => "created_at";
   String get message_for_recipient => "message_for_recipient";
   String get counter_account_name => "counter_account_name";
+}
+
+class BankAccountsTb {
+  const BankAccountsTb();
+  String get table => "bank_accounts";
+  String get id => "id";
+  String get created_at => "created_at";
+  String get account_number_human_readable => "account_number_human_readable";
+  String get secret => "secret";
+  String get account_number => "account_number";
+  String get title => "title";
+  String get type => "type";
+  String get min_fetch_wait_seconds => "min_fetch_wait_seconds";
+  String get last_fetch_time => "last_fetch_time";
+  String get is_fetch_enabled => "is_fetch_enabled";
+  String get supported_currencies => "supported_currencies";
 }
