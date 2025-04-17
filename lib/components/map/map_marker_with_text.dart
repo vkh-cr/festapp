@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:fstapp/components/map/map_place_model.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:latlong2/latlong.dart';
 
 class MapMarkerWithText extends Marker {

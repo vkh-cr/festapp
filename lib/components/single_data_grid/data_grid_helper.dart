@@ -1,17 +1,17 @@
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/IconModel.dart';
-import 'package:fstapp/dataModels/PlaceModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_models/icon_model.dart';
+import 'package:fstapp/data_models/place_model.dart';
+import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:fstapp/dataModelsEshop/OrderModel.dart';
-import 'package:fstapp/dataServices/DbOccasions.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/CustomThreeStateCheckbox.dart';
+import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/custom_three_state_checkbox.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class DataGridHelper
@@ -21,6 +21,7 @@ class DataGridHelper
     required String field,
     required TrinaColumnRendererContext rendererContext,
     required Future<String?> Function() loadContent,
+    int? occasionId
   }) {
     String? textToEdit;
     String? oldText = rendererContext.row.cells[field]?.value;
@@ -35,7 +36,7 @@ class DataGridHelper
           HtmlEditorPage.parLoad: loadContent,
         };
 
-        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param)).then((value) async {
+        RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
           if (value != null) {
             var newText = value as String;
             if (newText != textToEdit) {

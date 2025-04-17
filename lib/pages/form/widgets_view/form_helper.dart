@@ -1,27 +1,25 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/dataModels/UserInfoModel.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
+import 'package:fstapp/dialogs/standard_dialog.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
-import 'package:fstapp/services/HtmlHelper.dart';
-import 'package:fstapp/services/Utilities.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/widgets/standard_dialog.dart';
+import 'package:fstapp/services/html_helper.dart';
+import 'package:fstapp/services/utilities_all.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import '../models/birth_date_field_holder.dart';
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
 import 'birth_date_field_builder.dart';
 import 'form_field_builders.dart';
-import 'option_field_helper.dart';
 
 class FormHelper {
-  // Field Type Constants
   static const String fieldTypeName = "name";
   static const String fieldTypeSurname = "surname";
   static const String fieldTypeCity = "city";
@@ -43,10 +41,14 @@ class FormHelper {
   static const String optionDelimiter = " | ";
 
   static const String metaMaxTickets = "max_tickets";
+  static const String metaSelectionType = "selection_type";
+  static const String metaSelectionTypeMany = "select_many";
+  static const String metaSelectionTypeOne = "select_one";
+
+  static const String metaOptions = "options";
   static const String metaFields = "fields";
   static const String metaType = "type";
   static const String metaLabel = "label";
-  static const String metaOptions = "options";
   static const String metaOptionsType = "optionsType";
   static const String metaSecret = "secret";
   static const String metaForm = "form";
@@ -276,7 +278,16 @@ class FormHelper {
             ticketData[metaFields] = [];
           }
           var value = getFieldData(ticketKey, subFieldHolder);
-          ticketData[metaFields].add({subFieldHolder.fieldType: value});
+
+          if (subFieldHolder.fieldType == fieldTypeProductType
+              && subFieldHolder is OptionsFieldProductHolder
+              && subFieldHolder.selectionType == OptionsFieldProductSelectionType.selectMany) {
+            for (var v in value) {
+              ticketData[metaFields].add({subFieldHolder.fieldType: v});
+            }
+          } else{
+            ticketData[metaFields].add({subFieldHolder.fieldType: value});
+          }
         }
         if (ticket.tickets[i].seat != null) {
           ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
@@ -344,6 +355,9 @@ class FormHelper {
         return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeProductType:
         var optionsField = field as OptionsFieldProductHolder;
+        if(optionsField.selectionType == OptionsFieldProductSelectionType.selectMany) {
+          return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
+        }
         return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthDate:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthDateLabel());
@@ -391,7 +405,7 @@ class FormHelper {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    title ?? "Description".tr(),
+                    title,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),

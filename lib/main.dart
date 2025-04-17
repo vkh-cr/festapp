@@ -2,21 +2,21 @@ import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
-import 'package:fstapp/AppRouter.dart';
-import 'package:fstapp/appConfig.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/OfflineDataService.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServices/SynchroService.dart';
-import 'package:fstapp/pages/occasion/OccasionHomePage.dart';
-import 'package:fstapp/services/NotificationHelper.dart';
+import 'package:fstapp/app_router.dart';
+import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services/synchro_service.dart';
+import 'package:fstapp/pages/occasion/occasion_home_page.dart';
+import 'package:fstapp/services/notification_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/TimeTravelWidget.dart';
+import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/time_travel_widget.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -125,8 +125,8 @@ class _MyAppState extends State<MyApp> {
     var baseTheme = ThemeConfig.baseTheme();
     return AdaptiveTheme(
       light: ThemeConfig.baseTheme(),
-      dark: ThemeConfig.darkTheme(baseTheme),
-      initial: AdaptiveThemeMode.system,
+      dark: ThemeConfig.isDarkModeEnabled ? ThemeConfig.darkTheme(baseTheme) : baseTheme,
+      initial: ThemeConfig.isDarkModeEnabled ? AdaptiveThemeMode.system : AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
         debugShowCheckedModeBanner: false,
@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        title: OccasionHomePage.HOME_PAGE,
+        title: OccasionHomePage.homePageTitle,
         theme: theme,
         darkTheme: darkTheme,
       ).animate().fadeIn(
