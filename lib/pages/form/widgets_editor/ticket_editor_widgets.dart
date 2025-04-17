@@ -214,7 +214,7 @@ class TicketEditorWidgets {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 10,
+                          flex: 9,
                           child: Row(
                             children: [
                               Flexible(
@@ -237,7 +237,7 @@ class TicketEditorWidgets {
                           ),
                         ),
                         Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: Text(
                             // Format the price together with its currency.
                             Utilities.formatPrice(context, product.price ?? 0, currencyCode: product.currencyCode),
