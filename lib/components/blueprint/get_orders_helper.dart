@@ -8,6 +8,7 @@ import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/order_product_ticket_model.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:collection/collection.dart';
@@ -38,6 +39,13 @@ class GetOrdersHelper {
     return json[TbEshop.products.table] != null
         ? List<ProductModel>.from(
         json[TbEshop.products.table].map((p) => ProductModel.fromJson(p)))
+        : null;
+  }
+
+  static List<ProductTypeModel>? parseProductTypes(Map<String, dynamic> json) {
+    return json[TbEshop.product_types.table] != null
+        ? List<ProductTypeModel>.from(
+        json[TbEshop.product_types.table].map((pt) => ProductTypeModel.fromJson(pt)))
         : null;
   }
 

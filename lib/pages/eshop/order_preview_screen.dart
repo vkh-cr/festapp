@@ -225,7 +225,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
               var sectionPrice = 0.0;
               var products = List<FormOptionProductModel>.from(value);
               sectionPrice += products.fold(0, (sum, product) => sum + product.price);
-              s = "$value (${Utilities.formatPrice(context, sectionPrice)})";
+              s = "$value (${Utilities.formatPrice(context, sectionPrice, currencyCode: widget.formHolder.controller!.currencyCode)})";
             } else if (value.isEmpty) {
               s = "";
             } else {
@@ -285,7 +285,7 @@ class _OrderPreviewScreenState extends State<OrderPreviewScreen> {
     return Center(
       child: Text(
         "Total Price: {price}".tr(namedArgs: {
-          "price": Utilities.formatPrice(context, widget.totalPrice),
+          "price": Utilities.formatPrice(context, widget.totalPrice, currencyCode: widget.formHolder.controller!.currencyCode),
         }),
         style: StylesConfig.textStyleBig.copyWith(
           fontSize: 16 * OrderPreviewScreen.fontSizeFactor,

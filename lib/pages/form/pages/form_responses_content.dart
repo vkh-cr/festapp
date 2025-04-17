@@ -49,12 +49,16 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
         columns: EshopColumns.generateColumns(
           context,
           columnIdentifiers,
-          data: {EshopColumns.RESPONSES: formFieldModels},
+          data: {
+            EshopColumns.RESPONSES: formFieldModels,
+            EshopColumns.TICKET_PRODUCTS_EXTENDED: FormResponseModel.productCategories,
+          },
         ),
-        exportOptions: ExportOptions(fileName: "${formLink??""}-responses")
+        exportOptions: ExportOptions(fileName: "${formLink ?? ""}-responses"),
       );
     });
   }
+
 
   Future<void> refreshData() async {
     await controller?.reloadData();
@@ -71,7 +75,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
   static List<String> columnIdentifiers = [
     EshopColumns.ORDER_ID,
     EshopColumns.ORDER_SYMBOL,
-    EshopColumns.TICKET_PRODUCTS,
+    EshopColumns.TICKET_PRODUCTS_EXTENDED,
     EshopColumns.ORDER_STATE,
     EshopColumns.RESPONSES
   ];
