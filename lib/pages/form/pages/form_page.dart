@@ -43,6 +43,7 @@ class _FormPageState extends State<FormPage> {
   bool _isLoading = false;
   bool _formNotAvailable = false;
   double _totalPrice = 0.0;
+
   int _totalTickets = 0;
   Map<String, dynamic>? formResult;
   FormHolder? formHolder;
@@ -118,6 +119,7 @@ class _FormPageState extends State<FormPage> {
   }
 
   void _updateTotalPrice() {
+    String? currencyC;
     _totalPrice = 0.0;
     _totalTickets = 0;
 
@@ -126,6 +128,7 @@ class _FormPageState extends State<FormPage> {
         var selectedOption = field.getValue(formHolder!.controller!.globalKey);
         if (selectedOption is FormOptionProductModel) {
           _totalPrice += selectedOption.price;
+          currencyC ??= selectedOption.currencyCode;
         }
       }
 
@@ -144,6 +147,7 @@ class _FormPageState extends State<FormPage> {
           for (var s in field.tickets) {
             if (s.seat != null) {
               _totalPrice += s.seat!.objectModel!.product!.price!;
+              currencyC ??= s.seat!.objectModel!.product!.currencyCode;
             }
           }
         }
@@ -155,10 +159,12 @@ class _FormPageState extends State<FormPage> {
             for (var fValue in ticketField.values) {
               if (fValue is FormOptionProductModel) {
                 _totalPrice += fValue.price;
+                currencyC ??= fValue.currencyCode;
               } else if (fValue is Iterable) {
                 // Convert the JSArray (or any iterable) to a Dart list and sum the prices.
                 var products = List<FormOptionProductModel>.from(fValue);
                 _totalPrice += products.fold(0, (sum, product) => sum + product.price);
+                currencyC ??= products.firstOrNull?.currencyCode;
               }
             }
           }
@@ -166,6 +172,7 @@ class _FormPageState extends State<FormPage> {
       }
     }
 
+    formHolder!.controller!.currencyCode = currencyC;
     setState(() {});
   }
 
@@ -201,7 +208,7 @@ class _FormPageState extends State<FormPage> {
             ),
             const SizedBox(width: 10), // Increased spacing
             Text(
-              Utilities.formatPrice(context, _totalPrice),
+              Utilities.formatPrice(context, _totalPrice, currencyCode: formHolder!.controller!.currencyCode),
               style: const TextStyle(
                 fontSize: 18, // Increased font size
                 fontWeight: FontWeight.bold,

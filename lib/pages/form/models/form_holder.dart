@@ -16,6 +16,7 @@ class FormHolderController {
   final int? blueprintId;
   final GlobalKey<FormBuilderState> globalKey;
   final String? formKey;
+  String? currencyCode;
   void Function()? updateTotalPrice;
   Future<List<SeatModel>?> Function(List<SeatModel>)? showSeatReservation;
   void Function(List<SeatModel>?)? onCloseSeatReservation;
@@ -126,6 +127,7 @@ class FormHolder {
             p.id.toString(),
             p.title!,
             price: p.price ?? 0,
+            currencyCode: p.currencyCode,
             maximum: p.maximum,
             orderedCount: p.orderedCount,
             type: ffm.type!,

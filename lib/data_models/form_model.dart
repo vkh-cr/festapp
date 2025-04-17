@@ -1,5 +1,6 @@
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/data_models_eshop/bank_account_model.dart';
 
 class FormModel {
   int? id;
@@ -9,7 +10,8 @@ class FormModel {
   int? occasion;
   int? blueprint;
   String? type;
-  int? bankAccount;
+  // Changed from int? to BankAccountModel? to support full JSON conversion.
+  BankAccountModel? bankAccount;
   int? deadlineDuration;
   bool? isOpen;
   String? accountNumber;
@@ -18,6 +20,7 @@ class FormModel {
   String? headerOff;
   String? link;
   List<FormFieldModel>? relatedFields;
+  List<BankAccountModel>? availableBankAccounts;
 
   static const String metaIsCardDesign = "is_card_design";
 
@@ -38,6 +41,7 @@ class FormModel {
     this.headerOff,
     this.link,
     this.relatedFields,
+    this.availableBankAccounts,
   });
 
   factory FormModel.fromJson(Map<String, dynamic> json) {
@@ -51,7 +55,10 @@ class FormModel {
       occasion: json[Tb.forms.occasion],
       blueprint: json[Tb.forms.blueprint],
       type: json[Tb.forms.type],
-      bankAccount: json[Tb.forms.bank_account],
+      // Use the BankAccountModel conversion if the JSON value is not null.
+      bankAccount: json[Tb.forms.bank_account] != null
+          ? BankAccountModel.fromJson(json[Tb.forms.bank_account])
+          : null,
       deadlineDuration: json[Tb.forms.deadline_duration_seconds],
       isOpen: json[Tb.forms.is_open],
       accountNumber: json['account_number'],
@@ -63,7 +70,12 @@ class FormModel {
           ? (json['fields'] as List)
           .map((field) => FormFieldModel.fromJson(field))
           .toList()
-          : null, // Parsing related fields from JSON
+          : null,
+      availableBankAccounts: json['available_bank_accounts'] != null
+          ? (json['available_bank_accounts'] as List)
+          .map((account) => BankAccountModel.fromJson(account))
+          .toList()
+          : null,
     );
   }
 
@@ -75,7 +87,7 @@ class FormModel {
     Tb.forms.occasion: occasion,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
-    Tb.forms.bank_account: bankAccount,
+    Tb.forms.bank_account: bankAccount?.id,
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     'account_number': accountNumber,
@@ -94,7 +106,7 @@ class FormModel {
     Tb.forms.occasion: occasion,
     Tb.forms.blueprint: blueprint,
     Tb.forms.type: type,
-    Tb.forms.bank_account: bankAccount,
+    Tb.forms.bank_account: bankAccount?.id,
     Tb.forms.deadline_duration_seconds: deadlineDuration,
     Tb.forms.is_open: isOpen,
     Tb.forms.header: header,
@@ -102,4 +114,28 @@ class FormModel {
     Tb.forms.link: link,
     Tb.form_fields.table: relatedFields,
   };
+
+  /// Returns a list of available supported currencies.
+  ///
+  /// If [bankAccount] is not null and contains supported currencies, its list is returned.
+  /// Otherwise, the method aggregates supported currencies from all [availableBankAccounts] (unique values only).
+  List<String> getSupportedCurrencies() {
+    // Return supported currencies from the main bankAccount if available.
+    if (bankAccount != null &&
+        bankAccount!.supportedCurrencies != null &&
+        bankAccount!.supportedCurrencies!.isNotEmpty) {
+      return bankAccount!.supportedCurrencies!;
+    } else if (availableBankAccounts != null) {
+      // Use a Set to accumulate unique currencies from available bank accounts.
+      final currencySet = <String>{};
+      for (var account in availableBankAccounts!) {
+        if (account.supportedCurrencies != null) {
+          currencySet.addAll(account.supportedCurrencies!);
+        }
+      }
+      return currencySet.toList();
+    } else {
+      return [];
+    }
+  }
 }
