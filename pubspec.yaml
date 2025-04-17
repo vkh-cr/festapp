@@ -85,6 +85,7 @@ dependencies:
   vector_map_tiles_mbtiles: ^1.2.0
   vector_map_tiles: ^8.0.0
   mbtiles: ^0.4.0
+  sqlite3_flutter_libs: ^0.5.32
   file_saver: ^0.2.14
 
 dev_dependencies:
