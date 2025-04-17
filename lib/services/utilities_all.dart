@@ -27,6 +27,16 @@ class Utilities {
     return currencyFormatter.format(price);
   }
 
+  static String formatCurrencyCode(BuildContext context, {String? currencyCode}) {
+    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    final currency = currencyCode ?? 'CZK';
+    final NumberFormat simpleFormatter = NumberFormat.simpleCurrency(
+      locale: locale,
+      name: currency,
+    );
+    return simpleFormatter.currencySymbol;
+  }
+
   static bool isValidUrl(String link) {
     // 1. Check if the link is empty
     if (link.isEmpty) {
