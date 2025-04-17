@@ -93,6 +93,7 @@ create table if not exists eshop.bank_accounts (
   min_fetch_wait_seconds bigint null,
   last_fetch_time timestamp with time zone null,
   is_fetch_enabled boolean not null default true,
+  supported_currencies text[] null default array['CZK'::text],
   constraint bank_accounts_pkey primary key (id),
   constraint bank_accounts_secret_fkey foreign KEY (secret) references eshop.secrets (id)
 ) TABLESPACE pg_default;

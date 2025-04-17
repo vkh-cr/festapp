@@ -23,7 +23,7 @@ class OptionFieldHelper {
       FormOptionModel option,
       ) {
     if (option is FormOptionProductModel && option.price > 0) {
-      return '${option.title} (${Utilities.formatPrice(context, option.price)})';
+      return '${option.title} (${Utilities.formatPrice(context, option.price, currencyCode: option.currencyCode)})';
     }
     return option.title;
   }
