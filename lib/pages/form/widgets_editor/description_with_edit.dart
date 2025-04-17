@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/RouterService.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/router_service.dart';
 
 class DescriptionWithEdit extends StatelessWidget {
   final String description;

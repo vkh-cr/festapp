@@ -1,15 +1,16 @@
-import 'package:flutter/material.dart' as seat_layout_widget;
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/AutoResizeInteractiveViewerController.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/auto_resize_interactive_viewer_controller.dart';
+import 'package:fstapp/widgets/text_tooltip_widget.dart';
 
 import '../model/seat_layout_state_model.dart';
 import '../model/seat_model.dart';
 import '../utils/seat_state.dart';
 import 'seat_widget.dart';
 
-class SeatLayoutWidget extends seat_layout_widget.StatefulWidget {
+class SeatLayoutWidget extends StatefulWidget {
   final SeatLayoutStateModel stateModel;
   final AutoResizeInteractiveViewerController? controller;
   final void Function(SeatModel model)? onSeatTap;
@@ -26,8 +27,8 @@ class SeatLayoutWidget extends seat_layout_widget.StatefulWidget {
   _SeatLayoutWidgetState createState() => _SeatLayoutWidgetState();
 }
 
-class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> {
-  final seat_layout_widget.TransformationController _controller = seat_layout_widget.TransformationController();
+class _SeatLayoutWidgetState extends State<SeatLayoutWidget> {
+  final TransformationController _controller = TransformationController();
   late List<SeatModel> _seats;
   double _minScale = 1.0; // Dynamic minimum scale
 
@@ -41,7 +42,7 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
 
     _controller.addListener(_onTransformationChanged); // Add listener
 
-    seat_layout_widget.WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       _fitLayout();
     });
   }
@@ -76,7 +77,7 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
     if (!mounted) return;
 
     // Get the size of the widget (visible area)
-    final seat_layout_widget.RenderBox renderBox = context.findRenderObject() as seat_layout_widget.RenderBox;
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
     double widgetWidth = renderBox.size.width;
     double widgetHeight = renderBox.size.height;
 
@@ -91,7 +92,7 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
 
     setState(() {
       _minScale = scaleFactor; // Ensure the minScale allows the content to fit fully
-      _controller.value = seat_layout_widget.Matrix4.identity()
+      _controller.value = Matrix4.identity()
         ..scale(scaleFactor)
         ..setTranslationRaw(
           (widgetWidth - layoutWidth * scaleFactor) / 2,
@@ -102,56 +103,56 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
   }
 
   @override
-  seat_layout_widget.Widget build(seat_layout_widget.BuildContext context) {
+  Widget build(BuildContext context) {
     double layoutWidth = (widget.stateModel.cols * widget.stateModel.seatSize).toDouble();
     double layoutHeight = (widget.stateModel.rows * widget.stateModel.seatSize).toDouble();
 
-    return seat_layout_widget.InteractiveViewer(
+    return InteractiveViewer(
       minScale: _minScale,
       maxScale: 5,
-      boundaryMargin: const seat_layout_widget.EdgeInsets.all(double.infinity),
+      boundaryMargin: const EdgeInsets.all(double.infinity),
       constrained: false,
       transformationController: _controller,
-      child: seat_layout_widget.Stack(
+      child: Stack(
         children: [
-          seat_layout_widget.Positioned.fill(
-            child: seat_layout_widget.Container(
+          Positioned.fill(
+            child: Container(
               width: layoutWidth,
               height: layoutHeight,
-              decoration: seat_layout_widget.BoxDecoration(
+              decoration: BoxDecoration(
                 color: widget.stateModel.backgroundSvg != null
-                    ? seat_layout_widget.Colors.transparent
+                    ? Colors.transparent
                     : ThemeConfig.grey300(context),
-                borderRadius: seat_layout_widget.BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(12.0),
               ),
               child: widget.stateModel.backgroundSvg != null
-                  ? seat_layout_widget.ClipRRect(
-                borderRadius: seat_layout_widget.BorderRadius.circular(12.0),
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
                 child: SvgPicture.string(
                   widget.stateModel.backgroundSvg!,
                   width: layoutWidth,
                   height: layoutHeight,
-                  fit: seat_layout_widget.BoxFit.cover,
+                  fit: BoxFit.cover,
                 ),
               )
                   : null,
             ),
           ),
-          seat_layout_widget.SizedBox(
+          SizedBox(
             width: layoutWidth,
             height: layoutHeight,
-            child: seat_layout_widget.Stack(
+            child: Stack(
               children: _seats
                   .where((seatModel) =>
               (seatModel.objectModel != null &&
                   seatModel.objectModel!.id != null) ||
                   widget.isEditorMode == true)
                   .map((seatModel) {
-                return seat_layout_widget.Positioned(
+                return Positioned(
                   left: seatModel.colI * seatModel.seatSize.toDouble(),
                   top: seatModel.rowI * seatModel.seatSize.toDouble(),
                   child: seatModel.objectModel == null
-                      ? seat_layout_widget.GestureDetector(
+                      ? GestureDetector(
                     onTap: () {
                       if (widget.onSeatTap != null) {
                         widget.onSeatTap!(seatModel);
@@ -162,11 +163,10 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
                       size: seatModel.seatSize.toDouble(),
                     ),
                   )
-                      : seat_layout_widget.Tooltip(
-                    showDuration: const Duration(seconds: 0),
-                    message:
+                      : TextTooltipWidget(
+                    content:
                     "${seatModel.objectModel?.blueprintTooltip(context)}",
-                    child: seat_layout_widget.GestureDetector(
+                    child: GestureDetector(
                       onTap: () {
                         if (widget.onSeatTap != null) {
                           widget.onSeatTap!(seatModel);
@@ -177,19 +177,6 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
                         size: seatModel.seatSize.toDouble(),
                       ),
                     ),
-                    decoration: seat_layout_widget.BoxDecoration(
-                      color: ThemeConfig.whiteColor(context),
-                      borderRadius: seat_layout_widget.BorderRadius.circular(8.0),
-                      border: seat_layout_widget.Border.all(
-                        width: 2,
-                        color: ThemeConfig.blackColor(context),
-                      ),
-                    ),
-                    textStyle: seat_layout_widget.TextStyle(
-                      fontSize: 16.0,
-                      color: ThemeConfig.blackColor(context),
-                    ),
-                    verticalOffset: 20.0,
                   ),
                 );
               }).toList(),
@@ -213,15 +200,15 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
         _seats = _generateSeatModels();
       });
 
-      seat_layout_widget.WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         _fitLayout();
       });
     }
   }
 
   void _onTransformationChanged() {
-    final seat_layout_widget.Matrix4 matrix = _controller.value;
-    final seat_layout_widget.RenderBox renderBox = context.findRenderObject() as seat_layout_widget.RenderBox;
+    final Matrix4 matrix = _controller.value;
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
 
     double widgetWidth = renderBox.size.width;
     double widgetHeight = renderBox.size.height;
@@ -238,8 +225,10 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
     double scaledHeight = layoutHeight * scale;
 
     // Calculate the center offsets for zoomed-out state
-    double centerOffsetX = (widgetWidth - scaledWidth).clamp(0, double.infinity) / 2;
-    double centerOffsetY = (widgetHeight - scaledHeight).clamp(0, double.infinity) / 2;
+    double centerOffsetX =
+        (widgetWidth - scaledWidth).clamp(0, double.infinity) / 2;
+    double centerOffsetY =
+        (widgetHeight - scaledHeight).clamp(0, double.infinity) / 2;
 
     // Clamping ranges for each side
     double minX = widgetWidth < scaledWidth ? widgetWidth - scaledWidth : centerOffsetX;
@@ -253,9 +242,7 @@ class _SeatLayoutWidgetState extends seat_layout_widget.State<SeatLayoutWidget> 
 
     // Apply only if there is a change
     if (clampedX != translateX || clampedY != translateY) {
-      _controller.value = matrix
-        ..setTranslationRaw(clampedX, clampedY, 0);
+      _controller.value = matrix..setTranslationRaw(clampedX, clampedY, 0);
     }
   }
 }
-

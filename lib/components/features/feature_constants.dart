@@ -1,3 +1,4 @@
+// FeatureConstants with a new constant for the ticket type.
 class FeatureConstants {
   // Core keys
   static const String metaIsEnabled = "is_enabled";
@@ -23,6 +24,7 @@ class FeatureConstants {
   static const String ticketLightColor = "lightColor";
   static const String ticketDarkColor = "darkColor";
   static const String ticketBackground = "background";
+  static const String ticketType = "ticket_type";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";
