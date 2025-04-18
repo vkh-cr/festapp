@@ -504,7 +504,7 @@ class EshopColumns {
     );
   }
 
-  static const List<String> productCategories = ["others"];
+  static const List<String> productCategories = ["spot", "food", "others"];
 
   static Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
     // Get the allowed product categories.
