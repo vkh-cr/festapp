@@ -596,16 +596,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     // overwrite _icons so path-group icons match DB icons
     _icons = onlineIcons;
 
-    _pathGroups = (await DbPlaces.getAllPathGroups()).where((p)=>!p.isHidden!).toList();
-    _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
-        offlineList,
-        _pathGroups
-    );
-    // show all by default:
-    setState(() {
-      _polylines = _allGroupPolylines.values.expand((l) => l).toList();
-    });
-
     // now markers for online data:
     List<PlaceModel> onlineList;
     if (loadOtherGroups) {
@@ -630,6 +620,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _markers.clear();
     await addEventsToPlace(onlineList);
     addPlacesToMap(onlineList);
+
+    _pathGroups = (await DbPlaces.getAllPathGroups()).where((p)=>!p.isHidden!).toList();
+    _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
+        onlineList,
+        _pathGroups
+    );
+    // show all by default:
+    setState(() {
+      _polylines = _allGroupPolylines.values.expand((l) => l).toList();
+    });
 
     if (placeId != null) {
       var p = onlineList.firstWhereOrNull((p) => p.id == placeId);

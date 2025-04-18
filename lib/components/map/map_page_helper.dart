@@ -229,7 +229,7 @@ class MapPageHelper {
                 color: Colors.white,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? pathColor : Colors.transparent,
+                  color: isSelected ? pathColor : Colors.grey.shade400,
                   width: 3,
                 ),
               ),
