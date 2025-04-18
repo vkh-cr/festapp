@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/components/single_data_grid/single_table_data_grid.dart';
+import 'package:fstapp/data_models/form_response_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -33,13 +34,13 @@ class _TicketsTabState extends State<TicketsTab> {
     EshopColumns.TICKET_STATE,
     EshopColumns.TICKET_TOTAL_PRICE,
     EshopColumns.TICKET_SPOT,
-    EshopColumns.TICKET_PRODUCTS,
+    EshopColumns.TICKET_PRODUCTS_EXTENDED,
     EshopColumns.TICKET_NOTE,
     EshopColumns.TICKET_NOTE_HIDDEN,
   ];
 
   @override
-  void didChangeDependencies() {
+  Future<void> didChangeDependencies() async {
     super.didChangeDependencies();
     if (formLink == null && context.routeData.params.isNotEmpty) {
       formLink = context.routeData.params.getString("formLink");
@@ -67,7 +68,10 @@ class _TicketsTabState extends State<TicketsTab> {
             isEnabled: RightsService.isEditor,
           ),
         ],
-        columns: EshopColumns.generateColumns(context, columnIdentifiers),
+        columns: EshopColumns.generateColumns(context, columnIdentifiers,
+          data: {
+            EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+          },),
       );
     }
   }

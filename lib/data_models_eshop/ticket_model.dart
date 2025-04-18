@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
+import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'order_model.dart';
@@ -31,7 +32,6 @@ class TicketModel extends ITrinaRowModel {
   static const String metaRelatedOrder = "related_order";
   static const String metaTicketsProducts = "ticket_products";
   static const String metaPrice = "price";
-  static const String metaSpot = "spot";
 
   TicketModel({
     this.id,
@@ -71,7 +71,8 @@ class TicketModel extends ITrinaRowModel {
 
   @override
   TrinaRow toTrinaRow(BuildContext context) {
-    return TrinaRow(cells: {
+
+    Map<String, TrinaCell> cells = {
       TbEshop.tickets.id: TrinaCell(value: id ?? 0),
       TbEshop.tickets.created_at: TrinaCell(
           value: createdAt != null
@@ -93,12 +94,16 @@ class TicketModel extends ITrinaRowModel {
           value: relatedProducts != null
               ? relatedProducts!.map((p)=>p.toBasicString()).join(" | ")
               : ""),
-      metaSpot: TrinaCell(
+      EshopColumns.TICKET_SPOT: TrinaCell(
           value: relatedSpot != null
               ? relatedSpot?.toShortString()
               : ""),
       metaPrice: TrinaCell(value: totalPrice != null ? Utilities.formatPrice(context, totalPrice!) : ""),
-    });
+    };
+
+    final productCells = EshopColumns.generateProductTypeCells(relatedOrder!.relatedProducts ?? []);
+    cells.addAll(productCells);
+    return TrinaRow(cells: cells);
   }
 
   static TicketModel fromPlutoJson(Map<String, dynamic> json) {
