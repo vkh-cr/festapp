@@ -51,7 +51,7 @@ class _FormResponsesContentState extends State<FormResponsesContent> {
           columnIdentifiers,
           data: {
             EshopColumns.RESPONSES: formFieldModels,
-            EshopColumns.TICKET_PRODUCTS_EXTENDED: FormResponseModel.productCategories,
+            EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
           },
         ),
         exportOptions: ExportOptions(fileName: "${formLink ?? ""}-responses"),

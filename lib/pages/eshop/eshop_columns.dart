@@ -153,7 +153,7 @@ class EshopColumns {
         readOnly: true,
         enableEditingMode: true,
         title: "Spot".tr(),
-        field: TicketModel.metaSpot,
+        field: TICKET_SPOT,
         type: TrinaColumnType.text(),
         width: 60,
       ),
@@ -502,5 +502,41 @@ class EshopColumns {
         );
       },
     );
+  }
+
+  static const List<String> productCategories = ["others"];
+
+  static Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
+    // Get the allowed product categories.
+    final List<String> allowedCategories = productCategories;
+
+    // Initialize a map with each allowed category mapped to an empty list.
+    final Map<String, List<ProductModel>> groupedProducts = {
+      for (var category in allowedCategories) category: [],
+    };
+
+    // Group products by their type.
+    // If the product type is not in allowedCategories,
+    // assign it to the last category in the allowed list.
+    for (var product in products) {
+      final String productType = product.productTypeString ?? "";
+      final String categoryKey = allowedCategories.contains(productType)
+          ? productType
+          : allowedCategories.last;
+      groupedProducts[categoryKey]!.add(product);
+    }
+
+    // Build a cell for each allowed category; if no products are present, set an empty value.
+    final Map<String, TrinaCell> productCells = {};
+    for (var category in allowedCategories) {
+      final String cellValue = groupedProducts[category]!.isNotEmpty
+          ? groupedProducts[category]!
+          .map((p) => p.toBasicString())
+          .join(" | ")
+          : "";
+      productCells[category] = TrinaCell(value: cellValue);
+    }
+
+    return productCells;
   }
 }
