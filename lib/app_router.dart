@@ -72,7 +72,7 @@ class AppRouter extends RootStackRouter {
                   ]),
       AutoRoute(page: NewsRoute.page, path: "${NewsPage.ROUTE}", maintainState: false),
       AutoRoute(page: UnitRoute.page, path: "${UnitPage.ROUTE}", maintainState: false),
-      AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", maintainState: false, children: [
+      AutoRoute(page: MapRoute.page, path: "${MapPage.ROUTE}", children: [
         AutoRoute(path: ':id', page: MapRoute.page,),
       ]),
       AutoRoute(page: InfoRoute.page, path: "${InfoPage.ROUTE}", children: [
@@ -125,7 +125,7 @@ class AppRouter extends RootStackRouter {
 }
 
 /// Observer to monitor routing events for debugging or analytics purposes.
-class RoutingObserver extends AutoRouterObserver {
+class RoutingObserver extends AutoRouteObserver {
   @override
   void didPush(Route route, Route? previousRoute) {
     print('New route pushed: ${route.settings.name}');

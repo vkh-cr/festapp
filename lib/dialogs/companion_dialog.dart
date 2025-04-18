@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_services/db_companions.dart';
-import 'package:fstapp/data_models/CompanionModel.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 
