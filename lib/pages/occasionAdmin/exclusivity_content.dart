@@ -9,7 +9,7 @@ import 'package:fstapp/data_services/db_events.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class ExclusivityContent extends StatefulWidget {
-  const ExclusivityContent({Key? key}) : super(key: key);
+  const ExclusivityContent({super.key});
 
   @override
   _ExclusivityContentState createState() => _ExclusivityContentState();
@@ -21,12 +21,6 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
   @override
   void initState() {
     super.initState();
-    loadExclusiveGroups();
-  }
-
-  Future<void> loadExclusiveGroups() async {
-    // Add any initialization logic if required
-    setState(() {});
   }
 
   @override
@@ -58,7 +52,7 @@ class _ExclusivityContentState extends State<ExclusivityContent> {
           ),
           TrinaColumn(
             title: "Events".tr(),
-            field: ExclusiveGroupModel.eventsColumn,
+            field: Tb.events.table,
             type: TrinaColumnType.text(),
             width: 500,
           ),

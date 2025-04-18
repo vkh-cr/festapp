@@ -3,7 +3,7 @@ import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_models/CompanionModel.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
