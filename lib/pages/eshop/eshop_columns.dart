@@ -11,6 +11,7 @@ import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/dialogs/products_dialog.dart';
 import 'package:fstapp/dialogs/transactions_dialog.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
@@ -27,6 +28,7 @@ class EshopColumns {
   static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
   static const String TICKET_PRODUCTS = "ticketProducts";
   static const String TICKET_PRODUCTS_EXTENDED = "ticketProductsExtended";
+  static const String TICKET_PRODUCTS_EDIT = "ticketProductsEdit";
 
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
   static const String TICKET_SPOT = "ticketSpot";
@@ -312,6 +314,38 @@ class EshopColumns {
         },
       ),
     ],
+    TICKET_PRODUCTS_EDIT: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        enableAutoEditing: false,
+        title: "Products".tr(),
+        field: TICKET_PRODUCTS_EDIT,
+        type: TrinaColumnType.text(),
+        width: 150,
+        renderer: (rendererContext) {
+          return ElevatedButton(
+            onPressed: () async {
+              final ticketId = rendererContext.row.cells[TbEshop.tickets.id]!.value as int;
+              final changed = await _showTicketProducts(context, ticketId);
+              if (changed == true) {
+                var afterFunction = data[TICKET_PRODUCTS_EDIT];
+                if(afterFunction is Future<void> Function()?) {
+                  afterFunction?.call();
+                }
+              }
+            },
+            child: Row(
+              children: [
+                Icon(Icons.shopping_cart),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text("Products".tr()),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
     PRODUCT_ID: [
       TrinaColumn(
         hide: true,
@@ -538,5 +572,12 @@ class EshopColumns {
     }
 
     return productCells;
+  }
+
+  static Future<bool?> _showTicketProducts(BuildContext context, int ticketId) {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => ProductsDialog(ticketId: ticketId),
+    );
   }
 }
