@@ -35,6 +35,7 @@ class _TicketsTabState extends State<TicketsTab> {
     EshopColumns.TICKET_TOTAL_PRICE,
     EshopColumns.TICKET_SPOT,
     EshopColumns.TICKET_PRODUCTS_EXTENDED,
+    EshopColumns.TICKET_PRODUCTS_EDIT,
     EshopColumns.TICKET_NOTE,
     EshopColumns.TICKET_NOTE_HIDDEN,
   ];
@@ -71,6 +72,7 @@ class _TicketsTabState extends State<TicketsTab> {
         columns: EshopColumns.generateColumns(context, columnIdentifiers,
           data: {
             EshopColumns.TICKET_PRODUCTS_EXTENDED: EshopColumns.productCategories,
+            EshopColumns.TICKET_PRODUCTS_EDIT: refreshData
           },),
       );
     }

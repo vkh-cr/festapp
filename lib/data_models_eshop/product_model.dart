@@ -15,6 +15,8 @@ class ProductModel {
   ProductTypeModel? productType;
   int? occasion;
   String? productTypeString;
+  String? productTypeTitleString;
+
   int? order;
   int? maximum;
   int? orderedCount;
@@ -24,6 +26,7 @@ class ProductModel {
   static const String taxiType = "taxi";
   static const String spotType = "spot";
   static const String metaTypeField = "type";
+  static const String metaProductTypeTitleStringField = "type_title";
   static const String metaOrderedCount = "ordered_count";
 
   ProductModel({
@@ -38,6 +41,7 @@ class ProductModel {
     this.productTypeId,
     this.occasion,
     this.productTypeString,
+    this.productTypeTitleString,
     this.order,
     this.maximum,
     this.orderedCount,
@@ -64,6 +68,7 @@ class ProductModel {
       productTypeId: json[TbEshop.products.product_type],
       occasion: json[TbEshop.products.occasion],
       productTypeString: json[metaTypeField],
+      productTypeTitleString: json[metaProductTypeTitleStringField],
       order: json[TbEshop.products.order],
       maximum: json[TbEshop.products.maximum],
       orderedCount: json[metaOrderedCount],
