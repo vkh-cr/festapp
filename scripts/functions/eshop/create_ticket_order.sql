@@ -61,9 +61,6 @@ BEGIN
         IF occasion_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1003, 'message', 'Form is not linked to any occasion')::TEXT;
         END IF;
-        IF bank_account_id IS NULL THEN
-            RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1004, 'message', 'Form is not linked to any bank account')::TEXT;
-        END IF;
 
         -- Fetch organization and occasion title from the occasion
         SELECT organization, title
@@ -73,6 +70,7 @@ BEGIN
         IF organization_id IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1005, 'message', 'No organization found for the occasion')::TEXT;
         END IF;
+        /* Original bank account selection removed.
         SELECT bank_accounts.account_number, bank_accounts.account_number_human_readable
         INTO account_number, account_number_human_readable
         FROM eshop.bank_accounts
@@ -81,6 +79,7 @@ BEGIN
         IF account_number IS NULL THEN
             RAISE EXCEPTION '%', JSONB_BUILD_OBJECT('code', 1006, 'message', 'No account number found for the bank account')::TEXT;
         END IF;
+        */
 
         -- Calculate deadline if deadline duration is provided
         IF form_deadline_duration IS NOT NULL THEN
@@ -312,28 +311,68 @@ BEGIN
 
         order_data := input_data - 'ticket' || JSONB_BUILD_OBJECT('tickets', ticket_details);
 
+        -- Determine the bank account details based on the form and supported currency fallback using unit accounts only
+        IF bank_account_id IS NULL THEN
+            SELECT uba.bank_account, ba.account_number, ba.account_number_human_readable
+            INTO bank_account_id, account_number, account_number_human_readable
+            FROM eshop.unit_bank_accounts uba
+            JOIN eshop.bank_accounts ba ON uba.bank_account = ba.id
+            WHERE uba.unit = (SELECT unit FROM public.occasions WHERE id = occasion_id)
+              AND ba.supported_currencies @> ARRAY[first_currency_code]
+            ORDER BY ba.id
+            LIMIT 1;
+            IF bank_account_id IS NULL THEN
+                RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(
+                    'code', 1018,
+                    'message', 'No available bank account supports the required currency',
+                    'required_currency', first_currency_code
+                )::TEXT;
+            END IF;
+        ELSE
+            PERFORM 1
+            FROM eshop.unit_bank_accounts uba
+            JOIN eshop.bank_accounts ba ON uba.bank_account = ba.id
+            WHERE uba.unit = (SELECT unit FROM public.occasions WHERE id = occasion_id)
+              AND ba.id = bank_account_id
+              AND ba.supported_currencies @> ARRAY[first_currency_code];
+            IF NOT FOUND THEN
+                RAISE EXCEPTION '%', JSONB_BUILD_OBJECT(
+                    'code', 1018,
+                    'message', 'The specified bank account does not support the required currency or is not linked to the form unit',
+                    'expected_currency', first_currency_code,
+                    'provided_bank_account', bank_account_id
+                )::TEXT;
+            END IF;
+            SELECT b.account_number, b.account_number_human_readable
+            INTO account_number, account_number_human_readable
+            FROM eshop.bank_accounts b
+            WHERE b.id = bank_account_id;
+        END IF;
+
         -- Generate a variable symbol and create the payment info record
         generated_variable_symbol := generate_variable_symbol(bank_account_id);
-        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, created_at, deadline)
-        VALUES (bank_account_id, generated_variable_symbol, calculated_price, now, deadline)
+        INSERT INTO eshop.payment_info (bank_account, variable_symbol, amount, currency_code, created_at, deadline)
+        VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
         RETURNING id INTO payment_info_id;
 
         -- Update the order record with the calculated price, payment info, and modified input data (with tickets details)
         UPDATE eshop.orders
         SET price = calculated_price,
+            currency_code = first_currency_code,
             state = 'ordered',
             payment_info = payment_info_id,
             data = order_data
         WHERE id = order_id;
 
         -- Log the order to orders_history with details
-        INSERT INTO eshop.orders_history (created_at, data, "order", state, price)
+        INSERT INTO eshop.orders_history (created_at, data, "order", state, price, currency_code)
         VALUES (
             now,
             JSONB_BUILD_OBJECT('input_data', input_data, 'tickets', ticket_details),
             order_id,
             'ordered',
-            calculated_price
+            calculated_price,
+            first_currency_code
         );
 
         -- Prepare the success response JSON

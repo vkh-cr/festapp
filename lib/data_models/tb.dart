@@ -29,6 +29,7 @@ class Tb {
   static UnitUsersTb unit_users = const UnitUsersTb();
   static ImagesTb images = const ImagesTb();
   static EmailTemplatesTb email_templates = const EmailTemplatesTb();
+  static PathGroupsTb path_groups = const PathGroupsTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -354,6 +355,7 @@ class FormFieldsTb {
   String get is_hidden => "is_hidden";
   String get order => "order";
   String get product_type => "product_type";
+  String get product_type_data => "product_type_data";
   String get is_ticket_field => "is_ticket_field";
 }
 
@@ -399,4 +401,18 @@ class EmailTemplatesTb {
   String get organization => "organization";
   String get code => "code";
   String get unit => "unit";
+}
+
+class PathGroupsTb {
+  const PathGroupsTb();
+  String get table    => "path_groups";
+  String get id       => "id";
+  String get is_hidden => "is_hidden";
+  String get title    => "title";
+  String get path_data => "path_data";
+  String get data     => "data";
+  String get icon     => "icon";
+  String get color    => "color";
+  String get occasion => "occasion";
+  String get order => "order";
 }

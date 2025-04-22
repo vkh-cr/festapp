@@ -17,7 +17,7 @@ import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
-import 'package:fstapp/data_models/CompanionModel.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';

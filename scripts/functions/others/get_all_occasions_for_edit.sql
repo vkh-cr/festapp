@@ -41,9 +41,21 @@ BEGIN
       'services', o.services,
       'unit', o.unit,
       'features', o.features,
-      -- Subquery to fetch the first form for the occasion (if any)
       'form', (
-         SELECT row_to_json(f)
+         SELECT jsonb_build_object(
+           'id', f.id,
+           'created_at', f.created_at,
+           'data', f.data,
+           'key', f.key,
+           'occasion', f.occasion,
+           'type', f.type,
+           'is_open', f.is_open,
+           'link', f.link,
+           'blueprint', f.blueprint,
+           'header', f.header,
+           'header_off', f.header_off,
+           'updated_at', f.updated_at
+         )
          FROM public.forms f
          WHERE f.occasion = o.id
          ORDER BY f.id
