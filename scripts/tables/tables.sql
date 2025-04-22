@@ -43,6 +43,7 @@ create table if not exists eshop.secrets (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   secret TEXT NULL,
   expiry_date TIMESTAMP WITH TIME ZONE NULL,
+  data JSONB NULL,
   CONSTRAINT secrets_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
 
