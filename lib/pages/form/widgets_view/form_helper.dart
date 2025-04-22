@@ -41,10 +41,14 @@ class FormHelper {
   static const String optionDelimiter = " | ";
 
   static const String metaMaxTickets = "max_tickets";
+  static const String metaSelectionType = "selection_type";
+  static const String metaSelectionTypeMany = "select_many";
+  static const String metaSelectionTypeOne = "select_one";
+
+  static const String metaOptions = "options";
   static const String metaFields = "fields";
   static const String metaType = "type";
   static const String metaLabel = "label";
-  static const String metaOptions = "options";
   static const String metaOptionsType = "optionsType";
   static const String metaSecret = "secret";
   static const String metaForm = "form";
@@ -274,7 +278,16 @@ class FormHelper {
             ticketData[metaFields] = [];
           }
           var value = getFieldData(ticketKey, subFieldHolder);
-          ticketData[metaFields].add({subFieldHolder.fieldType: value});
+
+          if (subFieldHolder.fieldType == fieldTypeProductType
+              && subFieldHolder is OptionsFieldProductHolder
+              && subFieldHolder.selectionType == OptionsFieldProductSelectionType.selectMany) {
+            for (var v in value) {
+              ticketData[metaFields].add({subFieldHolder.fieldType: v});
+            }
+          } else{
+            ticketData[metaFields].add({subFieldHolder.fieldType: value});
+          }
         }
         if (ticket.tickets[i].seat != null) {
           ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
@@ -342,6 +355,9 @@ class FormHelper {
         return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeProductType:
         var optionsField = field as OptionsFieldProductHolder;
+        if(optionsField.selectionType == OptionsFieldProductSelectionType.selectMany) {
+          return CheckboxFieldBuilder.buildSelectManyField(context, optionsField, optionsField.options, formHolder);
+        }
         return RadioFieldBuilder.buildRadioField(context, optionsField, optionsField.options, formHolder);
       case fieldTypeBirthDate:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthDateLabel());

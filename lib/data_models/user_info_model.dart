@@ -1,5 +1,5 @@
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
-import 'package:fstapp/data_models/CompanionModel.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/place_model.dart';

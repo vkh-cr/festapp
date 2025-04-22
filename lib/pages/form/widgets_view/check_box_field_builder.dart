@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart'; // Added for translation support.
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart'; // Importing product model.
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/theme_config.dart';
 import '../models/field_holder.dart';
@@ -48,6 +50,7 @@ class CheckboxFieldBuilder {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Build card for each option.
                   ...optionsIn.map(
                         (o) => _buildOptionCard(context, field, o, formHolder),
                   ),
@@ -81,29 +84,44 @@ class CheckboxFieldBuilder {
       FormOptionModel o,
       FormHolder formHolder,
       ) {
-    final title = OptionFieldHelper.buildOptionTitle(context, o);
+    // Determine if this option is a priced product and disabled.
+    final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+    final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
+    final effectiveTitle =
+    isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
     final isSelected = field.value?.contains(o) ?? false;
 
-    return OptionFieldHelper.buildOptionCard(
+    Widget optionCard = OptionFieldHelper.buildOptionCard(
       context: context,
       isSelected: isSelected,
-      title: title,
+      title: effectiveTitle,
       description: o.description,
-      // Provide the leading widget (checkbox) to the shared card builder:
+      // The leading widget (checkbox) is disabled when needed.
       leading: Checkbox(
         value: isSelected,
-        onChanged: (val) {
+        onChanged: isDisabled
+            ? null
+            : (val) {
           _toggleItemInFieldValue(field, o, isSelected);
           formHolder.controller?.updateTotalPrice?.call();
           field.validate();
         },
       ),
-      onTap: () {
+      // Disable onTap for disabled items.
+      onTap: isDisabled
+          ? null
+          : () {
         _toggleItemInFieldValue(field, o, isSelected);
         formHolder.controller?.updateTotalPrice?.call();
         field.validate();
       },
     );
+
+    // Grey out the card if the option is disabled.
+    if (isDisabled) {
+      optionCard = Opacity(opacity: 0.5, child: optionCard);
+    }
+    return optionCard;
   }
 
   static void _toggleItemInFieldValue(
@@ -135,21 +153,29 @@ class _BasicCheckboxFieldWidget extends StatefulWidget {
   });
 
   @override
-  _BasicCheckboxFieldWidgetState createState() => _BasicCheckboxFieldWidgetState();
+  _BasicCheckboxFieldWidgetState createState() =>
+      _BasicCheckboxFieldWidgetState();
 }
 
 class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
-  final GlobalKey<FormBuilderFieldState> fieldKey = GlobalKey<FormBuilderFieldState>();
+  final GlobalKey<FormBuilderFieldState> fieldKey =
+  GlobalKey<FormBuilderFieldState>();
 
   @override
   Widget build(BuildContext context) {
+    // Create options with disabled support.
     final options = widget.optionsIn.map((o) {
-      final title = OptionFieldHelper.buildOptionTitle(context, o);
+      final bool isDisabled = o is FormOptionProductModel && !o.isEnabled;
+      final originalTitle = OptionFieldHelper.buildOptionTitle(context, o);
+      final effectiveTitle =
+      isDisabled ? "$originalTitle (${tr('Unavailable')})" : originalTitle;
       return FormBuilderFieldOption<FormOptionModel>(
         value: o,
         child: Text(
-          title,
-          style: OptionFieldHelper.optionTitleTextStyle(),
+          effectiveTitle,
+          style: OptionFieldHelper.optionTitleTextStyle().copyWith(
+            color: isDisabled ? Theme.of(context).disabledColor : null,
+          ),
         ),
       );
     }).toList();
@@ -172,7 +198,20 @@ class _BasicCheckboxFieldWidgetState extends State<_BasicCheckboxFieldWidget> {
           orientation: OptionsOrientation.vertical,
           wrapDirection: Axis.vertical,
           onChanged: (val) {
-            // Immediately trigger validation on change.
+            // Filter out any disabled options from the selected list.
+            if (val != null) {
+              final selectedList = val;
+              final filteredList = selectedList.where((option) {
+                if (option is FormOptionProductModel) {
+                  return option.isEnabled;
+                }
+                return true;
+              }).toList();
+              if (filteredList.length != selectedList.length) {
+                // Override the selection if disabled items were selected.
+                fieldKey.currentState?.didChange(filteredList);
+              }
+            }
             fieldKey.currentState?.validate();
             widget.formHolder.controller?.updateTotalPrice?.call();
             setState(() {}); // Force rebuild to update visual cues.
