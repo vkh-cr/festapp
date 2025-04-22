@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'product_detail_editor_dialog.dart';
-import 'ticket_editor_widgets.dart'; // New dialog file
+import 'ticket_editor_widgets.dart';
 
 class TicketProductEditorRow extends StatefulWidget {
   final ProductModel product;
@@ -64,7 +64,7 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
             context: context,
             builder: (context) {
               return SimpleDialog(
-                title: Text("Select Currency".tr()),
+                title: Text("Currency".tr()),
                 children: widget.availableCurrencies.map((currency) {
                   return SimpleDialogOption(
                     onPressed: () {

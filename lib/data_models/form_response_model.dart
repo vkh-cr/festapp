@@ -7,6 +7,7 @@ import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
+import 'package:fstapp/pages/eshop/eshop_columns.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -17,9 +18,6 @@ class FormResponseModel extends ITrinaRowModel {
   OrderModel? order;
   Map<String, dynamic>? fields;
   List<FormFieldModel>? allFields;
-
-  //last field is automatic if previous categories are not contained
-  static const List<String> productCategories = ["others"];
 
   FormResponseModel({
     this.id,
@@ -45,7 +43,7 @@ class FormResponseModel extends ITrinaRowModel {
               : ""),
     };
 
-    final productCells = generateProductTypeCells(order!.relatedProducts ?? []);
+    final productCells = EshopColumns.generateProductTypeCells(order!.relatedProducts ?? []);
     cells.addAll(productCells);
 
     // Process additional form fields.
@@ -75,40 +73,6 @@ class FormResponseModel extends ITrinaRowModel {
     }
 
     return TrinaRow(cells: cells);
-  }
-
-  Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
-    // Get the allowed product categories.
-    final List<String> allowedCategories = productCategories;
-
-    // Initialize a map with each allowed category mapped to an empty list.
-    final Map<String, List<ProductModel>> groupedProducts = {
-      for (var category in allowedCategories) category: [],
-    };
-
-    // Group products by their type.
-    // If the product type is not in allowedCategories,
-    // assign it to the last category in the allowed list.
-    for (var product in products) {
-      final String productType = product.productTypeString ?? "";
-      final String categoryKey = allowedCategories.contains(productType)
-          ? productType
-          : allowedCategories.last;
-      groupedProducts[categoryKey]!.add(product);
-    }
-
-    // Build a cell for each allowed category; if no products are present, set an empty value.
-    final Map<String, TrinaCell> productCells = {};
-    for (var category in allowedCategories) {
-      final String cellValue = groupedProducts[category]!.isNotEmpty
-          ? groupedProducts[category]!
-          .map((p) => p.toBasicString())
-          .join(" | ")
-          : "";
-      productCells[category] = TrinaCell(value: cellValue);
-    }
-
-    return productCells;
   }
 
   factory FormResponseModel.fromOrder(OrderModel order, List<FormFieldModel> allFields) {
