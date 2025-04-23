@@ -142,47 +142,53 @@ class _SettingsPageState extends State<SettingsPage> {
                   if (_notificationError)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
-                      child: const Text(
+                      child: Text(
                         "Failed to enable notifications.",
-                        style: TextStyle(color: Colors.red),
+                        style: TextStyle(color: ThemeConfig.redColor(context)),
                         textAlign: TextAlign.center,
                       ).tr(),
                     ),],
                 const SizedBox(height: 24),
-                const Text("Appearance", style: TextStyle(fontSize: 20)).tr(),
-                const SizedBox(height: 16),
-                ToggleButtons(
-                  isSelected: [
-                    _themeMode == AdaptiveThemeMode.dark,
-                    _themeMode == AdaptiveThemeMode.system,
-                    _themeMode == AdaptiveThemeMode.light,
-                  ],
-                  onPressed: (int index) {
-                    if (index == 0) {
-                      _setThemeMode(AdaptiveThemeMode.dark);
-                    } else if (index == 1) {
-                      _setThemeMode(AdaptiveThemeMode.system);
-                    } else if (index == 2) {
-                      _setThemeMode(AdaptiveThemeMode.light);
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(8.0),
-                  children:  [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: const Text("Dark").tr(),
+                if(ThemeConfig.isDarkModeEnabled)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Appearance", style: TextStyle(fontSize: 20)).tr(),
+                    const SizedBox(height: 16),
+                    ToggleButtons(
+                      isSelected: [
+                        _themeMode == AdaptiveThemeMode.dark,
+                        _themeMode == AdaptiveThemeMode.system,
+                        _themeMode == AdaptiveThemeMode.light,
+                      ],
+                      onPressed: (int index) {
+                        if (index == 0) {
+                          _setThemeMode(AdaptiveThemeMode.dark);
+                        } else if (index == 1) {
+                          _setThemeMode(AdaptiveThemeMode.system);
+                        } else if (index == 2) {
+                          _setThemeMode(AdaptiveThemeMode.light);
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(8.0),
+                      children:  [
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: const Text("Dark").tr(),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text("Auto").tr(),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Text("Light").tr(),
+                        ),
+                      ],
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text("Auto").tr(),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text("Light").tr(),
-                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
-                const SizedBox(height: 24),
                 if (kIsWeb) // Only show if running on web
                   Center(
                     child: Column(
@@ -197,9 +203,9 @@ class _SettingsPageState extends State<SettingsPage> {
                         if (!_isPlatformSupported)
                           Padding(
                             padding: const EdgeInsets.only(top: 8.0),
-                            child: const Text(
+                            child: Text(
                               "This platform or browser does not support the PWA install prompt or the app is already installed.",
-                              style: TextStyle(color: Colors.red),
+                              style: TextStyle(color: ThemeConfig.redColor(context)),
                               textAlign: TextAlign.center,
                             ).tr(),
                           ),

@@ -6,17 +6,25 @@ import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/pages/form/models/birth_date_field_holder.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
-import 'package:fstapp/widgets/html_view.dart';
 
 import 'form_message_widget.dart';
 
 class BirthDateEditor {
   static Widget buildBirthDateReadOnly(BuildContext context, FormFieldModel field) {
     final data = field.data ?? {};
-    final maxAge = data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "N/A";
-    final minAge = data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "N/A";
-    final message = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
-    final defaultWarning = "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
+    final int? minAgeInt = data[BirthDateFieldHolder.metaMinYear] is int
+        ? data[BirthDateFieldHolder.metaMinYear] as int
+        : int.tryParse(data[BirthDateFieldHolder.metaMinYear]?.toString() ?? "");
+    final int? maxAgeInt = data[BirthDateFieldHolder.metaMaxYear] is int
+        ? data[BirthDateFieldHolder.metaMaxYear] as int
+        : int.tryParse(data[BirthDateFieldHolder.metaMaxYear]?.toString() ?? "");
+    if (minAgeInt == 0 || maxAgeInt == 0) {
+      return Container();
+    }
+    final String minAge = minAgeInt?.toString() ?? "N/A";
+    final String maxAge = maxAgeInt?.toString() ?? "N/A";
+    final String message = data[BirthDateFieldHolder.metaMessage]?.toString() ?? "";
+    final String defaultWarning = "Warning: Your age is not within the recommended range ({minAge}-{maxAge} years old)."
         .tr(namedArgs: {"minAge": minAge, "maxAge": maxAge});
 
     return Column(
@@ -77,9 +85,7 @@ class BirthDateEditor {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (value) {
                 field.data ??= {};
-                // Update the min age value as integer if possible.
                 field.data![BirthDateFieldHolder.metaMinYear] = int.tryParse(value) ?? value;
-                // Also check if max age is now lower than the updated min age.
                 final currentMax = int.tryParse(maxAgeController.text) ?? 0;
                 final currentMin = int.tryParse(value) ?? 0;
                 if (currentMax < currentMin) {
@@ -87,7 +93,6 @@ class BirthDateEditor {
                 } else {
                   maxAgeError = null;
                 }
-                // Trigger rebuild without breaking field focus.
                 setState(() {});
               },
             ),
@@ -104,7 +109,6 @@ class BirthDateEditor {
               onChanged: (value) {
                 field.data ??= {};
                 final newMax = int.tryParse(value) ?? 0;
-                // Retrieve current min value from the min age field.
                 final currentMin = int.tryParse(minAgeController.text) ?? 0;
                 if (newMax < currentMin) {
                   maxAgeError = "Max age cannot be lower than min age.".tr();
@@ -112,7 +116,6 @@ class BirthDateEditor {
                   maxAgeError = null;
                   field.data![BirthDateFieldHolder.metaMaxYear] = newMax;
                 }
-                // Trigger a rebuild so that the default warning in the HtmlView is updated.
                 setState(() {});
               },
             ),

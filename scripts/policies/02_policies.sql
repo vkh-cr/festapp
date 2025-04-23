@@ -185,12 +185,6 @@ TO authenticated
 USING (true);
 
 DROP POLICY IF EXISTS "Enable select for editors" ON public.exclusive_events;
-CREATE POLICY "Enable select for editors" ON public.exclusive_events
-AS PERMISSIVE FOR SELECT
-TO authenticated
-USING (get_is_editor_view_on_occasion(( SELECT exclusive_groups.occasion
-   FROM exclusive_groups
-  WHERE (exclusive_groups.id = exclusive_events."group"))));
 
 DROP POLICY IF EXISTS "Enable insert for editors" ON public.exclusive_events;
 CREATE POLICY "Enable insert for editors" ON public.exclusive_events
@@ -205,10 +199,6 @@ WITH CHECK (get_is_editor_on_occasion(( SELECT exclusive_groups.occasion
 ----------------------------------------------------------------
 
 DROP POLICY IF EXISTS "Enable select for editors" ON public.exclusive_groups;
-CREATE POLICY "Enable select for editors" ON public.exclusive_groups
-AS PERMISSIVE FOR SELECT
-TO authenticated
-USING (get_is_editor_view_on_occasion(occasion));
 
 DROP POLICY IF EXISTS "Enable select to all auth" ON public.exclusive_groups;
 CREATE POLICY "Enable select to all auth" ON public.exclusive_groups
@@ -678,6 +668,35 @@ AS PERMISSIVE FOR ALL
 TO authenticated
 USING (get_is_editor_on_occasion(occasion))
 WITH CHECK (get_is_editor_on_occasion(occasion));
+
+----------------------------------------------------------------
+-- public.path_groups
+----------------------------------------------------------------
+
+DROP POLICY IF EXISTS "Enable select for all" ON public.path_groups;
+CREATE POLICY "Enable select for all" ON public.path_groups
+  AS PERMISSIVE FOR SELECT
+  TO public
+  USING (true);
+
+DROP POLICY IF EXISTS "Enable update for editors" ON public.path_groups;
+CREATE POLICY "Enable update for editors" ON public.path_groups
+  AS PERMISSIVE FOR UPDATE
+  TO authenticated
+  USING (get_is_editor_on_occasion(occasion))
+  WITH CHECK (get_is_editor_on_occasion(occasion));
+
+DROP POLICY IF EXISTS "Enable insert for editors" ON public.path_groups;
+CREATE POLICY "Enable insert for editors" ON public.path_groups
+  AS PERMISSIVE FOR INSERT
+  TO authenticated
+  WITH CHECK (get_is_editor_on_occasion(occasion));
+
+DROP POLICY IF EXISTS "Enable delete for editors" ON public.path_groups;
+CREATE POLICY "Enable delete for editors" ON public.path_groups
+  AS PERMISSIVE FOR DELETE
+  TO authenticated
+  USING (get_is_editor_on_occasion(occasion));
 
 -----------------------------------------------
 --eshop----------------------------------------

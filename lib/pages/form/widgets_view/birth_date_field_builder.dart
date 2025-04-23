@@ -16,7 +16,6 @@ class BirthDateFieldBuilder extends StatefulWidget {
   final BirthDateFieldHolder fieldHolder;
   final DateTime? eventDate;
   final GlobalKey<FormBuilderState> formKey;
-  /// Indicates whether the card design is used.
   final bool isCardDesign;
 
   const BirthDateFieldBuilder({
@@ -27,7 +26,6 @@ class BirthDateFieldBuilder extends StatefulWidget {
     this.isCardDesign = false,
   }) : super(key: key);
 
-  /// Builds the birth date field.
   static Widget buildBirthDateField({
     required BuildContext context,
     required BirthDateFieldHolder fieldHolder,
@@ -35,7 +33,6 @@ class BirthDateFieldBuilder extends StatefulWidget {
     required GlobalKey<FormBuilderState> formKey,
     required FormHolder formHolder,
   }) {
-    // Determine card design based on FormHelper.
     final bool isCardDesign = FormHelper.isCardDesign(formHolder, fieldHolder);
     return BirthDateFieldBuilder(
       fieldHolder: fieldHolder,
@@ -62,13 +59,9 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine effective event date (if provided, else now)
     final effectiveEventDate = widget.eventDate ?? DateTime.now();
-    // Extract allowed ages; default values if not provided.
-    final int effectiveMinAge = widget.fieldHolder.minYear ?? 12;
-    final int effectiveMaxAge = widget.fieldHolder.maxYear ?? 100;
-
-    // Calculate recommended birth date range based on the event date and age limits.
+    final int effectiveMinAge = widget.fieldHolder.minYear ?? 0;
+    final int effectiveMaxAge = widget.fieldHolder.maxYear ?? 0;
     final recommendedEarliestDate = DateTime(
       effectiveEventDate.year - effectiveMaxAge,
       effectiveEventDate.month,
@@ -79,15 +72,10 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
       effectiveEventDate.month,
       effectiveEventDate.day,
     );
-
-    // Determine picker limits.
     final pickerFirstDate = widget.fieldHolder.isHard ? recommendedEarliestDate : DateTime(1900);
     final pickerLastDate = widget.fieldHolder.isHard ? recommendedLatestDate : DateTime.now();
-
-    // Localized date format.
     final dateFormat = DateFormat.yMd(context.locale.toString());
 
-    // Build the form field widget.
     Widget fieldWidget = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -118,7 +106,11 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
               return FormBuilderValidators.required()(value);
             }
             if (value != null) {
-              if (value.isBefore(recommendedEarliestDate) ||
+              if (effectiveMinAge == 0 || effectiveMaxAge == 0) {
+                setState(() {
+                  warningMessage = null;
+                });
+              } else if (value.isBefore(recommendedEarliestDate) ||
                   value.isAfter(recommendedLatestDate)) {
                 if (widget.fieldHolder.isHard) {
                   return widget.fieldHolder.message.isNotEmpty
@@ -165,11 +157,8 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
             setState(() {
               selectedDate = value;
             });
-            // Revalidate the field to update error state and, consequently, the card wrapper.
             widget.formKey.currentState!
                 .fields[widget.fieldHolder.id.toString()]?.validate();
-
-            // Update the text selection and unfocus to hide the keyboard.
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _dateController.selection =
                   TextSelection.collapsed(offset: _dateController.text.length);
@@ -190,9 +179,7 @@ class _BirthDateFieldBuilderState extends State<BirthDateFieldBuilder> {
       ],
     );
 
-    // If card design is used, wrap the field widget in a card.
     if (widget.isCardDesign) {
-      // Dynamically check the error state for this field.
       bool hasError = widget.formKey.currentState
           ?.fields[widget.fieldHolder.id.toString()]
           ?.hasError ??
