@@ -545,5 +545,6 @@
   "Paths": "Paths",
   "Color": "Color",
   "Currency": "Currency",
+  "This determines whether this event is hidden from list views.": "This determines whether this event is hidden from list views.",
   "_":"_"
 }
