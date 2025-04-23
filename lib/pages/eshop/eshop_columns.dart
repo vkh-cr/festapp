@@ -5,9 +5,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
+import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
+import 'package:fstapp/dialogs/products_dialog.dart';
 import 'package:fstapp/dialogs/transactions_dialog.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
@@ -23,6 +27,9 @@ class EshopColumns {
   static const String TICKET_NOTE_HIDDEN = "ticketNoteHidden";
   static const String TICKET_TOTAL_PRICE = "ticketTotalPrice";
   static const String TICKET_PRODUCTS = "ticketProducts";
+  static const String TICKET_PRODUCTS_EXTENDED = "ticketProductsExtended";
+  static const String TICKET_PRODUCTS_EDIT = "ticketProductsEdit";
+
   static const String TICKET_CREATED_AT = "ticketCreatedAt";
   static const String TICKET_SPOT = "ticketSpot";
 
@@ -48,6 +55,8 @@ class EshopColumns {
   static const String ORDER_NOTE_HIDDEN = "orderDataNoteHidden";
   static const String ORDER_HISTORY = "orderHistory";
   static const String ORDER_TRANSACTIONS = "orderTransactions";
+
+  static const String ORDER_FORM = "orderForm";
 
   static const String RESPONSES = "responses";
 
@@ -146,7 +155,7 @@ class EshopColumns {
         readOnly: true,
         enableEditingMode: true,
         title: "Spot".tr(),
-        field: TicketModel.metaSpot,
+        field: TICKET_SPOT,
         type: TrinaColumnType.text(),
         width: 60,
       ),
@@ -305,6 +314,38 @@ class EshopColumns {
         },
       ),
     ],
+    TICKET_PRODUCTS_EDIT: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        enableAutoEditing: false,
+        title: "Products".tr(),
+        field: TICKET_PRODUCTS_EDIT,
+        type: TrinaColumnType.text(),
+        width: 150,
+        renderer: (rendererContext) {
+          return ElevatedButton(
+            onPressed: () async {
+              final ticketId = rendererContext.row.cells[TbEshop.tickets.id]!.value as int;
+              final changed = await _showTicketProducts(context, ticketId);
+              if (changed == true) {
+                var afterFunction = data[TICKET_PRODUCTS_EDIT];
+                if(afterFunction is Future<void> Function()?) {
+                  afterFunction?.call();
+                }
+              }
+            },
+            child: Row(
+              children: [
+                Icon(Icons.shopping_cart),
+                Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Text("Products".tr()),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    ],
     PRODUCT_ID: [
       TrinaColumn(
         hide: true,
@@ -393,6 +434,28 @@ class EshopColumns {
         width: 100,
       ),
     ],
+    ORDER_FORM: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Form".tr(),
+        field: Tb.forms.table,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 120,
+      ),
+    ],
+    TICKET_PRODUCTS_EXTENDED: (Map<String, dynamic> data) {
+      if(data[TICKET_PRODUCTS_EXTENDED] == null){
+        return <TrinaColumn>[];
+      }
+      var columns = <TrinaColumn>[];
+      for(var f in (data[TICKET_PRODUCTS_EXTENDED]) as List<String>){
+        var cc = genericTextColumn(ProductModel.typeToLocale(f), f, false);
+        columns.add(cc);
+      }
+      return columns;
+    },
     RESPONSES: (Map<String, dynamic> data) {
       if(data[RESPONSES] == null){
         return <TrinaColumn>[];
@@ -407,14 +470,14 @@ class EshopColumns {
     },
   };
 
-  static TrinaColumn genericTextColumn(String title, String field) {
+  static TrinaColumn genericTextColumn(String title, String field, [bool alignToEnd = true]) {
     return TrinaColumn(
       readOnly: true,
       enableEditingMode: true,
       title: title,
       field: field,
       type: TrinaColumnType.text(),
-      textAlign: TrinaColumnTextAlign.end,
+      textAlign: alignToEnd ? TrinaColumnTextAlign.end : TrinaColumnTextAlign.start,
       width: 150,
     );
   }
@@ -472,6 +535,49 @@ class EshopColumns {
           orderId: orderId,
         );
       },
+    );
+  }
+
+  static const List<String> productCategories = ["others"];
+
+  static Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
+    // Get the allowed product categories.
+    final List<String> allowedCategories = productCategories;
+
+    // Initialize a map with each allowed category mapped to an empty list.
+    final Map<String, List<ProductModel>> groupedProducts = {
+      for (var category in allowedCategories) category: [],
+    };
+
+    // Group products by their type.
+    // If the product type is not in allowedCategories,
+    // assign it to the last category in the allowed list.
+    for (var product in products) {
+      final String productType = product.productTypeString ?? "";
+      final String categoryKey = allowedCategories.contains(productType)
+          ? productType
+          : allowedCategories.last;
+      groupedProducts[categoryKey]!.add(product);
+    }
+
+    // Build a cell for each allowed category; if no products are present, set an empty value.
+    final Map<String, TrinaCell> productCells = {};
+    for (var category in allowedCategories) {
+      final String cellValue = groupedProducts[category]!.isNotEmpty
+          ? groupedProducts[category]!
+          .map((p) => p.toBasicString())
+          .join(" | ")
+          : "";
+      productCells[category] = TrinaCell(value: cellValue);
+    }
+
+    return productCells;
+  }
+
+  static Future<bool?> _showTicketProducts(BuildContext context, int ticketId) {
+    return showDialog<bool>(
+      context: context,
+      builder: (_) => ProductsDialog(ticketId: ticketId),
     );
   }
 }

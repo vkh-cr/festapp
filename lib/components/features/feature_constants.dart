@@ -24,8 +24,7 @@ class FeatureConstants {
   static const String ticketLightColor = "lightColor";
   static const String ticketDarkColor = "darkColor";
   static const String ticketBackground = "background";
-  // New constant for ticket type
-  static const String ticketType = "type";
+  static const String ticketType = "ticket_type";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";

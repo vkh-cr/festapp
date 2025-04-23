@@ -212,6 +212,7 @@ class _SchedulePageState extends State<SchedulePage>
               onAddNewEvent: (context, p, _) =>
                   AddNewEventDialog.showAddEventDialog(context, p)
                       .then((_) => loadData()),
+              defaultDateTime: RightsService.currentOccasion?.startTime,
             ),
           ),
         ],

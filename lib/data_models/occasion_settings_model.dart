@@ -15,6 +15,9 @@ class OccasionSettingsModel {
   // Features
   List<FeatureModel>? features;
 
+  // Visibility switch
+  bool? isHidden;
+
   static const String globalSettingsOffline = "globalSettingsOffline";
 
   OccasionSettingsModel({
@@ -24,6 +27,7 @@ class OccasionSettingsModel {
     this.gameStartTime,
     this.gameEndTime,
     this.features,
+    this.isHidden,
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class OccasionSettingsModel {
 
     var gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? {};
     var featuresJson = dataPart[Tb.occasions.data_features] as List<dynamic>? ?? [];
+    var hiddenFlag = dataPart[Tb.occasions.is_hidden] as bool?;
 
     return OccasionSettingsModel(
       eventStartTime: json[Tb.occasions.start_time] != null
@@ -54,7 +59,8 @@ class OccasionSettingsModel {
           ? DateTime.tryParse(gameSettings[Tb.occasions.data_game_end])
           : null,
       services: servicesPart,
-      features: featuresJson.map((feature) => FeatureModel.fromJson(feature)).toList(),
+      features: featuresJson.map((f) => FeatureModel.fromJson(f)).toList(),
+      isHidden: hiddenFlag,
     );
   }
 
@@ -66,6 +72,9 @@ class OccasionSettingsModel {
         Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
       },
       Tb.occasions.data_features: features
+          ?.map((f) => f.toJson())
+          .toList(),
+      Tb.occasions.is_hidden: isHidden,
     }
   };
 

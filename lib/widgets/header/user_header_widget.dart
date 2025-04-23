@@ -83,53 +83,59 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           ),
           const SizedBox(height: 16),
         ],
-        Text("Appearance",
-            style: TextStyle(
-                fontSize: 16, color: ThemeConfig.blackColor(context)))
-            .tr(),
-        const SizedBox(height: 8),
-        ToggleButtons(
-          isSelected: [
-            _currentThemeMode == AdaptiveThemeMode.dark,
-            _currentThemeMode == AdaptiveThemeMode.system,
-            _currentThemeMode == AdaptiveThemeMode.light,
-          ],
-          onPressed: (int index) {
-            AdaptiveThemeMode mode;
-            if (index == 0) {
-              mode = AdaptiveThemeMode.dark;
-            } else if (index == 1) {
-              mode = AdaptiveThemeMode.system;
-            } else {
-              mode = AdaptiveThemeMode.light;
-            }
-            AdaptiveTheme.of(context).setThemeMode(mode);
-            setState(() {
-              _currentThemeMode = mode;
-            });
-          },
-          borderRadius: BorderRadius.circular(8.0),
+        if(ThemeConfig.isDarkModeEnabled)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text("Dark",
-                  style: TextStyle(
-                      color: ThemeConfig.blackColor(context)))
-                  .tr(),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text("Auto",
-                  style: TextStyle(
-                      color: ThemeConfig.blackColor(context)))
-                  .tr(),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text("Light",
-                  style: TextStyle(
-                      color: ThemeConfig.blackColor(context)))
-                  .tr(),
+            Text("Appearance",
+                style: TextStyle(
+                    fontSize: 16, color: ThemeConfig.blackColor(context)))
+                .tr(),
+            const SizedBox(height: 8),
+            ToggleButtons(
+              isSelected: [
+                _currentThemeMode == AdaptiveThemeMode.dark,
+                _currentThemeMode == AdaptiveThemeMode.system,
+                _currentThemeMode == AdaptiveThemeMode.light,
+              ],
+              onPressed: (int index) {
+                AdaptiveThemeMode mode;
+                if (index == 0) {
+                  mode = AdaptiveThemeMode.dark;
+                } else if (index == 1) {
+                  mode = AdaptiveThemeMode.system;
+                } else {
+                  mode = AdaptiveThemeMode.light;
+                }
+                AdaptiveTheme.of(context).setThemeMode(mode);
+                setState(() {
+                  _currentThemeMode = mode;
+                });
+              },
+              borderRadius: BorderRadius.circular(8.0),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text("Dark",
+                      style: TextStyle(
+                          color: ThemeConfig.blackColor(context)))
+                      .tr(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text("Auto",
+                      style: TextStyle(
+                          color: ThemeConfig.blackColor(context)))
+                      .tr(),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text("Light",
+                      style: TextStyle(
+                          color: ThemeConfig.blackColor(context)))
+                      .tr(),
+                ),
+              ],
             ),
           ],
         ),

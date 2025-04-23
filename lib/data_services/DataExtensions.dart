@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart' as data_extensions;
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
+import 'package:fstapp/data_models/path_group_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 
 extension DataExtension on int? {
@@ -9,6 +10,17 @@ extension DataExtension on int? {
 
 extension PlaceExtensions on List<PlaceModel> {
   void sortPlaces([bool asc = true]) {
+    if(asc)
+    {
+      sort((a,b) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    } else {
+      sort((b,a) => (a.order.safeInt().compareTo(b.order.safeInt())));
+    }
+  }
+}
+
+extension PathGroupsExtensions on List<PathGroupsModel> {
+  void sortPathGroups([bool asc = true]) {
     if(asc)
     {
       sort((a,b) => (a.order.safeInt().compareTo(b.order.safeInt())));
