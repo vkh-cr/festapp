@@ -545,5 +545,6 @@
   "Paths": "Cesty",
   "Color": "Barva",
   "Currency": "Měna",
+  "This determines whether this event is hidden from list views.": "Určuje, zda je tato událost skrytá v seznamu událostí.",
   "_": "_"
 }
