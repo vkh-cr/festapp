@@ -51,7 +51,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
       actionsExtended: DataGridActionsController(
         areAllActionsEnabled: RightsService.canUpdateUnitUsers,
       ),
-      newObject: () => UnitUserModel.newRow(widget.unit.id!),
+      getNewObject: () => UnitUserModel.newRow(widget.unit.id!),
       headerChildren: [
         if (RightsService.isUnitManager())
           DataGridAction(

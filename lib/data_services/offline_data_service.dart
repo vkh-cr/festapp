@@ -6,6 +6,7 @@ import 'package:fstapp/data_models/icon_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/news_model.dart';
 import 'package:fstapp/data_models/occasion_settings_model.dart';
+import 'package:fstapp/data_models/path_group_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/storage_helper.dart';
@@ -88,11 +89,17 @@ class OfflineDataService {
   static Future<void> saveAllPlaces(List<PlaceModel> toSave) =>
       saveAllOffline(PlaceModel.placesOffline, toSave);
 
+  static Future<void> saveAllPathGroups(List<PathGroupsModel> toSave) =>
+      saveAllOffline(PathGroupsModel.pathsOffline, toSave);
+
   static Future<void> saveAllIcons(List<IconModel> toSave) =>
       saveAllOffline(IconModel.iconsOffline, toSave);
 
   static Future<List<PlaceModel>> getAllPlaces() =>
       getAllOffline(PlaceModel.placesOffline, PlaceModel.fromJson);
+
+  static Future<List<PathGroupsModel>> getAllPathGroups() =>
+      getAllOffline(PathGroupsModel.pathsOffline, PathGroupsModel.fromJson);
 
   static Future<List<IconModel>> getAllIcons() =>
       getAllOffline(IconModel.iconsOffline, IconModel.fromJson);

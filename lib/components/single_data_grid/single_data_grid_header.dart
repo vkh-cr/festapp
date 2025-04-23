@@ -49,30 +49,16 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
 class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     extends State<SingleDataGridHeader<T>> {
   final SingleDataGridController<T> controller;
-  List<Widget> allChildren = [];
 
-  _SingleDataGridHeaderState(
-      this.controller);
+  _SingleDataGridHeaderState(this.controller);
 
   @override
   Widget build(BuildContext context) {
-    allChildren.clear();
-    var headerChildren = controller.headerChildren ?? [];
-    for (var a in headerChildren) {
-      allChildren.add(
-        ElevatedButton(
-          onPressed: a.isEnabled != null && !a.isEnabled!()
-              ? null
-              : () => a.action!(controller, null),
-          child: Text(a.name ?? "---"),
-        ),
-      );
-    }
-    if (headerChildren.isNotEmpty) {
-      allChildren.insertAll(0, [const VerticalDivider()]);
-    }
+    // Build left-side actions (Add, Discard, Save and any extra header children)
+    List<Widget> leftActions = [];
     var actionsController = controller.actionsExtended;
-    allChildren.insertAll(0, [
+
+    leftActions.addAll([
       if (actionsController?.isAddActionPossible?.call() ?? true)
         ElevatedButton(
           onPressed: actionsController != null &&
@@ -106,15 +92,52 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
       ),
     ]);
 
+    if (controller.headerChildren != null && controller.headerChildren!.isNotEmpty) {
+      for (var a in controller.headerChildren!) {
+        leftActions.add(
+          ElevatedButton(
+            onPressed: a.isEnabled != null && !a.isEnabled!()
+                ? null
+                : () => a.action!(controller, null),
+            child: Text(a.name ?? "---"),
+          ),
+        );
+      }
+    }
+
+    // Build right-side actions: the export button if enabled.
+    List<Widget> rightActions = [];
+    if (controller.exportOptions?.visible == true) {
+      rightActions.add(
+        ElevatedButton.icon(
+          onPressed: () => controller.downloadCsv(context),
+          icon: const Icon(Icons.file_download),
+          label: Text("Download Table".tr()),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-        child: Wrap(
-          spacing: 10,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: allChildren,
+      child: Container(
+        // Remove the fixed width constraint to allow content to expand
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Use min to allow the row to shrink
+          children: [
+            Wrap(
+              spacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: leftActions,
+            ),
+            const SizedBox(width: 10), // Minimal space between left and right actions
+            if (rightActions.isNotEmpty)
+              Wrap(
+                spacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: rightActions,
+              ),
+          ],
         ),
       ),
     );
@@ -123,8 +146,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
   void _addRow() {
     var newRowsGenerated = controller.stateManager.getNewRows();
 
-    if(controller.newObject != null){
-      var obj = controller.newObject!();
+    if (controller.getNewObject != null) {
+      var obj = controller.getNewObject!();
       TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context)!;
       for (var c in newRowReal.cells.entries) {
         newRowsGenerated[0].cells[c.key] = newRowReal.cells[c.key]!;
