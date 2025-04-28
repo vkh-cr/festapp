@@ -8,7 +8,7 @@
         {
             "name": "festapp",
             "request": "launch",
-            "type": "dart",
+            "type": "dart"
         },
         {
             "name": "festapp (profile mode)",
