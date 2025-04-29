@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
@@ -27,7 +28,15 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
 
   static TrinaGridConfiguration defaultTrinaGridConfiguration(
       BuildContext context, String langCode) {
+    var defaultF = FilterHelper.defaultFilters.toList();
+    defaultF.removeAt(0);
     return TrinaGridConfiguration(
+      columnFilter: TrinaGridColumnFilterConfig(
+          filters: [TrinaFilterTypeContainsNoDiacritics(), ...defaultF],
+          resolveDefaultColumnFilter: (column, resolver) {
+        return resolver<TrinaFilterTypeContainsNoDiacritics>();
+      }
+      ),
       scrollbar: const TrinaGridScrollbarConfig(
         thickness: 12.0,
       ),
@@ -244,3 +253,45 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     await controller.loadData();
   }
 }
+
+class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
+
+  static String name = TrinaFilterTypeContains.name;
+
+  @override
+  String get title => TrinaFilterTypeContainsNoDiacritics.name;
+
+  @override
+  TrinaCompareFunction get compare => TrinaFilterTypeContainsNoDiacritics.compareContains;
+
+  const TrinaFilterTypeContainsNoDiacritics();
+
+  /// Compares [base] and [search] after removing any diacritics,
+  /// using a RegExp match under the hood.
+  static bool compareContains({
+    required String? base,
+    required String? search,
+    required TrinaColumn column,
+  }) {
+    if (base == null || search == null || search.isEmpty) return false;
+
+    // Normalize both strings by stripping diacritics:
+    final normalizedBase   = Utilities.removeDiacritics(base);
+    final normalizedSearch = Utilities.removeDiacritics(search);
+
+    // Escape the search term so RegExp treats it literally:
+    final pattern = RegExp.escape(normalizedSearch);
+    return _compareWithRegExp(pattern, normalizedBase);
+  }
+
+  /// Internal helper: runs a RegExp literal match.
+  static bool _compareWithRegExp(
+      String pattern,
+      String value, {
+        bool caseSensitive = false,
+      }) {
+    return RegExp(pattern, caseSensitive: caseSensitive).hasMatch(value);
+  }
+}
+
+
