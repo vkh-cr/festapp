@@ -170,7 +170,7 @@ class TicketEditorWidgets {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 10,
+                      flex: 9,
                       child: Text(
                         "Title".tr(),
                         style: Theme.of(context)
@@ -180,7 +180,7 @@ class TicketEditorWidgets {
                       ),
                     ),
                     Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: Text(
                         "Price".tr(),
                         style: Theme.of(context)

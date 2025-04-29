@@ -119,6 +119,9 @@ class DbOrders {
 
       if (order.isExpired()) {
         order.state = OrderModel.expiredState;
+        for(var t in order.relatedTickets!.where((t)=>t.state == OrderModel.orderedState)){
+          t.state = order.state;
+        }
       }
     }
 
