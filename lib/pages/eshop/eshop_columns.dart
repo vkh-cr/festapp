@@ -94,8 +94,8 @@ class EshopColumns {
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
-        width: 120,
+        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
+        width: 140,
         textAlign: TrinaColumnTextAlign.center,
       ),
     ],
