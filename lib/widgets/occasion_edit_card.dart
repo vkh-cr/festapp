@@ -5,7 +5,6 @@ import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
 
 class OccasionEditCard extends StatelessWidget {
   final OccasionModel occasion;
@@ -17,7 +16,7 @@ class OccasionEditCard extends StatelessWidget {
   final bool isPresent;
 
   const OccasionEditCard({
-    Key? key,
+    super.key,
     required this.occasion,
     required this.onView,
     required this.onSettings,
@@ -25,7 +24,7 @@ class OccasionEditCard extends StatelessWidget {
     required this.onReservation,
     required this.onCreateCopy,
     this.isPresent = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
-import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -71,8 +70,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
       if (actionsController?.isAddActionPossible?.call() ?? true)
         ElevatedButton(
           onPressed: actionsController != null &&
-              actionsController!.areAllActionsEnabled != null &&
-              !actionsController!.areAllActionsEnabled!()
+              actionsController.areAllActionsEnabled != null &&
+              !actionsController.areAllActionsEnabled!()
               ? null
               : _addRow,
           child: const Text("Add").tr(),
