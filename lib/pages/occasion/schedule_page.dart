@@ -31,9 +31,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 class SchedulePage extends StatefulWidget {
   static const ROUTE = "schedule";
 
-  const SchedulePage({
-    Key? key,
-  }) : super(key: key);
+  const SchedulePage({super.key});
 
   @override
   _SchedulePageState createState() => _SchedulePageState();

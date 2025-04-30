@@ -15,7 +15,7 @@ class SongbookPage extends StatefulWidget {
   final String? type = "song";
   static const ROUTE = "songbook";
 
-  SongbookPage({super.key});
+  const SongbookPage({super.key});
 
   @override
   _SongbookPageState createState() => _SongbookPageState();

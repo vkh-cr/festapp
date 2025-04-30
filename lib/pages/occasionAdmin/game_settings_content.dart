@@ -5,7 +5,7 @@ import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 class GameSettingsContent extends StatefulWidget {
-  const GameSettingsContent({Key? key}) : super(key: key);
+  const GameSettingsContent({super.key});
 
   @override
   _GameSettingsContentState createState() => _GameSettingsContentState();

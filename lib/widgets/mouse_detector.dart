@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MouseDetector extends StatefulWidget {
   final Widget Function(BuildContext context, bool mouseIsConnected) builder;
 
-  MouseDetector({super.key, required this.builder});
+  const MouseDetector({super.key, required this.builder});
 
   @override
   State<MouseDetector> createState() => _MouseDetectorState();

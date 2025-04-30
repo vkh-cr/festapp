@@ -11,7 +11,7 @@ import 'package:fstapp/data_services/db_places.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PathGroupsContent extends StatefulWidget {
-  const PathGroupsContent({Key? key}) : super(key: key);
+  const PathGroupsContent({super.key});
 
   @override
   _PathGroupsContentState createState() => _PathGroupsContentState();
