@@ -12,7 +12,7 @@ while(true)switch(x){case 0:s=e?"event_groups!event_groups_event_child_fkey(even
 r=$.hl()
 m=A
 x=3
-return A.d(r.bB("events").h6(0,"id,updated_at,occasion,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).cm("id",d).kI(0),$async$pY)
+return A.d(r.bB("events").h6(0,"id,updated_at,occasion,title,start_time,end_time,max_participants,split_for_men_women,is_group_event,is_hidden,type,places(id, title),"+s).cm("id",d).kJ(0),$async$pY)
 case 3:q=m.r9(g)
 p=y.u
 x=4
@@ -165,4 +165,4 @@ $S:59};(function inheritance(){var x=a.inheritMany
 x(A.bI,[B.b3m,B.b3n,B.b4q])})()
 var y={f:A.B("aW"),u:A.B("dD"),r:A.B("u<f>"),w:A.B("h"),e:A.B("y"),b:A.B("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_299",e:"endPart",h:b})})($__dart_deferred_initializers__,"f3HpDrZQEC6dARWtCJV5ossed6U=");
+a.eventLog.push({p:"main.dart.js_299",e:"endPart",h:b})})($__dart_deferred_initializers__,"F5CM6fMX5hcPJJdFSuxsw5zs/3E=");

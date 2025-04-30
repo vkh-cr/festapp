@@ -8,7 +8,7 @@ A=c[0]
 C=a.updateHolder(c[119],C)
 B=c[304]
 var z=a.updateTypes([]);(function constants(){B.rj=new A.aB(57415,"MaterialIcons",null,!1)
-B.as2=new A.aB(57491,"MaterialIcons",null,!0)
+B.as3=new A.aB(57491,"MaterialIcons",null,!0)
 B.Ma=new A.aB(58370,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_240",e:"endPart",h:b})})($__dart_deferred_initializers__,"C/YkoTFEgu+eSYpuhEI4mlHA1sI=");
+a.eventLog.push({p:"main.dart.js_240",e:"endPart",h:b})})($__dart_deferred_initializers__,"flxPdGg0Rvk1OSLKiOH6gGqHQyY=");

@@ -16,11 +16,11 @@ D=c[158]
 F=c[231]
 A.asN.prototype={
 B(d){var y,x=null,w=B.D(d).ax.a===C.u||this.f===!0?"assets/icons/fstapplogo.dark.svg":"assets/icons/fstapplogo.svg",v=this.d,u=this.e
-if(C.e.lh(w.toLowerCase(),".svg"))y=new D.Kd(u,v,F.hw,new D.Sz(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
+if(C.e.li(w.toLowerCase(),".svg"))y=new D.Kd(u,v,F.hw,new D.Sz(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
 else y=E.a08(w,x,v,x,u)
 return B.jI(!1,x,!0,y,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x)}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
 y(A.asN,B.a9)})()
 B.br(b.typeUniverse,JSON.parse('{"asN":{"a9":[],"e":[]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"6A+gG4ND1e5h5H9xwX/kr0TKiyk=");
+a.eventLog.push({p:"main.dart.js_262",e:"endPart",h:b})})($__dart_deferred_initializers__,"b6WWwYxMLkAuHMG3xh6zvTXr9Og=");

@@ -50,8 +50,8 @@ B.Dn.prototype={
 M(){return new B.aP5(new A.aN(null,y.o),new Q.co(V.av,$.aa()))}}
 B.aP5.prototype={
 l(){this.ag()},
-aS(){var x=0,w=A.m(y.v),v=this,u,t,s,r,q
-var $async$aS=A.i(function(d,e){if(d===1)return A.j(e,w)
+aT(){var x=0,w=A.m(y.v),v=this,u,t,s,r,q
+var $async$aT=A.i(function(d,e){if(d===1)return A.j(e,w)
 while(true)switch(x){case 0:v.c8()
 s=A.t5()
 u=A.bx("token=(?<token>[^&]+)",!0,!1,!1).rm(s.j(0))
@@ -62,15 +62,15 @@ if(y.g.b(r)){t=r
 r=v.c
 r.toString
 A.bF(r,J.ao(t),C.a8)}else throw p}return A.k(null,w)}})
-return A.l($async$aS,w)},
-B(d){var x,w,v,u,t=null,s=G.bh(D.bCI,t)
+return A.l($async$aT,w)},
+B(d){var x,w,v,u,t=null,s=G.bh(D.bCJ,t)
 s=L.i8(t,t,t,!0,t,t,1,!0,t,t,!1,t,!1,t,t,M.tB(new B.ca0(d)),t,!0,t,t,t,t,t,s,t,t,t,1,t)
 x=y.w
 x=A.U(A.r("Welcome in {name}!",A.z(["name","Festapp"],x,x)),t,t,t,t,t,t,t,R.GG,t,t,t,t,t)
 w=A.U(A.r("Create a new password to continue.",t),t,t,t,t,t,t,t,S.hm,t,t,t,t,t)
 v=A.r("New Password",t)
 u=A.c6(20)
-return K.eZ(s,t,new A.cz(C.O,t,t,new A.cT(new A.ac(0,720,0,1/0),N.dF(O.u3(t,t,new E.xI(A.al(A.a([x,F.a3,w,T.aaC,new A.a5(U.BJ,new P.ID(v,this.e,"password",t),t),F.a3,A.az(t,A.dg(!1,G.bh(D.bDk,t),t,t,t,t,t,t,new B.ca1(this,d),t,t),C.k,t,t,new A.be(C.cC,t,t,u,t,t,t,C.Q),t,50,t,t,t,t,250)],y.u),C.i,C.f,C.h,t,C.m),t),this.d,t),t,C.t,t,t,t,C.I),t),t),t,t,t,t,t)}}
+return K.f_(s,t,new A.cz(C.O,t,t,new A.cP(new A.ac(0,720,0,1/0),N.dF(O.u3(t,t,new E.xI(A.al(A.a([x,F.a3,w,T.aaC,new A.a5(U.BJ,new P.ID(v,this.e,"password",t),t),F.a3,A.az(t,A.dg(!1,G.bh(D.bDl,t),t,t,t,t,t,t,new B.ca1(this,d),t,t),C.k,t,t,new A.be(C.cC,t,t,u,t,t,t,C.Q),t,50,t,t,t,t,250)],y.u),C.i,C.f,C.h,t,C.m),t),this.d,t),t,C.t,t,t,t,C.I),t),t),t,t,t,t,t)}}
 var z=a.updateTypes([])
 B.ca0.prototype={
 $0(){return H.az6(this.a)},
@@ -119,8 +119,8 @@ w(A.cn,[B.ca0,B.ca1])
 x(B.c9Z,A.bI)
 x(B.ca_,A.dr)})()
 A.br(b.typeUniverse,JSON.parse('{"Dn":{"I":[],"e":[]},"aP5":{"M":["Dn"]}}'))
-var y={g:A.B("b7"),u:A.B("u<e>"),o:A.B("aN<nI>"),F:A.B("aE"),E:A.B("G"),w:A.B("h"),b:A.B("@"),v:A.B("~")};(function constants(){D.bCI=new A.c5("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bAK=new A.a1(!0,C.p,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bDk=new A.c5("Change Password",null,D.bAK,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+var y={g:A.B("b7"),u:A.B("u<e>"),o:A.B("aN<nI>"),F:A.B("aE"),E:A.B("G"),w:A.B("h"),b:A.B("@"),v:A.B("~")};(function constants(){D.bCJ=new A.c5("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bAL=new A.a1(!0,C.p,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bDl=new A.c5("Change Password",null,D.bAL,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"whi4yUAkhYrDCXo4DFPsWNot2eM=");
+a.eventLog.push({p:"main.dart.js_1",e:"endPart",h:b})})($__dart_deferred_initializers__,"A26lLEqg1ZlE7JwjuLaXQXpXW/c=");

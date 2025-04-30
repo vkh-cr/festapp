@@ -89,19 +89,19 @@ B.EG.prototype={
 J(){return"WrapAlignment."+this.b},
 Tp(d,e,f,g){var x,w,v=this
 $label0$0:{if(C.eM===v){x=new A.ak(g?d:0,e)
-break $label0$0}if(C.bJ4===v){x=C.eM.Tp(d,e,f,!g)
-break $label0$0}w=C.bJ6===v
+break $label0$0}if(C.bJ5===v){x=C.eM.Tp(d,e,f,!g)
+break $label0$0}w=C.bJ7===v
 if(w&&f<2){x=C.eM.Tp(d,e,f,g)
-break $label0$0}if(C.bJ5===v){x=new A.ak(d/2,e)
+break $label0$0}if(C.bJ6===v){x=new A.ak(d/2,e)
 break $label0$0}if(w){x=new A.ak(0,d/(f-1)+e)
-break $label0$0}if(C.bJ7===v){x=d/f
+break $label0$0}if(C.bJ8===v){x=d/f
 x=new A.ak(x/2,x+e)
-break $label0$0}if(C.bJ8===v){x=d/(f+1)
+break $label0$0}if(C.bJ9===v){x=d/(f+1)
 x=new A.ak(x,x+e)
 break $label0$0}x=null}return x}}
 B.a8G.prototype={
 J(){return"WrapCrossAlignment."+this.b},
-gb2b(){switch(this.a){case 0:var x=C.bJ9
+gb2b(){switch(this.a){case 0:var x=C.bJa
 break
 case 1:x=C.zc
 break
@@ -350,7 +350,7 @@ a1=a2
 b4.$2(a3.b3v(d,p+x.gaVD()*(m-a1)),e)
 d+=a0.a+h
 e=s.$1(e);--f}p+=m+u}},
-fM(d,e){return this.uR(d,e)},
+fN(d,e){return this.uR(d,e)},
 b0(d,e){var x,w=this,v=w.R&&w.dl!==D.k,u=w.P
 if(v){v=w.cx
 v===$&&A.b()
@@ -424,13 +424,13 @@ x(B.aP1,A.aD)
 w(B.aP2,A.ei)})()
 A.br(b.typeUniverse,JSON.parse('{"x7":{"hL":[],"hN":["X"],"fi":[]},"a4m":{"ei":["X","x7"],"X":[],"aD":["X","x7"],"Y":[],"aP":[],"aD.1":"x7","ei.1":"x7","aD.0":"X"},"aFY":{"fB":[],"aQ":[],"e":[]}}'))
 var y={a:A.B("ac"),h:A.B("nx"),d:A.B("dV"),u:A.B("u<V9>"),E:A.B("C<V9>"),e:A.B("x7")};(function constants(){C.eM=new B.EG(0,"start")
-C.bJ4=new B.EG(1,"end")
-C.bJ5=new B.EG(2,"center")
-C.bJ6=new B.EG(3,"spaceBetween")
-C.bJ7=new B.EG(4,"spaceAround")
-C.bJ8=new B.EG(5,"spaceEvenly")
+C.bJ5=new B.EG(1,"end")
+C.bJ6=new B.EG(2,"center")
+C.bJ7=new B.EG(3,"spaceBetween")
+C.bJ8=new B.EG(4,"spaceAround")
+C.bJ9=new B.EG(5,"spaceEvenly")
 C.zc=new B.a8G(0,"start")
-C.bJ9=new B.a8G(1,"end")
+C.bJa=new B.a8G(1,"end")
 C.Hn=new B.a8G(2,"center")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_73",e:"endPart",h:b})})($__dart_deferred_initializers__,"gAec6L64HnVlbPo36JbWjIChFng=");
+a.eventLog.push({p:"main.dart.js_73",e:"endPart",h:b})})($__dart_deferred_initializers__,"Yo2jZFO6mlN0Wg3tCDkvkjKphTI=");
