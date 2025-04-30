@@ -13,7 +13,7 @@ class ScheduleTabView extends StatefulWidget {
   final Function(BuildContext, List<schedule_tab_view.TimeBlockGroup>, schedule_tab_view.TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
 
-  ScheduleTabView({
+  const ScheduleTabView({
     super.key,
     required this.events,
     this.onAddNewEvent,

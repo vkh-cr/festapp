@@ -14,6 +14,7 @@ class UserGroupInfoModel extends ITrinaRowModel {
   static const String progressColumn = "progress";
   static const String participantsColumn = "participants";
 
+  @override
   int? id;
   String title;
   UserInfoModel? leader;
