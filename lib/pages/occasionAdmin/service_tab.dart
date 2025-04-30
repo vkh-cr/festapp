@@ -14,7 +14,7 @@ import 'package:fstapp/pages/occasionAdmin/user_columns.dart';
 import 'package:fstapp/dialogs/service_dialog.dart';
 
 class ServiceTab extends StatefulWidget {
-  const ServiceTab({Key? key}) : super(key: key);
+  const ServiceTab({super.key});
 
   @override
   _ServiceTabState createState() => _ServiceTabState();

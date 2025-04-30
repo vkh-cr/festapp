@@ -1,14 +1,12 @@
 import 'dart:convert';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
-import 'package:fstapp/data_models_eshop/product_type_model.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/dialogs/products_dialog.dart';
@@ -94,8 +92,8 @@ class EshopColumns {
         type: TrinaColumnType.select(
           OrderModel.statesToDataGridFormat(),
         ),
-        renderer: (renderer) => DataGridHelper.backgroundFromText(renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
-        width: 120,
+        renderer: (renderer) => DataGridHelper.orderState(context, renderer, OrderModel.singleDataGridStateToColor, OrderModel.statesDataGridToUpper),
+        width: 140,
         textAlign: TrinaColumnTextAlign.center,
       ),
     ],

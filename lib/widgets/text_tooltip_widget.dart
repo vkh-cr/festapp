@@ -6,10 +6,10 @@ class TextTooltipWidget extends StatelessWidget {
   final Widget child;
 
   const TextTooltipWidget({
-    Key? key,
+    super.key,
     required this.content,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
