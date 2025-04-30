@@ -10,7 +10,7 @@ import 'package:fstapp/data_services/rights_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class SongbookContent extends StatefulWidget {
-  const SongbookContent({Key? key}) : super(key: key);
+  const SongbookContent({super.key});
 
   @override
   _SongbookContentState createState() => _SongbookContentState();

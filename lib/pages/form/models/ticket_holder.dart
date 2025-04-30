@@ -17,16 +17,12 @@ class TicketHolder extends FieldHolder {
   final List<FieldHolder> fields;
 
   TicketHolder({
-    required String fieldType,
+    required super.fieldType,
     required this.maxTickets,
     required this.fields,
-    bool isRequired = true,
-    required int id,
-  }) : super(
-    fieldType: fieldType,
-    isRequired: isRequired,
-    id: id,
-  );
+    super.isRequired = true,
+    required super.id,
+  });
 
   @override
   Map<String, dynamic> toJson() {

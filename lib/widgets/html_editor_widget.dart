@@ -8,12 +8,12 @@ class HtmlEditorWidget extends StatefulWidget {
   final QuillEditorController controller;
   final Function(String)? onTextChanged;
 
-  HtmlEditorWidget({
+  const HtmlEditorWidget({
     required this.initialContent,
     required this.controller,
     this.onTextChanged,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   _HtmlEditorWidgetState createState() => _HtmlEditorWidgetState();

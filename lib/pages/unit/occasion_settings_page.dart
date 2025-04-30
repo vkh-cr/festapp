@@ -26,7 +26,7 @@ import 'package:fstapp/widgets/html_view.dart';
 
 class OccasionSettingsPage extends StatefulWidget {
   final OccasionModel occasion;
-  const OccasionSettingsPage({Key? key, required this.occasion}) : super(key: key);
+  const OccasionSettingsPage({super.key, required this.occasion});
 
   @override
   _OccasionSettingsPageState createState() => _OccasionSettingsPageState();
@@ -41,6 +41,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
   late TextEditingController _linkController;
   String? _description;
   bool _isOpen = false;
+  bool _isHidden = false;
 
   // For feature search and filtering
   String _featureSearchQuery = "";
@@ -55,7 +56,8 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
     _to = widget.occasion.endTime;
     _linkController = TextEditingController(text: _link);
     _description = widget.occasion.description ?? "";
-    _isOpen = widget.occasion.isOpen ?? false;
+    _isOpen = widget.occasion.isOpen;
+    _isHidden  = widget.occasion.isHidden;
     _featureSearchController = TextEditingController();
 
     final defaultFeatures = FeatureService.getDefaultFeatures();
@@ -89,6 +91,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
       widget.occasion.endTime = _to;
       widget.occasion.description = _description;
       widget.occasion.isOpen = _isOpen;
+      widget.occasion.isHidden = _isHidden;
       await DbOccasions.updateOccasion(widget.occasion);
       ToastHelper.Show(context, "${"Saved".tr()}: ${widget.occasion.title!}");
       Navigator.of(context).pop();
@@ -303,6 +306,24 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                     },
                   ),
                   const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: Row(
+                      children: [
+                        Expanded(child: Text("Hide".tr())),
+                        HelpWidget(
+                          title: "Hide".tr(),
+                          content: "This determines whether this event is hidden from list views.".tr(),
+                        ),
+                      ],
+                    ),
+                    value: _isHidden,
+                    onChanged: (value) {
+                      setState(() {
+                        _isHidden = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _linkController,
                     decoration: InputDecoration(
@@ -354,7 +375,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                           const SizedBox(height: 8),
                           ...enabledFeatures.map((feature) =>
                               FeatureForm(feature: feature, occasion: widget.occasion.id!)
-                          ).toList(),
+                          ),
                         ],
                         if (disabledFeatures.isNotEmpty) ...[
                           const SizedBox(height: 16),
@@ -362,7 +383,7 @@ class _OccasionSettingsPageState extends State<OccasionSettingsPage> {
                           const SizedBox(height: 8),
                           ...disabledFeatures.map((feature) =>
                               FeatureForm(feature: feature, occasion: widget.occasion.id!)
-                          ).toList(),
+                          ),
                         ],
                       ],
                     ),

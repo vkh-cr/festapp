@@ -6,7 +6,7 @@ import 'package:fstapp/pages/occasionAdmin/path_groups_content.dart';
 import 'package:fstapp/theme_config.dart';
 
 class PlacesTab extends StatefulWidget {
-  const PlacesTab({Key? key}) : super(key: key);
+  const PlacesTab({super.key});
 
   @override
   _PlacesTabState createState() => _PlacesTabState();
