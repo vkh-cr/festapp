@@ -6,10 +6,10 @@ class PopButton extends StatelessWidget {
   final double iconSize;
 
   const PopButton({
-    Key? key,
+    super.key,
     this.color,
     this.iconSize = 24.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -6,10 +6,10 @@ class ScheduleBackButton extends StatelessWidget {
   final double iconSize;
 
   const ScheduleBackButton({
-    Key? key,
+    super.key,
     this.color,
     this.iconSize = 24.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

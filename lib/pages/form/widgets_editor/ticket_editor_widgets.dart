@@ -11,7 +11,6 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import '../pages/form_editor_content.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {

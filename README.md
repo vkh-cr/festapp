@@ -8,35 +8,98 @@ Mobile solution for your festival, conference or event.
 ---
 ## Features
 
-- Everybody sees:
-  - Timeline - Schedule overview by time and day.
-  - Event detail - Includes: Time, Place (with link), Content, Subevents, Sign In/Out button.
-  - Timetable - View on event entries by the axis Time and Place.
-  - My schedule - Attendee can add event entries into his own list.
-  - News/Notifications - Receive news/notifications relevant to event.
-  - Map - Map with current user location and places with custom icons and description.
-  - Info - Various information supporting clickable phone numbers, e-mails or other hypertext.
-  - Songs - Page with list of Songs with possibility to increase font size.
-- Signed in user sees:
-  - User profile - Name, e-mail, sex, role, accommodation (with link).
-  - Limited capacity events.
-  - Groups (discuss groups).
-  - Synchronized "My schedule".
-- Admin sees:
-  - Admin dashboard with possibility to change: Information, Events, Places, Groups, Exclusivity, Users.
-  - User import from CSV table.
-  - Send News/Notifications.
-  - Change or delete content of Event, Information or News via included Text Editor.
-- Other features
-  - Available on Android, iOS and Web.
-  - Available Offline: Timeline, Event detail, Timetable, My Schedule, News, Map, Info, Songs, User profile.
-  - Languages: English, Czech, Slovak, Polish, German, Ukrainan.
- 
+- Available on Android, iOS, and Web.
+- Event is available for offline use (Android, iOS).
+- Dark and light modes are available.
+
+---
+- Schedule
+  - Timeline – Schedule overview by time and day.
+  - Event detail – Includes: Time, Place (with link), Content, Subevents, Sign In/Sign Out button.
+  - Timetable – View event entries on the axes of Time and Place.
+  - My schedule – Attendee can add event entries to their own list.
+
+<p align="center">
+  <img src="repo-data/screenshots/schedule2.png?raw=true" alt="schedule2" title="schedule2" width="200" />
+  <img src="repo-data/screenshots/schedule1.png?raw=true" alt="schedule1" title="schedule1" width="200" />
+  <img src="repo-data/screenshots/schedule5.png?raw=true" alt="schedule5" title="schedule5" width="200" />
+  <img src="repo-data/screenshots/schedule3.png?raw=true" alt="schedule3" title="schedule3" width="200" />
+</p>
+
+- Map
+  - Map with current user location, places, and paths with custom icons and descriptions. It is also possible to set up an offline map (Android, iOS).
+
+<p align="center">
+  <img src="repo-data/screenshots/map1.png?raw=true" alt="map1" title="map1" width="220" />
+  <img src="repo-data/screenshots/map2.png?raw=true" alt="map2" title="map2" width="220" />
+  <img src="repo-data/screenshots/map4.png?raw=true" alt="map4" title="map4" width="220" />
+</p>
+
+- News/Notifications
+  - Receive news and push notifications relevant to the event.
+  - Push notifications are supported on all platforms – Android, iOS, and Web.
+
+<p align="center">
+  <img src="repo-data/screenshots/news3.png?raw=true" alt="news3" title="news3" width="220" />
+  <img src="repo-data/screenshots/news2.png?raw=true" alt="news2" title="news2" width="220" />
+</p>
+  
+- Info/Songbook/Game
+  - Various information about the event, a Songbook with font-size increase/decrease, and a groups-based code-guessing game.
+
+- Administration/Feature settings
+  - Overview of all event data, map, groups, users, rights, and other settings.
+  - Setup of multiple events.
+
+- User/Companions/Workshops
+  - User profile with personal data.
+  - Ability to import users from a table.
+  - Creation of events with limited capacity (workshops) and creation of companions.
+  - QR code for workshop entry verification.
+
+<p align="center">
+  <img src="repo-data/screenshots/user1.png?raw=true" alt="user1" title="user1" width="200" />
+  <img src="repo-data/screenshots/user3.png?raw=true" alt="user3" title="user3" width="200" />
+  <img src="repo-data/screenshots/user4.png?raw=true" alt="user4" title="user4" width="200" />
+  <img src="repo-data/screenshots/user5.png?raw=true" alt="user5" title="user5" width="200" />
+</p>
+
+- Ticket/Form/Seat reservation
+  - Support for creation of custom forms (similar to Google Forms) with priced products.
+  - Creation of custom tickets with custom graphics.
+  - Creation of a seat reservation component.
+
+<p align="center">
+  <img src="repo-data/screenshots/form1.png?raw=true" alt="form1" title="form1" width="200" />
+  <img src="repo-data/screenshots/form3.png?raw=true" alt="form3" title="form3" width="200" />
+  <img src="repo-data/screenshots/form4.png?raw=true" alt="form4" title="form4" width="200" />
+  <img src="repo-data/screenshots/form5.png?raw=true" alt="form5" title="form5" width="200" />
+</p>
+
+- Orders/Transactions
+  - Order management, bank payment synchronization, automated sending, and creation of paid tickets.
+
+- Email Templates
+  - Customization of all email templates.
+
+<p align="center">
+  <img src="repo-data/screenshots/email1.png?raw=true" alt="email1" title="email1" width="220" />
+  <img src="repo-data/screenshots/email2.png?raw=true" alt="email2" title="email2" width="220" />
+  <img src="repo-data/screenshots/email3.png?raw=true" alt="email3" title="email3" width="220" />
+</p>
+
+- Ticket scanning
+  - QR-code-based ticket verification.
+
 ---
 ## Architecture
-The solution is based on the [Flutter](https://github.com/flutter/flutter) framework with the Dart language.
-As a backend, the serverless service [Supabase](https://github.com/supabase/supabase) is used. 
-Both technologies are chosen to speed up development, and they have effectively met this requirement.
+
+This project is built using the [Flutter](https://github.com/flutter/flutter) framework and the Dart programming language.
+
+For the backend, it uses [Supabase](https://github.com/supabase/supabase), a serverless platform. It includes:
+
+- Deno functions written in TypeScript  
+- PostgreSQL scripts for database operations
 
 ---
 ## Setup
