@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 
 class UserHeaderWidget extends StatefulWidget {
   final Color? appBarIconColor;
-  const UserHeaderWidget({Key? key, this.appBarIconColor}) : super(key: key);
+  const UserHeaderWidget({super.key, this.appBarIconColor});
 
   @override
   _UserHeaderWidgetState createState() => _UserHeaderWidgetState();

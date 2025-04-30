@@ -15,7 +15,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class PlacesContent extends StatefulWidget {
-  const PlacesContent({Key? key}) : super(key: key);
+  const PlacesContent({super.key});
 
   @override
   _PlacesContentState createState() => _PlacesContentState();

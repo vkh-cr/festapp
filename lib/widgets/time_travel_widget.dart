@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 class TimeTravelWidget extends StatefulWidget {
+  const TimeTravelWidget({super.key});
+
   @override
   _TimeTravelWidgetState createState() => _TimeTravelWidgetState();
 }
