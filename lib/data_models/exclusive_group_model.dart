@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class ExclusiveGroupModel extends ITrinaRowModel {
 
+  @override
   int? id;
   String? title;
   List<int>? events;
@@ -17,30 +19,24 @@ class ExclusiveGroupModel extends ITrinaRowModel {
 
   factory ExclusiveGroupModel.fromJson(Map<String, dynamic> json) {
     return ExclusiveGroupModel(
-      id: json[idColumn],
-      title: json.containsKey(titleColumn) ? json[titleColumn] : null,
-      events: json.containsKey(exclusiveEventsTable) ? List<int>.from(json[exclusiveEventsTable].map((e)=>e["event"])) : null,
+      id: json[Tb.exclusive_groups.id],
+      title: json.containsKey(Tb.exclusive_groups.title) ? json[Tb.exclusive_groups.title] : null,
+      events: json.containsKey(Tb.exclusive_events.table) ? List<int>.from(json[Tb.exclusive_events.table].map((e)=>e["event"])) : null,
   );
   }
 
-  static const String idColumn = "id";
-  static const String titleColumn = "title";
-  static const String eventsColumn = "events";
-  static const String exclusiveGroupsTable = "exclusive_groups";
-  static const String exclusiveEventsTable = "exclusive_events";
-  static const String exclusiveEventsGroupColumn = "group";
 
   static ExclusiveGroupModel fromPlutoJson(Map<String, dynamic> json) {
 
     List<int> events = [];
-    if(json[eventsColumn].toString().trim().isNotEmpty)
+    if(json[Tb.events.table].toString().trim().isNotEmpty)
     {
-      events = json[eventsColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
+      events = json[Tb.events.table].toString().split(",").map((e) => int.parse(e.trim())).toList();
     }
 
     return ExclusiveGroupModel(
-      id: json[idColumn] == -1 ? null : json[idColumn],
-      title: json[titleColumn],
+      id: json[Tb.exclusive_groups.id] == -1 ? null : json[Tb.exclusive_groups.id],
+      title: json[Tb.exclusive_groups.title],
       events: events
     );
   }
@@ -48,9 +44,9 @@ class ExclusiveGroupModel extends ITrinaRowModel {
   @override
   TrinaRow toTrinaRow(BuildContext context) {
     return TrinaRow(cells: {
-      idColumn: TrinaCell(value: id),
-      titleColumn: TrinaCell(value: title),
-      eventsColumn: TrinaCell(value: events?.map((e) => e.toString()).join(",")??"")
+      Tb.exclusive_groups.id: TrinaCell(value: id),
+      Tb.exclusive_groups.title: TrinaCell(value: title),
+      Tb.events.table: TrinaCell(value: events?.map((e) => e.toString()).join(",")??"")
     });
   }
 

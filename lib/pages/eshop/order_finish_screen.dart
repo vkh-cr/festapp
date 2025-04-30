@@ -8,10 +8,10 @@ class FinishOrderScreen extends StatefulWidget {
   final VoidCallback onResetForm;
 
   const FinishOrderScreen({
-    Key? key,
+    super.key,
     required this.orderFutureFunction,
     required this.onResetForm,
-  }) : super(key: key);
+  });
 
   @override
   _FinishOrderScreenState createState() => _FinishOrderScreenState();

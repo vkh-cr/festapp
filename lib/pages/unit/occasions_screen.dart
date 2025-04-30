@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,7 @@ import 'package:fstapp/widgets/occasion_edit_card.dart';
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
 
-  const OccasionsScreen({Key? key, required this.unit}) : super(key: key);
+  const OccasionsScreen({super.key, required this.unit});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();
@@ -111,6 +110,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
         .where((o) => o.startTime!.isBefore(now) && o.endTime!.isAfter(now))
         .toList();
     final upcomingEvents = _occasions.where((o) => o.startTime!.isAfter(now)).toList();
+    upcomingEvents.sort((a, b) => a.startTime!.compareTo(b.startTime!));
     final pastEvents = _occasions.where((o) => o.endTime!.isBefore(now)).toList();
 
     return Scaffold(

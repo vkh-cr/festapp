@@ -6,6 +6,7 @@ import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
 
 class TransactionModel extends ITrinaRowModel {
+  @override
   int? id;
   int? transactionId;
   DateTime? date;

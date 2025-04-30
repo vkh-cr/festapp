@@ -8,6 +8,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 @RoutePage()
 class InstanceInstallPage extends StatefulWidget {
   static const ROUTE = "instanceInstall";
+
+  const InstanceInstallPage({super.key});
   @override
   _InstanceInstallPageState createState() => _InstanceInstallPageState();
 }
@@ -203,7 +205,7 @@ class OperationSectionWidget extends StatefulWidget {
   final TextEditingController projectUrlController;
 
   const OperationSectionWidget({
-    Key? key,
+    super.key,
     required this.title,
     required this.dbController,
     required this.repoController,
@@ -211,7 +213,7 @@ class OperationSectionWidget extends StatefulWidget {
     this.fixedDirectory,
     this.customDirectory = false,
     this.initialDirectory,
-  }) : super(key: key);
+  });
 
   @override
   _OperationSectionWidgetState createState() => _OperationSectionWidgetState();

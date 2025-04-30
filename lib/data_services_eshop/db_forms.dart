@@ -4,7 +4,6 @@ import 'package:fstapp/data_models/form_model.dart';
 import 'package:fstapp/data_models/form_response_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/components/blueprint/blueprint_model.dart';
-import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
@@ -106,8 +105,9 @@ class DbForms {
   static Future<List<FormResponseModel>> getAllResponses(String formLink) async {
     var allFields = await getAllFormFields(formLink);
     var orders = await DbOrders.getAllOrders(formLink);
+    var onlyFormOrders = orders.where((o) => o.form?.link == formLink);
     return List<FormResponseModel>.from(
-      orders.map((x) => FormResponseModel.fromOrder(x, allFields)),
+      onlyFormOrders.map((x) => FormResponseModel.fromOrder(x, allFields)),
     );
   }
 
@@ -121,25 +121,25 @@ class DbForms {
     final int formId = formResponse[Tb.forms.id] as int;
 
     final fieldsData = await _supabase
-        .from(TbEshop.form_fields.table)
+        .from(Tb.form_fields.table)
         .select(
-        "${TbEshop.form_fields.id},"
-            "${TbEshop.form_fields.created_at},"
-            "${TbEshop.form_fields.title},"
-            "${TbEshop.form_fields.description},"
-            "${TbEshop.form_fields.data},"
-            "${TbEshop.form_fields.type},"
-            "${TbEshop.form_fields.is_required},"
-            "${TbEshop.form_fields.form},"
-            "${TbEshop.form_fields.is_hidden},"
-            "${TbEshop.form_fields.order},"
-            "${TbEshop.form_fields.product_type},"
-            "${TbEshop.form_fields.is_ticket_field}"
+        "${Tb.form_fields.id},"
+            "${Tb.form_fields.created_at},"
+            "${Tb.form_fields.title},"
+            "${Tb.form_fields.description},"
+            "${Tb.form_fields.data},"
+            "${Tb.form_fields.type},"
+            "${Tb.form_fields.is_required},"
+            "${Tb.form_fields.form},"
+            "${Tb.form_fields.is_hidden},"
+            "${Tb.form_fields.order},"
+            "${Tb.form_fields.product_type},"
+            "${Tb.form_fields.is_ticket_field}"
     )
-        .eq(TbEshop.form_fields.form, formId)
-        .eq(TbEshop.form_fields.is_ticket_field, false)
-        .neq(TbEshop.form_fields.type, FormHelper.fieldTypeTicket)
-        .order(TbEshop.form_fields.order, ascending: true);
+        .eq(Tb.form_fields.form, formId)
+        .eq(Tb.form_fields.is_ticket_field, false)
+        .neq(Tb.form_fields.type, FormHelper.fieldTypeTicket)
+        .order(Tb.form_fields.order, ascending: true);
 
     // Step 3: Map the retrieved data to a list of FormFieldModel instances
     List<FormFieldModel> formFields = [];

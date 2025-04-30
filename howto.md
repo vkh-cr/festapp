@@ -10,39 +10,39 @@
 - Visit [supabase.com](https://supabase.com) and start a new project.
 
 ##### Supabase / Database Setup
-- Launch the installation tool on [live.festapp.net/#/instanceInstall](https://live.festapp.net/#/instanceInstall) (or your build your localhost with Flutter Web).
-- Fill in the correct reference links and connection string with the Database password.
-- Copy generated supabase functions from installation tool and and deploy them to Supabase. For deployment is needed:
+1. Launch the installation tool on [live.festapp.net/#/instanceInstall](https://live.festapp.net/#/instanceInstall) (or build your own and run on localhost with Flutter Web).
+2. Fill in the correct reference links and connection string with your Database password (It can be obtained via Supabase - Project Settings - Database - Database password).
+3. Copy composed supabase functions from installation tool and deploy them to Supabase via CLI. For deployment is needed:
     - Docker
     - Supabase CLI
-- Then run installation tool functions (it will seed SQL from the repository):
-    - Tables
-    - Functions
-    - Policies
-    - Seed basic values
+4. Run each section - this will get SQL scripts from the GitHub and seed them to your Database. Follow the order:
+
+       1. Tables  
+       2. Functions  
+       3. Policies  
+       4. Seed (you can create new admin account here)
 
 ##### Notifications
 - Visit [OneSignal Dashboard](https://dashboard.onesignal.com/)
-- Get FCM key for Android (can be the same as others).
-- Get App ID and set up in `appConfig`.
-- Follow the [Flutter SDK Setup](https://documentation.onesignal.com/docs/flutter-sdk-setup).
-- Upload Apple P8 file.
-- Update Group ID.
-- Add to the same app group with OneSignal.
+- For all platforms follow the [OneSignal Flutter SDK Setup](https://documentation.onesignal.com/docs/flutter-sdk-setup).
+- Android can be setup once for each app.
+- Apple/iOS needs additional setup and it must be setup for each app individually:
+    - Get App ID and set up in `appConfig`.
+    - Upload Apple P8 file.
+    - Update Group ID.
+    - Add to the same app group with OneSignal.
 
 ##### Email Setup (SMTP)
-- Get a SMTP server with SMTP variables (see below).
+- Get a SMTP server (e.g. AWS) with SMTP variables (see below).
 - Edit and seed the password reset template.
 
 ##### Environment Variables
 - Fill `.env` file as following:
 ```
-ONESIGNAL_APP_ID=
-USER_AUTH_KEY=
-ONESIGNAL_REST_API_KEY=
 SMTP_HOSTNAME=
 SMTP_USER_NAME=
 SMTP_USER_PASSWORD=
+# default sender email address
 DEFAULT_EMAIL=
 # url in format https://kjdpmixlnhntmxjedpxh.supabase.co
 PROJECT_URL=
@@ -96,9 +96,9 @@ fvm dart run flutter_launcher_icons
 - Set up Netlify from branch.
 - Example Netlify setup for domain `app.festapp.net`:
 
-  Type: A  
-  Name: app  
-  Value: 75.2.60.5
+      Type: A  
+      Name: app  
+      Value: 75.2.60.5
 
 ##### Android Deployment
 - Create a new app.
@@ -123,16 +123,11 @@ fvm dart run flutter_launcher_icons
 
 ##### iOS Deployment
 - Create a new app on App Store Connect.
-- Upload 3 types of screenshots.
+- Upload 3 screenshots for iPhone and iPad.
 - Complete privacy settings.
 
 ##### Screenshots
 - Use [App Mockup Studio](https://studio.app-mockup.com/).
-- Devices:
-    - iPhone 11 Pro Max
-    - iPad Pro 12.9 (6th Gen)
-- Recommended Resolutions:
-    - 1320×2868 px, 2868×1320 px
-    - 1290×2796 px, 2796×1290 px
-    - 1242×2688 px, 2688×1242 px
-    - 1284×2778 px, 2778×1284 px
+- Devices (Simulator and Mockup Studio):
+    - iPhone 16 Pro Max
+    - iPad Pro 12.9

@@ -36,7 +36,7 @@ class DbTickets {
           if(tt[TbEshop.tickets.ticket_symbol] != t.ticketSymbol){
             continue;
           }
-          for(var p in tt[TbEshop.products.table]){
+          for(var p in tt[TbEshop.products.table]??[]){
             t.totalPrice = t.totalPrice! + (p[TbEshop.products.price] ?? 0);
           }
         }

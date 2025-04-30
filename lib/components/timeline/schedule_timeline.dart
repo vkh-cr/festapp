@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
-import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:timelines_plus/timelines_plus.dart';

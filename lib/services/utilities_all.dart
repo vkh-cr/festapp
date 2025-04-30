@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class Utilities {
   static String replaceIfNullOrEmpty(String? original, String replacement){
@@ -25,6 +24,16 @@ class Utilities {
     );
 
     return currencyFormatter.format(price);
+  }
+
+  static String formatCurrencyCode(BuildContext context, {String? currencyCode}) {
+    final locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+    final currency = currencyCode ?? 'CZK';
+    final NumberFormat simpleFormatter = NumberFormat.simpleCurrency(
+      locale: locale,
+      name: currency,
+    );
+    return simpleFormatter.currencySymbol;
   }
 
   static bool isValidUrl(String link) {

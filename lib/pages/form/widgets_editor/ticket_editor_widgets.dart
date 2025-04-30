@@ -9,8 +9,8 @@ import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import '../pages/form_editor_content.dart';
 import 'product_type_editor.dart';
 
 class TicketEditorWidgets {
@@ -169,7 +169,7 @@ class TicketEditorWidgets {
                 child: Row(
                   children: [
                     Expanded(
-                      flex: 10,
+                      flex: 9,
                       child: Text(
                         "Title".tr(),
                         style: Theme.of(context)
@@ -179,7 +179,7 @@ class TicketEditorWidgets {
                       ),
                     ),
                     Expanded(
-                      flex: 2,
+                      flex: 3,
                       child: Text(
                         "Price".tr(),
                         style: Theme.of(context)
@@ -213,7 +213,7 @@ class TicketEditorWidgets {
                     child: Row(
                       children: [
                         Expanded(
-                          flex: 10,
+                          flex: 9,
                           child: Row(
                             children: [
                               Flexible(
@@ -236,9 +236,10 @@ class TicketEditorWidgets {
                           ),
                         ),
                         Expanded(
-                          flex: 2,
+                          flex: 3,
                           child: Text(
-                            '${product.price ?? 0}',
+                            // Format the price together with its currency.
+                            Utilities.formatPrice(context, product.price ?? 0, currencyCode: product.currencyCode),
                             style: rowStyle,
                           ),
                         ),
@@ -246,7 +247,7 @@ class TicketEditorWidgets {
                           Expanded(
                             flex: 3,
                             child: Text(
-                              capacityText,
+                              formatOrderedCount(product.orderedCount, product.maximum),
                               style: rowStyle,
                               textAlign: TextAlign.center,
                               maxLines: 1,

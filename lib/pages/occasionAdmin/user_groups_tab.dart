@@ -18,7 +18,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class UserGroupsTab extends StatefulWidget {
-  const UserGroupsTab({Key? key}) : super(key: key);
+  const UserGroupsTab({super.key});
 
   @override
   _UserGroupsTabState createState() => _UserGroupsTabState();
