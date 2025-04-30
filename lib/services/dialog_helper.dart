@@ -20,12 +20,12 @@ import '../widgets/drop_file.dart';
 
 class DialogHelper{
 
-  static void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> _allUsers, String setText) {
+  static void chooseUser(BuildContext context, void onPressedAction(UserInfoModel), List<UserInfoModel> allUsers, String setText) {
     showSearch(
         context: context,
         delegate: SearchPage<UserInfoModel>(
           showItemsOnEmpty: true,
-          items: _allUsers,
+          items: allUsers,
           searchLabel: "Search participants".tr(),
           suggestion: Center(
             child: const Text(
@@ -225,7 +225,7 @@ class DialogHelper{
         String confirmButtonMessage = "Ok",
         String cancelButtonMessage = "Storno",
       ]) async {
-    final TextEditingController _messageController = TextEditingController();
+    final TextEditingController messageController = TextEditingController();
     String? result;
 
     await showDialog(
@@ -238,7 +238,7 @@ class DialogHelper{
               children: [
                 PasswordField(
                   label: hint,
-                  controller: _messageController,
+                  controller: messageController,
                   passwordType: AutofillHints.password,
                 ),
               ],
@@ -251,8 +251,8 @@ class DialogHelper{
             ),
             ElevatedButton(
               onPressed: () {
-                result = _messageController.text;
-                _messageController.clear();
+                result = messageController.text;
+                messageController.clear();
                 Navigator.pop(context);
               },
               child: Text(confirmButtonMessage),

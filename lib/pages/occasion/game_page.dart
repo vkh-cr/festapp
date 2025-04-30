@@ -18,7 +18,7 @@ class GamePage extends StatefulWidget {
 
   static const ROUTE = "game";
 
-  GamePage({super.key});
+  const GamePage({super.key});
 
   @override
   _GamePageState createState() => _GamePageState();

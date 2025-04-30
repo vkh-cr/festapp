@@ -5,18 +5,17 @@ import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
 import 'dart:async';
 
 class SearchTransactionsScreen extends StatefulWidget {
   final int paymentInfoId;
   final int bankAccount;
 
-  SearchTransactionsScreen({
-    Key? key,
+  const SearchTransactionsScreen({
+    super.key,
     required this.paymentInfoId,
     required this.bankAccount,
-  }) : super(key: key);
+  });
 
   @override
   _SearchTransactionsScreenState createState() => _SearchTransactionsScreenState();
