@@ -135,7 +135,7 @@ class EshopColumns {
         enableAutoEditing: true,
         title: "Maximum".tr(),
         field: TbEshop.products.maximum,
-        formatter: (s) => s == 0 ? "" : s,
+        formatter: (s) => s == 0 ? "" : s.toString(),
         applyFormatterInEditing: true,
         type: TrinaColumnType.number(defaultValue: 0, negative: false),
         textAlign: TrinaColumnTextAlign.end,
