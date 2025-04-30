@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +19,7 @@ import 'package:fstapp/widgets/occasion_edit_card.dart';
 class OccasionsScreen extends StatefulWidget {
   final UnitModel unit;
 
-  const OccasionsScreen({Key? key, required this.unit}) : super(key: key);
+  const OccasionsScreen({super.key, required this.unit});
 
   @override
   _OccasionsScreenState createState() => _OccasionsScreenState();

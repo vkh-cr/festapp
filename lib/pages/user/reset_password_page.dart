@@ -15,7 +15,7 @@ import 'package:fstapp/widgets/password_field.dart';
 class ResetPasswordPage extends StatefulWidget {
   static const ROUTE = "resetPassword";
 
-  const ResetPasswordPage({Key? key}) : super(key: key);
+  const ResetPasswordPage({super.key});
 
   @override
   _ResetPasswordPageState createState() => _ResetPasswordPageState();

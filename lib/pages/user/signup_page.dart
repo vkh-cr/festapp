@@ -1,5 +1,4 @@
 import 'package:auto_route/auto_route.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/form_field_model.dart';
 import 'package:fstapp/data_models/form_model.dart';
@@ -91,7 +90,7 @@ class _SignupPageState extends State<SignupPage> {
                 child: AutofillGroup(
                   child: Column(
                     children: [
-                    ...FormHelper.getAllFormFields(context, formHolder!.controller!.globalKey!, formHolder!),
+                    ...FormHelper.getAllFormFields(context, formHolder!.controller!.globalKey, formHolder!),
                       const SizedBox(
                         height: 16,
                       ),

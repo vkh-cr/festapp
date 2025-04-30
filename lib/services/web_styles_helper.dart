@@ -3,9 +3,20 @@ import 'package:flutter/material.dart';
 
 import 'js/js_interop.dart';
 
+
 extension ColorString on Color {
-  String toHexString() {
-    return '#${(a.toInt() & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  String toHexString({bool includeAlpha = false}) {
+    int red = (r * 255).round();
+    int green = (g * 255).round();
+    int blue = (b * 255).round();
+    int alpha = (a * 255).round();
+
+    final redHex = red.toRadixString(16).padLeft(2, '0');
+    final greenHex = green.toRadixString(16).padLeft(2, '0');
+    final blueHex = blue.toRadixString(16).padLeft(2, '0');
+    final alphaHex = alpha.toRadixString(16).padLeft(2, '0');
+
+    return '#${includeAlpha ? alphaHex + redHex + greenHex + blueHex : redHex + greenHex + blueHex}'.toUpperCase();
   }
 }
 

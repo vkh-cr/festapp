@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
-import 'dart:math' as math;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -60,8 +58,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   final PopupController _popupLayerController = PopupController();
 
   List<IconModel> _icons = [];
-  List<MapMarkerWithText> _markers = [];
-  List<MapMarkerWithText> _selectedMarkers = [];
+  final List<MapMarkerWithText> _markers = [];
+  final List<MapMarkerWithText> _selectedMarkers = [];
   static MapMarkerWithText? focusedMarker;
   static MapMarkerWithText? selectedMarker;
 
