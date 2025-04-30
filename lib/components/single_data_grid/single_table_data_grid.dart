@@ -4,14 +4,14 @@ import 'pluto_abstract.dart';
 import 'single_data_grid_header.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 
 import 'single_data_grid_controller.dart';
 
 class SingleTableDataGrid<T extends ITrinaRowModel> extends StatefulWidget {
   final SingleDataGridController<T> controller;
 
-  const SingleTableDataGrid(this.controller, {Key? key}) : super(key: key);
+  const SingleTableDataGrid(this.controller, {super.key});
 
   @override
   _SingleTableDataGridState<T> createState() => _SingleTableDataGridState<T>();

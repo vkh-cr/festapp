@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/services/TimeHelper.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/services/time_helper.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:intl/intl.dart';
 
 class TimelineWidget extends StatelessWidget {

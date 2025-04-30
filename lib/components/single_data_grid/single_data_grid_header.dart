@@ -1,12 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
+import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
-import 'package:fstapp/components/single_data_grid/data_grid_action.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
-import 'package:fstapp/services/DialogHelper.dart';
-import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/services/dialog_helper.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/theme_config.dart';
 import 'pluto_abstract.dart';
 
 class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
@@ -27,7 +27,15 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
 
   static TrinaGridConfiguration defaultTrinaGridConfiguration(
       BuildContext context, String langCode) {
+    var defaultF = FilterHelper.defaultFilters.toList();
+    defaultF.removeAt(0);
     return TrinaGridConfiguration(
+      columnFilter: TrinaGridColumnFilterConfig(
+          filters: [TrinaFilterTypeContainsNoDiacritics(), ...defaultF],
+          resolveDefaultColumnFilter: (column, resolver) {
+        return resolver<TrinaFilterTypeContainsNoDiacritics>();
+      }
+      ),
       scrollbar: const TrinaGridScrollbarConfig(
         thickness: 12.0,
       ),
@@ -49,35 +57,21 @@ class SingleDataGridHeader<T extends ITrinaRowModel> extends StatefulWidget {
 class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     extends State<SingleDataGridHeader<T>> {
   final SingleDataGridController<T> controller;
-  List<Widget> allChildren = [];
 
-  _SingleDataGridHeaderState(
-      this.controller);
+  _SingleDataGridHeaderState(this.controller);
 
   @override
   Widget build(BuildContext context) {
-    allChildren.clear();
-    var headerChildren = controller.headerChildren ?? [];
-    for (var a in headerChildren) {
-      allChildren.add(
-        ElevatedButton(
-          onPressed: a.isEnabled != null && !a.isEnabled!()
-              ? null
-              : () => a.action!(controller, null),
-          child: Text(a.name ?? "---"),
-        ),
-      );
-    }
-    if (headerChildren.isNotEmpty) {
-      allChildren.insertAll(0, [const VerticalDivider()]);
-    }
+    // Build left-side actions (Add, Discard, Save and any extra header children)
+    List<Widget> leftActions = [];
     var actionsController = controller.actionsExtended;
-    allChildren.insertAll(0, [
+
+    leftActions.addAll([
       if (actionsController?.isAddActionPossible?.call() ?? true)
         ElevatedButton(
           onPressed: actionsController != null &&
-              actionsController!.areAllActionsEnabled != null &&
-              !actionsController!.areAllActionsEnabled!()
+              actionsController.areAllActionsEnabled != null &&
+              !actionsController.areAllActionsEnabled!()
               ? null
               : _addRow,
           child: const Text("Add").tr(),
@@ -106,15 +100,52 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
       ),
     ]);
 
+    if (controller.headerChildren != null && controller.headerChildren!.isNotEmpty) {
+      for (var a in controller.headerChildren!) {
+        leftActions.add(
+          ElevatedButton(
+            onPressed: a.isEnabled != null && !a.isEnabled!()
+                ? null
+                : () => a.action!(controller, null),
+            child: Text(a.name ?? "---"),
+          ),
+        );
+      }
+    }
+
+    // Build right-side actions: the export button if enabled.
+    List<Widget> rightActions = [];
+    if (controller.exportOptions?.visible == true) {
+      rightActions.add(
+        ElevatedButton.icon(
+          onPressed: () => controller.downloadCsv(context),
+          icon: const Icon(Icons.file_download),
+          label: Text("Download Table".tr()),
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Padding(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
-        child: Wrap(
-          spacing: 10,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: allChildren,
+      child: Container(
+        // Remove the fixed width constraint to allow content to expand
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Use min to allow the row to shrink
+          children: [
+            Wrap(
+              spacing: 10,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: leftActions,
+            ),
+            const SizedBox(width: 10), // Minimal space between left and right actions
+            if (rightActions.isNotEmpty)
+              Wrap(
+                spacing: 10,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: rightActions,
+              ),
+          ],
         ),
       ),
     );
@@ -123,8 +154,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
   void _addRow() {
     var newRowsGenerated = controller.stateManager.getNewRows();
 
-    if(controller.newObject != null){
-      var obj = controller.newObject!();
+    if (controller.getNewObject != null) {
+      var obj = controller.getNewObject!();
       TrinaRow<dynamic> newRowReal = obj.toTrinaRow(context)!;
       for (var c in newRowReal.cells.entries) {
         newRowsGenerated[0].cells[c.key] = newRowReal.cells[c.key]!;
@@ -221,3 +252,45 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
     await controller.loadData();
   }
 }
+
+class TrinaFilterTypeContainsNoDiacritics implements TrinaFilterType {
+
+  static String name = TrinaFilterTypeContains.name;
+
+  @override
+  String get title => TrinaFilterTypeContainsNoDiacritics.name;
+
+  @override
+  TrinaCompareFunction get compare => TrinaFilterTypeContainsNoDiacritics.compareContains;
+
+  const TrinaFilterTypeContainsNoDiacritics();
+
+  /// Compares [base] and [search] after removing any diacritics,
+  /// using a RegExp match under the hood.
+  static bool compareContains({
+    required String? base,
+    required String? search,
+    required TrinaColumn column,
+  }) {
+    if (base == null || search == null || search.isEmpty) return false;
+
+    // Normalize both strings by stripping diacritics:
+    final normalizedBase   = Utilities.removeDiacritics(base);
+    final normalizedSearch = Utilities.removeDiacritics(search);
+
+    // Escape the search term so RegExp treats it literally:
+    final pattern = RegExp.escape(normalizedSearch);
+    return _compareWithRegExp(pattern, normalizedBase);
+  }
+
+  /// Internal helper: runs a RegExp literal match.
+  static bool _compareWithRegExp(
+      String pattern,
+      String value, {
+        bool caseSensitive = false,
+      }) {
+    return RegExp(pattern, caseSensitive: caseSensitive).hasMatch(value);
+  }
+}
+
+

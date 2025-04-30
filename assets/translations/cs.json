@@ -540,5 +540,11 @@
   "Indicates the start time from when people can sign in for workshops.": "Ukazuje čas, od kdy se mohou lidé přihlásit na workshopy.",
   "Edit Orders": "Měnit objednávky",
   "Read Orders": "Číst objednávky",
+  "Ticket Type": "Typ vstupenky",
+  "Download Table": "Stáhnout tabulku",
+  "Paths": "Cesty",
+  "Color": "Barva",
+  "Currency": "Měna",
+  "This determines whether this event is hidden from list views.": "Určuje, zda je tato událost skrytá v seznamu událostí.",
   "_": "_"
 }

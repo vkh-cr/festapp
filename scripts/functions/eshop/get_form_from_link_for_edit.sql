@@ -20,9 +20,33 @@ BEGIN
             'occasion', f.occasion,
             'blueprint', f.blueprint,
             'link', f.link,
-            'bank_account', f.bank_account,
+            -- Return full bank_account details as JSON instead of just the id:
+            'bank_account', jsonb_build_object(
+                                'account_number', ba.account_number,
+                                'account_number_human_readable', ba.account_number_human_readable,
+                                'title', ba.title,
+                                'supported_currencies', ba.supported_currencies
+                            ),
             'deadline_duration_seconds', f.deadline_duration_seconds,
+            -- Optionally, if you want to keep the account_number separately, you can leave it:
             'account_number', ba.account_number,
+            'available_bank_accounts', (
+                SELECT jsonb_agg(
+                    jsonb_build_object(
+                        'account_number', ba_inner.account_number,
+                        'account_number_human_readable', ba_inner.account_number_human_readable,
+                        'title', ba_inner.title,
+                        'supported_currencies', ba_inner.supported_currencies
+                    )
+                )
+                FROM eshop.unit_bank_accounts uba
+                JOIN eshop.bank_accounts ba_inner ON uba.bank_account = ba_inner.id
+                WHERE uba.unit = (
+                    SELECT o.unit
+                    FROM public.occasions o
+                    WHERE o.id = f.occasion
+                )
+            ),
             'fields', (
                 SELECT jsonb_agg(
                     jsonb_build_object(
@@ -53,6 +77,7 @@ BEGIN
                                                     'title', p.title,
                                                     'description', p.description,
                                                     'price', p.price,
+                                                    'currency_code', p.currency_code,
                                                     'is_hidden', p.is_hidden,
                                                     'order', p."order",
                                                     'ordered_count', (

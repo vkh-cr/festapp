@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/widgets/standard_dialog.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/dialogs/standard_dialog.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/widgets/html_view.dart';
 
 class OptionDetailEditorDialog extends StatefulWidget {
   final FormOptionModel option;
-  const OptionDetailEditorDialog({super.key, required this.option});
+  final int? occasionId;
+
+  const OptionDetailEditorDialog({super.key, required this.option, this.occasionId});
 
   @override
   _OptionDetailEditorDialogState createState() => _OptionDetailEditorDialogState();
@@ -27,7 +29,10 @@ class _OptionDetailEditorDialogState extends State<OptionDetailEditorDialog> {
   Future<void> _editContent() async {
     RouterService.navigatePageInfo(
       context,
-      HtmlEditorRoute(content: {HtmlEditorPage.parContent: _description}),
+      HtmlEditorRoute(
+          content: {HtmlEditorPage.parContent: _description},
+          occasionId: widget.occasionId,
+      ),
     ).then((value) {
       if (value != null) {
         setState(() {
