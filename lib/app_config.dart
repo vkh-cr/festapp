@@ -19,6 +19,7 @@ class AppConfig {
   //setup occasion id to force occasion
   static const String? forceOccasionLink = "csa2024";
   static const bool isPublicNotificationSendingDisabled = false;
+  static const bool isAllUnit = false;
 
   static const String webLink = "https://aksmcz.netlify.app";
   static const String appStoreLink = "https://apps.apple.com/us/app/csa-2024/id6479449613";

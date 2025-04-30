@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 import 'package:fstapp/data_models_eshop/ticket_model.dart';
 import 'package:fstapp/data_models_eshop/product_model.dart';
@@ -9,10 +11,10 @@ import 'package:fstapp/data_models_eshop/payment_info_model.dart';
 import 'package:fstapp/data_services_eshop/db_orders.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
-import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class OrderModel extends ITrinaRowModel {
+  @override
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
@@ -21,11 +23,12 @@ class OrderModel extends ITrinaRowModel {
   Map<String, dynamic>? data;
   int? occasion;
   int? paymentInfo;
-  int? form;
+  String? formKey;
   String? currencyCode;
   String? noteHidden;
 
   // Relating tickets, spots, products, and payment info to the order
+  FormModel? form;
   List<TicketModel>? relatedTickets;
   List<BlueprintObjectModel>? relatedSpots;
   List<ProductModel>? relatedProducts;
@@ -116,7 +119,7 @@ class OrderModel extends ITrinaRowModel {
     this.data,
     this.occasion,
     this.paymentInfo,
-    this.form,
+    this.formKey,
     this.currencyCode,
     this.relatedTickets,
     this.relatedSpots,
@@ -137,11 +140,14 @@ class OrderModel extends ITrinaRowModel {
       price: json[TbEshop.orders.price] != null
           ? double.tryParse(json[TbEshop.orders.price].toString())
           : null,
+      currencyCode: json[TbEshop.orders.currency_code],
       state: json[TbEshop.orders.state],
+      formKey: json[TbEshop.orders.data] != null
+          ? json[TbEshop.orders.data][TbEshop.orders.data_form]
+          : null,
       data: json[TbEshop.orders.data],
       occasion: json[TbEshop.orders.occasion],
       paymentInfo: json[TbEshop.orders.payment_info],
-      currencyCode: json[TbEshop.orders.currency_code],
       noteHidden: json[TbEshop.orders.note_hidden],
     );
   }
@@ -170,11 +176,11 @@ class OrderModel extends ITrinaRowModel {
     return TrinaRow(cells: {
       TbEshop.orders.id: TrinaCell(value: id ?? 0),
       TbEshop.orders.order_symbol: TrinaCell(value: id ?? 0),
-      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!) : ""),
+      TbEshop.orders.price: TrinaCell(value: price != null ? Utilities.formatPrice(context, price!, currencyCode: currencyCode) : ""),
       TbEshop.orders.state: TrinaCell(value: OrderModel.formatState(state ?? orderedState)),
-      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!) : ""),
-      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!) : ""),
-      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!) : ""),
+      TbEshop.payment_info.amount: TrinaCell(value: paymentInfoModel?.amount != null ? Utilities.formatPrice(context, paymentInfoModel!.amount!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      TbEshop.payment_info.paid: TrinaCell(value: paymentInfoModel?.paid != null ? Utilities.formatPrice(context, paymentInfoModel!.paid!, currencyCode: paymentInfoModel!.currencyCode) : ""),
+      TbEshop.payment_info.returned: TrinaCell(value: paymentInfoModel?.returned != null ? Utilities.formatPrice(context, paymentInfoModel!.returned!, currencyCode: paymentInfoModel!.currencyCode) : ""),
       TbEshop.payment_info.variable_symbol: TrinaCell(value: paymentInfoModel?.variableSymbol ?? 0),
       TbEshop.payment_info.deadline: TrinaCell(
         value: paymentInfoModel?.deadline != null
@@ -195,6 +201,7 @@ class OrderModel extends ITrinaRowModel {
       TbEshop.orders.note_hidden: TrinaCell(value: noteHidden ?? ""),
       TbEshop.orders_history.table: TrinaCell(value: ""),
       TbEshop.transactions.table: TrinaCell(value: ""),
+      Tb.forms.table: TrinaCell(value: form?.link ?? ""),
     });
   }
 

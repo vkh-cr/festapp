@@ -30,6 +30,7 @@ class FormEditorContent extends StatefulWidget {
 class _FormEditorContentState extends State<FormEditorContent> {
   FormModel? form;
   String? formLink;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void didChangeDependencies() {
@@ -148,9 +149,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   final result = await RouterService.navigatePageInfo(
                     context,
                     HtmlEditorRoute(
-                      content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
-                      occasionId: form!.occasion
-                    ),
+                        content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
+                        occasionId: form!.occasion),
                   );
                   if (result != null) {
                     setState(() => form!.headerOff = result as String);
@@ -198,6 +198,15 @@ class _FormEditorContentState extends State<FormEditorContent> {
           ),
         );
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
     }
   }
 
@@ -210,8 +219,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         children: [
           FloatingActionButton(
             onPressed: () {
-              RouterService.navigate(
-                  context, "${FormPage.ROUTE}/$formLink");
+              RouterService.navigate(context, "${FormPage.ROUTE}/$formLink");
             },
             child: const Icon(Icons.remove_red_eye_rounded),
           ),
@@ -232,6 +240,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Column(
@@ -251,19 +260,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           icon: const Icon(Icons.edit),
                           label: Text("Edit content".tr()),
                           onPressed: () async {
-                            final result = await RouterService
-                                .navigatePageInfo(
+                            final result = await RouterService.navigatePageInfo(
                               context,
                               HtmlEditorRoute(
-                                content: {
-                                  HtmlEditorPage.parContent: form!.header ?? ""
-                                },
-                                occasionId: form!.occasion
-                              ),
+                                  content: {HtmlEditorPage.parContent: form!.header ?? ""},
+                                  occasionId: form!.occasion),
                             );
                             if (result != null) {
-                              setState(() =>
-                              form!.header = result as String);
+                              setState(() => form!.header = result as String);
                             }
                           },
                         ),

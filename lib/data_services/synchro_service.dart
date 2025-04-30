@@ -47,6 +47,9 @@ class SynchroService {
     var places = await DbPlaces.getAllPlaces();
     await OfflineDataService.saveAllPlaces(places);
 
+    var paths = await DbPlaces.getAllPathGroups();
+    await OfflineDataService.saveAllPathGroups(paths);
+
     var icons = await DbPlaces.getAllIcons();
     await OfflineDataService.saveAllIcons(icons);
 

@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 
 class TimeDateRangePicker extends StatelessWidget {

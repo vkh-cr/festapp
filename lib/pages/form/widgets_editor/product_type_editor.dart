@@ -180,6 +180,7 @@ class _ProductTypeEditorState extends State<ProductTypeEditor> {
                     });
                     widget.refresh();
                   },
+                  availableCurrencies: widget.form.getSupportedCurrencies(),
                 ),
               // Add product button
               Align(

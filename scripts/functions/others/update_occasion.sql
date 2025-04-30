@@ -10,7 +10,6 @@ DECLARE
     updated_occ JSONB;
     v_feature_form_enabled BOOLEAN;
     v_unit BIGINT;
-    v_bank_account BIGINT;
     new_form_id BIGINT;
     new_product_type_id BIGINT;
     old_unit BIGINT;
@@ -129,20 +128,10 @@ BEGIN
                  WHERE occasion = occ_id
             ) THEN
                 v_unit := (updated_occ->>'unit')::BIGINT;
-                v_bank_account := NULL;
-
-                IF v_unit IS NOT NULL THEN
-                    SELECT ba.bank_account
-                      INTO v_bank_account
-                      FROM eshop.unit_bank_accounts ba
-                     WHERE ba.unit = v_unit
-                     LIMIT 1;
-                END IF;
 
                 INSERT INTO public.forms(
                     link,
                     occasion,
-                    bank_account,
                     created_at,
                     updated_at,
                     deadline_duration_seconds
@@ -150,7 +139,6 @@ BEGIN
                 VALUES (
                     COALESCE(input_data->>'form_link', updated_occ->>'link'),
                     occ_id,
-                    v_bank_account,
                     now,
                     now,
                     604800
@@ -239,7 +227,7 @@ BEGIN
                     is_ticket_field
                 )
                 VALUES (
-                    '',
+                    'Spot',
                     '',
                     '{}'::jsonb,
                     'product_type',

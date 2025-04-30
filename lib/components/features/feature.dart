@@ -72,7 +72,7 @@ class TicketFeature extends Feature {
   String? ticketDarkColor;
   String? ticketBackground;
   // New field to specify type ("named" or "wide")
-  String? type;
+  String? ticketType;
 
   TicketFeature({
     required super.code,
@@ -82,7 +82,7 @@ class TicketFeature extends Feature {
     this.ticketLightColor,
     this.ticketDarkColor,
     this.ticketBackground,
-    this.type,
+    this.ticketType,
   });
 
   factory TicketFeature.fromJson(Map<String, dynamic> json) {
@@ -92,7 +92,7 @@ class TicketFeature extends Feature {
       ticketLightColor: json[FeatureConstants.ticketLightColor],
       ticketDarkColor: json[FeatureConstants.ticketDarkColor],
       ticketBackground: json[FeatureConstants.ticketBackground],
-      type: json[FeatureConstants.ticketType],
+      ticketType: json[FeatureConstants.ticketType],
     );
   }
 
@@ -112,8 +112,8 @@ class TicketFeature extends Feature {
     if (ticketBackground != null) {
       data[FeatureConstants.ticketBackground] = ticketBackground!;
     }
-    if (type != null) {
-      data[FeatureConstants.ticketType] = type!;
+    if (ticketType != null) {
+      data[FeatureConstants.ticketType] = ticketType!;
     }
     return data;
   }

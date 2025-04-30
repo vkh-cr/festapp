@@ -107,6 +107,8 @@ Future<void> initializeEverything() async {
 class MyApp extends StatefulWidget {
   bool isTimeTravelVisible = false;
 
+  MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -125,8 +127,8 @@ class _MyAppState extends State<MyApp> {
     var baseTheme = ThemeConfig.baseTheme();
     return AdaptiveTheme(
       light: ThemeConfig.baseTheme(),
-      dark: ThemeConfig.darkTheme(baseTheme),
-      initial: AdaptiveThemeMode.system,
+      dark: ThemeConfig.isDarkModeEnabled ? ThemeConfig.darkTheme(baseTheme) : baseTheme,
+      initial: ThemeConfig.isDarkModeEnabled ? AdaptiveThemeMode.system : AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp.router(
         routerConfig: RouterService.router.config(navigatorObservers: () => [RoutingObserver()]),
         debugShowCheckedModeBanner: false,
@@ -154,7 +156,7 @@ class _MyAppState extends State<MyApp> {
         ],
         supportedLocales: context.supportedLocales,
         locale: context.locale,
-        title: OccasionHomePage.HOME_PAGE,
+        title: OccasionHomePage.homePageTitle,
         theme: theme,
         darkTheme: darkTheme,
       ).animate().fadeIn(

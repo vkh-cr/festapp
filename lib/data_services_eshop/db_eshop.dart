@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/data_models_eshop/payment_info_model.dart';
+import 'package:fstapp/data_models_eshop/product_model.dart';
 import 'package:fstapp/data_models_eshop/transaction_model.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -86,6 +87,41 @@ class DbEshop {
     }
   }
 
+  static Future<List<ProductModel>?> getProductsForTicketAllAvailable(int ticketId) async {
+    final result = await _supabase
+        .rpc('get_products_for_ticket_all_available', params: {'ticket_id': ticketId});
+    if (result != null && result['code'] == 200) {
+      return (result['data'] as List)
+          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else {
+      return [];
+    }
+  }
+
+  static Future<List<ProductModel>?> getProductsForTicket(int ticketId) async {
+    final result = await _supabase
+        .rpc('get_products_for_ticket', params: {'ticket_id': ticketId});
+    if (result != null && result['code'] == 200) {
+      return (result['data'] as List? ?? [])
+          .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else {
+      return [];
+    }
+  }
+
+  static Future<bool> updateProductsForOrder(int ticketId, List<int> list) async {
+    final result = await _supabase.rpc(
+      'update_ticket_products_ws',
+      params: {'p_ticket_id': ticketId, 'p_product_ids': list},
+    );
+    if (result != null && result['code'] == 200) {
+      return true;
+    }
+    return false;
+  }
+  
 }
 
 class GetTransactionsForOrderResponse {
