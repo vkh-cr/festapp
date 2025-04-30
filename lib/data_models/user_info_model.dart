@@ -1,5 +1,5 @@
 import 'package:fstapp/components/single_data_grid/i_has_id.dart';
-import 'package:fstapp/data_models/CompanionModel.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 import 'package:fstapp/data_models/information_model.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
@@ -8,9 +8,9 @@ import 'package:fstapp/data_models/unit_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:collection/collection.dart';
-import 'package:intl/intl.dart';
 
 class UserInfoModel extends IHasId {
+  @override
   String? id;
   String? email;
   String? name;

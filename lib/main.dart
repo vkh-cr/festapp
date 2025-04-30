@@ -107,6 +107,8 @@ Future<void> initializeEverything() async {
 class MyApp extends StatefulWidget {
   bool isTimeTravelVisible = false;
 
+  MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }

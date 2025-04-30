@@ -18,12 +18,12 @@ class ImageArea extends StatefulWidget {
   final String? hint;
 
   const ImageArea({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.onFileSelected,
     required this.onRemove,
     this.hint,
-  }) : super(key: key);
+  });
 
   @override
   _ImageAreaState createState() => _ImageAreaState();
