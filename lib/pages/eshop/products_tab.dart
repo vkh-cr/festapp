@@ -27,9 +27,9 @@ class _ProductsTabState extends State<ProductsTab> {
     EshopColumns.PRODUCT_TITLE,
     EshopColumns.PRODUCT_PRICE,
     EshopColumns.PRODUCT_CURRENCY_CODE,
-    EshopColumns.PRODUCT_MAXIMUM,
     EshopColumns.PRODUCT_PAID_COUNT,
     EshopColumns.PRODUCT_ORDERED_COUNT,
+    EshopColumns.PRODUCT_MAXIMUM,
     EshopColumns.PRODUCT_ORDER,
   ];
 

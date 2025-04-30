@@ -135,6 +135,8 @@ class EshopColumns {
         enableAutoEditing: true,
         title: "Maximum".tr(),
         field: TbEshop.products.maximum,
+        formatter: (s) => s == 0 ? "" : s.toString(),
+        applyFormatterInEditing: true,
         type: TrinaColumnType.number(defaultValue: 0, negative: false),
         textAlign: TrinaColumnTextAlign.end,
         width: 80,
@@ -446,7 +448,7 @@ class EshopColumns {
             },
             child: Row(
               children: [
-                Icon(Icons.shopping_cart),
+                Icon(Icons.category),
                 Padding(
                   padding: const EdgeInsets.all(6),
                   child: Text("Products".tr()),
