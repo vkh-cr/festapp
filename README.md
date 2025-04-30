@@ -20,10 +20,10 @@ Mobile solution for your festival, conference or event.
   - My schedule – Attendee can add event entries to their own list.
 
 <p align="center">
-  <img src="repo-data/screenshots/schedule2.png?raw=true" alt="schedule2" title="schedule2" width="220" />
-  <img src="repo-data/screenshots/schedule1.png?raw=true" alt="schedule1" title="schedule1" width="220" />
-  <img src="repo-data/screenshots/schedule5.png?raw=true" alt="schedule5" title="schedule5" width="220" />
-  <img src="repo-data/screenshots/schedule3.png?raw=true" alt="schedule3" title="schedule3" width="220" />
+  <img src="repo-data/screenshots/schedule2.png?raw=true" alt="schedule2" title="schedule2" width="200" />
+  <img src="repo-data/screenshots/schedule1.png?raw=true" alt="schedule1" title="schedule1" width="200" />
+  <img src="repo-data/screenshots/schedule5.png?raw=true" alt="schedule5" title="schedule5" width="200" />
+  <img src="repo-data/screenshots/schedule3.png?raw=true" alt="schedule3" title="schedule3" width="200" />
 </p>
 
 - Map
@@ -58,10 +58,10 @@ Mobile solution for your festival, conference or event.
   - QR code for workshop entry verification.
 
 <p align="center">
-  <img src="repo-data/screenshots/user1.png?raw=true" alt="user1" title="user1" width="220" />
-  <img src="repo-data/screenshots/user3.png?raw=true" alt="user3" title="user3" width="220" />
-  <img src="repo-data/screenshots/user4.png?raw=true" alt="user4" title="user4" width="220" />
-  <img src="repo-data/screenshots/user5.png?raw=true" alt="user5" title="user5" width="220" />
+  <img src="repo-data/screenshots/user1.png?raw=true" alt="user1" title="user1" width="200" />
+  <img src="repo-data/screenshots/user3.png?raw=true" alt="user3" title="user3" width="200" />
+  <img src="repo-data/screenshots/user4.png?raw=true" alt="user4" title="user4" width="200" />
+  <img src="repo-data/screenshots/user5.png?raw=true" alt="user5" title="user5" width="200" />
 </p>
 
 - Ticket/Form/Seat reservation
@@ -70,10 +70,10 @@ Mobile solution for your festival, conference or event.
   - Creation of a seat reservation component.
 
 <p align="center">
-  <img src="repo-data/screenshots/form1.png?raw=true" alt="form1" title="form1" width="220" />
-  <img src="repo-data/screenshots/form3.png?raw=true" alt="form3" title="form3" width="220" />
-  <img src="repo-data/screenshots/form4.png?raw=true" alt="form4" title="form4" width="220" />
-  <img src="repo-data/screenshots/form5.png?raw=true" alt="form5" title="form5" width="220" />
+  <img src="repo-data/screenshots/form1.png?raw=true" alt="form1" title="form1" width="200" />
+  <img src="repo-data/screenshots/form3.png?raw=true" alt="form3" title="form3" width="200" />
+  <img src="repo-data/screenshots/form4.png?raw=true" alt="form4" title="form4" width="200" />
+  <img src="repo-data/screenshots/form5.png?raw=true" alt="form5" title="form5" width="200" />
 </p>
 
 - Orders/Transactions
