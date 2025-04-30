@@ -38,6 +38,13 @@ class EshopColumns {
   static const String PRODUCT_ID = "productId";
   static const String PRODUCT_TITLE = "productTitle";
   static const String PRODUCT_PRICE = "productPrice";
+  static const String PRODUCT_IS_HIDDEN = "productIsHidden";
+  static const String PRODUCT_TYPE = "productType";
+  static const String PRODUCT_ORDER = "productOrder";
+  static const String PRODUCT_MAXIMUM = "productMaximum";
+  static const String PRODUCT_ORDERED_COUNT = "productOrderedCount";
+  static const String PRODUCT_PAID_COUNT = "productPaidCount";
+  static const String PRODUCT_CURRENCY_CODE = "productCurrencyCode";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -60,6 +67,112 @@ class EshopColumns {
 
   // Define columns
   static Map<String, dynamic> columnBuilders(BuildContext context) => {
+    PRODUCT_ID: [
+      TrinaColumn(
+        hide: true,
+        readOnly: true,
+        enableEditingMode: false,
+        title: "Id".tr(),
+        field: TbEshop.products.id,
+        type: TrinaColumnType.number(defaultValue: -1),
+        width: 50,
+        renderer: (r) => DataGridHelper.idRenderer(r),
+      ),
+    ],
+    PRODUCT_IS_HIDDEN: [
+      TrinaColumn(
+        title: "Hide".tr(),
+        field: TbEshop.products.is_hidden,
+        type: TrinaColumnType.text(),
+        applyFormatterInEditing: true,
+        enableEditingMode: false,
+        width: 100,
+        renderer: (ctx) =>
+            DataGridHelper.checkBoxRenderer(ctx, TbEshop.products.is_hidden),
+      ),
+    ],
+    PRODUCT_TITLE: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: "Title".tr(),
+        field: TbEshop.products.title,
+        type: TrinaColumnType.text(),
+        width: 200,
+      ),
+    ],
+    PRODUCT_PRICE: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: "Price".tr(),
+        field: TbEshop.products.price,
+        type: TrinaColumnType.number(negative: false, format: "#.##", locale: context.locale.languageCode),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 80,
+      ),
+    ],
+    PRODUCT_TYPE: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Product Type".tr(),
+        field: TbEshop.product_types.type,
+        type: TrinaColumnType.text(),
+        width: 250,
+      ),
+    ],
+    PRODUCT_ORDER: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: "Order".tr(),
+        field: TbEshop.products.order,
+        type: TrinaColumnType.number(defaultValue: 0),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 80,
+      ),
+    ],
+    PRODUCT_MAXIMUM: [
+      TrinaColumn(
+        enableAutoEditing: true,
+        title: "Maximum".tr(),
+        field: TbEshop.products.maximum,
+        type: TrinaColumnType.number(defaultValue: 0, negative: false),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 80,
+      ),
+    ],
+    PRODUCT_ORDERED_COUNT: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Ordered".tr(),
+        field: ProductModel.metaOrderedCount,
+        type: TrinaColumnType.number(defaultValue: 0),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 100,
+      ),
+    ],
+    PRODUCT_PAID_COUNT: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Paid".tr(),
+        field: ProductModel.metaPaidCount,
+        type: TrinaColumnType.number(defaultValue: 0),
+        textAlign: TrinaColumnTextAlign.end,
+        width: 100,
+      ),
+    ],
+    PRODUCT_CURRENCY_CODE: [
+      TrinaColumn(
+        readOnly: true,
+        enableEditingMode: true,
+        title: "Currency".tr(),
+        field: TbEshop.products.currency_code,
+        type: TrinaColumnType.text(),
+        textAlign: TrinaColumnTextAlign.center,
+        width: 80,
+      ),
+    ],
     TICKET_ID: [
       TrinaColumn(
         hide: true,
@@ -344,39 +457,6 @@ class EshopColumns {
         },
       ),
     ],
-    PRODUCT_ID: [
-      TrinaColumn(
-        hide: true,
-        title: "Id".tr(),
-        field: TbEshop.products.id,
-        type: TrinaColumnType.number(defaultValue: -1),
-        readOnly: true,
-        enableEditingMode: false,
-        width: 50,
-        renderer: (rendererContext) => DataGridHelper.idRenderer(rendererContext),
-      ),
-    ],
-    PRODUCT_TITLE: [
-      TrinaColumn(
-        readOnly: true,
-        enableEditingMode: true,
-        title: "Title".tr(),
-        field: TbEshop.products.title,
-        type: TrinaColumnType.text(),
-        width: 200,
-      ),
-    ],
-    PRODUCT_PRICE: [
-      TrinaColumn(
-        readOnly: true,
-        enableEditingMode: true,
-        title: "Price".tr(),
-        field: TbEshop.products.price,
-        type: TrinaColumnType.text(),
-        textAlign: TrinaColumnTextAlign.end,
-        width: 80,
-      ),
-    ],
     PAYMENT_INFO_AMOUNT: [
       TrinaColumn(
         readOnly: true,
@@ -536,7 +616,7 @@ class EshopColumns {
     );
   }
 
-  static const List<String> productCategories = ["others"];
+  static const List<String> productCategories = ["spot", "food", "others"];
 
   static Map<String, TrinaCell> generateProductTypeCells(List<ProductModel> products) {
     // Get the allowed product categories.
