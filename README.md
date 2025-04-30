@@ -1,6 +1,7 @@
 # Festapp
 
-Mobile solution for your festival, conference or event. 
+Festapp is a cross-platform mobile and web app for festivals, conferences, and events. It provides organizers and attendees with powerful tools like schedules, maps, notifications, tickets, forms, and much more.
+
 - Try now on [live.festapp.net](https://live.festapp.net) or install to your phone [here](https://live.festapp.net/#/install).
 - Visit us on website: [festapp.net](https://festapp.net)</br></br>
 ![Alt text](repo-data/festapp-showcase.png?raw=true "Showcase")
