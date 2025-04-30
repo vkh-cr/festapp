@@ -6,12 +6,6 @@ AS $$
 DECLARE
     exists_on_occasion boolean;
 BEGIN
-    -- Check the status of the occasion
-    -- Explicitly reference the table columns to avoid ambiguity
-    IF EXISTS (SELECT 1 FROM public.occasions WHERE id = oc AND is_hidden) THEN
-        RAISE EXCEPTION 'The occasion is hidden and cannot be accessed.';
-    END IF;
-
     -- If the occasion is closed, check if the user exists on the occasion
     IF EXISTS (SELECT 1 FROM public.occasions WHERE id = oc AND NOT is_open) THEN
         -- Use the existing function to check if the user exists on the occasion

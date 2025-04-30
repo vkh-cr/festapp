@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/data_services_eshop/db_eshop.dart';
 import 'package:fstapp/data_services_eshop/db_tickets.dart';
 import 'package:fstapp/pages/occasion/scan_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
@@ -121,7 +120,7 @@ class TicketCodeHelper {
                           Expanded(
                             child: SelectableText(
                               generatedCode.isNotEmpty
-                                  ? '$generatedCode'
+                                  ? generatedCode
                                   : '',
                               style: TextStyle(fontSize: 16),
                             ),

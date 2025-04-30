@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 class ForgotPasswordPage extends StatefulWidget {
   static const ROUTE = "forgotPassword";
 
-  const ForgotPasswordPage({Key? key}) : super(key: key);
+  const ForgotPasswordPage({super.key});
 
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
