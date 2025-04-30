@@ -50,7 +50,6 @@ class AppConfig {
     LanguageModel(const Locale("en"), "English"),
     LanguageModel(const Locale("cs"), "Čeština"),
     LanguageModel(const Locale("pl"), "Polski"),
-    LanguageModel(const Locale("uk"), "українська"),
   ];
 
   static String getUserPrefix(String email){
