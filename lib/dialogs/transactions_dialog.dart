@@ -107,7 +107,6 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     // Calculate dialog height based on screen size, but set a maximum height to ensure it fits on phone screens
     final dialogHeight = MediaQuery.of(context).size.height * 0.6;
@@ -263,138 +262,155 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
             ),
 
           // Transactions List
-          _transactions.isEmpty
-              ? Text("No transactions found.".tr())
-              : SizedBox(
-            width: StylesConfig.formMaxWidth,
-            height: dialogHeight,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _transactions.length,
-              itemBuilder: (context, index) {
-                final transaction = _transactions[index];
-                final counterAccountName =
-                    transaction.counterAccountName ?? transaction.performedBy ?? "N/A".tr();
+          if (_transactions.isEmpty)
+            Text("No transactions found.".tr())
+          else
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: dialogHeight),
+                child: SizedBox(
+                  width: StylesConfig.formMaxWidth,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _transactions.length,
+                    itemBuilder: (context, index) {
+                      final transaction = _transactions[index];
+                      final counterAccountName =
+                          transaction.counterAccountName ??
+                              transaction.performedBy ??
+                              "N/A".tr();
 
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 5),
-                  elevation: 2, // Consistent shadow elevation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Row containing transaction details and the delete icon
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Expanded Column for transaction details
-                            Expanded(
-                              child: Column(
+                      return Card(
+                        margin: EdgeInsets.symmetric(vertical: 5),
+                        elevation: 2, // Consistent shadow elevation
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Row containing transaction details and the delete icon
+                              Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Amount and Counter Account Name
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      // Amount
-                                      SelectableText(
-                                        Utilities.formatPrice(
-                                          context,
-                                          transaction.amount!,
-                                          currencyCode: transaction.currency ?? "N/A",
-                                          decimalDigits: 2,
+                                  // Expanded Column for transaction details
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        // Amount and Counter Account Name
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            // Amount
+                                            SelectableText(
+                                              Utilities.formatPrice(
+                                                context,
+                                                transaction.amount!,
+                                                currencyCode:
+                                                transaction.currency ?? "N/A",
+                                                decimalDigits: 2,
+                                              ),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            // Counter Account Name
+                                            if (counterAccountName.isNotEmpty)
+                                              SelectableText(
+                                                counterAccountName,
+                                                style: TextStyle(
+                                                  fontStyle: FontStyle.italic,
+                                                  color: ThemeConfig.grey600(context),
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                          ],
                                         ),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      // Counter Account Name
-                                      if (counterAccountName.isNotEmpty)
-                                        SelectableText(
-                                          counterAccountName,
-                                          style: TextStyle(
-                                            fontStyle: FontStyle.italic,
-                                            color: ThemeConfig.grey600(context),
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                    ],
+                                        SizedBox(height: 6),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(height: 6),
+                                  // Delete Icon (conditionally shown)
+                                  if (_isBankAdmin())
+                                    IconButton(
+                                      icon: Icon(Icons.delete),
+                                      tooltip: "Remove".tr(),
+                                      onPressed: () =>
+                                          _removeTransaction(transaction),
+                                    ),
                                 ],
                               ),
-                            ),
-                            // Delete Icon (conditionally shown)
-                            if (_isBankAdmin())
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                tooltip: "Remove".tr(),
-                                onPressed: () => _removeTransaction(transaction),
+
+                              // Additional transaction details
+                              // Date
+                              _buildInfoRow(
+                                title: 'Date'.tr(),
+                                value: transaction.date != null
+                                    ? DateFormat.yMMMd(
+                                    context.locale.languageCode)
+                                    .format(transaction.date!)
+                                    : "N/A".tr(),
                               ),
-                          ],
-                        ),
+                              SizedBox(height: 5),
 
-                        // Additional transaction details
-                        // Date
-                        _buildInfoRow(
-                          title: 'Date'.tr(),
-                          value: transaction.date != null
-                              ? DateFormat.yMMMd(context.locale.languageCode).format(transaction.date!)
-                              : "N/A".tr(),
-                        ),
-                        SizedBox(height: 5),
+                              // Amount and Currency
+                              _buildInfoRow(
+                                title: 'Amount'.tr(),
+                                value: transaction.amount != null
+                                    ? Utilities.formatPrice(
+                                  context,
+                                  transaction.amount!,
+                                  currencyCode:
+                                  transaction.currency ?? "N/A",
+                                  decimalDigits: 2,
+                                )
+                                    : "N/A".tr(),
+                              ),
+                              SizedBox(height: 5),
 
-                        // Amount and Currency
-                        _buildInfoRow(
-                          title: 'Amount'.tr(),
-                          value: transaction.amount != null
-                              ? Utilities.formatPrice(
-                            context,
-                            transaction.amount!,
-                            currencyCode: transaction.currency ?? "N/A",
-                            decimalDigits: 2,
-                          )
-                              : "N/A".tr(),
-                        ),
-                        SizedBox(height: 5),
+                              // Bank Account formatted as account/bankcode (bank name)
+                              _buildInfoRow(
+                                title: 'Bank Account'.tr(),
+                                value:
+                                '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
+                              ),
+                              SizedBox(height: 5),
 
-                        // Bank Account formatted as account/bankcode (bank name)
-                        _buildInfoRow(
-                          title: 'Bank Account'.tr(),
-                          value:
-                          '${transaction.counterAccount ?? "N/A".tr()} / ${transaction.bankCode ?? "N/A".tr()} (${transaction.bankName ?? "N/A".tr()})',
-                        ),
-                        SizedBox(height: 5),
+                              // Variable Symbol
+                              if (transaction.vs != null &&
+                                  transaction.vs!.isNotEmpty)
+                                _buildInfoRow(
+                                  title: 'Variable symbol'.tr(),
+                                  value: transaction.vs!,
+                                ),
+                              if (transaction.vs != null &&
+                                  transaction.vs!.isNotEmpty)
+                                SizedBox(height: 5),
 
-                        // Variable Symbol
-                        if (transaction.vs != null && transaction.vs!.isNotEmpty)
-                          _buildInfoRow(
-                            title: 'Variable symbol'.tr(),
-                            value: transaction.vs!,
+                              // Message for Recipient
+                              if (transaction.messageForRecipient != null &&
+                                  transaction.messageForRecipient!.isNotEmpty)
+                                _buildInfoRow(
+                                  title: 'Message for Recipient'.tr(),
+                                  value: transaction.messageForRecipient!,
+                                ),
+                            ],
                           ),
-                        if (transaction.vs != null && transaction.vs!.isNotEmpty)
-                          SizedBox(height: 5),
-
-                        // Message for Recipient
-                        if (transaction.messageForRecipient != null &&
-                            transaction.messageForRecipient!.isNotEmpty)
-                          _buildInfoRow(
-                            title: 'Message for Recipient'.tr(),
-                            value: transaction.messageForRecipient!,
-                          ),
-                      ],
-                    ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ),
-          SizedBox(height: 20),
+
+          // trimmed spacer so button sits up higher
+          SizedBox(height: 8),
           if (_isBankAdmin())
             ElevatedButton(
               onPressed: _addTransaction,

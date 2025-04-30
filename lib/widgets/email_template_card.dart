@@ -1,3 +1,4 @@
+import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class EmailTemplateCard extends StatelessWidget {
             // Bottom area that expands to fill the available space.
             Expanded(
               child: Container(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 2.0),
                 decoration: BoxDecoration(
                   // Use primary color with transparency for a light overlay.
                   color: theme.primaryColor.withOpacityUniversal(context, 0.1),
