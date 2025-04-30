@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/pages/eshop/products_tab.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/eshop/blueprint_editor_tab.dart';
@@ -197,6 +198,7 @@ class AdminTabDefinition {
   static const String blueprint = "Blueprint";
   static const String tickets = "Tickets";
   static const String orders = "Orders";
+  static const String products = "Products";
   static const String report = "Report";
   static const String emailTemplates = "Email Templates";
 
@@ -242,6 +244,10 @@ class AdminTabDefinition {
         label: "Orders".tr(),
         icon: Icons.shopping_cart,
         widget: OrdersTab()),
+    products: AdminTabDefinition(
+        label: "Products".tr(),
+        icon: Icons.category,
+        widget: ProductsTab()),
     report: AdminTabDefinition(
         label: "Report".tr(),
         icon: Icons.stacked_bar_chart,
