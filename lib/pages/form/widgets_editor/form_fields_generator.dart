@@ -90,7 +90,8 @@ class _FormFieldsGeneratorState extends State<FormFieldsGenerator> {
     final effectiveOpacity = (field.isHidden ?? false) ? kHiddenOpacity : 1.0;
 
     return GestureDetector(
-      key: ValueKey(field.id),
+      // use ObjectKey for new fields (id==null) so each gets a unique key
+      key: field.id != null ? ValueKey(field.id) : ObjectKey(field),
       onTap: () {
         if (!isSelected) {
           setState(() {

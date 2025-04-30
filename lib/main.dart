@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
@@ -107,6 +106,8 @@ Future<void> initializeEverything() async {
 
 class MyApp extends StatefulWidget {
   bool isTimeTravelVisible = false;
+
+  MyApp({super.key});
 
   @override
   _MyAppState createState() => _MyAppState();

@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class FormFieldModel extends ITrinaRowModel {
+  @override
   int? id;
   DateTime? createdAt;
   DateTime? updatedAt;
