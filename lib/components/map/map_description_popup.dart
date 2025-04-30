@@ -1,10 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timeline/schedule_timeline.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
-import 'package:fstapp/dataServices/AuthService.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
+import 'package:fstapp/widgets/html_view.dart';
 
 class MapDescriptionPopup extends StatefulWidget {
   final MapMarkerWithText marker;
@@ -45,7 +44,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
               softWrap: true,
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
-                fontSize: 14.0,
+                fontSize: 18
               ),
             ),
             const Padding(padding: EdgeInsets.symmetric(vertical: 4.0)),
@@ -59,10 +58,7 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                         ? null
                         : changePositionPressed,
                     child: const Text("Change location").tr())),
-            Text(
-              widget.marker.place.description ?? "",
-              style: const TextStyle(fontSize: 12.0),
-            ),
+            HtmlView(html: widget.marker.place.description ?? "", isSelectable: true,),
             // if(widget.marker.place.events?.isNotEmpty??false)
             //   ConstrainedBox(
             //     constraints: const BoxConstraints(maxHeight: 500),

@@ -1,16 +1,14 @@
-// lib/pages/form/models/form_holder.dart
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/seat_reservation/model/seat_model.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataModels/FormOptionProductModel.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_models/form_option_product_model.dart';
 import 'field_holder.dart';
 import 'ticket_holder.dart';
-import 'birth_date_field_holder.dart'; // Import the new holder.
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormOptionModel.dart';
+import 'birth_date_field_holder.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_option_model.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 
 class FormHolderController {
@@ -18,6 +16,7 @@ class FormHolderController {
   final int? blueprintId;
   final GlobalKey<FormBuilderState> globalKey;
   final String? formKey;
+  String? currencyCode;
   void Function()? updateTotalPrice;
   Future<List<SeatModel>?> Function(List<SeatModel>)? showSeatReservation;
   void Function(List<SeatModel>?)? onCloseSeatReservation;
@@ -65,7 +64,7 @@ class FormHolder {
     if (ticket != null) {
       ticket.fields.addAll(ticketChildFields.map((f) => createFieldHolder(f)));
     }
-    return FormHolder(fields: otherFields, isCardDesign: formModel.data?[FormModel.metaIsCardDesign]??false);
+    return FormHolder(fields: otherFields, isCardDesign: formModel.data?[FormModel.metaIsCardDesign] ?? false);
   }
 
   /// Creates a [FieldHolder] instance based on the provided [FormFieldModel].
@@ -106,31 +105,37 @@ class FormHolder {
           .toList();
 
       return OptionsFieldHolder(
-        id: ffm.id!,
-        fieldType: ffm.type!,
-        isRequired: ffm.isRequired ?? false,
-        options: formOptions,
-        title: ffm.title ?? "",
-        description: ffm.description
+          id: ffm.id!,
+          fieldType: ffm.type!,
+          isRequired: ffm.isRequired ?? false,
+          options: formOptions,
+          title: ffm.title ?? "",
+          description: ffm.description
       );
     } else if (fieldType == FormHelper.fieldTypeProductType) {
+      final selType = ffm.data?[FormHelper.metaSelectionType]?.toString();
+      final prodSelectionType = (selType != null && selType == FormHelper.metaSelectionTypeMany)
+          ? OptionsFieldProductSelectionType.selectMany
+          : OptionsFieldProductSelectionType.selectOne;
       return OptionsFieldProductHolder(
-        id: ffm.id!,
-        fieldType: ffm.type!,
-        isRequired: ffm.isRequired ?? false,
+          id: ffm.id!,
+          fieldType: ffm.type!,
+          selectionType: prodSelectionType,
+          isRequired: ffm.isRequired ?? false,
           productOptions: ffm.productType!.products!
-            .map((p) => FormOptionProductModel(
-          p.id.toString(),
-          p.title!,
-          price: p.price ?? 0,
-          maximum: p.maximum,
-          orderedCount: p.orderedCount,
-          type: ffm.type!,
-          description: p.description,
-        ))
-            .toList(),
-        title: ffm.productType!.title ?? "",
-        description: ffm.productType!.description
+              .map((p) => FormOptionProductModel(
+            p.id.toString(),
+            p.title!,
+            price: p.price ?? 0,
+            currencyCode: p.currencyCode,
+            maximum: p.maximum,
+            orderedCount: p.orderedCount,
+            type: ffm.type!,
+            description: p.description,
+          ))
+              .toList(),
+          title: ffm.productType!.title ?? "",
+          description: ffm.productType!.description
       );
     } else if (fieldType == FormHelper.fieldTypeBirthDate) {
       // Use constants from BirthDateFieldHolder instead of hardcoded strings.

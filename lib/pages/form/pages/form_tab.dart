@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/pages/form/pages/form_editor_content.dart';
 import 'package:fstapp/pages/form/pages/form_responses_content.dart';
-import 'package:fstapp/themeConfig.dart';
+import 'package:fstapp/theme_config.dart';
 
 class FormTab extends StatefulWidget {
-  const FormTab({Key? key}) : super(key: key);
+  const FormTab({super.key});
 
   @override
   _FormTabState createState() => _FormTabState();

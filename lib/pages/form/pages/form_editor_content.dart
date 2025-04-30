@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:fstapp/AppRouter.gr.dart';
-import 'package:fstapp/RouterService.dart';
-import 'package:fstapp/dataModels/FormFieldModel.dart';
-import 'package:fstapp/dataModels/FormModel.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
-import 'package:fstapp/dataServicesEshop/DbForms.dart';
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/router_service.dart';
+import 'package:fstapp/data_models/form_field_model.dart';
+import 'package:fstapp/data_models/form_model.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/data_services_eshop/db_forms.dart';
 import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
-import 'package:fstapp/services/ToastHelper.dart';
-import 'package:fstapp/styles/StylesConfig.dart';
-import 'package:fstapp/themeConfig.dart';
-import 'package:fstapp/widgets/HtmlView.dart';
-import 'package:fstapp/pages/utility/HtmlEditorPage.dart';
+import 'package:fstapp/services/toast_helper.dart';
+import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets_editor/form_fields_generator.dart';
@@ -30,12 +30,13 @@ class FormEditorContent extends StatefulWidget {
 class _FormEditorContentState extends State<FormEditorContent> {
   FormModel? form;
   String? formLink;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (formLink == null && context.routeData.pathParams.isNotEmpty) {
-      formLink = context.routeData.pathParams.getString("formLink");
+    if (formLink == null && context.routeData.params.isNotEmpty) {
+      formLink = context.routeData.params.getString("formLink");
     }
     loadData();
   }
@@ -148,8 +149,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   final result = await RouterService.navigatePageInfo(
                     context,
                     HtmlEditorRoute(
-                      content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
-                    ),
+                        content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
+                        occasionId: form!.occasion),
                   );
                   if (result != null) {
                     setState(() => form!.headerOff = result as String);
@@ -197,6 +198,15 @@ class _FormEditorContentState extends State<FormEditorContent> {
           ),
         );
       });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      });
     }
   }
 
@@ -209,8 +219,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         children: [
           FloatingActionButton(
             onPressed: () {
-              RouterService.navigate(
-                  context, "${FormPage.ROUTE}/$formLink");
+              RouterService.navigate(context, "${FormPage.ROUTE}/$formLink");
             },
             child: const Icon(Icons.remove_red_eye_rounded),
           ),
@@ -231,6 +240,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(6),
               child: Column(
@@ -250,18 +260,14 @@ class _FormEditorContentState extends State<FormEditorContent> {
                           icon: const Icon(Icons.edit),
                           label: Text("Edit content".tr()),
                           onPressed: () async {
-                            final result = await RouterService
-                                .navigatePageInfo(
+                            final result = await RouterService.navigatePageInfo(
                               context,
                               HtmlEditorRoute(
-                                content: {
-                                  HtmlEditorPage.parContent: form!.header ?? ""
-                                },
-                              ),
+                                  content: {HtmlEditorPage.parContent: form!.header ?? ""},
+                                  occasionId: form!.occasion),
                             );
                             if (result != null) {
-                              setState(() =>
-                              form!.header = result as String);
+                              setState(() => form!.header = result as String);
                             }
                           },
                         ),

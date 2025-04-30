@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:fstapp/dataServices/RightsService.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 
 import 'feature.dart';
 import 'feature_constants.dart';
@@ -44,7 +44,7 @@ class FeatureService {
   /// Retrieves a feature based on its [featureCode].
   static Feature? getFeatureDetails(String featureCode, {List<Feature>? features}) {
     if (RightsService.currentOccasion == null) return null;
-    var featuresList = features ?? RightsService.currentOccasion?.features;
+    var featuresList = features ?? RightsService.currentOccasion?.features ?? RightsService.currentUnit?.features;
     if (featuresList == null) {
       return null;
     }

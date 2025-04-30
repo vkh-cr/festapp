@@ -39,8 +39,7 @@ BEGIN
         FROM forms
         JOIN occasions ON forms.occasion = occasions.id
         WHERE forms.link = form_link
-          AND occasions.organization = org_id
-          AND occasions.is_hidden = false;
+          AND occasions.organization = org_id;
 
         -- If no occasion is found, return a 404 response
         IF occasionId IS NULL THEN
@@ -56,7 +55,6 @@ BEGIN
           INTO occasionId, occasion_link
         FROM occasions
         WHERE link = link_txt
-          AND is_hidden = false
           AND organization = org_id;
 
         IF occasionId IS NULL THEN
@@ -67,8 +65,11 @@ BEGIN
         END IF;
 
     ELSE
-        -- No link or form_link provided: first try to get the default occasion
-        SELECT (data->>'DEFAULT_OCCASION')::bigint
+        -- No link or form_link provided: first try to get the representative or default occasion
+        SELECT COALESCE(
+                 (data->>'REPRESENTATIVE_OCCASION')::bigint,
+                 (data->>'DEFAULT_OCCASION')::bigint
+               )
           INTO occasionId
         FROM organizations
         WHERE id = org_id;
@@ -100,7 +101,6 @@ BEGIN
                   INTO occasionId, occasion_link
                 FROM occasions
                 WHERE is_open = true
-                  AND is_hidden = false
                   AND organization = org_id
                 LIMIT 1;
 
@@ -164,7 +164,8 @@ BEGIN
 
         -- If the occasion is not open, enforce access restrictions
         IF is_open_bool = FALSE THEN
-            IF auth.uid() IS NULL OR (occasion_user IS NULL AND NOT is_admin_bool) THEN
+            IF (SELECT get_is_editor_view_on_occasion(occasionId)) <> TRUE
+               AND (SELECT get_is_editor_order_view_on_occasion(occasionId)) <> TRUE THEN
                 RETURN json_build_object(
                     'code', 403,
                     'message', 'Access forbidden',
