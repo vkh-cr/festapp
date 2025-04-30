@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/pages/form/models/birth_date_field_holder.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/widgets/html_view.dart';
 
@@ -19,12 +18,12 @@ class BirthDateFieldBuilder extends StatefulWidget {
   final bool isCardDesign;
 
   const BirthDateFieldBuilder({
-    Key? key,
+    super.key,
     required this.fieldHolder,
     this.eventDate,
     required this.formKey,
     this.isCardDesign = false,
-  }) : super(key: key);
+  });
 
   static Widget buildBirthDateField({
     required BuildContext context,

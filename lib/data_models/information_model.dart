@@ -10,6 +10,7 @@ class InformationModel extends ITrinaRowModel {
   static const String songType = "song";
   static const String quoteType = "quote";
 
+  @override
   int? id;
   InformationHiddenModel? informationHidden;
   DateTime? updatedAt;

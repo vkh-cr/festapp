@@ -22,7 +22,7 @@ class CheckPage extends StatefulWidget {
   static const ROUTE = "check";
   final int id;
 
-  const CheckPage({@pathParam required this.id, Key? key}) : super(key: key);
+  const CheckPage({@pathParam required this.id, super.key});
 
   @override
   _CheckPageState createState() => _CheckPageState();

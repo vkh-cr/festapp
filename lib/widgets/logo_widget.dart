@@ -14,12 +14,12 @@ class LogoWidget extends StatelessWidget {
   final bool? forceDark;
 
   const LogoWidget({
-    Key? key,
+    super.key,
     this.onTap,
     this.height,
     this.width,
     this.forceDark,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

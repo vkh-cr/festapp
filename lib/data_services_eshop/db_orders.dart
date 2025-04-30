@@ -104,7 +104,7 @@ class DbOrders {
 
       final ticketIdsForOrder = relatedTickets.map((t) => t.id).toSet();
       order.relatedSpots =
-          spots!.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
+          spots.where((s) => ticketIdsForOrder.contains(s.orderProductTicket)).toList();
 
       final orderProductIds = <int>{};
       for (var ticket in relatedTickets) {
@@ -113,7 +113,7 @@ class DbOrders {
         }
       }
       order.relatedProducts =
-          products!.where((p) => orderProductIds.contains(p.id)).toList();
+          products.where((p) => orderProductIds.contains(p.id)).toList();
 
       order.paymentInfoModel = paymentMap[order.paymentInfo];
 

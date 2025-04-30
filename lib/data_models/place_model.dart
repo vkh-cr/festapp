@@ -7,6 +7,7 @@ import 'package:trina_grid/trina_grid.dart';
 
 class PlaceModel extends ITrinaRowModel {
   dynamic latLng;
+  @override
   int? id;
   String? title;
   String? description;
