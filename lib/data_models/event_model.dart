@@ -19,6 +19,7 @@ class EventModel extends ITrinaRowModel {
   int? maxParticipants;
   int maxParticipantsNumber() => maxParticipants == null ? 0 : maxParticipants!;
 
+  @override
   final int? id;
   DateTime? updatedAt;
   bool isHidden = false;

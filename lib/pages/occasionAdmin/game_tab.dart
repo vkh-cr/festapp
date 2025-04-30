@@ -7,7 +7,7 @@ import 'package:fstapp/pages/occasionAdmin/game_user_groups_content.dart';
 import 'package:fstapp/theme_config.dart';
 
 class GameTab extends StatefulWidget {
-  const GameTab({Key? key}) : super(key: key);
+  const GameTab({super.key});
 
   @override
   _GameTabState createState() => _GameTabState();

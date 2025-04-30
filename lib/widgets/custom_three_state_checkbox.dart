@@ -12,15 +12,15 @@ class CustomThreeStateCheckbox extends StatelessWidget {
   final IconData? paidStateIcon;
   final IconData? usedStateIcon;
 
-  CustomThreeStateCheckbox({
-    Key? key,
+  const CustomThreeStateCheckbox({
+    super.key,
     required this.currentState,
     required this.onStateChanged,
     this.isEnabled = true,
     this.noneStateIcon,
     this.paidStateIcon,
     this.usedStateIcon,
-  }) : super(key: key);
+  });
 
   // Define the next state in the cycle
   String _getNextState(String currentState) {

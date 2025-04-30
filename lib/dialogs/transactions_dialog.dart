@@ -10,15 +10,14 @@ import 'package:fstapp/services/utilities_all.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/search_transactions_screen.dart';
-import 'package:intl/intl.dart';
 
 class TransactionsDialog extends StatefulWidget {
   final int orderId;
 
-  TransactionsDialog({
-    Key? key,
+  const TransactionsDialog({
+    super.key,
     required this.orderId,
-  }) : super(key: key);
+  });
 
   @override
   _TransactionsDialogState createState() => _TransactionsDialogState();

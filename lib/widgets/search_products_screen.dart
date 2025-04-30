@@ -64,8 +64,11 @@ class _SearchProductsScreenState extends State<SearchProductsScreen> {
 
   void _toggle(int id) {
     setState(() {
-      if (_sel.contains(id)) _sel.remove(id);
-      else                 _sel.add(id);
+      if (_sel.contains(id)) {
+        _sel.remove(id);
+      } else {
+        _sel.add(id);
+      }
     });
   }
 
