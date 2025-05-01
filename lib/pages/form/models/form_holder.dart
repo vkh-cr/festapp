@@ -134,7 +134,7 @@ class FormHolder {
             description: p.description,
           ))
               .toList(),
-          title: ffm.productType!.title ?? "",
+          title: ffm.title ?? ffm.productType!.title ?? "",
           description: ffm.productType!.description
       );
     } else if (fieldType == FormHelper.fieldTypeBirthDate) {
