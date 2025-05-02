@@ -111,7 +111,7 @@ class _FeatureFormState extends State<FeatureForm> {
           TextEditingController(text: mapFeature.offlineMapLayer.offlineMapStyleURL);
       mapOfflineMapLayerNameController =
           TextEditingController(text: mapFeature.offlineMapLayer.offlineMapLayerName);
-      autoDownloadOfflineMap = mapFeature.offlineMapLayer.autoDownloadOfflineMap;
+      autoDownloadOfflineMap = mapFeature.offlineMapLayer.forceOfflineMap;
     } else if (widget.feature is WorkshopsFeature) {
       // Initialize with an empty string. The formatted value will be set in didChangeDependencies.
       startTimeController = TextEditingController(text: "");
@@ -468,12 +468,12 @@ class _FeatureFormState extends State<FeatureForm> {
                 const SizedBox(height: 16),
                 // Extra offline settings (without showing offline map layer URL)
                 SwitchListTile(
-                  title: Text("Auto-download offline map".tr()),
+                  title: Text("Force offline map".tr()),
                   value: autoDownloadOfflineMap,
                   onChanged: (value) {
                     setState(() {
                       autoDownloadOfflineMap = value;
-                      mapFeature.offlineMapLayer.autoDownloadOfflineMap = value;
+                      mapFeature.offlineMapLayer.forceOfflineMap = value;
                     });
                   },
                 ),

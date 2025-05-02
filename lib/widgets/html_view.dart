@@ -35,7 +35,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   }
 }
 
-class HtmlView extends StatelessWidget {
+class HtmlView extends StatefulWidget {
   final String html;
   final double? fontSize;
   final bool isSelectable;
@@ -50,18 +50,23 @@ class HtmlView extends StatelessWidget {
   });
 
   @override
+  State<HtmlView> createState() => _HtmlViewState();
+}
+
+class _HtmlViewState extends State<HtmlView> {
+  @override
   Widget build(BuildContext context) {
-    color ??= ThemeConfig.defaultHtmlViewColor(context);
+    widget.color ??= ThemeConfig.defaultHtmlViewColor(context);
     String aColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
     Widget htmlWidget = HtmlWithAppLinksWidget(
       context,
-      html,
+      widget.html,
       renderMode: RenderMode.column,
       textStyle: TextStyle(
-        fontSize: fontSize,
+        fontSize: widget.fontSize,
         fontFamily: "Futura",
-        color: color,
+        color: widget.color,
         inherit: false,
       ),
       customStylesBuilder: (element) {
@@ -81,7 +86,7 @@ class HtmlView extends StatelessWidget {
       },
     );
 
-    return isSelectable
+    return widget.isSelectable
         ? SelectionArea(
       focusNode: FocusNode(),
       selectionControls: materialTextSelectionControls,
