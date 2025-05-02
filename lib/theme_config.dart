@@ -71,7 +71,7 @@ class ThemeConfig {
   static Color whiteColor(BuildContext context) => isDarkMode(context) ? dddBackground : Colors.white;
   static Color whiteTextColor(BuildContext context) => isDarkMode(context) ? dddText : Colors.white;
 
-  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).withValues(alpha: 0.9);
+  static Color whiteColorDarker(BuildContext context) => isDarkMode(context) ? dddBackgroundDarker : whiteColor(context).changeColorLightness(0.95);
 
   static Color timelineAll(BuildContext context) => isDarkMode(context) ? seed2.changeColorSaturation(0.6) : seed1.changeColorSaturation(0.4).changeColorLightness(0.4);
   static Color timelineSplitLabelColor(BuildContext context) => timelineAll(context);
@@ -94,7 +94,7 @@ class ThemeConfig {
 
   static Color upperNavText(BuildContext context) => isDarkMode(context) ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
 
-  static Color timetableTimeLineColor(BuildContext context) => appBarColor();
+  static Color timetableHorizontalLineColor(BuildContext context) => appBarColor();
   static Color timetableSelectedColor(BuildContext context, Color color) => isDarkMode(context) ?
   color.changeColorSaturation(0.7).changeColorLightness(0.8) :
   color.changeColorSaturation(0.5).changeColorLightness(0.6)
