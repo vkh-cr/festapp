@@ -19,7 +19,7 @@ class TimetableController {
   double verticalAxisTitleHeight() => 40;
   double horizontalAxisSpaceHeight() => isTimeHorizontal == true ? 30 : 60;
   double verticalAxisSpace() => isTimeHorizontal == true ? 0 : 60;
-  double itemStaticDimension() => isTimeHorizontal == true ? 56 : 100;
+  double itemStaticDimension() => isTimeHorizontal == true ? 56 : 112;
 
   TimetableController({this.onItemTap});
 
@@ -112,11 +112,15 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   }
 
   void setOffsetFromTime(double currentTimePosition, [bool animate = false]) {
-    double initialXOffset = constraints!.maxWidth / 2 - currentTimePosition;
+    Offset initialOffset;
+    if(widget.controller.isTimeHorizontal){
+      double initialXOffset = constraints!.maxWidth / 2 - currentTimePosition;
+      initialOffset = constrainNewOffset(initialXOffset, 0, currentScale);
+    } else {
+      double initialYOffset = constraints!.maxHeight / 2 - currentTimePosition - (widget.controller.horizontalAxisSpaceHeight() * currentScale);
+      initialOffset = constrainNewOffset(0, initialYOffset, currentScale);
+    }
 
-    // Constrain the initial offset
-    Offset initialOffset = constrainNewOffset(initialXOffset, 0, currentScale);
-    if (initialXOffset < 0) initialXOffset = 0;
 
     if(animate) {
       animateToOffset(currentOffset, initialOffset);
@@ -399,7 +403,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       var diffLength = TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour();
       container = Container(
         width: widget.controller.isTimeHorizontal ? diffLength : getTimetableWidth(),
-        height: widget.controller.isTimeHorizontal ? getTimetableHeight() : diffLength,
+        height: widget.controller.isTimeHorizontal ? getTimetableHeight() : diffLength + widget.controller.horizontalAxisSpaceHeight(),
         color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else {
@@ -415,8 +419,12 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         container,
         if (now.isAfter(startTime!) && now.isBefore(endTime!))
               Positioned(
-                left:  widget.controller.isTimeHorizontal ? TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() : 0,
-                top: widget.controller.isTimeHorizontal ? 0 : TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour(),
+                left:  widget.controller.isTimeHorizontal ?
+                TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() :
+                0,
+                top: widget.controller.isTimeHorizontal ?
+                0 :
+                TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight(),
                 child: Container(
                   width: widget.controller.isTimeHorizontal ? 2 : getTimetableWidth(),
                   height: widget.controller.isTimeHorizontal ? getTimetableHeight() : 2,
@@ -435,7 +443,9 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
               if(!widget.controller.isTimeHorizontal)
                 Positioned(
                     left: -10,
-                    top: widget.controller.isTimeHorizontal ? 0 : TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() - 12,
+                    top: widget.controller.isTimeHorizontal ?
+                    0 :
+                    TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight() - 12,
                     child: TimetableHelper.showTime(context, now, widget.controller)
                 )
       ],
