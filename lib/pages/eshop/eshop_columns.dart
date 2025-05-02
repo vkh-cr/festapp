@@ -134,7 +134,7 @@ class EshopColumns {
     PRODUCT_MAXIMUM: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Maximum".tr(),
+        title: "Max".tr(),
         field: TbEshop.products.maximum,
         formatter: (s) => s == 0 ? "" : s.toString(),
         applyFormatterInEditing: true,
@@ -354,7 +354,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Email".tr(),
+        title: "E-mail".tr(),
         field: TbEshop.orders.data_email,
         type: TrinaColumnType.text(),
         width: 140,
