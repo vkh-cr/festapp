@@ -1,9 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timetable/timetable_helper.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timetable/timeline_widget.dart';
+import 'package:fstapp/components/timetable/horizontal_line_widget.dart';
 import 'package:fstapp/components/timetable/timetable_items_widget.dart';
 import 'package:fstapp/theme_config.dart';
 
@@ -12,12 +13,25 @@ class TimetableController {
   void Function()? rebuild;
   void Function()? reset;
   void Function(int)? onItemTap;
+  bool isTimeHorizontal = false;
+  double pixelsInHour() => isTimeHorizontal == true ? 200 : 100;
+  double minimalPadding() => 1.5;
+  double verticalAxisTitleHeight() => 40;
+  double horizontalAxisSpaceHeight() => isTimeHorizontal == true ? 30 : 60;
+  double verticalAxisSpace() => isTimeHorizontal == true ? 0 : 60;
+  double itemStaticDimension() => isTimeHorizontal == true ? 56 : 100;
 
   TimetableController({this.onItemTap});
+
+  //support max 1 day skipping
+  double timeRangeLength(DateTime startTime, DateTime endTime) {
+    var range = DateTimeRange(start: startTime, end: endTime);
+    return range.duration.inMinutes / 60.0 * pixelsInHour();
+  }
 }
 
 class Timetable extends StatefulWidget {
-  final TimetableController? controller;
+  final TimetableController controller;
   static const int minimalDurationMinutes = 25;
 
   const Timetable({
@@ -25,7 +39,7 @@ class Timetable extends StatefulWidget {
     required this.items,
     required this.timetablePlaces,
     this.occasionEnd,
-    this.controller
+    required this.controller
   });
 
   final DateTime? occasionEnd;
@@ -37,11 +51,7 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
-  final double minimalPadding = 1.5;
-  final double pixelsInHour = 200;
-  final double placeTitleHeight = 40;
-  final double timelineHeight = 30;
-  final double itemHeight = 56;
+
   final int animationDuration = 1000;
   final double velocityAnimationSpeed = 0.5;
   final double globalMinimalScale = 0.2;
@@ -60,7 +70,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
   BoxConstraints? constraints;
 
   Matrix4 matrixTimetable = Matrix4.translationValues(0, 0, 0);
-  Matrix4 matrixPlaceTitles = Matrix4.translationValues(0, 0, 0);
+  Matrix4 matrixVerticalTitles = Matrix4.translationValues(0, 0, 0);
   Matrix4 matrixTimeline = Matrix4.translationValues(0, 0, 0);
 
   int? hourCount;
@@ -75,7 +85,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
   late TimetableItemsWidget allItems;
   IgnorePointer? timeNow;
-  late TimelineWidget timelineWidget;
+  late HorizontalLineWidget horizontalLineWidget;
 
   _TimetableState(TimetableController? timetableController) {
     if (timetableController != null) {
@@ -94,10 +104,10 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
 
     // Calculate the position of the current time
     if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
-      var current = TimeHelper.differenceInHours(startTime!, now) * pixelsInHour * currentScale;
+      var current = TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() * currentScale;
       setOffsetFromTime(current);
     } else {
-        setOffsetFromTime((defaultTime - startTime!.hourInDouble) * pixelsInHour * currentScale);
+        setOffsetFromTime((defaultTime - startTime!.hourInDouble) * widget.controller.pixelsInHour() * currentScale);
     }
   }
 
@@ -115,19 +125,25 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     }
   }
 
+
+
   double getTimetableHeight() =>
-      usedPlaces.length * (placeTitleHeight + itemHeight) +
-      timelineHeight;
+      widget.controller.isTimeHorizontal ?
+      usedPlaces.length * (widget.controller.verticalAxisTitleHeight() + widget.controller.itemStaticDimension()) +
+          widget.controller.horizontalAxisSpaceHeight() :
+      (hourCount ?? 24) * widget.controller.pixelsInHour() + widget.controller.horizontalAxisSpaceHeight();
 
-  double getTimetableWidth() => (hourCount ?? 24) * pixelsInHour;
-
-  double getWidgetHeight() => getTimetableHeight() > constraints!.maxHeight
-      ? getTimetableHeight()
-      : constraints!.maxHeight;
+  double getTimetableWidth() =>
+      widget.controller.isTimeHorizontal ?
+      (hourCount ?? 24) * widget.controller.pixelsInHour() :
+      usedPlaces.length * (widget.controller.itemStaticDimension()) +
+          widget.controller.verticalAxisSpace();
 
   double getWindowWidth(BuildContext context) {
     return MediaQuery.of(context).size.width;
   }
+
+  double getMaxWidth() => getWindowWidth(context) > getTimetableWidth() ? getWindowWidth(context) : getTimetableWidth();
 
   late AnimationController _animationController;
   late Animation<double> animationX =
@@ -142,7 +158,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         vsync: this, duration: Duration(milliseconds: animationDuration));
     _animationController.addListener(() {
       setState(() {
-        matrixPlaceTitles.setTranslationRaw(0, animationY.value, 0);
+        matrixVerticalTitles.setTranslationRaw(0, animationY.value, 0);
         matrixTimeline.setTranslationRaw(animationX.value, 0, 0);
         matrixTimetable.setTranslationRaw(
             animationX.value, animationY.value, 0);
@@ -189,7 +205,11 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       throw Exception("Events range cannot exceed 48 hours.");
     }
 
-    startTime = firstEvent.startTime.roundDown();
+    var roundedDown = firstEvent.startTime.roundDown();
+    if(roundedDown.isAtSameMomentAs(firstEvent.startTime)){
+      roundedDown = roundedDown.subtract(Duration(hours: 1));
+    }
+    startTime = roundedDown;
     endTime = lastEvent.endTime.roundUp();
 
     var lastHour = lastEvent.endTime.roundUp().hour;
@@ -200,27 +220,22 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     allItems = TimetableItemsWidget(
       usedItems: usedItems,
       usedPlaces: usedPlaces,
-      pixelsInHour: pixelsInHour,
-      minimalPadding: minimalPadding,
-      placeTitleHeight: placeTitleHeight,
-      itemHeight: itemHeight,
-      timelineHeight: timelineHeight,
-      timeRangeLength: timeRangeLength,
       height: getTimetableHeight(),
-      hourCount: hourCount!,
+      width: getTimetableWidth(),
+      xyHelpingColumnsCount: hourCount!,
       startTime: startTime!,
       endTime: endTime!,
       addToMyProgram: addToMyProgram,
       removeFromMyProgram: removeFromMyProgram,
-      onItemTap: widget.controller?.onItemTap,
+      controller: widget.controller,
     );
 
-    timelineWidget = TimelineWidget(
+    horizontalLineWidget = HorizontalLineWidget(
       startTime: startTime!,
       endTime: endTime!,
       hourCount: hourCount!,
-      pixelsInHour: pixelsInHour,
-      timelineHeight: timelineHeight,
+      controller: widget.controller,
+      basicStrings: widget.controller.isTimeHorizontal ? null : usedPlaces.map((p)=>p.title).toList(),
     );
 
     if(!initial){
@@ -255,36 +270,18 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       );
       List<Widget> stackChildren = [timetableItems];
 
-      var placeTitles = Transform(
-        transform: matrixPlaceTitles,
+      var verticalTitles = Transform(
+        transform: matrixVerticalTitles,
         child: Stack(
-          children: List<Widget>.generate(
-              usedPlaces.length,
-              (i) => Padding(
-                    padding: EdgeInsets.fromLTRB(
-                        0,
-                        i * (itemHeight + placeTitleHeight) + timelineHeight,
-                        0,
-                        0),
-                    child: Container(
-                      height: placeTitleHeight,
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          usedPlaces[i].title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                  )),
+          children: widget.controller.isTimeHorizontal ?
+          generateVerticalPlaces() : generateVerticalTime(),
         ),
       );
-      stackChildren.add(placeTitles);
+      stackChildren.add(verticalTitles);
 
       var timeline = Transform(
         transform: matrixTimeline,
-        child: timelineWidget,
+        child: horizontalLineWidget,
       );
       stackChildren.add(timeline);
 
@@ -330,16 +327,61 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     });
   }
 
+  List<Widget> generateVerticalPlaces(){
+    return List<Widget>.generate(
+        usedPlaces.length,
+            (i) => Padding(
+          padding: EdgeInsets.fromLTRB(
+              0,
+              i * (widget.controller.itemStaticDimension() + widget.controller.verticalAxisTitleHeight()) + widget.controller.horizontalAxisSpaceHeight(),
+              0,
+              0),
+          child: Container(
+            height: widget.controller.verticalAxisTitleHeight(),
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                usedPlaces[i].title,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ));
+  }
+
+  List<Widget> generateVerticalTime() {
+    return List<Widget>.generate(
+        hourCount! + 1,
+            (i) {
+              var hour = startTime!.hour + i;
+              if (hour > 23) {
+                hour -= 24;
+              }
+              return Padding(
+          padding: EdgeInsets.fromLTRB(
+              0,
+              i * (widget.controller.pixelsInHour()) + widget.controller.horizontalAxisSpaceHeight(),
+              0,
+              0),
+          child: Container(
+            height: widget.controller.verticalAxisTitleHeight(),
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Text(
+                "$hour:00",
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        );
+     });
+  }
+
   void updateScaleLimits() {
     minScale = (constraints!.maxHeight / getTimetableHeight()).clamp(globalMinimalScale, globalMaximalScale);
     currentScale = currentScale.clamp(minScale, 1.0);
-  }
-
-  //support max 1 day skipping
-  double timeRangeLength(
-      double pixelsPerHour, DateTime startTime, DateTime endTime) {
-    var range = DateTimeRange(start: startTime, end: endTime);
-    return range.duration.inMinutes / 60.0 * pixelsPerHour;
   }
 
   Widget buildTimeNow() {
@@ -354,9 +396,10 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else if (now.isAfter(startTime!) && now.isBefore(endTime!)) {
+      var diffLength = TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour();
       container = Container(
-        width: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
-        height: getTimetableHeight(),
+        width: widget.controller.isTimeHorizontal ? diffLength : getTimetableWidth(),
+        height: widget.controller.isTimeHorizontal ? getTimetableHeight() : diffLength,
         color: ThemeConfig.blackColor(context).withValues(alpha: ThemeConfig.timetableTimeSplitOpacity),
       );
     } else {
@@ -371,23 +414,30 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ),
         container,
         if (now.isAfter(startTime!) && now.isBefore(endTime!))
-          Positioned(
-            left: TimeHelper.differenceInHours(startTime!, now) * pixelsInHour,
-            child: Container(
-              width: 2,
-              height: getTimetableHeight(),
-              decoration: BoxDecoration(
-                color: ThemeConfig.timetableTimeSplitColor(context),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+              Positioned(
+                left:  widget.controller.isTimeHorizontal ? TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() : 0,
+                top: widget.controller.isTimeHorizontal ? 0 : TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour(),
+                child: Container(
+                  width: widget.controller.isTimeHorizontal ? 2 : getTimetableWidth(),
+                  height: widget.controller.isTimeHorizontal ? getTimetableHeight() : 2,
+                  decoration: BoxDecoration(
+                    color: ThemeConfig.timetableTimeSplitColor(context),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+              if(!widget.controller.isTimeHorizontal)
+                Positioned(
+                    left: -10,
+                    top: widget.controller.isTimeHorizontal ? 0 : TimeHelper.differenceInHours(startTime!, now) * widget.controller.pixelsInHour() - 12,
+                    child: TimetableHelper.showTime(context, now, widget.controller)
+                )
       ],
     );
   }
@@ -439,7 +489,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         ..scale(newScale)
         ..setTranslationRaw(offset.dx, offset.dy, 0);
 
-      matrixPlaceTitles = Matrix4.identity()
+      matrixVerticalTitles = Matrix4.identity()
         ..scale(newScale)
         ..setTranslationRaw(0, offset.dy, 0);
 
@@ -471,7 +521,7 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
     _animationController.reset();
     _animationController.forward();
   }
-  
+
   void onScaleStarted(ScaleStartDetails details) {
     _animationController.stop();
   }
