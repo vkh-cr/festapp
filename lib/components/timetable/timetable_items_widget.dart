@@ -4,6 +4,8 @@ import 'package:fstapp/components/timetable/timetable.dart';
 import 'package:fstapp/components/timetable/timetable_event_widget.dart';
 import 'package:fstapp/theme_config.dart';
 
+import 'timetable_controller.dart';
+
 class TimetableItemsWidget extends StatefulWidget {
   final List<TimeBlockItem> usedItems;
   final List<TimeBlockPlace> usedPlaces;
