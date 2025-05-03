@@ -1,94 +1,53 @@
-// lib/services/js/js_web.dart
-
+// js_web.dart
 import 'dart:async';
-import 'dart:js_interop';
-import 'dart:js_interop_unsafe';
-import 'package:web/web.dart' as web;
-
-/// Converts a Dart value into something Dart2Wasm’s JS interop will accept.
-JSAny? _toJSAny(dynamic v) {
-  if (v == null) return null;
-  if (v is JSAny?) return v;
-  if (v is String) return v.toJS;
-  if (v is bool)   return v.toJS;
-  if (v is int)    return v.toJS;
-  if (v is double) return v.toJS;
-  // TODO: recursively handle List/Map if you need JS arrays or objects
-  throw ArgumentError('Cannot convert `${v.runtimeType}` to JSAny');
-}
+import 'dart:js' as js;
+import 'dart:html' as html;
 
 class JSInterop {
-  /// globalThis[method](...args)
-  void callMethod(String method, List<dynamic> args) {
-    final jsArgs = args.map(_toJSAny).toList();
-    globalContext.callMethodVarArgs<JSAny?>(method.toJS, jsArgs);
+  void callMethod(String method, List args) async {
+    js.context.callMethod(method, args);
   }
 
-  /// returns globalThis[method](...args) as a Dart bool
-  bool callBoolMethod(String method, List<dynamic> args) {
-    final jsArgs = args.map(_toJSAny).toList();
-    final JSAny? result = globalContext.callMethodVarArgs<JSAny?>(
-      method.toJS,
-      jsArgs,
-    );
-    return result.dartify() as bool;
+  bool callBoolMethod(String method, List args) {
+    return js.context.callMethod(method, args);
   }
 
-  /// calls a JS function that expects (resolve, reject) callbacks,
-  /// completes true on resolve, false on reject
-  Future<bool> callFutureBoolMethod(String method, List<dynamic> args) {
+  Future<bool> callFutureBoolMethod(String method, List args) async {
     final completer = Completer<bool>();
-    final jsArgs = args.map(_toJSAny).toList();
 
-    void onSuccess(JSAny? r) => completer.complete(r.dartify() as bool);
-    void onError(JSAny? _)    => completer.complete(false);
+    js.context.callMethod(method, [
+          ...args,
+          (result) => completer.complete(result),
+          (error) => completer.complete(false),
+    ]);
 
-    globalContext.callMethodVarArgs<JSAny?>(
-      method.toJS,
-      [
-        ...jsArgs,
-        onSuccess.toJS,
-        onError.toJS,
-      ],
-    );
     return completer.future;
   }
 
-  /// calls a JS function that expects (resolve, reject) callbacks,
-  /// completes with whatever JS passes to resolve or reject
-  Future<dynamic> callFutureMethod(String method, List<dynamic> args) {
+  Future<dynamic> callFutureMethod(String method, List args) async {
     final completer = Completer<dynamic>();
-    final jsArgs = args.map(_toJSAny).toList();
 
-    void onSuccess(JSAny? r) => completer.complete(r.dartify());
-    void onError(JSAny? e)   => completer.complete(e.dartify());
+    js.context.callMethod(method, [
+      ...args,
+      (result) => completer.complete(result),
+      (error) => completer.complete(error),
+    ]);
 
-    globalContext.callMethodVarArgs<JSAny?>(
-      method.toJS,
-      [
-        ...jsArgs,
-        onSuccess.toJS,
-        onError.toJS,
-      ],
-    );
     return completer.future;
   }
 
-  /// “ios” / “android” / “web” based on navigator.userAgent
   String getOSInsideWeb() {
-    final ua = web.window.navigator.userAgent.toLowerCase();
-    if (ua.contains('iphone') || ua.contains('ipad')) return 'ios';
-    if (ua.contains('android')) return 'android';
-    return 'web';
+    final userAgent = html.window.navigator.userAgent.toString().toLowerCase();
+    if (userAgent.contains("iphone") || userAgent.contains("ipad")) return "ios";
+    if (userAgent.contains("android")) return "android";
+    return "web";
   }
 
-  /// window.open(link, "_blank")
   void openLinkInNewTab(String link) {
-    web.window.open(link, '_blank');
+    html.window.open(link, "_blank");
   }
 
-  /// history.replaceState(null, "", newUrl)
   void changeUrl(String newUrl) {
-    web.window.history.replaceState(null, '', newUrl);
+    html.window.history.replaceState(null, "", newUrl);
   }
 }
