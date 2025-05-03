@@ -8,8 +8,8 @@ class FeatureService {
   /// Checks whether the feature with [featureCode] is enabled.
   /// Expects [features] to be a list of Feature objects.
   static bool isFeatureEnabled(String featureCode, {List<Feature>? features}) {
-    if (RightsService.currentOccasion == null) return false;
-    final featureList = features ?? RightsService.currentOccasion!.features;
+    if (RightsService.currentOccasion() == null) return false;
+    final featureList = features ?? RightsService.currentOccasion()!.features;
     return featureList.any((feature) => feature.code == featureCode && feature.isEnabled);
   }
 
@@ -43,8 +43,8 @@ class FeatureService {
 
   /// Retrieves a feature based on its [featureCode].
   static Feature? getFeatureDetails(String featureCode, {List<Feature>? features}) {
-    if (RightsService.currentOccasion == null) return null;
-    var featuresList = features ?? RightsService.currentOccasion?.features ?? RightsService.currentUnit?.features;
+    if (RightsService.currentOccasion() == null) return null;
+    var featuresList = features ?? RightsService.currentOccasion()?.features ?? RightsService.currentUnit()?.features;
     if (featuresList == null) {
       return null;
     }

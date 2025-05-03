@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timetable/timetable.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:intl/intl.dart';
+
+import 'timetable_controller.dart';
 
 class TimetableHelper {
   static Widget showTime(BuildContext context, DateTime now, TimetableController controller) {

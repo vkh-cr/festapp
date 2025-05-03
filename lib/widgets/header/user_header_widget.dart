@@ -39,7 +39,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
 
   /// Returns the first letter of the user's name in uppercase.
   String _getUserInitial() {
-    final user = RightsService.currentUser;
+    final user = RightsService.currentUser();
     String fullName = user?.name ?? "U";
     return fullName.isNotEmpty ? fullName[0].toUpperCase() : "U";
   }
@@ -206,7 +206,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
           enabled: false,
           child: StatefulBuilder(
             builder: (context, localSetState) {
-              final user = RightsService.currentUser;
+              final user = RightsService.currentUser();
               final String fullName = user?.name ?? "User".tr();
               final String surname = user?.surname ?? "";
               final String email = user?.email ?? "";
@@ -263,7 +263,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                     const SizedBox(height: 32),
                     Builder(
                       builder: (context) {
-                        final units = RightsService.currentUser?.getUnitsWithEditorAccess();
+                        final units = RightsService.currentUser()?.getUnitsWithEditorAccess();
                         if (units == null || units.isEmpty) return SizedBox.shrink();
                         return Column(
                           children: units
@@ -307,7 +307,7 @@ class _UserHeaderWidgetState extends State<UserHeaderWidget> {
                       ).tr(),
                       onTap: () async {
                         Navigator.pop(context);
-                        var unit = RightsService.currentUnitUser?.unit;
+                        var unit = RightsService.currentUnitUser()?.unit;
                         await AuthService.logout();
                         await RouterService.goToUnit(context, unit);
 
