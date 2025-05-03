@@ -38,6 +38,7 @@ class DbInformation {
         "${Tb.information.updated_at},"
         "${Tb.information.is_hidden},"
         "${Tb.information.title},"
+        "${Tb.information.description},"
         "${Tb.information.order},"
         "${Tb.information.type},"
         "${Tb.information.data},"
@@ -64,6 +65,7 @@ class DbInformation {
         "${Tb.information.updated_at},"
         "${Tb.information.is_hidden},"
         "${Tb.information.title},"
+        "${Tb.information.description},"
         "${Tb.information.order},"
         "${Tb.information.type},"
         "${Tb.information.data},"
@@ -88,11 +90,12 @@ class DbInformation {
     var data = await _supabase
         .from(Tb.information.table)
         .select(
-        "${Tb.information.id},"
+            "${Tb.information.id},"
             "${Tb.information.updated_at},"
             "${Tb.information.order},"
             "${Tb.information.type},"
             "${Tb.information.title},"
+            "${Tb.information.description},"
             "${Tb.information.id},"
             "${Tb.information.data}"
         )
@@ -104,28 +107,6 @@ class DbInformation {
     infoList.sortBy((element) => element.title??"".toLowerCase());
     infoList.sort((a,b) => (a.getOrder().compareTo(b.getOrder())));
     return infoList;
-  }
-
-  static Future<List<InformationModel>> getInfosDescription(Iterable<int> ids) async {
-    var data = await _supabase
-        .from(Tb.information.table)
-        .select("${Tb.information.id}, ${Tb.information.updated_at}, ${Tb.information.description}")
-        .inFilter(Tb.information.id, ids.toList());
-    return List<InformationModel>.from(
-        data.map((x) => InformationModel.fromJson(x)));
-  }
-
-  static Future<List<InformationModel>> getAllInfoMeta() async {
-    var data = await _supabase
-        .from(Tb.information.table)
-        .select(
-          "${Tb.information.id},"
-          "${Tb.information.updated_at}")
-        .eq(Tb.information.is_hidden, false)
-        .eq(Tb.information.occasion, RightsService.currentOccasionId()!);
-
-    return List<InformationModel>.from(
-        data.map((x) => InformationModel.fromJson(x)));
   }
 
   static Future<void> updateInformation(InformationModel info) async {
@@ -180,40 +161,10 @@ class DbInformation {
         .eq(Tb.information.id, info.id!);
   }
 
-  static Future<void> updateInfoDescription([List<int>? infoIds]) async {
-    var needsUpdate = <int>[];
-    var allMeta = await DbInformation.getAllInfoMeta();
-
-    List<InformationModel> infosToCheck;
-    if (infoIds != null) {
-      infosToCheck = allMeta.where((e) => infoIds.contains(e.id)).toList();
-    } else {
-      infosToCheck = allMeta;
-    }
-
-    await _checkForUpdates(infosToCheck, needsUpdate);
-
-    if (needsUpdate.isNotEmpty) {
-      var fullEvents = await DbInformation.getInfosDescription(needsUpdate);
-      for (var e in fullEvents) {
-        await OfflineDataService.saveInfoDescription(e);
-      }
-    }
-  }
-
   static Future<void> fillDescriptionFromOffline(InformationModel info) async {
     var infoDesc = await OfflineDataService.getInfoDescription(info.id!.toString());
     if (infoDesc != null) {
       info.description = infoDesc.description ?? "";
-    }
-  }
-
-  static Future<void> _checkForUpdates(List<InformationModel> infosToCheck, List<int> needsUpdate) async {
-    for (var infoMeta in infosToCheck) {
-      var oe = await OfflineDataService.getInfoDescription(infoMeta.id.toString());
-      if (oe == null || oe.updatedAt == null || oe.updatedAt!.isBefore(infoMeta.updatedAt!)) {
-        needsUpdate.add(infoMeta.id!);
-      }
     }
   }
 

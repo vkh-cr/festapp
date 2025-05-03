@@ -40,8 +40,11 @@ class PlatformHelper {
   static bool get isIOS => defaultTargetPlatform == TargetPlatform.iOS;
   static bool get isAndroid => defaultTargetPlatform == TargetPlatform.android;
   static bool get isWeb => kIsWeb;
+  static bool get isWasm => identical(double.nan, double.nan);
   static bool get isWebBasic => kIsWeb && !PWAInstall().launchMode!.installed;
   static bool get isPwa => kIsWeb && PWAInstall().launchMode!.installed;
-  static bool get isNative => !const bool.fromEnvironment('dart.library.js_util');
+  static bool get isNative =>
+      !(const bool.fromEnvironment('dart.library.js_util') ||
+          const bool.fromEnvironment('dart.library.js_interop'));
   static bool isPwaInstalledOrNative() => isNative || isPwa;
 }

@@ -24,7 +24,7 @@ class SynchroService {
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
-          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
+          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.features}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
           .eq(Tb.occasions.id, RightsService.currentOccasionId()!)
           .single();
 
@@ -62,7 +62,6 @@ class SynchroService {
     if (PlatformHelper.isPwaInstalledOrNative())
     {
       await DbEvents.updateEventDescriptions();
-      await DbInformation.updateInfoDescription();
     }
 
     await DbEvents.synchronizeMySchedule();
