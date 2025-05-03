@@ -207,6 +207,8 @@ class TimeBlockItem {
       this.timeBlockPlace,
       this.eventType});
 
+  Duration duration() => startTime.isBefore(endTime) ? (DateTimeRange(start: startTime, end: endTime)).duration : Duration.zero;
+
   factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
     return TimeBlockItem(
       startTime: model.startTime.eventLocalTime(),
@@ -215,7 +217,7 @@ class TimeBlockItem {
       id: model.id!,
       data: model.toString(),
       eventType: model.type,
-      timeBlockPlace: model.place != null
+      timeBlockPlace: model.place != null && model.place!.id != null
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
     );
