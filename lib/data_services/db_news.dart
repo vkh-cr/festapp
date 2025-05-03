@@ -19,7 +19,7 @@ class DbNews {
 // from some reason lower than is behaving like lower and equal than on web platform
 // therefore additional check
         .neq(Tb.news.id, message.id)
-        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
+        .eq(Tb.news.occasion, RightsService.currentOccasionId()!)
         .order(Tb.news.created_at)
         .limit(1)
         .maybeSingle();
@@ -35,7 +35,7 @@ class DbNews {
         toBeUpdated.add({
           Tb.user_news.user: u[Tb.user_news.user],
           Tb.user_news.news_id: lastMes[Tb.news.id],
-          Tb.user_news.occasion: RightsService.currentOccasionId!
+          Tb.user_news.occasion: RightsService.currentOccasionId()!
         });
       }
 
@@ -67,7 +67,7 @@ class DbNews {
     await _supabase.from(Tb.log_notifications.table)
         .insert(
         {
-          Tb.log_notifications.occasion: RightsService.currentOccasionId!,
+          Tb.log_notifications.occasion: RightsService.currentOccasionId()!,
           Tb.log_notifications.to: to,
           Tb.log_notifications.content: message,
           Tb.log_notifications.heading: title,
@@ -81,7 +81,7 @@ class DbNews {
       var messageForNews = heading != null ? "<strong>$heading</strong><br>$message" : message;
       await _supabase.from(Tb.news.table).insert(
           {
-            Tb.news.occasion: RightsService.currentOccasionId!,
+            Tb.news.occasion: RightsService.currentOccasionId()!,
             Tb.news.message: messageForNews,
             Tb.news.created_by: AuthService.currentUserId()
           }
@@ -102,7 +102,7 @@ class DbNews {
       await _supabase.from(Tb.log_notifications.table)
           .insert(
           {
-            Tb.log_notifications.occasion: RightsService.currentOccasionId!,
+            Tb.log_notifications.occasion: RightsService.currentOccasionId()!,
             Tb.log_notifications.to: to,
             Tb.log_notifications.content: basicMessage,
             Tb.log_notifications.heading: heading ?? headingDefault,
@@ -125,7 +125,7 @@ class DbNews {
     var result = await _supabase
         .from(Tb.news.table)
         .select()
-        .eq(Tb.news.occasion, RightsService.currentOccasionId!)
+        .eq(Tb.news.occasion, RightsService.currentOccasionId()!)
         .gt(Tb.news.id, lastMessageId)
         .count();
     return result.count;
@@ -141,7 +141,7 @@ class DbNews {
             "${Tb.user_news.table}!inner(${Tb.user_news.news_id})"
     )
         .match({
-      Tb.news.occasion: RightsService.currentOccasionId!,
+      Tb.news.occasion: RightsService.currentOccasionId()!,
       "${Tb.user_news.table}.${Tb.user_news.user}": AuthService.currentUserId()
     }).maybeSingle();
     if (lastMessage != null) {
@@ -156,12 +156,12 @@ class DbNews {
         .from(Tb.user_news.table)
         .delete()
         .eq(Tb.user_news.user, AuthService.currentUserId())
-        .eq(Tb.user_news.occasion, RightsService.currentOccasionId!);
+        .eq(Tb.user_news.occasion, RightsService.currentOccasionId()!);
 
     await _supabase
         .from(Tb.user_news.table)
         .insert(
-        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId, Tb.user_news.occasion: RightsService.currentOccasionId}
+        {Tb.user_news.user: AuthService.currentUserId(), Tb.user_news.news_id: newId, Tb.user_news.occasion: RightsService.currentOccasionId()}
     ).select();
   }
 
@@ -170,7 +170,7 @@ class DbNews {
     if (AuthService.isLoggedIn()) {
       lastReadMessageId = await getLastReadMessage();
     }
-    var data = await _supabase.rpc("get_news_with_views", params: {"oc":RightsService.currentOccasionId!});
+    var data = await _supabase.rpc("get_news_with_views", params: {"oc":RightsService.currentOccasionId()!});
 
     List<NewsModel> loadedMessages = List<NewsModel>.from(data.map((x) => NewsModel.fromJson(x)));
 

@@ -88,7 +88,7 @@ class _PlacesContentState extends State<PlacesContent> {
           renderer: (ctx) {
             return DataGridHelper.buildHtmlEditorButton(
               context: context,
-              occasionId: RightsService.currentOccasionId,
+              occasionId: RightsService.currentOccasionId(),
               field: Tb.places.description,
               rendererContext: ctx,
               loadContent: () async =>

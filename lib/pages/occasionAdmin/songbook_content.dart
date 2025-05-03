@@ -62,7 +62,7 @@ class _SongbookContentState extends State<SongbookContent> {
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
-                occasionId: RightsService.currentOccasionId,
+                occasionId: RightsService.currentOccasionId(),
                 field: Tb.information.description,
                 rendererContext: rendererContext,
                 loadContent: () async {

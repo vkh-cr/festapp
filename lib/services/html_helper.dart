@@ -199,6 +199,23 @@ class HtmlHelper {
     ).trim().isEmpty;
   }
 
+  /// Returns true if the HTML content is “long” (text length exceeds threshold)
+  /// or contains at least one <img> tag, indicating it should be shown in a popup.
+  static bool isHtmlLong(String? htmlText, {int lengthThreshold = 500}) {
+    if(htmlText == null) {
+      return false;
+    }
+    // Quick check for any <img> tags
+    if (RegExp(r'<img\b[^>]*>', caseSensitive: false).hasMatch(htmlText)) {
+      return true;
+    }
+
+    // Strip tags and count plain text length
+    final document = html_parser.parse(htmlText);
+    final plainText = document.body?.text.trim() ?? '';
+    return plainText.length > lengthThreshold;
+  }
+
   static Future<String> storeImagesToOccasion(
       String oldHtml,
       String newHtml,
