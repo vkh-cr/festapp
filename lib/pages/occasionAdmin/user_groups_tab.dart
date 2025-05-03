@@ -192,7 +192,7 @@ class _UserGroupsTabState extends State<UserGroupsTab> {
                       content: {
                         HtmlEditorPage.parContent: oldText,
                       },
-                      occasionId: RightsService.currentOccasionId
+                      occasionId: RightsService.currentOccasionId()
                     ),
                   ).then((value) async {
                     if (value != null) {

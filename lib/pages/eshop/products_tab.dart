@@ -49,7 +49,7 @@ class _ProductsTabState extends State<ProductsTab> {
           areAllActionsEnabled: () => RightsService.canUpdateOrders(),
           isAddActionPossible: () => false,
         ),
-        columns: EshopColumns.generateColumns(context, columnIdentifiers, data: {EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId}),
+        columns: EshopColumns.generateColumns(context, columnIdentifiers, data: {EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId()}),
       );
     }
   }
