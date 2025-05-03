@@ -14,7 +14,6 @@ import 'package:fstapp/services/notification_helper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/time_travel_widget.dart';
@@ -38,13 +37,10 @@ Future<void> main() async {
 }
 
 Future<void> initializeEverything() async {
-
   print('Initialization started');
   //GoRouter.optionURLReflectsImperativeAPIs = true;
   WidgetsFlutterBinding.ensureInitialized();
   print('Widgets binding initialized');
-
-  print('Wasm state: ${PlatformHelper.isWasm}');
 
   try {
     PWAInstall().setup();
