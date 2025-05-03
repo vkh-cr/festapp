@@ -213,7 +213,7 @@ class _NewsPageState extends State<NewsPage> {
                             context,
                             HtmlEditorRoute(
                               content: {HtmlEditorPage.parContent: message.message},
-                              occasionId: RightsService.currentOccasionId,
+                              occasionId: RightsService.currentOccasionId(),
                             ),
                           ).then((value) async {
                             if (value != null) {

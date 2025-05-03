@@ -41,9 +41,9 @@ class AuthService {
     await _supabase.auth.signOut(scope: SignOutScope.local);
     _secureStorage.delete(key: REFRESH_TOKEN_KEY);
     currentUser = null;
-    RightsService.currentOccasionUser = null;
-    RightsService.currentUnitUser = null;
-    RightsService.currentUnitUser = null;
+    RightsService.occasionLinkModel?.occasionUser = null;
+    RightsService.occasionLinkModel?.unitUser = null;
+    RightsService.occasionLinkModel?.userInfo = null;
   }
 
   static Future<dynamic> resetPasswordForEmail(String email) async {
@@ -84,8 +84,8 @@ class AuthService {
   static Future<UserInfoModel> getFullUserInfo() async {
     var user = UserInfoModel();
     user.occasionUser = await DbUsers.getOccasionUser(AuthService.currentUserId());
-    if(RightsService.currentOccasionUser?.role != null) {
-      user.roleString = await getRoleInfo(RightsService.currentOccasionUser!.role!);
+    if(RightsService.currentOccasionUser()?.role != null) {
+      user.roleString = await getRoleInfo(RightsService.currentOccasionUser()!.role!);
     }
     user.userGroups = await DbGroups.getUserGroups();
     var eUserGroup = user.userGroups!.firstWhereOrNull((g)=>g.type == null);
@@ -199,7 +199,7 @@ class AuthService {
         params:
         {
           "usr": occasionUserModel.user,
-          "oc": occasionUserModel.occasion??RightsService.currentOccasionId,
+          "oc": occasionUserModel.occasion??RightsService.currentOccasionId(),
           "password": pwd
         });
   }

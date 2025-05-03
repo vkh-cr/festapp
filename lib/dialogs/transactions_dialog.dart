@@ -103,7 +103,7 @@ class _TransactionsDialogState extends State<TransactionsDialog> {
     if (_payment == null || _payment!.bankAccount == null) {
       return false;
     }
-    return RightsService.bankAccountAdmin?.any((i) => _payment!.bankAccount == i) ?? false;
+    return RightsService.bankAccountAdmin()?.any((i) => _payment!.bankAccount == i) ?? false;
   }
 
   @override
