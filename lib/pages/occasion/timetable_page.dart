@@ -174,7 +174,7 @@ class _TimetablePageState extends State<TimetablePage>
             controller: timetableController,
             items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces,
-            occasionEnd: RightsService.currentOccasion!.endTime,));
+            occasionEnd: RightsService.currentOccasion()!.endTime,));
   }
 
   final List<EventModel> _events = [];

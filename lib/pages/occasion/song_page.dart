@@ -157,7 +157,6 @@ class _SongbookPageState extends State<SongbookPage> {
     _informationList = allInfo.filterByType(widget.type);
     OfflineDataService.saveAllInfo(allInfo);
     setState(() {});
-    DbInformation.updateInfoDescription();
   }
 
   Future<void> loadItemDescription(int index) async {
