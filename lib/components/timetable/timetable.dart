@@ -192,17 +192,27 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       throw Exception("Events range cannot exceed 48 hours.");
     }
 
-    var roundedDown = firstEvent.startTime.roundDown();
-    if(roundedDown.isAtSameMomentAs(firstEvent.startTime)){
-      roundedDown = roundedDown.subtract(Duration(hours: 1));
+    // Round down start; if exact on the hour, go back one hour
+    final adjustedStart = firstEvent.startTime
+        .roundDown()
+        .subtract(firstEvent.startTime.isAtSameMomentAs(
+        firstEvent.startTime.roundDown())
+        ? const Duration(hours: 1)
+        : Duration.zero);
+
+    // Round up end
+    final adjustedEnd = lastEvent.endTime.roundUp();
+
+    // Store for later use
+    startTime = adjustedStart;
+    endTime = adjustedEnd;
+
+    // Compute total hours, wrapping across midnight if needed
+    var diff = adjustedEnd.difference(adjustedStart);
+    if (diff.isNegative) {
+      diff += const Duration(days: 1);
     }
-    startTime = roundedDown;
-    endTime = lastEvent.endTime.roundUp();
-
-    var lastHour = lastEvent.endTime.roundUp().hour;
-
-    bool isSkipping = firstEvent.startTime.day != lastEvent.endTime.day;
-    hourCount = isSkipping ? 24 - startTime!.hour + lastHour : lastHour - startTime!.hour;
+    hourCount = diff.inHours;
 
     allItems = TimetableItemsWidget(
       usedItems: usedItems,
