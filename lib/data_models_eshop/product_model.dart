@@ -137,6 +137,7 @@ class ProductModel extends ITrinaRowModel {
       TbEshop.products.id: TrinaCell(value: id ?? 0),
       TbEshop.products.is_hidden: TrinaCell(value: isHidden.toString()),
       TbEshop.products.title: TrinaCell(value: title ?? ''),
+      TbEshop.products.description: TrinaCell(value: description ?? ''),
       TbEshop.products.created_at: TrinaCell(
         value: createdAt != null
             ? DateFormat('yyyy-MM-dd').format(createdAt!)

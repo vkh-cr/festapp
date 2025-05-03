@@ -216,7 +216,7 @@ class MapLayer {
   String? offlineMapPackageURL;
   String? offlineMapStyleURL;
   String? offlineMapLayerName;
-  bool autoDownloadOfflineMap;
+  bool forceOfflineMap;
 
   MapLayer({
     this.logo,
@@ -227,7 +227,7 @@ class MapLayer {
     this.offlineMapPackageURL,
     this.offlineMapStyleURL,
     this.offlineMapLayerName,
-    this.autoDownloadOfflineMap = false,
+    this.forceOfflineMap = false,
   });
 
   factory MapLayer.fromJson(Map<String, dynamic> json) {
@@ -241,7 +241,7 @@ class MapLayer {
       offlineMapPackageURL: json[FeatureConstants.offlineMapPackageURL] as String?,
       offlineMapStyleURL: json[FeatureConstants.offlineMapStyleURL] as String?,
       offlineMapLayerName: json[FeatureConstants.offlineMapLayerName] as String?,
-      autoDownloadOfflineMap: json[FeatureConstants.forceOfflineMap] as bool? ?? false,
+      forceOfflineMap: json[FeatureConstants.forceOfflineMap] as bool? ?? false,
     );
   }
 
@@ -252,7 +252,7 @@ class MapLayer {
       FeatureConstants.mapLogoLink: logoLink,
       FeatureConstants.mapTextLink: textLink,
       FeatureConstants.mapLayerLink: layerLink,
-      FeatureConstants.forceOfflineMap: autoDownloadOfflineMap,
+      FeatureConstants.forceOfflineMap: forceOfflineMap,
     };
     if (offlineMapPackageURL != null) {
       data[FeatureConstants.offlineMapPackageURL] = offlineMapPackageURL!;

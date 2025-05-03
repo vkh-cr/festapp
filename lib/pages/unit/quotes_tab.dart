@@ -42,7 +42,7 @@ class QuotesTab extends StatelessWidget {
             title: "Unit".tr(),
             field: Tb.information.unit,
             type: TrinaColumnType.number(
-                defaultValue: RightsService.currentUnit!.id!),
+                defaultValue: RightsService.currentUnit()!.id!),
             readOnly: true,
             width: 50,
           ),

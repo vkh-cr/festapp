@@ -31,12 +31,12 @@ class AdminPageHelper {
     final screenWidth = MediaQuery.of(context).size.width;
     if (screenWidth < 600) {
       // For mobile, we show only the occasion title.
-      var title = RightsService.currentOccasion!.title!;
+      var title = RightsService.currentOccasion()!.title!;
       return buildMobileAdminAppBar(context, title, activeTabs, tabController!);
     } else {
       // For larger screens, we show a more detailed title.
       var title =
-          "${RightsService.currentUnit!.title!} - ${RightsService.currentOccasion!.title!}";
+          "${RightsService.currentUnit()!.title!} - ${RightsService.currentOccasion()!.title!}";
       return buildDesktopAdminAppBar(context, activeTabs, tabController!, title);
     }
   }
@@ -62,7 +62,7 @@ class AdminPageHelper {
             if (RightsService.canUserSeeUnitWorkspace()) {
               RouterService.navigate(
                 context,
-                "unit/${RightsService.currentUnitUser?.unit}/edit",
+                "unit/${RightsService.currentUnitUser()?.unit}/edit",
               );
             }
           },
@@ -125,7 +125,7 @@ class AdminPageHelper {
                 if (RightsService.canUserSeeUnitWorkspace()) {
                   RouterService.navigate(
                     context,
-                    "unit/${RightsService.currentUnitUser?.unit}/edit",
+                    "unit/${RightsService.currentUnitUser()?.unit}/edit",
                   );
                 }
               },
