@@ -11,9 +11,9 @@ class AppConfig {
   static const bool showPWAInstallOption = true;
   static const bool isOwnProgramSupportedWithoutSignIn = true;
   static const bool isOwnProgramSupported = true;
-  static const bool isNotificationsSupported = false;
+  static const bool isNotificationsSupported = true;
   static const bool isWebNotificationsSupported = true;
-  static const String oneSignalAppId = '';
+  static const String oneSignalAppId = '7140cfd2-280d-4971-a81a-b78503e99e6e';
 
   static const int organization = 6;
   //setup occasion id to force occasion
