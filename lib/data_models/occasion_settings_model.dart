@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:fstapp/data_models/feature_model.dart';
+import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/data_models/service_item_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 
@@ -13,7 +13,7 @@ class OccasionSettingsModel {
   DateTime? gameEndTime;
 
   // Features
-  List<FeatureModel>? features;
+  List<Feature>? features;
 
   // Visibility switch
   bool? isHidden;
@@ -27,12 +27,12 @@ class OccasionSettingsModel {
     this.gameStartTime,
     this.gameEndTime,
     this.features,
-    this.isHidden,
   });
 
   static OccasionSettingsModel fromJson(Map<String, dynamic> json) {
     // Initialize to default settings if required data is missing
     var servicesPart = json[Tb.occasions.services] as Map<String, dynamic>?;
+    var featuresPart = json[Tb.occasions.features] as List<dynamic>?;
     var dataPart = json[Tb.occasions.data] as Map<String, dynamic>?;
 
     if (dataPart == null) {
@@ -42,7 +42,6 @@ class OccasionSettingsModel {
     }
 
     var gameSettings = dataPart[Tb.occasions.data_game] as Map<String, dynamic>? ?? {};
-    var featuresJson = dataPart[Tb.occasions.data_features] as List<dynamic>? ?? [];
     var hiddenFlag = dataPart[Tb.occasions.is_hidden] as bool?;
 
     return OccasionSettingsModel(
@@ -59,33 +58,26 @@ class OccasionSettingsModel {
           ? DateTime.tryParse(gameSettings[Tb.occasions.data_game_end])
           : null,
       services: servicesPart,
-      features: featuresJson.map((f) => FeatureModel.fromJson(f)).toList(),
-      isHidden: hiddenFlag,
+      features: featuresPart?.map((f) => Feature.fromJson(f)).toList(),
     );
   }
 
   Map<String, dynamic> toJson() => {
     Tb.occasions.services: services,
+    Tb.occasions.features: features
+        ?.map((f) => f.toJson())
+        .toList(),
+    Tb.occasions.is_hidden: isHidden,
     Tb.occasions.data: {
       Tb.occasions.data_game: {
         Tb.occasions.data_game_start: gameStartTime?.toIso8601String(),
         Tb.occasions.data_game_end: gameEndTime?.toIso8601String(),
       },
-      Tb.occasions.data_features: features
-          ?.map((f) => f.toJson())
-          .toList(),
-      Tb.occasions.is_hidden: isHidden,
     }
   };
 
   static OccasionSettingsModel defaultSettings = OccasionSettingsModel(
   );
-
-  FeatureModel? getFeatureByCode(String code) =>
-      features?.firstWhereOrNull((feature) => feature.code == code);
-
-  bool isFeatureEnabled(String code) =>
-      features?.firstWhereOrNull((feature) => feature.code == code)?.isEnabled == true;
 
   ServiceItemModel? getReferenceToService(String serviceType, Map<String, dynamic>? userServices) {
     // Retrieve the list of services for the specified service type

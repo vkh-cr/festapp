@@ -63,10 +63,10 @@ class RouterService {
   }
 
   static void scheduleBack(BuildContext context) {
-    if(context.router.canNavigateBack){
+    //if(context.router.canPop()){
       context.router.replace(ScheduleRoute());
       context.router.maybePopTop();
-    }
+    //}
   }
 
   static bool canPop(BuildContext context) => context.router.canPop();
