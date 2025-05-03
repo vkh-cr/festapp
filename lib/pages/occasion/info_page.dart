@@ -140,7 +140,7 @@ class _InfoPageState extends State<InfoPage> {
                                 var result = await RouterService.navigatePageInfo(
                                     context, HtmlEditorRoute(
                                     content: {HtmlEditorPage.parContent: item.description},
-                                    occasionId: RightsService.currentOccasionId
+                                    occasionId: RightsService.currentOccasionId()
                                 ));
                                 if (result != null) {
                                   setState(() {
@@ -203,30 +203,6 @@ class _InfoPageState extends State<InfoPage> {
         jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${InfoPage.ROUTE}");
       }
     }
-
-    if (_informationList![panelIndex].description == null &&
-        !_isItemLoading[panelIndex]!) {
-      await loadItemDescription(panelIndex);
-    }
-  }
-
-  Future<void> loadItemDescription(int index) async {
-    setState(() {
-      _isItemLoading[index] = true;
-    });
-
-    var info = _informationList![index];
-    await DbInformation.fillDescriptionFromOffline(info);
-    setState(() {
-      if (info.description != null) {
-        _isItemLoading[index] = false;
-      }
-    });
-    await DbInformation.updateInfoDescription([info.id!]);
-    await DbInformation.fillDescriptionFromOffline(info);
-    setState(() {
-      _isItemLoading[index] = false;
-    });
   }
 
   Future<void> loadDataOffline() async {

@@ -42,7 +42,7 @@ class QuotesTab extends StatelessWidget {
             title: "Unit".tr(),
             field: Tb.information.unit,
             type: TrinaColumnType.number(
-                defaultValue: RightsService.currentUnit!.id!),
+                defaultValue: RightsService.currentUnit()!.id!),
             readOnly: true,
             width: 50,
           ),
@@ -64,15 +64,7 @@ class QuotesTab extends StatelessWidget {
                 field: Tb.information.description,
                 rendererContext: rendererContext,
                 loadContent: () async {
-                  var id = rendererContext.row.cells[Tb.information.id]!.value;
-                  if (id != null) {
-                    var infoDescription =
-                    await DbInformation.getInfosDescription([id]);
-                    if (infoDescription.isNotEmpty) {
-                      return infoDescription[0].description;
-                    }
-                  }
-                  return null;
+                  return rendererContext.row.cells[Tb.information.description]!.value;
                 },
               );
             },
