@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart' as fm;
 import 'package:flutter_map_animations/flutter_map_animations.dart';
@@ -10,6 +11,7 @@ import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
+import 'package:fstapp/components/map/place_detail_dialog.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -26,6 +28,7 @@ import 'package:fstapp/data_services/DataExtensions.dart';
 import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -190,7 +193,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (fileExists) {
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
     }
-    if (_mapFeature.offlineMapLayer.autoDownloadOfflineMap == true) {
+    if (_mapFeature.offlineMapLayer.forceOfflineMap == true) {
       setState(() => _useOffline = true);
       if (!fileExists) {
         Future.delayed(Duration(seconds: 1), () => _downloadOfflinePackage());
@@ -263,7 +266,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         title: Text(pageTitle),
         leading: PopButton(),
         actions: [
-          if (!PlatformHelper.isWeb && _isOfflineMapConfigured())
+          if (!kIsWeb && _isOfflineMapConfigured() && !_mapFeature.offlineMapLayer.forceOfflineMap)
             Row(
               children: [
                 Icon(
@@ -445,6 +448,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         options: PopupMarkerLayerOptions(
           popupController: _popupLayerController,
           markers: selectedMarker != null ? _selectedMarkers : _markers,
+          markerTapBehavior: MarkerTapBehavior.custom((space, state, controller){
+            var marker = space.marker;
+            if (marker is MapMarkerWithText && HtmlHelper.isHtmlLong(marker.place.description)) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return PlaceDetailDialog(marker: marker);
+                },
+              );
+            } else {
+              controller.showPopupsOnlyFor([marker]);
+            }
+          }),
           popupDisplayOptions: PopupDisplayOptions(
             snap: PopupSnap.markerTop,
             builder: (BuildContext context, fm.Marker marker) {

@@ -4,6 +4,8 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:fstapp/app_router.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/data_models/occasion_link_model.dart';
+import 'package:fstapp/data_models/occasion_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/router_service.dart';
@@ -81,6 +83,7 @@ Future<void> initializeEverything() async {
     var settings = await OfflineDataService.getGlobalSettings();
     if (settings != null) {
       SynchroService.globalSettingsModel = settings;
+      RightsService.occasionLinkModel = OccasionLinkModel(occasion: OccasionModel(features: settings.features, isOpen: true, isHidden: false));
       print('Global settings loaded');
     }
   } catch (e) {
