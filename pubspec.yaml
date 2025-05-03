@@ -44,7 +44,7 @@ dependencies:
 #  flutter_map_marker_popup:
 #    path: ./pckgs/flutter_map_marker_popup-master
   supabase_flutter: ^2.9.0
-  flutter_secure_storage: ^10.0.0-beta.4
+  flutter_secure_storage: ^9.2.2
   timelines_plus: ^1.0.6
   intl: ^0.19.0
   search_page: ^2.3.0
@@ -71,10 +71,7 @@ dependencies:
   easy_localization: ^3.0.7
   flutter_map_cancellable_tile_provider: ^3.0.2
   simple_shadow: ^0.3.1
-  pwa_install:
-    git:
-      url: https://github.com/jtmuller5/pwa_install.git
-      ref: 82320a219574c1b5ddf1d83e080cad5a84261c2d
+  pwa_install: ^0.0.5
   flutter_form_builder: ^10.0.1
   form_builder_validators: ^11.1.2
   qr_flutter: ^4.1.0
