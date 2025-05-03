@@ -16,7 +16,7 @@ class DbPlaces {
         .from(Tb.places.table)
         .select()
         .eq(Tb.places.is_hidden, false)
-        .eq(Tb.places.occasion, RightsService.currentOccasionId!);
+        .eq(Tb.places.occasion, RightsService.currentOccasionId()!);
     var toReturn =
     List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
@@ -27,7 +27,7 @@ class DbPlaces {
     var data = await _supabase
         .from(Tb.places.table)
         .select()
-        .eq(Tb.places.occasion, RightsService.currentOccasionId!);
+        .eq(Tb.places.occasion, RightsService.currentOccasionId()!);
     var toReturn =
     List<PlaceModel>.from(data.map((x) => PlaceModel.fromJson(x)));
     toReturn.sortPlaces();
@@ -81,7 +81,7 @@ class DbPlaces {
           .single();
     } else {
       upsertObj.remove(Tb.places.id);
-      upsertObj[Tb.places.occasion] = RightsService.currentOccasionId!;
+      upsertObj[Tb.places.occasion] = RightsService.currentOccasionId()!;
       data = await _supabase
           .from(Tb.places.table)
           .insert(upsertObj)
@@ -118,7 +118,7 @@ class DbPlaces {
             '${Tb.path_groups.path_data},'
             '${Tb.path_groups.icon}'
     )
-        .eq(Tb.path_groups.occasion, RightsService.currentOccasionId!);
+        .eq(Tb.path_groups.occasion, RightsService.currentOccasionId()!);
 
     var toReturn =  (data as List<dynamic>)
         .map((x) => PathGroupsModel.fromJson(x as Map<String, dynamic>))
@@ -152,7 +152,7 @@ class DbPlaces {
           .single();
     } else {
       // --- INSERT new
-      upsertObj[Tb.path_groups.occasion] = RightsService.currentOccasionId!;
+      upsertObj[Tb.path_groups.occasion] = RightsService.currentOccasionId()!;
       pgData = await _supabase
           .from(Tb.path_groups.table)
           .insert(upsertObj)

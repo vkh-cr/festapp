@@ -531,7 +531,7 @@
   "Offline Map Style URL": "URL stylu offline mapy",
   "Map Layer Settings": "Nastavení mapových vrstev",
   "Offline Map Layer Settings": "Nastavení offline mapových vrstev",
-  "Auto-download offline map": "Automaticky stáhnout offline mapy",
+  "Force offline map": "Vynutit offline mapy",
   "Offline Map Layer Name": "Název vrstvy offline mapy",
   "Allows displaying the program in a table.": "Umožní zobrazení programu v tabulce.",
   "Timetable": "Program v tabulce",
@@ -547,5 +547,6 @@
   "Color": "Barva",
   "Currency": "Měna",
   "This determines whether this event is hidden from list views.": "Určuje, zda je tato událost skrytá v seznamu událostí.",
+  "No news messages yet": "Zatím žádné novinky",
   "_": "_"
 }

@@ -22,6 +22,7 @@ DECLARE
     occasion_json jsonb;
     unit_json jsonb;
     user_info_json jsonb;
+    org_json jsonb;
 BEGIN
     -- Log the request details in log_app_config table
     INSERT INTO public.log_app_config (organization, platform)
@@ -246,6 +247,16 @@ BEGIN
     FROM public.user_info ui
     WHERE ui.id = auth.uid();
 
+    -- Fetch limited organization info
+    SELECT json_build_object(
+        'title', title,
+        'APP_NAME', data->>'APP_NAME',
+        'PLATFORMS', data->'PLATFORMS',
+        'IS_REGISTRATION_ENABLED', data->'IS_REGISTRATION_ENABLED'
+    ) INTO org_json
+    FROM public.organizations
+    WHERE id = org_id;
+
     RETURN json_build_object(
         'code', 200,
         'is_admin', is_admin_bool,
@@ -255,7 +266,8 @@ BEGIN
         'unit', COALESCE(unit_json, '{}'::jsonb),
         'version_recommended', version_recommended,
         'bank_accounts_admin', COALESCE(bank_account_ids, '{}'),
-        'user_info', COALESCE(user_info_json, '{}'::jsonb)
+        'user_info', COALESCE(user_info_json, '{}'::jsonb),
+        'organization', COALESCE(org_json::jsonb, '{}'::jsonb)
     );
 END;
 $$;

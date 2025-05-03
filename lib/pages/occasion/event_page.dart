@@ -187,7 +187,7 @@ class _EventPageState extends State<EventPage> {
                                                 HtmlEditorRoute(
                                                     content: {HtmlEditorPage.parContent:
                                                 _event!.description},
-                                                occasionId: RightsService.currentOccasionId))
+                                                occasionId: RightsService.currentOccasionId()))
                                             .then((value) async {
                                           if (value != null) {
                                             var changed = value as String;

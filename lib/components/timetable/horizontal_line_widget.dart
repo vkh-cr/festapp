@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/timetable/timetable.dart';
-import 'package:fstapp/components/timetable/timetable_helper.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:intl/intl.dart';
+
+import 'timetable_controller.dart';
+import 'timetable_helper.dart';
 
 class HorizontalLineWidget extends StatelessWidget {
   final DateTime startTime;
