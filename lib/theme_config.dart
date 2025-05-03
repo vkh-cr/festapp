@@ -18,7 +18,7 @@ class ThemeConfig {
       ),
       scaffoldBackgroundColor: lllBackground,
       appBarTheme: AppBarTheme(color: appBarColor()),
-      tabBarTheme: TabBarTheme(indicatorColor: lllPrimary)
+      tabBarTheme: TabBarThemeData(indicatorColor: lllPrimary)
   );
 
   // Dark theme configuration
@@ -37,7 +37,7 @@ class ThemeConfig {
         onSurface: dddText,
       ),
       appBarTheme: AppBarTheme(color: appBarColor()),
-      tabBarTheme: TabBarTheme(indicatorColor: dddPrimary)
+      tabBarTheme: TabBarThemeData(indicatorColor: dddPrimary)
   );
 
   // Dynamic color methods with BuildContext for theme-based color adaptation

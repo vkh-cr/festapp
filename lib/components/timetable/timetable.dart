@@ -8,31 +8,10 @@ import 'package:fstapp/components/timetable/horizontal_line_widget.dart';
 import 'package:fstapp/components/timetable/timetable_items_widget.dart';
 import 'package:fstapp/theme_config.dart';
 
-class TimetableController {
-  void Function()? autoSetPosition;
-  void Function()? rebuild;
-  void Function()? reset;
-  void Function(int)? onItemTap;
-  bool isTimeHorizontal = false;
-  double pixelsInHour() => isTimeHorizontal == true ? 200 : 100;
-  double minimalPadding() => 1.5;
-  double verticalAxisTitleHeight() => 40;
-  double horizontalAxisSpaceHeight() => isTimeHorizontal == true ? 30 : 60;
-  double verticalAxisSpace() => isTimeHorizontal == true ? 0 : 60;
-  double itemStaticDimension() => isTimeHorizontal == true ? 56 : 112;
-
-  TimetableController({this.onItemTap});
-
-  //support max 1 day skipping
-  double timeRangeLength(DateTime startTime, DateTime endTime) {
-    var range = DateTimeRange(start: startTime, end: endTime);
-    return range.duration.inMinutes / 60.0 * pixelsInHour();
-  }
-}
+import 'timetable_controller.dart';
 
 class Timetable extends StatefulWidget {
   final TimetableController controller;
-  static const int minimalDurationMinutes = 25;
 
   const Timetable({
     super.key,
@@ -187,6 +166,10 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
         if(item.endTime.isBefore(item.startTime)) {
           continue;
         }
+
+        if(item.duration().inMinutes<widget.controller.minimalDurationMinutes()){
+          continue;
+        }
         usedItems.add(item);
       }
     }
@@ -209,17 +192,27 @@ class _TimetableState extends State<Timetable> with TickerProviderStateMixin {
       throw Exception("Events range cannot exceed 48 hours.");
     }
 
-    var roundedDown = firstEvent.startTime.roundDown();
-    if(roundedDown.isAtSameMomentAs(firstEvent.startTime)){
-      roundedDown = roundedDown.subtract(Duration(hours: 1));
+    // Round down start; if exact on the hour, go back one hour
+    final adjustedStart = firstEvent.startTime
+        .roundDown()
+        .subtract(firstEvent.startTime.isAtSameMomentAs(
+        firstEvent.startTime.roundDown())
+        ? const Duration(hours: 1)
+        : Duration.zero);
+
+    // Round up end
+    final adjustedEnd = lastEvent.endTime.roundUp();
+
+    // Store for later use
+    startTime = adjustedStart;
+    endTime = adjustedEnd;
+
+    // Compute total hours, wrapping across midnight if needed
+    var diff = adjustedEnd.difference(adjustedStart);
+    if (diff.isNegative) {
+      diff += const Duration(days: 1);
     }
-    startTime = roundedDown;
-    endTime = lastEvent.endTime.roundUp();
-
-    var lastHour = lastEvent.endTime.roundUp().hour;
-
-    bool isSkipping = firstEvent.startTime.day != lastEvent.endTime.day;
-    hourCount = isSkipping ? 24 - startTime!.hour + lastHour : lastHour - startTime!.hour;
+    hourCount = diff.inHours;
 
     allItems = TimetableItemsWidget(
       usedItems: usedItems,

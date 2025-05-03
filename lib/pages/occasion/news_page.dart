@@ -112,12 +112,31 @@ class _NewsPageState extends State<NewsPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: ListView.builder(
+          // Show placeholder when empty, otherwise the list
+          child: newsMessages.isEmpty
+              ? Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.article_outlined,
+                  size: 64,
+                  color: Theme.of(context).disabledColor,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  tr('No news messages yet'),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+              : ListView.builder(
             itemCount: newsMessages.length,
             itemBuilder: (BuildContext context, int index) {
               final message = newsMessages[index];
               final previousMessage = index > 0 ? newsMessages[index - 1] : null;
-
               final isSameDay = previousMessage != null &&
                   message.createdAt!.year == previousMessage.createdAt!.year &&
                   message.createdAt!.month == previousMessage.createdAt!.month &&
@@ -132,7 +151,8 @@ class _NewsPageState extends State<NewsPage> {
                       padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
                       alignment: Alignment.topRight,
                       child: Text(
-                        DateFormat("EEEE d.M.y", context.locale.languageCode).format(message.createdAt!),
+                        DateFormat("EEEE d.M.y", context.locale.languageCode)
+                            .format(message.createdAt!),
                         style: message.isRead ? readTextStyle() : unReadTextStyle(),
                       ),
                     ),
@@ -165,7 +185,13 @@ class _NewsPageState extends State<NewsPage> {
                                 children: [
                                   Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
                                   const SizedBox(width: 6),
-                                  Text(message.views.toString(), style: TextStyle(color: Theme.of(context).disabledColor, fontWeight: FontWeight.bold)),
+                                  Text(
+                                    message.views.toString(),
+                                    style: TextStyle(
+                                      color: Theme.of(context).disabledColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   const SizedBox(width: 10),
                                 ],
                               ),
@@ -183,10 +209,13 @@ class _NewsPageState extends State<NewsPage> {
                           await DbNews.deleteNewsMessage(message);
                           ToastHelper.Show(context, "Message has been removed.".tr());
                         } else {
-                          await RouterService.navigatePageInfo(context, HtmlEditorRoute(
+                          await RouterService.navigatePageInfo(
+                            context,
+                            HtmlEditorRoute(
                               content: {HtmlEditorPage.parContent: message.message},
-                              occasionId: RightsService.currentOccasionId
-                          )).then((value) async {
+                              occasionId: RightsService.currentOccasionId(),
+                            ),
+                          ).then((value) async {
                             if (value != null) {
                               var newMessage = value as String;
                               message.message = newMessage;

@@ -164,7 +164,7 @@ class _SchedulePageState extends State<SchedulePage>
                 children: <Widget>[
                   GestureDetector(
                     onTap: () async {
-                      RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit!.id!}");
+                      RouterService.navigate(context, "${UnitPage.ROUTE}/${RightsService.currentUnit()!.id!}");
                     },
                     onDoubleTap: () async {
                       var packageInfo = await PackageInfo.fromPlatform();
@@ -212,7 +212,7 @@ class _SchedulePageState extends State<SchedulePage>
               onAddNewEvent: (context, p, _) =>
                   AddNewEventDialog.showAddEventDialog(context, p)
                       .then((_) => loadData()),
-              defaultDateTime: RightsService.currentOccasion?.startTime,
+              defaultDateTime: RightsService.currentOccasion()?.startTime,
             ),
           ),
         ],

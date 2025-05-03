@@ -1,7 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart' show Uint8List, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -26,7 +27,6 @@ import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
-import 'package:image_downloader_web/image_downloader_web.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
@@ -65,26 +65,28 @@ class _UserPageState extends State<UserPage> {
               },
             ),
             actions: [
-              if (kIsWeb)
-                Padding(
-                  padding: const EdgeInsets.all(6.0),
-                  child: IconButton(
-                    onPressed: () async {
-                      var captured = await screenshotController.capture();
-                      if (captured == null) {
-                        return;
-                      }
-                      await WebImageDownloader.downloadImageFromUInt8List(
-                        uInt8List: captured,
-                        name: name,
-                      );
-                    },
-                    icon: Icon(
-                      Icons.download,
-                      color: ThemeConfig.blackColor(context),
-                    ),
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: IconButton(
+                  onPressed: () async {
+                    // Capture screenshot (works on all platforms now)
+                    final Uint8List? captured = await screenshotController.capture();
+                    if (captured == null) return;
+
+                    // Save using FileSaver, same as your CSV
+                    await FileSaver.instance.saveFile(
+                      name: name,                            // your desired file name
+                      bytes: captured,                       // the PNG bytes
+                      ext: 'png',                            // extension
+                      mimeType: MimeType.png,                // PNG mime type
+                    );
+                  },
+                  icon: Icon(
+                    Icons.download,
+                    color: Colors.black,
                   ),
                 ),
+              ),
             ],
             backgroundColor: Colors.transparent,
             elevation: 0,

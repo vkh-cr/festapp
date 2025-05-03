@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/timetable/timetable_controller.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
@@ -69,7 +70,6 @@ class _TimetablePageState extends State<TimetablePage>
 
     _items.clear();
     _items.addAll(_events
-        .timetableEventsFilter(Timetable.minimalDurationMinutes)
         .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
 
     timetableController.rebuild?.call();
@@ -122,7 +122,6 @@ class _TimetablePageState extends State<TimetablePage>
 
     _items.clear();
     var items = _events
-        .timetableEventsFilter(Timetable.minimalDurationMinutes)
         .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)).toList();
 
     _days.clear();
@@ -133,7 +132,7 @@ class _TimetablePageState extends State<TimetablePage>
 
   Future<void> loadEventParticipants() async {
     await DbEvents.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.timetableEventsFilter(Timetable.minimalDurationMinutes)) {
+    for (var e in _events) {
       var item = _items.singleWhere((element) => element.id == e.id!);
       setState(() {
         item.data = e.toString();
@@ -175,7 +174,7 @@ class _TimetablePageState extends State<TimetablePage>
             controller: timetableController,
             items: _days[_currentIndex??0].events,
             timetablePlaces: _timetablePlaces,
-            occasionEnd: RightsService.currentOccasion!.endTime,));
+            occasionEnd: RightsService.currentOccasion()!.endTime,));
   }
 
   final List<EventModel> _events = [];
