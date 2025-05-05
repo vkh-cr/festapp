@@ -431,7 +431,7 @@ o.O$=0
 p.a.toString}}
 B.aKV.prototype={
 Ol(d,e,f){var x=d.v_(Aa.lf),w=$.ab()
-w=new B.Mh(new B.bYu(this),A.aW(y.e),C.i0,x,e,!0,null,new A.bR(!1,w,y.f),w)
+w=new B.Mh(new B.bYu(this),A.aU(y.e),C.i0,x,e,!0,null,new A.bR(!1,w,y.f),w)
 w.L_(e,null,!0,f,x)
 w.L0(e,null,0,!0,f,x)
 return w},
@@ -522,7 +522,7 @@ B.a5X.prototype={
 J(){return"ScanState."+this.b}}
 B.BA.prototype={
 M(){var x=$.ab()
-return new B.aav(D.a9J,new Z.cs(H.aw,x),new B.a_d(A.aW(y.e),x),E.cJe(F.KZ,A.a([C.nq],y.g)))},
+return new B.aav(D.a9J,new Z.cs(H.aw,x),new B.a_d(A.aU(y.e),x),E.cJe(F.KZ,A.a([C.nq],y.g)))},
 gbo(d){return this.c}}
 B.aav.prototype={
 U(){this.ae()
@@ -782,4 +782,4 @@ D.a9H=new B.a5X(1,"notSignedIn")
 D.a9J=new B.a5X(2,"nothing")
 D.bFy=new A.ca("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_322",e:"endPart",h:b})})($__dart_deferred_initializers__,"jt0zShBk0H+buMVT/cxttm1rjJk=");
+a.eventLog.push({p:"main.dart.js_322",e:"endPart",h:b})})($__dart_deferred_initializers__,"6tE4MNXtjyzIs1X+2eteXfYl1ZE=");

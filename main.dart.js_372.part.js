@@ -735,7 +735,7 @@ return A.i(null,w)}})
 return A.j($async$$0,w)},
 $S:1}
 B.c_7.prototype={
-$1(d){var x=A.aW(y.O)
+$1(d){var x=A.aU(y.O)
 if(J.ajj(this.a.r,new B.c_4(d)))x.t(0,A.dk([!0],y.y))
 return x},
 $S:1023}
@@ -979,4 +979,4 @@ D.bFt=new A.ca("Create Companion",null,null,null,null,null,null,null,null,null,n
 D.bFw=new A.ca("Sign in companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFF=new A.ca("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_372",e:"endPart",h:b})})($__dart_deferred_initializers__,"5Egn/6qcdCrIO0CyRXFYZ3WqVRc=");
+a.eventLog.push({p:"main.dart.js_372",e:"endPart",h:b})})($__dart_deferred_initializers__,"WW4+7f9A4jJxwK2lWHoMfI49YL4=");
