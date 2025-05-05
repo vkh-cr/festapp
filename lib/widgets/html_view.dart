@@ -111,7 +111,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   void _handlePointerUp(PointerUpEvent e) {
     _pointers = (_pointers - 1).clamp(0, 10);
-    if (_pointers < 2) {
+    if (_pointers < 1) {
       print('>> pinch end (_pointers<2)');
       final cb = widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
       cb?.call();
@@ -123,7 +123,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(child: widget.child),
+      child: PinchZoomReleaseUnzoomWidget(maxScale: 5,child: widget.child,),
     );
   }
 }
