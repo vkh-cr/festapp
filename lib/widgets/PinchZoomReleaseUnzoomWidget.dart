@@ -204,6 +204,7 @@
 
 import 'package:flutter/material.dart';
 
+
 class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
   static const Duration defaultResetDuration = Duration(milliseconds: 200);
 
@@ -256,8 +257,9 @@ class _PinchZoomReleaseUnzoomWidgetState
   Animation<Matrix4>? animation;
   OverlayEntry? entry;
   final List<OverlayEntry> overlayEntries = [];
+  bool _overlayShown = false;
   double scale = 1;
-  final List<int> events = [];
+  final List<int> pointers = [];
 
   @override
   void initState() {
@@ -287,7 +289,49 @@ class _PinchZoomReleaseUnzoomWidgetState
   }
 
   @override
-  Widget build(BuildContext context) => buildWidget(widget.child);
+  Widget build(BuildContext context) => _buildListener(widget.child);
+
+  Widget _buildListener(Widget zoomableWidget) => Listener(
+    onPointerDown: (event) {
+      pointers.add(event.pointer);
+      if (!_overlayShown && widget.useOverlay) {
+        _showOverlay(context);
+      }
+      if (pointers.length == widget.fingersRequiredToPinch) {
+        widget.twoFingersOn?.call();
+      }
+    },
+    onPointerUp: (event) {
+      pointers.remove(event.pointer);
+      if (pointers.length < widget.fingersRequiredToPinch) {
+        widget.twoFingersOff?.call();
+      }
+      if (pointers.isEmpty) {
+        // return to original size
+        resetAnimation();
+      }
+    },
+    child: InteractiveViewer(
+      clipBehavior: widget.clipBehavior,
+      minScale: widget.minScale,
+      maxScale: widget.maxScale,
+      transformationController: transformationController,
+      panEnabled: true,
+      boundaryMargin: widget.boundaryMargin,
+      onInteractionUpdate: (details) {
+        if (_overlayShown) {
+          scale = details.scale;
+          entry?.markNeedsBuild();
+        }
+      },
+      onInteractionEnd: (_) {
+        if (pointers.isEmpty && _overlayShown) {
+          resetAnimation();
+        }
+      },
+      child: zoomableWidget,
+    ),
+  );
 
   void resetAnimation() {
     if (!mounted) return;
@@ -301,52 +345,7 @@ class _PinchZoomReleaseUnzoomWidgetState
     animationController.forward(from: 0);
   }
 
-  Widget buildWidget(Widget zoomableWidget) => Builder(
-    builder: (context) => Listener(
-      onPointerDown: (PointerEvent event) {
-        events.add(event.pointer);
-        if (events.length == widget.fingersRequiredToPinch) {
-          widget.twoFingersOn?.call();
-        }
-      },
-      onPointerUp: (PointerUpEvent event) {
-        events.remove(event.pointer);
-        if (events.isEmpty) {
-          widget.twoFingersOff?.call();
-        }
-      },
-      child: InteractiveViewer(
-        clipBehavior: widget.clipBehavior,
-        minScale: widget.minScale,
-        maxScale: widget.maxScale,
-        transformationController: transformationController,
-        panEnabled: true, // allow one-finger pan when zoomed
-        boundaryMargin: widget.boundaryMargin,
-        onInteractionStart: (details) {
-          // only show overlay on two-finger pinch
-          if (widget.fingersRequiredToPinch > 0 &&
-              details.pointerCount == widget.fingersRequiredToPinch &&
-              widget.useOverlay) {
-            showOverlay(context);
-          }
-        },
-        onInteractionUpdate: (details) {
-          if (entry != null) {
-            scale = details.scale;
-            entry!.markNeedsBuild();
-          }
-        },
-        onInteractionEnd: (_) {
-          if (overlayEntries.isNotEmpty) {
-            resetAnimation();
-          }
-        },
-        child: zoomableWidget,
-      ),
-    ),
-  );
-
-  void showOverlay(BuildContext context) {
+  void _showOverlay(BuildContext context) {
     final overlay = Overlay.of(context, rootOverlay: widget.rootOverlay)!;
     final renderBox = context.findRenderObject()! as RenderBox;
     final offset = renderBox.localToGlobal(
@@ -373,7 +372,8 @@ class _PinchZoomReleaseUnzoomWidgetState
               child: SizedBox(
                 width: renderBox.size.width,
                 height: renderBox.size.height,
-                child: buildWidget(widget.zoomChild ?? widget.child),
+                child:
+                _buildListener(widget.zoomChild ?? widget.child),
               ),
             ),
           ],
@@ -383,6 +383,7 @@ class _PinchZoomReleaseUnzoomWidgetState
 
     overlay.insert(entry!);
     overlayEntries.add(entry!);
+    _overlayShown = true;
   }
 
   void removeOverlay() {
@@ -391,5 +392,6 @@ class _PinchZoomReleaseUnzoomWidgetState
     }
     overlayEntries.clear();
     entry = null;
+    _overlayShown = false;
   }
 }
