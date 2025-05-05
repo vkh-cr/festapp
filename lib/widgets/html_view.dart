@@ -123,7 +123,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
     return Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(maxScale: 5,child: widget.child,),
+      child: PinchZoomReleaseUnzoomWidget(maxScale: 4, child: widget.child, fingersRequiredToPinch: 1,),
     );
   }
 }
