@@ -232,12 +232,12 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
 
   final Widget child;
   final Widget? zoomChild;
-  final Clip clipBehavior;
-  final double maxScale;
-  final double minScale;
   final Duration resetDuration;
   final Curve resetCurve;
   final EdgeInsets boundaryMargin;
+  final Clip clipBehavior;
+  final double minScale;
+  final double maxScale;
   final bool useOverlay;
   final bool rootOverlay;
   final double maxOverlayOpacity;
@@ -253,14 +253,15 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
 
 class _PinchZoomReleaseUnzoomWidgetState
     extends State<PinchZoomReleaseUnzoomWidget> with TickerProviderStateMixin {
-  late final TransformationController _transformationController;
-  late final AnimationController _animationController;
+  late TransformationController _transformationController;
+  late AnimationController _animationController;
   Animation<Matrix4>? _animation;
   OverlayEntry? _entry;
   final List<OverlayEntry> _overlayEntries = [];
   bool _overlayShown = false;
+  bool _gestureActive = false;
   double _scale = 1;
-  final Set<int> _pointers = {};
+  final List<int> _pointers = [];
 
   @override
   void initState() {
@@ -289,67 +290,17 @@ class _PinchZoomReleaseUnzoomWidgetState
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) => _buildListener(widget.child);
-
-  Widget _buildListener(Widget zoomable) => Listener(
-    onPointerDown: (event) {
-      setState(() {
-        _pointers.add(event.pointer);
-      });
-      if (_pointers.length == widget.fingersRequiredToPinch) {
-        widget.twoFingersOn?.call();
-        if (!_overlayShown && widget.useOverlay) {
-          _showOverlay(context);
-        }
-      }
-    },
-    onPointerUp: (event) {
-      setState(() {
-        _pointers.remove(event.pointer);
-      });
-      if (_pointers.length < widget.fingersRequiredToPinch) {
-        widget.twoFingersOff?.call();
-      }
-      if (_pointers.isEmpty) {
-        _resetAnimation();
-      }
-    },
-    child: InteractiveViewer(
-      clipBehavior: widget.clipBehavior,
-      minScale: widget.minScale,
-      maxScale: widget.maxScale,
-      transformationController: _transformationController,
-      panEnabled: _pointers.length >= widget.fingersRequiredToPinch,
-      scaleEnabled: _pointers.length >= widget.fingersRequiredToPinch,
-      boundaryMargin: widget.boundaryMargin,
-      onInteractionUpdate: (details) {
-        if (_overlayShown) {
-          _scale = details.scale;
-          _entry?.markNeedsBuild();
-        }
-      },
-      onInteractionEnd: (_) {
-        if (_pointers.isEmpty && _overlayShown) {
-          _resetAnimation();
-        }
-      },
-      child: zoomable,
-    ),
-  );
-
   void _resetAnimation() {
     if (!mounted) return;
     _animation = Matrix4Tween(
       begin: _transformationController.value,
       end: Matrix4.identity(),
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: widget.resetCurve,
-      ),
-    );
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: widget.resetCurve,
+    ));
     _animationController.forward(from: 0);
+    _gestureActive = false;
   }
 
   void _showOverlay(BuildContext context) {
@@ -400,4 +351,48 @@ class _PinchZoomReleaseUnzoomWidgetState
     _entry = null;
     _overlayShown = false;
   }
+
+  Widget _buildListener(Widget zoomableWidget) => Listener(
+    onPointerDown: (event) {
+      _pointers.add(event.pointer);
+      // start gesture only when required number of fingers touch
+      if (_pointers.length == widget.fingersRequiredToPinch) {
+        _gestureActive = true;
+        widget.twoFingersOn?.call();
+        if (!_overlayShown && widget.useOverlay) {
+          _showOverlay(context);
+        }
+      }
+    },
+    onPointerUp: (event) {
+      _pointers.remove(event.pointer);
+      // only end gesture when all fingers are lifted
+      if (_pointers.isEmpty && _gestureActive) {
+        widget.twoFingersOff?.call();
+        _resetAnimation();
+      }
+    },
+    child: InteractiveViewer(
+      clipBehavior: widget.clipBehavior,
+      minScale: widget.minScale,
+      maxScale: widget.maxScale,
+      transformationController: _transformationController,
+      panEnabled: _gestureActive, // only pan after pinch start
+      boundaryMargin: widget.boundaryMargin,
+      onInteractionUpdate: (details) {
+        if (_overlayShown) {
+          _scale = details.scale;
+          _entry?.markNeedsBuild();
+        }
+      },
+      onInteractionEnd: (_) {
+        // if fingers left but gesture still active, wait for pointerUp logic
+        // do nothing here
+      },
+      child: zoomableWidget,
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) => _buildListener(widget.child);
 }
