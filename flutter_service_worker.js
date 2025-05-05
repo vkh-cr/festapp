@@ -248,7 +248,7 @@ const RESOURCES = {"main.dart.js_204.part.js": "7ac477ad83e8c083a7787d7ca2877ff9
 "main.dart.js_217.part.js": "8897358e93b12a465dcb489665e579d1",
 "main.dart.js_366.part.js": "0c945025e406b17122907018d2f96766",
 "main.dart.js_50.part.js": "0e8b354fcb4be20440abb30b8370c003",
-"flutter_bootstrap.js": "e377d0407b5a1a5e14d378693489f4d9",
+"flutter_bootstrap.js": "8fd37315b20ec672dfda3d10f7d8f230",
 "main.dart.js_284.part.js": "59afe5bbf7d552d4b531e0b147f74632",
 "main.dart.js_232.part.js": "11a85fa00a06f4b1ec21b998a97361ad",
 "main.dart.js_281.part.js": "963f5a2e13dc028d494c16e6e589a769",
