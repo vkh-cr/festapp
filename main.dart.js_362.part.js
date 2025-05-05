@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_362",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,H,I,K,L,M,N,O,P,Q,R,S,T,F,U,V,W,X,Y,Z,A_,A0,B={
-d6p(d,e){return new B.zq(e,d)},
+d6r(d,e){return new B.zq(e,d)},
 zq:function zq(d,e){this.c=d
 this.a=e},
 aNY:function aNY(d){var _=this
@@ -26,7 +26,7 @@ c9p:function c9p(d,e){this.a=d
 this.b=e},
 w9:function w9(d,e){this.a=d
 this.b=e},
-d6o(d){return A.cJq(d)},
+d6q(d){return A.cJs(d)},
 H9(d){var x=0,w=A.k(y.H),v,u,t,s,r,q,p,o,n,m,l
 var $async$H9=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:n=$.B5()
@@ -34,11 +34,11 @@ m=n.bU("news").hx(0,"id")
 l=d.a
 l.toString
 v=d.d
-m=A.pp(m.uK(m.wK("created_at","lt."+l.j(0))),m.$ti.c).aFp("id",v)
+m=A.pp(m.uK(m.wK("created_at","lt."+l.j(0))),m.$ti.c).aFq("id",v)
 l=A.dl()
 l.toString
 x=2
-return A.d(m.ct("occasion",l).bLu(0,"created_at").aEJ(1).PZ(),$async$H9)
+return A.d(m.ct("occasion",l).bLw(0,"created_at").aEK(1).PZ(),$async$H9)
 case 2:u=f
 x=u!=null?3:5
 break
@@ -168,7 +168,7 @@ if(u!=null)u.$0()
 v.e=!0
 case 5:case 3:return A.i(null,w)}})
 return A.j($async$Lj,w)},
-bp7(d){H.kl(d,"newsForm",y.X).aN(new B.c9k(this,d),y.P)},
+bp9(d){H.kl(d,"newsForm",y.X).aN(new B.c9k(this,d),y.P)},
 a_d(){var x=0,w=A.k(y.H),v=this,u
 var $async$a_d=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=B
@@ -181,7 +181,7 @@ nX(){var x=0,w=A.k(y.H),v=this,u
 var $async$nX=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=B
 x=2
-return A.d(V.mm("newsOffline",B.dpw(),y.x),$async$nX)
+return A.d(V.mm("newsOffline",B.dpy(),y.x),$async$nX)
 case 2:v.B(new u.c9r(v,e))
 return A.i(null,w)}})
 return A.j($async$nX,w)},
@@ -301,7 +301,7 @@ var $async$$1=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:x=d!=null?2:3
 break
 case 2:u=v.a
-u.b=A.bd(d)
+u.b=A.be(d)
 x=4
 return A.d(B.b7l(u),$async$$1)
 case 4:A.bI(v.b,A.u("Message has been changed.",null),C.a8)
@@ -313,9 +313,9 @@ $1(d){var x=y.B
 return A.a([F.uX(E.bm(Y.H4,null),!0,48,D.aoE,x),F.uX(E.bm(D.bEM,null),!0,48,D.KE,x)],y.h)},
 $S:z+1}
 B.c9p.prototype={
-$0(){return this.a.bp7(this.b)},
+$0(){return this.a.bp9(this.b)},
 $S:0};(function installTearOffs(){var x=a._static_1
-x(B,"dpw","d6o",2)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B,"dpy","d6q",2)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.zq,A.I)
 x(B.aNY,A.M)
 w(A.bF,[B.c9k,B.c9n,B.c9l,B.c9m])
@@ -333,4 +333,4 @@ D.avf=new A.dd(U.My,null,null,null,null)
 D.bEM=new A.ca("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFa=new A.ca("News",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_362",e:"endPart",h:b})})($__dart_deferred_initializers__,"Qo6YeQS5DI4Vv4vTAPJBImJ2mXI=");
+a.eventLog.push({p:"main.dart.js_362",e:"endPart",h:b})})($__dart_deferred_initializers__,"UYlJmrQJLRVUSgqYmQOqdhSkh+Y=");
