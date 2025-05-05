@@ -1,19 +1,9 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_154",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-awX(){var x=0,w=A.k(y.a),v
-var $async$awX=A.f(function(d,e){if(d===1)return A.h(e,w)
-while(true)switch(x){case 0:x=3
-return A.d($.xZ().bx9("requestNotificationPermission",[]),$async$awX)
-case 3:v=e
-x=1
-break
-case 1:return A.i(v,w)}})
-return A.j($async$awX,w)}}
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
 A=c[0]
-B=a.updateHolder(c[51],B)
-var z=a.updateTypes([])
-var y={a:A.A("x")}};
+B=c[212]
+var z=a.updateTypes([]);(function constants(){B.k8=new A.aD(57689,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_154",e:"endPart",h:b})})($__dart_deferred_initializers__,"btW8ZeuNqhXF1g7oBHHRGvmev8g=");
+a.eventLog.push({p:"main.dart.js_154",e:"endPart",h:b})})($__dart_deferred_initializers__,"6y869ZhvGQngNXRXnrA3A3tp9iU=");

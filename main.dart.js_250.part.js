@@ -1,9 +1,271 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_250",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,E,D,F,B={
+d7G(d,e,f,g){throw A.n(A.aH("Process.runSync"))},
+aCC:function aCC(){},
+aqd:function aqd(){this.c=this.b=$},
+bw0:function bw0(){},
+bw1:function bw1(){},
+bBs:function bBs(d,e){this.a=d
+this.b=e},
+Rk:function Rk(d,e,f,g){var _=this
+_.c=d
+_.d=e
+_.a=f
+_.b=g},
+bvF:function bvF(d){this.a=d},
+bvG:function bvG(d){this.a=d},
+bPR:function bPR(){},
+doE(d){var w,v=null
+try{v=C.ajT.bOX("xdg-user-dir",A.a([d],x.x),E.as)}catch(w){throw w}return D.bai(v.gbR_().od(0,"\n").h(0,0))},
+bXG:function bXG(){},
+Q0(){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n,m,l,k,j,i,h
+var $async$Q0=A.f(function(d,e){if(d===1){s.push(e)
+w=t}while(true)switch(w){case 0:j=null
+t=4
+w=$.cUa()||$.cU9()?7:9
+break
+case 7:h=J
+w=10
+return A.d(B.ctu(),$async$Q0)
+case 10:j=h.cvy(e)
+w=8
+break
+case 9:w=$.cUc()?11:13
+break
+case 11:w=14
+return A.d(B.cty(),$async$Q0)
+case 14:o=e
+j=o==null?null:J.cvy(o)
+w=12
+break
+case 13:w=$.cCM()?15:17
+break
+case 15:o=$.cv_()
+n=new B.bvG(new B.bPR())
+$.Nh().m(0,n,o)
+r=n
+w=18
+return A.d(r.aKC(),$async$Q0)
+case 18:j=e
+w=16
+break
+case 17:w=$.cUb()?19:20
+break
+case 19:o=D.dfl()
+m=$.cv_()
+l=new B.bvF(o)
+$.Nh().m(0,l,m)
+q=l
+m=B.doE("DOWNLOAD")
+o=m==null?null:m.a
+w=21
+return A.d(A.dF(o,x.w),$async$Q0)
+case 21:j=e
+case 20:case 16:case 12:case 8:t=2
+w=6
+break
+case 4:t=3
+i=s.pop()
+o=A.ag(i)
+if(x.g.b(o)){p=o
+J.ao(p)
+throw i}else throw i
+w=6
+break
+case 3:w=2
+break
+case 6:u=j
+w=1
+break
+case 1:return A.i(u,v)
+case 2:return A.h(s.at(-1),v)}})
+return A.j($async$Q0,v)},
+d3L(d){if(E.e.n(d,"."))return d
+else{if(d.length!==0)return"."+d
+return""}},
+cxn(d,e,f,g,h){var w=0,v=A.k(x.o),u
+var $async$cxn=A.f(function(i,j){if(i===1)return A.h(j,v)
+while(true)switch(w){case 0:u=A.cN("Either filePath or link or file must be provided")
+throw A.n(u)
+return A.i(null,v)}})
+return A.j($async$cxn,v)},
+ctu(){var w=0,v=A.k(x.D),u,t
+var $async$ctu=A.f(function(d,e){if(d===1)return A.h(e,v)
+while(true)switch(w){case 0:$.cCJ()
+w=3
+return A.d(F.a4d.dE("getApplicationDocumentsDirectory",null,!1,x.v),$async$ctu)
+case 3:t=e
+if(t==null)throw A.n(D.d5P("Unable to get application documents directory"))
+u=D.bai(t)
+w=1
+break
+case 1:return A.i(u,v)}})
+return A.j($async$ctu,v)},
+cty(){var w=0,v=A.k(x.i),u,t
+var $async$cty=A.f(function(d,e){if(d===1)return A.h(e,v)
+while(true)switch(w){case 0:$.cCJ()
+if(!F.aiL.gbH_())A.a7(A.aH("Functionality only available on macOS"))
+w=3
+return A.d(F.a4d.dE("getDownloadsDirectory",null,!1,x.v),$async$cty)
+case 3:t=e
+if(t==null){u=null
+w=1
+break}u=D.bai(t)
+w=1
+break
+case 1:return A.i(u,v)}})
+return A.j($async$cty,v)}},C
+J=c[1]
 A=c[0]
-B=c[355]
-var z=a.updateTypes([]);(function constants(){B.L5=new A.aT(1e4)})()};
+E=c[2]
+D=c[162]
+F=c[376]
+B=a.updateHolder(c[89],B)
+C=c[318]
+B.aCC.prototype={
+gcX(d){return"system"},
+kJ(d){return this.glR().cf(d)},
+glR(){$.Gk()
+return E.bH},
+gtN(){$.Gk()
+return E.ia}}
+B.aqd.prototype={
+AZ(d,e,f,g){var w=null,v=null,u=null
+return this.aLD(d,e,f,g)},
+aLD(d,e,f,a0){var w=0,v=A.k(x.v),u,t=2,s=[],r=this,q,p,o,n,m,l,k,j,i,h,g
+var $async$AZ=A.f(function(a1,a2){if(a1===1){s.push(a2)
+w=t}while(true)switch(w){case 0:j=null
+i=null
+h=null
+d=d
+if(f===C.bmD&&j==null)throw A.n(A.cN("customMimeType is required when mimeType is MimeType.custom"))
+q=B.d3L(e)
+p=i!=null||h!=null
+w=!p?3:4
+break
+case 3:o=d
+w=o==null?5:7
+break
+case 5:w=8
+return A.d(B.cxn(null,i,h,null,null),$async$AZ)
+case 8:w=6
+break
+case 7:a2=o
+case 6:d=a2
+case 4:t=10
+w=p?13:15
+break
+case 13:n=i
+if(n==null){n=h
+n.toString
+n=D.cx3(n)}w=16
+return A.d(r.Kr(q,n,f,a0),$async$AZ)
+case 16:n=a2
+m=r.b=n==null?y.a:n
+w=14
+break
+case 15:n=d
+n.toString
+l=f.d
+if(l.length===0){l=j
+l.toString}l=new B.bBs(new A.aqc(a0,n,q,l),new B.bw1())
+r.c=l
+w=17
+return A.d(l.er(0),$async$AZ)
+case 17:l=a2
+m=r.b=l==null?y.a:l
+case 14:u=m
+w=1
+break
+t=2
+w=12
+break
+case 10:t=9
+g=s.pop()
+throw g
+w=12
+break
+case 9:w=2
+break
+case 12:case 1:return A.i(u,v)
+case 2:return A.h(s.at(-1),v)}})
+return A.j($async$AZ,v)},
+Kr(d,e,f,g){return this.aLF(d,e,f,g)},
+aLF(d,e,f,g){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n
+var $async$Kr=A.f(function(h,i){if(h===1){s.push(i)
+w=t}while(true)switch(w){case 0:t=4
+w=7
+return A.d(B.Q0(),$async$Kr)
+case 7:r=i
+n=J
+w=8
+return A.d(e.aaW(A.o(r)+"/"+g+d),$async$Kr)
+case 8:q=n.cvy(i)
+u=q
+w=1
+break
+t=2
+w=6
+break
+case 4:t=3
+o=s.pop()
+throw o
+w=6
+break
+case 3:w=2
+break
+case 6:case 1:return A.i(u,v)
+case 2:return A.h(s.at(-1),v)}})
+return A.j($async$Kr,v)}}
+B.bw0.prototype={}
+B.bw1.prototype={
+S3(d){return this.aLE(d)},
+aLE(d){var w=0,v=A.k(x.w),u
+var $async$S3=A.f(function(e,f){if(e===1)return A.h(f,v)
+while(true)switch(w){case 0:w=3
+return A.d(A.be1(d),$async$S3)
+case 3:if(f){u="Downloads"
+w=1
+break}u=null
+w=1
+break
+case 1:return A.i(u,v)}})
+return A.j($async$S3,v)}}
+B.bBs.prototype={
+er(d){var w=0,v=A.k(x.w),u,t=this
+var $async$er=A.f(function(e,f){if(e===1)return A.h(f,v)
+while(true)switch(w){case 0:w=3
+return A.d(t.b.S3(t.a),$async$er)
+case 3:u=f
+w=1
+break
+case 1:return A.i(u,v)}})
+return A.j($async$er,v)}}
+B.Rk.prototype={
+J(){return"MimeType."+this.b}}
+B.bvF.prototype={}
+B.bvG.prototype={}
+B.bPR.prototype={}
+B.bXG.prototype={
+bOX(d,e,f){return B.d7G(d,e,C.ajg,f)}}
+var z=a.updateTypes([]);(function inheritance(){var w=a.inherit,v=a.inheritMany
+w(B.aCC,A.p1)
+v(A.E,[B.aqd,B.bw0,B.bBs,B.bPR,B.bXG])
+w(B.bw1,B.bw0)
+w(B.Rk,A.dY)
+v(D.axR,[B.bvF,B.bvG])})()
+A.bm(b.typeUniverse,JSON.parse('{"aCC":{"p1":[],"oU":["m","C<l>"]}}'))
+var y={a:"Something went wrong, please report the issue https://www.github.com/incrediblezayed/file_saver/issues"}
+var x={D:A.A("Hn"),g:A.A("b7"),x:A.A("r<m>"),v:A.A("m"),o:A.A("dv"),i:A.A("Hn?"),w:A.A("m?")};(function constants(){C.ajg=new B.aCC()
+C.ajT=new B.bXG()
+C.et=new A.ap(10,0,10,0)
+C.bOT=new B.Rk("Other","application/octet-stream",20,"other")
+C.bmD=new B.Rk("Custom","",31,"custom")})();(function lazyInitializers(){var w=a.lazyFinal
+w($,"dw6","cUb",()=>{$.Gk()
+return!1})
+w($,"dw7","cUc",()=>{$.Gk()
+return!1})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_250",e:"endPart",h:b})})($__dart_deferred_initializers__,"L+RkE5vwMhLp139mapww+QplJjY=");
+a.eventLog.push({p:"main.dart.js_250",e:"endPart",h:b})})($__dart_deferred_initializers__,"7jf3VoZT/hfGZMMkns23HfZGwqM=");
