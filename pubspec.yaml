@@ -95,6 +95,7 @@ dependencies:
 #      ref: 97b3618b9891eb2b05a1b71ee75c432a2dce6d1a
   flutter_widget_from_html_core: ^0.16.0
   fwfh_cached_network_image: ^0.16.0
+  pinch_zoom_release_unzoom: ^2.0.0
 
 dev_dependencies:
   auto_route_generator: ^10.0.1

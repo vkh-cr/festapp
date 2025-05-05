@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
@@ -6,8 +7,11 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:pinch_zoom_release_unzoom/pinch_zoom_release_unzoom.dart';
 
 class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
 
@@ -62,6 +66,8 @@ class HtmlView extends StatefulWidget {
 }
 
 class _HtmlViewState extends State<HtmlView> {
+  ScrollHoldController? _scrollHold;
+
   @override
   Widget build(BuildContext context) {
     widget.color ??= ThemeConfig.defaultHtmlViewColor(context);
@@ -100,7 +106,50 @@ class _HtmlViewState extends State<HtmlView> {
         return null;
       },
       customWidgetBuilder: (element) {
-        // On web, skip YouTube embedding
+        if (element.localName == 'img') {
+          final src = element.attributes['src']!;
+          Widget imageWidget;
+          if (src.startsWith('data:image/')) {
+            // decode base64 data URI
+            final base64Data = src.split(',').last;
+            final bytes = base64Decode(base64Data);
+            imageWidget = Image.memory(bytes);
+          } else {
+            imageWidget = CachedNetworkImage(
+              imageUrl: src,
+              cacheManager: DefaultCacheManager(),
+            );
+          }
+          // center the image without extra vertical space, and disable parent scroll during pinch
+          return Align(
+            alignment: Alignment.center,
+            child: PinchZoomReleaseUnzoomWidget(
+              child: imageWidget,
+              minScale: 0.7,
+              maxScale: 3.0,
+              resetDuration: PinchZoomReleaseUnzoomWidget.defaultResetDuration,
+              boundaryMargin: EdgeInsets.zero,
+              clipBehavior: Clip.none,
+              useOverlay: true,
+              maxOverlayOpacity: 0.5,
+              overlayColor: Colors.black12,
+              fingersRequiredToPinch: 2,
+              twoFingersOn: () {
+                _scrollHold = Scrollable.of(context).position.hold(() {});
+              },
+              twoFingersOff: () {
+                Future.delayed(
+                  PinchZoomReleaseUnzoomWidget.defaultResetDuration,
+                      () {
+                    _scrollHold?.cancel();
+                    _scrollHold = null;
+                  },
+                );
+              },
+            ),
+          );
+        }
+
         if (kIsWeb) return null;
 
         if (element.localName == 'a' &&
