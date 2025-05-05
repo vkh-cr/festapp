@@ -255,7 +255,7 @@ class _PinchZoomReleaseUnzoomWidgetState
   late AnimationController animationController;
   Animation<Matrix4>? animation;
   OverlayEntry? entry;
-  List<OverlayEntry> overlayEntries = [];
+  final List<OverlayEntry> overlayEntries = [];
   double scale = 1;
   final List<int> events = [];
 
@@ -267,7 +267,11 @@ class _PinchZoomReleaseUnzoomWidgetState
       vsync: this,
       duration: widget.resetDuration,
     )
-      ..addListener(() => transformationController.value = animation!.value)
+      ..addListener(() {
+        if (animation != null) {
+          transformationController.value = animation!.value;
+        }
+      })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed && widget.useOverlay) {
           Future.delayed(const Duration(milliseconds: 100), removeOverlay);
@@ -299,14 +303,13 @@ class _PinchZoomReleaseUnzoomWidgetState
 
   Widget buildWidget(Widget zoomableWidget) => Builder(
     builder: (context) => Listener(
-      onPointerDown: (event) {
+      onPointerDown: (PointerEvent event) {
         events.add(event.pointer);
-        final pointers = events.length;
-        if (pointers >= widget.fingersRequiredToPinch) {
+        if (events.length == widget.fingersRequiredToPinch) {
           widget.twoFingersOn?.call();
         }
       },
-      onPointerUp: (event) {
+      onPointerUp: (PointerUpEvent event) {
         events.remove(event.pointer);
         if (events.isEmpty) {
           widget.twoFingersOff?.call();
@@ -317,12 +320,13 @@ class _PinchZoomReleaseUnzoomWidgetState
         minScale: widget.minScale,
         maxScale: widget.maxScale,
         transformationController: transformationController,
+        panEnabled: true, // allow one-finger pan when zoomed
+        boundaryMargin: widget.boundaryMargin,
         onInteractionStart: (details) {
+          // only show overlay on two-finger pinch
           if (widget.fingersRequiredToPinch > 0 &&
-              details.pointerCount != widget.fingersRequiredToPinch) {
-            return;
-          }
-          if (widget.useOverlay) {
+              details.pointerCount == widget.fingersRequiredToPinch &&
+              widget.useOverlay) {
             showOverlay(context);
           }
         },
@@ -337,8 +341,6 @@ class _PinchZoomReleaseUnzoomWidgetState
             resetAnimation();
           }
         },
-        panEnabled: false,
-        boundaryMargin: widget.boundaryMargin,
         child: zoomableWidget,
       ),
     ),
@@ -352,7 +354,7 @@ class _PinchZoomReleaseUnzoomWidgetState
       ancestor: overlay.context.findRenderObject(),
     );
 
-    entry = OverlayEntry(builder: (ctx) {
+    entry = OverlayEntry(builder: (_) {
       final opacity = ((scale - 1) / (widget.maxScale - 1))
           .clamp(0, widget.maxOverlayOpacity);
       return Material(
