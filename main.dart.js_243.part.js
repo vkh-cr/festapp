@@ -2,65 +2,66 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_243",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,E,D,F,B={
-d4u(d,e,f,g){throw A.n(A.aH("Process.runSync"))},
-aBP:function aBP(){},
-apw:function apw(){this.c=this.b=$},
-buc:function buc(){},
-bud:function bud(){},
-bzC:function bzC(d,e){this.a=d
+d7y(d,e,f,g){throw A.n(A.aG("Process.runSync"))},
+aCA:function aCA(){},
+aqa:function aqa(){this.c=this.b=$},
+bvX:function bvX(){},
+bvY:function bvY(){},
+bBo:function bBo(d,e){this.a=d
 this.b=e},
-R_:function R_(d,e,f,g){var _=this
+Rg:function Rg(d,e,f,g){var _=this
 _.c=d
 _.d=e
 _.a=f
 _.b=g},
-btS:function btS(d){this.a=d},
-btT:function btT(d){this.a=d},
-bNV:function bNV(){},
-dln(d){var w,v=null
-try{v=C.ajB.bMW("xdg-user-dir",A.a([d],x.x),E.as)}catch(w){throw w}return D.ctT(v.gbOW().oM(0,"\n").h(0,0))},
-bVG:function bVG(){},
-PF(){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n,m,l,k,j,i
-var $async$PF=A.f(function(d,e){if(d===1){s.push(e)
+bvC:function bvC(d){this.a=d},
+bvD:function bvD(d){this.a=d},
+bPM:function bPM(){},
+dox(d){var w,v=null
+try{v=C.ajR.bP4("xdg-user-dir",A.a([d],x.x),E.as)}catch(w){throw w}return D.bag(v.gbR7().ob(0,"\n").h(0,0))},
+bXB:function bXB(){},
+PW(){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n,m,l,k,j,i,h
+var $async$PW=A.f(function(d,e){if(d===1){s.push(e)
 w=t}while(true)switch(w){case 0:j=null
 t=4
-w=$.cR9()||$.cR8()?7:9
+w=$.cU_()||$.cTZ()?7:9
 break
-case 7:w=10
-return A.d(B.cqL(),$async$PF)
-case 10:j=e.a
+case 7:h=J
+w=10
+return A.d(B.cth(),$async$PW)
+case 10:j=h.cvl(e)
 w=8
 break
-case 9:w=$.cRb()?11:13
+case 9:w=$.cU1()?11:13
 break
 case 11:w=14
-return A.d(B.cqP(),$async$PF)
+return A.d(B.ctl(),$async$PW)
 case 14:o=e
-j=o==null?null:o.a
+j=o==null?null:J.cvl(o)
 w=12
 break
-case 13:w=$.czS()?15:17
+case 13:w=$.cCz()?15:17
 break
-case 15:o=$.csc()
-n=new B.btT(new B.bNV())
-$.MY().m(0,n,o)
+case 15:o=$.cuN()
+n=new B.bvD(new B.bPM())
+$.Nd().m(0,n,o)
 r=n
 w=18
-return A.d(r.aJA(),$async$PF)
+return A.d(r.aKJ(),$async$PW)
 case 18:j=e
 w=16
 break
-case 17:w=$.cRa()?19:20
+case 17:w=$.cU0()?19:20
 break
-case 19:o=D.dc6()
-m=$.csc()
-l=new B.btS(o)
-$.MY().m(0,l,m)
+case 19:o=D.dfe()
+m=$.cuN()
+l=new B.bvC(o)
+$.Nd().m(0,l,m)
 q=l
-m=B.dln("DOWNLOAD")
+m=B.dox("DOWNLOAD")
 o=m==null?null:m.a
 w=21
-return A.d(A.e6(o,x.w),$async$PF)
+return A.d(A.dE(o,x.w),$async$PW)
 case 21:j=e
 case 20:case 16:case 12:case 8:t=2
 w=6
@@ -80,42 +81,42 @@ w=1
 break
 case 1:return A.i(u,v)
 case 2:return A.h(s.at(-1),v)}})
-return A.j($async$PF,v)},
-d0y(d){if(E.e.n(d,"."))return d
+return A.j($async$PW,v)},
+d3B(d){if(E.e.n(d,"."))return d
 else{if(d.length!==0)return"."+d
 return""}},
-cuy(d,e,f,g,h){var w=0,v=A.k(x.o),u
-var $async$cuy=A.f(function(i,j){if(i===1)return A.h(j,v)
-while(true)switch(w){case 0:u=A.cP("Either filePath or link or file must be provided")
+cxa(d,e,f,g,h){var w=0,v=A.k(x.o),u
+var $async$cxa=A.f(function(i,j){if(i===1)return A.h(j,v)
+while(true)switch(w){case 0:u=A.cN("Either filePath or link or file must be provided")
 throw A.n(u)
 return A.i(null,v)}})
-return A.j($async$cuy,v)},
-cqL(){var w=0,v=A.k(x.D),u,t
-var $async$cqL=A.f(function(d,e){if(d===1)return A.h(e,v)
-while(true)switch(w){case 0:$.czP()
+return A.j($async$cxa,v)},
+cth(){var w=0,v=A.k(x.D),u,t
+var $async$cth=A.f(function(d,e){if(d===1)return A.h(e,v)
+while(true)switch(w){case 0:$.cCw()
 w=3
-return A.d(F.a4_.dE("getApplicationDocumentsDirectory",null,!1,x.v),$async$cqL)
+return A.d(F.a4d.dE("getApplicationDocumentsDirectory",null,!1,x.v),$async$cth)
 case 3:t=e
-if(t==null)throw A.n(D.d2D("Unable to get application documents directory"))
-u=D.ctT(t)
+if(t==null)throw A.n(D.d5H("Unable to get application documents directory"))
+u=D.bag(t)
 w=1
 break
 case 1:return A.i(u,v)}})
-return A.j($async$cqL,v)},
-cqP(){var w=0,v=A.k(x.i),u,t
-var $async$cqP=A.f(function(d,e){if(d===1)return A.h(e,v)
-while(true)switch(w){case 0:$.czP()
-if(!F.ait.gbF2())A.a7(A.aH("Functionality only available on macOS"))
+return A.j($async$cth,v)},
+ctl(){var w=0,v=A.k(x.i),u,t
+var $async$ctl=A.f(function(d,e){if(d===1)return A.h(e,v)
+while(true)switch(w){case 0:$.cCw()
+if(!F.aiJ.gbH7())A.a7(A.aG("Functionality only available on macOS"))
 w=3
-return A.d(F.a4_.dE("getDownloadsDirectory",null,!1,x.v),$async$cqP)
+return A.d(F.a4d.dE("getDownloadsDirectory",null,!1,x.v),$async$ctl)
 case 3:t=e
 if(t==null){u=null
 w=1
-break}u=D.ctT(t)
+break}u=D.bag(t)
 w=1
 break
 case 1:return A.i(u,v)}})
-return A.j($async$cqP,v)}},C
+return A.j($async$ctl,v)}},C
 J=c[1]
 A=c[0]
 E=c[2]
@@ -123,24 +124,24 @@ D=c[156]
 F=c[369]
 B=a.updateHolder(c[89],B)
 C=c[311]
-B.aBP.prototype={
-gcX(d){return"system"},
-kH(d){return this.glP().ck(d)},
-glP(){$.G_()
+B.aCA.prototype={
+gcY(d){return"system"},
+kJ(d){return this.glR().cf(d)},
+glR(){$.Gh()
 return E.bH},
-gtJ(){$.G_()
+gtO(){$.Gh()
 return E.i9}}
-B.apw.prototype={
-AR(d,e,f,g){var w=null,v=null,u=null
-return this.aKA(d,e,f,g)},
-aKA(d,e,f,a0){var w=0,v=A.k(x.v),u,t=2,s=[],r=this,q,p,o,n,m,l,k,j,i,h,g
-var $async$AR=A.f(function(a1,a2){if(a1===1){s.push(a2)
+B.aqa.prototype={
+B_(d,e,f,g){var w=null,v=null,u=null
+return this.aLK(d,e,f,g)},
+aLK(d,e,f,a0){var w=0,v=A.k(x.v),u,t=2,s=[],r=this,q,p,o,n,m,l,k,j,i,h,g
+var $async$B_=A.f(function(a1,a2){if(a1===1){s.push(a2)
 w=t}while(true)switch(w){case 0:j=null
 i=null
 h=null
 d=d
-if(f===C.bm9&&j==null)throw A.n(A.cP("customMimeType is required when mimeType is MimeType.custom"))
-q=B.d0y(e)
+if(f===C.bmB&&j==null)throw A.n(A.cN("customMimeType is required when mimeType is MimeType.custom"))
+q=B.d3B(e)
 p=i!=null||h!=null
 w=!p?3:4
 break
@@ -148,7 +149,7 @@ case 3:o=d
 w=o==null?5:7
 break
 case 5:w=8
-return A.d(B.cuy(null,i,h,null,null),$async$AR)
+return A.d(B.cxa(null,i,h,null,null),$async$B_)
 case 8:w=6
 break
 case 7:a2=o
@@ -159,8 +160,8 @@ break
 case 13:n=i
 if(n==null){n=h
 n.toString
-n=D.cDR(n)}w=16
-return A.d(r.K8(q,n,f,a0),$async$AR)
+n=D.cwR(n)}w=16
+return A.d(r.Ks(q,n,f,a0),$async$B_)
 case 16:n=a2
 m=r.b=n==null?y.a:n
 w=14
@@ -169,10 +170,10 @@ case 15:n=d
 n.toString
 l=f.d
 if(l.length===0){l=j
-l.toString}l=new B.bzC(new A.apv(a0,n,q,l),new B.bud())
+l.toString}l=new B.bBo(new A.aq9(a0,n,q,l),new B.bvY())
 r.c=l
 w=17
-return A.d(l.er(0),$async$AR)
+return A.d(l.er(0),$async$B_)
 case 17:l=a2
 m=r.b=l==null?y.a:l
 case 14:u=m
@@ -190,79 +191,81 @@ case 9:w=2
 break
 case 12:case 1:return A.i(u,v)
 case 2:return A.h(s.at(-1),v)}})
-return A.j($async$AR,v)},
-K8(d,e,f,g){return this.aKC(d,e,f,g)},
-aKC(d,e,f,g){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p
-var $async$K8=A.f(function(h,i){if(h===1){s.push(i)
+return A.j($async$B_,v)},
+Ks(d,e,f,g){return this.aLM(d,e,f,g)},
+aLM(d,e,f,g){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n
+var $async$Ks=A.f(function(h,i){if(h===1){s.push(i)
 w=t}while(true)switch(w){case 0:t=4
 w=7
-return A.d(B.PF(),$async$K8)
+return A.d(B.PW(),$async$Ks)
 case 7:r=i
+n=J
 w=8
-return A.d(e.aao(A.o(r)+"/"+g+d),$async$K8)
-case 8:u=void 1
+return A.d(e.ab_(A.o(r)+"/"+g+d),$async$Ks)
+case 8:q=n.cvl(i)
+u=q
 w=1
 break
 t=2
 w=6
 break
 case 4:t=3
-p=s.pop()
-throw p
+o=s.pop()
+throw o
 w=6
 break
 case 3:w=2
 break
 case 6:case 1:return A.i(u,v)
 case 2:return A.h(s.at(-1),v)}})
-return A.j($async$K8,v)}}
-B.buc.prototype={}
-B.bud.prototype={
-RF(d){return this.aKB(d)},
-aKB(d){var w=0,v=A.k(x.w),u
-var $async$RF=A.f(function(e,f){if(e===1)return A.h(f,v)
+return A.j($async$Ks,v)}}
+B.bvX.prototype={}
+B.bvY.prototype={
+S5(d){return this.aLL(d)},
+aLL(d){var w=0,v=A.k(x.w),u
+var $async$S5=A.f(function(e,f){if(e===1)return A.h(f,v)
 while(true)switch(w){case 0:w=3
-return A.d(A.bcN(d),$async$RF)
+return A.d(A.be_(d),$async$S5)
 case 3:if(f){u="Downloads"
 w=1
 break}u=null
 w=1
 break
 case 1:return A.i(u,v)}})
-return A.j($async$RF,v)}}
-B.bzC.prototype={
+return A.j($async$S5,v)}}
+B.bBo.prototype={
 er(d){var w=0,v=A.k(x.w),u,t=this
 var $async$er=A.f(function(e,f){if(e===1)return A.h(f,v)
 while(true)switch(w){case 0:w=3
-return A.d(t.b.RF(t.a),$async$er)
+return A.d(t.b.S5(t.a),$async$er)
 case 3:u=f
 w=1
 break
 case 1:return A.i(u,v)}})
 return A.j($async$er,v)}}
-B.R_.prototype={
+B.Rg.prototype={
 J(){return"MimeType."+this.b}}
-B.btS.prototype={}
-B.btT.prototype={}
-B.bNV.prototype={}
-B.bVG.prototype={
-bMW(d,e,f){return B.d4u(d,e,C.aiZ,f)}}
+B.bvC.prototype={}
+B.bvD.prototype={}
+B.bPM.prototype={}
+B.bXB.prototype={
+bP4(d,e,f){return B.d7y(d,e,C.aje,f)}}
 var z=a.updateTypes([]);(function inheritance(){var w=a.inherit,v=a.inheritMany
-w(B.aBP,A.oT)
-v(A.F,[B.apw,B.buc,B.bzC,B.bNV,B.bVG])
-w(B.bud,B.buc)
-w(B.R_,A.dW)
-v(D.ax6,[B.btS,B.btT])})()
-A.bt(b.typeUniverse,JSON.parse('{"aBP":{"oT":[],"oL":["m","C<l>"]}}'))
+w(B.aCA,A.p_)
+v(A.E,[B.aqa,B.bvX,B.bBo,B.bPM,B.bXB])
+w(B.bvY,B.bvX)
+w(B.Rg,A.dY)
+v(D.axQ,[B.bvC,B.bvD])})()
+A.bt(b.typeUniverse,JSON.parse('{"aCA":{"p_":[],"oS":["m","C<l>"]}}'))
 var y={a:"Something went wrong, please report the issue https://www.github.com/incrediblezayed/file_saver/issues"}
-var x={D:A.B("ctS"),g:A.B("bd"),x:A.B("r<m>"),v:A.B("m"),o:A.B("dL"),i:A.B("ctS?"),w:A.B("m?")};(function constants(){C.aiZ=new B.aBP()
-C.ajB=new B.bVG()
-C.eq=new A.ap(10,0,10,0)
-C.bOo=new B.R_("Other","application/octet-stream",20,"other")
-C.bm9=new B.R_("Custom","",31,"custom")})();(function lazyInitializers(){var w=a.lazyFinal
-w($,"dsL","cRa",()=>{$.G_()
+var x={D:A.A("Hk"),g:A.A("b7"),x:A.A("r<m>"),v:A.A("m"),o:A.A("du"),i:A.A("Hk?"),w:A.A("m?")};(function constants(){C.aje=new B.aCA()
+C.ajR=new B.bXB()
+C.et=new A.ap(10,0,10,0)
+C.bOT=new B.Rg("Other","application/octet-stream",20,"other")
+C.bmB=new B.Rg("Custom","",31,"custom")})();(function lazyInitializers(){var w=a.lazyFinal
+w($,"dvZ","cU0",()=>{$.Gh()
 return!1})
-w($,"dsM","cRb",()=>{$.G_()
+w($,"dw_","cU1",()=>{$.Gh()
 return!1})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"kljV4V0pSD6BhSY2ZxHM20YKsjI=");
+a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"NH92yxN0Imh6poLnZeOCAliPWfI=");
