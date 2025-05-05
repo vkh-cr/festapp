@@ -229,8 +229,13 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
         assert(maxScale > 0),
         assert(maxScale >= minScale);
 
+  /// The widget to be displayed and zoomed.
   final Widget child;
+
+  /// Optional widget to display during zoom (e.g. a higher-res image).
   final Widget? zoomChild;
+
+  /// Behavior parameters:
   final Clip clipBehavior;
   final double maxScale;
   final double minScale;
@@ -242,6 +247,8 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
   final double maxOverlayOpacity;
   final Color overlayColor;
   final int fingersRequiredToPinch;
+
+  /// Callbacks to block/unblock scroll on pinch start/end.
   final VoidCallback? twoFingersOn;
   final VoidCallback? twoFingersOff;
 
@@ -259,7 +266,7 @@ class _PinchZoomReleaseUnzoomWidgetState
   final List<OverlayEntry> overlayEntries = [];
   bool _overlayShown = false;
   double scale = 1;
-  final List<int> pointers = [];
+  final Set<int> _pointers = {};
 
   @override
   void initState() {
@@ -293,21 +300,20 @@ class _PinchZoomReleaseUnzoomWidgetState
 
   Widget _buildListener(Widget zoomableWidget) => Listener(
     onPointerDown: (event) {
-      pointers.add(event.pointer);
-      if (!_overlayShown && widget.useOverlay) {
-        _showOverlay(context);
-      }
-      if (pointers.length == widget.fingersRequiredToPinch) {
+      _pointers.add(event.pointer);
+      if (_pointers.length == widget.fingersRequiredToPinch) {
         widget.twoFingersOn?.call();
+        if (!_overlayShown && widget.useOverlay) {
+          _showOverlay(context);
+        }
       }
     },
     onPointerUp: (event) {
-      pointers.remove(event.pointer);
-      if (pointers.length < widget.fingersRequiredToPinch) {
+      _pointers.remove(event.pointer);
+      if (_pointers.length < widget.fingersRequiredToPinch) {
         widget.twoFingersOff?.call();
       }
-      if (pointers.isEmpty) {
-        // return to original size
+      if (_pointers.isEmpty) {
         resetAnimation();
       }
     },
@@ -316,16 +322,17 @@ class _PinchZoomReleaseUnzoomWidgetState
       minScale: widget.minScale,
       maxScale: widget.maxScale,
       transformationController: transformationController,
-      panEnabled: true,
+      panEnabled: _overlayShown,
+      scaleEnabled: _overlayShown,
       boundaryMargin: widget.boundaryMargin,
       onInteractionUpdate: (details) {
-        if (_overlayShown) {
+        if (_overlayShown && entry != null) {
           scale = details.scale;
-          entry?.markNeedsBuild();
+          entry!.markNeedsBuild();
         }
       },
       onInteractionEnd: (_) {
-        if (pointers.isEmpty && _overlayShown) {
+        if (_pointers.isEmpty && _overlayShown) {
           resetAnimation();
         }
       },
@@ -369,12 +376,9 @@ class _PinchZoomReleaseUnzoomWidgetState
             Positioned(
               left: offset.dx,
               top: offset.dy,
-              child: SizedBox(
-                width: renderBox.size.width,
-                height: renderBox.size.height,
-                child:
-                _buildListener(widget.zoomChild ?? widget.child),
-              ),
+              width: renderBox.size.width,
+              height: renderBox.size.height,
+              child: _buildListener(widget.zoomChild ?? widget.child),
             ),
           ],
         ),
