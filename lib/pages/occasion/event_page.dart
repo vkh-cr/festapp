@@ -96,12 +96,12 @@ class _EventPageState extends State<EventPage> {
               ),
             ),
             if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-            ...ButtonsHelper.getAddToMyProgramButton(
-                _event?.canSaveEventToMyProgram(),
-                addToMySchedule,
-                removeFromMySchedule,
-                ThemeConfig.upperNavText(context),
-                ThemeConfig.upperNavText(context))]),
+              ...ButtonsHelper.getAddToMyProgramButton(
+                  _event?.canSaveEventToMyProgram(),
+                  addToMySchedule,
+                  removeFromMySchedule,
+                  ThemeConfig.upperNavText(context),
+                  ThemeConfig.upperNavText(context))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -266,8 +266,8 @@ class _EventPageState extends State<EventPage> {
                     ''',
                         isSelectable: true,
                         fontSize: 16,
-                        twoFingersOn: onPinchStart,
-                        twoFingersOff: onPinchEnd,
+                        twoFingersOn: () { print("started"); onPinchStart(); },
+                        twoFingersOff: () { print("ended"); onPinchEnd(); },
                       ),
                     ),
                   ),
@@ -495,7 +495,7 @@ class _EventPageState extends State<EventPage> {
     }
 
     var currentParticipants =
-        await DbEvents.getParticipantsPerEventCount(eventId);
+    await DbEvents.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
     _event = event;
     _childDots.clear();
@@ -540,28 +540,28 @@ class _EventPageState extends State<EventPage> {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text("Sign out participant").tr(),
-              content: const Text(
-                      "Do you want to sign out participant {participant} from {event}?")
-                  .tr(namedArgs: {
-                "participant": participant.toString(),
-                "event": _event!.toString()
-              }),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => RouterService.goBack(context),
-                  child: const Text("Storno").tr(),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    RouterService.goBack(context);
-                    await DbEvents.signOutFromEvent(
-                        context, _event!.id!, participant);
-                    await loadData(_event!.id!);
-                  },
-                  child: const Text("Sign out someone").tr(),
-                ),
-              ],
-            ));
+          title: const Text("Sign out participant").tr(),
+          content: const Text(
+              "Do you want to sign out participant {participant} from {event}?")
+              .tr(namedArgs: {
+            "participant": participant.toString(),
+            "event": _event!.toString()
+          }),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => RouterService.goBack(context),
+              child: const Text("Storno").tr(),
+            ),
+            TextButton(
+              onPressed: () async {
+                RouterService.goBack(context);
+                await DbEvents.signOutFromEvent(
+                    context, _event!.id!, participant);
+                await loadData(_event!.id!);
+              },
+              child: const Text("Sign out someone").tr(),
+            ),
+          ],
+        ));
   }
 }

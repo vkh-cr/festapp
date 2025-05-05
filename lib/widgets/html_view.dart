@@ -13,10 +13,28 @@ import 'package:pinch_zoom_release_unzoom/pinch_zoom_release_unzoom.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/// Provides the “blockScroll” callbacks to all descendants.
+class PinchScrollScope extends InheritedWidget {
+  final VoidCallback onPinchStart;
+  final VoidCallback onPinchEnd;
+
+  const PinchScrollScope({
+    Key? key,
+    required this.onPinchStart,
+    required this.onPinchEnd,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  static PinchScrollScope? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PinchScrollScope>();
+
+  @override
+  bool updateShouldNotify(covariant PinchScrollScope old) => false;
+}
+
 /// Wraps any child and provides a scroll view that can be blocked
 /// during two-finger pinch gestures.
 class PinchScrollView extends StatefulWidget {
-  /// Builder that receives callbacks to toggle scroll blocking.
   final Widget Function(VoidCallback onPinchStart, VoidCallback onPinchEnd)
   builder;
 
@@ -30,20 +48,82 @@ class _PinchScrollViewState extends State<PinchScrollView> {
   bool blockScroll = false;
   final ScrollController controller = ScrollController();
 
-  void _onPinchStart() => setState(() => blockScroll = true);
-  void _onPinchEnd() => Future.delayed(
-    PinchZoomReleaseUnzoomWidget.defaultResetDuration,
-        () => setState(() => blockScroll = false),
-  );
+  void _onPinchStart() {
+    print('>> scroll blocked');
+    setState(() => blockScroll = true);
+  }
+
+  void _onPinchEnd() {
+    Future.delayed(
+      PinchZoomReleaseUnzoomWidget.defaultResetDuration,
+          () {
+        print('>> scroll unblocked');
+        setState(() => blockScroll = false);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: controller,
-      physics: blockScroll
-          ? const NeverScrollableScrollPhysics()
-          : const BouncingScrollPhysics(),
-      child: widget.builder(_onPinchStart, _onPinchEnd),
+    return PinchScrollScope(
+      onPinchStart: _onPinchStart,
+      onPinchEnd: _onPinchEnd,
+      child: SingleChildScrollView(
+        controller: controller,
+        physics: blockScroll
+            ? const NeverScrollableScrollPhysics()
+            : const BouncingScrollPhysics(),
+        child: widget.builder(_onPinchStart, _onPinchEnd),
+      ),
+    );
+  }
+}
+
+/// A small widget that listens for raw pointer downs/ups,
+/// counts fingers, and fires your two-finger callbacks (or the inherited ones).
+class ZoomableImage extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTwoFingerStart;
+  final VoidCallback? onTwoFingerEnd;
+
+  const ZoomableImage({
+    Key? key,
+    required this.child,
+    this.onTwoFingerStart,
+    this.onTwoFingerEnd,
+  }) : super(key: key);
+
+  @override
+  State<ZoomableImage> createState() => _ZoomableImageState();
+}
+
+class _ZoomableImageState extends State<ZoomableImage> {
+  int _pointers = 0;
+
+  void _handlePointerDown(PointerDownEvent e) {
+    _pointers++;
+    if (_pointers == 2) {
+      print('>> pinch start (_pointers==2)');
+      final cb = widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
+      cb?.call();
+    }
+  }
+
+  void _handlePointerUp(PointerUpEvent e) {
+    _pointers = (_pointers - 1).clamp(0, 10);
+    if (_pointers < 2) {
+      print('>> pinch end (_pointers<2)');
+      final cb = widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
+      cb?.call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      child: PinchZoomReleaseUnzoomWidget(child: widget.child),
     );
   }
 }
@@ -65,7 +145,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   final BuildContext context;
 
   @override
-  FutureOr<bool> Function(String p1)? get onTapUrl => (url) {
+  FutureOr<bool> Function(String)? get onTapUrl => (url) {
     if (AppConfig.compatibleUrls()
         .where((u) => u.isNotEmpty)
         .any((u) => url.startsWith(u)) ||
@@ -84,15 +164,15 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
 
 class HtmlView extends StatefulWidget {
   final String html;
-  final double? fontSize;
+  final double fontSize;
   final bool isSelectable;
   final Color? color;
 
-  /// Callbacks provided by [PinchScrollView] to block/unblock scrolling
+  /// Optional overrides; if you don’t pass them, we’ll fall back to the scope.
   final VoidCallback? twoFingersOn;
   final VoidCallback? twoFingersOff;
 
-  HtmlView({
+  const HtmlView({
     Key? key,
     required this.html,
     this.fontSize = 18,
@@ -109,9 +189,9 @@ class HtmlView extends StatefulWidget {
 class _HtmlViewState extends State<HtmlView> {
   @override
   Widget build(BuildContext context) {
-    final textColor = widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
-    final linkColor =
-    colorToRgbString(ThemeConfig.htmlLinkColor(context));
+    final textColor =
+        widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
+    final linkColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
     Widget content = HtmlWithAppLinksWidget(
       context,
@@ -123,54 +203,45 @@ class _HtmlViewState extends State<HtmlView> {
         color: textColor,
         inherit: false,
       ),
-      customStylesBuilder: (element) {
-        switch (element.localName) {
+      customStylesBuilder: (el) {
+        switch (el.localName) {
           case 'a':
             return {'color': linkColor};
           case 'li':
-            if (element.attributes['data-list'] == 'bullet') {
+            if (el.attributes['data-list'] == 'bullet') {
               return {'list-style-type': 'disc'};
             }
-            break;
         }
         return null;
       },
-      customWidgetBuilder: (element) {
-        // IMAGE HANDLING
-        if (element.localName == 'img') {
-          final src = element.attributes['src']!;
-          Widget imageWidget;
-          if (src.startsWith('data:image/')) {
-            final base64Data = src.split(',').last;
-            final bytes = base64Decode(base64Data);
-            imageWidget = Image.memory(bytes);
-          } else {
-            imageWidget = CachedNetworkImage(
-              imageUrl: src,
-              cacheManager: DefaultCacheManager(),
-            );
-          }
-          // Center without extra vertical space, and hook into pinch callbacks
+      customWidgetBuilder: (el) {
+        if (el.localName == 'img') {
+          final src = el.attributes['src']!;
+          final img = src.startsWith('data:image/')
+              ? Image.memory(base64Decode(src.split(',').last))
+              : CachedNetworkImage(
+            imageUrl: src,
+            cacheManager: DefaultCacheManager(),
+          );
           return Align(
             alignment: Alignment.center,
             heightFactor: 1,
-            child: PinchZoomReleaseUnzoomWidget(
-              child: imageWidget,
-              twoFingersOn: widget.twoFingersOn ?? () {},
-              twoFingersOff: widget.twoFingersOff ?? () {},
+            child: ZoomableImage(
+              child: img,
+              onTwoFingerStart: widget.twoFingersOn,
+              onTwoFingerEnd: widget.twoFingersOff,
             ),
           );
         }
 
-        // YOUTUBE EMBEDDING (mobile only)
         if (!kIsWeb &&
-            element.localName == 'a' &&
-            (element.attributes['href']?.contains('youtube.com') == true ||
-                element.attributes['href']?.contains('youtu.be') == true)) {
-          final url = element.attributes['href']!;
-          final videoId = YoutubePlayer.convertUrlToId(url) ?? url;
-          final controller = YoutubePlayerController(
-            initialVideoId: videoId,
+            el.localName == 'a' &&
+            ((el.attributes['href'] ?? '').contains('youtube.com') ||
+                el.attributes['href']!.contains('youtu.be'))) {
+          final url = el.attributes['href']!;
+          final vid = YoutubePlayer.convertUrlToId(url) ?? url;
+          final ctrl = YoutubePlayerController(
+            initialVideoId: vid,
             flags: const YoutubePlayerFlags(
               useHybridComposition: true,
               showLiveFullscreenButton: false,
@@ -178,23 +249,21 @@ class _HtmlViewState extends State<HtmlView> {
               mute: false,
             ),
           );
-          final titleWidget = AnimatedBuilder(
-            animation: controller,
-            builder: (ctx, _) {
-              final title = controller.metadata.title;
-              final displayTitle =
-              title.isNotEmpty ? title : 'Loading title…';
+          final title = AnimatedBuilder(
+            animation: ctrl,
+            builder: (_, __) {
+              final t = ctrl.metadata.title;
               return Expanded(
                 child: GestureDetector(
                   onTap: () async {
                     final uri = Uri.parse(url);
-                    if (await canLaunchUrl(uri)) await launchUrl(uri);
+                    if (await canLaunchUrl(uri)) launchUrl(uri);
                   },
                   child: Text(
-                    displayTitle,
+                    t.isNotEmpty ? t : 'Loading title…',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 18.0,
+                      fontSize: 18,
                       decoration: TextDecoration.underline,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -205,10 +274,10 @@ class _HtmlViewState extends State<HtmlView> {
             },
           );
           return YoutubePlayer(
-            controller: controller,
+            controller: ctrl,
             showVideoProgressIndicator: true,
-            topActions: [titleWidget],
-            bottomActions: [
+            topActions: [title],
+            bottomActions: const [
               CurrentPosition(),
               ProgressBar(isExpanded: true),
               RemainingDuration(),
@@ -220,7 +289,6 @@ class _HtmlViewState extends State<HtmlView> {
       },
     );
 
-    // Wrap in SelectionArea if needed
     return widget.isSelectable
         ? SelectionArea(
       focusNode: FocusNode(),
@@ -230,13 +298,8 @@ class _HtmlViewState extends State<HtmlView> {
         : content;
   }
 
-  String colorToRgbString(Color? color) {
-    if (color != null) {
-      final r = (color.r * 255).round();
-      final g = (color.g * 255).round();
-      final b = (color.b * 255).round();
-      return 'rgb($r, $g, $b)';
-    }
-    return '';
+  String colorToRgbString(Color? c) {
+    if (c == null) return '';
+    return 'rgb(${(c.r * 255).round()}, ${(c.g * 255).round()}, ${(c.b * 255).round()})';
   }
 }
