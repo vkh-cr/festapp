@@ -9,10 +9,46 @@ import 'package:fstapp/theme_config.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:pinch_zoom_release_unzoom/pinch_zoom_release_unzoom.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:zoom_pinch_overlay/zoom_pinch_overlay.dart';
 
+/// Wraps any child and provides a scroll view that can be blocked
+/// during two-finger pinch gestures.
+class PinchScrollView extends StatefulWidget {
+  /// Builder that receives callbacks to toggle scroll blocking.
+  final Widget Function(VoidCallback onPinchStart, VoidCallback onPinchEnd)
+  builder;
+
+  const PinchScrollView({Key? key, required this.builder}) : super(key: key);
+
+  @override
+  State<PinchScrollView> createState() => _PinchScrollViewState();
+}
+
+class _PinchScrollViewState extends State<PinchScrollView> {
+  bool blockScroll = false;
+  final ScrollController controller = ScrollController();
+
+  void _onPinchStart() => setState(() => blockScroll = true);
+  void _onPinchEnd() => Future.delayed(
+    PinchZoomReleaseUnzoomWidget.defaultResetDuration,
+        () => setState(() => blockScroll = false),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      controller: controller,
+      physics: blockScroll
+          ? const NeverScrollableScrollPhysics()
+          : const BouncingScrollPhysics(),
+      child: widget.builder(_onPinchStart, _onPinchEnd),
+    );
+  }
+}
+
+/// Factory to enable cached network images in HtmlWidget
 class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
 
 class HtmlWithAppLinksWidget extends HtmlWidget {
@@ -29,19 +65,18 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
   final BuildContext context;
 
   @override
-  FutureOr<bool> Function(String p1)? get onTapUrl {
-    return (String url) {
-      if (AppConfig.compatibleUrls().where((u) => u.isNotEmpty).any((u) => url.startsWith(u)) ||
-          url.contains("localhost")) {
-        var path = url.split('/#/').last;
-        RouterService.navigate(context, path);
-        return true;
-      } else {
-        super.onTapUrl?.call(url);
-        return false;
-      }
-    };
-  }
+  FutureOr<bool> Function(String p1)? get onTapUrl => (url) {
+    if (AppConfig.compatibleUrls()
+        .where((u) => u.isNotEmpty)
+        .any((u) => url.startsWith(u)) ||
+        url.contains("localhost")) {
+      final path = url.split('/#/').last;
+      RouterService.navigate(context, path);
+      return true;
+    }
+    super.onTapUrl?.call(url);
+    return false;
+  };
 
   @override
   void Function(ImageMetadata)? get onTapImage => (_) {};
@@ -51,15 +86,21 @@ class HtmlView extends StatefulWidget {
   final String html;
   final double? fontSize;
   final bool isSelectable;
-  Color? color;
+  final Color? color;
+
+  /// Callbacks provided by [PinchScrollView] to block/unblock scrolling
+  final VoidCallback? twoFingersOn;
+  final VoidCallback? twoFingersOff;
 
   HtmlView({
-    super.key,
+    Key? key,
     required this.html,
     this.fontSize = 18,
     this.isSelectable = false,
     this.color,
-  });
+    this.twoFingersOn,
+    this.twoFingersOff,
+  }) : super(key: key);
 
   @override
   State<HtmlView> createState() => _HtmlViewState();
@@ -68,27 +109,18 @@ class HtmlView extends StatefulWidget {
 class _HtmlViewState extends State<HtmlView> {
   @override
   Widget build(BuildContext context) {
-    widget.color ??= ThemeConfig.defaultHtmlViewColor(context);
-    String linkColor = colorToRgbString(ThemeConfig.htmlLinkColor(context));
+    final textColor = widget.color ?? ThemeConfig.defaultHtmlViewColor(context);
+    final linkColor =
+    colorToRgbString(ThemeConfig.htmlLinkColor(context));
 
-    return widget.isSelectable
-        ? SelectionArea(
-      focusNode: FocusNode(),
-      selectionControls: materialTextSelectionControls,
-      child: _buildHtml(context, linkColor),
-    )
-        : _buildHtml(context, linkColor);
-  }
-
-  Widget _buildHtml(BuildContext context, String linkColor) {
-    return HtmlWithAppLinksWidget(
+    Widget content = HtmlWithAppLinksWidget(
       context,
       widget.html,
       renderMode: RenderMode.column,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
         fontFamily: "Futura",
-        color: widget.color,
+        color: textColor,
         inherit: false,
       ),
       customStylesBuilder: (element) {
@@ -104,12 +136,11 @@ class _HtmlViewState extends State<HtmlView> {
         return null;
       },
       customWidgetBuilder: (element) {
-
+        // IMAGE HANDLING
         if (element.localName == 'img') {
           final src = element.attributes['src']!;
           Widget imageWidget;
           if (src.startsWith('data:image/')) {
-            // decode base64 data URI
             final base64Data = src.split(',').last;
             final bytes = base64Decode(base64Data);
             imageWidget = Image.memory(bytes);
@@ -119,27 +150,25 @@ class _HtmlViewState extends State<HtmlView> {
               cacheManager: DefaultCacheManager(),
             );
           }
-          return ZoomOverlay(
-            modalBarrierColor: Colors.black12,
-            minScale: 0.7,
-            maxScale: 3.0,
-            animationCurve: Curves.fastOutSlowIn,
-            animationDuration: Duration(milliseconds: 300),
-            twoTouchOnly: true,
-            onScaleStart: () {},
-            onScaleStop: () {},
-            child: imageWidget,
+          // Center without extra vertical space, and hook into pinch callbacks
+          return Align(
+            alignment: Alignment.center,
+            heightFactor: 1,
+            child: PinchZoomReleaseUnzoomWidget(
+              child: imageWidget,
+              twoFingersOn: widget.twoFingersOn ?? () {},
+              twoFingersOff: widget.twoFingersOff ?? () {},
+            ),
           );
         }
 
-        if (kIsWeb) return null;
-
-        if (element.localName == 'a' &&
+        // YOUTUBE EMBEDDING (mobile only)
+        if (!kIsWeb &&
+            element.localName == 'a' &&
             (element.attributes['href']?.contains('youtube.com') == true ||
                 element.attributes['href']?.contains('youtu.be') == true)) {
           final url = element.attributes['href']!;
           final videoId = YoutubePlayer.convertUrlToId(url) ?? url;
-
           final controller = YoutubePlayerController(
             initialVideoId: videoId,
             flags: const YoutubePlayerFlags(
@@ -149,19 +178,17 @@ class _HtmlViewState extends State<HtmlView> {
               mute: false,
             ),
           );
-
           final titleWidget = AnimatedBuilder(
             animation: controller,
-            builder: (context, _) {
+            builder: (ctx, _) {
               final title = controller.metadata.title;
-              final displayTitle = title.isNotEmpty ? title : 'Loading title…';
+              final displayTitle =
+              title.isNotEmpty ? title : 'Loading title…';
               return Expanded(
                 child: GestureDetector(
                   onTap: () async {
                     final uri = Uri.parse(url);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    }
+                    if (await canLaunchUrl(uri)) await launchUrl(uri);
                   },
                   child: Text(
                     displayTitle,
@@ -177,7 +204,6 @@ class _HtmlViewState extends State<HtmlView> {
               );
             },
           );
-
           return YoutubePlayer(
             controller: controller,
             showVideoProgressIndicator: true,
@@ -189,19 +215,28 @@ class _HtmlViewState extends State<HtmlView> {
             ],
           );
         }
+
         return null;
       },
     );
+
+    // Wrap in SelectionArea if needed
+    return widget.isSelectable
+        ? SelectionArea(
+      focusNode: FocusNode(),
+      selectionControls: materialTextSelectionControls,
+      child: content,
+    )
+        : content;
   }
 
   String colorToRgbString(Color? color) {
     if (color != null) {
-      final int r = (color.r * 255).round();
-      final int g = (color.g * 255).round();
-      final int b = (color.b * 255).round();
+      final r = (color.r * 255).round();
+      final g = (color.g * 255).round();
+      final b = (color.b * 255).round();
       return 'rgb($r, $g, $b)';
-    } else {
-      return "";
     }
+    return '';
   }
 }
