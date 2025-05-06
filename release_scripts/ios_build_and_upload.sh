@@ -3,7 +3,7 @@
 # Exit if any command fails
 set -e
 
-# Step 0: Load environment variables from helper script (must be in same dir as this script)
+# Step 0: Load environment variables
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 ENV_SCRIPT="$SCRIPT_DIR/.set_appstore_env.sh"
 
@@ -12,12 +12,13 @@ if [ -f "$ENV_SCRIPT" ]; then
   source "$ENV_SCRIPT"
 else
   echo "⚠️  Warning: Environment script not found: $ENV_SCRIPT"
+  exit 1
 fi
 
-# Step 1: Build the IPA using FVM
+# Step 1: Build IPA using FVM
 echo "📦 Building IPA with FVM..."
-cd .. # go to project root from release_scripts/
-#fvm flutter build ipa --release
+cd .. # Go to project root
+# fvm flutter build ipa --release
 
 # Step 2: Determine IPA name from Info.plist
 INFO_PLIST="ios/Runner/Info.plist"
@@ -26,16 +27,13 @@ if [ ! -f "$INFO_PLIST" ]; then
   exit 1
 fi
 
-# Extract CFBundleName directly from plist
 APP_NAME=$(plutil -extract CFBundleName xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
-APP_NAME=${APP_NAME:-Runner} # fallback to Runner if empty
-
-# Construct expected IPA path
+APP_NAME=${APP_NAME:-Runner}
 IPA_PATH="build/ios/ipa/${APP_NAME}.ipa"
 
 if [ ! -f "$IPA_PATH" ]; then
-  echo "❌ IPA file not found at expected location: $IPA_PATH"
-  echo "🔍 Searching for other IPA files..."
+  echo "❌ IPA not found at $IPA_PATH"
+  echo "🔍 Searching for IPA files..."
   IPA_FILES=(build/ios/ipa/*.ipa)
 
   if [ ${#IPA_FILES[@]} -eq 0 ]; then
@@ -43,50 +41,50 @@ if [ ! -f "$IPA_PATH" ]; then
     exit 1
   fi
 
-  echo "✅ Found ${#IPA_FILES[@]} IPA file(s):"
+  echo "✅ Found IPA files:"
   select IPA_PATH in "${IPA_FILES[@]}"; do
     if [ -n "$IPA_PATH" ]; then
-      echo "📁 Selected IPA: $IPA_PATH"
+      echo "📁 Selected: $IPA_PATH"
       break
-    else
-      echo "❌ Invalid selection. Try again."
     fi
   done
 else
   echo "✅ Using IPA: $IPA_PATH"
 fi
 
-# Step 3: Automatically upload to App Store Connect using API key
-# Requires environment variables: APP_STORE_CONNECT_KEY_ID and APP_STORE_CONNECT_ISSUER_ID
-if [[ -z "$APP_STORE_CONNECT_KEY_ID" || -z "$APP_STORE_CONNECT_ISSUER_ID" ]]; then
-  echo "❌ Missing APP_STORE_CONNECT_KEY_ID or APP_STORE_CONNECT_ISSUER_ID environment variable."
-  exit 1
-fi
-
-# Copy private key to expected location if not already present
+# Step 3: Copy API key to expected location
 TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"
-mkdir -p "$TARGET_KEY_DIR"
 PRIVATE_KEY_NAME="AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
 SOURCE_KEY_PATH="$SCRIPT_DIR/$PRIVATE_KEY_NAME"
 TARGET_KEY_PATH="$TARGET_KEY_DIR/$PRIVATE_KEY_NAME"
 
+mkdir -p "$TARGET_KEY_DIR"
+
 if [ ! -f "$SOURCE_KEY_PATH" ]; then
-  echo "❌ Private key not found at expected source location: $SOURCE_KEY_PATH"
+  echo "❌ Private key missing: $SOURCE_KEY_PATH"
   exit 1
 fi
 
 if [ ! -f "$TARGET_KEY_PATH" ]; then
-  echo "📁 Copying private key to App Store Connect keychain location..."
+  echo "📁 Copying private key to $TARGET_KEY_PATH..."
   cp "$SOURCE_KEY_PATH" "$TARGET_KEY_PATH"
 else
-  echo "✅ Private key already exists at expected location: $TARGET_KEY_PATH"
+  echo "✅ Private key already exists."
 fi
 
-# Upload using altool (which looks for key only in system locations)
-echo "🚀 Uploading IPA to App Store Connect using API key..."
-xcrun altool --upload-app \
-  --type ios \
-  --file "$IPA_PATH" \
-  --apiKey "$APP_STORE_CONNECT_KEY_ID" \
-  --apiIssuer "$APP_STORE_CONNECT_ISSUER_ID" \
-  --verbose
+# Step 4: Prompt for release notes
+echo "📝 Enter release notes (press ENTER to finish):"
+read -r RELEASE_NOTES
+export RELEASE_NOTES
+export IPA_FILENAME="$(basename "$IPA_PATH")"
+
+# Step 5: Run Fastlane publish_ipa lane
+FASTLANE_DIR="$SCRIPT_DIR/fastlane"
+
+if command -v fastlane &> /dev/null; then
+  echo "🚀 Running Fastlane to publish IPA..."
+  fastlane --path "$FASTLANE_DIR" publish_ipa
+else
+  echo "❌ Fastlane not installed. Please run ./fastlane_setup.sh"
+  exit 1
+fi
