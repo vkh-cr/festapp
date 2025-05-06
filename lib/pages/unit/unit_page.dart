@@ -49,7 +49,7 @@ class _UnitPageState extends State<UnitPage> {
     _occasions = await OfflineDataService.getAllOccasions();
     setState(() {});
 
-    _initialId= widget.id ?? RightsService.currentUnit!.id!;
+    _initialId= widget.id ?? RightsService.currentUnit()!.id!;
 
     final unit = await DbUnits.getUnit(_initialId!);
 
