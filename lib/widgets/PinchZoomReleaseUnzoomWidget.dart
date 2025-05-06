@@ -225,20 +225,19 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
     this.fingersRequiredToPinch = 2,
     this.twoFingersOn,
     this.twoFingersOff,
-    Key? key,
+    super.key,
   })  : assert(minScale > 0),
         assert(maxScale > 0),
-        assert(maxScale >= minScale),
-        super(key: key);
+        assert(maxScale >= minScale);
 
   final Widget child;
   final Widget? zoomChild;
+  final Clip clipBehavior;
+  final double maxScale;
+  final double minScale;
   final Duration resetDuration;
   final Curve resetCurve;
   final EdgeInsets boundaryMargin;
-  final Clip clipBehavior;
-  final double minScale;
-  final double maxScale;
   final bool useOverlay;
   final bool rootOverlay;
   final double maxOverlayOpacity;
@@ -248,72 +247,103 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
   final VoidCallback? twoFingersOff;
 
   @override
-  _PinchZoomReleaseUnzoomWidgetState createState() =>
+  State<PinchZoomReleaseUnzoomWidget> createState() =>
       _PinchZoomReleaseUnzoomWidgetState();
 }
 
 class _PinchZoomReleaseUnzoomWidgetState
     extends State<PinchZoomReleaseUnzoomWidget> with TickerProviderStateMixin {
-  late TransformationController _transformationController;
-  late AnimationController _animationController;
-  Animation<Matrix4>? _animation;
-  OverlayEntry? _entry;
-  final List<OverlayEntry> _overlayEntries = [];
-  bool _overlayShown = false;
-  bool _gestureActive = false;
-  double _scale = 1;
-  final List<int> _pointers = [];
+  late TransformationController transformationController;
+  late AnimationController animationController;
+  Animation<Matrix4>? animation;
+  OverlayEntry? entry;
+  final List<OverlayEntry> overlayEntries = [];
+  final List<int> events = [];
+  double scale = 1.0;
+  bool _pinchStarted = false;
 
   @override
   void initState() {
     super.initState();
-    _transformationController = TransformationController();
-    _animationController = AnimationController(
+    transformationController = TransformationController();
+    animationController = AnimationController(
       vsync: this,
       duration: widget.resetDuration,
     )
       ..addListener(() {
-        if (_animation != null) {
-          _transformationController.value = _animation!.value;
+        if (animation != null) {
+          transformationController.value = animation!.value;
         }
       })
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed && widget.useOverlay) {
-          Future.delayed(const Duration(milliseconds: 100), _removeOverlay);
+          Future.delayed(const Duration(milliseconds: 100), removeOverlay);
         }
       });
   }
 
   @override
   void dispose() {
-    _transformationController.dispose();
-    _animationController.dispose();
+    transformationController.dispose();
+    animationController.dispose();
     super.dispose();
   }
 
-  void _resetAnimation() {
-    if (!mounted) return;
-    _animation = Matrix4Tween(
-      begin: _transformationController.value,
-      end: Matrix4.identity(),
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: widget.resetCurve,
-    ));
-    _animationController.forward(from: 0);
-    _gestureActive = false;
+  @override
+  Widget build(BuildContext context) {
+    return buildWidget(widget.child);
   }
 
-  void _showOverlay(BuildContext context) {
+  Widget buildWidget(Widget zoomableWidget) => Builder(
+    builder: (context) => Listener(
+      onPointerDown: (event) {
+        events.add(event.pointer);
+        if (events.length == widget.fingersRequiredToPinch && !_pinchStarted) {
+          setState(() => _pinchStarted = true);
+          widget.twoFingersOn?.call();
+          if (widget.useOverlay) showOverlay(context);
+        }
+      },
+      onPointerUp: (event) {
+        events.remove(event.pointer);
+        if (events.isEmpty && _pinchStarted) {
+          widget.twoFingersOff?.call();
+          resetAnimation();
+        }
+      },
+      child: InteractiveViewer(
+        clipBehavior: widget.clipBehavior,
+        minScale: widget.minScale,
+        maxScale: widget.maxScale,
+        transformationController: transformationController,
+        boundaryMargin: widget.boundaryMargin,
+        panEnabled: _pinchStarted,        // only pan after pinch start
+        scaleEnabled: true,
+        onInteractionUpdate: (details) {
+          // update overlay scale
+          if (entry != null) {
+            scale = details.scale;
+            entry!.markNeedsBuild();
+          }
+        },
+        onInteractionEnd: (_) {
+          // no-op: reset is handled in onPointerUp when fingers are gone
+        },
+        child: zoomableWidget,
+      ),
+    ),
+  );
+
+  void showOverlay(BuildContext context) {
     final overlay = Overlay.of(context, rootOverlay: widget.rootOverlay)!;
-    final renderBox = context.findRenderObject()! as RenderBox;
-    final offset = renderBox.localToGlobal(
+    final RenderBox renderBox = context.findRenderObject()! as RenderBox;
+    final Offset offset = renderBox.localToGlobal(
       Offset.zero,
       ancestor: overlay.context.findRenderObject(),
     );
 
-    _entry = OverlayEntry(builder: (_) {
-      final opacity = ((_scale - 1) / (widget.maxScale - 1))
+    entry = OverlayEntry(builder: (_) {
+      final double opacity = ((scale - 1) / (widget.maxScale - 1))
           .clamp(0, widget.maxOverlayOpacity);
       return Material(
         color: Colors.transparent,
@@ -321,7 +351,7 @@ class _PinchZoomReleaseUnzoomWidgetState
           children: [
             Positioned.fill(
               child: Opacity(
-                opacity: opacity.toDouble(),
+                opacity: opacity,
                 child: Container(color: widget.overlayColor),
               ),
             ),
@@ -331,7 +361,7 @@ class _PinchZoomReleaseUnzoomWidgetState
               child: SizedBox(
                 width: renderBox.size.width,
                 height: renderBox.size.height,
-                child: _buildListener(widget.zoomChild ?? widget.child),
+                child: buildWidget(widget.zoomChild ?? widget.child),
               ),
             ),
           ],
@@ -339,112 +369,30 @@ class _PinchZoomReleaseUnzoomWidgetState
       );
     });
 
-    overlay.insert(_entry!);
-    _overlayEntries.add(_entry!);
-    _overlayShown = true;
+    overlay.insert(entry!);
+    overlayEntries.add(entry!);
   }
 
-  void _removeOverlay() {
-    for (final e in _overlayEntries) {
+  void resetAnimation() {
+    if (!mounted) return;
+    animation = Matrix4Tween(
+      begin: transformationController.value,
+      end: Matrix4.identity(),
+    ).animate(CurvedAnimation(
+      parent: animationController,
+      curve: widget.resetCurve,
+    ));
+    animationController.forward(from: 0);
+  }
+
+  void removeOverlay() {
+    for (final e in overlayEntries) {
       e.remove();
     }
-    _overlayEntries.clear();
-    _entry = null;
-    _overlayShown = false;
-  }
-
-  Widget _buildListener(Widget zoomableWidget) => Listener(
-    onPointerDown: (event) {
-      _pointers.add(event.pointer);
-      if (_pointers.length == widget.fingersRequiredToPinch) {
-        _gestureActive = true;
-        widget.twoFingersOn?.call();
-        if (!_overlayShown && widget.useOverlay) {
-          _showOverlay(context);
-        }
-      }
-    },
-    onPointerUp: (event) {
-      _pointers.remove(event.pointer);
-      if (_pointers.isEmpty && _gestureActive) {
-        widget.twoFingersOff?.call();
-        _resetAnimation();
-      }
-    },
-    child: InteractiveViewer(
-      clipBehavior: widget.clipBehavior,
-      minScale: widget.minScale,
-      maxScale: widget.maxScale,
-      transformationController: _transformationController,
-      panEnabled: _gestureActive,
-      boundaryMargin: widget.boundaryMargin,
-      onInteractionUpdate: (details) {
-        if (_overlayShown) {
-          _scale = details.scale;
-          _entry?.markNeedsBuild();
-        }
-      },
-      onInteractionEnd: (_) {
-        // do nothing here — we wait for pointers to clear
-      },
-      child: zoomableWidget,
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) => _buildListener(widget.child);
-}
-
-/// A small widget that listens for raw pointer downs/ups,
-/// counts fingers, and fires your two-finger callbacks (or the inherited ones),
-/// then wraps the child in our zoom widget.
-class ZoomableImage extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTwoFingerStart;
-  final VoidCallback? onTwoFingerEnd;
-
-  const ZoomableImage({
-    Key? key,
-    required this.child,
-    this.onTwoFingerStart,
-    this.onTwoFingerEnd,
-  }) : super(key: key);
-
-  @override
-  State<ZoomableImage> createState() => _ZoomableImageState();
-}
-
-class _ZoomableImageState extends State<ZoomableImage> {
-  int _pointers = 0;
-
-  void _handlePointerDown(PointerDownEvent e) {
-    _pointers++;
-    if (_pointers == 2) {
-      final cb = widget.onTwoFingerStart;
-      cb?.call();
+    overlayEntries.clear();
+    entry = null;
+    if (_pinchStarted) {
+      setState(() => _pinchStarted = false);
     }
-  }
-
-  void _handlePointerUp(PointerUpEvent e) {
-    _pointers = (_pointers - 1).clamp(0, 10);
-    if (_pointers == 0) {
-      final cb = widget.onTwoFingerEnd;
-      cb?.call();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(
-        child: widget.child,
-        maxScale: 4,
-        fingersRequiredToPinch: 2,
-        twoFingersOn: widget.onTwoFingerStart,
-        twoFingersOff: widget.onTwoFingerEnd,
-      ),
-    );
   }
 }
