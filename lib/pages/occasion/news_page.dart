@@ -112,27 +112,27 @@ class _NewsPageState extends State<NewsPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: PinchScrollView(
-            builder: (onPinchStart, onPinchEnd) => newsMessages.isEmpty
-                ? Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.article_outlined,
-                    size: 64,
-                    color: Theme.of(context).disabledColor,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    tr('No news messages yet'),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            )
-                : ListView.builder(
+          child: newsMessages.isEmpty
+              ? Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.article_outlined,
+                  size: 64,
+                  color: Theme.of(context).disabledColor,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  tr('No news messages yet'),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+              : PinchScrollView(
+            builder: (onPinchStart, onPinchEnd) => ListView.builder(
               itemCount: newsMessages.length,
               itemBuilder: (BuildContext context, int index) {
                 final message = newsMessages[index];
