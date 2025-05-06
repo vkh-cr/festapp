@@ -28,7 +28,7 @@ B.b6F.prototype={
 $1(d){return d.b},
 $S:167}
 B.b6G.prototype={
-$1(d){return J.cXY(J.x(J.x(J.x(d,"event_users"),0),"count"),0)},
+$1(d){return J.cXX(J.x(J.x(J.x(d,"event_users"),0),"count"),0)},
 $S:87}
 B.b6H.prototype={
 $1(d){return A.bc(J.x(d,"id"))},
@@ -36,4 +36,4 @@ $S:168};(function inheritance(){var x=a.inheritMany
 x(A.bF,[B.b6F,B.b6G,B.b6H])})()
 var y={b:A.A("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_305",e:"endPart",h:b})})($__dart_deferred_initializers__,"bM0BguB39Hq+cLWVtWNo2d9PdR4=");
+a.eventLog.push({p:"main.dart.js_305",e:"endPart",h:b})})($__dart_deferred_initializers__,"gH7F3xYNiqXd2fAVr8zSEJ92vZY=");
