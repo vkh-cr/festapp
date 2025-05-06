@@ -79,55 +79,6 @@ class _PinchScrollViewState extends State<PinchScrollView> {
   }
 }
 
-/// A small widget that listens for raw pointer downs/ups,
-/// counts fingers, and fires your two-finger callbacks (or the inherited ones).
-class ZoomableImage extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTwoFingerStart;
-  final VoidCallback? onTwoFingerEnd;
-
-  const ZoomableImage({
-    Key? key,
-    required this.child,
-    this.onTwoFingerStart,
-    this.onTwoFingerEnd,
-  }) : super(key: key);
-
-  @override
-  State<ZoomableImage> createState() => _ZoomableImageState();
-}
-
-class _ZoomableImageState extends State<ZoomableImage> {
-  int _pointers = 0;
-
-  void _handlePointerDown(PointerDownEvent e) {
-    _pointers++;
-    if (_pointers == 2) {
-      print('>> pinch start (_pointers==2)');
-      final cb = widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
-      cb?.call();
-    }
-  }
-
-  void _handlePointerUp(PointerUpEvent e) {
-    _pointers = (_pointers - 1).clamp(0, 10);
-    if (_pointers < 1) {
-      print('>> pinch end (_pointers<2)');
-      final cb = widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
-      cb?.call();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(maxScale: 4, child: widget.child, fingersRequiredToPinch: 1,),
-    );
-  }
-}
-
 /// Factory to enable cached network images in HtmlWidget
 class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
 

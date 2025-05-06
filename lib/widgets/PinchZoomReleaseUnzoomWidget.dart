@@ -225,10 +225,11 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
     this.fingersRequiredToPinch = 2,
     this.twoFingersOn,
     this.twoFingersOff,
-    super.key,
+    Key? key,
   })  : assert(minScale > 0),
         assert(maxScale > 0),
-        assert(maxScale >= minScale);
+        assert(maxScale >= minScale),
+        super(key: key);
 
   final Widget child;
   final Widget? zoomChild;
@@ -247,7 +248,7 @@ class PinchZoomReleaseUnzoomWidget extends StatefulWidget {
   final VoidCallback? twoFingersOff;
 
   @override
-  State<PinchZoomReleaseUnzoomWidget> createState() =>
+  _PinchZoomReleaseUnzoomWidgetState createState() =>
       _PinchZoomReleaseUnzoomWidgetState();
 }
 
@@ -355,7 +356,6 @@ class _PinchZoomReleaseUnzoomWidgetState
   Widget _buildListener(Widget zoomableWidget) => Listener(
     onPointerDown: (event) {
       _pointers.add(event.pointer);
-      // start gesture only when required number of fingers touch
       if (_pointers.length == widget.fingersRequiredToPinch) {
         _gestureActive = true;
         widget.twoFingersOn?.call();
@@ -366,7 +366,6 @@ class _PinchZoomReleaseUnzoomWidgetState
     },
     onPointerUp: (event) {
       _pointers.remove(event.pointer);
-      // only end gesture when all fingers are lifted
       if (_pointers.isEmpty && _gestureActive) {
         widget.twoFingersOff?.call();
         _resetAnimation();
@@ -377,7 +376,7 @@ class _PinchZoomReleaseUnzoomWidgetState
       minScale: widget.minScale,
       maxScale: widget.maxScale,
       transformationController: _transformationController,
-      panEnabled: _gestureActive, // only pan after pinch start
+      panEnabled: _gestureActive,
       boundaryMargin: widget.boundaryMargin,
       onInteractionUpdate: (details) {
         if (_overlayShown) {
@@ -386,8 +385,7 @@ class _PinchZoomReleaseUnzoomWidgetState
         }
       },
       onInteractionEnd: (_) {
-        // if fingers left but gesture still active, wait for pointerUp logic
-        // do nothing here
+        // do nothing here — we wait for pointers to clear
       },
       child: zoomableWidget,
     ),
@@ -395,4 +393,58 @@ class _PinchZoomReleaseUnzoomWidgetState
 
   @override
   Widget build(BuildContext context) => _buildListener(widget.child);
+}
+
+/// A small widget that listens for raw pointer downs/ups,
+/// counts fingers, and fires your two-finger callbacks (or the inherited ones),
+/// then wraps the child in our zoom widget.
+class ZoomableImage extends StatefulWidget {
+  final Widget child;
+  final VoidCallback? onTwoFingerStart;
+  final VoidCallback? onTwoFingerEnd;
+
+  const ZoomableImage({
+    Key? key,
+    required this.child,
+    this.onTwoFingerStart,
+    this.onTwoFingerEnd,
+  }) : super(key: key);
+
+  @override
+  State<ZoomableImage> createState() => _ZoomableImageState();
+}
+
+class _ZoomableImageState extends State<ZoomableImage> {
+  int _pointers = 0;
+
+  void _handlePointerDown(PointerDownEvent e) {
+    _pointers++;
+    if (_pointers == 2) {
+      final cb = widget.onTwoFingerStart;
+      cb?.call();
+    }
+  }
+
+  void _handlePointerUp(PointerUpEvent e) {
+    _pointers = (_pointers - 1).clamp(0, 10);
+    if (_pointers == 0) {
+      final cb = widget.onTwoFingerEnd;
+      cb?.call();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerDown: _handlePointerDown,
+      onPointerUp: _handlePointerUp,
+      child: PinchZoomReleaseUnzoomWidget(
+        child: widget.child,
+        maxScale: 4,
+        fingersRequiredToPinch: 2,
+        twoFingersOn: widget.onTwoFingerStart,
+        twoFingersOff: widget.onTwoFingerEnd,
+      ),
+    );
+  }
 }
