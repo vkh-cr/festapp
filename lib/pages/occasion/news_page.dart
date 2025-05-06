@@ -15,7 +15,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import '../utility/html_editor_page.dart';
-import 'package:fstapp/widgets/pinch_scroll_view.dart';
 
 @RoutePage()
 class NewsPage extends StatefulWidget {

@@ -23,7 +23,6 @@ import '../../services/toast_helper.dart';
 import '../../services/js/js_interop.dart';
 import '../../widgets/html_view.dart';
 import '../utility/html_editor_page.dart';
-import 'package:fstapp/widgets/pinch_scroll_view.dart';
 
 @RoutePage()
 class InfoPage extends StatefulWidget {

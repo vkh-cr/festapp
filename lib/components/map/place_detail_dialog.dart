@@ -4,7 +4,6 @@ import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
 import 'package:fstapp/widgets/html_view.dart';
-import 'package:fstapp/widgets/pinch_scroll_view.dart';
 
 class PlaceDetailDialog extends StatefulWidget {
   final MapMarkerWithText marker;
