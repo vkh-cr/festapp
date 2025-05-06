@@ -33,7 +33,6 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/dialogs/companion_dialog.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/widgets/navigate_back_button.dart';
-
 import 'package:fstapp/styles/styles_config.dart';
 import 'map_page.dart';
 
@@ -96,18 +95,18 @@ class _EventPageState extends State<EventPage> {
               ),
             ),
             if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
-            ...ButtonsHelper.getAddToMyProgramButton(
-                _event?.canSaveEventToMyProgram(),
-                addToMySchedule,
-                removeFromMySchedule,
-                ThemeConfig.upperNavText(context),
-                ThemeConfig.upperNavText(context))]),
+              ...ButtonsHelper.getAddToMyProgramButton(
+                  _event?.canSaveEventToMyProgram(),
+                  addToMySchedule,
+                  removeFromMySchedule,
+                  ThemeConfig.upperNavText(context),
+                  ThemeConfig.upperNavText(context))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: SingleChildScrollView(
-            child: Column(
+          child: PinchScrollView(
+            builder: (onPinchStart, onPinchEnd) => Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -117,7 +116,7 @@ class _EventPageState extends State<EventPage> {
                         scrollDirection: Axis.horizontal,
                         child: ConstrainedBox(
                           constraints:
-                              BoxConstraints(minWidth: constraints.maxWidth),
+                          BoxConstraints(minWidth: constraints.maxWidth),
                           child: IntrinsicWidth(
                             child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -145,8 +144,8 @@ class _EventPageState extends State<EventPage> {
                                         child: ElevatedButton(
                                             onPressed: () => signInCompanion(),
                                             child:
-                                                const Text("Sign in companion")
-                                                    .tr()),
+                                            const Text("Sign in companion")
+                                                .tr()),
                                       )),
                                   Visibility(
                                     visible: showLoginLogoutButton() &&
@@ -156,25 +155,25 @@ class _EventPageState extends State<EventPage> {
                                       child: ElevatedButton(
                                           onPressed: () async {
                                             _queriedParticipants =
-                                                await DbUsers
-                                                    .getAllUsersBasics();
+                                            await DbUsers
+                                                .getAllUsersBasics();
                                             _queriedParticipants
                                                 .forEach((q) => {
-                                                      if (_participants.any(
-                                                          (p) => p.id == q.id))
-                                                        {q.isSignedIn = true}
-                                                    });
+                                              if (_participants.any(
+                                                      (p) => p.id == q.id))
+                                                {q.isSignedIn = true}
+                                            });
 
                                             // ignore: use_build_context_synchronously
                                             DialogHelper.chooseUser(context,
-                                                (person) async {
-                                              await signIn(person);
-                                              await loadData(_event!.id!);
-                                            }, _queriedParticipants,
+                                                    (person) async {
+                                                  await signIn(person);
+                                                  await loadData(_event!.id!);
+                                                }, _queriedParticipants,
                                                 "Sign in someone".tr());
                                           },
                                           child:
-                                              const Text("Sign in other").tr()),
+                                          const Text("Sign in other").tr()),
                                     ),
                                   ),
                                   if (AuthService.isGroupLeader() &&
@@ -182,38 +181,38 @@ class _EventPageState extends State<EventPage> {
                                       _event!.isGroupEvent)
                                     ElevatedButton(
                                         onPressed: () =>
-                                        RouterService.navigatePageInfo(
+                                            RouterService.navigatePageInfo(
                                                 context,
                                                 HtmlEditorRoute(
                                                     content: {HtmlEditorPage.parContent:
-                                                _event!.description},
-                                                occasionId: RightsService.currentOccasionId()))
-                                            .then((value) async {
-                                          if (value != null) {
-                                            var changed = value as String;
-                                            if (_groupInfoModel != null) {
-                                              _groupInfoModel!
-                                                  .description = changed;
-                                              await DbGroups
-                                                  .updateUserGroupInfo(
+                                                    _event!.description},
+                                                    occasionId: RightsService.currentOccasionId()))
+                                                .then((value) async {
+                                              if (value != null) {
+                                                var changed = value as String;
+                                                if (_groupInfoModel != null) {
+                                                  _groupInfoModel!
+                                                      .description = changed;
+                                                  await DbGroups
+                                                      .updateUserGroupInfo(
                                                       _groupInfoModel!);
-                                            }
-                                            await loadData(_event!.id!);
-                                            ToastHelper.Show(context,
-                                                "Content has been changed."
-                                                    .tr());
-                                          }
-                                        }),
+                                                }
+                                                await loadData(_event!.id!);
+                                                ToastHelper.Show(context,
+                                                    "Content has been changed."
+                                                        .tr());
+                                              }
+                                            }),
                                         child:
                                         const Text("Edit content").tr()),
                                   if(RightsService.isEditor())
-                                  ElevatedButton(
-                                      onPressed: () => RouterService.navigateOccasion(
-                                          context,
-                                          "${EventEditPage.ROUTE}/${_event!.id}")
-                                          .then((value) => loadData(_event!.id!)),
-                                      child:
-                                          const Text("Edit").tr())
+                                    ElevatedButton(
+                                        onPressed: () => RouterService.navigateOccasion(
+                                            context,
+                                            "${EventEditPage.ROUTE}/${_event!.id}")
+                                            .then((value) => loadData(_event!.id!)),
+                                        child:
+                                        const Text("Edit").tr())
                                 ]),
                           ),
                         ),
@@ -236,8 +235,8 @@ class _EventPageState extends State<EventPage> {
                         alignment: Alignment.topRight,
                         child: TextButton(
                             onPressed: () => RouterService.navigateOccasion(
-                                    context,
-                                    "${MapPage.ROUTE}/${_event!.place!.id}")
+                                context,
+                                "${MapPage.ROUTE}/${_event!.place!.id}")
                                 .then((value) => loadData(_event!.id!)),
                             child: IntrinsicWidth(
                               child: Row(
@@ -265,6 +264,8 @@ class _EventPageState extends State<EventPage> {
                     ''',
                       isSelectable: true,
                       fontSize: 16,
+                      twoFingersOn: onPinchStart,
+                      twoFingersOff: onPinchEnd,
                     ),
                   ),
                 ),
@@ -281,22 +282,27 @@ class _EventPageState extends State<EventPage> {
                   visible: _event != null && _event?.description != null,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
-                    child: HtmlView(html: _event?.description ?? "", isSelectable: true,),
+                    child: HtmlView(
+                      html: _event?.description ?? "",
+                      isSelectable: true,
+                      twoFingersOn: onPinchStart,
+                      twoFingersOff: onPinchEnd,
+                    ),
                   ),
                 ),
                 if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: SingleChildScrollView(
-                        child: ScheduleTimeline(
-                            eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
-                            onEventPressed: _eventPressed,
-                            showAddNewEventButton: RightsService.isEditor,
-                            onAddNewEvent: (context, p, parent) =>
-                                AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
-                                    .then((_) => loadData(_event!.id!)),
-                            parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
-                            nodePosition: 0.3))),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: SingleChildScrollView(
+                          child: ScheduleTimeline(
+                              eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
+                              onEventPressed: _eventPressed,
+                              showAddNewEventButton: RightsService.isEditor,
+                              onAddNewEvent: (context, p, parent) =>
+                                  AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
+                                      .then((_) => loadData(_event!.id!)),
+                              parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
+                              nodePosition: 0.3))),
                 Visibility(
                   visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
@@ -368,7 +374,7 @@ class _EventPageState extends State<EventPage> {
                               padding: const EdgeInsets.all(8),
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount:
-                                  _groupInfoModel?.participants!.length ?? 0,
+                              _groupInfoModel?.participants!.length ?? 0,
                               itemBuilder: (BuildContext context, int index) {
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -491,7 +497,7 @@ class _EventPageState extends State<EventPage> {
     }
 
     var currentParticipants =
-        await DbEvents.getParticipantsPerEventCount(eventId);
+    await DbEvents.getParticipantsPerEventCount(eventId);
     event.currentParticipants = currentParticipants;
     _event = event;
     _childDots.clear();
@@ -536,28 +542,28 @@ class _EventPageState extends State<EventPage> {
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
-              title: const Text("Sign out participant").tr(),
-              content: const Text(
-                      "Do you want to sign out participant {participant} from {event}?")
-                  .tr(namedArgs: {
-                "participant": participant.toString(),
-                "event": _event!.toString()
-              }),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () => RouterService.goBack(context),
-                  child: const Text("Storno").tr(),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    RouterService.goBack(context);
-                    await DbEvents.signOutFromEvent(
-                        context, _event!.id!, participant);
-                    await loadData(_event!.id!);
-                  },
-                  child: const Text("Sign out someone").tr(),
-                ),
-              ],
-            ));
+          title: const Text("Sign out participant").tr(),
+          content: const Text(
+              "Do you want to sign out participant {participant} from {event}?")
+              .tr(namedArgs: {
+            "participant": participant.toString(),
+            "event": _event!.toString()
+          }),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => RouterService.goBack(context),
+              child: const Text("Storno").tr(),
+            ),
+            TextButton(
+              onPressed: () async {
+                RouterService.goBack(context);
+                await DbEvents.signOutFromEvent(
+                    context, _event!.id!, participant);
+                await loadData(_event!.id!);
+              },
+              child: const Text("Sign out someone").tr(),
+            ),
+          ],
+        ));
   }
 }
