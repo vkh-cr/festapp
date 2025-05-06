@@ -97,7 +97,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         ),
         connectorTheme: ConnectorTheme.of(context).copyWith(
           color: ThemeConfig.timelineColor(context),
-          thickness: 2,
+          thickness: 2.5,
         ),
       ),
       builder: TimelineTileBuilder.connected(
@@ -123,9 +123,12 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
             ),
-            child: Text(
-              StylesConfig.formatTimelineRightText(event.data["rightText"]),
-              style: StylesConfig.timeLineSmallTextStyle,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                StylesConfig.formatTimelineRightText(event.data["rightText"]),
+                style: StylesConfig.timeLineSmallTextStyle,
+              ),
             ),
           );
         },
@@ -135,18 +138,19 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             return OutlinedDotIndicator(
               color: ThemeConfig.timelineColor(context),
               borderWidth: 6,
+              size: 15,
             );
           } else if (event.timeBlockType == TimeBlockType.canSignIn) {
             return OutlinedDotIndicator(
               color: ThemeConfig.timelineColor(context),
-              borderWidth: 2,
+              borderWidth: 2.8,
             );
           } else {
             return Padding(
-              padding: EdgeInsetsDirectional.symmetric(horizontal: 3.5),
+              padding: EdgeInsetsDirectional.symmetric(horizontal: 2.5),
               child: DotIndicator(
                 color: ThemeConfig.timelineColor(context),
-                size: 8,
+                size: 10,
               ),
             );
           }
