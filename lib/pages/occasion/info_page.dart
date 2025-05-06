@@ -23,6 +23,7 @@ import '../../services/toast_helper.dart';
 import '../../services/js/js_interop.dart';
 import '../../widgets/html_view.dart';
 import '../utility/html_editor_page.dart';
+import 'package:fstapp/widgets/pinch_scroll_view.dart';
 
 @RoutePage()
 class InfoPage extends StatefulWidget {
@@ -63,107 +64,112 @@ class _InfoPageState extends State<InfoPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Column(
-              children: [
-                if(FeatureService.isFeatureEnabled(FeatureConstants.game) ||
-                    FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: Colors.grey[300]!),
+          child: PinchScrollView(
+            builder: (onPinchStart, onPinchEnd) => SingleChildScrollView(
+              controller: _scrollController,
+              child: Column(
+                children: [
+                  if(FeatureService.isFeatureEnabled(FeatureConstants.game) ||
+                      FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Colors.grey[300]!),
+                        ),
+                      ),
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if(FeatureService.isFeatureEnabled(FeatureConstants.game))
+                              ButtonsHelper.buildReferenceButton(
+                                context: context,
+                                onPressed: () {
+                                  if (!AuthService.isLoggedIn()) {
+                                    ToastHelper.Show(context, "Sign in to participate in the game.".tr());
+                                    return;
+                                  }
+                                  RouterService.navigateOccasion(context, GamePage.ROUTE);
+                                },
+                                icon: Icons.gamepad,
+                                label: "Game",
+                              ),
+                            if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                              const SizedBox(width: 16),
+                            if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
+                              ButtonsHelper.buildReferenceButton(
+                                context: context,
+                                onPressed: () {
+                                  RouterService.navigateOccasion(context, SongbookPage.ROUTE);
+                                },
+                                icon: Icons.library_music,
+                                label: "Songbook",
+                              ),
+                          ],
+                        ),
                       ),
                     ),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Game button
-                          if(FeatureService.isFeatureEnabled(FeatureConstants.game))
-                            ButtonsHelper.buildReferenceButton(
-                              context: context,
-                              onPressed: () {
-                                if (!AuthService.isLoggedIn()) {
-                                  ToastHelper.Show(context, "Sign in to participate in the game.".tr());
-                                  return;
-                                }
-                                RouterService.navigateOccasion(context, GamePage.ROUTE);
-                              },
-                              icon: Icons.gamepad,
-                              label: "Game",
+                  ExpansionPanelList(
+                    expansionCallback: (panelIndex, isExpanded) async {
+                      await handleExpansion(panelIndex, isExpanded);
+                    },
+                    children: _informationList == null
+                        ? []
+                        : _informationList!.map<ExpansionPanel>((InformationModel item) {
+                      int index = _informationList!.indexOf(item);
+                      return ExpansionPanel(
+                        backgroundColor: ThemeConfig.backgroundColor(context),
+                        headerBuilder: (BuildContext context, bool isExpanded) {
+                          return ListTile(
+                            title: Text(item.title ?? ""),
+                          );
+                        },
+                        body: _isItemLoading[index] ?? false
+                            ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        )
+                            : Column(
+                          children: [
+                            if (RightsService.isEditor())
+                              ElevatedButton(
+                                onPressed: () async {
+                                  var result = await RouterService.navigatePageInfo(
+                                      context, HtmlEditorRoute(
+                                      content: {HtmlEditorPage.parContent: item.description},
+                                      occasionId: RightsService.currentOccasionId()
+                                  ));
+                                  if (result != null) {
+                                    setState(() {
+                                      item.description = result as String;
+                                    });
+                                    await DbInformation.updateInformation(item);
+                                    ToastHelper.Show(context, "Content has been changed.".tr());
+                                  }
+                                },
+                                child: const Text("Edit content").tr(),
+                              ),
+                            Padding(
+                              padding: const EdgeInsetsDirectional.all(12),
+                              child: HtmlView(
+                                html: item.description ?? "",
+                                isSelectable: true,
+                                twoFingersOn: onPinchStart,
+                                twoFingersOff: onPinchEnd,
+                              ),
                             ),
-                          if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                          const SizedBox(width: 16),
-                          if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                            ButtonsHelper.buildReferenceButton(
-                              context: context,
-                              onPressed: () {
-                                RouterService.navigateOccasion(context, SongbookPage.ROUTE);
-                              },
-                              icon: Icons.library_music,
-                              label: "Songbook",
-                            ),
-                        ],
-                      ),
-                    ),
+                          ],
+                        ),
+                        isExpanded: item.isExpanded,
+                        canTapOnHeader: true,
+                      );
+                    }).toList(),
                   ),
-                // Information list
-                ExpansionPanelList(
-                  expansionCallback: (panelIndex, isExpanded) async {
-                    await handleExpansion(panelIndex, isExpanded);
-                  },
-                  children: _informationList == null
-                      ? []
-                      : _informationList!.map<ExpansionPanel>((InformationModel item) {
-                    int index = _informationList!.indexOf(item);
-                    return ExpansionPanel(
-                      backgroundColor: ThemeConfig.backgroundColor(context),
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        return ListTile(
-                          title: Text(item.title ?? ""),
-                        );
-                      },
-                      body: _isItemLoading[index] ?? false
-                          ? const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                          : Column(
-                        children: [
-                          if (RightsService.isEditor())
-                            ElevatedButton(
-                              onPressed: () async {
-                                var result = await RouterService.navigatePageInfo(
-                                    context, HtmlEditorRoute(
-                                    content: {HtmlEditorPage.parContent: item.description},
-                                    occasionId: RightsService.currentOccasionId()
-                                ));
-                                if (result != null) {
-                                  setState(() {
-                                    item.description = result as String;
-                                  });
-                                  await DbInformation.updateInformation(item);
-                                  ToastHelper.Show(context, "Content has been changed.".tr());
-                                }
-                              },
-                              child: const Text("Edit content").tr(),
-                            ),
-                          Padding(
-                            padding: const EdgeInsetsDirectional.all(12),
-                            child: HtmlView(html: item.description ?? "", isSelectable: true),
-                          ),
-                        ],
-                      ),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true,
-                    );
-                  }).toList(),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
