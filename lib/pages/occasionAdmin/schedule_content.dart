@@ -37,7 +37,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
 
   Future<void> loadOccasion() async {
     // Fetch the occasion based on the current occasion ID
-    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasionId!);
+    occasionModel = await DbUsers.getOccasion(RightsService.currentOccasionId()!);
     isLoadedOccasion = true;
     if (isLoadedOccasion && isLoadedPlaces) {
       initController();
@@ -147,7 +147,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             renderer: (rendererContext) {
               return DataGridHelper.buildHtmlEditorButton(
                 context: context,
-                occasionId: RightsService.currentOccasionId,
+                occasionId: RightsService.currentOccasionId(),
                 field: Tb.events.description,
                 rendererContext: rendererContext,
                 loadContent: () async {

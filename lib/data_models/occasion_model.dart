@@ -4,6 +4,7 @@ import 'package:fstapp/data_models/tb.dart';
 
 class OccasionModel {
   static const String occasionsOffline = "occasionsOffline";
+  static const String registrationEnabled = "occasionsOffline";
 
   int? id;
   DateTime? createdAt;

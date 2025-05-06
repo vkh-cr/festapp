@@ -45,6 +45,7 @@ class EshopColumns {
   static const String PRODUCT_ORDERED_COUNT = "productOrderedCount";
   static const String PRODUCT_PAID_COUNT = "productPaidCount";
   static const String PRODUCT_CURRENCY_CODE = "productCurrencyCode";
+  static const String PRODUCT_DESCRIPTION = "productDescription";
 
   static const String PAYMENT_INFO_AMOUNT = "paymentInfoAmount";
   static const String PAYMENT_INFO_PAID = "paymentInfoPaid";
@@ -133,9 +134,9 @@ class EshopColumns {
     PRODUCT_MAXIMUM: [
       TrinaColumn(
         enableAutoEditing: true,
-        title: "Maximum".tr(),
+        title: "Max".tr(),
         field: TbEshop.products.maximum,
-        formatter: (s) => s == 0 ? "" : s,
+        formatter: (s) => s == 0 ? "" : s.toString(),
         applyFormatterInEditing: true,
         type: TrinaColumnType.number(defaultValue: 0, negative: false),
         textAlign: TrinaColumnTextAlign.end,
@@ -173,6 +174,24 @@ class EshopColumns {
         type: TrinaColumnType.text(),
         textAlign: TrinaColumnTextAlign.center,
         width: 80,
+      ),
+    ],
+    PRODUCT_DESCRIPTION: (Map<String, dynamic> data) => [
+      TrinaColumn(
+        title: "Description".tr(),
+        field:  TbEshop.products.description,
+        type: TrinaColumnType.text(),
+        width: 150,
+        renderer: (ctx) {
+          return DataGridHelper.buildHtmlEditorButton(
+            context: context,
+            occasionId: data[PRODUCT_DESCRIPTION],
+            field:  TbEshop.products.description,
+            rendererContext: ctx,
+            loadContent: () async =>
+            ctx.row.cells[Tb.places.description]!.value,
+          );
+        },
       ),
     ],
     TICKET_ID: [
@@ -335,7 +354,7 @@ class EshopColumns {
       TrinaColumn(
         readOnly: true,
         enableEditingMode: true,
-        title: "Email".tr(),
+        title: "E-mail".tr(),
         field: TbEshop.orders.data_email,
         type: TrinaColumnType.text(),
         width: 140,

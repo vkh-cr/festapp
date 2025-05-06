@@ -25,6 +25,7 @@ class _ProductsTabState extends State<ProductsTab> {
     EshopColumns.PRODUCT_IS_HIDDEN,
     EshopColumns.PRODUCT_TYPE,
     EshopColumns.PRODUCT_TITLE,
+    EshopColumns.PRODUCT_DESCRIPTION,
     EshopColumns.PRODUCT_PRICE,
     EshopColumns.PRODUCT_CURRENCY_CODE,
     EshopColumns.PRODUCT_PAID_COUNT,
@@ -48,7 +49,7 @@ class _ProductsTabState extends State<ProductsTab> {
           areAllActionsEnabled: () => RightsService.canUpdateOrders(),
           isAddActionPossible: () => false,
         ),
-        columns: EshopColumns.generateColumns(context, columnIdentifiers),
+        columns: EshopColumns.generateColumns(context, columnIdentifiers, data: {EshopColumns.PRODUCT_DESCRIPTION: RightsService.currentOccasionId()}),
       );
     }
   }

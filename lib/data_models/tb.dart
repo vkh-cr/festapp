@@ -68,7 +68,6 @@ class OccasionsTb {
   String get data_game_end => "end";
 
   String get services => "services";
-  String get data_features => "features";
   String get data_features_code => "code";
   String get data_features_is_enabled => "is_enabled";
 }

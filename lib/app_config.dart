@@ -37,7 +37,7 @@ class AppConfig {
 
   static const bool isSplitByPlace = false;
 
-  static const int offsetHours = -1;
+  static const int offsetHours = -2;
 
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
