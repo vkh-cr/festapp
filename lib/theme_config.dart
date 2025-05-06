@@ -5,7 +5,7 @@ class ThemeConfig {
   static bool isDarkModeEnabled = true;
 
   // Base theme to hold common properties
-  static final fontFamily = "Futura";
+  static final fontFamily = "Cerebri";
   static ThemeData baseTheme() => ThemeData(
       fontFamily: fontFamily,
       useMaterial3: false,
@@ -13,7 +13,7 @@ class ThemeConfig {
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: ThemeConfig.lllPrimary.getMaterialColorFromColor(),
       ).copyWith(
-        surface: seed2.changeColorSaturation(0.2).changeColorLightness(0.86),
+        surface: seed4.changeColorSaturation(0.2).changeColorLightness(0.86),
         onSurface: Colors.black,
       ),
       scaffoldBackgroundColor: lllBackground,
@@ -43,10 +43,10 @@ class ThemeConfig {
   // Dynamic color methods with BuildContext for theme-based color adaptation
   static Color backgroundColor(BuildContext context) => isDarkMode(context) ? dddBackground : lllBackground;
   static Color surfaceColor(BuildContext context) => grey200(context);
-  static Color seed1 = const Color(0xFF253759);
-  static Color seed2 = const Color(0xFF80BDF2); // brighter
-  static Color seed3 = const Color(0xFF4465A6); // darker
-  static Color seed4 = const Color(0xFF0D0D0D);
+  static Color seed1 = const Color(0xFF1F64BF);
+  static Color seed2 = const Color(0xFF79A3D9);
+  static Color seed3 = const Color(0xFF122640);
+  static Color seed4 = const Color(0xFFEBEEF2);
 
   static Color attentionColor(BuildContext context) => const Color(0xFF8B0000);
 
@@ -54,7 +54,7 @@ class ThemeConfig {
   static Color lllPrimary = seed3;
 
   static Color dddBackground = seed3.changeColorSaturation(0.08).changeColorLightness(0.14);
-  static Color lllBackground = seed2.changeColorSaturation(0.10).changeColorLightness(0.92);
+  static Color lllBackground = seed3.changeColorSaturation(0.3).changeColorLightness(0.92);
   static Color dddText = seed3.changeColorSaturation(0.1).changeColorLightness(0.82);
 
   static Color dddBackgroundDarker = const Color(0xFF191a1e);

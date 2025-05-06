@@ -121,10 +121,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: Futura
+    - family: Cerebri
       fonts:
-        - asset: fonts/Futura PT Book.ttf
-        - asset: fonts/Futura PT Medium.ttf
+        - asset: fonts/Cerebri-Sans-Bold.ttf
+        - asset: fonts/Cerebri-Sans-Heavy.ttf
   assets:
     - assets/icons/
     - assets/translations/

@@ -176,7 +176,7 @@ class _SchedulePageState extends State<SchedulePage>
                         });
                       }
                     },
-                    child: LogoWidget(width: 60,),
+                    child: LogoWidget(width: 180,),
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))

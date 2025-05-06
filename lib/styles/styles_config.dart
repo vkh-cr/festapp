@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:intl/intl.dart';
 
 class StylesConfig {
   // Text styles
@@ -38,8 +39,8 @@ class StylesConfig {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       );
 
-  static String formatDateTimeForTab(BuildContext context, DateTime time){
-    return time.weekdayToString(context);
+  static String formatDateTimeForTab(BuildContext context, DateTime time) {
+    return "${time.weekdayToString(context).toUpperCase().substring(0, 2)} ${DateFormat('dd.MM.').format(time)}";
   }
 
   static String formatTimelineSplit(String string){
