@@ -34,6 +34,7 @@ import 'package:fstapp/dialogs/companion_dialog.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/widgets/navigate_back_button.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart';
 import 'map_page.dart';
 
 @RoutePage()
