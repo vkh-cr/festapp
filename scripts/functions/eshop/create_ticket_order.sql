@@ -355,14 +355,24 @@ BEGIN
         VALUES (bank_account_id, generated_variable_symbol, calculated_price, first_currency_code, now, deadline)
         RETURNING id INTO payment_info_id;
 
-        -- Update the order record with the calculated price, payment info, and modified input data (with tickets details)
+        -- persist all of the non‐state fields
         UPDATE eshop.orders
-        SET price = calculated_price,
-            currency_code = first_currency_code,
-            state = 'ordered',
-            payment_info = payment_info_id,
-            data = order_data
+        SET
+          price         = calculated_price,
+          currency_code = first_currency_code,
+          payment_info  = payment_info_id,
+          data          = order_data,
+          updated_at    = now()
         WHERE id = order_id;
+
+        -- either flag as 'ordered' or, if free, mark paid via your function
+        IF calculated_price = 0 THEN
+          PERFORM update_order_and_tickets_to_paid(order_id);
+        ELSE
+          UPDATE eshop.orders
+          SET state      = 'ordered'
+          WHERE id = order_id;
+        END IF;
 
         -- Log the order to orders_history with details
         INSERT INTO eshop.orders_history (created_at, data, "order", state, price, currency_code)
