@@ -345,7 +345,7 @@ class _PinchZoomReleaseUnzoomWidgetState
   }
 
   void showOverlay(BuildContext context) {
-    final overlay = Overlay.of(context, rootOverlay: widget.rootOverlay)!;
+    final overlay = Overlay.of(context, rootOverlay: widget.rootOverlay);
     final renderBox = context.findRenderObject()! as RenderBox;
     final offset = renderBox.localToGlobal(
       Offset.zero,
