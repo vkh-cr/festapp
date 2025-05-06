@@ -6,7 +6,7 @@ b8_(d,e){var x=0,w=A.k(y.C),v,u,t,s,r
 var $async$b8_=A.f(function(f,g){if(f===1)return A.h(g,w)
 while(true)switch(x){case 0:s=y.z
 x=3
-return A.d($.Nf().dJ("scan_ticket",A.z(["scanned_id",d,"scanned_code",e],y.N,s),s),$async$b8_)
+return A.d($.Ne().dJ("scan_ticket",A.z(["scanned_id",d,"scanned_code",e],y.N,s),s),$async$b8_)
 case 3:r=g
 s=J.a2(r)
 if(!J.p(s.h(r,"code"),200)){v=null
@@ -26,17 +26,17 @@ while(true)switch(x){case 0:u=y.z
 t=J
 s=J
 x=3
-return A.d($.Nf().dJ("update_ticket_to_used",A.z(["ticket_id",d,"scan_code",e],y.N,u),u),$async$b84)
+return A.d($.Ne().dJ("update_ticket_to_used",A.z(["ticket_id",d,"scan_code",e],y.N,u),u),$async$b84)
 case 3:v=t.p(s.x(g,"code"),200)
 x=1
 break
 case 1:return A.i(v,w)}})
 return A.j($async$b84,w)},
 b80:function b80(){},
-d8B(d,e){return new B.Ee(e,d)},
+d8B(d,e){return new B.Ed(e,d)},
 SD:function SD(d,e){this.a=d
 this.b=e},
-Ee:function Ee(d,e){this.c=d
+Ed:function Ed(d,e){this.c=d
 this.a=e},
 aeF:function aeF(d,e,f){var _=this
 _.e=null
@@ -84,7 +84,7 @@ A0=c[203]
 A1=c[236]
 B.SD.prototype={
 J(){return"ScanState."+this.b}}
-B.Ee.prototype={
+B.Ed.prototype={
 M(){return new B.aeF(D.a9K,new Y.cs(A_.aw,$.ab()),E.cJh(F.KZ,A.a([C.nq],y.k)))}}
 B.aeF.prototype={
 l(){this.x.l()
@@ -111,7 +111,7 @@ break
 case 3:u=v.c
 u.toString
 x=5
-return A.d(T.P7(u,A.u("Enter Scan Code",null),null,A.u("Scan Code",null)),$async$O1)
+return A.d(T.P6(u,A.u("Enter Scan Code",null),null,A.u("Scan Code",null)),$async$O1)
 case 5:t=e
 if(t!=null&&t.length!==0)v.a.c=t
 case 4:return A.i(null,w)}})
@@ -127,18 +127,18 @@ v=A.a([],x)
 u=r.e.z
 if(u!=null&&u.length!==0){u.toString
 t=A.Z(u).i("Q<1,a6>")
-v.push(A.aj(A.H(new A.Q(u,new B.cfv(),t),!0,t.i("a9.E")),C.K,C.f,C.h,q,C.m))}v.push(L.an)
+v.push(A.aj(A.H(new A.Q(u,new B.cfv(),t),!0,t.i("a9.E")),C.K,C.f,C.h,q,C.l))}v.push(L.an)
 u=r.e.Q.a1j()
 t=r.e
 s=t.d
 t=t.e
 t.toString
 v.push(A.U(u+"   "+A.o(s)+"   "+t,q,q,q,q,q,q,q,F.abO,C.b1,q,q,q,q))
-x=A.a([A.bW(A.aj(v,C.i,C.f,C.h,q,C.m),q,q),L.an,A.br(w,C.r,q,30),Z.a2],x)
+x=A.a([A.bW(A.aj(v,C.i,C.f,C.h,q,C.l),q,q),L.an,A.br(w,C.r,q,30),Z.a2],x)
 if(r.f===D.FJ)x.push(A.dp(!1,H.bn(D.bF1,q),q,q,q,q,q,q,r.gb0d(),q,q))
-return new A.a6(I.b_,A.aj(x,C.i,C.f,C.h,q,C.m),q)},
+return new A.a6(I.b_,A.aj(x,C.i,C.f,C.h,q,C.l),q)},
 A(d){var x=this,w=null,v=x.e==null?R.bJu(d):x.a2d(x.f),u=A.c4(w,w,w,w,w,w,A.br(N.iw,C.cq,w,w),w,w,w,new B.cfw(d),w,w,w,w,w),t=y.p
-return M.f4(w,v,A.jC(!0,new A.cr(C.ah,w,C.af,C.A,A.a([A.aj(A.a([new A.a6(I.b_,A.av(A.a([u,A.bD(A.U("",w,w,w,w,w,w,w,A.aE(w,w,C.cq,w,w,w,w,w,w,w,w,20,w,w,C.a6,w,w,!0,w,w,w,w,w,w,w,w),C.b1,w,w,w,w),1,w)],t),C.i,C.f,C.h,0,w),w),x.aac(),A.bD(E.cJg(x.x,A1.IY,new B.cfx(x)),1,w)],t),C.i,C.f,C.h,w,C.m)],t),w),!0,C.V,!0,!0),w,w,w,w,w)},
+return M.f5(w,v,A.jC(!0,new A.cr(C.ah,w,C.af,C.A,A.a([A.aj(A.a([new A.a6(I.b_,A.av(A.a([u,A.bD(A.U("",w,w,w,w,w,w,w,A.aE(w,w,C.cq,w,w,w,w,w,w,w,w,20,w,w,C.a6,w,w,!0,w,w,w,w,w,w,w,w),C.b1,w,w,w,w),1,w)],t),C.i,C.f,C.h,0,w),w),x.aac(),A.bD(E.cJg(x.x,A1.IY,new B.cfx(x)),1,w)],t),C.i,C.f,C.h,w,C.l)],t),w),!0,C.V,!0,!0),w,w,w,w,w)},
 w6(d){return this.aOC(d)},
 aOC(d){var x=0,w=A.k(y.H),v,u=this,t,s,r
 var $async$w6=A.f(function(e,f){if(e===1)return A.h(f,w)
@@ -238,16 +238,16 @@ $S:0};(function installTearOffs(){var x=a._instance_0u
 x(B.aeF.prototype,"gb0d","TL",0)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
 x(A.bF,[B.b80,B.cfv,B.cfx])
 w(B.SD,A.dY)
-w(B.Ee,A.I)
+w(B.Ed,A.I)
 w(B.aeF,A.M)
 x(A.cp,[B.cfw,B.cfy,B.cfz,B.cfA,B.cfB,B.cfu])})()
-A.bk(b.typeUniverse,JSON.parse('{"Ee":{"I":[],"e":[]},"aeF":{"M":["Ee"]}}'))
+A.bk(b.typeUniverse,JSON.parse('{"Ed":{"I":[],"e":[]},"aeF":{"M":["Ed"]}}'))
 var y=(function rtii(){var x=A.A
-return{k:x("r<jv>"),p:x("r<e>"),j:x("C<@>"),P:x("B<m,@>"),K:x("eN"),u:x("qT"),N:x("m"),q:x("FT"),y:x("w"),z:x("@"),C:x("he?"),H:x("~")}})();(function constants(){D.FJ=new B.SD(0,"valid")
+return{k:x("r<jv>"),p:x("r<e>"),j:x("C<@>"),P:x("B<m,@>"),K:x("eN"),u:x("qT"),N:x("m"),q:x("FS"),y:x("w"),z:x("@"),C:x("he?"),H:x("~")}})();(function constants(){D.FJ=new B.SD(0,"valid")
 D.a9I=new B.SD(1,"invalid")
 D.FK=new B.SD(2,"used")
 D.a9K=new B.SD(3,"nothing")
 D.bF1=new A.ca("Confirm Ticket",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFo=new A.ca("Point the camera at the attendee's code for an entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"8Ne9gx5m6wgohEsywZBaZy6wWaQ=");
+a.eventLog.push({p:"main.dart.js_275",e:"endPart",h:b})})($__dart_deferred_initializers__,"f7TZexRqAf6PocTlDDZErRt2jdQ=");

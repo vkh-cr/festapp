@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_155",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,M,G,N,B={
-d9n(){return new B.Ep(null)},
-Ep:function Ep(d){this.a=d},
+d9n(){return new B.Eo(null)},
+Eo:function Eo(d){this.a=d},
 af5:function af5(){var _=this
 _.f=_.e=_.d=!1
 _.r=!0
@@ -29,7 +29,7 @@ bu2(){var x=0,w=A.k(y.e),v,u,t
 var $async$bu2=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=$.y0().XX("getNotificationPermission",[])
 x=3
-return A.d(A.EB("NotificationAllowed",null),$async$bu2)
+return A.d(A.EA("NotificationAllowed",null),$async$bu2)
 case 3:t=e
 v=u&&t==="true"
 x=1
@@ -97,7 +97,7 @@ K=c[218]
 T=c[126]
 E=c[199]
 U=c[96]
-B.Ep.prototype={
+B.Eo.prototype={
 M(){return new B.af5()}}
 B.af5.prototype={
 aV(){this.c7()
@@ -141,17 +141,17 @@ w.push(I.eM)
 v=E.bn(D.bER,r)
 u=s.y
 u=A.a([u===C.ld,u===C.hx,u===C.ii],y.l)
-w.push(A.aj(A.a([v,K.a2,F.cMr(A.c8(8),A.a([new A.a6(new A.ap(12,0,12,0),E.bn(D.bEE,r),r),new A.a6(new A.ap(12,0,12,0),E.bn(A.U("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.a6(new A.ap(12,0,12,0),E.bn(A.U("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),u,new B.chz(s)),I.eM],x),C.K,C.f,C.h,r,C.m))
+w.push(A.aj(A.a([v,K.a2,F.cMr(A.c8(8),A.a([new A.a6(new A.ap(12,0,12,0),E.bn(D.bEE,r),r),new A.a6(new A.ap(12,0,12,0),E.bn(A.U("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.a6(new A.ap(12,0,12,0),E.bn(A.U("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),u,new B.chz(s)),I.eM],x),C.K,C.f,C.h,r,C.l))
 v=A.u("Install App",r)
 u=!s.e
 t=u&&s.r&&s.f?s.gacZ():r
 if(u&&s.r&&s.f)u=A.D(d).ax.a===C.t?$.dD():C.r
 else u=C.b9
-x=A.a([T.NS(u,d,50,!0,v,t,A.D(d).ax.a===C.t?$.ix():C.p,250)],x)
+x=A.a([T.NR(u,d,50,!0,v,t,A.D(d).ax.a===C.t?$.ix():C.p,250)],x)
 if(!s.r)x.push(new A.a6(G.dI,E.bn(A.U("This platform or browser does not support the PWA install prompt or the app is already installed.",r,r,r,r,r,r,r,A.aE(r,r,A.D(d).ax.a===C.t?A.b3(q):A.b3(p),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b1,r,r,r,r),r),r))
 if(s.e||!s.f)x.push(new A.a6(G.dI,E.bn(A.U("The app is already installed.",r,r,r,r,r,r,r,A.aE(r,r,A.D(d).ax.a===C.t?$.dD():C.r,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b1,r,r,r,r),r),r))
-w.push(A.bW(A.aj(x,C.i,C.f,C.h,r,C.m),r,r))
-return M.f4(o,r,new A.cC(C.aK,r,r,new A.a6(R.b_,new A.cQ(new A.ac(0,720,0,1/0),A.aj(w,C.K,C.f,C.h,r,C.m),r),r),r),r,r,r,r,r)}}
+w.push(A.bW(A.aj(x,C.i,C.f,C.h,r,C.l),r,r))
+return M.f5(o,r,new A.cC(C.aK,r,r,new A.a6(R.b_,new A.cQ(new A.ac(0,720,0,1/0),A.aj(w,C.K,C.f,C.h,r,C.l),r),r),r),r,r,r,r,r)}}
 var z=a.updateTypes(["T<~>()"])
 B.chB.prototype={
 $1(d){return d.a.gff(0)===this.a.gff(0)},
@@ -216,11 +216,11 @@ else if(d===1)this.a.a82(C.hx)
 else if(d===2)this.a.a82(C.ii)},
 $S:18};(function installTearOffs(){var x=a._instance_0u
 x(B.af5.prototype,"gacZ","xh",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.Ep,A.I)
+x(B.Eo,A.I)
 x(B.af5,A.M)
 w(A.bF,[B.chB,B.chy,B.chz])
 w(A.cp,[B.chC,B.chA,B.chu,B.chw,B.chx,B.chv])})()
-A.bk(b.typeUniverse,JSON.parse('{"Ep":{"I":[],"e":[]},"af5":{"M":["Ep"]}}'))
+A.bk(b.typeUniverse,JSON.parse('{"Eo":{"I":[],"e":[]},"af5":{"M":["Eo"]}}'))
 var y={u:A.A("r<e>"),l:A.A("r<w>"),w:A.A("m"),q:A.A("kW"),e:A.A("w"),v:A.A("~")};(function constants(){D.avo=new A.dd(P.MI,null,null,null,null)
 D.bEE=new A.ca("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bEO=new A.ca("Enable Notifications",null,L.z6,null,null,null,null,null,null,null,null,null,null,null,null)
@@ -229,4 +229,4 @@ D.bFx=new A.ca("Language Settings",null,H.n6,null,null,null,null,null,null,null,
 D.bFA=new A.ca("Settings",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFE=new A.ca("Notification Settings",null,H.n6,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_155",e:"endPart",h:b})})($__dart_deferred_initializers__,"EWZwAPXjTrEmDCHAKRCO++eAzpA=");
+a.eventLog.push({p:"main.dart.js_155",e:"endPart",h:b})})($__dart_deferred_initializers__,"1r8nuwPR4D6kXbk+vfWSVqtj+kQ=");
