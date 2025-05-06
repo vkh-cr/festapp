@@ -106,157 +106,156 @@ class _EventPageState extends State<EventPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: PinchScrollView(
-            builder: (void Function() onPinchStart, void Function() onPinchEnd) {
-              return Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: ConstrainedBox(
-                            constraints:
-                            BoxConstraints(minWidth: constraints.maxWidth),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: ConstrainedBox(
+                          constraints:
+                          BoxConstraints(minWidth: constraints.maxWidth),
+                          child: IntrinsicWidth(
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Visibility(
+                                      visible: showLoginLogoutButton() &&
+                                          !(_event?.isSignedIn??false) &&
+                                          !EventModel.isEventFull(_event),
+                                      child: ElevatedButton(
+                                          onPressed: () => signIn(),
+                                          child: const Text("Sign in").tr())),
+                                  Visibility(
+                                      visible: showLoginLogoutButton() &&
+                                          (_event?.isSignedIn??false),
+                                      child: ElevatedButton(
+                                          onPressed: () => signOut(),
+                                          child: const Text("Sign out").tr())),
+                                  Visibility(
+                                      visible: showLoginLogoutButton() &&
+                                          FeatureService.isFeatureEnabled(FeatureConstants.companions),
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            8, 0, 0, 0),
+                                        child: ElevatedButton(
+                                            onPressed: () => signInCompanion(),
+                                            child:
+                                            const Text("Sign in companion")
+                                                .tr()),
+                                      )),
+                                  Visibility(
+                                    visible: showLoginLogoutButton() &&
+                                        (RightsService.isEditor()),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: ElevatedButton(
+                                          onPressed: () async {
+                                            _queriedParticipants =
+                                            await DbUsers
+                                                .getAllUsersBasics();
+                                            _queriedParticipants
+                                                .forEach((q) => {
+                                              if (_participants.any(
+                                                      (p) => p.id == q.id))
+                                                {q.isSignedIn = true}
+                                            });
+
+                                            // ignore: use_build_context_synchronously
+                                            DialogHelper.chooseUser(context,
+                                                    (person) async {
+                                                  await signIn(person);
+                                                  await loadData(_event!.id!);
+                                                }, _queriedParticipants,
+                                                "Sign in someone".tr());
+                                          },
+                                          child:
+                                          const Text("Sign in other").tr()),
+                                    ),
+                                  ),
+                                  if (AuthService.isGroupLeader() &&
+                                      _event != null &&
+                                      _event!.isGroupEvent)
+                                    ElevatedButton(
+                                        onPressed: () =>
+                                            RouterService.navigatePageInfo(
+                                                context,
+                                                HtmlEditorRoute(
+                                                    content: {HtmlEditorPage.parContent:
+                                                    _event!.description},
+                                                    occasionId: RightsService.currentOccasionId()))
+                                                .then((value) async {
+                                              if (value != null) {
+                                                var changed = value as String;
+                                                if (_groupInfoModel != null) {
+                                                  _groupInfoModel!
+                                                      .description = changed;
+                                                  await DbGroups
+                                                      .updateUserGroupInfo(
+                                                      _groupInfoModel!);
+                                                }
+                                                await loadData(_event!.id!);
+                                                ToastHelper.Show(context,
+                                                    "Content has been changed."
+                                                        .tr());
+                                              }
+                                            }),
+                                        child:
+                                        const Text("Edit content").tr()),
+                                  if(RightsService.isEditor())
+                                    ElevatedButton(
+                                        onPressed: () => RouterService.navigateOccasion(
+                                            context,
+                                            "${EventEditPage.ROUTE}/${_event!.id}")
+                                            .then((value) => loadData(_event!.id!)),
+                                        child:
+                                        const Text("Edit").tr())
+                                ]),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    alignment: Alignment.topRight,
+                    child: Text(_event?.durationString(context) ?? "",
+                        style: StylesConfig.normalTextStyle),
+                  ),
+                ),
+                Visibility(
+                    visible: _event?.place != null,
+                    child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        alignment: Alignment.topRight,
+                        child: TextButton(
+                            onPressed: () => RouterService.navigateOccasion(
+                                context,
+                                "${MapPage.ROUTE}/${_event!.place!.id}")
+                                .then((value) => loadData(_event!.id!)),
                             child: IntrinsicWidth(
                               child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  mainAxisSize: MainAxisSize.max,
-                                  children: [
-                                    Visibility(
-                                        visible: showLoginLogoutButton() &&
-                                            !(_event?.isSignedIn??false) &&
-                                            !EventModel.isEventFull(_event),
-                                        child: ElevatedButton(
-                                            onPressed: () => signIn(),
-                                            child: const Text("Sign in").tr())),
-                                    Visibility(
-                                        visible: showLoginLogoutButton() &&
-                                            (_event?.isSignedIn??false),
-                                        child: ElevatedButton(
-                                            onPressed: () => signOut(),
-                                            child: const Text("Sign out").tr())),
-                                    Visibility(
-                                        visible: showLoginLogoutButton() &&
-                                            FeatureService.isFeatureEnabled(FeatureConstants.companions),
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              8, 0, 0, 0),
-                                          child: ElevatedButton(
-                                              onPressed: () => signInCompanion(),
-                                              child:
-                                              const Text("Sign in companion")
-                                                  .tr()),
-                                        )),
-                                    Visibility(
-                                      visible: showLoginLogoutButton() &&
-                                          (RightsService.isEditor()),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: ElevatedButton(
-                                            onPressed: () async {
-                                              _queriedParticipants =
-                                              await DbUsers
-                                                  .getAllUsersBasics();
-                                              _queriedParticipants
-                                                  .forEach((q) => {
-                                                if (_participants.any(
-                                                        (p) => p.id == q.id))
-                                                  {q.isSignedIn = true}
-                                              });
-
-                                              // ignore: use_build_context_synchronously
-                                              DialogHelper.chooseUser(context,
-                                                      (person) async {
-                                                    await signIn(person);
-                                                    await loadData(_event!.id!);
-                                                  }, _queriedParticipants,
-                                                  "Sign in someone".tr());
-                                            },
-                                            child:
-                                            const Text("Sign in other").tr()),
-                                      ),
-                                    ),
-                                    if (AuthService.isGroupLeader() &&
-                                        _event != null &&
-                                        _event!.isGroupEvent)
-                                      ElevatedButton(
-                                          onPressed: () =>
-                                              RouterService.navigatePageInfo(
-                                                  context,
-                                                  HtmlEditorRoute(
-                                                      content: {HtmlEditorPage.parContent:
-                                                      _event!.description},
-                                                      occasionId: RightsService.currentOccasionId()))
-                                                  .then((value) async {
-                                                if (value != null) {
-                                                  var changed = value as String;
-                                                  if (_groupInfoModel != null) {
-                                                    _groupInfoModel!
-                                                        .description = changed;
-                                                    await DbGroups
-                                                        .updateUserGroupInfo(
-                                                        _groupInfoModel!);
-                                                  }
-                                                  await loadData(_event!.id!);
-                                                  ToastHelper.Show(context,
-                                                      "Content has been changed."
-                                                          .tr());
-                                                }
-                                              }),
-                                          child:
-                                          const Text("Edit content").tr()),
-                                    if(RightsService.isEditor())
-                                      ElevatedButton(
-                                          onPressed: () => RouterService.navigateOccasion(
-                                              context,
-                                              "${EventEditPage.ROUTE}/${_event!.id}")
-                                              .then((value) => loadData(_event!.id!)),
-                                          child:
-                                          const Text("Edit").tr())
-                                  ]),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Container(
-                      alignment: Alignment.topRight,
-                      child: Text(_event?.durationString(context) ?? "",
-                          style: StylesConfig.normalTextStyle),
-                    ),
-                  ),
-                  Visibility(
-                      visible: _event?.place != null,
-                      child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          alignment: Alignment.topRight,
-                          child: TextButton(
-                              onPressed: () => RouterService.navigateOccasion(
-                                  context,
-                                  "${MapPage.ROUTE}/${_event!.place!.id}")
-                                  .then((value) => loadData(_event!.id!)),
-                              child: IntrinsicWidth(
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.place),
-                                    SizedBox.fromSize(size: const Size(4.0, 4.0)),
-                                    Text(
-                                      "${"Place".tr()}: ${_event?.place?.title ?? ""}",
-                                    )
-                                  ],
-                                ),
-                              )))),
-                  Visibility(
-                    visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn(),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: HtmlView(
-                        html: '''
+                                children: [
+                                  const Icon(Icons.place),
+                                  SizedBox.fromSize(size: const Size(4.0, 4.0)),
+                                  Text(
+                                    "${"Place".tr()}: ${_event?.place?.title ?? ""}",
+                                  )
+                                ],
+                              ),
+                            )))),
+                Visibility(
+                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: HtmlView(
+                      html: '''
                       <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                         <div>${"An account is required to join this event.".tr()}</div>
                         <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
@@ -264,131 +263,128 @@ class _EventPageState extends State<EventPage> {
                         </a>
                       </div>
                     ''',
-                        isSelectable: true,
-                        fontSize: 16,
-                        twoFingersOn: () { print("started"); onPinchStart(); },
-                        twoFingersOff: () { print("ended"); onPinchEnd(); },
-                      ),
+                      isSelectable: true,
+                      fontSize: 16,
                     ),
                   ),
-                  Visibility(
-                      visible: EventModel.isEventFull(_event) &&
-                          AuthService.isLoggedIn(),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: const Text(
-                          "This event is fully booked.",
-                        ).tr(),
-                      )),
-                  Visibility(
-                    visible: _event != null && _event?.description != null,
+                ),
+                Visibility(
+                    visible: EventModel.isEventFull(_event) &&
+                        AuthService.isLoggedIn(),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: HtmlView(html: _event?.description ?? "", isSelectable: true,),
-                    ),
+                      padding: const EdgeInsets.all(8.0),
+                      child: const Text(
+                        "This event is fully booked.",
+                      ).tr(),
+                    )),
+                Visibility(
+                  visible: _event != null && _event?.description != null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: HtmlView(html: _event?.description ?? "", isSelectable: true,),
                   ),
-                  if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
-                    Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: SingleChildScrollView(
-                            child: ScheduleTimeline(
-                                eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
-                                onEventPressed: _eventPressed,
-                                showAddNewEventButton: RightsService.isEditor,
-                                onAddNewEvent: (context, p, parent) =>
-                                    AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
-                                        .then((_) => loadData(_event!.id!)),
-                                parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
-                                nodePosition: 0.3))),
-                  Visibility(
-                    visible: RightsService.isEditor() &&
-                        _event?.maxParticipants != null,
-                    child: ExpansionTile(
-                      title: Row(children: [
-                        IconButton(
-                            onPressed: () async {
-                              await Clipboard.setData(ClipboardData(
-                                  text: _participants
-                                      .map((e) => e.toFullNameString())
-                                      .join("\n")));
-                              ToastHelper.Show(context,
-                                  "Participants have been copied.".tr());
-                            },
-                            icon: const Icon(Icons.copy)),
-                        Text("${"Participants".tr()}:")
-                      ]),
-                      children: [
-                        ListView.builder(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.all(8),
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _participants.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    IconButton(
-                                        onPressed: () =>
-                                            signOutOther(_participants[index]),
-                                        icon: const Icon(
-                                            Icons.remove_circle_outline)),
-                                    Text("${_participants[index]}"),
-                                  ],
-                                ),
-                              );
-                            })
-                      ],
-                    ),
+                ),
+                if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: SingleChildScrollView(
+                          child: ScheduleTimeline(
+                              eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
+                              onEventPressed: _eventPressed,
+                              showAddNewEventButton: RightsService.isEditor,
+                              onAddNewEvent: (context, p, parent) =>
+                                  AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
+                                      .then((_) => loadData(_event!.id!)),
+                              parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
+                              nodePosition: 0.3))),
+                Visibility(
+                  visible: RightsService.isEditor() &&
+                      _event?.maxParticipants != null,
+                  child: ExpansionTile(
+                    title: Row(children: [
+                      IconButton(
+                          onPressed: () async {
+                            await Clipboard.setData(ClipboardData(
+                                text: _participants
+                                    .map((e) => e.toFullNameString())
+                                    .join("\n")));
+                            ToastHelper.Show(context,
+                                "Participants have been copied.".tr());
+                          },
+                          icon: const Icon(Icons.copy)),
+                      Text("${"Participants".tr()}:")
+                    ]),
+                    children: [
+                      ListView.builder(
+                          shrinkWrap: true,
+                          padding: const EdgeInsets.all(8),
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _participants.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                      onPressed: () =>
+                                          signOutOther(_participants[index]),
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline)),
+                                  Text("${_participants[index]}"),
+                                ],
+                              ),
+                            );
+                          })
+                    ],
                   ),
-                  Visibility(
-                    visible: _groupInfoModel != null,
-                    child: ExpansionTile(
-                      title: Text(_groupInfoModel?.title ?? ""),
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                            ),
-                            Visibility(
-                              visible: _groupInfoModel?.leader != null,
-                              child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 16),
-                                  child: Text(
-                                      "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
-                                      style: StylesConfig.normalTextStyle)),
-                            ),
-                            Padding(
+                ),
+                Visibility(
+                  visible: _groupInfoModel != null,
+                  child: ExpansionTile(
+                    title: Text(_groupInfoModel?.title ?? ""),
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(8.0),
+                          ),
+                          Visibility(
+                            visible: _groupInfoModel?.leader != null,
+                            child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 8.0, horizontal: 16),
-                                child: Text("${"Participants".tr()}:",
+                                child: Text(
+                                    "${"Moderator".tr()}: ${_groupInfoModel?.leader?.name ?? ""}",
                                     style: StylesConfig.normalTextStyle)),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                padding: const EdgeInsets.all(8),
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount:
-                                _groupInfoModel?.participants!.length ?? 0,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16.0, vertical: 4.0),
-                                    child: Text(
-                                        "${_groupInfoModel?.participants!.toList()[index].name}",
-                                        style: StylesConfig.normalTextStyle),
-                                  );
-                                })
-                          ],
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              );
-            },
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16),
+                              child: Text("${"Participants".tr()}:",
+                                  style: StylesConfig.normalTextStyle)),
+                          ListView.builder(
+                              shrinkWrap: true,
+                              padding: const EdgeInsets.all(8),
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount:
+                              _groupInfoModel?.participants!.length ?? 0,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16.0, vertical: 4.0),
+                                  child: Text(
+                                      "${_groupInfoModel?.participants!.toList()[index].name}",
+                                      style: StylesConfig.normalTextStyle),
+                                );
+                              })
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
