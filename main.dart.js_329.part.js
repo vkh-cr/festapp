@@ -2,53 +2,53 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_329",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,C,X,Y,Z,O,P,A_,Q,I,R,S,A0,A1,T,A2,A3,A4,A5,A6,G,K,L,A7,A8,H,M,U,N,A9,Aa,Ab,V,A={
-dh9(d,e,f,g){var w,v
+dh7(d,e,f,g){var w,v
 if(e){w=[f]
 C.b.H(w,g)
 g=w}v=x.z
-return A.cAO(Ae.d3f(d,B.aY(J.c_(g,A.dpf(),v),!0,v),null))},
-d4H(d,e,f){var w=null
+return A.cAM(Ae.d3d(d,B.aY(J.c_(g,A.dpd(),v),!0,v),null))},
+d4F(d,e,f){var w=null
 if(d<0||d>f)throw B.n(B.fr(d,0,f,w,w))
 if(e<d||e>f)throw B.n(B.fr(e,d,f,w,w))},
-cAT(d,e,f){var w
+cAR(d,e,f){var w
 try{if(Object.isExtensible(d)&&!Object.prototype.hasOwnProperty.call(d,e)){Object.defineProperty(d,e,{value:f})
 return!0}}catch(w){}return!1},
-cPv(d,e){if(Object.prototype.hasOwnProperty.call(d,e))return d[e]
+cPt(d,e){if(Object.prototype.hasOwnProperty.call(d,e))return d[e]
 return null},
-cAO(d){if(d==null||typeof d=="string"||typeof d=="number"||B.ku(d))return d
+cAM(d){if(d==null||typeof d=="string"||typeof d=="number"||B.ku(d))return d
 if(d instanceof A.pd)return d.a
-if(A.cRk(d))return d
+if(A.cRi(d))return d
 if(x.Q.b(d))return d
 if(d instanceof B.aZ)return B.mr(d)
-if(x.Z.b(d))return A.cPu(d,"$dart_jsFunction",new A.cqO())
-return A.cPu(d,"_$dart_jsObject",new A.cqP($.cDd()))},
-cPu(d,e,f){var w=A.cPv(d,e)
+if(x.Z.b(d))return A.cPs(d,"$dart_jsFunction",new A.cqM())
+return A.cPs(d,"_$dart_jsObject",new A.cqN($.cDb()))},
+cPs(d,e,f){var w=A.cPt(d,e)
 if(w==null){w=f.$1(d)
-A.cAT(d,e,w)}return w},
-cAN(d){if(d==null||typeof d=="string"||typeof d=="number"||typeof d=="boolean")return d
-else if(d instanceof Object&&A.cRk(d))return d
+A.cAR(d,e,w)}return w},
+cAL(d){if(d==null||typeof d=="string"||typeof d=="number"||typeof d=="boolean")return d
+else if(d instanceof Object&&A.cRi(d))return d
 else if(d instanceof Object&&x.Q.b(d))return d
 else if(d instanceof Date)return new B.aZ(B.jP(d.getTime(),0,!1),0,!1)
-else if(d.constructor===$.cDd())return d.o
-else return A.cQs(d)},
-cQs(d){if(typeof d=="function")return A.cB4(d,$.Nb(),new A.csm())
-if(d instanceof Array)return A.cB4(d,$.cD6(),new A.csn())
-return A.cB4(d,$.cD6(),new A.cso())},
-cB4(d,e,f){var w=A.cPv(d,e)
+else if(d.constructor===$.cDb())return d.o
+else return A.cQq(d)},
+cQq(d){if(typeof d=="function")return A.cB2(d,$.Nb(),new A.csk())
+if(d instanceof Array)return A.cB2(d,$.cD4(),new A.csl())
+return A.cB2(d,$.cD4(),new A.csm())},
+cB2(d,e,f){var w=A.cPt(d,e)
 if(w==null||!(d instanceof Object)){w=f.$1(d)
-A.cAT(d,e,w)}return w},
-cqO:function cqO(){},
-cqP:function cqP(d){this.a=d},
+A.cAR(d,e,w)}return w},
+cqM:function cqM(){},
+cqN:function cqN(d){this.a=d},
+csk:function csk(){},
+csl:function csl(){},
 csm:function csm(){},
-csn:function csn(){},
-cso:function cso(){},
 pd:function pd(d){this.a=d},
 QK:function QK(d){this.a=d},
 IA:function IA(d,e){this.a=d
 this.$ti=e},
 Vo:function Vo(){},
-cEF(d,e,f){var w=null
-return new A.GD(B.cw2(d,w,w,w,w,36,w,w,C.J1,w,88,f,w,w,C.AJ),e,w)},
+cED(d,e,f){var w=null
+return new A.GD(B.cw0(d,w,w,w,w,36,w,w,C.J1,w,88,f,w,w,C.AJ),e,w)},
 GD:function GD(d,e,f){this.w=d
 this.b=e
 this.a=f},
@@ -58,9 +58,9 @@ _.y=e
 _.dx=f
 _.fx=g
 _.a=h},
-cHz(d){var w=B.bz("(background-color|color)\\s*:\\s*[^;]+;?\\s*",!1,!1,!1)
+cHx(d){var w=B.bz("(background-color|color)\\s*:\\s*[^;]+;?\\s*",!1,!1,!1)
 return B.dx(d,w,"")},
-cHy(d){var w,v,u,t,s,r,q,p,o,n=B.bz("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",!0,!1,!1),m=B.bz("\\b((http|https)://|www\\.)[^\\s/$.?#].\\S*",!1,!1,!1),l=B.bz("\\b(\\+?[0-9]{1,4}[-.\\s]+)?(\\(?\\d{2,3}\\)?[-.\\s]+)?\\d{3}[-.\\s]+\\d{3}[-.\\s]+\\d{3,4}\\b",!0,!1,!1),k=Ac.WR(d),j=new A.bjm(),i=k.gr0(0)
+cHw(d){var w,v,u,t,s,r,q,p,o,n=B.bz("\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b",!0,!1,!1),m=B.bz("\\b((http|https)://|www\\.)[^\\s/$.?#].\\S*",!1,!1,!1),l=B.bz("\\b(\\+?[0-9]{1,4}[-.\\s]+)?(\\(?\\d{2,3}\\)?[-.\\s]+)?\\d{3}[-.\\s]+\\d{3}[-.\\s]+\\d{3,4}\\b",!0,!1,!1),k=Ac.WR(d),j=new A.bjm(),i=k.gr0(0)
 i.toString
 i=F.WT(i,"*")
 w=i.length
@@ -110,7 +110,7 @@ bjp:function bjp(d,e){this.a=d
 this.b=e},
 bjj:function bjj(d,e){this.a=d
 this.b=e},
-cHx(d,e){return new A.a0T(e,d,null)},
+cHv(d,e){return new A.a0T(e,d,null)},
 a0T:function a0T(d,e,f){this.c=d
 this.d=e
 this.a=f},
@@ -134,11 +134,11 @@ c4p:function c4p(){},
 a4n:function a4n(d,e,f){this.c=d
 this.e=e
 this.a=f},
-cL_(d){var w=new A.Ej(null,null),v=J.a2(d)
+cKY(d){var w=new A.Ej(null,null),v=J.a2(d)
 w.a=v.h(d,"index")
 w.b=v.h(d,"length")
 return w},
-cPx(d){return B.eY(B.QD(d,new A.crm(),x.S),0,null)},
+cPv(d){return B.eY(B.QD(d,new A.crk(),x.S),0,null)},
 a4P:function a4P(d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u){var _=this
 _.d=d
 _.e=e
@@ -192,8 +192,8 @@ bxy:function bxy(d){this.a=d},
 bxx:function bxx(d){this.a=d},
 Ej:function Ej(d,e){this.a=d
 this.b=e},
-crm:function crm(){},
-dby(d,e,f,g,h,i,j){return new A.Ll(j,g,h,i,f,e,d,null)},
+crk:function crk(){},
+dbw(d,e,f,g,h,i,j){return new A.Ll(j,g,h,i,f,e,d,null)},
 a8c:function a8c(d,e,f,g,h,i,j,k,l,m,n){var _=this
 _.c=d
 _.d=e
@@ -253,11 +253,11 @@ _.a=k},
 jF:function jF(d,e,f){this.c=d
 this.a=e
 this.b=f},
-d3N(d){var w=B.bz("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",!0,!1,!1)
+d3L(d){var w=B.bz("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",!0,!1,!1)
 if(!w.b.test(d.toLowerCase()))return C.F.an()
 d=B.dx(d.toUpperCase(),"#","")
 return B.dg(d.length===6?"FF"+d:d,16)},
-biw(d){var w=A.d3N(d)
+biw(d){var w=A.d3L(d)
 return new A.arZ((C.c.S(w,24)&255)/255,(C.c.S(w,16)&255)/255,(C.c.S(w,8)&255)/255,(w&255)/255,C.j)},
 a88(d){var w,v=""
 try{v="rgba("+C.b.c4(B.a([d.gQM(),d.gKp(),d.gNR(),B.oK(C.d.bi(d.geX(d),1))],x.a),",")+")"}catch(w){v="rgba(0,0,0,0)"}return v},
@@ -332,7 +332,7 @@ _.d=e
 _.e=f
 _.f=g
 _.a=h},
-cEE(d,e,f,g,h,i){return new A.Y9(e,g,h,d,f)},
+cEC(d,e,f,g,h,i){return new A.Y9(e,g,h,d,f)},
 Y9:function Y9(d,e,f,g,h){var _=this
 _.c=d
 _.d=e
@@ -415,11 +415,11 @@ _.e=e
 _.r=_.f=0
 _.w=f
 _.c=_.a=null},
-ck6:function ck6(d,e){this.a=d
+ck4:function ck4(d,e){this.a=d
 this.b=e},
-ck5:function ck5(){},
-ck7:function ck7(d){this.a=d},
-ck4:function ck4(d){this.a=d},
+ck3:function ck3(){},
+ck5:function ck5(d){this.a=d},
+ck2:function ck2(d){this.a=d},
 UB:function UB(d,e,f){this.e=d
 this.c=e
 this.a=f},
@@ -453,22 +453,22 @@ _.b6$=_.bb$=0},
 b4N:function b4N(){},
 ue:function ue(d,e){this.a=d
 this.b=e},
-cxq(d,e,f,g){var w,v,u,t=C.e.bq(d).toLowerCase()
+cxo(d,e,f,g){var w,v,u,t=C.e.bq(d).toLowerCase()
 if(!(C.e.ba(t,B.bz("<!DOCTYPE html>",!1,!1,!1))&&C.e.n(t,B.bz("<html",!1,!1,!1))&&C.e.n(t,B.bz("</html>",!1,!1,!1))))t='    <!DOCTYPE html>\n    <html lang="en">\n    <head>\n        <meta charset="UTF-8">\n        <meta name="viewport" content="width=device-width, initial-scale=1.0">\n        <title>IFrame '+g+"</title>\n    </head>\n    <body>\n    "+d+"\n    </body>\n    </html>\n    "
 else t=d
 w=x.N
-t=A.cHB(t,B.dk(["parent.connect_js_to_flutter"+g+" && parent.connect_js_to_flutter"+g+"(window)"],w),D.as0)
-if(f.gdc(f)){v=B.aU(w)
+t=A.cHz(t,B.dk(["parent.connect_js_to_flutter"+g+" && parent.connect_js_to_flutter"+g+"(window)"],w),D.as0)
+if(f.gdc(f)){v=B.aW(w)
 for(w=f.ga6(f);w.q();){u=w.gL(0)
 u.gbHz()
-v.t(0,u.gbHz())}t=A.cHB(t,v,D.arZ)}return t},
-cHB(d,e,f){return A.cHA(f,d,"\n<script>\n"+e.hd(0,new A.bjA())+"\n</script>\n")},
-cHC(d,e,f){var w=B.bz("<"+d+"([^>]*)>",!1,!1,!1)
+v.t(0,u.gbHz())}t=A.cHz(t,v,D.arZ)}return t},
+cHz(d,e,f){return A.cHy(f,d,"\n<script>\n"+e.hd(0,new A.bjA())+"\n</script>\n")},
+cHA(d,e,f){var w=B.bz("<"+d+"([^>]*)>",!1,!1,!1)
 B.Sb(0,0,e.length,"startIndex")
-return B.dqP(e,w,new A.bjB(d,f),0)},
-cHA(d,e,f){var w
-switch(d.a){case 2:return A.cHC("head",e,f)
-case 0:return A.cHC("body",e,f)
+return B.dqN(e,w,new A.bjB(d,f),0)},
+cHy(d,e,f){var w
+switch(d.a){case 2:return A.cHA("head",e,f)
+case 0:return A.cHA("body",e,f)
 case 3:w=C.e.dQ(e,"</head>")
 return C.e.a8(e,0,w)+f+"\n"+C.e.d7(e,w)
 case 1:w=C.e.dQ(e,"</body>")
@@ -516,41 +516,41 @@ _.a=n},
 agK:function agK(){var _=this
 _.y=_.x=_.w=_.r=_.f=_.e=_.d=$
 _.c=_.a=null},
-cpS:function cpS(d){this.a=d},
-cpP:function cpP(d){this.a=d},
-cpK:function cpK(d,e){this.a=d
+cpQ:function cpQ(d){this.a=d},
+cpN:function cpN(d){this.a=d},
+cpI:function cpI(d,e){this.a=d
 this.b=e},
-cpJ:function cpJ(d){this.a=d},
-cpO:function cpO(d){this.a=d},
-cpL:function cpL(){},
+cpH:function cpH(d){this.a=d},
 cpM:function cpM(d){this.a=d},
-cpN:function cpN(){},
-cpQ:function cpQ(d,e,f,g){var _=this
+cpJ:function cpJ(){},
+cpK:function cpK(d){this.a=d},
+cpL:function cpL(){},
+cpO:function cpO(d,e,f,g){var _=this
 _.a=d
 _.b=e
 _.c=f
 _.d=g},
-cpR:function cpR(d,e){this.a=d
+cpP:function cpP(d,e){this.a=d
 this.b=e},
-cRk(d){return x.B.b(d)||x.D.b(d)||x.l.b(d)||x.t.b(d)||x.U.b(d)||x.o.b(d)||x.bj.b(d)},
-cGr(d,e,f,g,h,i,j,k,l,m,n){var w=null
+cRi(d){return x.B.b(d)||x.D.b(d)||x.l.b(d)||x.t.b(d)||x.U.b(d)||x.o.b(d)||x.bj.b(d)},
+cGp(d,e,f,g,h,i,j,k,l,m,n){var w=null
 return new G.C0(i,m,w,w,j,w,k,8,l,g,w,w,24,!0,!1,48,f,w,!1,e,w,w,w,d,w,w,!1,w,n.i("C0<0>"))},
 Yd(d,e){var w=null,v=B.c8(8)
 return new B.a6(C.aB,new A.R9(d,C.aT,B.U(e,w,w,w,w,w,w,w,B.aE(w,w,C.hG,w,w,w,w,w,w,w,w,w,w,w,w,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),new B.da(v,C.y),w),w)},
-cLG(d){var w=C.a10.h(0,(d==null?C.a5:d).a)
+cLE(d){var w=C.a10.h(0,(d==null?C.a5:d).a)
 w.toString
 return B.dx(w,"w","")},
-d9R(d){var w=B.dn(d,0,null)
-if(C.e.n(w.goA(w).toLowerCase(),"youtube"))return A.d9Q(d)
-else if(C.e.n(w.goA(w).toLowerCase(),"vimeo"))return A.d9P(d)
+d9P(d){var w=B.dn(d,0,null)
+if(C.e.n(w.goA(w).toLowerCase(),"youtube"))return A.d9O(d)
+else if(C.e.n(w.goA(w).toLowerCase(),"vimeo"))return A.d9N(d)
 else return d},
-d9Q(d){var w,v,u,t
+d9O(d){var w,v,u,t
 if(!C.e.n(d,"http")&&d.length===11)return d
 C.e.bq(d)
 for(w=[B.bz("^https:\\/\\/(?:www\\.|m\\.)?youtube\\.com\\/watch\\?v=([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bz("^https:\\/\\/(?:music\\.)?youtube\\.com\\/watch\\?v=([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bz("^https:\\/\\/(?:www\\.|m\\.)?youtube\\.com\\/shorts\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bz("^https:\\/\\/(?:www\\.|m\\.)?youtube(?:-nocookie)?\\.com\\/embed\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1),B.bz("^https:\\/\\/youtu\\.be\\/([_\\-a-zA-Z0-9]{11}).*$",!0,!1,!1)],v=null,u=0;u<5;++u){t=w[u].rD(d)
 if(t!=null&&t.b.length-1>=1)v=t.b[1]}if(v==null)return null
 return"https://www.youtube.com/embed/"+v},
-d9P(d){var w=B.bz("(?:http|https)?:?\\/?\\/?(?:www\\.)?(?:player\\.)?vimeo\\.com\\/(?:channels\\/(?:\\w+\\/)?|groups\\/(?:[^\\/]*)\\/videos\\/|video\\/|)(\\d+)(?:|\\/\\?)",!1,!1,!1).rD(d),v=w==null?null:w.b[1]
+d9N(d){var w=B.bz("(?:http|https)?:?\\/?\\/?(?:www\\.)?(?:player\\.)?vimeo\\.com\\/(?:channels\\/(?:\\w+\\/)?|groups\\/(?:[^\\/]*)\\/videos\\/|video\\/|)(\\d+)(?:|\\/\\?)",!1,!1,!1).rD(d),v=w==null?null:w.b[1]
 if(v==null)return null
 return"https://player.vimeo.com/video/"+v}},D,Ac,Ad,F,E,Ae,W
 J=c[1]
@@ -597,17 +597,17 @@ Ae=c[172]
 W=c[235]
 A.pd.prototype={
 h(d,e){if(typeof e!="string"&&typeof e!="number")throw B.n(B.cj("property is not a String or num",null))
-return A.cAN(this.a[e])},
+return A.cAL(this.a[e])},
 m(d,e,f){if(typeof e!="string"&&typeof e!="number")throw B.n(B.cj("property is not a String or num",null))
-this.a[e]=A.cAO(f)},
+this.a[e]=A.cAM(f)},
 k(d,e){if(e==null)return!1
 return e instanceof A.pd&&this.a===e.a},
 j(d){var w,v
 try{w=String(this.a)
 return w}catch(v){w=this.qF(0)
 return w}},
-wT(d,e){var w=this.a,v=e==null?null:B.aY(new B.Q(e,A.dpg(),B.Z(e).i("Q<1,@>")),!0,x.z)
-return A.cAN(w[d].apply(w,v))},
+wT(d,e){var w=this.a,v=e==null?null:B.aY(new B.Q(e,A.dpe(),B.Z(e).i("Q<1,@>")),!0,x.z)
+return A.cAL(w[d].apply(w,v))},
 bx9(d){return this.wT(d,null)},
 gv(d){return 0}}
 A.QK.prototype={}
@@ -615,7 +615,7 @@ A.IA.prototype={
 alV(d){var w=d<0||d>=this.gu(0)
 if(w)throw B.n(B.fr(d,0,this.gu(0),null,null))},
 h(d,e){if(B.h3(e))this.alV(e)
-return this.aQU(0,e)},
+return this.aQT(0,e)},
 m(d,e,f){if(B.h3(e))this.alV(e)
 this.ak5(0,e,f)},
 gu(d){var w=this.a.length
@@ -627,7 +627,7 @@ H(d,e){this.wT("push",e instanceof Array?e:B.aY(e,!0,x.z))},
 kf(d){if(this.gu(0)===0)throw B.n(B.iI(-1))
 return this.bx9("pop")},
 e9(d,e,f,g,h){var w,v
-A.d4H(e,f,this.gu(0))
+A.d4F(e,f,this.gu(0))
 w=f-e
 if(w===0)return
 if(h<0)throw B.n(B.cj(h,null))
@@ -636,26 +636,26 @@ C.b.H(v,J.Gk(g,h).mN(0,w))
 this.wT("splice",v)},
 hN(d,e,f,g){return this.e9(0,e,f,g,0)},
 es(d,e){this.wT("sort",e==null?[]:[e])},
-$iaW:1,
+$iaV:1,
 $iy:1,
 $iC:1}
 A.Vo.prototype={
-m(d,e,f){return this.aQV(0,e,f)}}
+m(d,e,f){return this.aQU(0,e,f)}}
 A.GD.prototype={
 uo(d,e,f){return new A.GD(this.w,f,null)},
 e8(d){return!this.w.k(0,d.w)}}
 A.R9.prototype={
 gk6(d){return this.c!=null},
-A(d){var w,v,u,t,s=this,r=null,q=B.D(d),p=G.cw3(d),o=p.agR(s),n=q.p1.as
+A(d){var w,v,u,t,s=this,r=null,q=B.D(d),p=G.cw1(d),o=p.agR(s),n=q.p1.as
 n.toString
 n=n.cw(p.a2m(s))
 w=p.y
 if(w==null)w=p.a2m(s).R(0.12)
 v=p.z
 if(v==null)v=p.a2m(s).R(0.04)
-u=p.aL5(s)
-t=new B.ac(p.a,1/0,p.b,1/0).aAO(r,r)
-return B.cKn(C.M,!1,s.dx,C.k,t,0,2,!0,o,w,4,r,q.cx,8,v,4,q.f,r,r,r,s.c,u,s.fx,q.k1,n,q.Q)}}
+u=p.aL4(s)
+t=new B.ac(p.a,1/0,p.b,1/0).aAN(r,r)
+return B.cKl(C.M,!1,s.dx,C.k,t,0,2,!0,o,w,4,r,q.cx,8,v,4,q.f,r,r,r,s.c,u,s.fx,q.k1,n,q.Q)}}
 A.a0T.prototype={
 M(){return new A.aMj(B.a([D.bGB,D.bGE,D.bGH,D.bGG,D.acd,D.ach,D.acf],x.f),C.hG)}}
 A.aMj.prototype={
@@ -670,20 +670,20 @@ l(){this.a.d.l()
 this.ag()},
 A(d){var w=this,v=null,u=w.a.d,t=x.p,s=B.a([],t),r=u.b,q=w.a.d
 return B.av(B.a([new B.ar(50,v,new A.a8c(w.f,u,s,25,C.aT,w.r,A9.JU,C.aB,C.J,C.i,r),v),new B.eT(1,C.fS,new A.a4P(200,v,!0,q,new A.c4n(),C.aU,new A.c4o(w),new A.c4p(),new A.c4q(),new A.c4r(),D.bCZ,D.ar4,D.bE8,C.I,M.ari,!1,new A.c4s(w),q.a),v)],t),C.K,C.f,C.h,0,v)},
-t9(d){return this.aNt(d)},
-aNt(d){var w=0,v=B.k(x.H),u=this
+t9(d){return this.aNs(d)},
+aNs(d){var w=0,v=B.k(x.H),u=this
 var $async$t9=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:w=2
 return B.d(u.a.d.KD(d),$async$t9)
 case 2:return B.i(null,v)}})
 return B.j($async$t9,v)}}
 A.a4n.prototype={
-A(d){return $.cUk().azn(this.c,!1,this.a)}}
+A(d){return $.cUi().azm(this.c,!1,this.a)}}
 A.a4P.prototype={
 M(){return new A.a4Q()}}
 A.a4Q.prototype={
 U(){var w,v=this
-v.y=$.Ni().aES("packages/quill_html_editor/assets/scripts/quill_2.0.0_4_min.js")
+v.y=$.Ni().aER("packages/quill_html_editor/assets/scripts/quill_2.0.0_4_min.js")
 w=v.a.ax.d
 if(w==null)w="Roboto"
 v.z=w
@@ -702,8 +702,8 @@ v.fn()
 this.ag()},
 A(d){var w=this.y
 w===$&&B.b()
-return Y.cHe(new A.bxO(this),w,x.z)},
-aZ4(d,e){var w,v,u,t,s,r,q=this
+return Y.cHc(new A.bxO(this),w,x.z)},
+aZ3(d,e){var w,v,u,t,s,r,q=this
 q.e=q.ap6(e)
 w=C.c.j(B.ee(q.a.r.b))
 v=q.e
@@ -759,8 +759,8 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$Wj,v)},
-U6(d){return this.b3A(d)},
-b3A(d){var w=0,v=B.k(x.z),u,t=this,s
+U6(d){return this.b3z(d)},
+b3z(d){var w=0,v=B.k(x.z),u,t=this,s
 var $async$U6=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:s=t.d
 s===$&&B.b()
@@ -771,8 +771,8 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$U6,v)},
-U5(d){return this.b3z(d)},
-b3z(d){var w=0,v=B.k(x.z),u,t=this,s
+U5(d){return this.b3y(d)},
+b3y(d){var w=0,v=B.k(x.z),u,t=this,s
 var $async$U5=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:s=t.d
 s===$&&B.b()
@@ -783,8 +783,8 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$U5,v)},
-U7(d){return this.b3H(!0)},
-b3H(d){var w=0,v=B.k(x.z),u,t=this,s
+U7(d){return this.b3G(!0)},
+b3G(d){var w=0,v=B.k(x.z),u,t=this,s
 var $async$U7=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:s=t.d
 s===$&&B.b()
@@ -821,8 +821,8 @@ break
 case 6:case 1:return B.i(u,v)
 case 2:return B.h(s.at(-1),v)}})
 return B.j($async$Wi,v)},
-V5(d,e){return this.be0(d,e)},
-be0(d,e){var w=0,v=B.k(x.z),u,t=this,s
+V5(d,e){return this.be_(d,e)},
+be_(d,e){var w=0,v=B.k(x.z),u,t=this,s
 var $async$V5=B.f(function(f,g){if(f===1)return B.h(g,v)
 while(true)switch(w){case 0:s=t.d
 s===$&&B.b()
@@ -833,8 +833,8 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$V5,v)},
-Vs(d){return this.bfZ(d)},
-bfZ(d){var w=0,v=B.k(x.z),u,t=this,s
+Vs(d){return this.bfY(d)},
+bfY(d){var w=0,v=B.k(x.z),u,t=this,s
 var $async$Vs=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:s=t.d
 s===$&&B.b()
@@ -904,7 +904,7 @@ k=A.a88(b1.a.y)
 j=b1.a.ch
 i=j.x
 if(i==null)i=C.Cn
-j=A.cLG(j.w)
+j=A.cLE(j.w)
 h=b1.z
 g=b1.a.ax
 f=g.x
@@ -915,7 +915,7 @@ e=b1.a.ax.b
 e=A.a88(e==null?C.r:e)
 d=A.a88(b1.a.y)
 a0=b1.a.ax
-a0=A.cLG(a0.w)
+a0=A.cLE(a0.w)
 a1=b1.a.ay.a
 a1=B.o(a1)
 a2=b1.a.ay.c
@@ -937,8 +937,8 @@ b0=""+b1.a.d
 return'   <!DOCTYPE html>\n        <html>\n        <head>\n        <link href="https://fonts.googleapis.com/css?family='+c0+':400,400i,700,700i" rel="stylesheet">\n        <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">    \n        \n       <!-- Include the Quill library --> \n        <script>\n        '+w+"\n        </script>\n        <style>\n        /*!\n       * Quill Editor v2.0.0-dev.3\n       * https://quilljs.com/\n       * Copyright (c) 2014, Jason Chen\n       * Copyright (c) 2013, salesforce.com\n       */.ql-container{box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;font-size:13px;height:100%;margin:0;position:relative}.ql-container.ql-disabled .ql-tooltip{visibility:hidden}.ql-container:not(.ql-disabled) li[data-list=checked]>.ql-ui,.ql-container:not(.ql-disabled) li[data-list=unchecked]>.ql-ui{cursor:pointer}.ql-clipboard{left:-100000px;height:1px;overflow-y:hidden;position:absolute;top:50%}.ql-clipboard p{margin:0;padding:0}.ql-editor{box-sizing:border-box;counter-reset:list-0;line-height:1.42;height:100%;outline:0;overflow-y:auto;padding:12px 15px;tab-size:4;-moz-tab-size:4;text-align:left;white-space:pre-wrap;word-wrap:break-word}.ql-editor>*{cursor:text}.ql-editor blockquote,.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6,.ql-editor ol,.ql-editor p,.ql-editor pre{margin:0;padding:0}.ql-editor h1,.ql-editor h2,.ql-editor h3,.ql-editor h4,.ql-editor h5,.ql-editor h6,.ql-editor p{counter-reset:list-0 list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor table{border-collapse:collapse}.ql-editor td{border:1px solid #000;padding:2px 5px}.ql-editor ol{padding-left:1.5em}.ql-editor li{list-style-type:none;padding-left:1.5em;position:relative}.ql-editor li>.ql-ui:before{display:inline-block;margin-left:-1.5em;margin-right:.3em;text-align:right;white-space:nowrap;width:1.2em}.ql-editor li[data-list=checked]>.ql-ui,.ql-editor li[data-list=unchecked]>.ql-ui{color:#777}.ql-editor li[data-list=bullet]>.ql-ui:before{content:'\\2022'}.ql-editor li[data-list=checked]>.ql-ui:before{content:'\\2611'}.ql-editor li[data-list=unchecked]>.ql-ui:before{content:'\\2610'}.ql-editor li[data-list=ordered]{counter-reset:list-1 list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9;counter-increment:list-0}.ql-editor li[data-list=ordered]>.ql-ui:before{content:counter(list-0,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-1{counter-increment:list-1}.ql-editor li[data-list=ordered].ql-indent-1>.ql-ui:before{content:counter(list-1,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-1{counter-reset:list-2 list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-2{counter-increment:list-2}.ql-editor li[data-list=ordered].ql-indent-2>.ql-ui:before{content:counter(list-2,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-2{counter-reset:list-3 list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-3{counter-increment:list-3}.ql-editor li[data-list=ordered].ql-indent-3>.ql-ui:before{content:counter(list-3,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-3{counter-reset:list-4 list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-4{counter-increment:list-4}.ql-editor li[data-list=ordered].ql-indent-4>.ql-ui:before{content:counter(list-4,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-4{counter-reset:list-5 list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-5{counter-increment:list-5}.ql-editor li[data-list=ordered].ql-indent-5>.ql-ui:before{content:counter(list-5,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-5{counter-reset:list-6 list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-6{counter-increment:list-6}.ql-editor li[data-list=ordered].ql-indent-6>.ql-ui:before{content:counter(list-6,decimal) '. '}.ql-editor li[data-list=ordered].ql-indent-6{counter-reset:list-7 list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-7{counter-increment:list-7}.ql-editor li[data-list=ordered].ql-indent-7>.ql-ui:before{content:counter(list-7,lower-alpha) '. '}.ql-editor li[data-list=ordered].ql-indent-7{counter-reset:list-8 list-9}.ql-editor li[data-list=ordered].ql-indent-8{counter-increment:list-8}.ql-editor li[data-list=ordered].ql-indent-8>.ql-ui:before{content:counter(list-8,lower-roman) '. '}.ql-editor li[data-list=ordered].ql-indent-8{counter-reset:list-9}.ql-editor li[data-list=ordered].ql-indent-9{counter-increment:list-9}.ql-editor li[data-list=ordered].ql-indent-9>.ql-ui:before{content:counter(list-9,decimal) '. '}.ql-editor .ql-indent-1:not(.ql-direction-rtl){padding-left:3em}.ql-editor li.ql-indent-1:not(.ql-direction-rtl){padding-left:4.5em}.ql-editor .ql-indent-1.ql-direction-rtl.ql-align-right{padding-right:3em}.ql-editor li.ql-indent-1.ql-direction-rtl.ql-align-right{padding-right:4.5em}.ql-editor .ql-indent-2:not(.ql-direction-rtl){padding-left:6em}.ql-editor li.ql-indent-2:not(.ql-direction-rtl){padding-left:7.5em}.ql-editor .ql-indent-2.ql-direction-rtl.ql-align-right{padding-right:6em}.ql-editor li.ql-indent-2.ql-direction-rtl.ql-align-right{padding-right:7.5em}.ql-editor .ql-indent-3:not(.ql-direction-rtl){padding-left:9em}.ql-editor li.ql-indent-3:not(.ql-direction-rtl){padding-left:10.5em}.ql-editor .ql-indent-3.ql-direction-rtl.ql-align-right{padding-right:9em}.ql-editor li.ql-indent-3.ql-direction-rtl.ql-align-right{padding-right:10.5em}.ql-editor .ql-indent-4:not(.ql-direction-rtl){padding-left:12em}.ql-editor li.ql-indent-4:not(.ql-direction-rtl){padding-left:13.5em}.ql-editor .ql-indent-4.ql-direction-rtl.ql-align-right{padding-right:12em}.ql-editor li.ql-indent-4.ql-direction-rtl.ql-align-right{padding-right:13.5em}.ql-editor .ql-indent-5:not(.ql-direction-rtl){padding-left:15em}.ql-editor li.ql-indent-5:not(.ql-direction-rtl){padding-left:16.5em}.ql-editor .ql-indent-5.ql-direction-rtl.ql-align-right{padding-right:15em}.ql-editor li.ql-indent-5.ql-direction-rtl.ql-align-right{padding-right:16.5em}.ql-editor .ql-indent-6:not(.ql-direction-rtl){padding-left:18em}.ql-editor li.ql-indent-6:not(.ql-direction-rtl){padding-left:19.5em}.ql-editor .ql-indent-6.ql-direction-rtl.ql-align-right{padding-right:18em}.ql-editor li.ql-indent-6.ql-direction-rtl.ql-align-right{padding-right:19.5em}.ql-editor .ql-indent-7:not(.ql-direction-rtl){padding-left:21em}.ql-editor li.ql-indent-7:not(.ql-direction-rtl){padding-left:22.5em}.ql-editor .ql-indent-7.ql-direction-rtl.ql-align-right{padding-right:21em}.ql-editor li.ql-indent-7.ql-direction-rtl.ql-align-right{padding-right:22.5em}.ql-editor .ql-indent-8:not(.ql-direction-rtl){padding-left:24em}.ql-editor li.ql-indent-8:not(.ql-direction-rtl){padding-left:25.5em}.ql-editor .ql-indent-8.ql-direction-rtl.ql-align-right{padding-right:24em}.ql-editor li.ql-indent-8.ql-direction-rtl.ql-align-right{padding-right:25.5em}.ql-editor .ql-indent-9:not(.ql-direction-rtl){padding-left:27em}.ql-editor li.ql-indent-9:not(.ql-direction-rtl){padding-left:28.5em}.ql-editor .ql-indent-9.ql-direction-rtl.ql-align-right{padding-right:27em}.ql-editor li.ql-indent-9.ql-direction-rtl.ql-align-right{padding-right:28.5em}.ql-editor li.ql-direction-rtl{padding-right:1.5em}.ql-editor li.ql-direction-rtl>.ql-ui:before{margin-left:.3em;margin-right:-1.5em;text-align:left}.ql-editor table{table-layout:fixed;width:100%}.ql-editor table td{outline:0}.ql-editor .ql-code-block-container{font-family:monospace}.ql-editor .ql-video{display:block;max-width:100%}.ql-editor .ql-video.ql-align-center{margin:0 auto}.ql-editor .ql-video.ql-align-right{margin:0 0 0 auto}.ql-editor .ql-bg-black{background-color:#000}.ql-editor .ql-bg-red{background-color:#e60000}.ql-editor .ql-bg-orange{background-color:#f90}.ql-editor .ql-bg-yellow{background-color:#ff0}.ql-editor .ql-bg-green{background-color:#008a00}.ql-editor .ql-bg-blue{background-color:#06c}.ql-editor .ql-bg-purple{background-color:#93f}.ql-editor .ql-color-white{color:#fff}.ql-editor .ql-color-red{color:#e60000}.ql-editor .ql-color-orange{color:#f90}.ql-editor .ql-color-yellow{color:#ff0}.ql-editor .ql-color-green{color:#008a00}.ql-editor .ql-color-blue{color:#06c}.ql-editor .ql-color-purple{color:#93f}.ql-editor .ql-font-serif{font-family:Georgia,Times New Roman,serif}.ql-editor .ql-font-monospace{font-family:Monaco,Courier New,monospace}.ql-editor .ql-size-small{font-size:.75em}.ql-editor .ql-size-large{font-size:1.5em}.ql-editor .ql-size-huge{font-size:2.5em}.ql-editor .ql-direction-rtl{direction:rtl;text-align:inherit}.ql-editor .ql-align-center{text-align:center}.ql-editor .ql-align-justify{text-align:justify}.ql-editor .ql-align-right{text-align:right}.ql-editor .ql-ui{position:absolute}.ql-editor.ql-blank::before{color:rgba(0,0,0,.6);content:attr(data-placeholder);font-style:italic;left:15px;pointer-events:none;position:absolute;right:15px}.ql-snow .ql-toolbar:after,.ql-snow.ql-toolbar:after{clear:both;content:'';display:table}.ql-snow .ql-toolbar button,.ql-snow.ql-toolbar button{background:0 0;border:none;cursor:pointer;display:inline-block;float:left;height:24px;padding:3px 5px;width:28px}.ql-snow .ql-toolbar button svg,.ql-snow.ql-toolbar button svg{float:left;height:100%}.ql-snow .ql-toolbar button:active:hover,.ql-snow.ql-toolbar button:active:hover{outline:0}.ql-snow .ql-toolbar input.ql-image[type=file],.ql-snow.ql-toolbar input.ql-image[type=file]{display:none}.ql-snow .ql-toolbar .ql-picker-item.ql-selected,.ql-snow .ql-toolbar .ql-picker-item:hover,.ql-snow .ql-toolbar .ql-picker-label.ql-active,.ql-snow .ql-toolbar .ql-picker-label:hover,.ql-snow .ql-toolbar button.ql-active,.ql-snow .ql-toolbar button:focus,.ql-snow .ql-toolbar button:hover,.ql-snow.ql-toolbar .ql-picker-item.ql-selected,.ql-snow.ql-toolbar .ql-picker-item:hover,.ql-snow.ql-toolbar .ql-picker-label.ql-active,.ql-snow.ql-toolbar .ql-picker-label:hover,.ql-snow.ql-toolbar button.ql-active,.ql-snow.ql-toolbar button:focus,.ql-snow.ql-toolbar button:hover{color:#06c}.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-fill,.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-fill,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-fill,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-fill,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,.ql-snow .ql-toolbar button.ql-active .ql-fill,.ql-snow .ql-toolbar button.ql-active .ql-stroke.ql-fill,.ql-snow .ql-toolbar button:focus .ql-fill,.ql-snow .ql-toolbar button:focus .ql-stroke.ql-fill,.ql-snow .ql-toolbar button:hover .ql-fill,.ql-snow .ql-toolbar button:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-fill,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-fill,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-fill,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke.ql-fill,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-fill,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke.ql-fill,.ql-snow.ql-toolbar button.ql-active .ql-fill,.ql-snow.ql-toolbar button.ql-active .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:focus .ql-fill,.ql-snow.ql-toolbar button:focus .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:hover .ql-fill,.ql-snow.ql-toolbar button:hover .ql-stroke.ql-fill{fill:#06c}.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke,.ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke,.ql-snow .ql-toolbar .ql-picker-item:hover .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke,.ql-snow .ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke,.ql-snow .ql-toolbar .ql-picker-label:hover .ql-stroke-miter,.ql-snow .ql-toolbar button.ql-active .ql-stroke,.ql-snow .ql-toolbar button.ql-active .ql-stroke-miter,.ql-snow .ql-toolbar button:focus .ql-stroke,.ql-snow .ql-toolbar button:focus .ql-stroke-miter,.ql-snow .ql-toolbar button:hover .ql-stroke,.ql-snow .ql-toolbar button:hover .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke,.ql-snow.ql-toolbar .ql-picker-item.ql-selected .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke,.ql-snow.ql-toolbar .ql-picker-item:hover .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke,.ql-snow.ql-toolbar .ql-picker-label.ql-active .ql-stroke-miter,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke,.ql-snow.ql-toolbar .ql-picker-label:hover .ql-stroke-miter,.ql-snow.ql-toolbar button.ql-active .ql-stroke,.ql-snow.ql-toolbar button.ql-active .ql-stroke-miter,.ql-snow.ql-toolbar button:focus .ql-stroke,.ql-snow.ql-toolbar button:focus .ql-stroke-miter,.ql-snow.ql-toolbar button:hover .ql-stroke,.ql-snow.ql-toolbar button:hover .ql-stroke-miter{stroke:#06c}@media (pointer:coarse){.ql-snow .ql-toolbar button:hover:not(.ql-active),.ql-snow.ql-toolbar button:hover:not(.ql-active){color:#444}.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-fill,.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-fill,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke.ql-fill{fill:#444}.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke,.ql-snow .ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke,.ql-snow.ql-toolbar button:hover:not(.ql-active) .ql-stroke-miter{stroke:#444}}.ql-snow{box-sizing:border-box}.ql-snow *{box-sizing:border-box}.ql-snow .ql-hidden{display:none}.ql-snow .ql-out-bottom,.ql-snow .ql-out-top{visibility:hidden}.ql-snow .ql-tooltip{position:absolute;transform:translateY(10px)}.ql-snow .ql-tooltip a{cursor:pointer;text-decoration:none}.ql-snow .ql-tooltip.ql-flip{transform:translateY(-10px)}.ql-snow .ql-formats{display:inline-block;vertical-align:middle}.ql-snow .ql-formats:after{clear:both;content:'';display:table}.ql-snow .ql-stroke{fill:none;stroke:#444;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.ql-snow .ql-stroke-miter{fill:none;stroke:#444;stroke-miterlimit:10;stroke-width:2}.ql-snow .ql-fill,.ql-snow .ql-stroke.ql-fill{fill:#444}.ql-snow .ql-empty{fill:none}.ql-snow .ql-even{fill-rule:evenodd}.ql-snow .ql-stroke.ql-thin,.ql-snow .ql-thin{stroke-width:1}.ql-snow .ql-transparent{opacity:.4}.ql-snow .ql-direction svg:last-child{display:none}.ql-snow .ql-direction.ql-active svg:last-child{display:inline}.ql-snow .ql-direction.ql-active svg:first-child{display:none}.ql-snow .ql-editor h1{font-size:2em}.ql-snow .ql-editor h2{font-size:1.5em}.ql-snow .ql-editor h3{font-size:1.17em}.ql-snow .ql-editor h4{font-size:1em}.ql-snow .ql-editor h5{font-size:.83em}.ql-snow .ql-editor h6{font-size:.67em}.ql-snow .ql-editor a{text-decoration:underline}.ql-snow .ql-editor blockquote{border-left:4px solid #ccc;margin-bottom:5px;margin-top:5px;padding-left:16px}.ql-snow .ql-editor .ql-code-block-container,.ql-snow .ql-editor code{background-color:#f0f0f0;border-radius:3px}.ql-snow .ql-editor .ql-code-block-container{margin-bottom:5px;margin-top:5px;padding:5px 10px}.ql-snow .ql-editor code{font-size:85%;padding:2px 4px}.ql-snow .ql-editor .ql-code-block-container{background-color:#23241f;color:#f8f8f2;overflow:visible}.ql-snow .ql-editor img{max-width:100%}.ql-snow .ql-picker{color:#444;display:inline-block;float:left;font-size:14px;font-weight:500;height:24px;position:relative;vertical-align:middle}.ql-snow .ql-picker-label{cursor:pointer;display:inline-block;height:100%;padding-left:8px;padding-right:2px;position:relative;width:100%}.ql-snow .ql-picker-label::before{display:inline-block;line-height:22px}.ql-snow .ql-picker-options{background-color:#fff;display:none;min-width:100%;padding:4px 8px;position:absolute;white-space:nowrap}.ql-snow .ql-picker-options .ql-picker-item{cursor:pointer;display:block;padding-bottom:5px;padding-top:5px}.ql-snow .ql-picker.ql-expanded .ql-picker-label{color:#ccc;z-index:2}.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-fill{fill:#ccc}.ql-snow .ql-picker.ql-expanded .ql-picker-label .ql-stroke{stroke:#ccc}.ql-snow .ql-picker.ql-expanded .ql-picker-options{display:block;margin-top:-1px;top:100%;z-index:1}.ql-snow .ql-color-picker,.ql-snow .ql-icon-picker{width:28px}.ql-snow .ql-color-picker .ql-picker-label,.ql-snow .ql-icon-picker .ql-picker-label{padding:2px 4px}.ql-snow .ql-color-picker .ql-picker-label svg,.ql-snow .ql-icon-picker .ql-picker-label svg{right:4px}.ql-snow .ql-icon-picker .ql-picker-options{padding:4px 0}.ql-snow .ql-icon-picker .ql-picker-item{height:24px;width:24px;padding:2px 4px}.ql-snow .ql-color-picker .ql-picker-options{padding:3px 5px;width:152px}.ql-snow .ql-color-picker .ql-picker-item{border:1px solid transparent;float:left;height:16px;margin:2px;padding:0;width:16px}.ql-snow .ql-picker:not(.ql-color-picker):not(.ql-icon-picker) svg{position:absolute;margin-top:-9px;right:0;top:50%;width:18px}.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before{content:attr(data-label)}.ql-snow .ql-picker.ql-header{width:98px}.ql-snow .ql-picker.ql-header .ql-picker-item::before,.ql-snow .ql-picker.ql-header .ql-picker-label::before{content:'Normal'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"1\"]::before{content:'Heading 1'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"2\"]::before{content:'Heading 2'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"3\"]::before{content:'Heading 3'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"4\"]::before{content:'Heading 4'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"5\"]::before{content:'Heading 5'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before,.ql-snow .ql-picker.ql-header .ql-picker-label[data-value=\"6\"]::before{content:'Heading 6'}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"1\"]::before{font-size:2em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"2\"]::before{font-size:1.5em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"3\"]::before{font-size:1.17em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"4\"]::before{font-size:1em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"5\"]::before{font-size:.83em}.ql-snow .ql-picker.ql-header .ql-picker-item[data-value=\"6\"]::before{font-size:.67em}.ql-snow .ql-picker.ql-font{width:108px}.ql-snow .ql-picker.ql-font .ql-picker-item::before,.ql-snow .ql-picker.ql-font .ql-picker-label::before{content:'Sans Serif'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=serif]::before{content:'Serif'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before,.ql-snow .ql-picker.ql-font .ql-picker-label[data-value=monospace]::before{content:'Monospace'}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=serif]::before{font-family:Georgia,Times New Roman,serif}.ql-snow .ql-picker.ql-font .ql-picker-item[data-value=monospace]::before{font-family:Monaco,Courier New,monospace}.ql-snow .ql-picker.ql-size{width:98px}.ql-snow .ql-picker.ql-size .ql-picker-item::before,.ql-snow .ql-picker.ql-size .ql-picker-label::before{content:'Normal'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=small]::before{content:'Small'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=large]::before{content:'Large'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before,.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=huge]::before{content:'Huge'}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=small]::before{font-size:10px}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=large]::before{font-size:18px}.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=huge]::before{font-size:32px}.ql-snow .ql-color-picker.ql-background .ql-picker-item{background-color:#fff}.ql-snow .ql-color-picker.ql-color .ql-picker-item{background-color:#000}.ql-code-block-container{position:relative}.ql-code-block-container .ql-ui{right:5px;top:5px}.ql-toolbar.ql-snow{border:1px solid #ccc;box-sizing:border-box;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;padding:8px}.ql-toolbar.ql-snow .ql-formats{margin-right:15px}.ql-toolbar.ql-snow .ql-picker-label{border:1px solid transparent}.ql-toolbar.ql-snow .ql-picker-options{border:1px solid transparent;box-shadow:rgba(0,0,0,.2) 0 2px 8px}.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-label{border-color:#ccc}.ql-toolbar.ql-snow .ql-picker.ql-expanded .ql-picker-options{border-color:#ccc}.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item.ql-selected,.ql-toolbar.ql-snow .ql-color-picker .ql-picker-item:hover{border-color:#000}.ql-toolbar.ql-snow+.ql-container.ql-snow{border-top:0}.ql-snow .ql-tooltip{background-color:#fff;border:1px solid #ccc;box-shadow:0 0 5px #ddd;color:#444;padding:5px 12px;white-space:nowrap}.ql-snow .ql-tooltip::before{content:\"Visit URL:\";line-height:26px;margin-right:8px}.ql-snow .ql-tooltip input[type=text]{display:none;border:1px solid #ccc;font-size:13px;height:26px;margin:0;padding:3px 5px;width:170px}.ql-snow .ql-tooltip a.ql-preview{display:inline-block;max-width:200px;overflow-x:hidden;text-overflow:ellipsis;vertical-align:top}.ql-snow .ql-tooltip a.ql-action::after{border-right:1px solid #ccc;content:'Edit';margin-left:16px;padding-right:8px}.ql-snow .ql-tooltip a.ql-remove::before{content:'Remove';margin-left:8px}.ql-snow .ql-tooltip a{line-height:26px}.ql-snow .ql-tooltip.ql-editing a.ql-preview,.ql-snow .ql-tooltip.ql-editing a.ql-remove{display:none}.ql-snow .ql-tooltip.ql-editing input[type=text]{display:inline-block}.ql-snow .ql-tooltip.ql-editing a.ql-action::after{border-right:0;content:'Save';padding-right:0}.ql-snow .ql-tooltip[data-mode=link]::before{content:\"Enter link:\"}.ql-snow .ql-tooltip[data-mode=formula]::before{content:\"Enter formula:\"}.ql-snow .ql-tooltip[data-mode=video]::before{content:\"Enter video:\"}.ql-snow a{color:#06c}.ql-container.ql-snow{border:1px solid #ccc}\n        \n        body, html{\n         font-family: \""+v+'", sans-serif !important;\n        -webkit-user-select: text !important;\n        margin:0px !important;\n        background-color:'+u+";\n        color: "+t+";\n        }\n        .ql-font-roboto {\n           font-family: '"+s+"', sans-serif;\n          }\n        .ql-editor.ql-blank::before{\n         font-family: \""+s+'", sans-serif !important;\n        -webkit-user-select: text !important;\n          padding-left:'+r+b3+q+b4+p+b5+o+"px !important;\n          position: center;\n          left:0px;\n          text-align: "+m.b+b6+n+b7+l+b8+k+";\n          font-style: "+i.b+b9+j+';\n          \n        }\n        .ql-container.ql-snow{\n         font-family: "'+h+'", sans-serif !important;\n        -webkit-user-select: text !important;\n          white-space:nowrap !important;\n          margin-top:0px !important;\n          margin-bottom:0px !important;\n          margin:0px !important;\n          width:100%;\n          border:none;\n          font-style: '+f.b+b6+g+b7+e+b8+d+b9+a0+";\n          padding-left:"+a1+"px;\n          padding-right:"+a2+"px;\n          padding-top:"+a3+"px;\n          padding-bottom:"+a4+'px;\n          min-height:100%;\n        \n          contenteditable: true !important;\n          data-gramm: false !important;\n         \n        }\n        .ql-editor { \n         font-family: "'+a5+'", sans-serif !important;\n          -webkit-user-select: text !important;\n          padding-left:'+a6+b3+a7+b4+a8+b5+a9+"px !important;\n        }\n        .ql-toolbar { \n          position: absolute; \n          top: 0;\n          left:0;\n          right:0\n        }\n        .ql-tooltip{\n          display:none; \n        }\n        \n        .ql-editor.ql-blank:focus::before {\n          content: '';\n          }\n        #toolbar-container{\n         display:none;\n        }     \n        #scrolling-container {  \n        overflow-y: scroll  !important;\n          min-height: "+b0+'px !important;\n          -webkit-user-select: text !important;\n           scrollbar-width: none !important; \n         } \n         #scroll-container::-webkit-scrollbar {\n            display: none !important; /* For Chrome, Safari, and Opera */\n          }\n         ::-webkit-scrollbar {\n          width: 0;  /* Remove scrollbar space */\n          background: transparent;  /* Optional: just make scrollbar invisible */\n          } \n        </style>\n   \n        </head>\n        <body>\n         <script>\n           const resizeObserver = new ResizeObserver(entries =>{\n            ///console.log("Offset height has changed:", (entries[0].target.clientHeight).toString())\n                if(true) {\n                  EditorResizeCallback((entries[0].target.clientHeight).toString());\n                } else {\n                  EditorResizeCallback.postMessage((entries[0].target.clientHeight).toString());\n                }            \n            })\n            resizeObserver.observe(document.body)\n          </script>\n         <script>\n          let isTextSelectionInProgress = false;\n\n          // Event handler for text selection start\n          function handleTextSelectionStart() {\n              isTextSelectionInProgress = true;\n             // console.log("Text selection started.");\n          }\n  \n          // Event handler for text selection end\n          function handleTextSelectionEnd() {\n              isTextSelectionInProgress = false;\n             // console.log("Text selection ended.");\n          }\n  \n          // Check if text is being selected while dragging the mouse\n          function handleMouseMove(event) {\n              if (isTextSelectionInProgress) {\n                  // Do something when the text is being selected (dragging the mouse while text is selected)\n                  window.getSelection();\n              }\n          }\n  \n          // Attach event listeners\n          document.addEventListener("mousedown", handleTextSelectionStart);\n          document.addEventListener("mouseup", handleTextSelectionEnd);\n          document.addEventListener("mousemove", handleMouseMove);\n         \n         </script> \n        <!-- Create the toolbar container -->\n        <div id="scrolling-container">\n        <div id="toolbar-container"></div>\n        \n        <!-- Create the editor container -->\n        <div style="position:relative;margin-top:0em;">\n        <div id="editorcontainer" style= "min-height:'+b0+'px;margin-top:0em;">\n        <div id="editor" style="min-height:'+b0+"px; width:100%;\"></div>\n        </div>\n        </div> \n        </div>\n      \n        <!-- Initialize Quill editor -->\n        <script>\n      \n            let fullWindowHeight = window.innerHeight;\n            let keyboardIsProbablyOpen = false;\n            window.addEventListener(\"resize\", function() {\n              if(window.innerHeight == fullWindowHeight) {\n                keyboardIsProbablyOpen = false;\n              } else if(window.innerHeight < fullWindowHeight * 0.9) {\n                keyboardIsProbablyOpen = true;\n              }\n            });\n            \n            function resizeElementHeight(element, ratio) {\n              var height = 0;\n              var body = window.document.body;\n              if(window.innerHeight) {\n                height = window.innerHeight;\n              } else if(body.parentElement.clientHeight) {\n                height = body.parentElement.clientHeight;\n              } else if(body && body.clientHeight) {\n                height = body.clientHeight;\n              }\n              let isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)\n              if(isIOS) {\n                element.style.height = ((height / ratio - element.offsetTop) + \"px\");\n              } else {\n                element.style.height = ((height - element.offsetTop) + \"px\");\n              }  \n            }\n            \n            \n          function replaceSelection(replaceText) {\n              try{\n              var range = quilleditor.getSelection(true);\n                    if (range) {\n                      if (range.length == 0) {\n                       // console.log('User cursor is at index', range.index);\n                      } else {\n                       quilleditor.deleteText(range.index, range.length);\n                       quilleditor.insertText(range.index, replaceText);\n                      \n                      /// replace text with format will be coming in future release\n                      /// quilleditor.insertText(range.index, replaceText, JSON.parse(format));\n                      }\n                    } else {\n                     // console.log('User cursor is not in editor');\n                    }\n                }\n                 catch(e) {\n                    console.log('replaceSelection', e);\n                 } \n            }\n            // Retrieve the Quill editor container element by its ID\n            var quillContainer = document.getElementById('scrolling-container');\n            \n            // Add the focusout event listener to the Quill editor container\n            quillContainer.addEventListener('focusout', function() {\n                 if(true) {\n                FocusChanged(false);\n              } else {\n                FocusChanged.postMessage(false);\n              }\n            });\n            \n             quillContainer.addEventListener('focusin', () => {\n               if(true) {\n                FocusChanged(true);\n              } else {\n                FocusChanged.postMessage(true);\n              }\n             })\n             quillContainer.addEventListener('click', function() {\n              quilleditor.focus(); // Set focus on the Quill editor\n              });\n             \n             /*quilleditor.root.addEventListener(\"blur\", function() {\n               if(true) {\n                FocusChanged(false);\n                } else {\n                var focus  = quilleditor.hasFocus();\n                  FocusChanged.postMessage(isQuillFocused());\n                }\n            });\n            \n            quilleditor.root.addEventListener(\"focus\", function() {\n               if(true) {\n                FocusChanged(true);\n              } else {\n              var focus  = quilleditor.hasFocus();\n                FocusChanged.postMessage(isQuillFocused());\n              }\n            });*/\n            \n            function isQuillFocused() {\n                // Retrieve the Quill editor container element by its ID\n                var quillContainer = document.getElementById('scrolling-container');\n              \n                // Check if the Quill editor container or any of its descendants have focus\n                return quillContainer.contains(document.activeElement);\n              }\n            \n            function getSelectedText() {\n            let text = '';\n              try{\n                var range = quilleditor.getSelection(true);\n                    if (range) {\n                      if (range.length == 0) {\n                       // console.log('User cursor is at index', range.index);\n                      } else {\n                         text = quilleditor.getText(range.index, range.length);\n                      }\n                    } else {\n                    //  console.log('User cursor is not in editor');\n                    }\n                }\n                 catch(e) {\n                    console.log('getSelectedText', e);\n                  } \n                return text;  \n            }\n              \n         \n            function applyGoogleKeyboardWorkaround(editor) {\n              try {\n              \n                let isIOS = /iPad|iPhone|iPod/.test(navigator.platform) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)\n\n                if(true || isIOS){\n                  return;\n                }\n                if(editor.applyGoogleKeyboardWorkaround) {\n                  return\n                }\n                editor.applyGoogleKeyboardWorkaround = true\n                editor.on('editor-change', function(eventName, ...args) {\n                  try {\n                    // args[0] will be delta\n                    var ops = args[0]['ops']\n                    if(ops === null) {\n                      return\n                    }\n                    var oldSelection = editor.getSelection(true)\n                    var oldPos = oldSelection.index\n                    var oldSelectionLength = oldSelection.length\n                    if( ops[0][\"retain\"] === undefined || !ops[1] || !ops[1][\"insert\"] || !ops[1][\"insert\"] || ops[1][\"list\"] === \"bullet\" || ops[1][\"list\"] === \"ordered\" || ops[1][\"insert\"] != \"\\n\" || oldSelectionLength > 0) {\n                      return\n                    }\n                    \n                    setTimeout(function() {\n                      var newPos = editor.getSelection(true).index\n                      if(newPos === oldPos) {\n                      console.log('newPos oldPos');\n                        editor.setSelection(editor.getSelection(true).index + 1, 0)\n                      }\n                    }, 30);\n                    //onRangeChanged();\n                  } catch(e) {\n                    console.log('applyGoogleKeyboardWorkaround - editor-change', e);\n                  }\n                });\n              } catch(e) {\n                console.log('applyGoogleKeyboardWorkaround', e);\n              } \n            }\n            \n            /// observer to listen to the editor div changes \n            // select the target node\n            var target = document.querySelector('#editor');\n            \n            // create an observer instance\n            var tempText = \"\";\n            var observer = new MutationObserver(function(mutations) {\n                 var text = quilleditor.root.innerHTML; \n                 if(text != tempText){\n                      tempText = text;\n                     if(true) {\n                      OnTextChanged(text);\n                    } else {\n                      OnTextChanged.postMessage(text);\n                    }\n                     onRangeChanged(); \n                     quilleditor.focus();\n                 }\n            });\n\n            // configuration of the observer:\n            var config = { attributes: true, childList: true, characterData: true, subtree: true };\n\n            // pass in the target node, as well as the observer options\n            observer.observe(target, config);\n    \n           // stops the listener\n           //// observer.disconnect();\n          \n        \n           //// to accept all link formats \n           var Link = Quill.import('formats/link');\n              Link.sanitize = function(url) {\n                // modify url if desired\n                return url;\n              }\n             Quill.register(Link, true);\n           \n            /// quill custom font import\n            var FontStyle = Quill.import('attributors/class/font');\n            Quill.register(FontStyle, true);\n            \n            const Inline = Quill.import('blots/inline');\n            class RequirementBlot extends Inline {}\n            RequirementBlot.blotName = 'requirement';\n            RequirementBlot.tagName = 'requirement';\n            Quill.register(RequirementBlot);\n            \n            class ResponsibilityBlot extends Inline {}\n            ResponsibilityBlot.blotName = 'responsibility';\n            ResponsibilityBlot.tagName = 'responsibility';\n            Quill.register(ResponsibilityBlot);\n            \n             ///// quill shift enter key binding      \n              var bindings = {\n                  linebreak: {\n                      key: 13,\n                      shiftKey: true,\n                      handler: function(range) {\n                          this.quill.insertEmbed(range.index, 'breaker', true, Quill.sources.USER);\n                          this.quill.setSelection(range.index + 1, Quill.sources.SILENT);\n                          return false;\n                      }\n                  },\n                  enter: {\n                      key: 'Enter',\n                      handler: () => {\n                         if(true) {\n                          OnEditingCompleted(quilleditor.root.innerHTML);\n                          } else {\n                          OnEditingCompleted.postMessage(quilleditor.root.innerHTML);\n                          }\n                      }\n                  }\n              };\n              \n              let Embed = Quill.import('blots/embed');\n              \n              class Breaker extends Embed {\n                  static tagName = 'br';\n                  static blotName = 'breaker';\n              }\n              Quill.register(Breaker);\n\n            var quilleditor = new Quill('#editor', {\n              modules: {\n                toolbar: '#toolbar-container',\n                table: true,\n                 keyboard:  {},\n                history: {\n                  delay: 2000,\n                  maxStack: 500,\n                  userOnly: false\n                }\n              },\n              theme: 'snow',\n             scrollingContainer: '#scrolling-container', \n              placeholder: 'Description',\n              clipboard: {\n                matchVisual: true\n              }\n            });\n            \n          \n            const table = quilleditor.getModule('table');\n            quilleditor.enable(true);\n        \n           applyGoogleKeyboardWorkaround(quilleditor);\n            \n            let editorLoaded = false;\n            quilleditor.on('editor-change', function(eventName, ...args) {\n      \n             if (!editorLoaded) {\n                if(true) {\n                    EditorLoaded(true);\n                } else {\n                    EditorLoaded.postMessage(true);\n                }\n                  editorLoaded = true;\n                }\n             \n            });\n            \n            quilleditor.on('selection-change', function(range, oldRange, source)  {\n             /// console.log('selection changed');\n              onRangeChanged();\n              if(true){\n              OnSelectionChanged(getSelectionRange());\n              }else{\n              OnSelectionChanged.postMessage(getSelectionRange());\n              }     \n              \n            });\n                  \n            function onRangeChanged() { \n              try {\n                var range = quilleditor.getSelection(true);\n                if(range != null) {\n                  if(range.length == 0) {\n                    var format = quilleditor.getFormat();\n                    formatParser(format);\n                  } else {\n                    var format = quilleditor.getFormat(range.index, range.length);\n                    formatParser(format);\n                  }\n                } else {\n                 // console.log('Cursor not in the editor');\n                }\n              } catch(e) {\n              ///  console.log(e);\n              }\n            }\n            \n             function redo(){\n              quilleditor.history.redo();\n              return '';\n             }\n             \n             function undo(){\n              quilleditor.history.undo();\n              return '';\n             }\n             function clearHistory(){\n               quilleditor.history.clear();\n               return '';\n             }\n            \n            \n            function formatParser(format) {\n              var formatMap = {};\n              formatMap['bold'] = format['bold'];\n              formatMap['italic'] = format['italic'];\n              formatMap['underline'] = format['underline'];\n              formatMap['strike'] = format['strike'];\n              formatMap['blockqoute'] = format['blockqoute'];\n              formatMap['background'] = format['background'];\n              formatMap['code-block'] = format['code-block'];\n              formatMap['indent'] = format['indent'];\n              formatMap['direction'] = format['direction'];\n              formatMap['size'] = format['size'];\n              formatMap['header'] = format['header'];\n              formatMap['color'] = format['color'];\n              formatMap['font'] = format['font'];\n              formatMap['align'] = format['align'];\n              formatMap['list'] = format['list'];\n              formatMap['image'] = format['image'];\n              formatMap['video'] = format['video'];\n              formatMap['clean'] = format['clean'];\n              formatMap['link'] = format['link'];\n              if(true) {\n                UpdateFormat(JSON.stringify(formatMap));\n              } else {\n                UpdateFormat.postMessage(JSON.stringify(formatMap));\n              }\n            }\n     \n           \n            function getHtmlText() {\n              return quilleditor.root.innerHTML;\n            }\n \n            function getPlainText() {\n              var text = \"\";\n              try{\n                 text =  toPlaintext(quilleditor.getContents());\n              }catch(e){\n                 text = \"\";\n              }\n              return text; \n            }\n            \n            function toPlaintext(delta) {\n              return delta.reduce(function (text, op) {\n                if (!op.insert) throw new TypeError('only `insert` operations can be transformed!');\n                if (typeof op.insert !== 'string') return text + ' ';\n                return text + op.insert;\n              }, '');\n            };\n            \n            function getSelection() {\n            try{\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                return range.length;\n              }\n                }catch(e){\n                console.log('getSelection', e);\n              }\n              return -1;\n            }\n            \n            function getSelectionHtml() {\n              var selection = quilleditor.getSelection(true);\n              if(selection){\n              var selectedContent = quilleditor.getContents(selection.index, selection.length);\n              var tempContainer = document.createElement('div')\n              var tempQuill = new Quill(tempContainer);\n              tempQuill.setContents(selectedContent);\n              return tempContainer.querySelector('.ql-editor').innerHTML;\n              }\n              return '';\n            }\n            \n            function getSelectionRange() {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                var rangeMap = {};\n                rangeMap['length'] = range.length;\n                rangeMap['index'] = range.index;\n                return JSON.stringify(rangeMap);\n              }\n              return {};\n            }\n            \n            function setSelection(index, length) {\n            try{\n              setTimeout(() => quilleditor.setSelection(index, length), 1);\n              }catch(e){\n                console.log('setSelection', e);\n              }\n              return '';\n            }\n            \n            function setHtmlText(htmlString) {\n            try{\n               quilleditor.enable(false);\n               quilleditor.clipboard.dangerouslyPasteHTML(htmlString);   \n            }catch(e){\n               console.log('setHtmlText', e);\n            }\n             setTimeout(() =>   quilleditor.enable(true), 10);  \n              return '';\n            }\n            \n          \n            function setDeltaContent(deltaMap) {   \n              try{\n                  quilleditor.enable(false);\n                  const obj = JSON.parse(deltaMap);\n                  quilleditor.setContents(obj);\n                }catch(e){\n                  console.log('setDeltaContent', e);\n                }\n               setTimeout(() =>   quilleditor.enable(true), 10);  \n              return '';\n            }\n            \n            function getDelta() {\n              return JSON.stringify(quilleditor.getContents()); \n            }\n\n            function requestFocus() {\n              try{\n              var htmlString = quilleditor.root.innerHTML;\n               setTimeout(() => {\n                    quilleditor.setSelection(htmlString.length + 1, htmlString.length + 1);\n                    quilleditor.focus();\n               }, 600);\n              }catch(e){\n                console.log('requestFocus',e);\n              }\n            \n              return '';\n            }\n            \n            function unFocus() {\n              quilleditor.root.blur()\n              return '';\n            }\n  \n            function insertTable(row,column) {\n              table.insertTable(row, column);\n              return '';\n            }\n            \n            function modifyTable(type) {\n                if(type ==\"insertRowAbove\"){\n                 table.insertRowAbove();\n                }else if(type == \"insertRowBelow\"){\n                  table.insertRowBelow();\n                }else if(type == \"insertColumnLeft\"){\n                  table.insertColumnLeft();\n                }else if(type == \"insertColumnRight\"){\n                  table.insertColumnRight();\n                }else if(type == \"deleteRow\"){\n                  table.deleteRow();\n                }else if(type == \"deleteColumn\"){\n                  table.deleteColumn();\n                }else if(type == \"deleteTable\"){\n                  table.deleteTable();\n                }\n              return '';\n            }\n            \n            function insertHtmlText(htmlString, index) {\n              if(index == null) {\n                var range = quilleditor.getSelection(true);\n                if(range) {\n                  quilleditor.clipboard.dangerouslyPasteHTML(range.index, htmlString);\n                }\n              } else {\n                quilleditor.clipboard.dangerouslyPasteHTML(index, htmlString);\n              }\n              return '';\n            }\n            \n            function embedVideo(videoUrl) {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                quilleditor.insertEmbed(range.index, 'video', videoUrl);\n              }\n              return '';\n            }\n            \n            function embedImage(img) {\n              var range = quilleditor.getSelection(true);\n              if(range) {\n                quilleditor.insertEmbed(range.index, 'image', img);\n              }\n              return '';\n            }\n            \n            function enableEditor(isEnabled) {\n              quilleditor.enable(isEnabled);\n              return '';\n            }\n            \n            function setFormat(format, value) {\n            try{\n              if(format == 'clean') {\n                var range = quilleditor.getSelection(true);\n                if(range) {\n                  if(range.length == 0) {\n                    quilleditor.removeFormat(range.index, quilleditor.root.innerHTML.length);\n                  } else {\n                    quilleditor.removeFormat(range.index, range.length);\n                  }\n                } else {\n                  quilleditor.format('clean');\n                }\n              } else {\n                \n                quilleditor.format(format, value);\n              }\n            }catch(e){\n            console.log('setFormat',e);\n            }\n              return '';\n            } \n        </script>\n        </body>\n        </html>\n       "}}
 A.az3.prototype={
 akh(){var w,v=this,u=null
-v.a=new B.aN(A.cPx(15),x.h)
-v.b=new B.aN(A.cPx(15),x.R)
+v.a=new B.aN(A.cPv(15),x.h)
+v.b=new B.aN(A.cPv(15),x.R)
 w=x.N
 v.c=B.fS(u,u,u,u,!1,w)
 v.d=B.fS(u,u,u,u,!1,w)},
@@ -975,8 +975,8 @@ break
 case 6:case 1:return B.i(u,v)
 case 2:return B.h(s.at(-1),v)}})
 return B.j($async$Kk,v)},
-KD(d){return this.aOn(d)},
-aOn(d){var w=0,v=B.k(x.z),u,t=this,s
+KD(d){return this.aOm(d)},
+aOm(d){var w=0,v=B.k(x.z),u,t=this,s
 var $async$KD=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:s=t.a.gX()
 s=s==null?null:s.Wj(d)
@@ -1014,7 +1014,7 @@ return B.j($async$a_r,v)},
 YS(d){return this.bCn(d)},
 bCn(d){var w=0,v=B.k(x.z),u,t=this,s,r
 var $async$YS=B.f(function(e,f){if(e===1)return B.h(f,v)
-while(true)switch(w){case 0:r=A.d9R(d)
+while(true)switch(w){case 0:r=A.d9P(d)
 if(r==null){w=1
 break}s=t.a.gX()
 s=s==null?null:s.U6(r)
@@ -1054,13 +1054,13 @@ r=r==null?null:r.UE()
 w=3
 return B.d(x._.b(r)?r:B.c7(r,x.z),$async$RT)
 case 3:s=e
-u=s!=null?A.cL_(C.at.tM(0,s,null)):new A.Ej(0,0)
+u=s!=null?A.cKY(C.at.tM(0,s,null)):new A.Ej(0,0)
 w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$RT,v)},
-SB(d,e,f){return this.aO5(0,e,f)},
-aO5(d,e,f){var w=0,v=B.k(x.z),u,t=this,s
+SB(d,e,f){return this.aO4(0,e,f)},
+aO4(d,e,f){var w=0,v=B.k(x.z),u,t=this,s
 var $async$SB=B.f(function(g,h){if(g===1)return B.h(h,v)
 while(true)switch(w){case 0:s=t.a.gX()
 s=s==null?null:s.Wl(e,f)
@@ -1071,8 +1071,8 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$SB,v)},
-w4(d,e){return this.aNm(d,e)},
-aNm(d,e){var w=0,v=B.k(x.H),u=this,t
+w4(d,e){return this.aNl(d,e)},
+aNl(d,e){var w=0,v=B.k(x.H),u=this,t
 var $async$w4=B.f(function(f,g){if(f===1)return B.h(g,v)
 while(true)switch(w){case 0:t=u.a.gX()
 if(t!=null)t.Wi(d,e)
@@ -1132,7 +1132,7 @@ t=t.f
 u.push(new A.Ll(v,!1,null,q.x,t,r,s,null))}q.ae()},
 A(d){var w=null,v=this.a,u=v.w
 v=v.z
-u=B.o4(B.az(w,A4.dI(B.d2A(this.b5d(d),C.k,C.K,v,w,C.f,C.h,0,w,w,C.m),w,C.u,w,w,w,v),C.k,w,w,new B.bi(u,w,w,w,w,w,w,C.P),w,w,w,w,w,w,17976931348623157e292),!1,w)
+u=B.o4(B.az(w,A4.dI(B.d2y(this.b5c(d),C.k,C.K,v,w,C.f,C.h,0,w,w,C.m),w,C.u,w,w,w,v),C.k,w,w,new B.bi(u,w,w,w,w,w,w,C.P),w,w,w,w,w,w,17976931348623157e292),!1,w)
 return u},
 bQd(d){var w,v,u,t,s,r,q=this,p="direction",o="color",n="align",m="background"
 q.e=d
@@ -1192,16 +1192,16 @@ else s.m(t,m,w.h(d,m))}}catch(r){}break
 case 18:J.bY(q.e,"link",w.h(d,"link"))
 break
 case 22:case 23:case 26:case 25:case 24:case 27:break}}q.B(new A.bLP())},
-b5d(d){var w,v,u,t,s,r,q,p=this,o=null,n=B.a([],x.p)
+b5c(d){var w,v,u,t,s,r,q,p=this,o=null,n=B.a([],x.p)
 for(w=0;v=p.d,w<v.length;++w){u={}
 t=u.a=v[w]
 v=t.c
-if(v===D.bGK)n.push(B.i8(new B.a6(p.x,p.b4V(),o),o,o,v.c,o,o,o,o,E.eY))
+if(v===D.bGK)n.push(B.i8(new B.a6(p.x,p.b4U(),o),o,o,v.c,o,o,o,o,E.eY))
 else if(v===D.acd){u=p.x
 s=p.a.f
-n.push(B.i8(new B.a6(u,new B.ar(s,s,p.aY3(),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGO){u=p.x
+n.push(B.i8(new B.a6(u,new B.ar(s,s,p.aY2(),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGO){u=p.x
 s=p.a.f
-n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b5P(w),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGN){u=p.x
+n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b5O(w),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGN){u=p.x
 s=p.a
 r=s.f-2
 s=H.a16("packages/quill_html_editor/assets/camera_roll_icon.png",s.r,o,o,o)
@@ -1212,9 +1212,9 @@ s=B.br(D.au0,s.r,o,s.f)
 J.v(p.e,"link")
 n.push(B.i8(new B.a6(u,new A.Qy(new A.bLA(p),D.bJd,p.a.d,s,o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGL){u=p.x
 s=p.a.f
-n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b5O(w),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGA){u=p.x
+n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b5N(w),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGA){u=p.x
 s=p.a.f
-n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b6p(w,d),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGD){u=p.x
+n.push(B.i8(new B.a6(u,new B.ar(s,s,p.b6o(w,d),o),o),o,o,v.c,o,o,o,o,E.eY))}else if(v===D.bGD){u=p.x
 s=p.a
 r=s.r
 q=s.f
@@ -1231,7 +1231,7 @@ q=s.r
 s=s.f
 n.push(B.i8(new A.Ll(v,t.d,new A.bLC(u,p),p.x,s,q,r,o),o,o,v.c,o,o,o,o,E.eY))}}p.a.toString
 return n},
-b5Q(d,e){switch(d.a){case 0:return B.z(["format","bold","value",e],x.N,x.z)
+b5P(d,e){switch(d.a){case 0:return B.z(["format","bold","value",e],x.N,x.z)
 case 1:return B.z(["format","italic","value",e],x.N,x.z)
 case 2:return B.z(["format","underline","value",e],x.N,x.z)
 case 3:return B.z(["format","strike","value",e],x.N,x.z)
@@ -1254,16 +1254,16 @@ case 11:return B.z(["format","header","value",e?2:4],x.N,x.z)
 case 13:return B.z(["format","background","value","red"],x.N,x.z)
 case 18:return B.z(["format","link","value",""],x.N,x.z)
 case 22:case 23:case 24:case 26:case 25:case 27:return B.z(["format","undo","value",""],x.N,x.z)}},
-b4V(){var w,v=this,u=null,t=v.a.w,s=J.v(v.e,"size")
+b4U(){var w,v=this,u=null,t=v.a.w,s=J.v(v.e,"size")
 if(s==null)s="normal"
 w=B.aE(u,u,v.a.r,u,u,u,u,u,u,u,u,12,u,u,u,u,u,!0,u,u,u,u,u,u,u,u)
-return P.aqm(C.L,new G.yO(A.cEF(!0,A.cGr(C.bB,t,u,u,!0,B.a([v.Ul(8,"Small"),v.Ul(12,"Normal"),v.Ul(16,"Large"),v.Ul(20,"Huge")],x.k),new A.bLv(v),new A.bLw(v),w,s,x.z),C.V),u),C.k,W.hA)},
+return P.aqm(C.L,new G.yO(A.cED(!0,A.cGp(C.bB,t,u,u,!0,B.a([v.Ul(8,"Small"),v.Ul(12,"Normal"),v.Ul(16,"Large"),v.Ul(20,"Huge")],x.k),new A.bLv(v),new A.bLw(v),w,s,x.z),C.V),u),C.k,W.hA)},
 Ul(d,e){var w=null,v=J.p(J.v(this.e,"size"),e.toLowerCase()),u=this.a
 return G.Pj(new A.pI(B.U(e,w,w,w,w,w,w,w,B.aE(w,w,v?u.x:u.r,w,w,w,w,w,w,w,w,d,w,w,C.a6,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w),e.toLowerCase(),x.z)},
 Uk(d){var w=null,v=this.a
 return new B.ar(w,w,B.U(d,w,w,w,w,w,w,w,B.aE(w,w,d.toLowerCase()!=="normal"?v.x:v.r,w,w,w,w,w,w,w,w,14,w,w,C.a6,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w)},
-aY3(){var w=this,v="align",u=w.a.w,t=J.p(J.v(w.e,v),"")||J.v(w.e,v)==null?"left":J.v(w.e,v)
-return new G.yO(A.cEF(!1,A.cGr(C.co,u,C.F,D.byo,!0,B.a([w.Uq("left"),w.Uq("center"),w.Uq("right"),w.Uq("justify")],x.G),new A.bLt(w),null,null,t,x.N),C.V),null)},
+aY2(){var w=this,v="align",u=w.a.w,t=J.p(J.v(w.e,v),"")||J.v(w.e,v)==null?"left":J.v(w.e,v)
+return new G.yO(A.cED(!1,A.cGp(C.co,u,C.F,D.byo,!0,B.a([w.Uq("left"),w.Uq("center"),w.Uq("right"),w.Uq("justify")],x.G),new A.bLt(w),null,null,t,x.N),C.V),null)},
 Uq(d){var w,v,u
 if(d==="center")w=D.atQ
 else if(d==="right")w=D.atT
@@ -1272,7 +1272,7 @@ v=J.p(J.v(this.e,"align"),d)
 u=this.a
 v=v?u.x:u.r
 return G.Pj(new A.pI(B.br(w,v,null,u.f),null),d,x.N)},
-b5P(d){var w,v,u,t=this,s=null,r="color",q=t.r
+b5O(d){var w,v,u,t=this,s=null,r="color",q=t.r
 q===$&&B.b()
 w=t.a.f
 v=J.v(t.e,r)
@@ -1281,7 +1281,7 @@ v=v!=null?u.x:u.r
 u=B.bD(B.U("A",s,s,1,s,s,s,s,B.aE(s,s,v,s,s,s,s,s,s,s,s,u.f-5,s,s,C.a6,s,s,!0,s,s,s,s,s,s,s,s),s,s,s,s,s),1,s)
 v=J.v(t.e,r)!=null?A.biw(J.v(t.e,r)):C.r
 return A.apM(B.ha(C.M,!0,s,new B.ar(w,w,B.aj(B.a([u,B.az(s,s,C.k,v,s,s,s,3,s,s,s,s,t.a.f-3)],x.p),C.i,C.bs,C.Y,s,C.m),s),C.k,C.F,0,s,s,s,s,s,C.c2),C.p,new A.YJ(new A.bLH(t,d),s),10,q,new A.bLI(t))},
-b5O(d){var w,v,u,t,s,r=this,q=null,p="background",o=r.f
+b5N(d){var w,v,u,t,s,r=this,q=null,p="background",o=r.f
 o===$&&B.b()
 w=N.ij(C.r,C.D,0.1)
 v=J.v(r.e,p)!=null?A.biw(J.v(r.e,p)):C.F
@@ -1290,7 +1290,7 @@ t=J.v(r.e,p)
 s=r.a
 t=t!=null?s.x:s.r
 return A.apM(B.ha(C.M,!0,q,B.az(C.L,P.aqm(C.L,B.U("A",q,q,1,q,q,q,q,B.aE(q,q,t,q,q,q,q,q,q,q,q,s.f-1,q,q,C.fT,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),C.k,W.agO),C.k,q,q,new B.bi(v,q,w,q,q,q,q,C.P),q,u,q,q,q,q,u),C.k,C.F,0,q,q,q,q,q,C.c2),C.p,new A.YJ(new A.bLE(r,d),q),10,o,new A.bLF(r))},
-b6p(d,e){var w,v=this,u=null,t=v.a,s=t.w,r=v.w
+b6o(d,e){var w,v=this,u=null,t=v.a,s=t.w,r=v.w
 r===$&&B.b()
 w=t.f
 return A.apM(new B.ar(w,w,H.a16(y.b,t.r,u,u,u),u),s,new B.ar(u,200,new A.Tz(new A.bLJ(v),6,u),u),0,r,new A.bLK(v,e))},
@@ -1298,8 +1298,8 @@ bpl(d){var w=null
 Q.fj(w,w,!0,w,new A.bLO(this),d,w,!0,!0,x.z)}}
 A.Ll.prototype={
 A(d){var w=this,v=null,u=w.c
-return B.i8(B.jR(!1,v,!0,new B.a6(w.f,new B.ar(v,v,w.b5W(u),v),v),v,!0,v,v,v,v,v,v,v,v,v,v,v,w.e,v,v,v,v,v),v,v,u.c,v,v,v,v,E.eY)},
-b5W(d){var w=this
+return B.i8(B.jR(!1,v,!0,new B.a6(w.f,new B.ar(v,v,w.b5V(u),v),v),v,!0,v,v,v,v,v,v,v,v,v,v,v,w.e,v,v,v,v,v),v,v,u.c,v,v,v,v,E.eY)},
+b5V(d){var w=this
 switch(d.a){case 0:return w.lJ(D.MJ)
 case 1:return w.lJ(D.auy)
 case 2:return w.lJ(D.auF)
@@ -1328,7 +1328,7 @@ return B.br(d,v,null,w.r)},
 aoy(d){var w=this,v=null,u=w.r
 return new B.ar(u,u,H.a16(d,w.d?w.x:w.w,v,v,v),v)},
 iJ(d){var w=this
-return A.dby(w.x,w.w,w.r,d,null,w.f,w.c)}}
+return A.dbw(w.x,w.w,w.r,d,null,w.f,w.c)}}
 A.jF.prototype={
 J(){return"ToolBarStyle."+this.b}}
 A.arZ.prototype={}
@@ -1395,13 +1395,13 @@ w.ae()
 w.w=new B.aN(J.ao(w.a.a),x.A)
 $.aw.RG$.push(new A.bbW(w))
 $.aw.e3$.push(w)},
-b5U(d){var w=this,v=w.w
+b5T(d){var w=this,v=w.w
 v===$&&B.b()
 v=$.aw.aY$.x.h(0,v)
 v=v==null?null:v.gaj()
 x.r.a(v)
 if(w.c!=null)w.B(new A.bbQ(w,v))},
-beP(d){var w,v=this,u=v.c
+beO(d){var w,v=this,u=v.c
 u.toString
 u=B.D1(u,x.u)
 u.toString
@@ -1448,7 +1448,7 @@ w.toString
 v.a55(w)}}}
 A.aLa.prototype={}
 A.ak4.prototype={
-b6t(){var w,v=this,u=null,t=1,s=1,r=!1,q=0
+b6s(){var w,v=this,u=null,t=1,s=1,r=!1,q=0
 switch(v.d.a){case 0:break
 case 1:r=!0
 break
@@ -1479,8 +1479,8 @@ case 5:s=-1
 q=1
 break}w=v.c
 w=r?new A.aDQ(w,u):new A.amc(w,u)
-return B.czI(new B.Eb(q,B.iQ(u,u,!1,u,w,new B.V(v.e,v.f)),u),u,t,s)},
-A(d){return this.b6t()}}
+return B.czG(new B.Eb(q,B.iQ(u,u,!1,u,w,new B.V(v.e,v.f)),u),u,t,s)},
+A(d){return this.b6s()}}
 A.Y9.prototype={
 M(){return new A.aIP()}}
 A.aIP.prototype={
@@ -1608,7 +1608,7 @@ u=v.b
 o=o.d+o.b*0.5
 t=s.f
 return new A.ns(new A.hi(q,p,r-q-w-u,o-p),new A.hi(q,p,Math.floor(r-w-u),Math.floor(o-v.a)),D.arM,new B.dE(new B.b4(t,t),new B.b4(t,t),new B.b4(t,t),C.R))},
-atU(){var w,v,u,t,s,r=this,q=r.c,p=q.a
+atT(){var w,v,u,t,s,r=this,q=r.c,p=q.a
 q=q.b
 w=r.b
 v=w.c+w.a+r.e
@@ -1617,7 +1617,7 @@ w=w.d+w.b*0.5
 t=Math.floor(w)
 s=r.f
 return new A.ns(new A.hi(p,q,Math.floor(v+r.a.b),Math.floor(w)),new A.hi(p,q,u,t),D.arO,new B.dE(C.R,new B.b4(s,s),new B.b4(s,s),new B.b4(s,s)))},
-atS(){var w,v,u,t,s=this,r=s.c,q=r.a
+atR(){var w,v,u,t,s=this,r=s.c,q=r.a
 r=r.b
 w=s.b
 v=w.c+w.a+s.e
@@ -1625,7 +1625,7 @@ w=w.d+w.b*0.5
 u=s.a
 t=s.f
 return new A.ns(new A.hi(q,r,v+u.b,w-r*0.5),new A.hi(q,r,Math.floor(v),Math.floor(w-u.a*0.5)),D.arP,B.Bu(new B.b4(t,t)))},
-atT(){var w,v,u,t,s=this,r=s.c,q=r.a
+atS(){var w,v,u,t,s=this,r=s.c,q=r.a
 r=r.b
 w=s.b
 v=w.c+w.a+s.e
@@ -1639,7 +1639,7 @@ if(u+v.a<w.a){u=v.d
 v=u>0&&u+v.b<w.b}else v=t}else v=t
 if(v)return!0
 return!1},
-b4I(){var w,v,u=this,t=[u.gbrB(),u.gaYE(),u.gbew(),u.gbmY(),u.gbkG(),u.gbkF(),u.gbey(),u.gbn_(),u.gbex(),u.gbmZ(),u.gbkE(),u.gbkD()]
+b4H(){var w,v,u=this,t=[u.gbrB(),u.gaYD(),u.gbev(),u.gbmY(),u.gbkF(),u.gbkE(),u.gbex(),u.gbn_(),u.gbew(),u.gbmZ(),u.gbkD(),u.gbkC()]
 for(w=0;w<12;++w){v=t[w]
 if(u.ao8(v.$0()))return v.$0()}return u.WV()},
 bHZ(d,e){var w,v=this
@@ -1661,14 +1661,14 @@ case 10:w=v.ar6()
 break
 case 11:w=v.ar7()
 break
-case 3:w=v.atU()
+case 3:w=v.atT()
 break
-case 4:w=v.atS()
+case 4:w=v.atR()
 break
-case 5:w=v.atT()
+case 5:w=v.atS()
 break
 default:w=v.WV()
-break}return v.ao8(w)?w:v.b4I()}}
+break}return v.ao8(w)?w:v.b4H()}}
 A.ns.prototype={}
 A.blQ.prototype={
 J(){return"InputAction."+this.b}}
@@ -1677,7 +1677,7 @@ a0s(){var w=0,v=B.k(x.H),u=1,t=[],s=this,r,q,p,o,n,m,l,k,j
 var $async$a0s=B.f(function(d,e){if(d===1){t.push(e)
 w=u}while(true)switch(w){case 0:u=3
 w=6
-return B.d($.cGO.co().a0t(!1,C.asG,!0),$async$a0s)
+return B.d($.cGM.co().a0t(!1,C.asG,!0),$async$a0s)
 case 6:r=e
 if(r!=null){q=J.hq(r.a)
 p=q.c
@@ -1703,14 +1703,14 @@ bL6(d,e){return this.c.$1(e)}}
 A.aMP.prototype={
 U(){this.f=new B.aN(C.c.j(B.ee(this.a.e)),x.q)
 this.ae()},
-A(d){return this.aLv(d)},
-aLv(d){var w,v,u=this,t={}
+A(d){return this.aLu(d)},
+aLu(d){var w,v,u=this,t={}
 t.a=null
 w=u.f
 w===$&&B.b()
-v=u.b6q(!0,0,0,null,d)
+v=u.b6p(!0,0,0,null,d)
 return A.apM(u.a.r,C.p,v,10,w,new A.c5R(t,u))},
-b6q(d,e,f,g,h){var w,v,u,t=this,s=null,r={}
+b6p(d,e,f,g,h){var w,v,u,t=this,s=null,r={}
 r.a=e
 r.b=f
 w=B.ay(h,s,x.w).w
@@ -1720,12 +1720,12 @@ return new A.pI(A6.ut(s,s,new B.a6(new B.ap(0,0,0,w.f.d),B.az(C.L,B.av(B.a([A1.j
 A.aEP.prototype={
 J(){return"UrlInputType."+this.b}}
 A.Tz.prototype={
-M(){return new A.afJ(B.aU(x.S),B.aU(x.e),new B.aN(null,x.A))},
+M(){return new A.afJ(B.aW(x.S),B.aW(x.e),new B.aN(null,x.A))},
 bL7(d,e){return this.c.$2(d,e)}}
 A.afJ.prototype={
 U(){this.ae()},
-b2a(d){var w,v,u,t,s,r=this
-r.b_M()
+b29(d){var w,v,u,t,s,r=this
+r.b_L()
 w=$.aw.aY$.x.h(0,r.w).zX(x.r)
 w.toString
 v=B.a([],x.J)
@@ -1734,12 +1734,12 @@ u.fT()
 if(w.fD(new B.w2(v,B.a([u],x.O),B.a([],x.b)),w.hZ(d.gaB(d))))for(w=v.length,u=r.e,t=0;t<v.length;v.length===w||(0,B.S)(v),++t){s=v[t].a
 if(s instanceof A.UA&&!u.n(0,s)){u.t(0,s)
 r.bo2(s.I)}}},
-bo2(d){this.B(new A.ck6(this,d))},
-A(d){var w=this,v=null,u=w.gb29(),t=w.a.d
-return new A.pI(B.n8(C.ch,I.arR(v,C.u,new L.th(t,0,0,1),new A.ck7(w),t*t,w.w,v,Ab.du,C.aj,!0),v,v,u,v,u,v,v,w.gbil()),v)},
-b_M(){this.e.V(0)
-this.B(new A.ck4(this))},
-bim(d){this.a.bL7(this.f+1,this.r+1)}}
+bo2(d){this.B(new A.ck4(this,d))},
+A(d){var w=this,v=null,u=w.gb28(),t=w.a.d
+return new A.pI(B.n8(C.ch,I.arR(v,C.u,new L.th(t,0,0,1),new A.ck5(w),t*t,w.w,v,Ab.du,C.aj,!0),v,v,u,v,u,v,v,w.gbik()),v)},
+b_L(){this.e.V(0)
+this.B(new A.ck2(this))},
+bil(d){this.a.bL7(this.f+1,this.r+1)}}
 A.UB.prototype={
 bd(d){var w=new A.UA(this.e,null,new B.bs(),B.aJ(x.v))
 w.bf()
@@ -1757,7 +1757,7 @@ var $async$AX=B.f(function(d,e){if(d===1)return B.h(e,v)
 while(true)switch(w){case 0:t=u.c
 t.c.Nz(t.a)
 t.a=t.b.kf(0)
-B.csR("\x1b[34m[WebViewX]\x1b[0m "+("Current history: "+t.j(0))+"\x1b[0m",1024)
+B.csP("\x1b[34m[WebViewX]\x1b[0m "+("Current history: "+t.j(0))+"\x1b[0m",1024)
 u.a2()
 return B.i(null,v)}})
 return B.j($async$AX,v)},
@@ -1766,7 +1766,7 @@ var $async$AY=B.f(function(d,e){if(d===1)return B.h(e,v)
 while(true)switch(w){case 0:t=u.c
 t.b.jz(0,t.a)
 t.a=t.c.vK()
-B.csR("\x1b[34m[WebViewX]\x1b[0m "+("Current history: "+t.j(0))+"\x1b[0m",1024)
+B.csP("\x1b[34m[WebViewX]\x1b[0m "+("Current history: "+t.j(0))+"\x1b[0m",1024)
 u.a2()
 return B.i(null,v)}})
 return B.j($async$AY,v)},
@@ -1798,7 +1798,7 @@ bDj(d,e,f,g){var w=0,v=B.k(x.N),u,t=this,s,r
 var $async$Z2=B.f(function(h,i){if(h===1)return B.h(i,v)
 while(true)switch(w){case 0:s=B.dn(t.aab(B.rb(4,g,C.as,!1)),0,null)
 w=3
-return B.d(f==="get"?B.cBE(s,e):B.aXn(s,d,null,e),$async$Z2)
+return B.d(f==="get"?B.cBC(s,e):B.aXn(s,d,null,e),$async$Z2)
 case 3:r=i
 u=t.acq(B.lC(J.v(B.lz(r.e).c.a,"charset")).de(0,r.w))
 w=1
@@ -1840,8 +1840,8 @@ r.a.toString
 r.y=!1
 w=E.jO.Rq()
 r.e="_iframe"+("_"+B.dx(w,"-","_"))
-r.d=r.b0M()
-r.bm1(r.e)
+r.d=r.b0L()
+r.bm0(r.e)
 w=r.a
 v=w.c
 w=w.d
@@ -1850,7 +1850,7 @@ t=$.ab()
 u=new B.bR(u,t,x.V)
 s=x.Y
 t=new A.a9w(u,new A.as3(new A.M_(v,w,q,q),B.n7(q,s),B.n7(q,s),x.K),t)
-t.a4(0,r.gaxG())
+t.a4(0,r.gaxF())
 u.a4(0,r.gapJ())
 r.w=t
 w=r.a
@@ -1859,18 +1859,18 @@ u=!0
 if(v!==D.abe)if(v!==D.abg)w=v===D.abf&&w.c==="about:blank"
 else w=u
 else w=u
-if(w)r.b0d(r.gb_0())
+if(w)r.b0c(r.gb__())
 else r.alK()
-r.bm0()
-B.hK(C.H,new A.cpS(r),x.P)},
-bm1(d){$.B8()
-$.rg().vG(d,new A.cpP(this),!0)},
-b0d(d){var w=$.cWb(),v=this.e
+r.bm_()
+B.hK(C.H,new A.cpQ(r),x.P)},
+bm0(d){$.B8()
+$.rg().vG(d,new A.cpN(this),!0)},
+b0c(d){var w=$.cW9(),v=this.e
 v===$&&B.b()
-w.m(0,"connect_js_to_flutter"+v,new A.cpK(this,d))},
-bm0(){var w=this.d
+w.m(0,"connect_js_to_flutter"+v,new A.cpI(this,d))},
+bm_(){var w=this.d
 w===$&&B.b()
-this.f=B.c_I(w,"load",new A.cpO(this),!1,x.E.c)},
+this.f=B.c_I(w,"load",new A.cpM(this),!1,x.E.c)},
 alK(){var w=this.a.w,v=this.w
 v===$&&B.b()
 w.$1(v)},
@@ -1886,7 +1886,7 @@ u=B.a([new B.ar(t,s,u,v)],x.p)
 if(w)u.push(B.t5(0,new A.a4n(B.az(v,v,C.k,v,v,v,v,v,v,v,v,v,v),!1,v)))
 else u.push(C.ad)
 return new B.cr(C.ah,v,C.af,C.A,u,v)},
-b0M(){var w,v=this,u=document.createElement("iframe")
+b0L(){var w,v=this,u=document.createElement("iframe")
 u.toString
 w=v.e
 w===$&&B.b()
@@ -1909,16 +1909,16 @@ C.b.aQ(D.aLO,C.aq3.gkn(w))
 v.a.toString
 u.sandbox.add("allow-scripts")
 v.a.toString
-u.allow=C.b.hd(D.aIF,new A.cpL())
+u.allow=C.b.hd(D.aIF,new A.cpJ())
 return u},
 btV(){var w=this.w
 w===$&&B.b()
 w=w.c.a
 this.alJ(w.a)
-this.axf(w)},
-b8K(){this.B(new A.cpM(this))},
-a4n(d,e){return this.b_t(d,e)},
-b_t(d,e){var w=0,v=B.k(x.y),u,t=this
+this.axe(w)},
+b8J(){this.B(new A.cpK(this))},
+a4n(d,e){return this.b_s(d,e)},
+b_s(d,e){var w=0,v=B.k(x.y),u,t=this
 var $async$a4n=B.f(function(f,g){if(f===1)return B.h(g,v)
 while(true)switch(w){case 0:t.a.toString
 u=!0
@@ -1926,7 +1926,7 @@ w=1
 break
 case 1:return B.i(u,v)}})
 return B.j($async$a4n,v)},
-axf(d){var w,v,u=this,t=d.a
+axe(d){var w,v,u=this,t=d.a
 if(t.length===0){u.a.toString
 return}w=d.b
 switch(w.a){case 0:w=u.d
@@ -1934,27 +1934,27 @@ w===$&&B.b()
 u.a.toString
 v=u.e
 v===$&&B.b()
-w.srcdoc=A.cxq(t,!0,D.G1,v)
+w.srcdoc=A.cxo(t,!0,D.G1,v)
 break
 case 1:case 2:if(t==="about:blank"){w=u.d
 w===$&&B.b()
 u.a.toString
 v=u.e
 v===$&&B.b()
-w.srcdoc=A.cxq("<br>",!0,D.G1,v)
+w.srcdoc=A.cxo("<br>",!0,D.G1,v)
 break}if(!C.e.ba(t,B.bz("http[s]?://",!1,!1,!1))){u.a.toString
 return}if(w===D.abf){w=u.d
 w===$&&B.b()
-w=B.dhx(w.contentWindow)
+w=B.dhv(w.contentWindow)
 w.toString
-J.cYP(J.cYs(w),t)}else u.bso(d.c,"get",t)
+J.cYN(J.cYq(w),t)}else u.bso(d.c,"get",t)
 break}},
-UO(d){return this.b9M(d)},
-b9M(d){var w=0,v=B.k(x.H),u,t=this,s,r,q,p,o,n,m
+UO(d){return this.b9L(d)},
+b9L(d){var w=0,v=B.k(x.H),u,t=this,s,r,q,p,o,n,m
 var $async$UO=B.f(function(e,f){if(e===1)return B.h(f,v)
 while(true)switch(w){case 0:o=x.g.a(C.at.tM(0,d,null))
 n=J.a2(o)
-m=B.be(n.h(o,"href"))
+m=B.bd(n.h(o,"href"))
 n.j(o)
 t.a.toString
 s=t.w
@@ -1967,22 +1967,22 @@ break}if(m==="javascript:history.back()"){t.w.AX()
 w=1
 break}else if(m==="javascript:history.forward()"){t.w.AY()
 w=1
-break}r=B.be(n.h(o,"method"))
+break}r=B.bd(n.h(o,"method"))
 q=n.h(o,"body")
 if(q==null)p=null
 else{n=x.N
 p=B.K(n,n)
-p.Xs(p,J.c_(x.j.a(q),new A.cpN(),x.I))}t.awh(p,t.w.c.a.c,r,m)
+p.Xs(p,J.c_(x.j.a(q),new A.cpL(),x.I))}t.awg(p,t.w.c.a.c,r,m)
 case 1:return B.i(u,v)}})
 return B.j($async$UO,v)},
-awh(d,e,f,g){this.a5f(d,e,f,g).aN(new A.cpQ(this,g,e,d),x.P).l4(new A.cpR(this,g))},
-bso(d,e,f){return this.awh(null,d,e,f)},
-a5f(d,e,f,g){return this.b4h(d,e,f,g)},
-b4h(d,e,f,g){var w=0,v=B.k(x.N),u,t=this,s,r,q,p,o,n,m
+awg(d,e,f,g){this.a5f(d,e,f,g).aN(new A.cpO(this,g,e,d),x.P).l4(new A.cpP(this,g))},
+bso(d,e,f){return this.awg(null,d,e,f)},
+a5f(d,e,f,g){return this.b4g(d,e,f,g)},
+b4g(d,e,f,g){var w=0,v=B.k(x.N),u,t=this,s,r,q,p,o,n,m
 var $async$a5f=B.f(function(h,i){if(h===1)return B.h(i,v)
 while(true)$async$outer:switch(w){case 0:t.a.toString
 p=B.H(D.aCc,!0,x.W)
-C.b.aOY(p)
+C.b.aOX(p)
 s=p
 t.a.toString
 r=0
@@ -2009,25 +2009,25 @@ v===$&&B.b()
 v.a_(0)
 v=w.w
 v===$&&B.b()
-v.N(0,w.gaxG())
+v.N(0,w.gaxF())
 w.w.b.N(0,w.gapJ())
 w.ag()}}
 var z=a.updateTypes(["ns()","~()","~(pD)","QK(@)","IA<@>(@)","pd(@)","~(iG,rT,m)","~(Ej)","e(L,fH<@>)","a9x<@>(a9x<@>)","T<@>(rz)","fx(L)","pI(L,l)","@(cR)","~(kM)","UB(L,l)","aC(pd)","E?(E?)","E?(@)"])
-A.cqO.prototype={
-$1(d){var w=function(e,f,g){return function(){return e(f,g,this,Array.prototype.slice.apply(arguments))}}(A.dh9,d,!1)
-A.cAT(w,$.Nb(),d)
+A.cqM.prototype={
+$1(d){var w=function(e,f,g){return function(){return e(f,g,this,Array.prototype.slice.apply(arguments))}}(A.dh7,d,!1)
+A.cAR(w,$.Nb(),d)
 return w},
 $S:50}
-A.cqP.prototype={
+A.cqN.prototype={
 $1(d){return new this.a(d)},
 $S:50}
-A.csm.prototype={
+A.csk.prototype={
 $1(d){return new A.QK(d)},
 $S:z+3}
-A.csn.prototype={
+A.csl.prototype={
 $1(d){return new A.IA(d,x.M)},
 $S:z+4}
-A.cso.prototype={
+A.csm.prototype={
 $1(d){return new A.pd(d)},
 $S:z+5}
 A.bjm.prototype={
@@ -2037,7 +2037,7 @@ w=e.oQ(0)
 w.toString
 if(f.length===0&&C.e.ba(w,"www."))v="https://"+w
 else v=w
-u=F.cGx("a")
+u=F.cGv("a")
 u.b.m(0,"href",f+v)
 u.ghc(0).V(0)
 w=F.a7z(w)
@@ -2128,7 +2128,7 @@ $S:z+8}
 A.bxN.prototype={
 $2(d,e){var w=this.a,v=e.b
 w.e=w.ap6(v)
-return w.aZ4(d,v)},
+return w.aZ3(d,v)},
 $S:93}
 A.bxL.prototype={
 $1(d){this.a.as=!1},
@@ -2210,7 +2210,7 @@ v=w.a
 v.toString
 if(!w.w){w.w=!0
 v.z.$1(!0)}w=w.a.Q
-w.$1(d!=null?A.cL_(C.at.tM(0,d,null)):new A.Ej(0,0))}catch(u){}},
+w.$1(d!=null?A.cKY(C.at.tM(0,d,null)):new A.Ej(0,0))}catch(u){}},
 $S:9}
 A.bxJ.prototype={
 $1(d){var w=this.a
@@ -2226,8 +2226,8 @@ $S:10}
 A.bxx.prototype={
 $1(d){this.a.$0()},
 $S:10}
-A.crm.prototype={
-$1(d){return"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890".charCodeAt($.cXb().Aj(62))},
+A.crk.prototype={
+$1(d){return"AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890".charCodeAt($.cX9().Aj(62))},
 $S:69}
 A.bLP.prototype={
 $0(){},
@@ -2277,7 +2277,7 @@ if(q.c===D.ace)q.iJ(!1)}n=o.a
 o.a=n.iJ(!n.d)}else o.a=n.iJ(!n.d)
 case 12:case 9:case 6:case 3:n=u.b
 o=o.a
-p=n.b5Q(o.c,o.d)
+p=n.b5P(o.c,o.d)
 n.a.d.w4(p.h(0,"format"),p.h(0,"value"))
 if(J.p(J.v(n.e,"direction"),"rtl"))n.a.d.w4("align","right")
 n.B(new A.bLy())
@@ -2432,7 +2432,7 @@ $S:60}
 A.bbW.prototype={
 $1(d){var w=this.a,v=w.c
 v.toString
-return w.beP(v)},
+return w.beO(v)},
 $S:4}
 A.bbQ.prototype={
 $0(){var w=this.a,v=this.b
@@ -2446,10 +2446,10 @@ $.aw.RG$.push(new A.bbR(u,d))
 w=u.w
 w===$&&B.b()
 v=u.M_()
-return B.qF(B.bW(A.cEE(u.a.e,C.p,w,2,C.b7,v),null,null),0)},
+return B.qF(B.bW(A.cEC(u.a.e,C.p,w,2,C.b7,v),null,null),0)},
 $S:766}
 A.bbR.prototype={
-$1(d){return this.a.b5U(this.b)},
+$1(d){return this.a.b5T(this.b)},
 $S:4}
 A.bbV.prototype={
 $1(d){var w,v,u,t,s,r=null,q=this.a
@@ -2459,7 +2459,7 @@ v=w.a
 u=q.M_()
 t=q.a
 s=t.d
-v=B.eJ(r,A.cEE(t.e,s,r,2,w.d,u),r,r,v.c,r,v.d,r)
+v=B.eJ(r,A.cEC(t.e,s,r,2,w.d,u),r,r,v.c,r,v.d,r)
 u=w.b
 u=B.eJ(r,new A.ak4(s,w.c,16,10,r),r,r,u.c,r,u.d,r)
 w=q.M_()
@@ -2530,24 +2530,24 @@ w=this.b.f
 w===$&&B.b()
 w.gX().xk()},
 $S:0}
-A.ck6.prototype={
+A.ck4.prototype={
 $0(){var w,v,u,t,s=this.a,r=s.d
 r.t(0,this.b)
 w=B.H(r,!0,B.t(r).i("cG.E"))
-C.b.es(w,new A.ck5())
+C.b.es(w,new A.ck3())
 s.r=C.d.hz(C.b.gY(w),s.a.d)
 s.f=C.d.ao(C.b.gY(w),s.a.d)
 r.V(0)
 for(v=0,u=0;u<s.a.d;++u)for(t=0;t<s.a.d;++t){if(u<=s.r&&t<=s.f)r.t(0,v);++v}},
 $S:0}
-A.ck5.prototype={
+A.ck3.prototype={
 $2(d,e){return d-e},
 $S:204}
-A.ck7.prototype={
+A.ck5.prototype={
 $2(d,e){var w=null,v=this.a.d,u=v.n(0,e)?K.Kj:C.F,t=v.n(0,e)?2:1
 return new A.UB(e,B.az(w,w,C.k,w,w,new B.bi(u,w,N.ij(v.n(0,e)?K.Kq:U.nN,C.D,t),w,w,w,w,C.P),w,w,S.C3,w,w,w,w),w)},
 $S:z+15}
-A.ck4.prototype={
+A.ck2.prototype={
 $0(){this.a.d.V(0)},
 $S:0}
 A.bjA.prototype={
@@ -2558,31 +2558,31 @@ $1(d){var w=d.b[1]
 w.toString
 return"<"+this.a+w+"> \n"+this.b},
 $S:65}
-A.cpS.prototype={
+A.cpQ.prototype={
 $0(){var w=this.a,v=w.w
 v===$&&B.b()
-w.axf(v.c.a)},
+w.axe(v.c.a)},
 $S:5}
-A.cpP.prototype={
+A.cpN.prototype={
 $1(d){var w=this.a.d
 w===$&&B.b()
 return w},
 $S:768}
-A.cpK.prototype={
+A.cpI.prototype={
 $1(d){var w,v,u,t=this.a
 t.r=d
 for(w=t.a.y,w=B.e5(w,w.r,B.t(w).c),v=w.$ti.c;w.q();){u=w.d
 if(u==null)u=v.a(u)
-t.r.m(0,u.a,u.b)}t.r.m(0,"WebOnClickInsideIframe",new A.cpJ(t))
+t.r.m(0,u.a,u.b)}t.r.m(0,"WebOnClickInsideIframe",new A.cpH(t))
 w=t.w
 w===$&&B.b()
 w.a=t.r
 this.b.$0()},
 $S:z+16}
-A.cpJ.prototype={
-$1(d){this.a.UO(B.be(d))},
+A.cpH.prototype={
+$1(d){this.a.UO(B.bd(d))},
 $S:9}
-A.cpO.prototype={
+A.cpM.prototype={
 $1(d){var w,v,u=this.a
 u.e===$&&B.b()
 w=u.a
@@ -2596,62 +2596,62 @@ u.alJ(w.c.a.a)}else{u=u.w
 u===$&&B.b()
 w.ax.$1(u.c.a.a)}},
 $S:155}
-A.cpL.prototype={
+A.cpJ.prototype={
 $2(d,e){return d+"; "+e},
 $S:122}
-A.cpM.prototype={
+A.cpK.prototype={
 $0(){var w=this.a,v=w.w
 v===$&&B.b()
 w.y=v.b.a},
 $S:0}
-A.cpN.prototype={
+A.cpL.prototype={
 $1(d){var w=J.a2(d)
 return new B.bx(J.ao(w.h(d,0)),J.ao(w.h(d,1)),x.I)},
 $S:769}
-A.cpQ.prototype={
-$1(d){var w,v=this,u=v.a,t=v.b,s=A.cHA(D.as_,d,'      <base href="'+t+"\">\n      <script>\n\n      document.addEventListener('click', e => {\n        if (frameElement && document.activeElement && document.activeElement.href) {\n          e.preventDefault()\n\n          var returnedObject = JSON.stringify({method: 'get', href: document.activeElement.href});\n          frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n        }\n      })\n      document.addEventListener('submit', e => {\n        if (frameElement && document.activeElement && document.activeElement.form && document.activeElement.form.action) {\n          e.preventDefault()\n\n          if (document.activeElement.form.method === 'post') {\n            var formData = new FormData(document.activeElement.form);\n            \n            var returnedObject = JSON.stringify({method: 'post', href: document.activeElement.form.action, body: [...formData]});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          } else {\n            var urlWithQueryParams = document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form))\n\n            var returnedObject = JSON.stringify({method: 'get', href: urlWithQueryParams});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          }\n        }\n      })\n      </script>\n      "),r=u.d
+A.cpO.prototype={
+$1(d){var w,v=this,u=v.a,t=v.b,s=A.cHy(D.as_,d,'      <base href="'+t+"\">\n      <script>\n\n      document.addEventListener('click', e => {\n        if (frameElement && document.activeElement && document.activeElement.href) {\n          e.preventDefault()\n\n          var returnedObject = JSON.stringify({method: 'get', href: document.activeElement.href});\n          frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n        }\n      })\n      document.addEventListener('submit', e => {\n        if (frameElement && document.activeElement && document.activeElement.form && document.activeElement.form.action) {\n          e.preventDefault()\n\n          if (document.activeElement.form.method === 'post') {\n            var formData = new FormData(document.activeElement.form);\n            \n            var returnedObject = JSON.stringify({method: 'post', href: document.activeElement.form.action, body: [...formData]});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          } else {\n            var urlWithQueryParams = document.activeElement.form.action + '?' + new URLSearchParams(new FormData(document.activeElement.form))\n\n            var returnedObject = JSON.stringify({method: 'get', href: urlWithQueryParams});\n            frameElement.contentWindow.WebOnClickInsideIframe && frameElement.contentWindow.WebOnClickInsideIframe(returnedObject)\n          }\n        }\n      })\n      </script>\n      "),r=u.d
 r===$&&B.b()
 u.a.toString
 w=u.e
 w===$&&B.b()
-r.srcdoc=A.cxq(s,!0,D.G1,w)
+r.srcdoc=A.cxo(s,!0,D.G1,w)
 w=u.w
 w===$&&B.b()
 w.c.buJ(new A.M_(t,D.abg,v.c,v.d))
 u.a.toString},
 $S:79}
-A.cpR.prototype={
+A.cpP.prototype={
 $1(d){var w=this.a
 w.a.toString
 B.o(d)
 w.a.toString},
 $S:9};(function aliases(){var w=A.pd.prototype
-w.aQU=w.h
-w.aQV=w.m
+w.aQT=w.h
+w.aQU=w.m
 w=A.Vo.prototype
 w.ak5=w.m})();(function installTearOffs(){var w=a._static_1,v=a._instance_0u,u=a._instance_1u
-w(A,"dpg","cAO",17)
-w(A,"dpf","cAN",18)
+w(A,"dpe","cAM",17)
+w(A,"dpd","cAL",18)
 var t
-v(t=A.ays.prototype,"gbkG","asY",0)
+v(t=A.ays.prototype,"gbkF","asY",0)
 v(t,"gbrB","WV",0)
-v(t,"gbkF","asX",0)
-v(t,"gbkE","asW",0)
-v(t,"gaYE","al8",0)
-v(t,"gbkD","asV",0)
-v(t,"gbey","ar8",0)
-v(t,"gbew","ar6",0)
-v(t,"gbex","ar7",0)
-v(t,"gbn_","atU",0)
-v(t,"gbmY","atS",0)
-v(t,"gbmZ","atT",0)
-u(t=A.afJ.prototype,"gb29","b2a",13)
-u(t,"gbil","bim",14)
+v(t,"gbkE","asX",0)
+v(t,"gbkD","asW",0)
+v(t,"gaYD","al8",0)
+v(t,"gbkC","asV",0)
+v(t,"gbex","ar8",0)
+v(t,"gbev","ar6",0)
+v(t,"gbew","ar7",0)
+v(t,"gbn_","atT",0)
+v(t,"gbmY","atR",0)
+v(t,"gbmZ","atS",0)
+u(t=A.afJ.prototype,"gb28","b29",13)
+u(t,"gbik","bil",14)
 v(A.a9w.prototype,"gfh","l",1)
-v(t=A.agK.prototype,"gb_0","alK",1)
-v(t,"gaxG","btV",1)
-v(t,"gapJ","b8K",1)})();(function inheritance(){var w=a.mixinHard,v=a.mixin,u=a.inheritMany,t=a.inherit
-u(B.bF,[A.cqO,A.cqP,A.csm,A.csn,A.cso,A.bjm,A.bjn,A.bjl,A.bjo,A.bjk,A.bjp,A.bjj,A.c4u,A.c4s,A.c4o,A.c4n,A.c4q,A.c4p,A.bxL,A.bxK,A.bxM,A.bxA,A.bxD,A.bxE,A.bxF,A.bxG,A.bxH,A.bxI,A.bxJ,A.bxy,A.bxx,A.crm,A.bLz,A.bLA,A.bLB,A.bLx,A.bLw,A.bLv,A.bLt,A.bLH,A.bLE,A.bLO,A.bLN,A.bZc,A.bZ9,A.bbW,A.bbS,A.bbR,A.bbV,A.c5N,A.c5O,A.c5K,A.bjB,A.cpP,A.cpK,A.cpJ,A.cpO,A.cpN,A.cpQ,A.cpR])
+v(t=A.agK.prototype,"gb__","alK",1)
+v(t,"gaxF","btV",1)
+v(t,"gapJ","b8J",1)})();(function inheritance(){var w=a.mixinHard,v=a.mixin,u=a.inheritMany,t=a.inherit
+u(B.bF,[A.cqM,A.cqN,A.csk,A.csl,A.csm,A.bjm,A.bjn,A.bjl,A.bjo,A.bjk,A.bjp,A.bjj,A.c4u,A.c4s,A.c4o,A.c4n,A.c4q,A.c4p,A.bxL,A.bxK,A.bxM,A.bxA,A.bxD,A.bxE,A.bxF,A.bxG,A.bxH,A.bxI,A.bxJ,A.bxy,A.bxx,A.crk,A.bLz,A.bLA,A.bLB,A.bLx,A.bLw,A.bLv,A.bLt,A.bLH,A.bLE,A.bLO,A.bLN,A.bZc,A.bZ9,A.bbW,A.bbS,A.bbR,A.bbV,A.c5N,A.c5O,A.c5K,A.bjB,A.cpN,A.cpI,A.cpH,A.cpM,A.cpL,A.cpO,A.cpP])
 u(B.E,[A.pd,A.az3,A.Ej,A.hi,A.ays,A.ns,A.bkY,A.b4N,A.ue,A.as3,A.bQE,A.By,A.M_])
 u(A.pd,[A.QK,A.Vo])
 t(A.IA,A.Vo)
@@ -2659,8 +2659,8 @@ t(A.GD,B.ey)
 u(B.aa,[A.R9,A.a4n,A.Ll,A.YJ,A.ak4,A.awB,A.pI])
 u(B.I,[A.a0T,A.a4P,A.a8c,A.a_s,A.a_w,A.Y9,A.Qy,A.Tz,A.a9v])
 u(B.M,[A.aMj,A.a4Q,A.a8d,A.aL3,A.aLa,A.aIP,A.aMP,A.afJ,A.agK])
-u(B.cp,[A.c4v,A.c4w,A.c4t,A.c4m,A.c4r,A.bxz,A.bxC,A.bxB,A.bLP,A.bLC,A.bLy,A.bLu,A.bLs,A.bLI,A.bLG,A.bLF,A.bLD,A.bLK,A.bLL,A.b36,A.bZd,A.bZb,A.bbQ,A.bbT,A.bbU,A.c5R,A.c5M,A.c5P,A.c5L,A.c5Q,A.ck6,A.ck4,A.cpS,A.cpM])
-u(B.dt,[A.bxO,A.bxN,A.bLJ,A.bLM,A.b37,A.bZ7,A.bZ8,A.bZa,A.ck5,A.ck7,A.bjA,A.cpL])
+u(B.cp,[A.c4v,A.c4w,A.c4t,A.c4m,A.c4r,A.bxz,A.bxC,A.bxB,A.bLP,A.bLC,A.bLy,A.bLu,A.bLs,A.bLI,A.bLG,A.bLF,A.bLD,A.bLK,A.bLL,A.b36,A.bZd,A.bZb,A.bbQ,A.bbT,A.bbU,A.c5R,A.c5M,A.c5P,A.c5L,A.c5Q,A.ck4,A.ck2,A.cpQ,A.cpK])
+u(B.dt,[A.bxO,A.bxN,A.bLJ,A.bLM,A.b37,A.bZ7,A.bZ8,A.bZa,A.ck3,A.ck5,A.bjA,A.cpJ])
 u(B.dY,[A.jF,A.rz,A.p1,A.blQ,A.aEP,A.a_D,A.a76,A.bmk,A.b_E])
 t(A.arZ,B.W)
 t(A.a_x,A.aLa)
@@ -2671,7 +2671,7 @@ t(A.a9w,B.h6)
 u(A.By,[A.al_,A.alQ,A.aFr])
 w(A.Vo,B.a4)
 v(A.aLa,B.eC)})()
-B.bn(b.typeUniverse,JSON.parse('{"QK":{"pd":[]},"IA":{"a4":["1"],"C":["1"],"aW":["1"],"pd":[],"y":["1"],"a4.E":"1","y.E":"1"},"GD":{"ey":[],"bk":[],"bj":[],"e":[]},"R9":{"aa":[],"e":[]},"a0T":{"I":[],"e":[]},"aMj":{"M":["a0T"]},"a4n":{"aa":[],"e":[]},"a4P":{"I":[],"e":[]},"a4Q":{"M":["a4P"]},"a8c":{"I":[],"e":[]},"a8d":{"M":["a8c"]},"Ll":{"aa":[],"e":[]},"arZ":{"W":[]},"YJ":{"aa":[],"e":[]},"a_s":{"I":[],"e":[]},"aL3":{"M":["a_s"]},"a_w":{"I":[],"e":[]},"a_x":{"M":["a_w"],"eC":[]},"ak4":{"aa":[],"e":[]},"Y9":{"I":[],"e":[]},"aIP":{"M":["Y9"]},"awB":{"aa":[],"e":[]},"amc":{"au":[]},"aDQ":{"au":[]},"Qy":{"I":[],"e":[]},"aMP":{"M":["Qy"]},"Tz":{"I":[],"e":[]},"UB":{"bt":[],"aR":[],"e":[]},"UA":{"X":[],"bB":["X"],"Y":[],"aQ":[]},"afJ":{"M":["Tz"]},"a9w":{"au":[],"a9x":["pd"]},"al_":{"By":[]},"alQ":{"By":[]},"aFr":{"By":[]},"pI":{"aa":[],"e":[]},"a9v":{"I":[],"e":[]},"agK":{"M":["a9v"]}}'))
+B.bn(b.typeUniverse,JSON.parse('{"QK":{"pd":[]},"IA":{"a4":["1"],"C":["1"],"aV":["1"],"pd":[],"y":["1"],"a4.E":"1","y.E":"1"},"GD":{"ey":[],"bk":[],"bj":[],"e":[]},"R9":{"aa":[],"e":[]},"a0T":{"I":[],"e":[]},"aMj":{"M":["a0T"]},"a4n":{"aa":[],"e":[]},"a4P":{"I":[],"e":[]},"a4Q":{"M":["a4P"]},"a8c":{"I":[],"e":[]},"a8d":{"M":["a8c"]},"Ll":{"aa":[],"e":[]},"arZ":{"W":[]},"YJ":{"aa":[],"e":[]},"a_s":{"I":[],"e":[]},"aL3":{"M":["a_s"]},"a_w":{"I":[],"e":[]},"a_x":{"M":["a_w"],"eC":[]},"ak4":{"aa":[],"e":[]},"Y9":{"I":[],"e":[]},"aIP":{"M":["Y9"]},"awB":{"aa":[],"e":[]},"amc":{"au":[]},"aDQ":{"au":[]},"Qy":{"I":[],"e":[]},"aMP":{"M":["Qy"]},"Tz":{"I":[],"e":[]},"UB":{"bt":[],"aR":[],"e":[]},"UA":{"X":[],"bB":["X"],"Y":[],"aQ":[]},"afJ":{"M":["Tz"]},"a9w":{"au":[],"a9x":["pd"]},"al_":{"By":[]},"alQ":{"By":[]},"aFr":{"By":[]},"pI":{"aa":[],"e":[]},"a9v":{"I":[],"e":[]},"agK":{"M":["a9v"]}}'))
 B.lx(b.typeUniverse,JSON.parse('{"Vo":1,"a9x":1}'))
 var y={b:"packages/quill_html_editor/assets/insert_table.png"}
 var x=(function rtii(){var w=B.A
@@ -2753,7 +2753,7 @@ D.bsa=new B.a6(Aa.k_,D.bF6,null)
 D.ase=new B.p3(1,C.fS,D.bsa,null)
 D.aG_=B.a(w([D.ase,A0.akr]),x.p)
 D.bvv=new B.ll(C.aj,C.f,C.h,C.i,null,C.m,null,C.k,0,D.aG_,null)
-D.G1=new B.hs(C.dc,0,B.A("hs<dtW>"))
+D.G1=new B.hs(C.dc,0,B.A("hs<dtU>"))
 D.byo=new B.ar(0,null,null,null)
 D.byr=new B.ar(15,null,null,null)
 D.byI=new L.th(4,0,0,1)
@@ -2784,9 +2784,9 @@ D.bGN=new A.jF("Insert Youtube/Url",20,"video")
 D.bGO=new A.jF("Font color",12,"color")
 D.bJc=new A.aEP(0,"video")
 D.bJd=new A.aEP(1,"hyperlink")})();(function lazyInitializers(){var w=a.lazyFinal,v=a.lazy
-w($,"dzw","cWb",()=>A.cQs(self))
-w($,"dyq","cD6",()=>B.cR6("_$dart_dartObject"))
-w($,"dzA","cDd",()=>function DartObject(d){this.o=d})
-v($,"dB0","cXb",()=>B.cyN(null))})()};
+w($,"dzu","cW9",()=>A.cQq(self))
+w($,"dyo","cD4",()=>B.cR4("_$dart_dartObject"))
+w($,"dzy","cDb",()=>function DartObject(d){this.o=d})
+v($,"dAZ","cX9",()=>B.cyL(null))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_329",e:"endPart",h:b})})($__dart_deferred_initializers__,"PgFAwZDONM8mneyPqVlN9NaVf1E=");
+a.eventLog.push({p:"main.dart.js_329",e:"endPart",h:b})})($__dart_deferred_initializers__,"1YKKDOrSBfRZ075HhQutWQ88gXs=");
