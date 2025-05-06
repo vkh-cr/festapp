@@ -1,6 +1,6 @@
 import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { qrcode } from "https://deno.land/x/qrcode/mod.ts";
 import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
