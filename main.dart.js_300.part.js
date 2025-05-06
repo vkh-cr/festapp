@@ -1,7 +1,7 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_300",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={a0s:function a0s(d,e){this.a=d
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={a0r:function a0r(d,e){this.a=d
 this.b=e},
 d0w(d){C.b.es(d,new B.b78())
 return d},
@@ -51,30 +51,30 @@ else q=t<s?-1:1
 if(q!==0)return q}++u}return C.c.bx(o,v.length)},
 bPs:function bPs(){},
 bPt:function bPt(){},
-aoF(){var w=0,v=A.k(x.i),u,t,s,r,q,p
-var $async$aoF=A.f(function(d,e){if(d===1)return A.h(e,v)
+aoE(){var w=0,v=A.k(x.i),u,t,s,r,q,p
+var $async$aoE=A.f(function(d,e){if(d===1)return A.h(e,v)
 while(true)switch(w){case 0:q=$.tR().bU("occasions").hx(0,"data")
 p=A.dl()
 p.toString
 w=3
-return A.d(q.ct("id",p).PZ(),$async$aoF)
+return A.d(q.ct("id",p).PZ(),$async$aoE)
 case 3:t=e
 if(t!=null){s=J.v(t,"data")
 if(s!=null&&J.v(s,"game")!=null){q=J.v(s,"game")
 p=J.a2(q)
 r=p.h(q,"start")!=null?A.f0(p.h(q,"start")):null
-u=new B.a0s(r,p.h(q,"end")!=null?A.f0(p.h(q,"end")):null)
+u=new B.a0r(r,p.h(q,"end")!=null?A.f0(p.h(q,"end")):null)
 w=1
 break}}u=null
 w=1
 break
 case 1:return A.i(u,v)}})
-return A.j($async$aoF,v)}}
+return A.j($async$aoE,v)}}
 J=c[1]
 A=c[0]
 C=c[2]
 B=a.updateHolder(c[61],B)
-B.a0s.prototype={
+B.a0r.prototype={
 bp(){var w,v=this.a
 v=v==null?null:v.hH()
 w=this.b
@@ -94,7 +94,7 @@ w=w==null?null:w.toLowerCase()
 return B.bPr(u,w==null?"":w)},
 $S:179}
 B.b7h.prototype={
-$1(d){return A.asZ(d)},
+$1(d){return A.asY(d)},
 $S:117}
 B.bPs.prototype={
 $1(d){var w=d.b[0]
@@ -107,10 +107,10 @@ w.toString
 return w},
 $S:257};(function installTearOffs(){var w=a.installStaticTearOff
 w(B,"dno",0,function(){return[null]},["$1","$0"],["yF",function(){return B.yF(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
-w(B.a0s,A.E)
-w(B.b78,A.dt)
+w(B.a0r,A.E)
+w(B.b78,A.ds)
 v(A.bF,[B.b7h,B.bPs,B.bPt])})()
 var y={d:"id,occasion,created_at,updated_at,is_hidden,title,description,order,type,data,information_hidden(*)"}
-var x={c:A.A("eI"),l:A.A("C<eI>"),g:A.A("m"),b:A.A("@"),i:A.A("a0s?")}};
+var x={c:A.A("eI"),l:A.A("C<eI>"),g:A.A("m"),b:A.A("@"),i:A.A("a0r?")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_300",e:"endPart",h:b})})($__dart_deferred_initializers__,"qNI9o1F89VaNLZ4pX81TwkZ6/Ls=");
+a.eventLog.push({p:"main.dart.js_300",e:"endPart",h:b})})($__dart_deferred_initializers__,"hp/RsDWC3k3+DjWwD7gn5WM6KUs=");

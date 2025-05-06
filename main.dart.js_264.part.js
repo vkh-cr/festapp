@@ -5,9 +5,9 @@ $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
 Nx(){var x=0,w=A.k(y.b),v,u
 var $async$Nx=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.awZ().xR(0,C.jZ),$async$Nx)
+return A.d(A.awY().xR(0,C.jZ),$async$Nx)
 case 2:x=3
-return A.d(B.axb(),$async$Nx)
+return A.d(B.axa(),$async$Nx)
 case 3:x=4
 return A.d($.e6().gdH().EZ(C.aaz),$async$Nx)
 case 4:C.nv.Ys(0,"refresh")
@@ -19,14 +19,14 @@ if(!u)v.f=null
 if(!u)v.d=null
 return A.i(null,w)}})
 return A.j($async$Nx,w)},
-axb(){var x=0,w=A.k(y.b)
-var $async$axb=A.f(function(d,e){if(d===1)return A.h(e,w)
+axa(){var x=0,w=A.k(y.b)
+var $async$axa=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.a3E("user_info"),$async$axb)
+return A.d(A.a3D("user_info"),$async$axa)
 case 2:x=3
-return A.d(A.a3E("mySchedule"),$async$axb)
+return A.d(A.a3D("mySchedule"),$async$axa)
 case 3:return A.i(null,w)}})
-return A.j($async$axb,w)},
+return A.j($async$axa,w)},
 bAz(){var x=$.h1
 x=x==null?null:x.f
 x=x==null?null:x.r
@@ -37,4 +37,4 @@ B=a.updateHolder(c[90],B)
 var z=a.updateTypes([])
 var y={b:A.A("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_264",e:"endPart",h:b})})($__dart_deferred_initializers__,"9Zx983104YlSAhtlE+qValpmcqI=");
+a.eventLog.push({p:"main.dart.js_264",e:"endPart",h:b})})($__dart_deferred_initializers__,"tAxU04fcDkfx8dPdQAxmsUPwIRc=");

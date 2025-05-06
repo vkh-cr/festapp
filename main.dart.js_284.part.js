@@ -353,9 +353,9 @@ x(B,"cRz","d6F",4)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.iP,A.E)
 w(A.bF,[B.b0L,B.b0M,B.b0N,B.b0O,B.b0P,B.b0Q,B.b0K,B.b0R,B.b0S,B.bv_,B.bK7,B.bd9])
 w(A.hL,[B.hc,B.he])})()
-A.bn(b.typeUniverse,JSON.parse('{"hc":{"hL":[]},"he":{"hL":[]}}'))
+A.bm(b.typeUniverse,JSON.parse('{"hc":{"hL":[]},"he":{"hL":[]}}'))
 var y={E:A.A("r<eN>"),q:A.A("C<eN>"),w:A.A("m"),d:A.A("h2"),b:A.A("@"),v:A.A("~")};(function constants(){var x=a.makeConstList
 D.mf=A.a(x(["spot","food","others"]),A.A("r<m>"))})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dtm","Nd",()=>$.hD().gn5(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"Q1hiXevR0HSfjA4GMFSqrVEuc5s=");
+a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"7iLS7ZElTfQep3b/ASqWz1JYxic=");

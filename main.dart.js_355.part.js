@@ -2,14 +2,14 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_355",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,H,I,K,L,M,N,O,P,E,Q,R,F,S,T,B={b47:function b47(){},b4a:function b4a(){},
-aoy(){var x=0,w=A.k(y.x),v,u,t,s
-var $async$aoy=A.f(function(d,e){if(d===1)return A.h(e,w)
+aox(){var x=0,w=A.k(y.x),v,u,t,s
+var $async$aox=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:u=y.b
 x=3
-return A.d($.B4().dJ("game_get_correctly_guessed_checkpoints",A.z(["oc",A.dl()],y.w,u),u),$async$aoy)
+return A.d($.B4().dJ("game_get_correctly_guessed_checkpoints",A.z(["oc",A.dl()],y.w,u),u),$async$aox)
 case 3:t=e
 x=4
-return A.d(y.i.b(t)?t:A.c7(t,u),$async$aoy)
+return A.d(y.i.b(t)?t:A.c7(t,u),$async$aox)
 case 4:s=e
 if(s==null||!J.p(J.v(s,"code"),200)){v=A.a([],y.r)
 x=1
@@ -17,7 +17,7 @@ break}v=A.aY(J.fB(J.v(s,"data"),new B.b74()),!0,y.e)
 x=1
 break
 case 1:return A.i(v,w)}})
-return A.j($async$aoy,w)},
+return A.j($async$aox,w)},
 b74:function b74(){},
 d3i(d){return new B.Cn(d)},
 Cn:function Cn(d){this.a=d},
@@ -166,10 +166,10 @@ x.ag()},
 DM(){var x=0,w=A.k(y.v),v=this,u,t,s,r
 var $async$DM=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(F.aoF(),$async$DM)
+return A.d(F.aoE(),$async$DM)
 case 2:v.r=e
 x=3
-return A.d(A.ZA(),$async$DM)
+return A.d(A.Zz(),$async$DM)
 case 3:u=e
 t=J.d0(u)
 s=t.ez(u,new B.c3f())
@@ -198,7 +198,7 @@ var $async$PO=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:if(!u.z){x=1
 break}t=B
 x=3
-return A.d(B.aoy(),$async$PO)
+return A.d(B.aox(),$async$PO)
 case 3:u.B(new t.c3e(u,e))
 case 1:return A.i(v,w)}})
 return A.j($async$PO,w)},
@@ -214,7 +214,7 @@ o.toString
 w=p.jm(o)}else w=!1
 o=A.U(r.f,q,q,q,q,q,q,q,q,q,q,q,q,q)
 o=L.ii(q,q,q,!0,q,q,1,q,q,q,!1,q,!1,q,q,O.u_(new B.c39(d)),q,!0,q,q,q,q,q,o,q,q,q,1,q)
-v=A.a([new A.cC(C.aK,q,q,new A.cQ(new A.ac(0,720,0,1/0),K.arR(q,C.u,D.byJ,new B.c3a(r),r.d.length,q,C.aB,q,C.J,!1),q),q)],y.u)
+v=A.a([new A.cC(C.aK,q,q,new A.cQ(new A.ac(0,720,0,1/0),K.arQ(q,C.u,D.byJ,new B.c3a(r),r.d.length,q,C.aB,q,C.J,!1),q),q)],y.u)
 if(!r.z)v.push(r.Um(A.u("For playing the game, you must be assigned to a game group",q)))
 if(r.z&&x)v.push(r.Um(A.u("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.c8(8)
@@ -304,7 +304,7 @@ s=A.U(A.u("Check point {title}",A.z(["title",u.c],s,s)),t,t,t,t,t,t,t,t,t,t,t,t,
 x=u.a
 w=y.u
 v=A.aj(A.a([E.hd(!0,C.aW,!1,t,!0,C.A,t,E.hC(),t,t,t,t,t,t,2,E.cy(t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,A.u("Take a guess",t),t,t,t,t,t,t,t,t,t,!0,t,t,t,t,t,t,t,t,t,t,t,t,t),C.u,!0,t,!0,t,!1,t,R.aZ,t,t,t,t,t,t,t,1,t,t,!1,"\u2022",t,new B.c35(x),t,t,t,!1,t,t,!1,t,!0,t,G.b8,t,t,C.aS,C.aP,t,t,t,t,t,t,t,!0,C.I,t,G.ba,t,t,t,t)],w),C.i,C.f,C.Y,t,C.m)
-return M.je(A.a([A.de(!1,V.bm(D.bF3,t),t,t,t,t,t,t,new B.c36(x,u.b,u.d,u.e,d),t,t)],w),t,t,v,t,t,t,s,t)},
+return M.je(A.a([A.de(!1,V.bl(D.bF3,t),t,t,t,t,t,t,new B.c36(x,u.b,u.d,u.e,d),t,t)],w),t,t,v,t,t,t,s,t)},
 $S:z+0}
 B.c35.prototype={
 $1(d){return this.a.a=d},
@@ -331,16 +331,16 @@ x.toString
 w.t(0,x)},
 $S:0};(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.b47,A.E)
-w(A.dt,[B.b4a,B.c3a])
+w(A.ds,[B.b4a,B.c3a])
 w(A.bF,[B.b74,B.c3c,B.c3d,B.c3f,B.c3h,B.c3l,B.c3j,B.c37,B.c35])
 x(B.Cn,A.I)
 x(B.aM0,A.M)
 w(A.cp,[B.c3b,B.c3g,B.c3i,B.c3e,B.c3k,B.c39,B.c38,B.c36,B.c34])})()
-A.bn(b.typeUniverse,JSON.parse('{"Cn":{"I":[],"e":[]},"aM0":{"M":["Cn"]}}'))
+A.bm(b.typeUniverse,JSON.parse('{"Cn":{"I":[],"e":[]},"aM0":{"M":["Cn"]}}'))
 var y=(function rtii(){var x=A.A
 return{i:x("T<@>"),p:x("r<eI>"),u:x("r<e>"),r:x("r<l>"),x:x("C<l>"),w:x("m"),B:x("x"),b:x("@"),e:x("l"),v:x("~")}})();(function constants(){D.aqy=new A.aT(5e6)
 D.byJ=new P.th(4,8,8,0.75)
 D.bC0=new A.a1(!0,C.p,null,null,null,null,16,C.a6,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bF3=new A.ca("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cF8=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_355",e:"endPart",h:b})})($__dart_deferred_initializers__,"/Tf0Pp0HLdzocfjOJe5isQa4HY8=");
+a.eventLog.push({p:"main.dart.js_355",e:"endPart",h:b})})($__dart_deferred_initializers__,"ufCAPlo0/H3F5CHBBeV3i6WQS5Q=");
