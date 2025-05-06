@@ -112,136 +112,142 @@ class _NewsPageState extends State<NewsPage> {
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          // Show placeholder when empty, otherwise the list
-          child: newsMessages.isEmpty
-              ? Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.article_outlined,
-                  size: 64,
-                  color: Theme.of(context).disabledColor,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  tr('No news messages yet'),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          )
-              : ListView.builder(
-            itemCount: newsMessages.length,
-            itemBuilder: (BuildContext context, int index) {
-              final message = newsMessages[index];
-              final previousMessage = index > 0 ? newsMessages[index - 1] : null;
-              final isSameDay = previousMessage != null &&
-                  message.createdAt!.year == previousMessage.createdAt!.year &&
-                  message.createdAt!.month == previousMessage.createdAt!.month &&
-                  message.createdAt!.day == previousMessage.createdAt!.day;
+          child: PinchScrollView(
+            builder: (onPinchStart, onPinchEnd) => newsMessages.isEmpty
+                ? Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.article_outlined,
+                    size: 64,
+                    color: Theme.of(context).disabledColor,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    tr('No news messages yet'),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            )
+                : ListView.builder(
+              itemCount: newsMessages.length,
+              itemBuilder: (BuildContext context, int index) {
+                final message = newsMessages[index];
+                final previousMessage = index > 0 ? newsMessages[index - 1] : null;
+                final isSameDay = previousMessage != null &&
+                    message.createdAt!.year == previousMessage.createdAt!.year &&
+                    message.createdAt!.month == previousMessage.createdAt!.month &&
+                    message.createdAt!.day == previousMessage.createdAt!.day;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (index != 0 && !isSameDay) const Divider(),
-                  if (index == 0 || !isSameDay)
-                    Container(
-                      padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
-                      alignment: Alignment.topRight,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    if (index != 0 && !isSameDay) const Divider(),
+                    if (index == 0 || !isSameDay)
+                      Container(
+                        padding: const EdgeInsets.only(top: 8.0, right: 16.0, left: 16.0),
+                        alignment: Alignment.topRight,
+                        child: Text(
+                          DateFormat("EEEE d.M.y", context.locale.languageCode)
+                              .format(message.createdAt!),
+                          style: message.isRead ? readTextStyle() : unReadTextStyle(),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        DateFormat("EEEE d.M.y", context.locale.languageCode)
-                            .format(message.createdAt!),
+                        message.createdBy ?? "",
                         style: message.isRead ? readTextStyle() : unReadTextStyle(),
                       ),
                     ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      message.createdBy ?? "",
-                      style: message.isRead ? readTextStyle() : unReadTextStyle(),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Theme.of(context).colorScheme.surface,
-                      ),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: HtmlView(html: message.message!, isSelectable: true),
-                          ),
-                          Visibility(
-                            visible: AuthService.isLoggedIn(),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    message.views.toString(),
-                                    style: TextStyle(
-                                      color: Theme.of(context).disabledColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Theme.of(context).colorScheme.surface,
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: HtmlView(
+                                html: message.message!,
+                                isSelectable: true,
+                                twoFingersOn: onPinchStart,
+                                twoFingersOff: onPinchEnd,
                               ),
                             ),
+                            Visibility(
+                              visible: AuthService.isLoggedIn(),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Icon(Icons.remove_red_eye, size: 16, color: Theme.of(context).disabledColor),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      message.views.toString(),
+                                      style: TextStyle(
+                                        color: Theme.of(context).disabledColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                  ],
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                    Visibility(
+                      visible: RightsService.isEditor(),
+                      child: PopupMenuButton<ContextMenuChoice>(
+                        onSelected: (choice) async {
+                          if (choice == ContextMenuChoice.delete) {
+                            await DbNews.deleteNewsMessage(message);
+                            ToastHelper.Show(context, "Message has been removed.".tr());
+                          } else {
+                            await RouterService.navigatePageInfo(
+                              context,
+                              HtmlEditorRoute(
+                                content: {HtmlEditorPage.parContent: message.message},
+                                occasionId: RightsService.currentOccasionId(),
+                              ),
+                            ).then((value) async {
+                              if (value != null) {
+                                var newMessage = value as String;
+                                message.message = newMessage;
+                                await DbNews.updateNewsMessage(message);
+                                ToastHelper.Show(context, "Message has been changed.".tr());
+                              }
+                            });
+                          }
+                          await loadData();
+                        },
+                        icon: const Icon(Icons.more_horiz),
+                        itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
+                          PopupMenuItem<ContextMenuChoice>(
+                            value: ContextMenuChoice.edit,
+                            child: const Text("Edit").tr(),
+                          ),
+                          PopupMenuItem<ContextMenuChoice>(
+                            value: ContextMenuChoice.delete,
+                            child: const Text("Delete").tr(),
                           )
                         ],
                       ),
                     ),
-                  ),
-                  Visibility(
-                    visible: RightsService.isEditor(),
-                    child: PopupMenuButton<ContextMenuChoice>(
-                      onSelected: (choice) async {
-                        if (choice == ContextMenuChoice.delete) {
-                          await DbNews.deleteNewsMessage(message);
-                          ToastHelper.Show(context, "Message has been removed.".tr());
-                        } else {
-                          await RouterService.navigatePageInfo(
-                            context,
-                            HtmlEditorRoute(
-                              content: {HtmlEditorPage.parContent: message.message},
-                              occasionId: RightsService.currentOccasionId(),
-                            ),
-                          ).then((value) async {
-                            if (value != null) {
-                              var newMessage = value as String;
-                              message.message = newMessage;
-                              await DbNews.updateNewsMessage(message);
-                              ToastHelper.Show(context, "Message has been changed.".tr());
-                            }
-                          });
-                        }
-                        await loadData();
-                      },
-                      icon: const Icon(Icons.more_horiz),
-                      itemBuilder: (BuildContext context) => <PopupMenuEntry<ContextMenuChoice>>[
-                        PopupMenuItem<ContextMenuChoice>(
-                          value: ContextMenuChoice.edit,
-                          child: const Text("Edit").tr(),
-                        ),
-                        PopupMenuItem<ContextMenuChoice>(
-                          value: ContextMenuChoice.delete,
-                          child: const Text("Delete").tr(),
-                        )
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
