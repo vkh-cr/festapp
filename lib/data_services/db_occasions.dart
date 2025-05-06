@@ -149,12 +149,24 @@ class DbOccasions {
   }
 
   static Future<void> deleteOccasion(int oc) async {
-    var data = await _supabase.from(Tb.images.table).select().eq(Tb.images.occasion, oc);
-    var occasionImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
-    for(var oc in occasionImages){
-      await DbImages.removeImage(oc.link!);
+    await _supabase.rpc('delete_occasion', params: {'oc': oc});
+
+    final data = await _supabase
+        .from(Tb.images.table)
+        .select()
+        .isFilter(Tb.images.occasion, null)
+        .isFilter(Tb.images.unit, null);
+    final orphanImages = List<ImageModel>.from(data.map((x) => ImageModel.fromJson(x)));
+
+    for (var img in orphanImages) {
+      await DbImages.removeImage(img.link!);
     }
-    await _supabase.from(Tb.images.table).delete().eq(Tb.images.occasion, oc);
-    await _supabase.rpc("delete_occasion", params: {"oc": oc});
+
+    await _supabase
+        .from(Tb.images.table)
+        .delete()
+        .isFilter(Tb.images.occasion, null)
+        .isFilter(Tb.images.unit, null);
   }
+
 }
