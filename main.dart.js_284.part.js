@@ -102,7 +102,7 @@ while(true)switch(x){case 0:v=y.b
 u=J
 t=J
 x=2
-return A.d($.Ne().dJ("update_ticket_note_hidden",A.z(["ticket_id",d,"new_note_hidden",e],y.w,v),v),$async$b83)
+return A.d($.Nf().dJ("update_ticket_note_hidden",A.z(["ticket_id",d,"new_note_hidden",e],y.w,v),v),$async$b83)
 case 2:if(!u.p(t.x(g,"code"),200))throw A.n(A.cN("Saving of note has failed."))
 return A.i(null,w)}})
 return A.j($async$b83,w)}},D,F,C
@@ -178,7 +178,7 @@ bGZ(){var x,w
 if(this.e==="ordered"){x=this.ay
 x=x==null||x.w==null}else x=!0
 if(x)return!1
-w=A.cF(A.bA(F.Li()),A.bM(F.Li()),A.cL(F.Li()),0,0,0,0,0)
+w=A.cF(A.bA(F.Lj()),A.bM(F.Lj()),A.cL(F.Lj()),0,0,0,0,0)
 x=this.ay.w
 x.toString
 return w.jm(A.cF(A.bA(x),A.bM(x),A.cL(x),0,0,0,0,0))},
@@ -323,7 +323,7 @@ $S:z+2}
 B.b0P.prototype={
 $1(d){var x=this.a.x
 return d!=(x==null?null:x.a)},
-$S:343}
+$S:381}
 B.b0Q.prototype={
 $1(d){var x,w=this.a.as
 if(w==null)x=null
@@ -333,7 +333,7 @@ return w==null?"":w},
 $S:1026}
 B.b0K.prototype={
 $1(d){return d.a==this.a},
-$S:37}
+$S:39}
 B.b0R.prototype={
 $1(d){return d.length!==0},
 $S:19}
@@ -342,13 +342,13 @@ $1(d){return d.a==this.a.c},
 $S:z+3}
 B.bv_.prototype={
 $1(d){return d.lk()},
-$S:145}
+$S:152}
 B.bK7.prototype={
 $1(d){return d.lk()},
-$S:145}
+$S:152}
 B.bd9.prototype={
 $1(d){return d.lk()},
-$S:145};(function installTearOffs(){var x=a._static_1
+$S:152};(function installTearOffs(){var x=a._static_1
 x(B,"cRC","d6I",4)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.iP,A.E)
 w(A.bF,[B.b0L,B.b0M,B.b0N,B.b0O,B.b0P,B.b0Q,B.b0K,B.b0R,B.b0S,B.bv_,B.bK7,B.bd9])
@@ -356,6 +356,6 @@ w(A.hL,[B.hc,B.he])})()
 A.bk(b.typeUniverse,JSON.parse('{"hc":{"hL":[]},"he":{"hL":[]}}'))
 var y={E:A.A("r<eN>"),q:A.A("C<eN>"),w:A.A("m"),d:A.A("h2"),b:A.A("@"),v:A.A("~")};(function constants(){var x=a.makeConstList
 D.mf=A.a(x(["spot","food","others"]),A.A("r<m>"))})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dtp","Ne",()=>$.hD().gn5(0))})()};
+x($,"dtp","Nf",()=>$.hD().gn5(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"ZfMiQ8Him5acSWMXvidHrVGe4fY=");
+a.eventLog.push({p:"main.dart.js_284",e:"endPart",h:b})})($__dart_deferred_initializers__,"gx7+sqae97YhlHKTjtYgnSxsBqM=");

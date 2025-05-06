@@ -16,7 +16,7 @@ return A.d(r.bU("events").hx(0,"id,updated_at,occasion,title,start_time,end_time
 case 3:q=m.rB(g)
 p=y.u
 x=4
-return A.d(A.qC(C.c.j(d),A.Ga(),"events",p),$async$qa)
+return A.d(A.qC(C.c.j(d),A.Gb(),"events",p),$async$qa)
 case 4:o=g
 n=o==null
 if(n)u=null
@@ -139,7 +139,7 @@ axc(d){var x=0,w=A.k(y.e),v,u
 var $async$axc=A.f(function(e,f){if(e===1)return A.h(f,w)
 while(true)switch(x){case 0:u=J
 x=3
-return A.d(A.Jc(),$async$axc)
+return A.d(A.Jd(),$async$axc)
 case 3:v=u.lG(f,d)
 x=1
 break
@@ -161,8 +161,8 @@ $1(d){return d.db},
 $S:1039}
 B.b6u.prototype={
 $1(d){return A.rB(d)},
-$S:64};(function inheritance(){var x=a.inheritMany
+$S:65};(function inheritance(){var x=a.inheritMany
 x(A.bF,[B.b5l,B.b5m,B.b6u])})()
 var y={f:A.A("aZ"),u:A.A("dR"),r:A.A("r<l>"),w:A.A("m"),e:A.A("w"),b:A.A("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_304",e:"endPart",h:b})})($__dart_deferred_initializers__,"9r5VGc0yVZ87tpHuJY4DJ/SOSJU=");
+a.eventLog.push({p:"main.dart.js_304",e:"endPart",h:b})})($__dart_deferred_initializers__,"+m4kiimS8JumiPMPq033b70urFg=");

@@ -168,7 +168,7 @@ return S.nP(new B.a6(R.bk,B.aj(u,A.K,A.f,A.h,w,A.m),w),w,3,w,w)}}
 var z=a.updateTypes(["a6(zt)","T<~>()"])
 C.c6_.prototype={
 $1(d){this.a.B(new C.c5Z())},
-$S:11}
+$S:10}
 C.c5Z.prototype={
 $0(){},
 $S:0}
@@ -209,14 +209,14 @@ x(B.bF,[C.c6_,C.c61])
 x(B.cp,[C.c5Z,C.c60,C.caH,C.caI,C.caJ,C.caK])
 w(C.zt,B.E)})()
 B.bk(b.typeUniverse,JSON.parse('{"a3I":{"I":[],"e":[]},"CI":{"I":[],"e":[]},"aMQ":{"M":["CI"]},"adi":{"M":["a3I"]}}'))
-var y={D:B.A("r<zt>"),u:B.A("r<e>"),w:B.A("m"),v:B.A("FS"),b:B.A("@"),q:B.A("~")};(function constants(){D.awd=new E.pa(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+var y={D:B.A("r<zt>"),u:B.A("r<e>"),w:B.A("m"),v:B.A("FT"),b:B.A("@"),q:B.A("~")};(function constants(){D.awd=new E.pa(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.awg=new E.pa(null,null,null,"Supabase Project URL",null,null,null,null,null,null,"Enter your Supabase project URL",null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.awj=new E.pa(null,null,null,"Database Connection String",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.awk=new E.pa(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.awl=new E.pa(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.awm=new E.pa(null,null,null,"Admin Email",null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.bFl=new B.ca("Copied to clipboard",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.byP=new A1.Ex(D.bFl,null,null,null,null,null,null,null,null,null,null,null,null,A2.La,null,null,null,A.A,null)
+D.byP=new A1.Ey(D.bFl,null,null,null,null,null,null,null,null,null,null,null,null,A2.La,null,null,null,A.A,null)
 D.bCx=new B.a1(!0,null,null,"monospace",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bEI=new B.ca("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)\n - pg_cron extension (Database > Extensions)",null,A0.abR,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bEP=new B.ca("Migrations",null,Q.H1,null,null,null,null,null,null,null,null,null,null,null,null)
@@ -226,4 +226,4 @@ D.bFf=new B.ca("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.bFi=new B.ca("Initial",null,Q.H1,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFs=new B.ca("Supabase Function Deploy Commands:",null,A6.z5,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_189",e:"endPart",h:b})})($__dart_deferred_initializers__,"RiK82w8qIK18STxRx9LL6Uy3QWQ=");
+a.eventLog.push({p:"main.dart.js_189",e:"endPart",h:b})})($__dart_deferred_initializers__,"yHmchaKxNACsnrZOVGUxWkMMXAA=");
