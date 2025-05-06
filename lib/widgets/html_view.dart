@@ -22,7 +22,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
       this.context,
       super.html, {
         super.key,
-        required ColumnMode renderMode,
+        required RenderMode renderMode,
         super.textStyle,
         super.customWidgetBuilder,
         super.customStylesBuilder,
@@ -82,7 +82,7 @@ class _HtmlViewState extends State<HtmlView> {
     Widget content = HtmlWithAppLinksWidget(
       context,
       widget.html,
-      renderMode: RenderMode.column,
+      renderMode: RenderMode.listView,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
         fontFamily: "Futura",
