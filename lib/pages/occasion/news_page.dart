@@ -14,6 +14,7 @@ import 'package:fstapp/widgets/html_view.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/pop_button.dart';
+import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart';
 import '../utility/html_editor_page.dart';
 
 @RoutePage()
