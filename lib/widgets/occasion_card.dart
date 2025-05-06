@@ -54,173 +54,206 @@ class _OccasionCardState extends State<OccasionCard> {
 
     // Retrieve external price from the 'form' feature, if available.
     var details = FeatureService.getFeatureDetails(
-      FeatureConstants.form, features: widget.occasion.features,
+      FeatureConstants.form,
+      features: widget.occasion.features,
     );
-    String? externalPrice = details is FormFeature ? details.formExternalPrice : null;
+    String? externalPrice = details is FormFeature
+        ? details.formExternalPrice
+        : null;
 
     return MouseRegion(
       onEnter: (_) => setState(() => isHovered = true),
       onExit: (_) => setState(() => isHovered = false),
-      child: LayoutBuilder(builder: (context, constraints) {
-        final double widthScale =
-        (constraints.maxWidth / OccasionCard.kMinCardWidth).clamp(1.0, 1.5);
-        final double heightScale =
-        (constraints.maxHeight / OccasionCard.kMinCardHeight).clamp(1.0, 1.2);
-        final double buttonScale = (widthScale + heightScale) / 2;
+      child: RepaintBoundary(  // ← cache the entire card (including its BackdropFilters)
+        child: LayoutBuilder(builder: (context, constraints) {
+          final double widthScale = (constraints.maxWidth /
+              OccasionCard.kMinCardWidth)
+              .clamp(1.0, 1.5);
+          final double heightScale = (constraints.maxHeight /
+              OccasionCard.kMinCardHeight)
+              .clamp(1.0, 1.2);
+          final double buttonScale = (widthScale + heightScale) / 2;
 
-        return ConstrainedBox(
-          constraints: const BoxConstraints(
-            minWidth: OccasionCard.kMinCardWidth,
-            minHeight: OccasionCard.kMinCardHeight,
-          ),
-          child: AnimatedContainer(
-            duration: OccasionCard.kAnimationDuration,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(OccasionCard.kCardBorderRadius),
-              border: border,
-              boxShadow: [
-                if (widget.isPresent)
-                  BoxShadow(
-                    color: Theme.of(context).primaryColor.withOpacity(0.6),
-                    blurRadius: 20,
-                    spreadRadius: 4,
-                  ),
-                BoxShadow(
-                  color: isHovered ? Colors.black26 : Colors.black12,
-                  blurRadius: isHovered ? 8 : 4,
-                  offset: isHovered ? const Offset(0, 4) : const Offset(0, 2),
-                ),
-              ],
+          return ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: OccasionCard.kMinCardWidth,
+              minHeight: OccasionCard.kMinCardHeight,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(innerRadius),
-              child: Stack(
-                children: [
-                  if (widget.occasion.data?[Tb.occasions.data_image] != null)
-                    Positioned.fill(
-                      child: CachedNetworkImage(
-                        imageUrl: widget.occasion.data?[Tb.occasions.data_image]!,
-                        fit: BoxFit.cover,
-                      ),
+            child: AnimatedContainer(
+              duration: OccasionCard.kAnimationDuration,
+              decoration: BoxDecoration(
+                borderRadius:
+                BorderRadius.circular(OccasionCard.kCardBorderRadius),
+                border: border,
+                boxShadow: [
+                  if (widget.isPresent)
+                    BoxShadow(
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withOpacity(0.6),
+                      blurRadius: 20,
+                      spreadRadius: 4,
                     ),
-                  if (widget.isPast)
-                    Positioned.fill(
-                      child: Container(
-                        color: Colors.grey.withOpacity(0.6),
-                      ),
-                    ),
-                  // Display external price badge at top right if available.
-                  if (externalPrice != null && externalPrice.trim().isNotEmpty)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: SelectableText(
-                              externalPrice,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: ClipRect(
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                        child: Container(
-                          padding: const EdgeInsets.all(8.0),
-                          color: Colors.black.withOpacity(0.4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SelectableText(
-                                widget.occasion.title ?? '',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              SelectableText(
-                                TimeHelper.getMinimalisticDateRange(
-                                  context,
-                                  widget.occasion.startTime!,
-                                  widget.occasion.endTime!,
-                                ),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 6 * buttonScale,
-                    right: 10 * buttonScale,
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        if (!FeatureService.isFeatureEnabled(
-                            FeatureConstants.form,
-                            features: widget.occasion.features)) {
-                          try{
-                            await RightsService.updateOccasionData(widget.occasion.link!);
-                          } catch(e) {
-                            // empty
-                          }
-                          await RouterService.navigateOccasion(context, "");
-                        } else {
-                          showDialog(
-                            context: context,
-                            builder: (context) =>
-                                OccasionDetailDialog(occasion: widget.occasion),
-                          );
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.white),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 16 * buttonScale,
-                          vertical: 8 * buttonScale,
-                        ),
-                        minimumSize: Size(112 * buttonScale, 36 * buttonScale),
-                      ),
-                      child: Text(
-                        "Detail".tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14 * buttonScale,
-                        ),
-                      ),
-                    ),
+                  BoxShadow(
+                    color: isHovered ? Colors.black26 : Colors.black12,
+                    blurRadius: isHovered ? 8 : 4,
+                    offset:
+                    isHovered ? const Offset(0, 4) : const Offset(0, 2),
                   ),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(innerRadius),
+                child: Stack(
+                  children: [
+                    if (widget.occasion
+                        .data?[Tb.occasions.data_image] !=
+                        null)
+                      Positioned.fill(
+                        child: CachedNetworkImage(
+                          imageUrl: widget.occasion
+                              .data![Tb.occasions.data_image]!,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+
+                    if (widget.isPast)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.grey.withOpacity(0.6),
+                        ),
+                      ),
+
+                    // External price badge with cached blur
+                    if (externalPrice != null &&
+                        externalPrice.trim().isNotEmpty)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: RepaintBoundary( // ← cache this blurred badge only
+                          child: ClipRect(
+                            child: BackdropFilter(
+                              filter:
+                              ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                              child: Container(
+                                padding:
+                                const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: SelectableText(
+                                  externalPrice,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                    // Bottom overlay with cached blur
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: RepaintBoundary( // ← cache this blurred footer only
+                        child: ClipRect(
+                          child: BackdropFilter(
+                            filter:
+                            ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              color: Colors.black.withOpacity(0.4),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SelectableText(
+                                    widget.occasion.title ?? '',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  SelectableText(
+                                    TimeHelper.getMinimalisticDateRange(
+                                      context,
+                                      widget.occasion.startTime!,
+                                      widget.occasion.endTime!,
+                                    ),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Detail button
+                    Positioned(
+                      bottom: 6 * buttonScale,
+                      right: 10 * buttonScale,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          if (!FeatureService.isFeatureEnabled(
+                              FeatureConstants.form,
+                              features: widget.occasion.features)) {
+                            try {
+                              await RightsService.updateOccasionData(
+                                  widget.occasion.link!);
+                            } catch (e) {
+                              // ignore
+                            }
+                            await RouterService.navigateOccasion(
+                                context, "");
+                          } else {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  OccasionDetailDialog(
+                                      occasion: widget.occasion),
+                            );
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16 * buttonScale,
+                            vertical: 8 * buttonScale,
+                          ),
+                          minimumSize: Size(
+                              112 * buttonScale, 36 * buttonScale),
+                        ),
+                        child: Text(
+                          "Detail".tr(),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14 * buttonScale,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }
