@@ -44,11 +44,11 @@ class _PlaceDetailDialogState extends State<PlaceDetailDialog> {
       ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400),
-        child: SingleChildScrollView(
-          child: Column(
+        child: PinchScrollView(
+          builder: (onPinchStart, onPinchEnd) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Change location button, only for editors or group‑leaders
+              // Change location button, only for editors or group-leaders
               if (RightsService.isEditor() ||
                   (AuthService.isGroupLeader() &&
                       AuthService.currentUserGroup()!.place!.id ==
@@ -68,6 +68,8 @@ class _PlaceDetailDialogState extends State<PlaceDetailDialog> {
               HtmlView(
                 html: place.description ?? '',
                 isSelectable: true,
+                twoFingersOn: onPinchStart,
+                twoFingersOff: onPinchEnd,
               ),
 
               // (Optional) upcoming events timeline
