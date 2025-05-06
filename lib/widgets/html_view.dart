@@ -6,7 +6,7 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/PinchZoomReleaseUnzoomWidget.dart';
+import 'package:fstapp/widgets/pinch_zoom_release_unzoom_widget.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -19,11 +19,11 @@ class PinchScrollScope extends InheritedWidget {
   final VoidCallback onPinchEnd;
 
   const PinchScrollScope({
-    Key? key,
+    super.key,
     required this.onPinchStart,
     required this.onPinchEnd,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   static PinchScrollScope? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<PinchScrollScope>();
@@ -38,7 +38,7 @@ class PinchScrollView extends StatefulWidget {
   final Widget Function(VoidCallback onPinchStart, VoidCallback onPinchEnd)
   builder;
 
-  const PinchScrollView({Key? key, required this.builder}) : super(key: key);
+  const PinchScrollView({super.key, required this.builder});
 
   @override
   State<PinchScrollView> createState() => _PinchScrollViewState();
@@ -87,11 +87,11 @@ class ZoomableImage extends StatefulWidget {
   final VoidCallback? onTwoFingerEnd;
 
   const ZoomableImage({
-    Key? key,
+    super.key,
     required this.child,
     this.onTwoFingerStart,
     this.onTwoFingerEnd,
-  }) : super(key: key);
+  });
 
   @override
   State<ZoomableImage> createState() => _ZoomableImageState();
@@ -173,14 +173,14 @@ class HtmlView extends StatefulWidget {
   final VoidCallback? twoFingersOff;
 
   const HtmlView({
-    Key? key,
+    super.key,
     required this.html,
     this.fontSize = 18,
     this.isSelectable = false,
     this.color,
     this.twoFingersOn,
     this.twoFingersOff,
-  }) : super(key: key);
+  });
 
   @override
   State<HtmlView> createState() => _HtmlViewState();
@@ -227,9 +227,9 @@ class _HtmlViewState extends State<HtmlView> {
             alignment: Alignment.center,
             heightFactor: 1,
             child: ZoomableImage(
-              child: img,
               onTwoFingerStart: widget.twoFingersOn,
               onTwoFingerEnd: widget.twoFingersOff,
+              child: img,
             ),
           );
         }
