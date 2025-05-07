@@ -403,6 +403,7 @@
   "Enter option value": "Enter option value",
   "No Product Types": "No Product Types",
   "Product Types": "Product Types",
+  "Product Type": "Product Type",
   "Add Product Type": "Add Product Type",
   "New Product Type": "New Product Type",
   "No Products": "No Products",
@@ -530,7 +531,7 @@
   "Offline Map Style URL": "Offline Map Style URL",
   "Map Layer Settings": "Map Layer Settings",
   "Offline Map Layer Settings": "Offline Map Layer Settings",
-  "Auto-download offline map": "Auto-download offline map",
+  "Force offline map": "Force offline map",
   "Offline Map Layer Name": "Offline Map Layer Name",
   "Allows displaying the program in a table.": "Allows displaying the program in a table.",
   "Timetable": "Timetable",
@@ -546,5 +547,6 @@
   "Color": "Color",
   "Currency": "Currency",
   "This determines whether this event is hidden from list views.": "This determines whether this event is hidden from list views.",
+  "No news messages yet": "No news messages yet",
   "_":"_"
 }

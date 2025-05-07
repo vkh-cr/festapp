@@ -18,14 +18,14 @@ class SynchroService {
 
   static Future<OccasionSettingsModel> loadOrInitOccasionSettings() async {
     OccasionSettingsModel toReturn;
-    if(RightsService.currentOccasionId == null) {
+    if(RightsService.currentOccasionId() == null) {
       toReturn =  OccasionSettingsModel.defaultSettings;
     }
     else{
       var data = await _supabase
           .from(Tb.occasions.table)
-          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
-          .eq(Tb.occasions.id, RightsService.currentOccasionId!)
+          .select("${Tb.occasions.data}, ${Tb.occasions.services}, ${Tb.occasions.features}, ${Tb.occasions.start_time}, ${Tb.occasions.end_time}", )
+          .eq(Tb.occasions.id, RightsService.currentOccasionId()!)
           .single();
 
       toReturn = OccasionSettingsModel.fromJson(data);
@@ -62,7 +62,6 @@ class SynchroService {
     if (PlatformHelper.isPwaInstalledOrNative())
     {
       await DbEvents.updateEventDescriptions();
-      await DbInformation.updateInfoDescription();
     }
 
     await DbEvents.synchronizeMySchedule();
