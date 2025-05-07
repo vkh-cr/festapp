@@ -43,12 +43,10 @@ platform :ios do
         'cs-CZ' => ENV["RELEASE_NOTES"] || "No notes provided"
       },
       run_precheck_before_submit: false
-    )
-
-    submit_for_review(
-      api_key: api_key,
+      submit_for_review: true,
       automatic_release: true
     )
+
   end
 end
 EOF

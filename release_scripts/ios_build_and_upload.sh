@@ -15,12 +15,17 @@ else
   exit 1
 fi
 
-# Step 1: Build IPA using FVM
+# Step 1: Prompt for release notes (before build)
+echo "📝 What’s new in this version? (release notes):"
+read -r RELEASE_NOTES
+export RELEASE_NOTES
+
+# Step 2: Build IPA using FVM
 echo "📦 Building IPA with FVM..."
 cd .. # Go to project root
-#fvm flutter build ipa --release
+fvm flutter build ipa --release
 
-# Step 2: Determine IPA name from Info.plist
+# Step 3: Determine IPA name from Info.plist
 INFO_PLIST="ios/Runner/Info.plist"
 if [ ! -f "$INFO_PLIST" ]; then
   echo "❌ Info.plist not found at $INFO_PLIST"
@@ -52,7 +57,7 @@ else
   echo "✅ Using IPA: $IPA_PATH"
 fi
 
-# Step 3: Copy API key to expected location
+# Step 4: Copy API key to expected location
 TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"
 PRIVATE_KEY_NAME="AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
 SOURCE_KEY_PATH="$SCRIPT_DIR/$PRIVATE_KEY_NAME"
@@ -72,21 +77,27 @@ else
   echo "✅ Private key already exists."
 fi
 
-# Step 4: Prompt for release notes
-echo "📝 Enter release notes (press ENTER to finish):"
-read -r RELEASE_NOTES
-export RELEASE_NOTES
+# Step 5: Prepare and run Fastlane
 export IPA_FILENAME="$(basename "$IPA_PATH")"
-
-# Step 5: Run Fastlane publish_ipa lane
 FASTLANE_DIR="$SCRIPT_DIR/fastlane"
 
 if command -v fastlane &> /dev/null; then
+  if [ ! -f "$FASTLANE_DIR/Fastfile" ]; then
+    echo "❌ Fastfile not found at: $FASTLANE_DIR/Fastfile"
+    exit 1
+  fi
+
   echo "🚀 Running Fastlane to publish IPA..."
-  cd "$SCRIPT_DIR/fastlane"
-  fastlane publish_ipa
-  cd - > /dev/null
+  (
+    cd "$FASTLANE_DIR"
+    FASTLANE_SKIP_UPDATE_CHECK=1 \
+    FASTLANE_SKIP_INIT=true \
+    fastlane publish_ipa
+  )
 else
   echo "❌ Fastlane not installed. Please run ./fastlane_setup.sh"
   exit 1
 fi
+
+
+
