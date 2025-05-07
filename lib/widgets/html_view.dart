@@ -6,127 +6,13 @@ import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/pinch_zoom_release_unzoom_widget.dart';
 import 'package:fwfh_cached_network_image/fwfh_cached_network_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Provides the “blockScroll” callbacks to all descendants.
-class PinchScrollScope extends InheritedWidget {
-  final VoidCallback onPinchStart;
-  final VoidCallback onPinchEnd;
-
-  const PinchScrollScope({
-    super.key,
-    required this.onPinchStart,
-    required this.onPinchEnd,
-    required super.child,
-  });
-
-  static PinchScrollScope? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<PinchScrollScope>();
-
-  @override
-  bool updateShouldNotify(covariant PinchScrollScope old) => false;
-}
-
-/// Wraps any child and provides a scroll view that can be blocked
-/// during two-finger pinch gestures.
-class PinchScrollView extends StatefulWidget {
-  final Widget Function(VoidCallback onPinchStart, VoidCallback onPinchEnd)
-  builder;
-
-  const PinchScrollView({super.key, required this.builder});
-
-  @override
-  State<PinchScrollView> createState() => _PinchScrollViewState();
-}
-
-class _PinchScrollViewState extends State<PinchScrollView> {
-  bool blockScroll = false;
-  final ScrollController controller = ScrollController();
-
-  void _onPinchStart() {
-    print('>> scroll blocked');
-    setState(() => blockScroll = true);
-  }
-
-  void _onPinchEnd() {
-    Future.delayed(
-      PinchZoomReleaseUnzoomWidget.defaultResetDuration,
-          () {
-        print('>> scroll unblocked');
-        setState(() => blockScroll = false);
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PinchScrollScope(
-      onPinchStart: _onPinchStart,
-      onPinchEnd: _onPinchEnd,
-      child: SingleChildScrollView(
-        controller: controller,
-        physics: blockScroll
-            ? const NeverScrollableScrollPhysics()
-            : const BouncingScrollPhysics(),
-        child: widget.builder(_onPinchStart, _onPinchEnd),
-      ),
-    );
-  }
-}
-
-/// A small widget that listens for raw pointer downs/ups,
-/// counts fingers, and fires your two-finger callbacks (or the inherited ones).
-class ZoomableImage extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTwoFingerStart;
-  final VoidCallback? onTwoFingerEnd;
-
-  const ZoomableImage({
-    super.key,
-    required this.child,
-    this.onTwoFingerStart,
-    this.onTwoFingerEnd,
-  });
-
-  @override
-  State<ZoomableImage> createState() => _ZoomableImageState();
-}
-
-class _ZoomableImageState extends State<ZoomableImage> {
-  int _pointers = 0;
-
-  void _handlePointerDown(PointerDownEvent e) {
-    _pointers++;
-    if (_pointers == 2) {
-      print('>> pinch start (_pointers==2)');
-      final cb = widget.onTwoFingerStart ?? PinchScrollScope.of(context)?.onPinchStart;
-      cb?.call();
-    }
-  }
-
-  void _handlePointerUp(PointerUpEvent e) {
-    _pointers = (_pointers - 1).clamp(0, 10);
-    if (_pointers < 1) {
-      print('>> pinch end (_pointers<2)');
-      final cb = widget.onTwoFingerEnd ?? PinchScrollScope.of(context)?.onPinchEnd;
-      cb?.call();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _handlePointerDown,
-      onPointerUp: _handlePointerUp,
-      child: PinchZoomReleaseUnzoomWidget(maxScale: 4, child: widget.child, fingersRequiredToPinch: 2,),
-    );
-  }
-}
+import 'zoomable_image/zoomable_image.dart';
 
 /// Factory to enable cached network images in HtmlWidget
 class MyWidgetFactory extends WidgetFactory with CachedNetworkImageFactory {}
@@ -136,7 +22,7 @@ class HtmlWithAppLinksWidget extends HtmlWidget {
       this.context,
       super.html, {
         super.key,
-        required ColumnMode renderMode,
+        required RenderMode renderMode,
         super.textStyle,
         super.customWidgetBuilder,
         super.customStylesBuilder,
@@ -196,7 +82,7 @@ class _HtmlViewState extends State<HtmlView> {
     Widget content = HtmlWithAppLinksWidget(
       context,
       widget.html,
-      renderMode: RenderMode.column,
+      renderMode: RenderMode.listView,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
         fontFamily: "Futura",
@@ -234,55 +120,54 @@ class _HtmlViewState extends State<HtmlView> {
           );
         }
 
-        if (!kIsWeb &&
-            el.localName == 'a' &&
-            ((el.attributes['href'] ?? '').contains('youtube.com') ||
-                el.attributes['href']!.contains('youtu.be'))) {
+        if (!kIsWeb && el.localName == 'a') {
           final url = el.attributes['href']!;
-          final vid = YoutubePlayer.convertUrlToId(url) ?? url;
-          final ctrl = YoutubePlayerController(
-            initialVideoId: vid,
-            flags: const YoutubePlayerFlags(
-              useHybridComposition: true,
-              showLiveFullscreenButton: false,
-              autoPlay: false,
-              mute: false,
-            ),
-          );
-          final title = AnimatedBuilder(
-            animation: ctrl,
-            builder: (_, __) {
-              final t = ctrl.metadata.title;
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final uri = Uri.parse(url);
-                    if (await canLaunchUrl(uri)) launchUrl(uri);
-                  },
-                  child: Text(
-                    t.isNotEmpty ? t : 'Loading title…',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      decoration: TextDecoration.underline,
+          final vid = YoutubePlayer.convertUrlToId(url);
+          if (vid != null) {
+            final ctrl = YoutubePlayerController(
+              initialVideoId: vid,
+              flags: const YoutubePlayerFlags(
+                useHybridComposition: true,
+                showLiveFullscreenButton: false,
+                autoPlay: false,
+                mute: false,
+              ),
+            );
+            final title = AnimatedBuilder(
+              animation: ctrl,
+              builder: (_, __) {
+                final t = ctrl.metadata.title;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      final uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) launchUrl(uri);
+                    },
+                    child: Text(
+                      t.isNotEmpty ? t : 'Loading title…',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        decoration: TextDecoration.underline,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
-                ),
-              );
-            },
-          );
-          return YoutubePlayer(
-            controller: ctrl,
-            showVideoProgressIndicator: true,
-            topActions: [title],
-            bottomActions: const [
-              CurrentPosition(),
-              ProgressBar(isExpanded: true),
-              RemainingDuration(),
-            ],
-          );
+                );
+              },
+            );
+            return YoutubePlayer(
+              controller: ctrl,
+              showVideoProgressIndicator: true,
+              topActions: [title],
+              bottomActions: const [
+                CurrentPosition(),
+                ProgressBar(isExpanded: true),
+                RemainingDuration(),
+              ],
+            );
+          }
         }
 
         return null;
