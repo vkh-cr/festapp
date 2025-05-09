@@ -58,7 +58,7 @@ class _UserPageState extends State<UserPage> {
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: Colors.black,
+                color: ThemeConfig.appBarColorNegative(),
               ),
               onPressed: () {
                 RouterService.goBack(context);
@@ -140,7 +140,7 @@ class _UserPageState extends State<UserPage> {
   Widget build(BuildContext context) {
     List<Widget> actions = [
       IconButton(
-        icon: Icon(Icons.settings),
+        icon: Icon(Icons.settings, color: ThemeConfig.appBarColorNegative(),),
         onPressed: () => RouterService.navigate(context, SettingsPage.ROUTE),
       ),
     ];
@@ -148,8 +148,9 @@ class _UserPageState extends State<UserPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("Profile").tr(),
+        title: Text("Profile", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
         leading: BackButton(
+          color: ThemeConfig.appBarColorNegative(),
           onPressed: () => RouterService.popOrHome(context),
         ),
         actions: actions,
