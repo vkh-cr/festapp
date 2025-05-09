@@ -18,11 +18,6 @@ BEGIN
     -- grab current_user_id user after entering PL/pgSQL execution
     current_user_id := auth.uid();
 
-    -- Authorization
-    IF NOT get_is_editor_view_on_occasion(p_occasion) THEN
-        RETURN jsonb_build_object('code', 403, 'message', 'User not authorized');
-    END IF;
-
     -- (a) all events, with per-user flags
     SELECT jsonb_agg(jsonb_build_object(
         'id',                   e.id,

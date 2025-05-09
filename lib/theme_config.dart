@@ -89,7 +89,9 @@ class ThemeConfig {
   static Color profileButtonColor(BuildContext context) => appBarColor();
   static Color profileButtonTextColor(BuildContext context) => seed4;
 
-  static Color indicatorColor(BuildContext context) => isDarkMode(context) ? dddPrimary : seed1;
+  static Color indicatorColor(BuildContext context) => isDarkMode(context) ? dddPrimary : seed3;
+  static Color tabTextColor(BuildContext context) => blackColor(context).withOpacityUniversal(context, 0.7); //indicator color
+  static Color indicatorTextColor(BuildContext context) => whiteColorDarker(context); //header color
 
   static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
   static Color appBarColorNegative() => Colors.grey.changeColorLightness(0.8);
