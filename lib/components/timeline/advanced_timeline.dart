@@ -340,10 +340,10 @@ class _EventCard extends StatelessWidget {
                       Icon(
                         expanded ? Icons.expand_less : Icons.expand_more,
                         size: 20,
-                        color: ThemeConfig.darkColor(context),
+                        color: Colors.grey,
                       )
                     else if (hasDescription || hasPlace || isEditor)
-                      Icon(Icons.chevron_right, size: 20, color: ThemeConfig.darkColor(context)),
+                      Icon(Icons.chevron_right, size: 20, color: Colors.grey),
                   ]),
                 ),
               ),
@@ -477,7 +477,7 @@ class AdvancedTimelineView extends StatelessWidget {
               final canGoBack = controller.index > 0;
               return IconButton(
                 icon: const Icon(Icons.chevron_left),
-                color: ThemeConfig.appBarColor(),
+                color: ThemeConfig.indicatorColor(context),
                 onPressed: canGoBack
                     ? () => controller.animateTo(controller.index - 1)
                     : null,
@@ -492,7 +492,7 @@ class AdvancedTimelineView extends StatelessWidget {
               controller: controller,
               isScrollable: true,
               indicator: BoxDecoration(
-                color: ThemeConfig.appBarColor(),
+                color: ThemeConfig.indicatorColor(context),
                 border: StylesConfig.indicatorBorder(),
                 borderRadius:
                 BorderRadius.circular(StylesConfig.indicatorRoundness),
@@ -512,7 +512,7 @@ class AdvancedTimelineView extends StatelessWidget {
                       (animation.value - i).abs().clamp(0.0, 1.0);
                       final factor = 1.0 - diff;
                       final labelColor = Color.lerp(
-                        ThemeConfig.appBarColor(),
+                        ThemeConfig.indicatorColor(context),
                         ThemeConfig.tabHeaderColor(context),
                         factor,
                       )!;
@@ -561,7 +561,7 @@ class AdvancedTimelineView extends StatelessWidget {
               final canGoForward = controller.index < groups.length - 1;
               return IconButton(
                 icon: const Icon(Icons.chevron_right),
-                color: ThemeConfig.appBarColor(),
+                color: ThemeConfig.indicatorColor(context),
                 onPressed: canGoForward
                     ? () => controller.animateTo(controller.index + 1)
                     : null,
