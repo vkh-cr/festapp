@@ -259,10 +259,10 @@ class _EventCard extends StatelessWidget {
                 ),
                 child: Text('Sign out'.tr()),
               )
-                  : ElevatedButton(
+                  : OutlinedButton(
                 onPressed: () { controller.onSignInEvent!(event.id); },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: ThemeConfig.appBarColor(),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
                   padding: const EdgeInsets.symmetric(
