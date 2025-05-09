@@ -85,12 +85,17 @@ class ThemeConfig {
   static Color newsPageColor(BuildContext context) => backgroundColor(context);
   static Color infoPageColor(BuildContext context) => backgroundColor(context);
   static Color profileButtonColor(BuildContext context) => appBarColor();
-  static Color profileButtonTextColor(BuildContext context) => isDarkMode(context) ? darkColor(context) : Colors.grey;
+  static Color profileButtonTextColor(BuildContext context) => seed4;
 
   static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
+  static Color appBarColorNegative() => seed4;
+
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
   static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
   static Color bottomNavUnselectedItemColor(BuildContext context) => Colors.grey;
+
+  static Color tabHeaderColor(BuildContext context) => seed2;
+
 
   static Color upperNavText(BuildContext context) => isDarkMode(context) ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.surface;
 
