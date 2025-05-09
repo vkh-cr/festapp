@@ -92,7 +92,7 @@ class ThemeConfig {
   static Color indicatorTextColor(BuildContext context) => tabHeaderColor(context); //header color
 
   static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
-  static Color appBarColorNegative() => seed4;
+  static Color appBarColorNegative() => Colors.white.changeColorLightness(0.95);
 
   static Color bottomNavBackgroundColor(BuildContext context) => appBarColor();
   static Color bottomNavSelectedItemColor(BuildContext context) => seed2;
