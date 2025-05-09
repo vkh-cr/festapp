@@ -77,9 +77,10 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Settings").tr(),
+        title: Text("Settings", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
         leading: BackButton(
           onPressed: () => RouterService.goBackOrInitial(context),
+          color: ThemeConfig.appBarColorNegative(),
         ),
       ),
       body: Align(

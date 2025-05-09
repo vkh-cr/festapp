@@ -253,7 +253,7 @@ class _EventCard extends StatelessWidget {
                 onPressed: () { controller.onSignOutEvent!(event.id); },
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 6),
                 ),
@@ -264,7 +264,7 @@ class _EventCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).primaryColor,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
                   padding: const EdgeInsets.symmetric(
                       horizontal: 12, vertical: 6),
                   elevation: 0,
@@ -294,7 +294,7 @@ class _EventCard extends StatelessWidget {
           child: Card(
             elevation: 0,
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness)),
             clipBehavior: Clip.hardEdge,
             child: Column(children: [
               InkWell(
@@ -452,7 +452,7 @@ class AdvancedTimelineView extends StatelessWidget {
     required this.weekdays,
     required this.groups,
     this.maxTabBarWidth = StylesConfig.formMaxWidth,
-    this.padding = const EdgeInsets.symmetric(vertical: 4),
+    this.padding = StylesConfig.tabHeaderPadding,
   }) : super(key: key);
 
   @override
@@ -463,16 +463,26 @@ class AdvancedTimelineView extends StatelessWidget {
 
     return Container(
       padding: padding,
-      color: Theme.of(context).scaffoldBackgroundColor,
+      decoration: BoxDecoration(
+        color: ThemeConfig.tabHeaderColor(context),
+        border: StylesConfig.headerBorder(),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Left arrow
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: controller.index > 0
-                ? () => controller.animateTo(controller.index - 1)
-                : null,
+          // Left arrow, rebuilds on tab animation
+          AnimatedBuilder(
+            animation: animation,
+            builder: (ctx, _) {
+              final canGoBack = controller.index > 0;
+              return IconButton(
+                icon: const Icon(Icons.chevron_left),
+                color: ThemeConfig.appBarColor(),
+                onPressed: canGoBack
+                    ? () => controller.animateTo(controller.index - 1)
+                    : null,
+              );
+            },
           ),
 
           // TabBar in constrained box
@@ -482,8 +492,10 @@ class AdvancedTimelineView extends StatelessWidget {
               controller: controller,
               isScrollable: true,
               indicator: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12),
+                color: ThemeConfig.appBarColor(),
+                border: StylesConfig.indicatorBorder(),
+                borderRadius:
+                BorderRadius.circular(StylesConfig.indicatorRoundness),
               ),
               indicatorSize: TabBarIndicatorSize.tab,
               labelColor: Colors.transparent,
@@ -496,11 +508,12 @@ class AdvancedTimelineView extends StatelessWidget {
                   child: AnimatedBuilder(
                     animation: animation,
                     builder: (ctx, _) {
-                      final diff = (animation.value - i).abs().clamp(0.0, 1.0);
+                      final diff =
+                      (animation.value - i).abs().clamp(0.0, 1.0);
                       final factor = 1.0 - diff;
                       final labelColor = Color.lerp(
-                        ThemeConfig.darkColor(context),
-                        ThemeConfig.whiteColor(context),
+                        ThemeConfig.appBarColor(),
+                        ThemeConfig.tabHeaderColor(context),
                         factor,
                       )!;
 
@@ -517,7 +530,8 @@ class AdvancedTimelineView extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            day.toString().padLeft(2, '0'),
+                            DateFormat.Md(context.locale.toString())
+                                .format(groups[i].dateTime!),
                             style: TextStyle(fontSize: 10, color: labelColor),
                           ),
                           if (day == today) ...[
@@ -540,12 +554,19 @@ class AdvancedTimelineView extends StatelessWidget {
             ),
           ),
 
-          // Right arrow
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: controller.index < groups.length - 1
-                ? () => controller.animateTo(controller.index + 1)
-                : null,
+          // Right arrow, rebuilds on tab animation
+          AnimatedBuilder(
+            animation: animation,
+            builder: (ctx, _) {
+              final canGoForward = controller.index < groups.length - 1;
+              return IconButton(
+                icon: const Icon(Icons.chevron_right),
+                color: ThemeConfig.appBarColor(),
+                onPressed: canGoForward
+                    ? () => controller.animateTo(controller.index + 1)
+                    : null,
+              );
+            },
           ),
         ],
       ),
