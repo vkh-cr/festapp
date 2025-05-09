@@ -352,7 +352,7 @@ class _IconWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = ThemeConfig.profileButtonTextColor(context);
+    final color = ThemeConfig.appBarColorNegative();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
