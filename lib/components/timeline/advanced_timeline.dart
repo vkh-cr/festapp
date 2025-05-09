@@ -86,9 +86,9 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
 
     return DefaultTabController(
       length: datedEvents.length,
+      initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.first.startTime.weekday)),
       child: Builder(builder: (ctx) {
-        final controller = DefaultTabController.of(ctx)!;
-
+        final controller = DefaultTabController.of(ctx);
         return Scaffold(
           body: SafeArea(
             child: Column(children: [
@@ -477,7 +477,7 @@ class AdvancedTimelineView extends StatelessWidget {
               final canGoBack = controller.index > 0;
               return IconButton(
                 icon: const Icon(Icons.chevron_left),
-                color: ThemeConfig.indicatorColor(context),
+                color: ThemeConfig.tabTextColor(context),
                 onPressed: canGoBack
                     ? () => controller.animateTo(controller.index - 1)
                     : null,
@@ -512,8 +512,8 @@ class AdvancedTimelineView extends StatelessWidget {
                       (animation.value - i).abs().clamp(0.0, 1.0);
                       final factor = 1.0 - diff;
                       final labelColor = Color.lerp(
-                        ThemeConfig.indicatorColor(context),
-                        ThemeConfig.tabHeaderColor(context),
+                        ThemeConfig.tabTextColor(context),
+                        ThemeConfig.indicatorTextColor(context),
                         factor,
                       )!;
 
@@ -561,7 +561,7 @@ class AdvancedTimelineView extends StatelessWidget {
               final canGoForward = controller.index < groups.length - 1;
               return IconButton(
                 icon: const Icon(Icons.chevron_right),
-                color: ThemeConfig.indicatorColor(context),
+                color: ThemeConfig.tabTextColor(context),
                 onPressed: canGoForward
                     ? () => controller.animateTo(controller.index + 1)
                     : null,

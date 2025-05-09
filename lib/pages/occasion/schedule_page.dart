@@ -188,14 +188,14 @@ class _SchedulePageState extends State<SchedulePage>
     final bool isLargeScreen = MediaQuery.of(context).size.height > 860;
 
     // split into days
-    final dated = TimeBlockHelper.splitTimeBlocksByDate(
+    final datedEvents = TimeBlockHelper.splitTimeBlocksByDate(
       _dots,
       context,
       AppConfig.daySplitHour,
     );
-    if (dated.isEmpty) {
+    if (datedEvents.isEmpty) {
       final dt = TimeHelper.now();
-      dated.add(TimeBlockGroup(
+      datedEvents.add(TimeBlockGroup(
         title: dt.weekdayToString(context),
         events: [],
         dateTime: dt,
@@ -215,7 +215,8 @@ class _SchedulePageState extends State<SchedulePage>
         top: true,
         bottom: false,
         child: DefaultTabController(
-          length: dated.length,
+          initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.first.startTime.weekday)),
+          length: datedEvents.length,
           child: NestedScrollView(
             controller: _scrollController,
             headerSliverBuilder: (ctx, inner) => [
@@ -276,10 +277,10 @@ class _SchedulePageState extends State<SchedulePage>
               SliverPersistentHeader(
                 pinned: true,
                 delegate: _SliverToBoxAdapterDelegate(
-                  dayGroups: dated,
+                  dayGroups: datedEvents,
                   child: AdvancedTimelineView(
                     weekdays: weekdays,
-                    groups: dated,
+                    groups: datedEvents,
                     maxTabBarWidth: StylesConfig.formMaxWidth,
                   ),
                 ),
@@ -289,7 +290,7 @@ class _SchedulePageState extends State<SchedulePage>
               color: Theme.of(context).scaffoldBackgroundColor,
               child: TabBarView(
                 children: [
-                  for (var group in dated)
+                  for (var group in datedEvents)
                     DayList(
                       dayGroup: group,
                       onToggle: (id) => setState(
@@ -306,7 +307,7 @@ class _SchedulePageState extends State<SchedulePage>
                         onRemoveFromProgramEvent: _handleRemove,
                         onEditEvent: (c, ev) => RouterService
                             .navigateOccasion(
-                            context, "${EventPage.ROUTE}/$ev")
+                            context, "${EventPage.ROUTE}/$ev/edit")
                             .then((_) => loadData()),
                         onPlaceTap: (c, pl) => _goToMap(pl.id),
                       ),
