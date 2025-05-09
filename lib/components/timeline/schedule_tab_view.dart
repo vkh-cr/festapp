@@ -88,7 +88,7 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
     );
   }
 
-  int getInitialIndex() => TimeHelper.getIndexFromDays(
+  int getInitialIndex() => TimeHelper.getTimeNowIndexFromDays(
     datedEvents.map((e) => e.dateTime!.weekday),
   );
 }

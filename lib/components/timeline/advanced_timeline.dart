@@ -86,9 +86,9 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
 
     return DefaultTabController(
       length: datedEvents.length,
+      initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.first.startTime.weekday)),
       child: Builder(builder: (ctx) {
-        final controller = DefaultTabController.of(ctx)!;
-
+        final controller = DefaultTabController.of(ctx);
         return Scaffold(
           body: SafeArea(
             child: Column(children: [
