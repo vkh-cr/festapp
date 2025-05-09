@@ -262,7 +262,7 @@ class _EventCard extends StatelessWidget {
                   : OutlinedButton(
                 onPressed: () { controller.onSignInEvent!(event.id); },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: ThemeConfig.appBarColor(),
+                  foregroundColor: ThemeConfig.darkColor(context),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
                   padding: const EdgeInsets.symmetric(
