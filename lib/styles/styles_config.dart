@@ -27,13 +27,13 @@ class StylesConfig {
   static const double kHorizontalPadding = 16.0;
 
   static const double signInSignOutRoundness = 16; //16
-  static const double indicatorRoundness = 0; //12
-  static const double eventItemRoundness = 4; //12
-  static const double newsItemRoundness = 2; //10
+  static const double indicatorRoundness = 12; //12
+  static const double eventItemRoundness = 12; //12
+  static const double newsItemRoundness = 10; //10
 
-  static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 0); //4
-  static Border indicatorBorder() => Border.all(width: 2.5, color: ThemeConfig.appBarColor()); //null
-  static Border headerBorder() => Border.symmetric(horizontal: BorderSide(width: 2.5, color: ThemeConfig.appBarColor())); //Theme.of(context).scaffoldBackgroundColor
+  static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 4); //4
+  static Border? indicatorBorder() => null;
+  static Border? headerBorder() => null; //Theme.of(context).scaffoldBackgroundColor
 
   static TextStyle textStyleBig = TextStyle(fontWeight: FontWeight.w900, fontSize: 16);
 
