@@ -88,6 +88,8 @@ class ThemeConfig {
   static Color profileButtonTextColor(BuildContext context) => seed4;
 
   static Color indicatorColor(BuildContext context) => appBarColor();
+  static Color tabTextColor(BuildContext context) => indicatorColor(context); //indicator color
+  static Color indicatorTextColor(BuildContext context) => tabHeaderColor(context); //header color
 
   static Color appBarColor() => seed3.changeColorSaturation(0.4).changeColorLightness(0.10);
   static Color appBarColorNegative() => seed4;
