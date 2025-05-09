@@ -130,6 +130,8 @@ class ThemeConfig {
   // Function for eventTypeColor
   static Color eventTypeToColor(BuildContext context, String? type) {
     switch (type) {
+      case "children":
+        return seed1;
       case "music":
         return seed2;
       case "talk":
