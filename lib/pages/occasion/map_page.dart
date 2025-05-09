@@ -34,6 +34,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/offline_map_helper.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
@@ -263,8 +264,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _useOffline ? _buildOfflineMap() : _buildOnlineMap();
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageTitle),
-        leading: PopButton(),
+        title: Text(pageTitle, style: TextStyle(color: ThemeConfig.appBarColorNegative())),
+        leading: PopButton(color: ThemeConfig.appBarColorNegative(),),
         actions: [
           if (!kIsWeb && _isOfflineMapConfigured() && !_mapFeature.offlineMapLayer.forceOfflineMap)
             Row(
