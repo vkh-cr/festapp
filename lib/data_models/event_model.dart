@@ -155,9 +155,8 @@ class EventModel extends ITrinaRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
-    isEventInMySchedule = event.isEventInMySchedule;
     childEventIds = event.childEventIds;
-    place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
+    place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
     type = event.type;
     occasionId = event.occasionId;
   }
@@ -291,7 +290,7 @@ class EventModel extends ITrinaRowModel {
         isSignedInColumn: isSignedIn,
         isEventInMyProgramColumn: isEventInMySchedule,
         isGroupEventColumn: isGroupEvent,
-        placeColumn: place?.id,
+        placesTable: place,
         Tb.events.type: type,
         childEventsList: childEventIds,
         Tb.events.occasion: occasionId
