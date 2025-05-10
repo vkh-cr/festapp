@@ -28,6 +28,8 @@ class FeatureConstants {
 
   static const String scheduleType = "schedule_type";
   static const String schedule = "schedule";
+  static const String scheduleTypeBasic = "basic";
+  static const String scheduleTypeAdvanced = "advanced";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";

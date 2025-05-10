@@ -386,7 +386,7 @@ class ScheduleFeature extends Feature {
 
   ScheduleFeature({
     super.code = FeatureConstants.schedule,
-    super.isEnabled = true,       // enabled by default
+    super.isEnabled = true,
     super.title,
     super.description,
     this.scheduleType,
@@ -396,7 +396,7 @@ class ScheduleFeature extends Feature {
     return ScheduleFeature(
       code: json[FeatureConstants.metaCode],
       isEnabled: json[FeatureConstants.metaIsEnabled] ?? true,
-      scheduleType: json[FeatureConstants.scheduleType] ?? 'basic',
+      scheduleType: json[FeatureConstants.scheduleType] ?? FeatureConstants.scheduleTypeAdvanced,
     );
   }
 

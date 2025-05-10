@@ -222,8 +222,8 @@ class _SchedulePageState extends State<SchedulePage>
             controller: _scrollController,
             headerSliverBuilder: (ctx, inner) => [
               SliverAppBar(
-                collapsedHeight: 60,
-                expandedHeight: isLargeScreen ? 60 : 60,
+                collapsedHeight: 62,
+                expandedHeight: isLargeScreen ? 62 : 62,
                 pinned: isLargeScreen,
                 floating: false,
                 automaticallyImplyLeading: false,
