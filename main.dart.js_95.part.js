@@ -1,11 +1,20 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_95",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={PU:function PU(d,e,f,g){var _=this
+_.a=d
+_.b=e
+_.c=f
+_.d=g}}
 A=c[0]
-C=c[2]
-B=c[279]
-var z=a.updateTypes([]);(function constants(){B.q6=new A.jO(-1,1)
-B.lS=new A.db(C.fv,null,null,null,null)})()};
+B=a.updateHolder(c[188],B)
+B.PU.prototype={
+j(d){var y=this
+switch(y.d.a){case 0:return"ColorFilter.mode("+A.o(y.a)+", "+A.o(y.b)+")"
+case 1:return"ColorFilter.matrix("+A.o(y.c)+")"
+case 2:return"ColorFilter.linearToSrgbGamma()"
+case 3:return"ColorFilter.srgbToLinearGamma()"}}}
+var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
+y(B.PU,A.E)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_95",e:"endPart",h:b})})($__dart_deferred_initializers__,"/GiyHWvXFw3z5dtb65qOIACh/O8=");
+a.eventLog.push({p:"main.dart.js_95",e:"endPart",h:b})})($__dart_deferred_initializers__,"MNk3xD0iQktJPkZAky4bPmvpxR4=");
