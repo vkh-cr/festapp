@@ -26,6 +26,9 @@ class FeatureConstants {
   static const String ticketBackground = "background";
   static const String ticketType = "ticket_type";
 
+  static const String scheduleType = "schedule_type";
+  static const String schedule = "schedule";
+
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";
   static const String formExternalLink = "external_form_link";
