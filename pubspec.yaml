@@ -57,7 +57,7 @@ dependencies:
     git:
       url: https://github.com/the-airbender/quill_html_editor.git
       ref: a2beeb5bfd436e86f2635c8db1154b4190eeedb5
-  trina_grid: ^1.6.7
+  trina_grid: ^1.6.8
   url_strategy: ^0.3.0
   desktop_drop: ^0.6.0
   csv: ^6.0.0
