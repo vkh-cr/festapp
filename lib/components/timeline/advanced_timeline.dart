@@ -221,7 +221,7 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final col = ThemeConfig.eventTypeToColor(context, event.eventType);
-    const stripeW = 6.0, stripeH = 48.0;
+    const stripeW = 6.0, stripeH = 52.0;
     final capEvent = event.maxParticipants > 0;
 
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
@@ -320,15 +320,15 @@ class _EventCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(event.durationTimeString(),
                               style: TextStyle(
-                                fontSize: 11,
-                                color: ThemeConfig.darkColor(context).withOpacity(0.7),
+                                fontSize: 13,
+                                color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.6),
                               )),
                           if (hasPlace && !expanded) ...[
                             const SizedBox(height: 2),
                             Text(event.timeBlockPlace!.title,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: ThemeConfig.darkColor(context), fontSize: 12)),
+                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.95), fontSize: 12)),
                           ],
                         ],
                       ),
@@ -434,6 +434,7 @@ class _EventCard extends StatelessWidget {
 }
 
 
+/// Tab header widget with scrollable, centered tabs and inline arrow navigation.
 class AdvancedTimelineView extends StatelessWidget {
   /// Localized weekday labels (e.g., ['MON', 'TUE', ...]).
   final List<String> weekdays;
@@ -461,114 +462,128 @@ class AdvancedTimelineView extends StatelessWidget {
     final animation = controller.animation!;
     final today = TimeHelper.now().day;
 
+    // Total extra width to accommodate both arrows (approx. IconButton width)
+    const arrowTotalWidth = 96.0;
+
     return Container(
       padding: padding,
       decoration: BoxDecoration(
         color: ThemeConfig.tabHeaderColor(context),
         border: StylesConfig.headerBorder(),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Left arrow, rebuilds on tab animation
-          AnimatedBuilder(
-            animation: animation,
-            builder: (ctx, _) {
-              final canGoBack = controller.index > 0;
-              return IconButton(
-                icon: const Icon(Icons.chevron_left),
-                color: ThemeConfig.tabTextColor(context),
-                onPressed: canGoBack
-                    ? () => controller.animateTo(controller.index - 1)
-                    : null,
-              );
-            },
+      child: Center(
+        child: ConstrainedBox(
+          // Limit overall tab header width + arrows
+          constraints: BoxConstraints(
+            maxWidth: maxTabBarWidth + arrowTotalWidth,
           ),
-
-          // TabBar in constrained box
-          ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxTabBarWidth),
-            child: TabBar(
-              controller: controller,
-              isScrollable: true,
-              indicator: BoxDecoration(
-                color: ThemeConfig.indicatorColor(context),
-                border: StylesConfig.indicatorBorder(),
-                borderRadius:
-                BorderRadius.circular(StylesConfig.indicatorRoundness),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Back arrow, right next to tabs
+              AnimatedBuilder(
+                animation: animation,
+                builder: (ctx, _) {
+                  final canGoBack = controller.index > 0;
+                  return IconButton(
+                    icon: const Icon(Icons.chevron_left),
+                    color: ThemeConfig.tabTextColor(context),
+                    onPressed: canGoBack
+                        ? () => controller.animateTo(controller.index - 1)
+                        : null,
+                  );
+                },
               ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelColor: Colors.transparent,
-              unselectedLabelColor: Colors.transparent,
-              tabs: List.generate(groups.length, (i) {
-                final day = groups[i].dateTime!.day;
-                return SizedBox(
-                  width: 42,
-                  height: 60,
-                  child: AnimatedBuilder(
-                    animation: animation,
-                    builder: (ctx, _) {
-                      final diff =
-                      (animation.value - i).abs().clamp(0.0, 1.0);
-                      final factor = 1.0 - diff;
-                      final labelColor = Color.lerp(
-                        ThemeConfig.tabTextColor(context),
-                        ThemeConfig.indicatorTextColor(context),
-                        factor,
-                      )!;
 
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            weekdays[groups[i].dateTime!.weekday - 1],
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: labelColor,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            DateFormat.Md(context.locale.toString())
-                                .format(groups[i].dateTime!),
-                            style: TextStyle(fontSize: 10, color: labelColor),
-                          ),
-                          if (day == today) ...[
-                            const SizedBox(height: 4),
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: ThemeConfig.redColor(context),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ],
-                        ],
+              // Scrollable tabs
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxTabBarWidth),
+                  child: TabBar(
+                    controller: controller,
+                    isScrollable: true,
+                    indicator: BoxDecoration(
+                      color: ThemeConfig.indicatorColor(context),
+                      border: StylesConfig.indicatorBorder(),
+                      borderRadius:
+                      BorderRadius.circular(StylesConfig.indicatorRoundness),
+                    ),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.transparent,
+                    unselectedLabelColor: Colors.transparent,
+                    tabs: List.generate(groups.length, (i) {
+                      final group = groups[i];
+                      final day = group.dateTime!.day;
+                      return SizedBox(
+                        width: 42,
+                        height: 60,
+                        child: AnimatedBuilder(
+                          animation: animation,
+                          builder: (ctx, _) {
+                            final diff =
+                            (animation.value - i).abs().clamp(0.0, 1.0);
+                            final factor = 1.0 - diff;
+                            final labelColor = Color.lerp(
+                              ThemeConfig.tabTextColor(context),
+                              ThemeConfig.indicatorTextColor(context),
+                              factor,
+                            )!;
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  weekdays[group.dateTime!.weekday - 1],
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: labelColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  DateFormat.Md(context.locale.toString())
+                                      .format(group.dateTime!),
+                                  style: TextStyle(
+                                      fontSize: 10, color: labelColor),
+                                ),
+                                if (day == today) ...[
+                                  const SizedBox(height: 4),
+                                  Container(
+                                    width: 6,
+                                    height: 6,
+                                    decoration: BoxDecoration(
+                                      color: ThemeConfig.redColor(context),
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            );
+                          },
+                        ),
                       );
-                    },
+                    }),
                   ),
-                );
-              }),
-            ),
-          ),
+                ),
+              ),
 
-          // Right arrow, rebuilds on tab animation
-          AnimatedBuilder(
-            animation: animation,
-            builder: (ctx, _) {
-              final canGoForward = controller.index < groups.length - 1;
-              return IconButton(
-                icon: const Icon(Icons.chevron_right),
-                color: ThemeConfig.tabTextColor(context),
-                onPressed: canGoForward
-                    ? () => controller.animateTo(controller.index + 1)
-                    : null,
-              );
-            },
+              // Forward arrow, directly adjacent
+              AnimatedBuilder(
+                animation: animation,
+                builder: (ctx, _) {
+                  final canGoForward = controller.index < groups.length - 1;
+                  return IconButton(
+                    icon: const Icon(Icons.chevron_right),
+                    color: ThemeConfig.tabTextColor(context),
+                    onPressed: canGoForward
+                        ? () => controller.animateTo(controller.index + 1)
+                        : null,
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
