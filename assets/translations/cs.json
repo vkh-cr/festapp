@@ -548,5 +548,6 @@
   "Currency": "Měna",
   "This determines whether this event is hidden from list views.": "Určuje, zda je tato událost skrytá v seznamu událostí.",
   "No news messages yet": "Zatím žádné novinky",
+  "Allows customizing event schedule display settings.": "Umožní upravovat vzhled programu.",
   "_": "_"
 }
