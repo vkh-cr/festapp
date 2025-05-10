@@ -13,6 +13,7 @@ import 'package:fstapp/data_services/DataExtensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/dialogs/add_new_event_dialog.dart';
+import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/pages/occasion/my_schedule_page.dart';
@@ -215,14 +216,14 @@ class _SchedulePageState extends State<SchedulePage>
         top: true,
         bottom: false,
         child: DefaultTabController(
-          initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.first.startTime.weekday)),
+          initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.firstOrNull?.startTime.weekday ?? 0)),
           length: datedEvents.length,
           child: NestedScrollView(
             controller: _scrollController,
             headerSliverBuilder: (ctx, inner) => [
               SliverAppBar(
-                collapsedHeight: 60,
-                expandedHeight: isLargeScreen ? 60 : 60,
+                collapsedHeight: 62,
+                expandedHeight: isLargeScreen ? 62 : 62,
                 pinned: isLargeScreen,
                 floating: false,
                 automaticallyImplyLeading: false,
@@ -307,7 +308,7 @@ class _SchedulePageState extends State<SchedulePage>
                         onRemoveFromProgramEvent: _handleRemove,
                         onEditEvent: (c, ev) => RouterService
                             .navigateOccasion(
-                            context, "${EventPage.ROUTE}/$ev/edit")
+                            context, "${EventEditPage.ROUTE}/$ev")
                             .then((_) => loadData()),
                         onPlaceTap: (c, pl) => _goToMap(pl.id),
                       ),
@@ -354,24 +355,26 @@ class _IconWithLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = ThemeConfig.appBarColorNegative();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: Icon(icon, size: 24, color: color),
-            onPressed: onPressed,
-            splashRadius: 24,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(color: color),
-          ),
-        ],
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(24),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: color,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(color: color, fontSize: 12),
+            ),
+          ],
+        ),
       ),
     );
   }

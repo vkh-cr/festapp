@@ -85,7 +85,7 @@ class ThemeConfig {
   static Color newsPageColor(BuildContext context) => backgroundColor(context);
   static Color infoPageColor(BuildContext context) => backgroundColor(context);
   static Color profileButtonColor(BuildContext context) => appBarColor();
-  static Color profileButtonTextColor(BuildContext context) => seed4;
+  static Color profileButtonTextColor(BuildContext context) => bottomNavUnselectedItemColor(context);
 
   static Color indicatorColor(BuildContext context) => appBarColor();
   static Color tabTextColor(BuildContext context) => indicatorColor(context); //indicator color
