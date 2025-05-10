@@ -66,7 +66,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
         appBar: AppBar(
           title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
           leading: BackButton(
-            color: ThemeConfig.appBarColor(),
+            color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),
           ),
         ),

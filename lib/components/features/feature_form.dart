@@ -32,6 +32,7 @@ class _FeatureFormState extends State<FeatureForm> {
   TextEditingController? reserveButtonTitleController;
   // New variable for ticket type
   String? ticketType;
+  String? scheduleType;
 
   // Controllers for MapFeature (Online Map Layer)
   TextEditingController? zoomController;
@@ -115,6 +116,9 @@ class _FeatureFormState extends State<FeatureForm> {
     } else if (widget.feature is WorkshopsFeature) {
       // Initialize with an empty string. The formatted value will be set in didChangeDependencies.
       startTimeController = TextEditingController(text: "");
+    } else if (widget.feature is ScheduleFeature) {
+      final sched = widget.feature as ScheduleFeature;
+      scheduleType = sched.scheduleType ?? 'basic';
     } else {
       useExternalForm = false;
     }
@@ -589,8 +593,25 @@ class _FeatureFormState extends State<FeatureForm> {
           },
         ),
       );
+    } else if (widget.feature is ScheduleFeature) {
+      final sched = widget.feature as ScheduleFeature;
+      fields.add(DropdownButtonFormField<String>(
+        value: scheduleType,
+        decoration: InputDecoration(labelText: "Schedule Type".tr()),
+        items: <String>["basic", "advanced"].map((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        onChanged: (newValue) {
+          setState(() {
+            scheduleType = newValue;
+          });
+        },
+        onSaved: (val) => sched.scheduleType = val,
+      ));
     }
-
     return fields;
   }
 }

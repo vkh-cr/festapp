@@ -85,7 +85,7 @@ class _TimetablePageState extends State<TimetablePage>
       DateFormat("EEEE", context.locale.languageCode).format(e);
 
   void setupTabController(List<TimeBlockGroup> days) {
-    _currentIndex ??= TimeHelper.getIndexFromDays(days.map((d)=>d.dateTime!.weekday));
+    _currentIndex ??= TimeHelper.getTimeNowIndexFromDays(days.map((d)=>d.dateTime!.weekday));
 
     if (_tabController?.length != days.length) {
       _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);
