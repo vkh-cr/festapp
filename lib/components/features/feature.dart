@@ -29,6 +29,8 @@ abstract class Feature {
         return CompanionsFeature.fromJson(json);
       case FeatureConstants.map:
         return MapFeature.fromJson(json);
+      case FeatureConstants.schedule:       // <<< new
+        return ScheduleFeature.fromJson(json);
       case FeatureConstants.workshops:
         return WorkshopsFeature.fromJson(json);
       default:
@@ -375,5 +377,38 @@ class WorkshopsFeature extends Feature {
       FeatureConstants.metaIsEnabled: isEnabled,
       'start_time': startTime?.toIso8601String(),
     };
+  }
+}
+
+/// Feature for schedule with a type of "basic" or "advanced".
+class ScheduleFeature extends Feature {
+  String? scheduleType;
+
+  ScheduleFeature({
+    super.code = FeatureConstants.schedule,
+    super.isEnabled = true,
+    super.title,
+    super.description,
+    this.scheduleType,
+  });
+
+  factory ScheduleFeature.fromJson(Map<String, dynamic> json) {
+    return ScheduleFeature(
+      code: json[FeatureConstants.metaCode],
+      isEnabled: json[FeatureConstants.metaIsEnabled] ?? true,
+      scheduleType: json[FeatureConstants.scheduleType] ?? FeatureConstants.scheduleTypeAdvanced,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    final data = {
+      FeatureConstants.metaCode: code,
+      FeatureConstants.metaIsEnabled: isEnabled,
+    };
+    if (scheduleType != null) {
+      data[FeatureConstants.scheduleType] = scheduleType!;
+    }
+    return data;
   }
 }

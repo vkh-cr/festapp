@@ -16,9 +16,7 @@ class FeatureService {
   /// Returns a default list of features.
   static List<Feature> getDefaultFeatures() {
     return [
-      // Use FormFeature for the form feature.
       FormFeature(code: FeatureConstants.form, isEnabled: false),
-      // Use TicketFeature for ticket-specific properties.
       TicketFeature(
         code: FeatureConstants.ticket,
         isEnabled: false,
@@ -26,7 +24,6 @@ class FeatureService {
         ticketDarkColor: '000000',
         ticketBackground: '',
       ),
-      // Use SimpleFeature for features with no extra properties.
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
       WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
       MapFeature(code: FeatureConstants.map, isEnabled: true),
@@ -38,6 +35,7 @@ class FeatureService {
       SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
       SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
       CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
+      ScheduleFeature(code: FeatureConstants.schedule, isEnabled: true, scheduleType: 'basic'),
     ];
   }
 

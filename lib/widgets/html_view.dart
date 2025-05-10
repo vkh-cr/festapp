@@ -85,7 +85,7 @@ class _HtmlViewState extends State<HtmlView> {
       renderMode: RenderMode.listView,
       textStyle: TextStyle(
         fontSize: widget.fontSize,
-        fontFamily: "Futura",
+        fontFamily: ThemeConfig.fontFamily,
         color: textColor,
         inherit: false,
       ),

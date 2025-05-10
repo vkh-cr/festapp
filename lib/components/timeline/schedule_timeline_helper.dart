@@ -5,6 +5,178 @@ import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/services/time_helper.dart';
 
+/// Determines available actions/state for an event.
+enum TimeBlockType {
+  saved,       // already saved to user's program
+  canSave,     // can be saved to program
+  noAction,    // no actions available
+  signedIn,    // user is signed in
+  isFull,      // event full
+  canSignIn,   // can sign in
+}
+
+/// Represents an optional place or "track" for splitting.
+class TimeBlockPlace {
+  final int id;
+  final String title;
+  final int? order;
+
+  TimeBlockPlace({required this.id, required this.title, required this.order});
+
+  factory TimeBlockPlace.fromPlaceModel(PlaceModel place) {
+    return TimeBlockPlace(
+      id: place.id!,
+      title: place.title ?? '---',
+      order: place.order,
+    );
+  }
+}
+
+/// A group of time blocks, e.g. by place or time of day.
+class TimeBlockGroup {
+  final String title;
+  final DateTime? dateTime;
+  final List<TimeBlockItem> events;
+
+  TimeBlockGroup({required this.title, required this.events, this.dateTime});
+}
+
+/// A single time-block entry, now supporting nested child blocks.
+class TimeBlockItem {
+  DateTime startTime;
+  DateTime endTime;
+  TimeBlockType timeBlockType;
+  dynamic data;
+  String? description;
+  final int id;
+  TimeBlockPlace? timeBlockPlace;
+  String? eventType;
+  final String title;
+  final int participants;
+  final int maxParticipants;
+  /// Nested child time blocks
+  List<TimeBlockItem>? children;
+
+  TimeBlockItem({
+    required this.id,
+    required this.startTime,
+    required this.endTime,
+    required this.timeBlockType,
+    this.data,
+    this.description,
+    this.timeBlockPlace,
+    this.eventType,
+    this.title = '',
+    this.participants = 0,
+    this.maxParticipants = 0,
+    this.children,
+  });
+
+  /// Duration of the block.
+  Duration duration() => startTime.isBefore(endTime)
+      ? DateTimeRange(start: startTime, end: endTime).duration
+      : Duration.zero;
+
+  String durationString() {
+    final d = duration();
+    return '${d.inHours}h ${d.inMinutes.remainder(60)}m';
+  }
+
+  bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
+  bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
+  bool haveChildren() => children?.isNotEmpty ?? false;
+
+  String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
+
+  /// Factory from EventModel for table view (old usage).
+  factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
+    return TimeBlockItem(
+      id: model.id!,
+      startTime: model.startTime.eventLocalTime(),
+      endTime: model.endTime.eventLocalTime(),
+      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
+      data: model.toString(),
+      eventType: model.type,
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
+      title: model.title!,
+      participants: model.currentParticipants ?? 0,
+      maxParticipants: model.maxParticipants ?? 0,
+      children: model.childEvents
+          .map((c) => TimeBlockItem.fromEventModelAsChild(c))
+          .toList(),
+    );
+  }
+
+  /// Factory from EventModel for schedule timeline (new usage).
+  factory TimeBlockItem.fromEventModelTimeline(EventModel model) {
+    return TimeBlockItem(
+      id: model.id!,
+      startTime: model.startTime,
+      endTime: model.endTime,
+      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
+      data: {
+        "leftText": model.startTimeString(),
+        "rightText": model.toString()
+      },
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
+    );
+  }
+
+  factory TimeBlockItem.fromEventModel(EventModel model) {
+    return TimeBlockItem(
+      id: model.id!,
+      startTime: model.startTime.eventLocalTime(),
+      endTime: model.endTime.eventLocalTime(),
+      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
+      data: model.toString(),
+      description: model.description,
+      eventType: model.type,
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
+      title: model.title!,
+      participants: model.currentParticipants ?? 0,
+      maxParticipants: model.maxParticipants ?? 0,
+      children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
+          .toList(),
+    );
+  }
+
+  /// Factory from EventModel as a child event.
+  factory TimeBlockItem.fromEventModelAsChild(EventModel model) {
+    return TimeBlockItem(
+      id: model.id!,
+      startTime: model.startTime,
+      endTime: model.endTime,
+      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
+      data: {
+        "leftText": model.durationTimeString(),
+        "rightText": model.toString()
+      },
+      timeBlockPlace: null,
+    );
+  }
+
+  /// Factory for companion entries.
+  factory TimeBlockItem.forCompanion(EventModel model) {
+    return TimeBlockItem(
+      id: model.id!,
+      startTime: model.startTime,
+      endTime: model.endTime,
+      timeBlockType: TimeBlockType.signedIn,
+      data: {
+        "leftText": model.durationTimeString(),
+        "rightText": model.toString()
+      },
+    );
+  }
+}
+
+/// Helper class for splitting/time-block typing.
 class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn) {
@@ -28,241 +200,100 @@ class TimeBlockHelper {
 
   static List<TimeBlockGroup> splitTimeBlockByPlace(
       Iterable<TimeBlockItem> events) {
-    // Group events by AlternativeSplit.id, handling null case
-    Map<int?, List<TimeBlockItem>> groupedByAlternativeSplit = {};
+    Map<int?, List<TimeBlockItem>> grouped = {};
     for (var event in events) {
-      int? alternativeSplitId = event.timeBlockPlace?.id;
-      if (!groupedByAlternativeSplit.containsKey(alternativeSplitId)) {
-        groupedByAlternativeSplit[alternativeSplitId] = [];
-      }
-      groupedByAlternativeSplit[alternativeSplitId]!.add(event);
+      grouped.putIfAbsent(event.timeBlockPlace?.id, () => []).add(event);
     }
-
-    // Convert to a list of EventGroup and order by AlternativeSplit.order, handling null case
-    List<TimeBlockGroup> eventGroups =
-        groupedByAlternativeSplit.entries.map((entry) {
-      var alternativeSplit = entry.value.first.timeBlockPlace;
-      String title = alternativeSplit!.title;
+    var groups = grouped.entries.map((entry) {
+      var place = entry.value.first.timeBlockPlace;
       return TimeBlockGroup(
-        title: title,
+        title: place?.title ?? '',
         events: entry.value,
       );
     }).toList();
-
-    // Sort the event groups by AlternativeSplit.order, with nulls (max order) at the end
-    eventGroups.sort((a, b) {
-      int orderA =
-          a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
-      int orderB =
-          b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
-      return orderA.compareTo(orderB);
+    groups.sort((a, b) {
+      var oa = a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+      var ob = b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+      return oa.compareTo(ob);
     });
-
-    return eventGroups;
+    return groups;
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDay(
       Iterable<TimeBlockItem> events, BuildContext context) {
-    Map<String, List<TimeBlockItem>> groupedByDay = {};
-
-    for (var event in events) {
-      String day = DateFormat("EEEE d. MMMM ", context.locale.languageCode)
-          .format(event.startTime);
+    Map<String, List<TimeBlockItem>> map = {};
+    for (var e in events) {
+      var day = DateFormat("EEEE d. MMMM ", context.locale.languageCode)
+          .format(e.startTime);
       day = day[0].toUpperCase() + day.substring(1);
-
-      if (!groupedByDay.containsKey(day)) {
-        groupedByDay[day] = [];
-      }
-      groupedByDay[day]!.add(event);
+      map.putIfAbsent(day, () => []).add(e);
     }
-
-    return groupedByDay.entries.map((entry) {
-      return TimeBlockGroup(title: entry.key, events: entry.value);
+    return map.entries.map((en) {
+      return TimeBlockGroup(title: en.key, events: en.value);
     }).toList();
   }
 
-  static List<TimeBlockGroup> splitTimeBlocks(Iterable<TimeBlockItem> events) {
-    List<TimeBlockGroup> eventGroups;
+  static List<TimeBlockGroup> splitTimeBlocks(
+      Iterable<TimeBlockItem> events) {
     if (AppConfig.isSplitByPlace) {
-      eventGroups = TimeBlockHelper.splitTimeBlockByPlace(
+      return splitTimeBlockByPlace(
           events.where((e) => e.timeBlockPlace != null));
     } else {
-      eventGroups = TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
+      return splitTimeBlocksByTimeOfDay(events);
     }
-    return eventGroups;
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDate(
       List<TimeBlockItem> events, BuildContext context, int splitHour) {
     List<TimeBlockGroup> toReturn = [];
-    if (events.isEmpty) {
-      return toReturn;
-    }
+    if (events.isEmpty) return toReturn;
     var fromD = events.first.startTime.subtract(const Duration(days: 1));
     var fromDate = DateTime(fromD.year, fromD.month, fromD.day);
     var tested = fromDate.add(Duration(hours: splitHour));
-
     while (!tested.isAfter(events.last.startTime)) {
-      var testedPlusDay = tested.add(const Duration(days: 1));
-      var eventsFocused = events
-          .where((e) =>
-              e.startTime.isAfter(tested) &&
-              (e.startTime.isAtSameMomentAs(testedPlusDay) ||
-                  e.startTime.isBefore(testedPlusDay)))
-          .toList();
-      if (eventsFocused.isNotEmpty) {
+      var next = tested.add(const Duration(days: 1));
+      var focused = events.where((e) =>
+      e.startTime.isAfter(tested) && e.startTime.isBefore(next) ||
+          e.startTime.isAtSameMomentAs(next)).toList();
+      if (focused.isNotEmpty) {
         toReturn.add(TimeBlockGroup(
-            title: eventsFocused.first.startTime.weekdayToString(context),
-            events: eventsFocused,
-            dateTime: tested));
+          title: focused.first.startTime.weekdayToString(context),
+          events: focused,
+          dateTime: tested,
+        ));
       }
-      tested = testedPlusDay;
+      tested = next;
     }
     return toReturn;
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(
       Iterable<TimeBlockItem> events) {
-    List<TimeBlockItem> morningEvents =
-        events.where((e) => e.startTime.hour <= 12).toList();
-    List<TimeBlockItem> afternoonEvents = events
+    List<TimeBlockItem> morning =
+    events.where((e) => e.startTime.hour <= 12).toList();
+    List<TimeBlockItem> afternoon = events
         .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
         .toList();
-    List<TimeBlockItem> eveningEvents =
-        events.where((e) => e.startTime.hour >= 18).toList();
+    List<TimeBlockItem> evening =
+    events.where((e) => e.startTime.hour >= 18).toList();
 
-    bool hasMultipleGroups = [morningEvents, afternoonEvents, eveningEvents]
-            .where((group) => group.isNotEmpty)
-            .length >
+    bool multi = [morning, afternoon, evening]
+        .where((g) => g.isNotEmpty)
+        .length >
         1;
-
-    TimeBlockGroup createGroup(String title, List<TimeBlockItem> events) {
-      return TimeBlockGroup(
-          title: hasMultipleGroups ? title.tr() : "", events: events);
-    }
+    TimeBlockGroup make(String t, List<TimeBlockItem> ev) =>
+        TimeBlockGroup(title: multi ? t.tr() : '', events: ev);
 
     return [
-      createGroup("", morningEvents),
-      if (afternoonEvents.isNotEmpty)
-        createGroup("Afternoon".tr(), afternoonEvents),
-      if (eveningEvents.isNotEmpty) createGroup("Evening".tr(), eveningEvents),
+      make('', morning),
+      if (afternoon.isNotEmpty) make('Afternoon', afternoon),
+      if (evening.isNotEmpty) make('Evening', evening),
     ];
   }
 
   static bool? getTimetableItemTypeAsCanSignIn(TimeBlockType type) {
-    if (type == TimeBlockType.canSave) {
-      return true;
-    } else if (type == TimeBlockType.saved) {
-      return false;
-    }
+    if (type == TimeBlockType.canSave) return true;
+    if (type == TimeBlockType.saved) return false;
     return null;
-  }
-}
-
-class TimeBlockPlace {
-  final int id;
-  final String title;
-  final int? order;
-
-  TimeBlockPlace({required this.id, required this.title, required this.order});
-
-  factory TimeBlockPlace.fromPlaceModel(PlaceModel place) {
-    return TimeBlockPlace(
-        id: place.id!, title: place.title ?? "---", order: place.order ?? 0);
-  }
-}
-
-class TimeBlockGroup {
-  final String title;
-  final DateTime? dateTime;
-  final List<TimeBlockItem> events;
-
-  TimeBlockGroup({required this.title, required this.events, this.dateTime});
-}
-
-enum TimeBlockType {
-  saved,
-  canSave,
-  noAction,
-  signedIn,
-  isFull,
-  canSignIn,
-}
-
-class TimeBlockItem {
-  DateTime startTime;
-  DateTime endTime;
-  TimeBlockType timeBlockType;
-  dynamic data;
-  final int id;
-  TimeBlockPlace? timeBlockPlace;
-  String? eventType;
-
-  TimeBlockItem(
-      {required this.timeBlockType,
-      required this.startTime,
-      required this.endTime,
-      required this.id,
-      this.data,
-      this.timeBlockPlace,
-      this.eventType});
-
-  Duration duration() => startTime.isBefore(endTime) ? (DateTimeRange(start: startTime, end: endTime)).duration : Duration.zero;
-
-  factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
-    return TimeBlockItem(
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
-      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
-      id: model.id!,
-      data: model.toString(),
-      eventType: model.type,
-      timeBlockPlace: model.place != null && model.place!.id != null
-          ? TimeBlockPlace.fromPlaceModel(model.place!)
-          : null,
-    );
-  }
-
-  factory TimeBlockItem.fromEventModel(EventModel model) {
-    return TimeBlockItem(
-      startTime: model.startTime,
-      endTime: model.endTime,
-      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
-      id: model.id!,
-      data: {
-        "leftText": model.startTimeString(),
-        "rightText": model.toString()
-      },
-      timeBlockPlace: model.place != null && model.place!.id != null
-          ? TimeBlockPlace.fromPlaceModel(model.place!)
-          : null,
-    );
-  }
-
-  factory TimeBlockItem.fromEventModelAsChild(EventModel model) {
-    return TimeBlockItem(
-      startTime: model.startTime,
-      endTime: model.endTime,
-      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
-      id: model.id!,
-      data: {
-        "leftText": model.durationTimeString(),
-        "rightText": model.toString()
-      },
-      timeBlockPlace: null,
-    );
-  }
-
-  factory TimeBlockItem.forCompanion(EventModel model) {
-    return TimeBlockItem(
-      startTime: model.startTime,
-      endTime: model.endTime,
-      timeBlockType: TimeBlockType.signedIn,
-      id: model.id!,
-      data: {
-        "leftText": model.durationTimeString(),
-        "rightText": model.toString()
-      },
-    );
   }
 }
