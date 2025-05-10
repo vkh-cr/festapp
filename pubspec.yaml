@@ -121,7 +121,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   fonts:
-    - family: Futura
+    - family: Agrandir-Narrow
       fonts:
         - asset: fonts/Agrandir-Narrow.ttf
   assets:

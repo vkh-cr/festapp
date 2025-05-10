@@ -221,7 +221,7 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final col = ThemeConfig.eventTypeToColor(context, event.eventType);
-    const stripeW = 6.0, stripeH = 48.0;
+    const stripeW = 6.0, stripeH = 54.0;
     final capEvent = event.maxParticipants > 0;
 
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
@@ -320,7 +320,7 @@ class _EventCard extends StatelessWidget {
                           const SizedBox(height: 2),
                           Text(event.durationTimeString(),
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 13,
                                 color: ThemeConfig.darkColor(context).withOpacity(0.7),
                               )),
                           if (hasPlace && !expanded) ...[
