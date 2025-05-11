@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -5,21 +7,21 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:intl/intl.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/services/time_helper.dart';
-import 'package:fstapp/theme_config.dart';
-import 'schedule_timeline_helper.dart';
+import 'schedule_helper.dart';
 import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/widgets/html_view.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 /// Centralizes all data & callbacks for the timeline view.
 class AdvancedTimelineController {
   final List<TimeBlockItem> events;
   final void Function(int eventId)? onEventPressed;
-  final void Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEvent)?
-  onAddNewEvent;
+  final void Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEvent)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
   final Future<void> Function(int eventId)? onSignInEvent;
   final Future<void> Function(int eventId)? onSignOutEvent;
@@ -103,7 +105,7 @@ class _AdvancedTimelineTabState extends State<AdvancedTimelineTab> {
                     child: AdvancedTimelineView(
                       weekdays: weekdays,
                       groups: datedEvents,
-                      maxTabBarWidth: 300,                    // same as your old BoxConstraints
+                      maxTabBarWidth: 300,
                       padding: const EdgeInsets.symmetric(vertical: 0),
                     ),
                   );
@@ -194,16 +196,17 @@ class DayList extends StatelessWidget {
   );
 
   Widget _buildCard(TimeBlockItem e) {
-    final isOpen = openId == e.id;
-
     return _EventCard(
       event: e,
-      expanded: isOpen,
+      expanded: openId == e.id,
       controller: controller,
       onToggle: () => onToggle(e.id),
     );
   }
 }
+
+// Minimum width threshold for inline buttons
+const double _kMinWidthForInlineButtons = 420.0;
 
 class _EventCard extends StatelessWidget {
   final TimeBlockItem event;
@@ -221,8 +224,13 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final col = ThemeConfig.eventTypeToColor(context, event.eventType);
-    const stripeW = 6.0, stripeH = 54.0;
+    const stripeW = 6.0, stripeH = 58.0;
+    final imageUrl = event.imageUrl;
     final capEvent = event.maxParticipants > 0;
+
+    // Responsive inline button logic
+    final screenWidth = MediaQuery.of(context).size.width;
+    final showInlineButtons = screenWidth >= _kMinWidthForInlineButtons;
 
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
     final hasPlace = event.timeBlockPlace?.title != null;
@@ -231,13 +239,13 @@ class _EventCard extends StatelessWidget {
     final haveChildren = event.haveChildren();
     final canExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
 
-    Widget actionSection;
+    Widget inlineActionSection;
     if (capEvent) {
       final capColor = event.isSignedIn()
           ? Theme.of(context).primaryColor
           : Colors.grey;
 
-        actionSection = Column(
+      inlineActionSection = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(children: [
@@ -246,36 +254,24 @@ class _EventCard extends StatelessWidget {
               const SizedBox(width: 4),
               Icon(Icons.people, size: 14, color: capColor),
             ]),
-            if(AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants)) ...[
+            if (AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && showInlineButtons) ...[
               const SizedBox(height: 4),
               event.isSignedIn()
                   ? OutlinedButton(
                 onPressed: () { controller.onSignOutEvent!(event.id); },
-                style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                ),
+                style: _signButtonStyle(ThemeConfig.darkColor(context), Theme.of(context).primaryColor),
                 child: Text('Sign out'.tr()),
               )
                   : OutlinedButton(
                 onPressed: () { controller.onSignInEvent!(event.id); },
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: ThemeConfig.darkColor(context),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness)),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 6),
-                  elevation: 0,
-                ),
+                style: _signButtonStyle(ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
                 child: Text('Sign in'.tr()),
               ),
             ],
           ]
-        );
+      );
     } else {
-      actionSection = Row(
+      inlineActionSection = Row(
         children: ButtonsHelper.getAddToMyProgramButton(
           !event.isInMySchedule(),
               () async => () { controller.onAddToProgramEvent!(event.id); }(),
@@ -308,21 +304,32 @@ class _EventCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(children: [
-                    Container(width: stripeW, height: stripeH, color: col),
+                    if (imageUrl == null) Container(width: stripeW, height: stripeH, color: col),
                     const SizedBox(width: 6),
+                    if (imageUrl != null)
+                      Container(
+                        width: stripeH,
+                        height: stripeH,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: BoxDecoration(borderRadius:
+                        BorderRadius.circular(StylesConfig.imageRoundness)),
+                        child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.fitWidth),
+                      ),
+                    if (imageUrl != null) const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+
+                          Text(event.durationTimeString(),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.6),
+                              )),
                           Text(event.title,
                               style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600)),
                           const SizedBox(height: 2),
-                          Text(event.durationTimeString(),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: ThemeConfig.darkColor(context).withOpacity(0.7),
-                              )),
                           if (hasPlace && !expanded) ...[
                             const SizedBox(height: 2),
                             Text(event.timeBlockPlace!.title,
@@ -334,7 +341,7 @@ class _EventCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    actionSection,
+                    inlineActionSection,
                     const SizedBox(width: 4),
                     if (canExpand)
                       Icon(
@@ -386,15 +393,33 @@ class _EventCard extends StatelessWidget {
 
                         const SizedBox(height: 8),
 
+                        // Responsive inline buttons moved here for small screens
+                        if (capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
+                          Center(
+                            child: event.isSignedIn()
+                                ? OutlinedButton(
+                              onPressed: () { controller.onSignOutEvent!(event.id); },
+                              style: _signButtonStyle(ThemeConfig.darkColor(context), Theme.of(context).primaryColor),
+                              child: Text('Sign out'.tr()),
+                            )
+                                : OutlinedButton(
+                              onPressed: () { controller.onSignInEvent!(event.id); },
+                              style: _signButtonStyle(ThemeConfig.darkColor(context), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
+                              child: Text('Sign in'.tr()),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+
                         // Show sign-in prompt for unauthenticated users
                         if (event.timeBlockType == TimeBlockType.canSignIn && !AuthService.isLoggedIn()) ...[
                           Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: HtmlView(
-                                        html: '''
+                              html: '''
                                 <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                                   <div>${"An account is required to join this event.".tr()}</div>
-                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                                  <a href="\${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
                                     ${"Click here to sign in.".tr()}
                                   </a>
                                 </div>
@@ -433,6 +458,15 @@ class _EventCard extends StatelessWidget {
   }
 }
 
+// Sign in/out button style (smaller)
+ButtonStyle _signButtonStyle(Color fg, Color bd) => OutlinedButton.styleFrom(
+  foregroundColor: fg,
+  side: BorderSide(color: bd),
+  textStyle: const TextStyle(fontSize: 13),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(StylesConfig.signInSignOutRoundness),
+  ),
+);
 
 /// Tab header widget with scrollable, centered tabs and inline arrow navigation.
 class AdvancedTimelineView extends StatelessWidget {
@@ -588,4 +622,3 @@ class AdvancedTimelineView extends StatelessWidget {
     );
   }
 }
-

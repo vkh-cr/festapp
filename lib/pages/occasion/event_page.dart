@@ -25,7 +25,7 @@ import 'package:fstapp/dialogs/add_new_event_dialog.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/theme_config.dart';

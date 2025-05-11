@@ -23,6 +23,7 @@ class EventModel extends ITrinaRowModel {
   final int? id;
   DateTime? updatedAt;
   bool isHidden = false;
+  Map<String, dynamic>? data;
   PlaceModel? place;
   String? type;
   List<EventModel> childEvents = [];
@@ -65,6 +66,7 @@ class EventModel extends ITrinaRowModel {
     this.title,
     this.description,
     this.maxParticipants,
+    this.data,
     this.place,
     this.type,
     this.childEventIds,
@@ -123,6 +125,7 @@ class EventModel extends ITrinaRowModel {
         title: json.containsKey(titleColumn) ? json[titleColumn] : null,
         description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
         maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
+        data: json.containsKey(dataColumn) ? json[dataColumn] : null,
         place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
         json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
         type: json[Tb.events.type],
@@ -159,6 +162,7 @@ class EventModel extends ITrinaRowModel {
     place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
     type = event.type;
     occasionId = event.occasionId;
+    data = event.data;
   }
 
   static const String startDateColumn = "startDate";
@@ -172,6 +176,7 @@ class EventModel extends ITrinaRowModel {
   static const String childEventsList = "childEvents";
   static const String updatedAtColumn = "updated_at";
   static const String isHiddenColumn = "is_hidden";
+  static const String dataColumn = "data";
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
@@ -214,6 +219,10 @@ class EventModel extends ITrinaRowModel {
       eventRoles = json[Tb.event_roles.role].toString().split(",").map((e) => int.parse(e.trim())).toList();
     }
 
+    Map<String, dynamic> dataFromTab = {};
+    dataFromTab[Tb.events.dataHeaderImage] = json[Tb.events.dataHeaderImage];
+
+
     return EventModel(
         startTime: dateFormat.parse(startTimeString),
         endTime: dateFormat.parse(endTimeString),
@@ -223,6 +232,7 @@ class EventModel extends ITrinaRowModel {
         title: json[titleColumn],
         description: json[descriptionColumn],
         maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+        data: dataFromTab,
         place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
         type: json[Tb.events.type],
         splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
@@ -252,7 +262,8 @@ class EventModel extends ITrinaRowModel {
       isGroupEventColumn: TrinaCell(value: isGroupEvent.toString()),
       parentEventColumn: TrinaCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
       Tb.event_roles.role: TrinaCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_users.table: TrinaCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0)
+      Tb.event_users.table: TrinaCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0),
+      Tb.events.dataHeaderImage: TrinaCell(value: data?[Tb.events.dataHeaderImage])
     });
   }
 
@@ -293,7 +304,8 @@ class EventModel extends ITrinaRowModel {
         placesTable: place,
         Tb.events.type: type,
         childEventsList: childEventIds,
-        Tb.events.occasion: occasionId
+        Tb.events.occasion: occasionId,
+        dataColumn: data
       };
 
   static HashSet<EventModel> CreateEventModelSet() {

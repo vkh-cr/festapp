@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
+import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/services/time_helper.dart';
 
 /// Determines available actions/state for an event.
@@ -54,8 +55,10 @@ class TimeBlockItem {
   final String title;
   final int participants;
   final int maxParticipants;
+  final String? imageUrl;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
+
 
   TimeBlockItem({
     required this.id,
@@ -70,6 +73,7 @@ class TimeBlockItem {
     this.participants = 0,
     this.maxParticipants = 0,
     this.children,
+    this.imageUrl
   });
 
   /// Duration of the block.
@@ -143,6 +147,7 @@ class TimeBlockItem {
       maxParticipants: model.maxParticipants ?? 0,
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
+      imageUrl:  model.data?[Tb.events.dataHeaderImage]
     );
   }
 

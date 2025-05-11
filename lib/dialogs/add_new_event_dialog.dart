@@ -9,7 +9,7 @@ import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/mouse_detector.dart';
 import 'package:fstapp/widgets/time_data_range_picker.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 
 class AddNewEventDialog {
   static Future<void> showAddEventDialog(

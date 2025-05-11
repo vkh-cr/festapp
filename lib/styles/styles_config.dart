@@ -30,6 +30,7 @@ class StylesConfig {
   static const double indicatorRoundness = 0; //12
   static const double eventItemRoundness = 4; //12
   static const double newsItemRoundness = 2; //10
+  static const double imageRoundness = 100;
 
   static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 0); //4
   static Border? indicatorBorder() => Border.all(width: 2.5, color: ThemeConfig.appBarColor()); //null
