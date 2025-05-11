@@ -161,38 +161,38 @@ class _ScheduleContentState extends State<ScheduleContent> {
               );
             },
           ),
-          TrinaColumn(
-            title: "M/F 50/50".tr(),
-            field: EventModel.splitForMenWomenColumn,
-            type: TrinaColumnType.text(),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
-                rendererContext, EventModel.splitForMenWomenColumn),
-          ),
-          TrinaColumn(
-            title: "Group".tr(),
-            field: EventModel.isGroupEventColumn,
-            type: TrinaColumnType.text(),
-            applyFormatterInEditing: true,
-            enableEditingMode: false,
-            width: 100,
-            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
-                rendererContext, EventModel.isGroupEventColumn),
-          ),
-          TrinaColumn(
-            title: "Show inside event".tr(),
-            field: EventModel.parentEventColumn,
-            type: TrinaColumnType.text(),
-            width: 300,
-          ),
-          TrinaColumn(
-            title: "Roles".tr(),
-            field: Tb.event_roles.role,
-            type: TrinaColumnType.text(),
-            width: 100,
-          ),
+          // TrinaColumn(
+          //   title: "M/F 50/50".tr(),
+          //   field: EventModel.splitForMenWomenColumn,
+          //   type: TrinaColumnType.text(),
+          //   applyFormatterInEditing: true,
+          //   enableEditingMode: false,
+          //   width: 100,
+          //   renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+          //       rendererContext, EventModel.splitForMenWomenColumn),
+          // ),
+          // TrinaColumn(
+          //   title: "Group".tr(),
+          //   field: EventModel.isGroupEventColumn,
+          //   type: TrinaColumnType.text(),
+          //   applyFormatterInEditing: true,
+          //   enableEditingMode: false,
+          //   width: 100,
+          //   renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+          //       rendererContext, EventModel.isGroupEventColumn),
+          // ),
+          // TrinaColumn(
+          //   title: "Show inside event".tr(),
+          //   field: EventModel.parentEventColumn,
+          //   type: TrinaColumnType.text(),
+          //   width: 300,
+          // ),
+          // TrinaColumn(
+          //   title: "Roles".tr(),
+          //   field: Tb.event_roles.role,
+          //   type: TrinaColumnType.text(),
+          //   width: 100,
+          // ),
           TrinaColumn(
             title: "Type".tr(),
             field: Tb.events.type,
