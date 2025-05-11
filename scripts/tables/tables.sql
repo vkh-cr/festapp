@@ -535,6 +535,7 @@ create table if not exists public.events (
   is_hidden BOOLEAN NOT NULL DEFAULT false,
   occasion BIGINT NOT NULL DEFAULT '1'::bigint,
   type TEXT NULL,
+  data jsonb NULL,
   CONSTRAINT events_place_fkey FOREIGN KEY (place) REFERENCES public.places (id),
   CONSTRAINT public_events_occasion_fkey FOREIGN KEY (occasion) REFERENCES public.occasions (id),
   CONSTRAINT events_pkey PRIMARY KEY (id)

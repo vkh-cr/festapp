@@ -5,7 +5,7 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 
