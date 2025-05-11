@@ -220,6 +220,7 @@ class DbEvents {
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
         "${Tb.events.type},"
+        "${Tb.events.data},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
         "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
@@ -576,6 +577,7 @@ class DbEvents {
       Tb.events.is_group_event: event.isGroupEvent,
       Tb.events.is_hidden: event.isHidden,
       Tb.events.type: event.type,
+      Tb.events.data: event.data,
     };
     if(event.description!=null) {
       upsertObj.addAll({Tb.events.description: event.description});

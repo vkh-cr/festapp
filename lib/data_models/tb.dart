@@ -207,6 +207,11 @@ class EventsTb{
   String get split_for_men_women => "split_for_men_women";
   String get is_group_event => "is_group_event";
   String get type => "type";
+  String get data => "data";
+
+  String get dataHeaderImage => "header_image";
+
+
 }
 class EventUserTb{
   const EventUserTb();
