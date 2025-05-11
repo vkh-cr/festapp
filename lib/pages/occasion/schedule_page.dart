@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/timeline/advanced_timeline.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_events.dart';

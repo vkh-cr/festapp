@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
