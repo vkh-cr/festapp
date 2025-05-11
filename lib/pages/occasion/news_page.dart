@@ -106,7 +106,7 @@ class _NewsPageState extends State<NewsPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.newsPageColor(context),
       appBar: AppBar(
-        title: const Text("News").tr(),
+        title: Text("News", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
         leading: PopButton(),
       ),
       body: Align(
@@ -169,7 +169,7 @@ class _NewsPageState extends State<NewsPage> {
                           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
                           child: Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(StylesConfig.newsItemRoundness),
                               color: Theme.of(context).colorScheme.surface,
                             ),
                             child: Column(
