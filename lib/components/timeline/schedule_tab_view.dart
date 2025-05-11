@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/theme_config.dart';
 import 'schedule_timeline.dart';
-import 'schedule_timeline_helper.dart';
+import 'schedule_helper.dart';
 
 class ScheduleTabView extends StatefulWidget {
   final DateTime? defaultDateTime;
