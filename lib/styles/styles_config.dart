@@ -27,9 +27,10 @@ class StylesConfig {
   static const double kHorizontalPadding = 16.0;
 
   static const double signInSignOutRoundness = 16; //16
-  static const double indicatorRoundness = 12; //12
-  static const double eventItemRoundness = 12; //12
-  static const double newsItemRoundness = 10; //10
+  static const double indicatorRoundness = 12; //0
+  static const double eventItemRoundness = 12; //4
+  static const double newsItemRoundness = 10; //2
+  static const double imageRoundness = 100;
 
   static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 4); //4
   static Border? indicatorBorder() => null;
