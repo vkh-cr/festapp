@@ -56,6 +56,10 @@ class FeatureMetadata {
       'title': 'Workshops',
       'description': 'Indicates the start time from when people can sign in for workshops.',
     },
+    FeatureConstants.schedule: {
+      'title': 'Schedule',
+      'description': 'Allows customizing event schedule display settings.',
+    },
   };
 
   /// Returns the translated title for the given feature code.

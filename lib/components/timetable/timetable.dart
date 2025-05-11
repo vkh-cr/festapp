@@ -1,5 +1,5 @@
 import 'package:flutter/gestures.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timetable/timetable_helper.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/services/time_helper.dart';
