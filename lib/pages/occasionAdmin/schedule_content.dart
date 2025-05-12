@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature.dart';
@@ -17,7 +16,8 @@ import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/db_images.dart';
 import 'package:fstapp/services/image_compression_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
-import 'package:fstapp/services/dialog_helper.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/image_area.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:trina_grid/trina_grid.dart';
@@ -105,63 +105,91 @@ class _ScheduleContentState extends State<ScheduleContent> {
             width: 80,
           ),
           if((FeatureService.getFeatureDetails(FeatureConstants.schedule) as ScheduleFeature?)?.scheduleType == FeatureConstants.scheduleTypeAdvanced)
-          TrinaColumn(
-            title: "Intro Image".tr(),
-            field: Tb.events.dataHeaderImage,
-            type: TrinaColumnType.text(defaultValue: ""),
-            width: 140,
-            applyFormatterInEditing: true,
-            renderer: (ctx) {
-              final imageUrl = ctx.cell.value as String?;
-              return GestureDetector(
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      // Prevent the dialog from filling the entire screen:
-                      insetPadding: const EdgeInsets.symmetric(
-                        horizontal: 40.0,
-                        vertical: 24.0,
-                      ),
-                      title: Text("Intro Image".tr()),
-                      content: SizedBox(
-                        width: 200.0,
-                        height: 200.0,
-                        child: ImageArea(
-                          imageUrl: imageUrl,
-                          onFileSelected: (file) async {
-                            final bytes = await file.readAsBytes();
-                            final compressed = await ImageCompressionHelper.compress(bytes, 200);
-                            final publicUrl = await DbImages.uploadImage(compressed, RightsService.currentOccasionId(), null);
-                            // also update your cell here
-                            ctx.stateManager.changeCellValue(ctx.cell, publicUrl, force: true);
-                            ToastHelper.Show(context, "Image uploaded successfully".tr());
-                            return publicUrl;
-                          },
-                          onRemove: () async {
-                            if (imageUrl != null && imageUrl.isNotEmpty) {
-                              await DbImages.removeImage(imageUrl);
-                              ctx.stateManager.changeCellValue(ctx.cell, "", force: true);
-                              ToastHelper.Show(context, "Image removed".tr());
-                            }
-                          },
+            TrinaColumn(
+              title: "Intro Image".tr(),
+              field: Tb.events.dataHeaderImage,
+              type: TrinaColumnType.text(defaultValue: null),
+              width: 140,
+              applyFormatterInEditing: true,
+              renderer: (ctx) {
+                final imageUrl = ctx.cell.value as String?;
+
+                return GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        insetPadding: const EdgeInsets.symmetric(
+                          horizontal: 40.0,
+                          vertical: 24.0,
                         ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text("Close".tr()),
+                        title: Text("Intro Image".tr()),
+                        content: SizedBox(
+                          width: 200.0,
+                          height: 200.0,
+                          child: ImageArea(
+                            imageUrl: imageUrl,
+                            onFileSelected: (file) async {
+                              final bytes = await file.readAsBytes();
+                              final compressed = await ImageCompressionHelper.compress(bytes, 200);
+                              final publicUrl = await DbImages.uploadImage(
+                                compressed,
+                                RightsService.currentOccasionId(),
+                                null,
+                              );
+                              ctx.stateManager.changeCellValue(ctx.cell, publicUrl, force: true);
+                              ToastHelper.Show(context, "Image uploaded successfully".tr());
+                              return publicUrl;
+                            },
+                            onRemove: () async {
+                              if (imageUrl != null && imageUrl.isNotEmpty) {
+                                await DbImages.removeImage(imageUrl);
+                                ctx.stateManager.changeCellValue(ctx.cell, "", force: true);
+                                ToastHelper.Show(context, "Image removed".tr());
+                              }
+                            },
+                          ),
                         ),
-                      ],
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: Text("Close".tr()),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: imageUrl != null
+                      ? Tooltip(
+                    showDuration: const Duration(seconds: 0),
+                    preferBelow: false,
+                    padding: EdgeInsets.zero,
+                    verticalOffset: 10,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
                     ),
-                  );
-                },
-                child: imageUrl != null && imageUrl.isNotEmpty
-                    ? Image.network(imageUrl, width: 50, height: 50, fit: BoxFit.cover)
-                    : Icon(Icons.image, size: 24),
-              );
-            },
-          ),
+                    richMessage: WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade400),
+                          color: ThemeConfig.whiteColor(context),
+                        ),
+                        child: CachedNetworkImage(imageUrl: imageUrl, width: 120, fit: BoxFit.contain),
+                      ),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                      : Icon(Icons.image, size: 24),
+                );
+              },
+            ),
           TrinaColumn(
             title: "Title".tr(),
             field: EventModel.titleColumn,
