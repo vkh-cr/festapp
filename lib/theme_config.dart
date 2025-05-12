@@ -151,6 +151,10 @@ class ThemeConfig {
     return appBarColor();
   }
 
+  static Color eventTypeToColorNegative(BuildContext context, String? type) {
+    return Colors.white;
+  }
+
   static Color eventTypeToColorTimetable(BuildContext context, String? type) {
     return eventTypeToColor(context, type);
   }
