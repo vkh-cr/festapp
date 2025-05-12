@@ -115,6 +115,7 @@ For a helpful step-by-step guide on creating your own app, see [howto.md](./howt
 - [Celostátní setkání animátorů 2024](https://aksmcz.netlify.app)
 - [Festival Slunovrat](https://app.festivalslunovrat.cz)
 - [Hvězda mořská](https://hvezdamorska.netlify.app)
+- [Jubileum mládeže 2025](https://jubileum2025.netlify.app)
 
 Under similar names usually available in AppStore and Google Play Store.
 
