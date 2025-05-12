@@ -186,6 +186,7 @@ class _HtmlEditorPageState extends State<HtmlEditorPage> {
     String? htmlTextEdited = await controller.getText();
     var htmlText = HtmlHelper.removeColor(htmlTextEdited);
     htmlText = HtmlHelper.detectAndReplaceLinks(htmlText);
+    htmlText = HtmlHelper.htmlTrim(htmlText);
 
     // New way using storeImagesToOccasion with the occasionId from widget
     if (widget.occasionId != null) {
