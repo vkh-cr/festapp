@@ -307,13 +307,17 @@ class _EventCard extends StatelessWidget {
                     if (imageUrl == null) Container(width: stripeW, height: stripeH, color: col),
                     const SizedBox(width: 6),
                     if (imageUrl != null)
-                      Container(
-                        width: stripeH,
-                        height: stripeH,
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(borderRadius:
-                        BorderRadius.circular(StylesConfig.imageRoundness)),
-                        child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.fitWidth),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
+                        clipBehavior: Clip.antiAlias,
+                        child: SizedBox(
+                          width: stripeH,
+                          height: stripeH,
+                          child: CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
                       ),
                     if (imageUrl != null) const SizedBox(width: 16),
                     Expanded(
@@ -329,13 +333,11 @@ class _EventCard extends StatelessWidget {
                           Text(event.title,
                               style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
                           if (hasPlace && !expanded) ...[
-                            const SizedBox(height: 2),
                             Text(event.timeBlockPlace!.title,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.95), fontSize: 12)),
+                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13)),
                           ],
                         ],
                       ),
