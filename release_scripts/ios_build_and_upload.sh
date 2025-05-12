@@ -23,21 +23,31 @@ export RELEASE_NOTES
 # Step 2: Build IPA using FVM
 echo "📦 Building IPA with FVM..."
 cd .. # Go to project root
+
 fvm flutter build ipa --release
 
-# Step 3: Determine IPA name from Info.plist
+# Step 3: Determine IPA name and app identifier from Info.plist
 INFO_PLIST="ios/Runner/Info.plist"
 if [ ! -f "$INFO_PLIST" ]; then
   echo "❌ Info.plist not found at $INFO_PLIST"
   exit 1
 fi
 
+# Get bundle name for IPA filename
 APP_NAME=$(plutil -extract CFBundleName xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
 APP_NAME=${APP_NAME:-Runner}
+
+# Get bundle identifier for FASTLANE
+APP_IDENTIFIER=$(plutil -extract CFBundleIdentifier xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+export FASTLANE_APP_IDENTIFIER="$APP_IDENTIFIER"
+echo "📱 App Identifier: $FASTLANE_APP_IDENTIFIER"
+
+# Construct expected IPA path
 IPA_PATH="build/ios/ipa/${APP_NAME}.ipa"
 
+# If IPA not found, let user select one
 if [ ! -f "$IPA_PATH" ]; then
-  echo "❌ IPA not found at $IPA_PATH"
+  echo "❌ IPA not found at expected path: $IPA_PATH"
   echo "🔍 Searching for IPA files..."
   IPA_FILES=(build/ios/ipa/*.ipa)
 
