@@ -152,6 +152,12 @@ class ThemeConfig {
   }
 
   static Color eventTypeToColorNegative(BuildContext context, String? type) {
+    switch (type) {
+      case "music":
+        return Colors.black;
+      case "other":
+        return Colors.black;
+    }
     return Colors.white;
   }
 
