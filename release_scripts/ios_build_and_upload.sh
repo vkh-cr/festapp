@@ -30,7 +30,7 @@ export RELEASE_NOTES
 echo "📦 Building IPA with FVM..."
 cd .. # Go to project root
 
-#fvm flutter build ipa --release
+fvm flutter build ipa --release
 
 # Step 3: Determine IPA name and app identifier from Info.plist
 INFO_PLIST="ios/Runner/Info.plist"
