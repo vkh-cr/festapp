@@ -406,7 +406,7 @@ class _EventCard extends StatelessWidget {
                             )
                                 : OutlinedButton(
                               onPressed: () { controller.onSignInEvent!(event.id); },
-                              style: _signButtonStyle(ThemeConfig.darkColor(context), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
+                              style: _signButtonStyle(ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
                               child: Text('Sign in'.tr()),
                             ),
                           ),
@@ -421,7 +421,7 @@ class _EventCard extends StatelessWidget {
                               html: '''
                                 <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                                   <div>${"An account is required to join this event.".tr()}</div>
-                                  <a href="\${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
                                     ${"Click here to sign in.".tr()}
                                   </a>
                                 </div>
