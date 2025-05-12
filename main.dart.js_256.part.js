@@ -159,7 +159,7 @@ B(d){var x=this,w=null,v=y.u,u=B.at(B.a([B.R(x.a.c,w,w,w,w,w,w,w,A4.ac8,w,w,w,w,
 u=B.a([u,Z.i9,t.e?E.hi(!0,A.aY,!1,w,!0,A.y,w,E.hH(),x.e,w,w,w,w,w,2,D.awq,A.r,!0,w,!0,w,!1,w,H.b0,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.ba,w,w,A.aT,A.aR,w,w,w,w,w,w,w,!0,A.I,w,F.bb,w,w,w,w):new B.a5(S.f0,B.R("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
 if(x.a.d==="scripts/seed")A.b.H(u,B.a([L.fX,D.bEW,G.ak,D.bFl,G.ak,E.hi(!0,A.aY,!1,w,!0,A.y,w,E.hH(),x.x,w,w,w,w,w,2,D.awz,A.r,!0,w,!0,w,!1,w,H.b0,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.ba,w,w,A.aT,A.aR,w,w,w,w,w,w,w,!0,A.I,w,F.bb,w,w,w,w),E.hi(!0,A.aY,!1,w,!0,A.y,w,E.hH(),x.y,w,w,w,w,w,2,D.awy,A.r,!0,w,!0,w,!1,w,H.b0,w,w,w,w,w,w,w,1,w,w,!0,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,F.ba,w,w,A.aT,A.aR,w,w,w,w,w,w,w,!0,A.I,w,F.bb,w,w,w,w),new B.a5(S.f0,B.R("Supabase Project URL: "+x.a.x.a.a,w,w,w,w,w,w,w,R.ac4,w,w,w,w,w),w)],v))
 u.push(G.ak)
-u.push(B.dw(!1,D.bFp,w,w,w,w,w,w,x.f?w:x.gbsO(),w,w))
+u.push(B.dx(!1,D.bFp,w,w,w,w,w,w,x.f?w:x.gbsO(),w,w))
 u.push(G.ak)
 if(x.f)v=A.ci
 else{v=x.r
@@ -226,4 +226,4 @@ D.bFp=new B.cj("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.bFs=new B.cj("Initial",null,P.Ha,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFC=new B.cj("Supabase Function Deploy Commands:",null,A5.za,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"NvGVF/AKjBh4H1YvD0sChyeYVLo=");
+a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"CiQngRMLDivsx53e5SWfT7uhJ4c=");

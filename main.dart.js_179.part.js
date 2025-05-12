@@ -54,7 +54,7 @@ aV(){var x=0,w=A.k(y.v),v=this,u,t,s,r,q
 var $async$aV=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:v.c6()
 s=A.rh()
-u=A.bC("token=(?<token>[^&]+)",!0,!1,!1).rP(s.j(0))
+u=A.bx("token=(?<token>[^&]+)",!0,!1,!1).rP(s.j(0))
 if(u!=null)try{r=u.aeT("token")
 r.toString
 v.f=r}catch(p){r=A.ag(p)
@@ -70,7 +70,7 @@ x=A.R(A.t("Welcome in {name}!",A.A(["name","Festapp"],x,x)),t,t,t,t,t,t,t,N.Ha,t
 w=A.R(A.t("Create a new password to continue.",t),t,t,t,t,t,t,t,I.hy,t,t,t,t,t)
 v=A.t("New Password",t)
 u=A.c2(20)
-return R.f_(s,t,new A.cC(C.L,t,t,new A.cI(new A.ac(0,720,0,1/0),Q.dR(S.uC(t,t,new G.yj(A.aj(A.a([x,H.a2,w,O.abo,new A.a5(P.C3,new M.JR(v,this.e,"password",t),t),H.a2,A.ax(t,A.di(!1,E.bp(D.bFL,t),t,t,t,t,t,t,new B.cgw(this,d),t,t),C.k,t,t,new A.bi(C.cj,t,t,u,t,t,t,C.N),t,50,t,t,t,t,t,250)],y.u),C.i,C.f,C.h,t,C.l),t),this.d,t),t,C.r,t,t,t,C.J),t),t),t,t,t,t,t)}}
+return R.f_(s,t,new A.cC(C.L,t,t,new A.cI(new A.ac(0,720,0,1/0),Q.dR(S.uE(t,t,new G.yj(A.aj(A.a([x,H.a2,w,O.abo,new A.a5(P.C3,new M.JR(v,this.e,"password",t),t),H.a2,A.ax(t,A.di(!1,E.bp(D.bFL,t),t,t,t,t,t,t,new B.cgw(this,d),t,t),C.k,t,t,new A.bi(C.ct,t,t,u,t,t,t,C.N),t,50,t,t,t,t,t,250)],y.u),C.i,C.f,C.h,t,C.l),t),this.d,t),t,C.r,t,t,t,C.J),t),t),t,t,t,t,t)}}
 var z=a.updateTypes([])
 B.cgv.prototype={
 $0(){return F.aAZ(this.a)},
@@ -117,10 +117,10 @@ x(B.Er,A.I)
 x(B.aRj,A.M)
 w(A.ch,[B.cgv,B.cgw])
 x(B.cgt,A.bG)
-x(B.cgu,A.dz)})()
+x(B.cgu,A.dA)})()
 A.bl(b.typeUniverse,JSON.parse('{"Er":{"I":[],"e":[]},"aRj":{"M":["Er"]}}'))
 var y={g:A.y("b9"),u:A.y("r<e>"),o:A.y("aK<o8>"),F:A.y("aB"),E:A.y("E"),w:A.y("m"),b:A.y("@"),v:A.y("~")};(function constants(){D.bFc=new A.cj("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bDf=new A.a3(!0,C.q,null,null,null,null,25,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFL=new A.cj("Change Password",null,D.bDf,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_179",e:"endPart",h:b})})($__dart_deferred_initializers__,"Naq6tR3JHSA1TFkKqeaSi4Vd76U=");
+a.eventLog.push({p:"main.dart.js_179",e:"endPart",h:b})})($__dart_deferred_initializers__,"rTzFXM3Rexr9N3Pb3L+5pUPpmOw=");

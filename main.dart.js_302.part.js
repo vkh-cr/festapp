@@ -258,7 +258,7 @@ w(B.RM,A.dW)
 v(D.ayq,[B.bwX,B.bwY])})()
 A.bl(b.typeUniverse,JSON.parse('{"aDd":{"p9":[],"p1":["m","C<l>"]}}'))
 var y={a:"Something went wrong, please report the issue https://www.github.com/incrediblezayed/file_saver/issues"}
-var x={D:A.y("HJ"),g:A.y("b9"),x:A.y("r<m>"),v:A.y("m"),o:A.y("dB"),i:A.y("HJ?"),w:A.y("m?")};(function constants(){C.ajz=new B.aDd()
+var x={D:A.y("HJ"),g:A.y("b9"),x:A.y("r<m>"),v:A.y("m"),o:A.y("dC"),i:A.y("HJ?"),w:A.y("m?")};(function constants(){C.ajz=new B.aDd()
 C.akb=new B.bZ1()
 C.ey=new A.ap(10,0,10,0)
 C.bP4=new B.RM("Other","application/octet-stream",20,"other")
@@ -268,4 +268,4 @@ return!1})
 w($,"dyF","cWz",()=>{$.GF()
 return!1})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_302",e:"endPart",h:b})})($__dart_deferred_initializers__,"yphbANgYVRkZEAO0qg0EY2wH5rg=");
+a.eventLog.push({p:"main.dart.js_302",e:"endPart",h:b})})($__dart_deferred_initializers__,"VWwiz/MZjBVGxJcP/e72cc7Xjfg=");

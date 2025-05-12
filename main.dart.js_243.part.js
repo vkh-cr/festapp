@@ -81,7 +81,7 @@ x=A.ax(u,u,B.k,u,u,new A.bi(u,M.cHR(B.L,I.jN,new A2.GQ("assets/icons/fstappicon.
 w=y.g
 w=A.t("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.A(["title","Festapp"],w,w))
 v=y.e
-return Z.f_(t,u,new A.cC(B.aN,u,u,new A.a5(T.Lz,new A.cI(new A.ac(0,720,0,1/0),A.aj(A.a([A.bQ(A.at(A.a([x,D.byG,A.bD(E.bp(A.R(w,u,u,u,u,u,u,u,A.aA(u,u,A.D(d).ax.a===B.p?$.d5():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.i,B.bg,B.h,0,u),u,u),U.abn,this.bxS(d,A.t("Install for Apple",u),D.avf,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bxT(d,A.t("Install for Android",u),D.atN,"",1,A.t("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bxR(d,A.t("Install for PC/Mac",u),D.atY,"",2)],v),B.i,B.f,B.h,u,B.l),u),u),u),u,u,u,u,u)},
+return Z.f_(t,u,new A.cC(B.aN,u,u,new A.a5(T.Lz,new A.cI(new A.ac(0,720,0,1/0),A.aj(A.a([A.bQ(A.at(A.a([x,D.byG,A.bE(E.bp(A.R(w,u,u,u,u,u,u,u,A.aA(u,u,A.D(d).ax.a===B.p?$.d5():B.t,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.i,B.bg,B.h,0,u),u,u),U.abn,this.bxS(d,A.t("Install for Apple",u),D.avf,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bxT(d,A.t("Install for Android",u),D.atN,"",1,A.t("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bxR(d,A.t("Install for PC/Mac",u),D.atY,"",2)],v),B.i,B.f,B.h,u,B.l),u),u),u),u,u,u,u,u)},
 aaH(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
 if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
 else o=n
@@ -90,15 +90,15 @@ n=y.e
 x=A.at(A.a([A.bn(f,q,q,24),V.jz,A.R(e,q,q,q,q,q,q,q,B.eP,q,q,q,q,q)],n),B.i,B.f,B.h,0,q)
 w=A.a([],n)
 if(j!=null){v=A.D(d).ax.a===B.p?$.d5():B.t
-B.b.H(w,A.a([new A.a5(B.cC,E.bp(A.R(j,q,q,q,q,q,q,q,A.aA(q,q,A.dv(204,v.an()>>>16&255,v.an()>>>8&255,v.an()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),W.i9],n))}v=i?A.t("Download App",q):A.t("Install Now",q)
+B.b.H(w,A.a([new A.a5(B.cC,E.bp(A.R(j,q,q,q,q,q,q,q,A.aA(q,q,A.dw(204,v.an()>>>16&255,v.an()>>>8&255,v.an()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),W.i9],n))}v=i?A.t("Download App",q):A.t("Install Now",q)
 if(i)u=new C.c7x(g)
 else u=!r.d&&!r.f&&r.e?r.gadB():q
 t=!i
 if(t)s=!r.d&&!r.f&&r.e
 else s=!0
-v=A.a([Q.Om(s?B.cj:B.as,d,50,!0,v,u,B.q,250)],n)
-if(r.d)v.push(new A.a5(H.dJ,E.bp(A.R("The app is already installed.",q,q,q,q,q,q,q,A.aA(q,q,B.cj,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.b2,q,q,q,q),q),q))
-if(t&&r.f)v.push(new A.a5(H.dJ,A.aj(A.a([E.bp(D.bFt,q),N.ak,A.at(A.a([A.bD(R.es(q,!1,r.w,A1.awu,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.I,q,q),1,q),S.cf,L.xu(A.bn(Y.rC,q,q,q),q,E.bp(A.R("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.c7y(r,d),q)],n),B.i,B.f,B.h,0,q)],n),B.i,B.f,B.h,q,B.l),q))
+v=A.a([Q.Om(s?B.ct:B.as,d,50,!0,v,u,B.q,250)],n)
+if(r.d)v.push(new A.a5(H.dJ,E.bp(A.R("The app is already installed.",q,q,q,q,q,q,q,A.aA(q,q,B.ct,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.b2,q,q,q,q),q),q))
+if(t&&r.f)v.push(new A.a5(H.dJ,A.aj(A.a([E.bp(D.bFt,q),N.ak,A.at(A.a([A.bE(R.es(q,!1,r.w,A1.awu,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.I,q,q),1,q),S.cf,L.xu(A.bn(Y.rC,q,q,q),q,E.bp(A.R("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.c7y(r,d),q)],n),B.i,B.f,B.h,0,q)],n),B.i,B.f,B.h,q,B.l),q))
 w.push(new A.a5(B.cC,A.aj(v,B.i,B.f,B.h,q,B.l),q))
 w.push(A3.a2)
 return F.I3(w,p,q,o,new C.c7z(r,h),q,q,x,q)},
@@ -156,4 +156,4 @@ D.bFt=new A.cj("Installation failed. Please open this link in your device's defa
 D.bFu=new A.cj("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dx6","cEW",()=>new A.R7())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"9MW9uVPksBbK0JlTzyHweQ5WT6s=");
+a.eventLog.push({p:"main.dart.js_243",e:"endPart",h:b})})($__dart_deferred_initializers__,"kAtVxhC3SBopQDkksVO12ZVtiwY=");

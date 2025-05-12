@@ -98,7 +98,7 @@ while(true)switch(x){case 0:v.c6()
 if(v.a.c==null&&v.c.hk(y.u).f.f.length!==0){u=v.a
 u.toString
 u.c=v.c.hk(y.u).f.f[0].a.wc(0,"scanCode")}$.y5().aih("https://unpkg.com/@zxing/library@0.21.3")
-A.dC(v.a.c)
+A.dD(v.a.c)
 v.Oq()
 return A.i(null,w)}})
 return A.j($async$aV,w)},
@@ -135,10 +135,10 @@ t=t.e
 t.toString
 v.push(A.R(u+"   "+A.o(s)+"   "+t,q,q,q,q,q,q,q,F.ac6,C.b2,q,q,q,q))
 x=A.a([A.bQ(A.aj(v,C.i,C.f,C.h,q,C.l),q,q),I.ak,A.bn(w,C.t,q,30),A0.a2],x)
-if(r.f===D.FQ)x.push(A.dw(!1,G.bp(D.bFe,q),q,q,q,q,q,q,r.gb13(),q,q))
+if(r.f===D.FQ)x.push(A.dx(!1,G.bp(D.bFe,q),q,q,q,q,q,q,r.gb13(),q,q))
 return new A.a5(K.aW,A.aj(x,C.i,C.f,C.h,q,C.l),q)},
-B(d){var x=this,w=null,v=x.e==null?T.bKM(d):x.a2I(x.f),u=A.c3(w,w,w,w,w,w,A.bn(S.iA,C.cj,w,w),w,w,w,new B.chj(d),w,w,w,w,w),t=y.p
-return R.f_(w,v,A.js(!0,new A.cr(C.ag,w,C.ae,C.y,A.a([A.aj(A.a([new A.a5(K.aW,A.at(A.a([u,A.bD(A.R("",w,w,w,w,w,w,w,A.aA(w,w,C.cj,w,w,w,w,w,w,w,w,20,w,w,C.a5,w,w,!0,w,w,w,w,w,w,w,w),C.b2,w,w,w,w),1,w)],t),C.i,C.f,C.h,0,w),w),x.aaM(),A.bD(E.cLy(x.x,M.J5,new B.chk(x)),1,w)],t),C.i,C.f,C.h,w,C.l)],t),w),!0,C.U,!0,!0),w,w,w,w,w)},
+B(d){var x=this,w=null,v=x.e==null?T.bKM(d):x.a2I(x.f),u=A.c3(w,w,w,w,w,w,A.bn(S.iA,C.ct,w,w),w,w,w,new B.chj(d),w,w,w,w,w),t=y.p
+return R.f_(w,v,A.js(!0,new A.cr(C.ag,w,C.ae,C.y,A.a([A.aj(A.a([new A.a5(K.aW,A.at(A.a([u,A.bE(A.R("",w,w,w,w,w,w,w,A.aA(w,w,C.ct,w,w,w,w,w,w,w,w,20,w,w,C.a5,w,w,!0,w,w,w,w,w,w,w,w),C.b2,w,w,w,w),1,w)],t),C.i,C.f,C.h,0,w),w),x.aaM(),A.bE(E.cLy(x.x,M.J5,new B.chk(x)),1,w)],t),C.i,C.f,C.h,w,C.l)],t),w),!0,C.U,!0,!0),w,w,w,w,w)},
 wk(d){return this.aPs(d)},
 aPs(d){var x=0,w=A.k(y.H),v,u=this,t,s,r
 var $async$wk=A.f(function(e,f){if(e===1)return A.h(f,w)
@@ -250,4 +250,4 @@ D.aa_=new B.T4(3,"nothing")
 D.bFe=new A.cj("Confirm Ticket",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bFy=new A.cj("Point the camera at the attendee's code for an entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_319",e:"endPart",h:b})})($__dart_deferred_initializers__,"Wvpu8xd1lKt4fHtQbaz4G6GjpSM=");
+a.eventLog.push({p:"main.dart.js_319",e:"endPart",h:b})})($__dart_deferred_initializers__,"GUUF4Yir3wdXER1S8IvyrZtMF1s=");

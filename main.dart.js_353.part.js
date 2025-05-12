@@ -500,7 +500,7 @@ if(x){t.a4a(d)
 return}x=t.aG
 if(x!=null)x.$0()
 t.aG=null
-v=A.bK("simulation")
+v=A.bL("simulation")
 x=t.aP
 x.$0()
 w=x.$0()
@@ -588,11 +588,11 @@ u=t.r.ch
 u.toString
 C.b.H(x,J.bY(u,new B.bWe(),y.l))
 C.b.H(v,x)}C.b.H(r,v)}return new A.a5(K.aW,A.aj(r,C.K,C.f,C.h,s,C.l),s)},
-B(d){var x,w=this,v=null,u=w.r==null?L.bKM(d):w.a2I(w.w),t=A.c3(v,v,v,v,v,v,A.bn(Z.iA,C.cj,v,v),v,v,v,new B.bWi(d),v,v,v,v,v),s=w.d
+B(d){var x,w=this,v=null,u=w.r==null?L.bKM(d):w.a2I(w.w),t=A.c3(v,v,v,v,v,v,A.bn(Z.iA,C.ct,v,v),v,v,v,new B.bWi(d),v,v,v,v,v),s=w.d
 s=s==null?v:s.j(0)
 if(s==null)s=""
 x=y.p
-return W.f_(v,u,A.js(!0,new A.cr(C.ag,v,C.ae,C.y,A.a([A.aj(A.a([new A.a5(K.aW,A.at(A.a([t,A.bD(A.R(s,v,v,v,v,v,v,v,A.aA(v,v,C.cj,v,v,v,v,v,v,v,v,20,v,v,C.a5,v,v,!0,v,v,v,v,v,v,v,v),C.b2,v,v,v,v),1,v)],x),C.i,C.f,C.h,0,v),v),w.aaM(),A.bD(E.cLy(w.z,O.J5,new B.bWj(w)),1,v)],x),C.i,C.f,C.h,v,C.l),A.a6z(A.tp(d).aBg(A.ds([C.c4,C.cG],y.z)),new B.a_H(0.25,0.25,0.88,w.y,new B.bWk(w),v))],x),v),!0,C.U,!0,!0),v,v,v,v,v)},
+return W.f_(v,u,A.js(!0,new A.cr(C.ag,v,C.ae,C.y,A.a([A.aj(A.a([new A.a5(K.aW,A.at(A.a([t,A.bE(A.R(s,v,v,v,v,v,v,v,A.aA(v,v,C.ct,v,v,v,v,v,v,v,v,20,v,v,C.a5,v,v,!0,v,v,v,v,v,v,v,v),C.b2,v,v,v,v),1,v)],x),C.i,C.f,C.h,0,v),v),w.aaM(),A.bE(E.cLy(w.z,O.J5,new B.bWj(w)),1,v)],x),C.i,C.f,C.h,v,C.l),A.a6z(A.tp(d).aBg(A.ds([C.c4,C.cG],y.z)),new B.a_H(0.25,0.25,0.88,w.y,new B.bWk(w),v))],x),v),!0,C.U,!0,!0),v,v,v,v,v)},
 wk(d){return this.aPr(d)},
 aPr(d){var x=0,w=A.k(y.H),v,u=this,t
 var $async$wk=A.f(function(e,f){if(e===1)return A.h(f,w)
@@ -644,7 +644,7 @@ w===$&&A.b()
 x=x.a.e
 A.a0(1/0,e.a,e.b)
 w.y=x*A.a0(1/0,e.c,e.d)
-return new A.ar(1/0,1/0,new B.as1(this.b,C.cr,this.c,null),null)},
+return new A.ar(1/0,1/0,new B.as1(this.b,C.cq,this.c,null),null)},
 $S:92}
 B.bZP.prototype={
 $0(){return this.a.as},
@@ -721,7 +721,7 @@ return A.j($async$$1,w)},
 $S:370}
 B.bWk.prototype={
 $2(d,e){var x=null,w=this.a,v=A.D(d).ax.a===C.p?$.i1():C.q,u=A6.cGM(C.R,new A.b6(16,16)),t=A.ax(C.L,A.ax(x,x,C.k,x,x,new A.bi(C.fq,x,x,A.c2(3),x,x,x,C.N),x,6,x,A7.C_,x,x,x,60),C.k,x,x,x,x,40,x,x,x,x,x,1/0),s=H.hi(!0,C.aY,!1,x,!0,C.y,x,H.hH(),w.x,x,x,x,x,x,2,H.cx(x,A8.pc,x,x,x,x,x,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,A.t("Search Attendees",x),!0,x,M.CQ,x,x,x,x,x,x,x,x,x,x,x),C.r,!0,x,!0,x,!1,x,S.b0,x,x,x,x,x,x,x,1,x,x,!1,"\u2022",x,x,x,x,x,!1,x,x,!1,x,!0,x,G.ba,x,x,C.aT,C.aR,x,x,x,x,x,x,x,!0,C.I,x,G.bb,x,x,x,x),r=w.f
-return A.cU(x,A.ax(x,A.aj(A.a([t,new A.a5(C.aC,s,x),A.bD(r!=null?Q.mu(!0,!0,!0,C.y,e,C.r,new B.bWf(w),J.by(r),x,V.bG,x,x,x,x,!1,C.J,!1):C.ci,1,x)],y.p),C.i,C.f,C.h,x,C.l),C.k,x,x,new A.bi(v,x,x,u,x,x,x,C.N),x,x,x,x,x,x,x,x),C.r,!1,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,new B.bWg(w),x,new B.bWh(w,d),!1,C.a9)},
+return A.cU(x,A.ax(x,A.aj(A.a([t,new A.a5(C.aC,s,x),A.bE(r!=null?Q.mu(!0,!0,!0,C.y,e,C.r,new B.bWf(w),J.bz(r),x,V.bG,x,x,x,x,!1,C.J,!1):C.ci,1,x)],y.p),C.i,C.f,C.h,x,C.l),C.k,x,x,new A.bi(v,x,x,u,x,x,x,C.N),x,x,x,x,x,x,x,x),C.r,!1,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,new B.bWg(w),x,new B.bWh(w,d),!1,C.a9)},
 $S:1016}
 B.bWh.prototype={
 $1(d){var x=this.a.y,w=x.a.as.x.a,v=d.c
@@ -770,9 +770,9 @@ w(B.Cg,B.abO)
 w(B.abP,A.E)
 v(A.M,[B.aLv,B.ab0])
 v(A.bG,[B.bZT,B.bak,B.bWl,B.bWc,B.bWe,B.bWj,B.bWh,B.bWg,B.bWn])
-v(A.dz,[B.bZS,B.bWk,B.bWf])
+v(A.dA,[B.bZS,B.bWk,B.bWf])
 w(B.aLu,A.cJ)
-w(B.MJ,A.vd)
+w(B.MJ,A.vf)
 w(B.a6q,A.dW)
 x(B.abO,A.mN)})()
 A.bl(b.typeUniverse,JSON.parse('{"a5C":{"X":[],"br":["X"],"U":[],"aM":[]},"as1":{"bw":[],"aQ":[],"e":[]},"a_H":{"I":[],"e":[]},"a_G":{"av":[]},"Cg":{"mN":[]},"aLv":{"M":["a_H"]},"aLu":{"cJ":[],"av":[]},"MJ":{"hh":[],"l0":[],"av":[],"nx":[]},"BP":{"I":[],"e":[]},"ab0":{"M":["BP"]}}'))
@@ -784,4 +784,4 @@ D.a9X=new B.a6q(1,"notSignedIn")
 D.a9Z=new B.a6q(2,"nothing")
 D.bFI=new A.cj("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_353",e:"endPart",h:b})})($__dart_deferred_initializers__,"NFXdk6Q7WQXIJtlinC6QP/roa3Y=");
+a.eventLog.push({p:"main.dart.js_353",e:"endPart",h:b})})($__dart_deferred_initializers__,"JwUsanbwqFEjJPJgh+tiG4be2DE=");

@@ -156,10 +156,10 @@ case 3:s=f.a
 if(s!=null&&y.B.b(s)){t=J.v(y.B.a(s),"data")
 if(typeof t=="string"){v=C.cP.cf(t)
 x=1
-break}else{A.dC("Error: Data is not a string.")
+break}else{A.dD("Error: Data is not a string.")
 v=null
 x=1
-break}}else{A.dC("Error: No data returned from supabase function.")
+break}}else{A.dD("Error: No data returned from supabase function.")
 v=null
 x=1
 break}case 1:return A.i(v,w)}})
@@ -254,61 +254,71 @@ w=F.YD(u.w?t:u.gbyh(),w)
 v=A.t("Save",t)
 s=A.ax(t,P.dR(T.t_(A.at(A.a([x,w,F.YD(u.w?t:u.gaMA(),v)],s),C.i,C.f,C.h,0,t),t),t,C.r,t,t,t,C.aj),C.k,C.hO,t,t,t,t,t,t,t,t,t,17976931348623157e292)}else s=t
 return A.js(!0,R.f_(t,C.q,new A.cr(C.ag,t,C.ae,C.y,r,t),s,t,t,t,!0),!0,C.U,!0,!0)},
-uD(){var x=0,w=A.k(y.v),v,u=this,t,s,r,q,p,o
+uD(){var x=0,w=A.k(y.v),v,u=this,t,s,r,q,p,o,n
 var $async$uD=A.f(function(d,e){if(d===1)return A.h(e,w)
-while(true)switch(x){case 0:q=u.as
-q===$&&A.b()
-p=F
+while(true)switch(x){case 0:p=u.as
+p===$&&A.b()
 o=F
+n=F
 x=3
-return A.d(q.KG(),$async$uD)
-case 3:t=p.cJP(o.cJR(e))
+return A.d(p.KG(),$async$uD)
+case 3:t=o.cJP(n.cJR(e))
+p=A.bx("^(?:\\s*(?:<p\\b[^>]*>|\\s*<br\\s*/?>))*",!1,!1,!1)
+s=A.dv(t,p,"")
+p=A.bx("(?:<\\/?p\\b[^>]*>|\\s*<br\\s*\\/?>\\s*)*$",!1,!1,!1)
+s=A.dv(s,p,"")
 x=u.a.d!=null?4:5
 break
 case 4:u.A(new B.c5P(u))
 x=6
 return A.d(A.hA(C.ex,null,y.b),$async$uD)
-case 6:q=u.e
-if(q==null)q=""
-s=u.a.d
-s.toString
+case 6:p=u.e
+if(p==null)p=""
+r=u.a.d
+r.toString
 x=7
-return A.d(B.Qw(q,t,s),$async$uD)
+return A.d(B.Qw(p,s,r),$async$uD)
 case 7:t=e
-s=u.c
-s.toString
-I.fl(s,!1).f.em(t)
+r=u.c
+r.toString
+I.fl(r,!1).f.em(t)
 x=1
 break
 case 5:u.A(new B.c5Q(u))
-q=y.b
+p=y.b
 x=8
-return A.d(A.hA(C.ex,null,q),$async$uD)
-case 8:s=B.d6q(t)
-u.Q=s
-x=s.length!==0?9:10
+return A.d(A.hA(C.ex,null,p),$async$uD)
+case 8:r=B.d6q(s)
+u.Q=r
+x=r.length!==0?9:11
 break
-case 9:s=u.c
-s.toString
-x=13
-return A.d(N.fc(null,null,!1,null,new B.c5R(),s,null,!0,!0,q),$async$uD)
-case 13:x=e?11:12
-break
-case 11:u.A(new B.c5S(u))
-x=14
-return A.d(A.hA(C.M,null,q),$async$uD)
-case 14:q=u.Q,s=q.length,r=0
-case 15:if(!(r<q.length)){x=17
-break}x=18
-return A.d(B.asP(t,q[r],new B.c5T(u)),$async$uD)
-case 18:t=e
-case 16:q.length===s||(0,A.S)(q),++r
+case 9:r=u.c
+r.toString
 x=15
+return A.d(N.fc(null,null,!1,null,new B.c5R(),r,null,!0,!0,p),$async$uD)
+case 15:x=e?12:14
 break
-case 17:case 12:case 10:u.A(new B.c5U(u))
-q=u.c
-q.toString
-I.fl(q,!1).f.em(t)
+case 12:u.A(new B.c5S(u))
+x=16
+return A.d(A.hA(C.M,null,p),$async$uD)
+case 16:p=u.Q,r=p.length,t=s,q=0
+case 17:if(!(q<p.length)){x=19
+break}x=20
+return A.d(B.asP(t,p[q],new B.c5T(u)),$async$uD)
+case 20:t=e
+case 18:p.length===r||(0,A.S)(p),++q
+x=17
+break
+case 19:x=13
+break
+case 14:t=s
+case 13:x=10
+break
+case 11:t=s
+case 10:u.A(new B.c5U(u))
+p=u.c
+p.toString
+I.fl(p,!1).f.em(t)
 case 1:return A.i(v,w)}})
 return A.j($async$uD,w)},
 ab_(){var x=0,w=A.k(y.v),v=this,u
@@ -405,9 +415,9 @@ w(A.bG,[B.c5M,B.c5R,B.bkE,B.bkF])
 w(A.ch,[B.c5J,B.c5K,B.c5L,B.c5P,B.c5Q,B.c5O,B.c5S,B.c5T,B.c5N,B.c5U])})()
 A.bl(b.typeUniverse,JSON.parse('{"CK":{"I":[],"e":[]},"acG":{"M":["CK"]}}'))
 var y=(function rtii(){var x=A.y
-return{i:x("V<@>"),x:x("r<m>"),u:x("r<e>"),B:x("B<@,@>"),F:x("aB"),w:x("m"),e:x("w"),b:x("@"),n:x("dB?"),v:x("~")}})();(function constants(){E.bF5=new A.cj("Processing content and detecting large images...",null,V.acb,null,null,null,null,null,null,null,null,null,null,null,null)
+return{i:x("V<@>"),x:x("r<m>"),u:x("r<e>"),B:x("B<@,@>"),F:x("aB"),w:x("m"),e:x("w"),b:x("@"),n:x("dC?"),v:x("~")}})();(function constants(){E.bF5=new A.cj("Processing content and detecting large images...",null,V.acb,null,null,null,null,null,null,null,null,null,null,null,null)
 E.bF6=new A.cj("Large Images Detected",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 E.bFj=new A.cj("Reducing Images Size...",null,M.H7,null,null,null,null,null,null,null,null,null,null,null,null)
 E.bFF=new A.cj("Some images are large and may slow down the app. Press OK to convert them into optimal size.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_363",e:"endPart",h:b})})($__dart_deferred_initializers__,"Sj0zb1eS+fTO+wi9+gSrk/YcqzQ=");
+a.eventLog.push({p:"main.dart.js_363",e:"endPart",h:b})})($__dart_deferred_initializers__,"Vy0vAFMld3RdBqcR8kYzQLEzrRg=");
