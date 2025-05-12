@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_302",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,E,D,F,B={
-da3(d,e,f,g){throw A.n(A.aI("Process.runSync"))},
+da2(d,e,f,g){throw A.n(A.aI("Process.runSync"))},
 aDb:function aDb(){},
 aqL:function aqL(){this.c=this.b=$},
 bxc:function bxc(){},
@@ -24,7 +24,7 @@ Qp(){var w=0,v=A.k(x.w),u,t=2,s=[],r,q,p,o,n,m,l,k,j,i,h
 var $async$Qp=A.f(function(d,e){if(d===1){s.push(e)
 w=t}while(true)switch(w){case 0:j=null
 t=4
-w=$.cWs()||$.cWr()?7:9
+w=$.cWr()||$.cWq()?7:9
 break
 case 7:h=J
 w=10
@@ -32,7 +32,7 @@ return A.d(B.cvN(),$async$Qp)
 case 10:j=h.cxR(e)
 w=8
 break
-case 9:w=$.cWu()?11:13
+case 9:w=$.cWt()?11:13
 break
 case 11:w=14
 return A.d(B.cvR(),$async$Qp)
@@ -40,7 +40,7 @@ case 14:o=e
 j=o==null?null:J.cxR(o)
 w=12
 break
-case 13:w=$.cF_()?15:17
+case 13:w=$.cEZ()?15:17
 break
 case 15:o=$.cxi()
 n=new B.bwT(new B.bR8())
@@ -51,7 +51,7 @@ return A.d(r.aLu(),$async$Qp)
 case 18:j=e
 w=16
 break
-case 17:w=$.cWt()?19:20
+case 17:w=$.cWs()?19:20
 break
 case 19:o=D.dhN()
 m=$.cxi()
@@ -82,7 +82,7 @@ break
 case 1:return A.i(u,v)
 case 2:return A.h(s.at(-1),v)}})
 return A.j($async$Qp,v)},
-d6a(d){if(E.e.n(d,"."))return d
+d69(d){if(E.e.n(d,"."))return d
 else{if(d.length!==0)return"."+d
 return""}},
 czE(d,e,f,g,h){var w=0,v=A.k(x.o),u
@@ -93,11 +93,11 @@ return A.i(null,v)}})
 return A.j($async$czE,v)},
 cvN(){var w=0,v=A.k(x.D),u,t
 var $async$cvN=A.f(function(d,e){if(d===1)return A.h(e,v)
-while(true)switch(w){case 0:$.cEX()
+while(true)switch(w){case 0:$.cEW()
 w=3
 return A.d(F.a4t.dG("getApplicationDocumentsDirectory",null,!1,x.v),$async$cvN)
 case 3:t=e
-if(t==null)throw A.n(D.d8c("Unable to get application documents directory"))
+if(t==null)throw A.n(D.d8b("Unable to get application documents directory"))
 u=D.bbp(t)
 w=1
 break
@@ -105,7 +105,7 @@ case 1:return A.i(u,v)}})
 return A.j($async$cvN,v)},
 cvR(){var w=0,v=A.k(x.i),u,t
 var $async$cvR=A.f(function(d,e){if(d===1)return A.h(e,v)
-while(true)switch(w){case 0:$.cEX()
+while(true)switch(w){case 0:$.cEW()
 if(!F.aj4.gbI9())A.a7(A.aI("Functionality only available on macOS"))
 w=3
 return A.d(F.a4t.dG("getDownloadsDirectory",null,!1,x.v),$async$cvR)
@@ -120,10 +120,10 @@ return A.j($async$cvR,v)}},C
 J=c[1]
 A=c[0]
 E=c[2]
-D=c[173]
-F=c[395]
-B=a.updateHolder(c[93],B)
-C=c[341]
+D=c[172]
+F=c[394]
+B=a.updateHolder(c[92],B)
+C=c[340]
 B.aDb.prototype={
 gcY(d){return"system"},
 kO(d){return this.glX().cf(d)},
@@ -140,8 +140,8 @@ w=t}while(true)switch(w){case 0:j=null
 i=null
 h=null
 d=d
-if(f===C.bmQ&&j==null)throw A.n(A.cP("customMimeType is required when mimeType is MimeType.custom"))
-q=B.d6a(e)
+if(f===C.bmR&&j==null)throw A.n(A.cP("customMimeType is required when mimeType is MimeType.custom"))
+q=B.d69(e)
 p=i!=null||h!=null
 w=!p?3:4
 break
@@ -249,23 +249,23 @@ B.bwS.prototype={}
 B.bwT.prototype={}
 B.bR8.prototype={}
 B.bYX.prototype={
-bQ5(d,e,f){return B.da3(d,e,C.ajz,f)}}
+bQ5(d,e,f){return B.da2(d,e,C.ajz,f)}}
 var z=a.updateTypes([]);(function inheritance(){var w=a.inherit,v=a.inheritMany
 w(B.aDb,A.pa)
 v(A.E,[B.aqL,B.bxc,B.bCD,B.bR8,B.bYX])
 w(B.bxd,B.bxc)
 w(B.RJ,A.dW)
 v(D.ayo,[B.bwS,B.bwT])})()
-A.bl(b.typeUniverse,JSON.parse('{"aDb":{"pa":[],"p2":["m","C<l>"]}}'))
+A.bm(b.typeUniverse,JSON.parse('{"aDb":{"pa":[],"p2":["m","C<l>"]}}'))
 var y={a:"Something went wrong, please report the issue https://www.github.com/incrediblezayed/file_saver/issues"}
 var x={D:A.y("HI"),g:A.y("b9"),x:A.y("r<m>"),v:A.y("m"),o:A.y("dC"),i:A.y("HI?"),w:A.y("m?")};(function constants(){C.ajz=new B.aDb()
 C.akb=new B.bYX()
-C.ey=new A.ao(10,0,10,0)
-C.bP4=new B.RJ("Other","application/octet-stream",20,"other")
-C.bmQ=new B.RJ("Custom","",31,"custom")})();(function lazyInitializers(){var w=a.lazyFinal
-w($,"dyz","cWt",()=>{$.GE()
+C.ez=new A.ao(10,0,10,0)
+C.bP5=new B.RJ("Other","application/octet-stream",20,"other")
+C.bmR=new B.RJ("Custom","",31,"custom")})();(function lazyInitializers(){var w=a.lazyFinal
+w($,"dyz","cWs",()=>{$.GE()
 return!1})
-w($,"dyA","cWu",()=>{$.GE()
+w($,"dyA","cWt",()=>{$.GE()
 return!1})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_302",e:"endPart",h:b})})($__dart_deferred_initializers__,"rwCgcy+gHD+rPTyHp7Tp5RMRJic=");
+a.eventLog.push({p:"main.dart.js_302",e:"endPart",h:b})})($__dart_deferred_initializers__,"xU3SRsQ+xr2CG8Id5kTF7d/1grY=");

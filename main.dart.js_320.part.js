@@ -4,8 +4,8 @@ a[b][c].push({p:"main.dart.js_320",e:"beginPart"})})(self,"$__dart_deferred_init
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,G,H,E,F,I,K,B={apE:function apE(d,e,f){this.c=d
 this.a=e
 this.b=f},
-cLt(d,e,f){return new B.a3u(d,f,e,null)},
-d8i(d,e){},
+cLs(d,e,f){return new B.a3u(d,f,e,null)},
+d8h(d,e){},
 a3u:function a3u(d,e,f,g){var _=this
 _.c=d
 _.d=e
@@ -18,8 +18,8 @@ cah:function cah(d){this.a=d},
 cag:function cag(d,e){this.a=d
 this.b=e},
 aWp:function aWp(){},
-cLu(d,e){var x=d===D.aq1?250:0
-return new B.a3x(d,x,e,new A.fm(null,null,y.n),D.bn5,$.a9())},
+cLt(d,e){var x=d===D.aq1?250:0
+return new B.a3x(d,x,e,new A.fm(null,null,y.n),D.bn6,$.a9())},
 a3x:function a3x(d,e,f,g,h,i){var _=this
 _.y=d
 _.z=e
@@ -70,14 +70,14 @@ case 2:return A.i(null,w)}})
 return A.j($async$qo,w)}},D
 A=c[0]
 C=c[2]
-G=c[190]
-H=c[224]
-E=c[211]
-F=c[146]
-I=c[364]
-K=c[248]
+G=c[189]
+H=c[223]
+E=c[210]
+F=c[145]
+I=c[363]
+K=c[247]
 B=a.updateHolder(c[37],B)
-D=c[243]
+D=c[242]
 B.apE.prototype={
 J(){return"DetectionSpeed."+this.b}}
 B.a3u.prototype={
@@ -99,7 +99,7 @@ a_j(){var x=0,w=A.k(y.v),v=this,u,t,s
 var $async$a_j=A.f(function(d,e){if(d===1)return A.h(e,w)
 while(true)switch(x){case 0:t=v.a
 s=t.c
-v.d!==$&&A.bh()
+v.d!==$&&A.bi()
 v.d=s
 s.fr=!0
 u=s.CW
@@ -137,7 +137,7 @@ x=this.d
 x===$&&A.b()
 w=x.a
 if(w.d){w=w.c
-w=(w==null?null:w.a)!==C.yt}else w=!1
+w=(w==null?null:w.a)!==C.yu}else w=!1
 w=!w
 if(w)return
 switch(d.a){case 0:case 3:case 4:return
@@ -171,7 +171,7 @@ x.sp(0,w.bAB(!1,w.w===C.jF?C.jF:C.acB))
 return!0},
 kW(d){var x=0,w=A.k(y.v),v,u=2,t=[],s=this,r,q,p,o,n,m,l,k,j
 var $async$kW=A.f(function(e,f){if(e===1){t.push(f)
-x=u}while(true)switch(x){case 0:if(s.dy)throw A.n(A.t5(C.ys,A.t4(null,null,C.ys.glF(0))))
+x=u}while(true)switch(x){case 0:if(s.dy)throw A.n(A.t5(C.yt,A.t4(null,null,C.yt.glF(0))))
 if(!s.fr)throw A.n(A.t5(C.a4B,A.t4(null,null,C.a4B.glF(0))))
 o=s.a
 if(o.f){x=1
@@ -250,8 +250,8 @@ return this.CQ(x,x,x,x,x,x,x,x,d,x)},
 bAB(d,e){var x=null
 return this.CQ(x,x,x,x,x,d,x,x,e,x)}}
 B.aB9.prototype={
-B(d){var x=null,w=A.a([D.bsl],y.u)
-w.push(A.R(C.hp.glF(0),x,x,x,x,x,x,x,K.pJ,x,x,x,x,x))
+B(d){var x=null,w=A.a([D.bsm],y.u)
+w.push(A.R(C.hq.glF(0),x,x,x,x,x,x,x,K.pJ,x,x,x,x,x))
 return new A.n1(C.t,A.bQ(A.aj(w,C.i,C.f,C.W,x,C.l),x,x),x)}}
 B.bHu.prototype={
 eh(){var x,w,v=this,u=A.L(y.x,y.q)
@@ -316,13 +316,13 @@ u=u?new A.Y(x.b,x.a):x
 x=this.a
 w=x.c
 if(!w.a.d)A.a7(A.t5(C.a4z,A.t4(v,v,C.a4z.glF(0))))
-if(w.dy)A.a7(A.t5(C.ys,A.t4(v,v,C.ys.glF(0))))
+if(w.dy)A.a7(A.t5(C.yt,A.t4(v,v,C.yt.glF(0))))
 return E.tq(x.bv1($.y5().azK()),u)},
 $S:z+2}
 B.bHv.prototype={
 $1(d){return d.c},
 $S:1072};(function installTearOffs(){var x=a._static_2,w=a._instance_0u
-x(B,"drZ","d8i",3)
+x(B,"drZ","d8h",3)
 w(B.a3x.prototype,"gfj","l",1)})();(function inheritance(){var x=a.mixin,w=a.inherit,v=a.inheritMany
 w(B.apE,A.dW)
 w(B.a3u,A.I)
@@ -334,23 +334,23 @@ w(B.a3x,A.bP)
 v(A.ab,[B.alK,B.aB9])
 v(A.E,[B.wX,B.bHu])
 x(B.aWp,A.ey)})()
-A.bl(b.typeUniverse,JSON.parse('{"a3u":{"I":[],"e":[]},"aOj":{"M":["a3u"],"ey":[]},"a3x":{"bP":["wX"],"av":[]},"alK":{"ab":[],"e":[]},"aB9":{"ab":[],"e":[]}}'))
+A.bm(b.typeUniverse,JSON.parse('{"a3u":{"I":[],"e":[]},"aOj":{"M":["a3u"],"ey":[]},"a3x":{"bP":["wX"],"av":[]},"alK":{"ab":[],"e":[]},"aB9":{"ab":[],"e":[]}}'))
 var y={w:A.y("V<~>"),u:A.y("r<e>"),x:A.y("m"),i:A.y("fG<wX>"),n:A.y("fm<mg>"),q:A.y("E?"),v:A.y("~")};(function constants(){var x=a.makeConstList
 D.aoC=new A.n1(C.t,null,null)
 D.L4=new B.apE(0,0,"noDuplicates")
 D.aq1=new B.apE(1,1,"normal")
 D.Ls=new A.ao(0,24,0,12)
 D.Mu=new A.aE(57657,"MaterialIcons",null,!1)
-D.bP1=A.a(x([]),A.y("r<jC>"))
+D.bP2=A.a(x([]),A.y("r<jC>"))
 D.anC=new A.Z(1,0.5098039215686274,0.6941176470588235,1,C.j)
 D.anv=new A.Z(1,0.26666666666666666,0.5411764705882353,1,C.j)
 D.an6=new A.Z(1,0.1607843137254902,0.4745098039215686,1,C.j)
 D.aog=new A.Z(1,0.1607843137254902,0.3843137254901961,1,C.j)
-D.aWZ=new A.c([100,D.anC,200,D.anv,400,D.an6,700,D.aog],A.y("c<l,Z>"))
-D.a4n=new A.Jk(D.aWZ,1,0.26666666666666666,0.5411764705882353,1,C.j)
-D.bn5=new B.wX(null,C.nF,null,!1,!1,!1,C.a_,C.jF,1,C.r5)
-D.avr=new A.dd(H.rG,null,C.p,null,null)
-D.bsl=new A.a5(I.BZ,D.avr,null)
+D.aX_=new A.c([100,D.anC,200,D.anv,400,D.an6,700,D.aog],A.y("c<l,Z>"))
+D.a4n=new A.Jk(D.aX_,1,0.26666666666666666,0.5411764705882353,1,C.j)
+D.bn6=new B.wX(null,C.nF,null,!1,!1,!1,C.a_,C.jF,1,C.r5)
+D.avs=new A.dd(H.rG,null,C.p,null,null)
+D.bsm=new A.a5(I.C_,D.avs,null)
 D.ac6=new A.a3(!0,C.t,null,null,null,null,16,C.a5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_320",e:"endPart",h:b})})($__dart_deferred_initializers__,"YXyNgilkVjEKhhn8JXtj8DQuwPw=");
+a.eventLog.push({p:"main.dart.js_320",e:"endPart",h:b})})($__dart_deferred_initializers__,"hK0JunOL2+52ZYMsWAbEF+W/c0Q=");

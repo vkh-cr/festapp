@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_229",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,M,E,N,O,P,G,B={
-dbM(){return new B.EK(null)},
+dbL(){return new B.EK(null)},
 EK:function EK(d){this.a=d},
 afE:function afE(){var _=this
 _.f=_.e=_.d=!1
@@ -79,24 +79,24 @@ case 3:return A.i(null,w)}})
 return A.j($async$axw,w)}},D,Q,F,R,S,H,L,I,T,K,U
 A=c[0]
 C=c[2]
-M=c[219]
-E=c[209]
-N=c[102]
-O=c[176]
-P=c[131]
-G=c[330]
+M=c[218]
+E=c[208]
+N=c[101]
+O=c[175]
+P=c[130]
+G=c[329]
 B=a.updateHolder(c[26],B)
-D=c[328]
-Q=c[53]
-F=c[92]
-R=c[331]
-S=c[125]
-H=c[296]
-L=c[329]
-I=c[225]
-T=c[216]
-K=c[228]
-U=c[207]
+D=c[327]
+Q=c[52]
+F=c[91]
+R=c[330]
+S=c[124]
+H=c[295]
+L=c[328]
+I=c[224]
+T=c[215]
+K=c[227]
+U=c[206]
 B.EK.prototype={
 M(){return new B.afE()}}
 B.afE.prototype={
@@ -124,26 +124,26 @@ return A.d(v.qw(),$async$xw)
 case 2:return A.i(null,w)}})
 return A.j($async$xw,w)},
 a8C(d){this.A(new B.cjK(this,d))},
-B(d){var x,w,v,u,t,s=this,r=null,q=4294922834,p=4292030255,o=A.bm(C.as)
-o=E.bp(A.R("Settings",r,r,r,r,r,r,r,A.aA(r,r,new A.be(o.a,o.b,o.c,0.8).bi(),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r,r,r,r),r)
-x=A.bm(C.as)
-o=U.ip(r,r,r,!0,r,r,1,r,r,r,!1,r,!1,r,r,O.u6(new A.be(x.a,x.b,x.c,0.8).bi(),new B.cjM(d)),r,!0,r,r,r,r,r,o,r,r,r,1,r)
+B(d){var x,w,v,u,t,s=this,r=null,q=4294922834,p=4292030255,o=A.bn(C.as)
+o=E.bp(A.R("Settings",r,r,r,r,r,r,r,A.aA(r,r,new A.bf(o.a,o.b,o.c,0.8).bi(),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r,r,r,r),r)
+x=A.bn(C.as)
+o=U.ip(r,r,r,!0,r,r,1,r,r,r,!1,r,!1,r,r,O.u6(new A.bf(x.a,x.b,x.c,0.8).bi(),new B.cjM(d)),r,!0,r,r,r,r,r,o,r,r,r,1,r)
 x=y.u
 w=A.a([],x)
-if(A.Y2().length>1){v=E.bp(D.bFH,r)
+if(A.Y2().length>1){v=E.bp(D.bFI,r)
 u=s.x
 u=u==null?r:u.b
 if(u==null)u="---"
 t=y.w
-C.b.H(w,A.a([v,K.a2,A.at(A.a([A.R(A.t("Current Language: {language}",A.A(["language",u],t,t)),r,r,r,r,r,r,r,L.zb,r,r,r,r,r),A.c3(r,r,r,r,r,r,D.avD,r,r,r,new B.cjN(s,d),r,r,r,r,r)],x),C.i,C.bX,C.h,0,r),I.eo],x))}A.b_m()
-v=A.a([E.bp(D.bFN,r),K.a2,A.at(A.a([E.bp(D.bF1,r),S.xs(r,r,r,!1,C.r,r,r,r,r,r,r,new B.cjO(s),r,r,r,r,r,r,r,r,s.d)],x),C.i,C.bX,C.h,0,r)],x)
+C.b.H(w,A.a([v,K.a2,A.as(A.a([A.R(A.t("Current Language: {language}",A.A(["language",u],t,t)),r,r,r,r,r,r,r,L.zc,r,r,r,r,r),A.c3(r,r,r,r,r,r,D.avE,r,r,r,new B.cjN(s,d),r,r,r,r,r)],x),C.i,C.bX,C.h,0,r),I.eo],x))}A.b_m()
+v=A.a([E.bp(D.bFO,r),K.a2,A.as(A.a([E.bp(D.bF2,r),S.xs(r,r,r,!1,C.r,r,r,r,r,r,r,new B.cjO(s),r,r,r,r,r,r,r,r,s.d)],x),C.i,C.bX,C.h,0,r)],x)
 if(s.w)v.push(new A.a5(G.dJ,E.bp(A.R("Failed to enable notifications.",r,r,r,r,r,r,r,A.aA(r,r,A.D(d).ax.a===C.q?A.b2(q):A.b2(p),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b2,r,r,r,r),r),r))
 C.b.H(w,v)
 w.push(I.eo)
-v=E.bp(D.bF4,r)
+v=E.bp(D.bF5,r)
 u=s.y
 u=A.a([u===C.lh,u===C.hG,u===C.iq],y.l)
-w.push(A.aj(A.a([v,K.a2,F.cOF(A.c2(8),A.a([new A.a5(new A.ao(12,0,12,0),E.bp(D.bES,r),r),new A.a5(new A.ao(12,0,12,0),E.bp(A.R("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.a5(new A.ao(12,0,12,0),E.bp(A.R("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),u,new B.cjP(s)),I.eo],x),C.K,C.f,C.h,r,C.l))
+w.push(A.aj(A.a([v,K.a2,F.cOE(A.c1(8),A.a([new A.a5(new A.ao(12,0,12,0),E.bp(D.bET,r),r),new A.a5(new A.ao(12,0,12,0),E.bp(A.R("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.a5(new A.ao(12,0,12,0),E.bp(A.R("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),u,new B.cjP(s)),I.eo],x),C.K,C.f,C.h,r,C.l))
 v=A.t("Install App",r)
 u=!s.e
 t=u&&s.r&&s.f?s.gadB():r
@@ -174,7 +174,7 @@ $0(){var x=this.a,w=this.b
 x.y=w
 x=x.c
 x.toString
-F.cGa(x).aiX(w)},
+F.cG9(x).aiX(w)},
 $S:0}
 B.cjM.prototype={
 $0(){return N.aAX(this.a)},
@@ -222,12 +222,12 @@ x(B.EK,A.I)
 x(B.afE,A.M)
 w(A.bG,[B.cjR,B.cjO,B.cjP])
 w(A.ch,[B.cjS,B.cjQ,B.cjK,B.cjM,B.cjN,B.cjL])})()
-A.bl(b.typeUniverse,JSON.parse('{"EK":{"I":[],"e":[]},"afE":{"M":["EK"]}}'))
-var y={u:A.y("r<e>"),l:A.y("r<w>"),w:A.y("m"),q:A.y("ka"),e:A.y("w"),v:A.y("~")};(function constants(){D.avD=new A.dd(R.MT,null,null,null,null)
-D.bES=new A.cj("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bF1=new A.cj("Enable Notifications",null,L.zb,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bF4=new A.cj("Appearance",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bFH=new A.cj("Language Settings",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bFN=new A.cj("Notification Settings",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)})()};
+A.bm(b.typeUniverse,JSON.parse('{"EK":{"I":[],"e":[]},"afE":{"M":["EK"]}}'))
+var y={u:A.y("r<e>"),l:A.y("r<w>"),w:A.y("m"),q:A.y("ka"),e:A.y("w"),v:A.y("~")};(function constants(){D.avE=new A.dd(R.MT,null,null,null,null)
+D.bET=new A.cj("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bF2=new A.cj("Enable Notifications",null,L.zc,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bF5=new A.cj("Appearance",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bFI=new A.cj("Language Settings",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bFO=new A.cj("Notification Settings",null,H.n9,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_229",e:"endPart",h:b})})($__dart_deferred_initializers__,"bPl+UDwOeAVCqoEV+yeVsL4Ydc0=");
+a.eventLog.push({p:"main.dart.js_229",e:"endPart",h:b})})($__dart_deferred_initializers__,"1kIOtkHeBhHPN6l83M6oBoeCXW0=");
