@@ -45,6 +45,10 @@ extension DataExtensions on List<EventModel> {
     return filtered;
   }
 
+  List<EventModel> filterNotHidden() {
+    return where((e) => !e.isHidden).toList();
+  }
+
   List<EventModel> timetableEventsFilter(int minimalDurationMinutes) {
     return filterRootEvents()
         .where((e) => e.place?.id != null)

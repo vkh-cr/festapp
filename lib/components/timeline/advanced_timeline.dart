@@ -435,7 +435,7 @@ class _EventCard extends StatelessWidget {
 
                         // HTML description with extra horizontal padding
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: HtmlView(
                             html: event.description ?? "",
                             isSelectable: true,
