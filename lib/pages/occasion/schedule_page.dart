@@ -245,7 +245,7 @@ class _SchedulePageState extends State<SchedulePage>
                               setState(() => TimeHelper.toggleTimeTravel?.call());
                             }
                           },
-                          child: LogoWidget(width: 120, forceDark: true),
+                          child: LogoWidget(height: 60, forceDark: true),
                         ),
                         const Spacer(),
                         if (FeatureService.isFeatureEnabled(
