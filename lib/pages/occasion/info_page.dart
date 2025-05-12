@@ -58,7 +58,7 @@ class _InfoPageState extends State<InfoPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.infoPageColor(context),
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title, style: TextStyle(color: ThemeConfig.appBarColorNegative()),),
         leading: PopButton(),
       ),
       body: Align(

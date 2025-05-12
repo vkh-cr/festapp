@@ -14,7 +14,7 @@ class TimeHelper {
     return DateTime.now();
   }
 
-  static int getIndexFromDays(Iterable<int> weekdays) {
+  static int getTimeNowIndexFromDays(Iterable<int> weekdays) {
     var index = weekdays.toList().indexOf(now().weekday);
     if(index == -1) {
       return 0;
