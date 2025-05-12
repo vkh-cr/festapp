@@ -34,14 +34,11 @@ platform :ios do
       key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_#{ENV["APP_STORE_CONNECT_KEY_ID"]}.p8")
     )
 
-    app_version = get_version_number(
-      xcodeproj: "../ios/Runner.xcodeproj",
-      target: "Runner"
-    )
+    ipa_path = File.expand_path("../../build/ios/ipa/#{ENV["IPA_FILENAME"]}", __dir__)
 
     upload_to_app_store(
       api_key: api_key,
-      ipa: File.expand_path("../../build/ios/ipa/#{ENV["IPA_FILENAME"]}", __dir__),
+      ipa: ipa_path,
       skip_metadata: true,
       skip_screenshots: true,
       run_precheck_before_submit: false,
@@ -51,15 +48,6 @@ platform :ios do
     )
 
     require 'spaceship'
-    # ✅ This is the hash version needed by `deliver`
-    api_key_hash = app_store_connect_api_key(
-      key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
-      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
-      key_filepath: File.expand_path("~/.appstoreconnect/private_keys/AuthKey_#{ENV["APP_STORE_CONNECT_KEY_ID"]}.p8")
-    )
-
-    # ✅ This is the JWT token object needed by `Spaceship`
-    require 'spaceship'
     token = Spaceship::ConnectAPI::Token.create(
       key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
       issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
@@ -67,19 +55,50 @@ platform :ios do
     )
     Spaceship::ConnectAPI.token = token
 
-    app_id = Spaceship::ConnectAPI::App.find(ENV['FASTLANE_APP_IDENTIFIER']).id
+    app = Spaceship::ConnectAPI::App.find(ENV['FASTLANE_APP_IDENTIFIER'])
+
+    UI.message("⏳ Waiting for App Store Connect to process the build...")
+    build = nil
+    max_attempts = 40
+    attempt = 0
+
+    until build
+      attempt += 1
+      builds = app.get_builds.sort_by(&:uploaded_date).reverse
+
+      # Print status of each build (for debug)
+      builds.each do |b|
+        UI.message("Attempt #{attempt} - Build #{b.version} (#{b}): #{b.processing_state}")
+      end
+
+      build = builds.find { |b| b.processing_state == "VALID" }
+
+      if build
+        UI.success("✅ Build #{build.version} (#{build}) is processed!")
+        break
+      end
+
+      if attempt >= max_attempts
+        UI.user_error!("❌ Build processing timeout after #{attempt * 15} seconds.")
+      end
+
+      sleep(15)
+    end
+
+    # Proceed with setting release notes and submitting for review
+    app_id = app.id
     app = Spaceship::ConnectAPI::App.get(app_id: app_id)
     version = app.get_edit_app_store_version(includes: 'appStoreVersionLocalizations')
 
     version.get_app_store_version_localizations(limit: 100).each do |localization|
-      UI.message("Updating release notes for #{localization.locale}")
+      UI.message("📝 Updating release notes for #{localization.locale}")
       localization.update(attributes: {
         whatsNew: ENV["RELEASE_NOTES"] || "No notes provided"
       })
     end
 
     deliver(
-      api_key: api_key_hash,
+      api_key: api_key,
       app_identifier: ENV['FASTLANE_APP_IDENTIFIER'],
       submit_for_review: true,
       skip_binary_upload: true,
