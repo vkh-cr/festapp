@@ -220,7 +220,8 @@ class EventModel extends ITrinaRowModel {
     }
 
     Map<String, dynamic> dataFromTab = {};
-    dataFromTab[Tb.events.dataHeaderImage] = json[Tb.events.dataHeaderImage];
+    String? headerUrl = json[Tb.events.dataHeaderImage];
+    dataFromTab[Tb.events.dataHeaderImage] = headerUrl != null && headerUrl.isNotEmpty ? headerUrl : null;
 
 
     return EventModel(
