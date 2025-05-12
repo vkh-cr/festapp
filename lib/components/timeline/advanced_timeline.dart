@@ -406,7 +406,7 @@ class _EventCard extends StatelessWidget {
                             )
                                 : OutlinedButton(
                               onPressed: () { controller.onSignInEvent!(event.id); },
-                              style: _signButtonStyle(ThemeConfig.darkColor(context), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
+                              style: _signButtonStyle(ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
                               child: Text('Sign in'.tr()),
                             ),
                           ),
@@ -421,7 +421,7 @@ class _EventCard extends StatelessWidget {
                               html: '''
                                 <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                                   <div>${"An account is required to join this event.".tr()}</div>
-                                  <a href="\${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
                                     ${"Click here to sign in.".tr()}
                                   </a>
                                 </div>
@@ -471,6 +471,7 @@ ButtonStyle _signButtonStyle(Color fg, Color bd) => OutlinedButton.styleFrom(
 );
 
 /// Tab header widget with scrollable, centered tabs and inline arrow navigation.
+/// Tab header widget with scrollable, centered tabs and inline arrow navigation.
 class AdvancedTimelineView extends StatelessWidget {
   /// Localized weekday labels (e.g., ['MON', 'TUE', ...]).
   final List<String> weekdays;
@@ -496,7 +497,7 @@ class AdvancedTimelineView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = DefaultTabController.of(context)!;
     final animation = controller.animation!;
-    final today = TimeHelper.now().day;
+    final todayDate = TimeHelper.now();  // changed from `final today = TimeHelper.now().day;`
 
     // Total extra width to accommodate both arrows (approx. IconButton width)
     const arrowTotalWidth = 96.0;
@@ -549,7 +550,10 @@ class AdvancedTimelineView extends StatelessWidget {
                     unselectedLabelColor: Colors.transparent,
                     tabs: List.generate(groups.length, (i) {
                       final group = groups[i];
-                      final day = group.dateTime!.day;
+                      final isToday = group.dateTime!.year == todayDate.year &&
+                          group.dateTime!.month == todayDate.month &&
+                          group.dateTime!.day == todayDate.day;
+
                       return SizedBox(
                         width: 42,
                         height: 60,
@@ -582,7 +586,7 @@ class AdvancedTimelineView extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 10, color: labelColor),
                                 ),
-                                if (day == today) ...[
+                                if (isToday) ...[
                                   const SizedBox(height: 4),
                                   Container(
                                     width: 6,
