@@ -24,6 +24,11 @@ class RouterService {
     return context.router.pushPath(getCurrentLink() + path);
   }
 
+  static Future<T?> navigateOccasionNoContext<T extends Object?>(
+      String path) {
+    return router.pushPath(getCurrentLink() + path);
+  }
+
   static Future<T?> changeOnOccasion<T extends Object?>(
       BuildContext context, String path, {Object? extra}) {
     return context.router.push(
