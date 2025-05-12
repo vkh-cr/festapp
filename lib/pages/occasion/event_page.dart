@@ -76,9 +76,9 @@ class _EventPageState extends State<EventPage> {
               : ThemeConfig.eventTypeToColor(context, _event!.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.eventTypeToColorNegative(context, _event?.type)),
           ),
-          leading: ScheduleBackButton(),
+          leading: ScheduleBackButton(color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureConstants.entryCode),
@@ -425,7 +425,7 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     isLoadingEvent = false;
-    await OfflineDataService.saveEventDescription(_event!);
+
     if (RightsService.isEditor()) {
       await loadParticipants(id);
     }
@@ -445,9 +445,6 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.eventUserGroup;
         }
       } else {
-        var descr = await OfflineDataService.getEventDescription(id.toString());
-        event.description = descr?.description;
-
         if (event.place?.id != null) {
           var place = (await OfflineDataService.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
