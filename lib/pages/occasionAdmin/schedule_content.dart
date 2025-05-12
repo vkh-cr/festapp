@@ -108,7 +108,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             TrinaColumn(
               title: "Intro Image".tr(),
               field: Tb.events.dataHeaderImage,
-              type: TrinaColumnType.text(defaultValue: ""),
+              type: TrinaColumnType.text(defaultValue: null),
               width: 140,
               applyFormatterInEditing: true,
               renderer: (ctx) {
