@@ -144,7 +144,7 @@ class EventModel extends ITrinaRowModel {
 
   bool isFull() => currentParticipants !>= maxParticipants!;
   static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null;
-  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && event!.currentParticipants! >= event.maxParticipants!;
+  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && (event!.currentParticipants??0) >= event.maxParticipants!;
   @override
   String toString() {
     return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
