@@ -549,5 +549,7 @@
   "This determines whether this event is hidden from list views.": "This determines whether this event is hidden from list views.",
   "No news messages yet": "No news messages yet",
   "Allows customizing event schedule display settings.": "Allows customizing event schedule display settings.",
+  "Volunteers": "Volunteers",
+  "Volunteers_description": "Allows management of activities for volunteers.",
   "_":"_"
 }
