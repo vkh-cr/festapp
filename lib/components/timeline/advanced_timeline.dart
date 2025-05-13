@@ -248,12 +248,37 @@ class _EventCard extends StatelessWidget {
       inlineActionSection = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(children: [
-              Text('${event.participants}/${event.maxParticipants}',
-                  style: TextStyle(fontSize: 12, color: capColor)),
-              const SizedBox(width: 4),
-              Icon(Icons.people, size: 14, color: capColor),
-            ]),
+            Row(
+              children: [
+                if (event.isSignedIn())
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${event.participants}/${event.maxParticipants}',
+                          style: TextStyle(fontSize: 13, color: Theme.of(context).cardColor),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.people, size: 14, color: Theme.of(context).cardColor),
+                      ],
+                    ),
+                  )
+                else
+                  Row(
+                    children: [
+                      Text('${event.participants}/${event.maxParticipants}',
+                          style: TextStyle(fontSize: 13, color: capColor)),
+                      const SizedBox(width: 4),
+                      Icon(Icons.people, size: 14, color: capColor),
+                    ],
+                  ),
+              ],
+            ),
             if (AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && showInlineButtons) ...[
               const SizedBox(height: 4),
               event.isSignedIn()
