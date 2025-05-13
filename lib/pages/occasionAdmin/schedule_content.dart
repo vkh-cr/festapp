@@ -1,8 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/components/features/feature.dart';
-import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/single_data_grid/data_grid_helper.dart';
 import 'package:fstapp/components/single_data_grid/single_data_grid_controller.dart';
 import 'package:fstapp/data_models/event_model.dart';
@@ -104,7 +103,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
             TrinaColumnType.number(negative: false, defaultValue: 0),
             width: 80,
           ),
-          if((FeatureService.getFeatureDetails(FeatureConstants.schedule) as ScheduleFeature?)?.scheduleType == FeatureConstants.scheduleTypeAdvanced)
+          if((FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule) as ScheduleFeature?)?.scheduleType == ScheduleFeature.scheduleTypeAdvanced)
             TrinaColumn(
               title: "Intro Image".tr(),
               field: Tb.events.dataHeaderImage,
