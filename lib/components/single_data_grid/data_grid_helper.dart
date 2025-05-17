@@ -10,8 +10,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:fstapp/data_models_eshop/order_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/custom_three_state_checkbox.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class DataGridHelper
@@ -20,25 +22,35 @@ class DataGridHelper
     required BuildContext context,
     required String field,
     required TrinaColumnRendererContext rendererContext,
-    required Future<String?> Function() loadContent,
+    required Future<String?> Function() loadContent, // Used for both editor and potentially tooltip
+    bool showTooltipWithContent = true, // Flag to enable tooltip
     int? occasionId
   }) {
-    String? textToEdit;
-    String? oldText = rendererContext.row.cells[field]?.value;
-    if (oldText != null) {
-      textToEdit = oldText;
-    }
+    String? textToEdit = rendererContext.row.cells[field]?.value as String?;
 
-    return ElevatedButton(
+    // Button's visual part, kept as original
+    Widget buttonChild = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.edit),
+        Padding(
+          padding: const EdgeInsets.all(6),
+          child: Text("Edit".tr()),
+        ),
+      ],
+    );
+
+    Widget button = ElevatedButton(
       onPressed: () async {
         Map<String, dynamic> param = {
-          HtmlEditorPage.parContent: textToEdit,
-          HtmlEditorPage.parLoad: loadContent,
+          HtmlEditorPage.parContent: textToEdit, // Pass current cell value to editor
+          HtmlEditorPage.parLoad: loadContent, // Editor will use this if parContent is null/empty
         };
 
         RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
           if (value != null) {
             var newText = value as String;
+            // Compare with the value that was in the cell when edit was initiated
             if (newText != textToEdit) {
               rendererContext.row.cells[field]?.value = newText;
               var cell = rendererContext.row.cells[field]!;
@@ -47,16 +59,79 @@ class DataGridHelper
           }
         });
       },
-      child: Row(
-        children: [
-          const Icon(Icons.edit),
-          Padding(
-            padding: const EdgeInsets.all(6),
-            child: Text("Edit".tr()),
-          ),
-        ],
-      ),
+      child: buttonChild,
     );
+
+    if (showTooltipWithContent) { // Use the new flag
+      final tooltipTheme = TooltipTheme.of(context);
+      final effectiveDecoration = tooltipTheme.decoration ?? BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white,
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        border: Border.all(color: Colors.grey.shade400, width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
+        ],
+      );
+      final baseTextStyle = tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
+      final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14); // Ensure font size for tooltip
+
+      return Tooltip(
+        showDuration: const Duration(seconds: 15),
+        preferBelow: true,
+        verticalOffset: 24,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.zero,
+        decoration: BoxDecoration(color: Colors.transparent),
+        richMessage: WidgetSpan(
+          alignment: PlaceholderAlignment.bottom,
+          child: FutureBuilder<String?>(
+            future: loadContent(), // Use loadContent directly for the tooltip
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Container(
+                  padding: const EdgeInsets.all(8.0),
+                  constraints: BoxConstraints(maxWidth: 350, maxHeight: 250),
+                  decoration: effectiveDecoration,
+                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                );
+              }
+
+              final htmlContent = snapshot.data;
+              if (snapshot.hasError || HtmlHelper.isHtmlEmptyOrNull(htmlContent)) {
+                return Container(
+                  padding: const EdgeInsets.all(10.0), // Slightly more padding for icon
+                  decoration: effectiveDecoration,
+                  child: Icon(
+                    Icons.text_snippet_outlined, // Icon suggesting a document/text
+                    size: 22,
+                    color: (effectiveTextStyle.color ?? Colors.grey).withOpacity(0.5), // Subdued color
+                  ),
+                );
+              }
+
+              return Container(
+                padding: const EdgeInsets.all(8.0),
+                constraints: BoxConstraints(maxWidth: 450, maxHeight: 300),
+                decoration: effectiveDecoration,
+                child: SingleChildScrollView(
+                  child: HtmlView(
+                    html: htmlContent!,
+                    fontSize: effectiveTextStyle.fontSize!,
+                    color: effectiveTextStyle.color, // Ensure HtmlView text color matches tooltip theme
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        child: button,
+      );
+    }
+    return button;
   }
 
   static Widget buildTab(BuildContext context, IconData icon, String text) {

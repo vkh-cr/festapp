@@ -36,6 +36,11 @@ ALTER TABLE public.form_fields ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.request_secrets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.path_groups ENABLE ROW LEVEL SECURITY;
 
+ALTER TABLE public.activities    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignment_places  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignment_events  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.activity_assignments   ENABLE ROW LEVEL SECURITY;
+
 --eshop
 ALTER TABLE eshop.orders_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE eshop.bank_account_requests ENABLE ROW LEVEL SECURITY;
