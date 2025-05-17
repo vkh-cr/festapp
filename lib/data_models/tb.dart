@@ -30,6 +30,10 @@ class Tb {
   static ImagesTb images = const ImagesTb();
   static EmailTemplatesTb email_templates = const EmailTemplatesTb();
   static PathGroupsTb path_groups = const PathGroupsTb();
+  static ActivitiesTb activities = const ActivitiesTb();
+  static ActivityAssignmentsTb activity_assignments = const ActivityAssignmentsTb();
+  static ActivityAssignmentPlacesTb activity_assignment_places = const ActivityAssignmentPlacesTb();
+  static ActivityAssignmentEventsTb activity_assignment_events = const ActivityAssignmentEventsTb();
 }
 class OccasionsTb {
   const OccasionsTb();
@@ -93,6 +97,7 @@ class OccasionUsersTb{
   String get data_birthDate => "birthDate";
   String get data_phone => "phone";
   String get data_isInvited => "is_invited";
+  String get data_is_volunteer => "is_volunteer";
   String get data_note => "note";
   String get data_diet => "diet";
   String get data_text1 => "text1";
@@ -419,4 +424,48 @@ class PathGroupsTb {
   String get color    => "color";
   String get occasion => "occasion";
   String get order => "order";
+}
+
+
+class ActivitiesTb {
+  const ActivitiesTb();
+  String get table        => 'activities';
+  String get id           => 'id';
+  String get created_at   => 'created_at';
+  String get updated_at   => 'updated_at';
+  String get title        => 'title';
+  String get description  => 'description';
+  String get type         => 'type';
+  String get occasion     => 'occasion';
+  String get unit         => 'unit';
+  String get is_hidden    => 'is_hidden';
+  String get data         => 'data';
+  String get order        => 'order';
+}
+
+class ActivityAssignmentsTb {
+  const ActivityAssignmentsTb();
+  String get table        => 'activity_assignments';
+  String get id           => 'id';
+  String get activity_id  => 'activity_id';
+  String get user         => 'user';
+  String get start_time   => 'start_time';
+  String get end_time     => 'end_time';
+  String get title        => 'title';
+  String get description  => 'description';
+  String get data         => 'data';
+}
+
+class ActivityAssignmentPlacesTb {
+  const ActivityAssignmentPlacesTb();
+  String get table         => 'activity_assignment_places';
+  String get assignment_id => 'assignment_id';
+  String get place_id      => 'place_id';
+}
+
+class ActivityAssignmentEventsTb {
+  const ActivityAssignmentEventsTb();
+  String get table         => 'activity_assignment_events';
+  String get assignment_id => 'assignment_id';
+  String get event_id      => 'event_id';
 }
