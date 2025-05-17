@@ -4,12 +4,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
+// Import DayList and AdvancedTimelineController if they are indeed from advanced_timeline.dart
+// and used as controller for DayList instances here.
+// Assuming DayList used here is the one from advanced_timeline.dart,
+// and it expects an AdvancedTimelineController.
 import 'package:fstapp/components/timeline/advanced_timeline.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_events.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/dialogs/add_new_event_dialog.dart';
@@ -75,21 +79,23 @@ class _SchedulePageState extends State<SchedulePage>
       await _loadFullData();
       _fullEventsLoaded = true;
     }
+    // setState is called within _loadOfflineDataThenFast and _loadFullData,
+    // which will trigger a rebuild with the new data.
   }
 
   Future<void> _loadOfflineDataThenFast() async {
+    bool needsSetState = false;
     if (_events.isEmpty) {
-      await OfflineDataService.getAllEvents().then((offline) {
-         _events = offline;
-         for (var e in _events) {
-           _eventDescriptions[e.id!] = e.description;
-         }
-         _dots = _events
-             .filterRootEvents()
-             .map((e) => TimeBlockItem.fromEventModel(e))
-             .toList();
-         setState(() {});
-      });
+      final offline = await OfflineDataService.getAllEvents();
+      _events = offline;
+      for (var e in _events) {
+        if (e.id != null) _eventDescriptions[e.id!] = e.description;
+      }
+      _dots = _events
+          .filterRootEvents()
+          .map((e) => TimeBlockItem.fromEventModel(e))
+          .toList();
+      needsSetState = true;
     }
 
     final fast = await DbEvents.getAllEvents(
@@ -115,7 +121,9 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
-    setState(() {});
+    if(mounted && (needsSetState || true)) { // Ensure setState is called if data changes
+      setState(() {});
+    }
   }
 
   Future<void> _loadFullData() async {
@@ -138,35 +146,33 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
     await OfflineDataService.saveAllEvents(_events);
-    setState(() {});
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _handleSignIn(int id) async {
     await DbEvents.signInToEvent(context, id);
     _signedIn.add(id);
-    setState(() {});
-    await loadData();
+    await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleSignOut(int id) async {
     await DbEvents.signOutFromEvent(context, id);
     _signedIn.remove(id);
-    setState(() {});
-    await loadData();
+    await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleAdd(int id) async {
     await DbEvents.addToMySchedule(context, id);
     _inProgram.add(id);
-    setState(() {});
-    await loadData();
+    await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleRemove(int id) async {
     await DbEvents.removeFromMySchedule(context, id);
     _inProgram.remove(id);
-    setState(() {});
-    await loadData();
+    await loadData(); // Reload data to reflect changes
   }
 
   void _eventPressed(int id) {
@@ -184,11 +190,63 @@ class _SchedulePageState extends State<SchedulePage>
       AddNewEventDialog.showAddEventDialog(ctx, groups)
           .then((_) => loadData());
 
+  // Method to calculate the target tab index
+  int _calculateTargetTabIndex(List<TimeBlockGroup> currentDatedEvents) {
+    if (currentDatedEvents.isEmpty) {
+      return 0; // Should be handled by dummy group addition if list becomes empty
+    }
+
+    DateTime now = TimeHelper.now();
+    int targetIndex = 0;
+    int? currentEventDayIndex;
+
+    // Find day with a currently active event
+    for (int dayIdx = 0; dayIdx < currentDatedEvents.length; dayIdx++) {
+      final dayGroup = currentDatedEvents[dayIdx];
+      for (final event in dayGroup.events) {
+        if (event.startTime.isBefore(now) && event.endTime.isAfter(now)) {
+          currentEventDayIndex = dayIdx;
+          break;
+        }
+      }
+      if (currentEventDayIndex != null) break;
+    }
+
+    if (currentEventDayIndex != null) {
+      targetIndex = currentEventDayIndex;
+    } else {
+      // If no current event, find today's index in the list
+      int todayIndexInList = -1;
+      for (int dayIdx = 0; dayIdx < currentDatedEvents.length; dayIdx++) {
+        final dayGroup = currentDatedEvents[dayIdx];
+        if (dayGroup.dateTime != null &&
+            dayGroup.dateTime!.year == now.year &&
+            dayGroup.dateTime!.month == now.month &&
+            dayGroup.dateTime!.day == now.day) {
+          todayIndexInList = dayIdx;
+          break;
+        }
+      }
+      if (todayIndexInList != -1) {
+        targetIndex = todayIndexInList;
+      } else {
+        // If today is not in the list, fallback to the first tab
+        targetIndex = 0;
+      }
+    }
+
+    // Ensure index is within bounds
+    if (targetIndex < 0 || targetIndex >= currentDatedEvents.length) {
+      targetIndex = currentDatedEvents.isNotEmpty ? 0 : 0;
+    }
+    return targetIndex;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     final bool isLargeScreen = MediaQuery.of(context).size.height > 860;
 
-    // split into days
     final datedEvents = TimeBlockHelper.splitTimeBlocksByDate(
       _dots,
       context,
@@ -203,12 +261,14 @@ class _SchedulePageState extends State<SchedulePage>
       ));
     }
 
-    // weekday labels for tabs
     final weekdays = List.generate(7, (i) {
       return DateFormat.E(context.locale.toString())
           .format(DateTime(2020, 1, 6 + i))
           .toUpperCase();
     });
+
+    // Calculate the target tab index using the robust method
+    int currentTargetTabIndex = _calculateTargetTabIndex(datedEvents);
 
     return Scaffold(
       backgroundColor: ThemeConfig.appBarColor(),
@@ -216,7 +276,9 @@ class _SchedulePageState extends State<SchedulePage>
         top: true,
         bottom: false,
         child: DefaultTabController(
-          initialIndex:  TimeHelper.getTimeNowIndexFromDays(datedEvents.map((e) => e.events.firstOrNull?.startTime.weekday ?? 0)),
+          // Key changes when target index or length changes, forcing re-initialization
+          key: ValueKey<String>("SchedulePage_TabController_${currentTargetTabIndex}_${datedEvents.length}"),
+          initialIndex: currentTargetTabIndex,
           length: datedEvents.length,
           child: NestedScrollView(
             controller: _scrollController,
@@ -242,7 +304,9 @@ class _SchedulePageState extends State<SchedulePage>
                             ToastHelper.Show(context,
                                 "${info.appName} ${info.version}+${info.buildNumber}");
                             if (RightsService.isEditor()) {
-                              setState(() => TimeHelper.toggleTimeTravel?.call());
+                              // Ensure TimeHelper.toggleTimeTravel is handled safely if it might be null
+                              TimeHelper.toggleTimeTravel?.call();
+                              setState(() {}); // Rebuild to reflect time travel mode if UI changes
                             }
                           },
                           child: LogoWidget(width: 50, forceDark: true),
@@ -279,7 +343,7 @@ class _SchedulePageState extends State<SchedulePage>
                 pinned: true,
                 delegate: _SliverToBoxAdapterDelegate(
                   dayGroups: datedEvents,
-                  child: AdvancedTimelineView(
+                  child: AdvancedTimelineView( // This view uses DefaultTabController.of(ctx)
                     weekdays: weekdays,
                     groups: datedEvents,
                     maxTabBarWidth: StylesConfig.formMaxWidth,
@@ -289,16 +353,16 @@ class _SchedulePageState extends State<SchedulePage>
             ],
             body: Container(
               color: Theme.of(context).scaffoldBackgroundColor,
-              child: TabBarView(
+              child: TabBarView( // This also uses DefaultTabController.of(ctx)
                 children: [
-                  for (var group in datedEvents)
-                    DayList(
-                      dayGroup: group,
+                  for (var i = 0; i < datedEvents.length; i++)
+                    DayList( // This is the DayList from advanced_timeline.dart
+                      dayGroup: datedEvents[i],
                       onToggle: (id) => setState(
                               () => _openId = _openId == id ? null : id),
                       openId: _openId,
                       controller: AdvancedTimelineController(
-                        events: _dots,
+                        events: _dots, // Pass the master list of dots
                         onEventPressed: _eventPressed,
                         showAddNewEventButton: RightsService.isEditor,
                         onAddNewEvent: _openAddDialog,
@@ -312,6 +376,11 @@ class _SchedulePageState extends State<SchedulePage>
                             .then((_) => loadData()),
                         onPlaceTap: (c, pl) => _goToMap(pl.id),
                       ),
+                      // Note: The auto-scroll-to-current-event logic (isTargetDayForScroll, etc.)
+                      // is part of AdvancedTimelineTab's internal DayList usage.
+                      // If SchedulePage's DayList also needs this, similar props would be passed here.
+                      // For now, this DayList will not auto-scroll to a specific event,
+                      // only the tab will be correct.
                     ),
                 ],
               ),
@@ -326,18 +395,22 @@ class _SchedulePageState extends State<SchedulePage>
 /// Renders the arrow+TabBar row
 class _SliverToBoxAdapterDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
-  List<TimeBlockGroup> dayGroups;
+  final List<TimeBlockGroup> dayGroups; // Keep final for immutability if possible
   _SliverToBoxAdapterDelegate({required this.child, required this.dayGroups});
 
   @override double get minExtent => child is PreferredSizeWidget
       ? (child as PreferredSizeWidget).preferredSize.height
-      : 62;
+      : 62; // Assuming 62 is the consistent height.
   @override double get maxExtent => minExtent;
 
   @override Widget build(BuildContext _, double __, bool ___) => child;
 
   @override
-  bool shouldRebuild(_SliverToBoxAdapterDelegate old) => !old.dayGroups.equals(dayGroups);
+  bool shouldRebuild(_SliverToBoxAdapterDelegate old) {
+    // Rebuild if the child reference changes or if dayGroups content has changed.
+    // ListEquality for deep comparison if necessary, or a simpler length/reference check.
+    return old.child != child || !const ListEquality().equals(old.dayGroups, dayGroups);
+  }
 }
 
 class _IconWithLabel extends StatelessWidget {
