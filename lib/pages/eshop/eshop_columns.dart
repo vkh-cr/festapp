@@ -187,6 +187,7 @@ class EshopColumns {
             context: context,
             occasionId: data[PRODUCT_DESCRIPTION],
             field:  TbEshop.products.description,
+            title: ctx.row.cells[Tb.places.title]!.value,
             rendererContext: ctx,
             loadContent: () async =>
             ctx.row.cells[Tb.places.description]!.value,
