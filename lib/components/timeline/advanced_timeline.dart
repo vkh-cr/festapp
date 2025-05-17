@@ -239,6 +239,9 @@ class _EventCard extends StatelessWidget {
     final haveChildren = event.haveChildren();
     final canExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
 
+    final now = TimeHelper.now();
+    final bool isCurrentEvent = event.startTime.isBefore(now) && event.endTime.isAfter(now);
+
     Widget inlineActionSection;
     if (capEvent) {
       final capColor = event.isSignedIn()
@@ -349,12 +352,33 @@ class _EventCard extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-                          Text(event.durationTimeString(),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.6),
-                              )),
+                          Row(
+                            children: [
+                              if (isCurrentEvent)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: ThemeConfig.redColor(context),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    "Right Now".tr().toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              Text(event.durationTimeString(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.6),
+                                  )),
+                            ],
+                          ),
                           Text(event.title,
                               style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600)),

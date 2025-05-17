@@ -66,7 +66,7 @@ class OfflineDataService {
     var me = await getUserInfo();
     if (me?.eventUserGroup != null) {
       for (var e in events) {
-        if (e.isGroupEvent) {
+        if (e.isGroupEvent ?? false) {
           e.title = me!.eventUserGroup!.title;
           e.isMyGroupEvent = true;
         }

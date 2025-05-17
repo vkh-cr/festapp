@@ -22,7 +22,7 @@ class EventModel extends ITrinaRowModel {
   @override
   final int? id;
   DateTime? updatedAt;
-  bool isHidden = false;
+  bool? isHidden = false;
   Map<String, dynamic>? data;
   PlaceModel? place;
   String? type;
@@ -35,18 +35,18 @@ class EventModel extends ITrinaRowModel {
   int? currentUsersSaved;
   String? title = "Event".tr();
   String? description = "";
-  bool isSignedIn = false;
-  bool splitForMenWomen = false;
+  bool? isSignedIn = false;
+  bool? splitForMenWomen = false;
 
-  bool isGroupEvent = false;
-  bool isMyGroupEvent = false;
+  bool? isGroupEvent = false;
+  bool? isMyGroupEvent = false;
 
   bool? isEventInMySchedule;
   int? occasionId;
 
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
-        !isGroupEvent &&
+        !isGroupEvent! &&
         (childEventIds == null || childEventIds!.isEmpty);
     if(!canSave){
       return null;
@@ -62,7 +62,7 @@ class EventModel extends ITrinaRowModel {
     required this.endTime,
     this.id,
     this.updatedAt,
-    required this.isHidden,
+    this.isHidden = false,
     this.title,
     this.description,
     this.maxParticipants,
@@ -72,11 +72,11 @@ class EventModel extends ITrinaRowModel {
     this.childEventIds,
     this.parentEventIds,
     this.eventRolesIds,
-    required this.splitForMenWomen,
+    this.splitForMenWomen = false,
     this.currentParticipants,
     this.currentUsersSaved,
-    required this.isSignedIn,
-    required this.isGroupEvent,
+    this.isSignedIn = false,
+    this.isGroupEvent = false,
     this.isEventInMySchedule,
     this.occasionId
   });

@@ -9,7 +9,7 @@ import 'package:fstapp/data_models/exclusive_group_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -287,7 +287,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if(event.isGroupEvent && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -441,7 +441,7 @@ class DbEvents {
     //rewrite group names for group events
     for(var e in events)
     {
-      if(e.isGroupEvent && AuthService.hasGroup())
+      if((e.isGroupEvent ?? false) && AuthService.hasGroup())
       {
         e.title = AuthService.currentUserGroup()!.title;
         e.isMyGroupEvent = true;
