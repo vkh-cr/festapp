@@ -48,6 +48,18 @@ class _TimelineRowState extends State<TimelineRow> {
   double _initialWidthPctOnDrag = 0.0;
   bool _isPlaceOrEventDragOver = false;
 
+  // Style Constants
+  static const double _barHorizontalPadding = 3.0;
+  static const double _minVisibleTextWidth = 25.0;
+  static const double _spacing = 6.0;
+  static const double _avatarSize = 20.0;
+  static const double _avatarMarginRight = 6.0;
+  static const double _iconSize = 14.0;
+  static const double _countTextSize = 10.0;
+  static const double _detailTextSize = 10.0;
+  static const double _timeTextSize = 11.0;
+  static const double _iconTextPadding = 2.0;
+
   @override
   void initState() {
     super.initState();
@@ -216,6 +228,7 @@ class _TimelineRowState extends State<TimelineRow> {
       newStartOffsetSeconds = (totalSeconds * _leftPct).round();
     }
 
+
     DateTime newStart = widget.start.add(Duration(seconds: newStartOffsetSeconds));
     DateTime newEnd = newStart.add(Duration(seconds: newDurationSeconds));
 
@@ -227,6 +240,7 @@ class _TimelineRowState extends State<TimelineRow> {
       if (newStart.isBefore(widget.start)) newStart = widget.start;
     }
     if (newStart.isAfter(newEnd)) newEnd = newStart;
+
 
     _dragItemStartInternal = newStart;
     _dragItemEndInternal = newEnd;
@@ -243,6 +257,14 @@ class _TimelineRowState extends State<TimelineRow> {
     final isPreviewItem = widget.assignment?.data?['isDragPreview'] == true;
     final Color contentColor = Colors.white.withOpacity(0.95);
 
+    // Unified Text Styles
+    final TextStyle timeTextStyle = TextStyle(color: contentColor, fontSize: _timeTextSize, fontWeight: FontWeight.w500);
+    final TextStyle detailTextStyle = TextStyle(color: contentColor.withOpacity(0.85), fontSize: _detailTextSize);
+    final TextStyle countTextStyle = TextStyle(fontSize: _countTextSize, color: contentColor.withOpacity(0.85));
+
+    // Unified Icon Style
+    final Color iconColor = contentColor.withOpacity(0.85);
+
     return LayoutBuilder(builder: (c, bc) {
       if (bc.maxWidth <= 0) return const SizedBox.shrink();
       _recomputePercentagesFromInternalState();
@@ -253,27 +275,25 @@ class _TimelineRowState extends State<TimelineRow> {
       }
 
       List<Widget> barChildren = [];
-      double availableWidthForContent = currentItemWidthPx - 6.0; // 3px padding on each side of the Row
-      const double minVisibleTextWidth = 20.0; // Minimum width to attempt showing any text
-      const double spacing = 4.0; // General spacing between elements
+      double availableWidthForContent = currentItemWidthPx - (2 * _barHorizontalPadding);
 
       // 1. Avatar
       var userInfo = widget.assignment?.user;
       if (userInfo != null) {
         final initials = userInfo.toFullNameString().split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase();
         Color userAvatarBgColor = darkUserColors[userInfo.hashCode % darkUserColors.length];
-        const double avatarWidgetWidth = 16 /*avatar*/ + 4 /*margin right*/ + 1 /*margin left*/;
+        final double avatarWidgetWidth = _avatarSize + _avatarMarginRight;
         if (availableWidthForContent >= avatarWidgetWidth) {
           barChildren.add(
               Container(
-                width: 16, height: 16,
-                margin: const EdgeInsets.only(right: spacing, left: 1), // Use spacing constant
+                width: _avatarSize, height: _avatarSize,
+                margin: EdgeInsets.only(right: _avatarMarginRight),
                 decoration: BoxDecoration(
                     color: userAvatarBgColor.withOpacity(widget.isDarkMode ? 0.85 : 0.95),
                     shape: BoxShape.circle,
                     border: Border.all(color: Colors.white.withOpacity(0.4), width: 0.75)
                 ),
-                child: Center(child: Text(initials, style: TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.bold))),
+                child: Center(child: Text(initials, style: TextStyle(fontSize: _avatarSize * 0.45, color: Colors.white, fontWeight: FontWeight.bold))),
               )
           );
           availableWidthForContent -= avatarWidgetWidth;
@@ -285,9 +305,9 @@ class _TimelineRowState extends State<TimelineRow> {
           }
         }
       } else {
-        const double noAvatarPadding = spacing; // Consistent padding
+        const double noAvatarPadding = _spacing;
         if (availableWidthForContent >= noAvatarPadding) {
-          barChildren.add(SizedBox(width: noAvatarPadding)); // Align with avatar's potential space
+          barChildren.add(SizedBox(width: noAvatarPadding));
           availableWidthForContent -= noAvatarPadding;
         }
       }
@@ -295,7 +315,7 @@ class _TimelineRowState extends State<TimelineRow> {
       // 2. Time Text
       final String timeText = "${_formatTime(_dragItemStartInternal)} - ${_formatTime(_dragItemEndInternal)}";
       final timeTextPainter = TextPainter(
-        text: TextSpan(text: timeText, style: TextStyle(color: contentColor, fontSize: 10, fontWeight: FontWeight.w500)),
+        text: TextSpan(text: timeText, style: timeTextStyle),
         textDirection: TextDirection.ltr,
       )..layout();
       double timeTextMeasuredWidth = timeTextPainter.width;
@@ -304,13 +324,13 @@ class _TimelineRowState extends State<TimelineRow> {
 
       if (availableWidthForContent >= timeTextMeasuredWidth) {
         barChildren.add(
-            Text(timeText, style: TextStyle(color: contentColor, fontSize: 10, fontWeight: FontWeight.w500), overflow: TextOverflow.clip, softWrap: false)
+            Text(timeText, style: timeTextStyle, overflow: TextOverflow.clip, softWrap: false)
         );
         availableWidthForContent -= timeTextMeasuredWidth;
         timeTextAdded = true;
-      } else if (availableWidthForContent >= minVisibleTextWidth) {
+      } else if (availableWidthForContent >= _minVisibleTextWidth) {
         barChildren.add(Expanded(
-            child: Text(timeText, style: TextStyle(color: contentColor, fontSize: 10, fontWeight: FontWeight.w500), overflow: TextOverflow.ellipsis, softWrap: false)
+            child: Text(timeText, style: timeTextStyle, overflow: TextOverflow.ellipsis, softWrap: false)
         ));
         availableWidthForContent = 0;
         timeTextAdded = true;
@@ -327,46 +347,46 @@ class _TimelineRowState extends State<TimelineRow> {
         List<Widget> tempIconWidgets = [];
 
         if (placeCount > 0 || eventCount > 0) {
-          iconsRequiredWidth += spacing;
+          iconsRequiredWidth += _spacing; // Space before first icon set
 
           if (placeCount > 0) {
-            iconsRequiredWidth += 12;
+            iconsRequiredWidth += _iconSize;
             if (placeCount > 1) {
-              final pCountPainter = TextPainter(text: TextSpan(text: '$placeCount', style: TextStyle(fontSize: 9)), textDirection: TextDirection.ltr)..layout();
-              iconsRequiredWidth += (2.0 + pCountPainter.width);
+              final pCountPainter = TextPainter(text: TextSpan(text: '$placeCount', style: countTextStyle), textDirection: TextDirection.ltr)..layout();
+              iconsRequiredWidth += (_iconTextPadding + pCountPainter.width); // Padding after icon
             }
           }
-          if (placeCount > 0 && eventCount > 0) iconsRequiredWidth += spacing;
+          if (placeCount > 0 && eventCount > 0) iconsRequiredWidth += _spacing; // Space between place and event icons
 
           if (eventCount > 0) {
-            iconsRequiredWidth += 12;
+            iconsRequiredWidth += _iconSize;
             if (eventCount > 1) {
-              final eCountPainter = TextPainter(text: TextSpan(text: '$eventCount', style: TextStyle(fontSize: 9)), textDirection: TextDirection.ltr)..layout();
-              iconsRequiredWidth += (2.0 + eCountPainter.width);
+              final eCountPainter = TextPainter(text: TextSpan(text: '$eventCount', style: countTextStyle), textDirection: TextDirection.ltr)..layout();
+              iconsRequiredWidth += (_iconTextPadding + eCountPainter.width); // Padding after icon
             }
           }
         }
 
         if (availableWidthForContent >= iconsRequiredWidth) {
-          tempIconWidgets.add(const SizedBox(width: spacing));
+          tempIconWidgets.add(SizedBox(width: _spacing));
 
           if (placeCount > 0) {
-            tempIconWidgets.add(Icon(Icons.location_pin, size: 12, color: contentColor.withOpacity(0.85)));
+            tempIconWidgets.add(Icon(Icons.location_pin, size: _iconSize, color: iconColor));
             if (placeCount > 1) {
               tempIconWidgets.add(Padding(
-                padding: const EdgeInsets.only(left: 2.0),
-                child: Text('$placeCount', style: TextStyle(fontSize: 9, color: contentColor.withOpacity(0.85))),
+                padding: const EdgeInsets.only(left: _iconTextPadding),
+                child: Text('$placeCount', style: countTextStyle),
               ));
             }
-            if (eventCount > 0) tempIconWidgets.add(const SizedBox(width: spacing));
+            if (eventCount > 0) tempIconWidgets.add(SizedBox(width: _spacing));
           }
 
           if (eventCount > 0) {
-            tempIconWidgets.add(Icon(Icons.event, size: 12, color: contentColor.withOpacity(0.85)));
+            tempIconWidgets.add(Icon(Icons.event, size: _iconSize, color: iconColor));
             if (eventCount > 1) {
               tempIconWidgets.add(Padding(
-                padding: const EdgeInsets.only(left: 2.0),
-                child: Text('$eventCount', style: TextStyle(fontSize: 9, color: contentColor.withOpacity(0.85))),
+                padding: const EdgeInsets.only(left: _iconTextPadding),
+                child: Text('$eventCount', style: countTextStyle),
               ));
             }
           }
@@ -383,15 +403,14 @@ class _TimelineRowState extends State<TimelineRow> {
       bool detailTextExpanded = false;
 
       if ((timeTextAdded || iconsAdded) && detailText.isNotEmpty) {
-        const double minDetailTextWidth = 20.0;
-        final double requiredSpaceForDetailText = spacing + minDetailTextWidth;
+        final double requiredSpaceForDetailText = _spacing + _minVisibleTextWidth; // Space before detail text + min width
 
         if (availableWidthForContent >= requiredSpaceForDetailText) {
-          barChildren.add(const SizedBox(width: spacing));
+          barChildren.add(SizedBox(width: _spacing));
           barChildren.add(Expanded(
             child: Text(
               detailText,
-              style: TextStyle(color: contentColor.withOpacity(0.85), fontSize: 9),
+              style: detailTextStyle,
               overflow: TextOverflow.ellipsis,
               softWrap: false,
             ),
@@ -404,15 +423,14 @@ class _TimelineRowState extends State<TimelineRow> {
       bool hasExpandedChild = timeTextExpanded || detailTextExpanded;
 
       if (!hasExpandedChild) {
-        if (barChildren.isNotEmpty) {
-          barChildren.add(Expanded(child: SizedBox.shrink()));
-        } else if (currentItemWidthPx > 0) {
-          barChildren.add(Expanded(child: SizedBox.shrink()));
+        if (barChildren.isNotEmpty || currentItemWidthPx > 0) {
+          barChildren.add(const Expanded(child: SizedBox.shrink()));
         }
       }
 
+
       Widget barContent = Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 3.0),
+        padding: const EdgeInsets.symmetric(horizontal: _barHorizontalPadding),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -438,7 +456,7 @@ class _TimelineRowState extends State<TimelineRow> {
             )
           ] : null,
         ),
-        child: Stack(clipBehavior: Clip.hardEdge, children: [ // Added clipBehavior
+        child: Stack(clipBehavior: Clip.hardEdge, children: [
           Positioned.fill(child: barContent),
           if (widget.draggable && !isPreviewItem) ...[
             Positioned(left: 0, top: 0, bottom: 0, width: 10.clamp(0, currentItemWidthPx / 3).toDouble(), child: GestureDetector(

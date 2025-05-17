@@ -772,7 +772,7 @@ CREATE TABLE IF NOT EXISTS public.activity_assignments (
   description TEXT NULL,
   data JSONB NULL,
   CONSTRAINT activity_assignments_activity_fkey FOREIGN KEY (activity_id) REFERENCES public.activities (id) ON DELETE CASCADE,
-  CONSTRAINT activity_assignments_userinfo_fkey FOREIGN KEY (user_info) REFERENCES public.user_info (id) ON DELETE CASCADE
+  CONSTRAINT activity_assignments_user_fkey FOREIGN KEY ("user") REFERENCES public.user_info (id) ON DELETE CASCADE
 ) TABLESPACE pg_default;
 
 
