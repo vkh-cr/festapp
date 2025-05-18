@@ -56,7 +56,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
         if (value["code"] == 403 || value["code"] == 404) {
           ToastHelper.Show(context, "Token is not valid.".tr(), severity: ToastSeverity.NotOk);
         } else if (value["code"] == 200) {
-          await AuthService.login(value["email"], _passwordController.text);
+          await AuthService.login(AppConfig.getUserPrefix(value["email"]), _passwordController.text);
           ToastHelper.Show(context, "Password has been changed.".tr());
           RouterService.goBackOrInitial(context);
         }

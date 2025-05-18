@@ -10,7 +10,7 @@ import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
-import 'package:fstapp/pages/user/signup_password_page.dart';
+import 'package:fstapp/pages/user/reset_password_page.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/pages/occasion/info_page.dart';
 import 'package:fstapp/pages/utility/install_page.dart';
