@@ -184,12 +184,12 @@ class TimeBlockItem {
 /// Helper class for splitting/time-block typing.
 class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
-    if (model.isSignedIn) {
+    if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
     } else if (model.isEventInMySchedule == true) {
       return TimeBlockType.saved;
-    } else if (model.isGroupEvent) {
-      if (model.isMyGroupEvent) {
+    } else if (model.isGroupEvent!) {
+      if (model.isMyGroupEvent!) {
         return TimeBlockType.signedIn;
       }
       return TimeBlockType.noAction;
