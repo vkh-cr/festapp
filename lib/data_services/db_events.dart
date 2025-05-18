@@ -9,7 +9,7 @@ import 'package:fstapp/data_models/exclusive_group_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -232,28 +232,6 @@ class DbEvents {
         data.map((x) => EventModel.fromJson(x)));
   }
 
-  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
-        .inFilter(Tb.events.id, ids);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getAllEventsMeta() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-        "${Tb.events.id},"
-        "${Tb.events.updated_at}")
-        .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId()!);
-
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
   static Future<EventModel> getEvent(int eventId, [bool withParent = false]) async {
     // with parents or children
     var withParentSelect = withParent ?
@@ -266,6 +244,7 @@ class DbEvents {
             "${Tb.events.updated_at},"
             "${Tb.events.occasion},"
             "${Tb.events.title},"
+            "${Tb.events.description},"
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
             "${Tb.events.max_participants},"
@@ -279,14 +258,6 @@ class DbEvents {
         .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
-
-    var cachedEvent = await OfflineDataService.getEventDescription(eventId.toString());
-    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
-      var descrEvent = await getEventsDescription([event.id!]);
-      event.description = descrEvent[0].description;
-    } else {
-      event.description = cachedEvent?.description;
-    }
 
     if(AuthService.isLoggedIn()) {
       event.isEventInMySchedule = await isEventSaved(event.id!);
@@ -316,7 +287,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if(event.isGroupEvent && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -470,7 +441,7 @@ class DbEvents {
     //rewrite group names for group events
     for(var e in events)
     {
-      if(e.isGroupEvent && AuthService.hasGroup())
+      if((e.isGroupEvent ?? false) && AuthService.hasGroup())
       {
         e.title = AuthService.currentUserGroup()!.title;
         e.isMyGroupEvent = true;
@@ -737,23 +708,6 @@ class DbEvents {
                   .tr(), severity: ToastSeverity.NotOk);
         }
         return;
-    }
-  }
-
-  static Future<void> updateEventDescriptions() async {
-    var needsUpdate = <int>[];
-    var allEventsMeta = await DbEvents.getAllEventsMeta();
-
-    for(var e in allEventsMeta) {
-      var oe = await OfflineDataService.getEventDescription(e.id.toString());
-      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
-        needsUpdate.add(e.id!);
-      }
-    }
-
-    var fullEvents = await DbEvents.getEventsDescription(needsUpdate);
-    for(var e in fullEvents) {
-      await OfflineDataService.saveEventDescription(e);
     }
   }
 

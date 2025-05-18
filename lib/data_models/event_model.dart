@@ -22,7 +22,7 @@ class EventModel extends ITrinaRowModel {
   @override
   final int? id;
   DateTime? updatedAt;
-  bool isHidden = false;
+  bool? isHidden = false;
   Map<String, dynamic>? data;
   PlaceModel? place;
   String? type;
@@ -35,18 +35,18 @@ class EventModel extends ITrinaRowModel {
   int? currentUsersSaved;
   String? title = "Event".tr();
   String? description = "";
-  bool isSignedIn = false;
-  bool splitForMenWomen = false;
+  bool? isSignedIn = false;
+  bool? splitForMenWomen = false;
 
-  bool isGroupEvent = false;
-  bool isMyGroupEvent = false;
+  bool? isGroupEvent = false;
+  bool? isMyGroupEvent = false;
 
   bool? isEventInMySchedule;
   int? occasionId;
 
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
-        !isGroupEvent &&
+        !isGroupEvent! &&
         (childEventIds == null || childEventIds!.isEmpty);
     if(!canSave){
       return null;
@@ -62,7 +62,7 @@ class EventModel extends ITrinaRowModel {
     required this.endTime,
     this.id,
     this.updatedAt,
-    required this.isHidden,
+    this.isHidden = false,
     this.title,
     this.description,
     this.maxParticipants,
@@ -72,11 +72,11 @@ class EventModel extends ITrinaRowModel {
     this.childEventIds,
     this.parentEventIds,
     this.eventRolesIds,
-    required this.splitForMenWomen,
+    this.splitForMenWomen = false,
     this.currentParticipants,
     this.currentUsersSaved,
-    required this.isSignedIn,
-    required this.isGroupEvent,
+    this.isSignedIn = false,
+    this.isGroupEvent = false,
     this.isEventInMySchedule,
     this.occasionId
   });
@@ -144,7 +144,7 @@ class EventModel extends ITrinaRowModel {
 
   bool isFull() => currentParticipants !>= maxParticipants!;
   static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null;
-  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && event!.currentParticipants! >= event.maxParticipants!;
+  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && (event!.currentParticipants??0) >= event.maxParticipants!;
   @override
   String toString() {
     return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
@@ -207,20 +207,17 @@ class EventModel extends ITrinaRowModel {
     var placeId = DataGridHelper.getIdFromFormatted(json[placeColumn]);
     var dateFormat = DateFormat("yyyy-MM-dd-HH:mm");
 
-    List<int> parentEvents = [];
-    if(json[parentEventColumn].toString().trim().isNotEmpty)
-    {
-      parentEvents = json[parentEventColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
-    }
+    List<int> parseIntList(dynamic value) =>
+        (value?.toString().trim().isNotEmpty ?? false)
+            ? value.toString().split(',').map((e) => int.parse(e.trim())).toList()
+            : [];
 
-    List<int> eventRoles = [];
-    if(json[Tb.event_roles.role].toString().trim().isNotEmpty)
-    {
-      eventRoles = json[Tb.event_roles.role].toString().split(",").map((e) => int.parse(e.trim())).toList();
-    }
+    List<int> parentEvents = parseIntList(json[parentEventColumn]);
+    List<int> eventRoles = parseIntList(json[Tb.event_roles.role]);
 
     Map<String, dynamic> dataFromTab = {};
-    dataFromTab[Tb.events.dataHeaderImage] = json[Tb.events.dataHeaderImage];
+    String? headerUrl = json[Tb.events.dataHeaderImage];
+    dataFromTab[Tb.events.dataHeaderImage] = headerUrl != null && headerUrl.isNotEmpty ? headerUrl : null;
 
 
     return EventModel(
@@ -287,7 +284,7 @@ class EventModel extends ITrinaRowModel {
   @override
   String toBasicString() => "$title";
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
       {
         idColumn: id,
         updatedAtColumn: updatedAt?.toIso8601String(),

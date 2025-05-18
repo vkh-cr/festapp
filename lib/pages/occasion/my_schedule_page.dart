@@ -49,8 +49,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     var myEvents = offlineEvents.where((e) =>
         e.isEventInMySchedule == true ||
-        (e.isGroupEvent && (userInfo?.hasGroup() ?? false)) ||
-        e.isSignedIn);
+        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
+            (e.isSignedIn ?? false));
 
     _events.clear();
     _events.addAll(myEvents);
