@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fstapp/app_router.gr.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_information.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -58,7 +58,7 @@ class _InfoPageState extends State<InfoPage> {
     return Scaffold(
       backgroundColor: ThemeConfig.infoPageColor(context),
       appBar: AppBar(
-        title: Text(title),
+        title: Text(title, style: TextStyle(color: ThemeConfig.appBarColorNegative()),),
         leading: PopButton(),
       ),
       body: Align(

@@ -61,7 +61,8 @@ class SynchroService {
 
     if (PlatformHelper.isPwaInstalledOrNative())
     {
-      await DbEvents.updateEventDescriptions();
+      var events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
+      await OfflineDataService.saveAllEvents(events);
     }
 
     await DbEvents.synchronizeMySchedule();

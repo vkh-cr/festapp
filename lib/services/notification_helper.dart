@@ -59,7 +59,7 @@ class NotificationHelper {
     } else {
       OneSignal.initialize(AppConfig.oneSignalAppId);
       OneSignal.Notifications.addClickListener((event) {
-        RouterService.navigateOccasion(NavigationService.navigatorKey.currentContext!, NewsPage.ROUTE);
+        RouterService.navigateOccasionNoContext(NewsPage.ROUTE);
       });
     }
     await NotificationHelper.login();

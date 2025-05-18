@@ -65,6 +65,7 @@ class _InformationContentState extends State<InformationContent> {
                 occasionId: RightsService.currentOccasionId(),
                 field: Tb.information.description,
                 rendererContext: rendererContext,
+                title: rendererContext.row.cells[Tb.information.title]!.value,
                 loadContent: () async {
                   return rendererContext.row.cells[Tb.information.description]!.value;
                 },

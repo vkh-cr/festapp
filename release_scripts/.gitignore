@@ -1,0 +1,2 @@
+# Ignore Apple API private key
+AuthKey_*.p8

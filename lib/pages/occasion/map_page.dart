@@ -10,12 +10,12 @@ import 'package:flutter_map_animations/flutter_map_animations.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/map/place_detail_dialog.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/components/features/feature.dart';
 import 'package:fstapp/components/map/map_description_popup.dart';
 import 'package:fstapp/components/map/map_location_pin_helper.dart';
 import 'package:fstapp/components/map/map_marker_with_text.dart';
@@ -24,7 +24,7 @@ import 'package:fstapp/components/map/offline_map_style_helper.dart';
 import 'package:fstapp/data_models/icon_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/path_group_model.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -34,6 +34,7 @@ import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/map/offline_map_helper.dart';
+import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:collection/collection.dart';
 import 'package:latlong2/latlong.dart';
@@ -263,8 +264,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _useOffline ? _buildOfflineMap() : _buildOnlineMap();
     return Scaffold(
       appBar: AppBar(
-        title: Text(pageTitle),
-        leading: PopButton(),
+        title: Text(pageTitle, style: TextStyle(color: ThemeConfig.appBarColorNegative())),
+        leading: PopButton(color: ThemeConfig.appBarColorNegative(),),
         actions: [
           if (!kIsWeb && _isOfflineMapConfigured() && !_mapFeature.offlineMapLayer.forceOfflineMap)
             Row(
