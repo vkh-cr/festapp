@@ -466,8 +466,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () => controller.onPlaceTap
                                     ?.call(context, event.timeBlockPlace!),
-                                icon: Icon(Icons.place, size: 14, color: buttonTextColor), // Adjusted icon color
-                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: buttonTextColor)), // Adjusted text color
+                                icon: Icon(Icons.place, size: 14, color: selectedColor), // Adjusted icon color
+                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)), // Adjusted text color
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerLeft,
@@ -478,8 +478,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () =>
                                     controller.onEditEvent?.call(context, event.id),
-                                icon: Icon(Icons.edit, size: 14, color: buttonTextColor), // Adjusted icon color
-                                label: Text('Edit'.tr(), style: TextStyle(color: buttonTextColor)), // Adjusted text color
+                                icon: Icon(Icons.edit, size: 14, color: selectedColor), // Adjusted icon color
+                                label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)), // Adjusted text color
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerRight,

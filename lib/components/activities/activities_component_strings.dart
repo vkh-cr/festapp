@@ -3,50 +3,50 @@ import 'package:easy_localization/easy_localization.dart';
 
 class ActivitiesComponentStrings {
   // General
-  static String buttonCancel = 'ActivitiesComponentStrings.buttonCancel'.tr();
-  static String buttonOK = 'ActivitiesComponentStrings.buttonOK'.tr();
-  static String buttonSave = 'ActivitiesComponentStrings.buttonSave'.tr();
-  static String labelTitle = 'ActivitiesComponentStrings.labelTitle'.tr();
-  static String tooltipRemovePlace = 'ActivitiesComponentStrings.tooltipRemovePlace'.tr();
-  static String tooltipRemoveEvent = 'ActivitiesComponentStrings.tooltipRemoveEvent'.tr();
-  static String tooltipExitFullscreen = 'ActivitiesComponentStrings.tooltipExitFullscreen'.tr();
-  static String tooltipEnterFullscreen = 'ActivitiesComponentStrings.tooltipEnterFullscreen'.tr();
-  static String tooltipAddNewActivity = 'ActivitiesComponentStrings.tooltipAddNewActivity'.tr();
+  static String get buttonCancel => 'ActivitiesComponentStrings.buttonCancel'.tr();
+  static String get buttonOK => 'ActivitiesComponentStrings.buttonOK'.tr();
+  static String get buttonSave => 'ActivitiesComponentStrings.buttonSave'.tr();
+  static String get labelTitle => 'ActivitiesComponentStrings.labelTitle'.tr();
+  static String get tooltipRemovePlace => 'ActivitiesComponentStrings.tooltipRemovePlace'.tr();
+  static String get tooltipRemoveEvent => 'ActivitiesComponentStrings.tooltipRemoveEvent'.tr();
+  static String get tooltipExitFullscreen => 'ActivitiesComponentStrings.tooltipExitFullscreen'.tr();
+  static String get tooltipEnterFullscreen => 'ActivitiesComponentStrings.tooltipEnterFullscreen'.tr();
+  static String get tooltipAddNewActivity => 'ActivitiesComponentStrings.tooltipAddNewActivity'.tr();
 
   // Search/Filter
-  static String hintSearchUsers = 'ActivitiesComponentStrings.hintSearchUsers'.tr();
-  static String hintSearchPlaces = 'ActivitiesComponentStrings.hintSearchPlaces'.tr();
-  static String hintSearchEvents = 'ActivitiesComponentStrings.hintSearchEvents'.tr();
-  static String hintGlobalFilter = 'ActivitiesComponentStrings.hintGlobalFilter'.tr();
-  static String textNoFilterMatch = 'ActivitiesComponentStrings.textNoFilterMatch'.tr();
+  static String get hintSearchUsers => 'ActivitiesComponentStrings.hintSearchUsers'.tr();
+  static String get hintSearchPlaces => 'ActivitiesComponentStrings.hintSearchPlaces'.tr();
+  static String get hintSearchEvents => 'ActivitiesComponentStrings.hintSearchEvents'.tr();
+  static String get hintGlobalFilter => 'ActivitiesComponentStrings.hintGlobalFilter'.tr();
+  static String get textNoFilterMatch => 'ActivitiesComponentStrings.textNoFilterMatch'.tr();
 
   // Activities Timeline
-  static String titleActivitiesTimeline = 'ActivitiesComponentStrings.titleActivitiesTimeline'.tr();
-  static String textNoActivitiesAvailable = 'ActivitiesComponentStrings.textNoActivitiesAvailable'.tr();
-  static String textClickPlusToAddOne = 'ActivitiesComponentStrings.textClickPlusToAddOne'.tr(); // Unicode for plus
-  static String textActivityHidden = 'ActivitiesComponentStrings.textActivityHidden'.tr();
-  static String textNewActivityAddedDragDrop = 'ActivitiesComponentStrings.textNewActivityAddedDragDrop'.tr();
-  static String textDragUsersFromTopDropHere = 'ActivitiesComponentStrings.textDragUsersFromTopDropHere'.tr();
-  static String textNoUsersAssignedYet = 'ActivitiesComponentStrings.textNoUsersAssignedYet'.tr();
-  static String textUntitledActivity = 'ActivitiesComponentStrings.textUntitledActivity'.tr();
+  static String get titleActivitiesTimeline => 'ActivitiesComponentStrings.titleActivitiesTimeline'.tr();
+  static String get textNoActivitiesAvailable => 'ActivitiesComponentStrings.textNoActivitiesAvailable'.tr();
+  static String get textClickPlusToAddOne => 'ActivitiesComponentStrings.textClickPlusToAddOne'.tr();
+  static String get textActivityHidden => 'ActivitiesComponentStrings.textActivityHidden'.tr();
+  static String get textNewActivityAddedDragDrop => 'ActivitiesComponentStrings.textNewActivityAddedDragDrop'.tr();
+  static String get textDragUsersFromTopDropHere => 'ActivitiesComponentStrings.textDragUsersFromTopDropHere'.tr();
+  static String get textNoUsersAssignedYet => 'ActivitiesComponentStrings.textNoUsersAssignedYet'.tr();
+  static String get textUntitledActivity => 'ActivitiesComponentStrings.textUntitledActivity'.tr();
 
   // Activity Options
-  static String menuRename = 'ActivitiesComponentStrings.menuRename'.tr();
-  static String menuDelete = 'ActivitiesComponentStrings.menuDelete'.tr();
-  static String dialogRenameActivity = 'ActivitiesComponentStrings.dialogRenameActivity'.tr();
-  static String tooltipActivityOptions = 'ActivitiesComponentStrings.tooltipActivityOptions'.tr();
-  static String tooltipMarkVisible = 'ActivitiesComponentStrings.tooltipMarkVisible'.tr();
-  static String tooltipMarkHidden = 'ActivitiesComponentStrings.tooltipMarkHidden'.tr();
+  static String get menuRename => 'ActivitiesComponentStrings.menuRename'.tr();
+  static String get menuDelete => 'ActivitiesComponentStrings.menuDelete'.tr();
+  static String get dialogRenameActivity => 'ActivitiesComponentStrings.dialogRenameActivity'.tr();
+  static String get tooltipActivityOptions => 'ActivitiesComponentStrings.tooltipActivityOptions'.tr();
+  static String get tooltipMarkVisible => 'ActivitiesComponentStrings.tooltipMarkVisible'.tr();
+  static String get tooltipMarkHidden => 'ActivitiesComponentStrings.tooltipMarkHidden'.tr();
 
   // Assignment Detail Overlay
-  static String labelPlaces = 'ActivitiesComponentStrings.labelPlaces'.tr();
-  static String labelEvents = 'ActivitiesComponentStrings.labelEvents'.tr();
-  static String textNoItemsAssigned = 'ActivitiesComponentStrings.textNoItemsAssigned'.tr();
-  static String tooltipDeleteAssignment = 'ActivitiesComponentStrings.tooltipDeleteAssignment'.tr();
+  static String get labelPlaces => 'ActivitiesComponentStrings.labelPlaces'.tr();
+  static String get labelEvents => 'ActivitiesComponentStrings.labelEvents'.tr();
+  static String get textNoItemsAssigned => 'ActivitiesComponentStrings.textNoItemsAssigned'.tr();
+  static String get tooltipDeleteAssignment => 'ActivitiesComponentStrings.tooltipDeleteAssignment'.tr();
 
   // User Row Options
-  static String menuRemoveUserFromActivity = 'ActivitiesComponentStrings.menuRemoveUserFromActivity'.tr();
-  static String tooltipUserAssignmentOptions = 'ActivitiesComponentStrings.tooltipUserAssignmentOptions'.tr();
+  static String get menuRemoveUserFromActivity => 'ActivitiesComponentStrings.menuRemoveUserFromActivity'.tr();
+  static String get tooltipUserAssignmentOptions => 'ActivitiesComponentStrings.tooltipUserAssignmentOptions'.tr();
 
   // Default/Unnamed Items
   static String textUnnamedPlace = 'Unnamed Place';
