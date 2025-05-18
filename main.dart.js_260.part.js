@@ -3,10 +3,10 @@ a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_260",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={a16:function a16(d,e){this.a=d
 this.b=e},
-d7H(d){C.b.ec(d,new B.b98())
+d7I(d){C.b.ec(d,new B.b98())
 return d},
-yS(d){return B.d7J(d)},
-d7J(d){var w=0,v=A.l(x.l),u,t,s,r
+yS(d){return B.d7K(d)},
+d7K(d){var w=0,v=A.l(x.l),u,t,s,r
 var $async$yS=A.h(function(e,f){if(e===1)return A.i(f,v)
 while(true)switch(w){case 0:w=d!=null?3:5
 break
@@ -24,7 +24,7 @@ s.toString
 w=7
 return A.d(t.cV("occasion",s).aHh("type.eq.,type.is.null"),$async$yS)
 case 7:r=f
-case 4:u=B.d7H(A.aX(J.bO(r,new B.b9h(),x.b),!0,x.c))
+case 4:u=B.d7I(A.aX(J.bO(r,new B.b9h(),x.b),!0,x.c))
 w=1
 break
 case 1:return A.j(u,v)}})
@@ -51,13 +51,13 @@ else q=t<s?-1:1
 if(q!==0)return q}++u}return C.c.bt(o,v.length)},
 bSA:function bSA(){},
 bSB:function bSB(){},
-apQ(){var w=0,v=A.l(x.i),u,t,s,r,q,p
-var $async$apQ=A.h(function(d,e){if(d===1)return A.i(e,v)
+apR(){var w=0,v=A.l(x.i),u,t,s,r,q,p
+var $async$apR=A.h(function(d,e){if(d===1)return A.i(e,v)
 while(true)switch(w){case 0:q=$.tS().c4("occasions").i3(0,"data")
 p=A.dj()
 p.toString
 w=3
-return A.d(q.cV("id",p).QD(),$async$apQ)
+return A.d(q.cV("id",p).QD(),$async$apR)
 case 3:t=e
 if(t!=null){s=J.v(t,"data")
 if(s!=null&&J.v(s,"game")!=null){q=J.v(s,"game")
@@ -69,7 +69,7 @@ break}}u=null
 w=1
 break
 case 1:return A.j(u,v)}})
-return A.k($async$apQ,v)}}
+return A.k($async$apR,v)}}
 J=c[1]
 A=c[0]
 C=c[2]
@@ -94,7 +94,7 @@ w=w==null?null:w.toLowerCase()
 return B.bSz(u,w==null?"":w)},
 $S:192}
 B.b9h.prototype={
-$1(d){return A.au7(d)},
+$1(d){return A.au8(d)},
 $S:140}
 B.bSA.prototype={
 $1(d){var w=d.b[0]
@@ -106,11 +106,11 @@ $1(d){var w=d.b[0]
 w.toString
 return w},
 $S:423};(function installTearOffs(){var w=a.installStaticTearOff
-w(B,"duX",0,function(){return[null]},["$1","$0"],["yS",function(){return B.yS(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
+w(B,"duY",0,function(){return[null]},["$1","$0"],["yS",function(){return B.yS(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
 w(B.a16,A.G)
 w(B.b98,A.ep)
 v(A.c8,[B.b9h,B.bSA,B.bSB])})()
 var y={d:"id,occasion,created_at,updated_at,is_hidden,title,description,order,type,data,information_hidden(*)"}
 var x={c:A.D("eA"),l:A.D("B<eA>"),g:A.D("m"),b:A.D("@"),i:A.D("a16?")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_260",e:"endPart",h:b})})($__dart_deferred_initializers__,"TdU0vl0clHWq7xqRBEB2g5FziBs=");
+a.eventLog.push({p:"main.dart.js_260",e:"endPart",h:b})})($__dart_deferred_initializers__,"vi+YSxefp7aaki5NxMwVFhK/NvQ=");
