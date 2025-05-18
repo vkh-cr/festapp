@@ -15,7 +15,13 @@ else
   exit 1
 fi
 
-# Step 1: Prompt for release notes (before build)
+# Check required variables
+if [[ -z "$APP_STORE_CONNECT_KEY_ID" || -z "$APP_STORE_CONNECT_ISSUER_ID" ]]; then
+  echo "❌ Missing required environment variables: APP_STORE_CONNECT_KEY_ID or APP_STORE_CONNECT_ISSUER_ID"
+  exit 1
+fi
+
+# Step 1: Prompt for release notes
 echo "📝 What’s new in this version? (release notes):"
 read -r RELEASE_NOTES
 export RELEASE_NOTES
@@ -37,8 +43,17 @@ fi
 APP_NAME=$(plutil -extract CFBundleName xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
 APP_NAME=${APP_NAME:-Runner}
 
-# Get bundle identifier for FASTLANE
-APP_IDENTIFIER=$(plutil -extract CFBundleIdentifier xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+# Get bundle identifier for FASTLANE from the built .app Info.plist
+APP_PLIST="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist"
+
+if [ ! -f "$APP_PLIST" ]; then
+  echo "❌ App Info.plist not found: $APP_PLIST"
+  exit 1
+fi
+
+APP_IDENTIFIER=$(plutil -extract CFBundleIdentifier xml1 -o - "$APP_PLIST" | \
+  grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+
 export FASTLANE_APP_IDENTIFIER="$APP_IDENTIFIER"
 echo "📱 App Identifier: $FASTLANE_APP_IDENTIFIER"
 
@@ -66,6 +81,21 @@ if [ ! -f "$IPA_PATH" ]; then
 else
   echo "✅ Using IPA: $IPA_PATH"
 fi
+
+# Step 3.5: Extract version and build number from compiled Info.plist
+if [ ! -f "$APP_PLIST" ]; then
+  echo "❌ Compiled Info.plist not found at: $APP_PLIST"
+  exit 1
+fi
+
+IPA_VERSION=$(plutil -extract CFBundleShortVersionString xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+IPA_BUILD_NUMBER=$(plutil -extract CFBundleVersion xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+
+export IPA_VERSION
+export IPA_BUILD_NUMBER
+
+echo "📦 IPA Version: $IPA_VERSION"
+echo "🔢 IPA Build Number: $IPA_BUILD_NUMBER"
 
 # Step 4: Copy API key to expected location
 TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"

@@ -11,7 +11,7 @@ import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/user_group_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/db_companions.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_users.dart';
@@ -76,9 +76,9 @@ class _EventPageState extends State<EventPage> {
               : ThemeConfig.eventTypeToColor(context, _event!.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.eventTypeToColorNegative(context, _event?.type)),
           ),
-          leading: ScheduleBackButton(),
+          leading: ScheduleBackButton(color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),),
           actions:[
             Visibility(
               visible: showLoginLogoutButton() && RightsService.isApprover() && FeatureService.isFeatureEnabled(FeatureConstants.entryCode),
@@ -90,8 +90,9 @@ class _EventPageState extends State<EventPage> {
                           context,
                           CheckRoute(id: _event!.id!));
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.qr_code_scanner,
+                      color: ThemeConfig.eventTypeToColor(context, _event!.type),
                     )),
               ),
             ),
@@ -100,8 +101,8 @@ class _EventPageState extends State<EventPage> {
                   _event?.canSaveEventToMyProgram(),
                   addToMySchedule,
                   removeFromMySchedule,
-                  ThemeConfig.upperNavText(context),
-                  ThemeConfig.upperNavText(context))]),
+                  ThemeConfig.eventTypeToColorNegative(context, _event?.type),
+                  ThemeConfig.eventTypeToColorNegative(context, _event?.type))]),
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
@@ -179,7 +180,7 @@ class _EventPageState extends State<EventPage> {
                                   ),
                                   if (AuthService.isGroupLeader() &&
                                       _event != null &&
-                                      _event!.isGroupEvent)
+                                      (_event!.isGroupEvent ?? false))
                                     ElevatedButton(
                                         onPressed: () =>
                                             RouterService.navigatePageInfo(
@@ -294,16 +295,15 @@ class _EventPageState extends State<EventPage> {
                 if(_event?.isGroupEvent == false && (_event?.childEvents.isNotEmpty == true || RightsService.isEditor()))
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      child: SingleChildScrollView(
-                          child: ScheduleTimeline(
-                              eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
-                              onEventPressed: _eventPressed,
-                              showAddNewEventButton: RightsService.isEditor,
-                              onAddNewEvent: (context, p, parent) =>
-                                  AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
-                                      .then((_) => loadData(_event!.id!)),
-                              parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
-                              nodePosition: 0.3))),
+                      child: ScheduleTimeline(
+                          eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_childDots, context),
+                          onEventPressed: _eventPressed,
+                          showAddNewEventButton: RightsService.isEditor,
+                          onAddNewEvent: (context, p, parent) =>
+                              AddNewEventDialog.showAddEventDialog(context, p, TimeBlockItem.fromEventModelAsChild(_event!))
+                                  .then((_) => loadData(_event!.id!)),
+                          parentEvent: TimeBlockItem.fromEventModelAsChild(_event!),
+                          nodePosition: 0.3)),
                 Visibility(
                   visible: RightsService.isEditor() &&
                       _event?.maxParticipants != null,
@@ -425,7 +425,7 @@ class _EventPageState extends State<EventPage> {
 
     await loadEvent(id);
     isLoadingEvent = false;
-    await OfflineDataService.saveEventDescription(_event!);
+
     if (RightsService.isEditor()) {
       await loadParticipants(id);
     }
@@ -435,7 +435,7 @@ class _EventPageState extends State<EventPage> {
     var allEvents = await OfflineDataService.getAllEvents();
     var event = allEvents.firstWhereOrNull((element) => element.id == id);
     if (event != null) {
-      if (event.isGroupEvent && AuthService.isLoggedIn()) {
+      if ((event.isGroupEvent ?? false) && AuthService.isLoggedIn()) {
         var userInfo = await OfflineDataService.getUserInfo();
         if (userInfo?.eventUserGroup != null) {
           event.title = userInfo!.eventUserGroup!.title;
@@ -445,9 +445,6 @@ class _EventPageState extends State<EventPage> {
           _groupInfoModel = userInfo.eventUserGroup;
         }
       } else {
-        var descr = await OfflineDataService.getEventDescription(id.toString());
-        event.description = descr?.description;
-
         if (event.place?.id != null) {
           var place = (await OfflineDataService.getAllPlaces())
               .firstWhereOrNull((element) => element.id == event.place!.id);
@@ -481,7 +478,7 @@ class _EventPageState extends State<EventPage> {
   Future<void> loadEvent(int eventId) async {
     var event = await DbEvents.getEvent(eventId);
 
-    if (event.isGroupEvent && event.isMyGroupEvent) {
+    if ((event.isGroupEvent ?? false) && (event.isMyGroupEvent ?? false)) {
       var group = await DbGroups.getUserGroupInfo(
           AuthService.currentUserGroup()!.id!);
       if (group == null) {

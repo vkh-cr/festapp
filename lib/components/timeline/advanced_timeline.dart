@@ -208,6 +208,11 @@ class DayList extends StatelessWidget {
 // Minimum width threshold for inline buttons
 const double _kMinWidthForInlineButtons = 420.0;
 
+// Constant to control the use of pastel background color
+const bool _kUsePastelBackground = false;
+
+bool isDark(context) => Theme.of(context).brightness == Brightness.dark;
+
 class _EventCard extends StatelessWidget {
   final TimeBlockItem event;
   final bool expanded;
@@ -221,10 +226,25 @@ class _EventCard extends StatelessWidget {
     required this.onToggle
   });
 
+  // Adjust color for pastel effect based on theme brightness
+  Color _toPastel(BuildContext context, Color color) {
+    final HSLColor hslColor = HSLColor.fromColor(color);
+    // Reduce saturation significantly
+    final double saturated = isDark(context) ? hslColor.saturation * 0.5 : hslColor.saturation * 0.9;
+    // Increase lightness, more in dark mode
+    final double lightened = isDark(context)
+        ? hslColor.lightness * 0.5 + 0.0  // Lighter in dark mode
+        : hslColor.lightness * 0.35 + 0.5; // More light in light mode
+
+    return hslColor.withSaturation(saturated.clamp(0.0, 1.0)).withLightness(lightened.clamp(0.0, 1.0)).toColor();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final col = ThemeConfig.eventTypeToColor(context, event.eventType);
+    //event.timeBlockType = TimeBlockType.signedIn;
     const stripeW = 6.0, stripeH = 58.0;
+    final baseColor = ThemeConfig.eventTypeToColor(context, event.eventType);
+    final cardColor = _kUsePastelBackground ? _toPastel(context, baseColor) : null;
     final imageUrl = event.imageUrl;
     final capEvent = event.maxParticipants > 0;
 
@@ -239,32 +259,81 @@ class _EventCard extends StatelessWidget {
     final haveChildren = event.haveChildren();
     final canExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
 
+    final now = TimeHelper.now();
+    final bool isCurrentEvent = event.startTime.isBefore(now) && event.endTime.isAfter(now);
+
+    // Determine button and capacity text color based on pastel background
+    final buttonTextColor = _kUsePastelBackground
+        ? (isDark(context) ? Colors.white : Colors.black87) // Darker color in light mode
+        : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7);
+
+    final selectedColor = _kUsePastelBackground
+        ? (isDark(context) ? Colors.white : Colors.black87) // Darker color in light mode
+        : Theme.of(context).primaryColor;
+
+    final unselectedColor = _kUsePastelBackground
+        ? (isDark(context) ? Colors.white70 : Colors.black54) // Slightly lighter black for capacity in light mode
+        : Colors.grey;
+
+    final signInSignOutButtonBorderColor = _kUsePastelBackground
+        ? (isDark(context) ? Colors.white30 : Colors.black26) // Adjusted border color for pastel backgrounds
+        : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3);
+
     Widget inlineActionSection;
     if (capEvent) {
-      final capColor = event.isSignedIn()
-          ? Theme.of(context).primaryColor
-          : Colors.grey;
+      final capBackgroundColor = event.isSignedIn()
+          ? selectedColor
+          : unselectedColor;
+
+      final capTextColor = event.isSignedIn()
+          ? _kUsePastelBackground ? cardColor : Colors.white
+          : unselectedColor;
 
       inlineActionSection = Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(children: [
-              Text('${event.participants}/${event.maxParticipants}',
-                  style: TextStyle(fontSize: 12, color: capColor)),
-              const SizedBox(width: 4),
-              Icon(Icons.people, size: 14, color: capColor),
-            ]),
+            Row(
+              children: [
+                if (event.isSignedIn())
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: selectedColor,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${event.participants}/${event.maxParticipants}',
+                          style: TextStyle(fontSize: 13, color: capTextColor),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.people, size: 14, color: capTextColor),
+                      ],
+                    ),
+                  )
+                else
+                  Row(
+                    children: [
+                      Text('${event.participants}/${event.maxParticipants}',
+                          style: TextStyle(fontSize: 13, color: capBackgroundColor)),
+                      const SizedBox(width: 4),
+                      Icon(Icons.people, size: 14, color: capBackgroundColor),
+                    ],
+                  ),
+              ],
+            ),
             if (AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && showInlineButtons) ...[
               const SizedBox(height: 4),
               event.isSignedIn()
                   ? OutlinedButton(
                 onPressed: () { controller.onSignOutEvent!(event.id); },
-                style: _signButtonStyle(ThemeConfig.darkColor(context), Theme.of(context).primaryColor),
+                style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                 child: Text('Sign out'.tr()),
               )
                   : OutlinedButton(
                 onPressed: () { controller.onSignInEvent!(event.id); },
-                style: _signButtonStyle(ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
+                style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                 child: Text('Sign in'.tr()),
               ),
             ],
@@ -276,8 +345,8 @@ class _EventCard extends StatelessWidget {
           !event.isInMySchedule(),
               () async => () { controller.onAddToProgramEvent!(event.id); }(),
               () async => () { controller.onRemoveFromProgramEvent!(event.id); }(),
-          Theme.of(context).primaryColor,
-          Colors.grey,
+          selectedColor, // Use adjusted color
+          unselectedColor, // Use adjusted color for outline
         ),
       );
     }
@@ -288,6 +357,7 @@ class _EventCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           child: Card(
+            color: cardColor,
             elevation: 0,
             shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness)),
@@ -304,42 +374,69 @@ class _EventCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(children: [
-                    if (imageUrl == null) Container(width: stripeW, height: stripeH, color: col),
+                    if (!_kUsePastelBackground) Container(width: stripeW, height: stripeH, color: baseColor),
                     const SizedBox(width: 6),
-                    if (imageUrl != null)
-                      Container(
-                        width: stripeH,
-                        height: stripeH,
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(borderRadius:
-                        BorderRadius.circular(StylesConfig.imageRoundness)),
-                        child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.fitWidth),
-                      ),
-                    if (imageUrl != null) const SizedBox(width: 16),
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-
-                          Text(event.durationTimeString(),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.6),
-                              )),
+                          Row(
+                            children: [
+                              if (isCurrentEvent)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: ThemeConfig.redColor(context),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    "Right Now".tr().toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              Text(event.durationTimeString(),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.8),
+                                  )),
+                            ],
+                          ),
                           Text(event.title,
                               style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 2),
                           if (hasPlace && !expanded) ...[
-                            const SizedBox(height: 2),
                             Text(event.timeBlockPlace!.title,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.95), fontSize: 12)),
+                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13)),
                           ],
                         ],
                       ),
                     ),
+                    // Image positioned after the text content
+                    if (imageUrl != null)
+                      Padding( // Add padding to the left of the image
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
+                          clipBehavior: Clip.antiAlias,
+                          child: SizedBox(
+                            width: 58.0, // Keep image size consistent
+                            height: 58.0,
+                            child: CachedNetworkImage(
+                              imageUrl: imageUrl,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
                     const SizedBox(width: 4),
                     inlineActionSection,
                     const SizedBox(width: 4),
@@ -347,10 +444,10 @@ class _EventCard extends StatelessWidget {
                       Icon(
                         expanded ? Icons.expand_less : Icons.expand_more,
                         size: 20,
-                        color: Colors.grey,
+                        color: unselectedColor,
                       )
                     else if (hasDescription || hasPlace || isEditor)
-                      Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+                      Icon(Icons.chevron_right, size: 20, color: unselectedColor),
                   ]),
                 ),
               ),
@@ -369,8 +466,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () => controller.onPlaceTap
                                     ?.call(context, event.timeBlockPlace!),
-                                icon: const Icon(Icons.place, size: 14),
-                                label: Text(event.timeBlockPlace!.title),
+                                icon: Icon(Icons.place, size: 14, color: selectedColor), // Adjusted icon color
+                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)), // Adjusted text color
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerLeft,
@@ -381,8 +478,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () =>
                                     controller.onEditEvent?.call(context, event.id),
-                                icon: const Icon(Icons.edit, size: 14),
-                                label: const Text('Edit').tr(),
+                                icon: Icon(Icons.edit, size: 14, color: selectedColor), // Adjusted icon color
+                                label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)), // Adjusted text color
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerRight,
@@ -399,12 +496,12 @@ class _EventCard extends StatelessWidget {
                             child: event.isSignedIn()
                                 ? OutlinedButton(
                               onPressed: () { controller.onSignOutEvent!(event.id); },
-                              style: _signButtonStyle(ThemeConfig.darkColor(context), Theme.of(context).primaryColor),
+                              style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                               child: Text('Sign out'.tr()),
                             )
                                 : OutlinedButton(
                               onPressed: () { controller.onSignInEvent!(event.id); },
-                              style: _signButtonStyle(ThemeConfig.darkColor(context), ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3)),
+                              style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                               child: Text('Sign in'.tr()),
                             ),
                           ),
@@ -419,7 +516,7 @@ class _EventCard extends StatelessWidget {
                               html: '''
                                 <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
                                   <div>${"An account is required to join this event.".tr()}</div>
-                                  <a href="\${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
                                     ${"Click here to sign in.".tr()}
                                   </a>
                                 </div>
@@ -433,7 +530,7 @@ class _EventCard extends StatelessWidget {
 
                         // HTML description with extra horizontal padding
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: HtmlView(
                             html: event.description ?? "",
                             isSelectable: true,
@@ -469,6 +566,7 @@ ButtonStyle _signButtonStyle(Color fg, Color bd) => OutlinedButton.styleFrom(
 );
 
 /// Tab header widget with scrollable, centered tabs and inline arrow navigation.
+/// Tab header widget with scrollable, centered tabs and inline arrow navigation.
 class AdvancedTimelineView extends StatelessWidget {
   /// Localized weekday labels (e.g., ['MON', 'TUE', ...]).
   final List<String> weekdays;
@@ -494,7 +592,7 @@ class AdvancedTimelineView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = DefaultTabController.of(context)!;
     final animation = controller.animation!;
-    final today = TimeHelper.now().day;
+    final todayDate = TimeHelper.now();  // changed from `final today = TimeHelper.now().day;`
 
     // Total extra width to accommodate both arrows (approx. IconButton width)
     const arrowTotalWidth = 96.0;
@@ -547,7 +645,10 @@ class AdvancedTimelineView extends StatelessWidget {
                     unselectedLabelColor: Colors.transparent,
                     tabs: List.generate(groups.length, (i) {
                       final group = groups[i];
-                      final day = group.dateTime!.day;
+                      final isToday = group.dateTime!.year == todayDate.year &&
+                          group.dateTime!.month == todayDate.month &&
+                          group.dateTime!.day == todayDate.day;
+
                       return SizedBox(
                         width: 42,
                         height: 60,
@@ -580,7 +681,7 @@ class AdvancedTimelineView extends StatelessWidget {
                                   style: TextStyle(
                                       fontSize: 10, color: labelColor),
                                 ),
-                                if (day == today) ...[
+                                if (isToday) ...[
                                   const SizedBox(height: 4),
                                   Container(
                                     width: 6,

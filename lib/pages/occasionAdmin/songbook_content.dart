@@ -64,6 +64,7 @@ class _SongbookContentState extends State<SongbookContent> {
                 context: context,
                 occasionId: RightsService.currentOccasionId(),
                 field: Tb.information.description,
+                title: rendererContext.row.cells[Tb.information.title]!.value,
                 rendererContext: rendererContext,
                 loadContent: () async {
                   return rendererContext.row.cells[Tb.information.description]!.value;

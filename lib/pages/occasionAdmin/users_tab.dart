@@ -29,6 +29,8 @@ class _UsersTabState extends State<UsersTab> {
     UserColumns.SEX,
     if (FeatureService.isFeatureEnabled(FeatureConstants.services))
       UserColumns.ACCOMMODATION,
+    if (FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
+      UserColumns.IS_VOLUNTEER,
     UserColumns.MANAGER,
     UserColumns.EDITOR,
     UserColumns.EDITOR_VIEW,
