@@ -15,24 +15,54 @@ else
   exit 1
 fi
 
-# Step 1: Build IPA using FVM
+# Check required variables
+if [[ -z "$APP_STORE_CONNECT_KEY_ID" || -z "$APP_STORE_CONNECT_ISSUER_ID" ]]; then
+  echo "❌ Missing required environment variables: APP_STORE_CONNECT_KEY_ID or APP_STORE_CONNECT_ISSUER_ID"
+  exit 1
+fi
+
+# Step 1: Prompt for release notes
+echo "📝 What’s new in this version? (release notes):"
+read -r RELEASE_NOTES
+export RELEASE_NOTES
+
+# Step 2: Build IPA using FVM
 echo "📦 Building IPA with FVM..."
 cd .. # Go to project root
-# fvm flutter build ipa --release
 
-# Step 2: Determine IPA name from Info.plist
+fvm flutter build ipa --release
+
+# Step 3: Determine IPA name and app identifier from Info.plist
 INFO_PLIST="ios/Runner/Info.plist"
 if [ ! -f "$INFO_PLIST" ]; then
   echo "❌ Info.plist not found at $INFO_PLIST"
   exit 1
 fi
 
+# Get bundle name for IPA filename
 APP_NAME=$(plutil -extract CFBundleName xml1 -o - "$INFO_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
 APP_NAME=${APP_NAME:-Runner}
+
+# Get bundle identifier for FASTLANE from the built .app Info.plist
+APP_PLIST="build/ios/archive/Runner.xcarchive/Products/Applications/Runner.app/Info.plist"
+
+if [ ! -f "$APP_PLIST" ]; then
+  echo "❌ App Info.plist not found: $APP_PLIST"
+  exit 1
+fi
+
+APP_IDENTIFIER=$(plutil -extract CFBundleIdentifier xml1 -o - "$APP_PLIST" | \
+  grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+
+export FASTLANE_APP_IDENTIFIER="$APP_IDENTIFIER"
+echo "📱 App Identifier: $FASTLANE_APP_IDENTIFIER"
+
+# Construct expected IPA path
 IPA_PATH="build/ios/ipa/${APP_NAME}.ipa"
 
+# If IPA not found, let user select one
 if [ ! -f "$IPA_PATH" ]; then
-  echo "❌ IPA not found at $IPA_PATH"
+  echo "❌ IPA not found at expected path: $IPA_PATH"
   echo "🔍 Searching for IPA files..."
   IPA_FILES=(build/ios/ipa/*.ipa)
 
@@ -52,7 +82,22 @@ else
   echo "✅ Using IPA: $IPA_PATH"
 fi
 
-# Step 3: Copy API key to expected location
+# Step 3.5: Extract version and build number from compiled Info.plist
+if [ ! -f "$APP_PLIST" ]; then
+  echo "❌ Compiled Info.plist not found at: $APP_PLIST"
+  exit 1
+fi
+
+IPA_VERSION=$(plutil -extract CFBundleShortVersionString xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+IPA_BUILD_NUMBER=$(plutil -extract CFBundleVersion xml1 -o - "$APP_PLIST" | grep -oE '<string>.*</string>' | sed -E 's/<\/?string>//g')
+
+export IPA_VERSION
+export IPA_BUILD_NUMBER
+
+echo "📦 IPA Version: $IPA_VERSION"
+echo "🔢 IPA Build Number: $IPA_BUILD_NUMBER"
+
+# Step 4: Copy API key to expected location
 TARGET_KEY_DIR="$HOME/.appstoreconnect/private_keys"
 PRIVATE_KEY_NAME="AuthKey_${APP_STORE_CONNECT_KEY_ID}.p8"
 SOURCE_KEY_PATH="$SCRIPT_DIR/$PRIVATE_KEY_NAME"
@@ -72,19 +117,27 @@ else
   echo "✅ Private key already exists."
 fi
 
-# Step 4: Prompt for release notes
-echo "📝 Enter release notes (press ENTER to finish):"
-read -r RELEASE_NOTES
-export RELEASE_NOTES
+# Step 5: Prepare and run Fastlane
 export IPA_FILENAME="$(basename "$IPA_PATH")"
-
-# Step 5: Run Fastlane publish_ipa lane
 FASTLANE_DIR="$SCRIPT_DIR/fastlane"
 
 if command -v fastlane &> /dev/null; then
+  if [ ! -f "$FASTLANE_DIR/Fastfile" ]; then
+    echo "❌ Fastfile not found at: $FASTLANE_DIR/Fastfile"
+    exit 1
+  fi
+
   echo "🚀 Running Fastlane to publish IPA..."
-  fastlane --path "$FASTLANE_DIR" publish_ipa
+  (
+    cd "$FASTLANE_DIR"
+    FASTLANE_SKIP_UPDATE_CHECK=1 \
+    FASTLANE_SKIP_INIT=true \
+    fastlane publish_ipa
+  )
 else
   echo "❌ Fastlane not installed. Please run ./fastlane_setup.sh"
   exit 1
 fi
+
+
+

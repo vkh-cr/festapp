@@ -24,6 +24,7 @@ class UserColumns {
   static const String TEXT3 = "text3";
   static const String NOTE = "note";
   static const String DIET = "diet";
+  static const String IS_VOLUNTEER = "isVolunteer";
   static const String MANAGER = "manager";
   static const String EDITOR = "editor";
   static const String EDITOR_VIEW = "editorView";
@@ -193,6 +194,7 @@ class UserColumns {
             width: 100
         )];
     },
+    IS_VOLUNTEER: [_statusColumn("Volunteer".tr(), Tb.occasion_users.data_is_volunteer)],
     MANAGER: [_statusColumn("Administrator".tr(), Tb.occasion_users.is_manager)],
     EDITOR: [_statusColumn("Editor".tr(), Tb.occasion_users.is_editor)],
     EDITOR_VIEW: [_statusColumn("Read only".tr(), Tb.occasion_users.is_editor_view)],

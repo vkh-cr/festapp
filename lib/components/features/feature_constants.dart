@@ -19,6 +19,7 @@ class FeatureConstants {
   static const String map = "map";
   static const String quotes = "quotes";
   static const String workshops = "workshops";
+  static const String volunteers = "volunteers";
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";

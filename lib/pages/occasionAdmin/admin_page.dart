@@ -22,13 +22,15 @@ class _AdminPageState extends State<AdminPage> with SingleTickerProviderStateMix
     AdminTabDefinition.info,
     if(!AppConfig.isAllUnit)
     AdminTabDefinition.events,
-    AdminTabDefinition.places,
+      AdminTabDefinition.places,
     if(FeatureService.isFeatureEnabled(FeatureConstants.userGroups))
-    AdminTabDefinition.groups,
+      AdminTabDefinition.groups,
     if(FeatureService.isFeatureEnabled(FeatureConstants.game))
-    AdminTabDefinition.game,
+      AdminTabDefinition.game,
     if(FeatureService.isFeatureEnabled(FeatureConstants.services))
-    AdminTabDefinition.service,
+      AdminTabDefinition.service,
+    if(FeatureService.isFeatureEnabled(FeatureConstants.volunteers))
+      AdminTabDefinition.volunteers,
     AdminTabDefinition.emailTemplates,
     AdminTabDefinition.users,
   ];

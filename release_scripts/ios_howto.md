@@ -18,7 +18,7 @@ This guide explains how to configure and use the `release_scripts/` automation t
 1. Go to [https://appstoreconnect.apple.com/access/integrations/api](https://appstoreconnect.apple.com/access/integrations/api)
 2. Click the ➕ button to create a new API key
 3. Name it (e.g., `Release Upload Key`)
-4. Set **Access**: App Manager
+4. Set **Access**: **App Manager** or **Admin** (❗ required for submitting builds)
 5. Download the `.p8` file (e.g. `AuthKey_ABCD123456.p8`)
 
 ---

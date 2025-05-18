@@ -1,8 +1,14 @@
 import 'package:collection/collection.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 
+import 'companion_feature.dart';
 import 'feature.dart';
 import 'feature_constants.dart';
+import 'form_feature.dart';
+import 'map_feature.dart';
+import 'schedule_feature.dart';
+import 'ticket_feature.dart';
+import 'workshop_feature.dart';
 
 class FeatureService {
   /// Checks whether the feature with [featureCode] is enabled.
@@ -16,9 +22,7 @@ class FeatureService {
   /// Returns a default list of features.
   static List<Feature> getDefaultFeatures() {
     return [
-      // Use FormFeature for the form feature.
       FormFeature(code: FeatureConstants.form, isEnabled: false),
-      // Use TicketFeature for ticket-specific properties.
       TicketFeature(
         code: FeatureConstants.ticket,
         isEnabled: false,
@@ -26,7 +30,6 @@ class FeatureService {
         ticketDarkColor: '000000',
         ticketBackground: '',
       ),
-      // Use SimpleFeature for features with no extra properties.
       SimpleFeature(code: FeatureConstants.blueprint, isEnabled: false),
       WorkshopsFeature(code: FeatureConstants.workshops, isEnabled: true),
       MapFeature(code: FeatureConstants.map, isEnabled: true),
@@ -37,7 +40,9 @@ class FeatureService {
       SimpleFeature(code: FeatureConstants.userGroups, isEnabled: false),
       SimpleFeature(code: FeatureConstants.entryCode, isEnabled: false),
       SimpleFeature(code: FeatureConstants.timetable, isEnabled: false),
+      SimpleFeature(code: FeatureConstants.volunteers, isEnabled: false),
       CompanionsFeature(code: FeatureConstants.companions, isEnabled: false, companionsMax: 1),
+      ScheduleFeature(code: ScheduleFeature.metaSchedule, isEnabled: true, scheduleType: 'basic'),
     ];
   }
 
