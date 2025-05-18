@@ -573,7 +573,7 @@
   "ActivitiesComponentStrings.textClickPlusToAddOne": "Click \u002b above to add one.",
   "ActivitiesComponentStrings.textActivityHidden": "Activity hidden (will not be visible to users)",
   "ActivitiesComponentStrings.textNewActivityAddedDragDrop": "New activity",
-  "ActivitiesComponentStrings.textDragUsersFromTopDropHere": "Nová activity added. Drag users from the top panel and drop them here to create assignments.",
+  "ActivitiesComponentStrings.textDragUsersFromTopDropHere": "New activity added. Drag users from the top panel and drop them here to create assignments.",
   "ActivitiesComponentStrings.textNoUsersAssignedYet": "No users assigned to this activity yet.",
   "ActivitiesComponentStrings.textUntitledActivity": "Untitled",
   "ActivitiesComponentStrings.menuRename": "Rename",

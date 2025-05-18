@@ -222,7 +222,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
 
     if (earliestTimeToShow != null && _timelineStart != null && _timelineEnd != null) {
-      _shiftTimelineToDateTime(earliestTimeToShow!);
+      _shiftTimelineToDateTime(earliestTimeToShow);
     }
     // If no specific time to shift to, _panOffset (set to 0.0 in _loadData) remains the default.
   }
@@ -872,9 +872,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     );
   }
 
-
   Widget _buildUsersPanel() {
-    final filtered = _allUsers.where((u) => (u.toFullNameString()).toLowerCase().contains(_userFilter.toLowerCase())).toList();
+    final filtered = _allUsers
+        .where((u) => u.toFullNameString().toLowerCase().contains(_userFilter.toLowerCase()))
+        .toList();
     final isDark = isDarkMode(context);
     final hintColor = isDark ? Colors.white54 : Colors.black54;
     final textColor = isDark ? Colors.white : Colors.black;
@@ -882,101 +883,143 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     return Container(
       padding: const EdgeInsets.all(2),
       color: isDark ? Colors.grey[850] : Colors.grey[100],
-      child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: TextField(
-            style: TextStyle(fontSize: 12, color: textColor),
-            decoration: InputDecoration(
-              hintText: ActivitiesComponentStrings.hintSearchUsers,
-              hintStyle: TextStyle(color: hintColor, fontSize: 12),
-              isDense: true,
-              alignLabelWithHint: true,
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(left: 8, right: 4),
-                child: Icon(Icons.search, size: 14, color: hintColor),
+      child: Column(
+        children: [
+          // search field unchanged
+          Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: TextField(
+              style: TextStyle(fontSize: 12, color: textColor),
+              decoration: InputDecoration(
+                hintText: ActivitiesComponentStrings.hintSearchUsers,
+                hintStyle: TextStyle(color: hintColor, fontSize: 12),
+                isDense: true,
+                alignLabelWithHint: true,
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 8, right: 4),
+                  child: Icon(Icons.search, size: 14, color: hintColor),
+                ),
+                prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                contentPadding: const EdgeInsets.symmetric(vertical: 6),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.transparent,
               ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              contentPadding: const EdgeInsets.symmetric(vertical: 6),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.transparent,
+              onChanged: (v) => setState(() => _userFilter = v),
             ),
-            onChanged: (v) => setState(() => _userFilter = v),
           ),
-        ),
-        Expanded(child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 60,
-              mainAxisSpacing: 2,
-              crossAxisSpacing: 2,
-              childAspectRatio: 1.0
-          ),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final u = filtered[index];
-            final initials = (u.toFullNameString()).split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join();
-            final color = darkUserColors[u.hashCode % darkUserColors.length];
-            final avatarTextColor = Colors.white;
-            return Draggable<UserInfoModel>(
-              data: u,
-              onDragStarted: () { _hideAssignmentDetailOverlay(); setState(() => _currentlyDraggedUser = u); },
-              onDragEnd: (details) => setState(() { _currentlyDraggedUser = null; _hoveredActivityForPreview = null; _previewStartTime = null; }),
-              feedback: Material(
-                  color: Colors.transparent,
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Container(width: 36, height: 36, decoration: BoxDecoration(shape: BoxShape.circle, color: color.withOpacity(0.8), border: Border.all(color: color, width: 1.5)), child: Center(child: Text(initials, style: TextStyle(color: avatarTextColor, fontSize: 14, fontWeight: FontWeight.bold)))),
-                    const SizedBox(height: 3),
-                    Text(u.toFullNameString(), style: TextStyle(color: textColor, fontSize: 12, decoration: TextDecoration.none)),
-                  ])
+
+          // Fixed grid: enforce a minimum height so names don’t overflow
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 60,
+                mainAxisExtent: 60,         // ← ensure 60px height regardless of width
+                mainAxisSpacing: 2,
+                crossAxisSpacing: 2,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 28, height: 28,
-                    margin: const EdgeInsets.only(top: 2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: color,
-                      border: Border.all(color: color.withOpacity(0.5), width: 1.0),
+              itemCount: filtered.length,
+              itemBuilder: (context, index) {
+                final u = filtered[index];
+                final initials = u
+                    .toFullNameString()
+                    .split(' ')
+                    .map((w) => w.isNotEmpty ? w[0] : '')
+                    .take(2)
+                    .join();
+                final color = darkUserColors[u.hashCode % darkUserColors.length];
+                final avatarTextColor = Colors.white;
+
+                return Draggable<UserInfoModel>(
+                  data: u,
+                  onDragStarted: () {
+                    _hideAssignmentDetailOverlay();
+                    setState(() => _currentlyDraggedUser = u);
+                  },
+                  onDragEnd: (_) => setState(() {
+                    _currentlyDraggedUser = null;
+                    _hoveredActivityForPreview = null;
+                    _previewStartTime = null;
+                  }),
+                  feedback: Material(
+                    color: Colors.transparent,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 36, height: 36,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: color.withOpacity(0.8),
+                            border: Border.all(color: color, width: 1.5),
+                          ),
+                          child: Center(
+                            child: Text(
+                              initials,
+                              style: TextStyle(
+                                color: avatarTextColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          u.toFullNameString(),
+                          style: TextStyle(color: textColor, fontSize: 12, decoration: TextDecoration.none),
+                        ),
+                      ],
                     ),
-                    child: Center(
-                      child: Text(
-                        initials,
-                        style: TextStyle(
-                          color: avatarTextColor,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 28, height: 28,
+                        margin: const EdgeInsets.only(top: 2),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: color,
+                          border: Border.all(color: color.withOpacity(0.5), width: 1.0),
+                        ),
+                        child: Center(
+                          child: Text(
+                            initials,
+                            style: TextStyle(
+                              color: avatarTextColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2, left: 1.0, right: 1.0),
-                    child: Text(
-                      u.toFullNameString(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: textColor.withOpacity(0.8),
-                        height: 1.1,
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2, left: 1, right: 1),
+                        child: Text(
+                          u.toFullNameString(),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: textColor.withOpacity(0.8),
+                            height: 1.1,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,          // ← allow wrapping onto two lines
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
-                      softWrap: false,
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        )),
-      ]),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1730,7 +1773,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                             setState(() { a.isHidden = !a.isHidden!; });
                           },
                         ),
-                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))),
+                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))), // Activity title in bold
                         PopupMenuButton<String>(
                           icon: Icon(Icons.more_vert, size: 15, color: activityHeaderTextColor.withOpacity(0.8)),
                           tooltip: ActivitiesComponentStrings.tooltipActivityOptions,
@@ -1761,30 +1804,30 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           valueListenable: _currentPanOffsetNotifier,
                           builder: (context, currentPanOffsetValue, child){
                             return ClipRect(
-                              child: Transform.translate(
-                                offset: Offset(currentPanOffsetValue, 0),
-                                child: SizedBox(
-                                  width: timelineWidth,
-                                  height: 24,
-                                  child: CustomPaint(
-                                    foregroundPainter: VerticalGridLinesPainter(
-                                      start: _timelineStart!,
-                                      end: _timelineEnd!,
-                                      pps: _basePps * _scale,
-                                      viewHeight: 24,
-                                      isDarkMode: isDark,
-                                    ),
-                                    child: Container(
-                                      color: a.isHidden!
-                                          ? activityHiddenOverlayColor
-                                          : (isDark
-                                          ? Colors.grey.shade700.withOpacity(0.2)
-                                          : Colors.grey.shade300.withOpacity(0.2)
+                                child: Transform.translate(
+                                    offset: Offset(currentPanOffsetValue, 0),
+                                    child: SizedBox(
+                                      width: timelineWidth,
+                                      height: 24,
+                                      child: CustomPaint(
+                                        foregroundPainter: VerticalGridLinesPainter(
+                                          start: _timelineStart!,
+                                          end: _timelineEnd!,
+                                          pps: _basePps * _scale,
+                                          viewHeight: 24,
+                                          isDarkMode: isDark,
+                                        ),
+                                        child: Container(
+                                          color: a.isHidden!
+                                              ? activityHiddenOverlayColor
+                                              : (isDark
+                                              ? Colors.grey.shade700.withOpacity(0.2)
+                                              : Colors.grey.shade300.withOpacity(0.2)
+                                          ),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                                    )
+                                )
                             );
                           }
                       )

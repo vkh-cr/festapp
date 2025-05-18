@@ -90,8 +90,9 @@ class _EventPageState extends State<EventPage> {
                           context,
                           CheckRoute(id: _event!.id!));
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.qr_code_scanner,
+                      color: ThemeConfig.eventTypeToColor(context, _event!.type),
                     )),
               ),
             ),
