@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/check_page.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
@@ -8,7 +10,7 @@ import 'package:fstapp/pages/occasion/event_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/unit/unit_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
-import 'package:fstapp/pages/user/signup_password_page.dart';
+import 'package:fstapp/pages/user/reset_password_page.dart';
 import 'package:fstapp/pages/utility/html_editor_page.dart';
 import 'package:fstapp/pages/occasion/info_page.dart';
 import 'package:fstapp/pages/utility/install_page.dart';
@@ -27,6 +29,7 @@ import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/utility/instance_install_page.dart';
 
 import 'app_router.gr.dart';
+import 'components/features/feature_constants.dart';
 import 'pages/occasion/game_page.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
@@ -67,7 +70,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: OccasionHomeRoute.page, path: "/:$linkFormatted", children: [
       AutoRoute(page: UserRoute.page, path: UserPage.ROUTE),
       AutoRoute(page: ScheduleNavigationRoute.page, path: EventPage.ROUTE, children: [
-                  AutoRoute(page: ScheduleRoute.page, path: "", initial: true),
+                  getSchedulePage(),
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
       AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE, maintainState: false),
@@ -85,6 +88,14 @@ class AppRouter extends RootStackRouter {
 
     RedirectRoute(path: '*', redirectTo: getDefaultLink()),
   ];
+
+  static AutoRoute getSchedulePage() {
+    var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced) {
+      return AutoRoute(page: ScheduleRoute.page, path: "", initial: true);
+    }
+    return AutoRoute(page: ScheduleBasicRoute.page, path: "", initial: true);
+  }
 
   static String getDefaultLink() {
 

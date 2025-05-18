@@ -9,12 +9,14 @@ import 'package:fstapp/data_models/exclusive_group_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'get_events_helper.dart';
 
 class DbEvents {
   static final _supabase = Supabase.instance.client;
@@ -91,7 +93,7 @@ class DbEvents {
           "${Tb.events.title},"
           "${Tb.events.start_time},"
           "${Tb.events.end_time},"
-          "${Tb.events.place},"
+          "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
           "${Tb.events.type},"
           "${Tb.events.max_participants},"
           "${Tb.events.is_group_event},"
@@ -115,7 +117,7 @@ class DbEvents {
                 "${Tb.events.title},"
                 "${Tb.events.start_time},"
                 "${Tb.events.end_time},"
-                "${Tb.events.place},"
+                "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
                 "${Tb.events.type},"
                 "${Tb.events.max_participants},"
                 "${Tb.events.is_group_event}")
@@ -136,7 +138,7 @@ class DbEvents {
             "${Tb.events.title},"
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
-            "${Tb.events.place},"
+            "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
             "${Tb.events.type},"
             "${Tb.events.max_participants},"
             "${Tb.events.is_group_event}, "
@@ -159,7 +161,7 @@ class DbEvents {
         "${Tb.events.title},"
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
-        "${Tb.events.place},"
+        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event},"
@@ -187,7 +189,7 @@ class DbEvents {
         "${Tb.events.title},"
         "${Tb.events.start_time},"
         "${Tb.events.end_time},"
-        "${Tb.events.place},"
+        "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.events.type},"
         "${Tb.events.max_participants},"
         "${Tb.events.is_group_event}")
@@ -218,6 +220,7 @@ class DbEvents {
         "${Tb.events.split_for_men_women},"
         "${Tb.events.is_group_event},"
         "${Tb.events.type},"
+        "${Tb.events.data},"
         "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
         "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_child}_fkey(${Tb.event_groups.event_parent}),"
         "${Tb.event_roles.table}!${Tb.event_roles.event}(${Tb.event_roles.role}),"
@@ -225,28 +228,6 @@ class DbEvents {
         "${Tb.event_users.table}(count)")
         .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
         .order(Tb.events.start_time, ascending: true);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getEventsDescription(List<int> ids) async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.events.updated_at}, ${Tb.events.description}")
-        .inFilter(Tb.events.id, ids);
-    return List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-  }
-
-  static Future<List<EventModel>> getAllEventsMeta() async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-        "${Tb.events.id},"
-        "${Tb.events.updated_at}")
-        .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId()!);
-
     return List<EventModel>.from(
         data.map((x) => EventModel.fromJson(x)));
   }
@@ -263,6 +244,7 @@ class DbEvents {
             "${Tb.events.updated_at},"
             "${Tb.events.occasion},"
             "${Tb.events.title},"
+            "${Tb.events.description},"
             "${Tb.events.start_time},"
             "${Tb.events.end_time},"
             "${Tb.events.max_participants},"
@@ -276,14 +258,6 @@ class DbEvents {
         .eq(Tb.events.id, eventId)
         .single();
     var event = EventModel.fromJson(data);
-
-    var cachedEvent = await OfflineDataService.getEventDescription(eventId.toString());
-    if(cachedEvent?.updatedAt!.isBefore(event.updatedAt!)??true) {
-      var descrEvent = await getEventsDescription([event.id!]);
-      event.description = descrEvent[0].description;
-    } else {
-      event.description = cachedEvent?.description;
-    }
 
     if(AuthService.isLoggedIn()) {
       event.isEventInMySchedule = await isEventSaved(event.id!);
@@ -313,7 +287,7 @@ class DbEvents {
         await loadIsCurrentUserSignedIn(event.childEvents);
       }
     }
-    if(event.isGroupEvent && AuthService.hasGroup())
+    if((event.isGroupEvent ?? false) && AuthService.hasGroup())
     {
       event.isMyGroupEvent = true;
     }
@@ -467,7 +441,7 @@ class DbEvents {
     //rewrite group names for group events
     for(var e in events)
     {
-      if(e.isGroupEvent && AuthService.hasGroup())
+      if((e.isGroupEvent ?? false) && AuthService.hasGroup())
       {
         e.title = AuthService.currentUserGroup()!.title;
         e.isMyGroupEvent = true;
@@ -574,6 +548,7 @@ class DbEvents {
       Tb.events.is_group_event: event.isGroupEvent,
       Tb.events.is_hidden: event.isHidden,
       Tb.events.type: event.type,
+      Tb.events.data: event.data,
     };
     if(event.description!=null) {
       upsertObj.addAll({Tb.events.description: event.description});
@@ -736,26 +711,74 @@ class DbEvents {
     }
   }
 
-  static Future<void> updateEventDescriptions() async {
-    var needsUpdate = <int>[];
-    var allEventsMeta = await DbEvents.getAllEventsMeta();
-
-    for(var e in allEventsMeta) {
-      var oe = await OfflineDataService.getEventDescription(e.id.toString());
-      if(oe==null || oe.updatedAt==null || oe.updatedAt!.isBefore(e.updatedAt!)) {
-        needsUpdate.add(e.id!);
-      }
-    }
-
-    var fullEvents = await DbEvents.getEventsDescription(needsUpdate);
-    for(var e in fullEvents) {
-      await OfflineDataService.saveEventDescription(e);
-    }
-  }
-
   static Future<bool> hasEventAllowedRole(int eventId) async {
     var data = await _supabase.rpc("get_is_event_allowed",
         params: {"ev": eventId});
     return data;
   }
+
+  static Future<List<EventModel>> getAllEvents(int occasionId, bool includeDescription) async {
+    final response = await _supabase.rpc(
+      'get_events',
+      params: {
+        'p_occasion': occasionId,
+        'p_include_description': includeDescription,
+      },
+    );
+
+    if (response['code'] != 200) return [];
+
+    final json = response['data'] as Map<String, dynamic>;
+
+    // root‐level arrays
+    final eventsJson        = (json['events']           as List).cast<Map<String, dynamic>>();
+    final placesList        = GetEventsHelper.parsePlaces(json);
+    final groupsList        = GetEventsHelper.parseEventGroups(json);
+    final rolesList         = GetEventsHelper.parseEventRoles(json);
+    final usersCountList    = GetEventsHelper.parseEventUsers(json);
+    final usersSavedList    = GetEventsHelper.parseEventUsersSaved(json);
+
+    // build lookup maps
+    final placeById    = { for (var p in placesList) p.id!: p };
+    final groupsByParent = <int, List<EventGroupModel>>{};
+    final parentsByChild = <int, List<EventGroupModel>>{};
+    for (var g in groupsList) {
+      groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+      parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
+    }
+    final rolesByEvent = <int, List<int>>{};
+    for (var r in rolesList) {
+      rolesByEvent.putIfAbsent(r.eventId!, () => []).add(r.roleId!);
+    }
+    final usersByEvent     = { for (var u in usersCountList)     u.eventId!: u.count! };
+    final savedByEvent     = { for (var s in usersSavedList)     s.eventId!: s.count! };
+
+    // instantiate and populate each EventModel
+    final events = <EventModel>[];
+    for (var eJson in eventsJson) {
+      final ev = EventModel.fromJson(eJson);
+      // override place with full model if available
+      if (ev.place?.id != null) {
+        ev.place = placeById[ev.place!.id];
+      }
+      // assign child/parent IDs
+      ev.childEventIds  = groupsByParent[ev.id!]?.map((g) => g.eventChild).toList();
+      ev.parentEventIds = parentsByChild[ev.id!]?.map((g) => g.eventParent).toList();
+      // assign roles and counts
+      ev.eventRolesIds      = rolesByEvent[ev.id!];
+      ev.currentParticipants = usersByEvent[ev.id!];
+      ev.currentUsersSaved   = savedByEvent[ev.id!];
+      events.add(ev);
+    }
+    
+    for (var e in events){
+      var children = events.where((ev) => ev.parentEventIds?.contains(e.id)??false).toList();
+      e.childEvents = children;
+    }
+
+    // sort by start time, for example
+    events.sort((a, b) => a.startTime.compareTo(b.startTime));
+    return events;
+  }
+
 }

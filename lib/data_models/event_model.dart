@@ -22,7 +22,8 @@ class EventModel extends ITrinaRowModel {
   @override
   final int? id;
   DateTime? updatedAt;
-  bool isHidden = false;
+  bool? isHidden = false;
+  Map<String, dynamic>? data;
   PlaceModel? place;
   String? type;
   List<EventModel> childEvents = [];
@@ -34,18 +35,18 @@ class EventModel extends ITrinaRowModel {
   int? currentUsersSaved;
   String? title = "Event".tr();
   String? description = "";
-  bool isSignedIn = false;
-  bool splitForMenWomen = false;
+  bool? isSignedIn = false;
+  bool? splitForMenWomen = false;
 
-  bool isGroupEvent = false;
-  bool isMyGroupEvent = false;
+  bool? isGroupEvent = false;
+  bool? isMyGroupEvent = false;
 
   bool? isEventInMySchedule;
   int? occasionId;
 
   bool? canSaveEventToMyProgram() {
     var canSave = (maxParticipants == null || maxParticipants == 0) &&
-        !isGroupEvent &&
+        !isGroupEvent! &&
         (childEventIds == null || childEventIds!.isEmpty);
     if(!canSave){
       return null;
@@ -61,20 +62,21 @@ class EventModel extends ITrinaRowModel {
     required this.endTime,
     this.id,
     this.updatedAt,
-    required this.isHidden,
+    this.isHidden = false,
     this.title,
     this.description,
     this.maxParticipants,
+    this.data,
     this.place,
     this.type,
     this.childEventIds,
     this.parentEventIds,
     this.eventRolesIds,
-    required this.splitForMenWomen,
+    this.splitForMenWomen = false,
     this.currentParticipants,
     this.currentUsersSaved,
-    required this.isSignedIn,
-    required this.isGroupEvent,
+    this.isSignedIn = false,
+    this.isGroupEvent = false,
     this.isEventInMySchedule,
     this.occasionId
   });
@@ -123,6 +125,7 @@ class EventModel extends ITrinaRowModel {
         title: json.containsKey(titleColumn) ? json[titleColumn] : null,
         description: json.containsKey(descriptionColumn) ? json[descriptionColumn] : null,
         maxParticipants: json.containsKey(maxParticipantsColumn) ? json[maxParticipantsColumn] : null,
+        data: json.containsKey(dataColumn) ? json[dataColumn] : null,
         place: (json.containsKey(placesTable) && json[placesTable] != null) ? PlaceModel.fromJson(json[placesTable]) :
         json.containsKey(placeColumn)?PlaceModel(id: json[placeColumn], title: null, description: null, type: null):null,
         type: json[Tb.events.type],
@@ -141,7 +144,7 @@ class EventModel extends ITrinaRowModel {
 
   bool isFull() => currentParticipants !>= maxParticipants!;
   static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null;
-  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && event!.currentParticipants! >= event.maxParticipants!;
+  static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && (event!.currentParticipants??0) >= event.maxParticipants!;
   @override
   String toString() {
     return (maxParticipants==null ? title:"$title (${currentParticipants??"-"}/$maxParticipants)")??"";
@@ -155,11 +158,11 @@ class EventModel extends ITrinaRowModel {
     description = event.description;
     maxParticipants = event.maxParticipants;
     isGroupEvent = event.isGroupEvent;
-    isEventInMySchedule = event.isEventInMySchedule;
     childEventIds = event.childEventIds;
-    place = PlaceModel(id: event.place?.id, title: null, description: null, type: null);
+    place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
     type = event.type;
     occasionId = event.occasionId;
+    data = event.data;
   }
 
   static const String startDateColumn = "startDate";
@@ -173,6 +176,7 @@ class EventModel extends ITrinaRowModel {
   static const String childEventsList = "childEvents";
   static const String updatedAtColumn = "updated_at";
   static const String isHiddenColumn = "is_hidden";
+  static const String dataColumn = "data";
 
   static const String maxParticipantsColumn = "max_participants";
   static const String placeColumn = "place";
@@ -203,17 +207,18 @@ class EventModel extends ITrinaRowModel {
     var placeId = DataGridHelper.getIdFromFormatted(json[placeColumn]);
     var dateFormat = DateFormat("yyyy-MM-dd-HH:mm");
 
-    List<int> parentEvents = [];
-    if(json[parentEventColumn].toString().trim().isNotEmpty)
-    {
-      parentEvents = json[parentEventColumn].toString().split(",").map((e) => int.parse(e.trim())).toList();
-    }
+    List<int> parseIntList(dynamic value) =>
+        (value?.toString().trim().isNotEmpty ?? false)
+            ? value.toString().split(',').map((e) => int.parse(e.trim())).toList()
+            : [];
 
-    List<int> eventRoles = [];
-    if(json[Tb.event_roles.role].toString().trim().isNotEmpty)
-    {
-      eventRoles = json[Tb.event_roles.role].toString().split(",").map((e) => int.parse(e.trim())).toList();
-    }
+    List<int> parentEvents = parseIntList(json[parentEventColumn]);
+    List<int> eventRoles = parseIntList(json[Tb.event_roles.role]);
+
+    Map<String, dynamic> dataFromTab = {};
+    String? headerUrl = json[Tb.events.dataHeaderImage];
+    dataFromTab[Tb.events.dataHeaderImage] = headerUrl != null && headerUrl.isNotEmpty ? headerUrl : null;
+
 
     return EventModel(
         startTime: dateFormat.parse(startTimeString),
@@ -224,6 +229,7 @@ class EventModel extends ITrinaRowModel {
         title: json[titleColumn],
         description: json[descriptionColumn],
         maxParticipants: json[maxParticipantsColumn] == 0 ? null : json[maxParticipantsColumn],
+        data: dataFromTab,
         place: placeId == null ? null : PlaceModel(id: placeId, title: "", description: "", type: ""),
         type: json[Tb.events.type],
         splitForMenWomen: json[splitForMenWomenColumn] == "true" ? true : false,
@@ -253,7 +259,8 @@ class EventModel extends ITrinaRowModel {
       isGroupEventColumn: TrinaCell(value: isGroupEvent.toString()),
       parentEventColumn: TrinaCell(value: parentEventIds?.map((e) => e.toString()).join(",")??""),
       Tb.event_roles.role: TrinaCell(value: eventRolesIds?.map((e) => e.toString()).join(",")??""),
-      Tb.event_users.table: TrinaCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0)
+      Tb.event_users.table: TrinaCell(value: (maxParticipants??0) > 0 ? currentParticipants??0 : currentUsersSaved??0),
+      Tb.events.dataHeaderImage: TrinaCell(value: data?[Tb.events.dataHeaderImage])
     });
   }
 
@@ -277,7 +284,7 @@ class EventModel extends ITrinaRowModel {
   @override
   String toBasicString() => "$title";
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
       {
         idColumn: id,
         updatedAtColumn: updatedAt?.toIso8601String(),
@@ -291,10 +298,11 @@ class EventModel extends ITrinaRowModel {
         isSignedInColumn: isSignedIn,
         isEventInMyProgramColumn: isEventInMySchedule,
         isGroupEventColumn: isGroupEvent,
-        placeColumn: place?.id,
+        placesTable: place,
         Tb.events.type: type,
         childEventsList: childEventIds,
-        Tb.events.occasion: occasionId
+        Tb.events.occasion: occasionId,
+        dataColumn: data
       };
 
   static HashSet<EventModel> CreateEventModelSet() {

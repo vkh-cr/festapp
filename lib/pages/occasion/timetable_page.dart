@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/components/timetable/timetable_controller.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -85,7 +85,7 @@ class _TimetablePageState extends State<TimetablePage>
       DateFormat("EEEE", context.locale.languageCode).format(e);
 
   void setupTabController(List<TimeBlockGroup> days) {
-    _currentIndex ??= TimeHelper.getIndexFromDays(days.map((d)=>d.dateTime!.weekday));
+    _currentIndex ??= TimeHelper.getTimeNowIndexFromDays(days.map((d)=>d.dateTime!.weekday));
 
     if (_tabController?.length != days.length) {
       _tabController = TabController(vsync: this, length: days.length, initialIndex: _currentIndex!);

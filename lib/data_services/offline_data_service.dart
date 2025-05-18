@@ -66,7 +66,7 @@ class OfflineDataService {
     var me = await getUserInfo();
     if (me?.eventUserGroup != null) {
       for (var e in events) {
-        if (e.isGroupEvent) {
+        if (e.isGroupEvent ?? false) {
           e.title = me!.eventUserGroup!.title;
           e.isMyGroupEvent = true;
         }
@@ -103,12 +103,6 @@ class OfflineDataService {
 
   static Future<List<IconModel>> getAllIcons() =>
       getAllOffline(IconModel.iconsOffline, IconModel.fromJson);
-
-  static Future<void> saveEventDescription(EventModel toSave) =>
-      saveOffline(toSave.id!.toString(), toSave, eventsOfflineStorage);
-
-  static Future<EventModel?> getEventDescription(String id) =>
-      getOffline(id, EventModel.fromJson, eventsOfflineStorage);
 
   static Future<void> saveInfoDescription(InformationModel toSave) =>
       saveOffline(toSave.id!.toString(), toSave, informationOfflineStorage);

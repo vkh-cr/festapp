@@ -90,6 +90,7 @@ class _PlacesContentState extends State<PlacesContent> {
               context: context,
               occasionId: RightsService.currentOccasionId(),
               field: Tb.places.description,
+              title: ctx.row.cells[Tb.places.title]!.value,
               rendererContext: ctx,
               loadContent: () async =>
               ctx.row.cells[Tb.places.description]!.value,

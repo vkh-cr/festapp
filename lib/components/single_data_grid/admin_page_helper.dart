@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/activities/activities_content.dart';
 import 'package:fstapp/pages/eshop/products_tab.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -201,6 +202,7 @@ class AdminTabDefinition {
   static const String products = "Products";
   static const String report = "Report";
   static const String emailTemplates = "Email Templates";
+  static const String volunteers = "volunteers";
 
   // Available tabs defined in a dictionary.
   static Map<String, AdminTabDefinition> get availableTabs => {
@@ -222,6 +224,10 @@ class AdminTabDefinition {
         label: "Service".tr(),
         icon: Icons.food_bank,
         widget: ServiceTab()),
+    volunteers: AdminTabDefinition(
+        label: "Volunteers".tr(),
+        icon: Icons.view_timeline,
+        widget: ActivitiesContent(occasionId: RightsService.currentOccasionId()!)),
     users: AdminTabDefinition(
         label: "Users".tr(),
         icon: Icons.people,
