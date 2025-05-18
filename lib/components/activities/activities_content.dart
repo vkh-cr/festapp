@@ -77,13 +77,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   DateTime? _timelineStart, _timelineEnd;
 
   double _scale = 0.2;
-  double _panOffset = 0.0;
-  double _currentPanOffset = 0.0;
+  double _panOffset = 0.0; // Stable pan offset
+  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(0.0); // Live pan offset for dragging
+
   double _gesturePanOffsetStart = 0.0;
   double _gestureDragStartX = 0.0;
-  double _scrollbarDragInitialPanOffset = 0.0;
 
-  final double _basePps = 0.05;
+  double _scrollbarGestureDragStartX = 0.0;
+  double _scrollbarGesturePanOffsetStartValue = 0.0;
+
+  final double _basePps = 0.05; // Pixels per second at scale 1.0
 
   late List<UserInfoModel> _allUsers;
   late List<PlaceModel> _allPlaces;
@@ -112,6 +115,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   bool _isTimelineFullscreen = false;
 
+  // Store the viewport width for zoom calculations if needed outside LayoutBuilder
+  double _currentViewportWidth = 0;
+
+  // Constants for timeline date padding
+  static const int kTimelinePaddingDaysBefore = 1;
+  static const int kTimelinePaddingDaysAfter = 1;
+
+
   @override
   void initState() {
     super.initState();
@@ -134,6 +145,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     _mainController.dispose();
     _topController.dispose();
     _globalFilterController.dispose();
+    _currentPanOffsetNotifier.dispose();
     super.dispose();
   }
 
@@ -146,11 +158,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         _allPlaces = data.places!;
         _allEvents = data.events!;
         _allUsers = data.users!;
-        _computeTimelineBounds();
+        _computeTimelineBounds(); // This sets _timelineStart and _timelineEnd
+
         _activityAssignments.clear();
         if (data.activityAssignments != null) {
           for (var assignment in data.activityAssignments!) {
-
             final activity = data.activities?.firstWhereOrNull((act) {
               bool isMatch = (act.id == assignment.activityId);
               if (assignment.activityId == -1 && act.id == null) isMatch = true;
@@ -161,12 +173,56 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             }
           }
         }
+        // Reset pan to default before potentially shifting
         _panOffset = 0.0;
-        _currentPanOffset = 0.0;
+        _currentPanOffsetNotifier.value = 0.0;
+
         _updateFilteredActivities();
+
+        // Schedule the initial scroll to occur after the current build cycle completes
+        // and layout information (like _currentViewportWidth) is available.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if(mounted) { // Ensure the widget is still in the tree
+            _performInitialTimelineScroll();
+          }
+        });
       });
     }
   }
+
+  void _performInitialTimelineScroll() {
+    // This check ensures that layout has occurred and _currentViewportWidth is set.
+    // If _currentViewportWidth is 0, it means LayoutBuilder hasn't run or provided the width yet.
+    // addPostFrameCallback usually runs after the build triggered by setState, so width should be available.
+    if (_currentViewportWidth <= 0 && mounted) {
+      // Optionally, retry after a short delay if width is consistently not available,
+      // but typically, it should be available after the first frame post-setState.
+      // For now, we proceed, and _shiftTimelineToDateTime has its own guard for _currentViewportWidth <= 0.
+    }
+
+    DateTime? earliestTimeToShow;
+    List<DateTime> allPossibleStartTimes = [];
+
+    if (_bundle?.events?.isNotEmpty ?? false) {
+      allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime.toLocal()));
+    }
+    _activityAssignments.values.expand((list) => list).forEach((assignment) {
+      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) { // Exclude previews for initial scroll
+        allPossibleStartTimes.add(assignment.startTime!.toLocal());
+      }
+    });
+
+    if (allPossibleStartTimes.isNotEmpty) {
+      allPossibleStartTimes.sort((a, b) => a.compareTo(b));
+      earliestTimeToShow = allPossibleStartTimes.first;
+    }
+
+    if (earliestTimeToShow != null && _timelineStart != null && _timelineEnd != null) {
+      _shiftTimelineToDateTime(earliestTimeToShow!);
+    }
+    // If no specific time to shift to, _panOffset (set to 0.0 in _loadData) remains the default.
+  }
+
 
   void _computeTimelineBounds() {
     final allStarts = <DateTime>[], allEnds = <DateTime>[];
@@ -188,14 +244,62 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (allStarts.isNotEmpty && allEnds.isNotEmpty) {
       allStarts.sort();
       allEnds.sort();
-      _timelineStart = allStarts.first.subtract(const Duration(minutes: 15));
-      _timelineEnd = allEnds.last.add(const Duration(minutes: 15));
+      DateTime earliestActivityDate = allStarts.first;
+      DateTime latestActivityDate = allEnds.last;
+
+      // Set start to the beginning of the day of the earliest activity, minus padding
+      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day)
+          .subtract(const Duration(days: kTimelinePaddingDaysBefore));
+      // Set end to the end of the day of the latest activity, plus padding
+      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999)
+          .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
+      // Default if no events or assignments to define bounds
       final now = DateTime.now();
       _timelineStart = now.subtract(const Duration(hours: 1));
       _timelineEnd = now.add(const Duration(hours: 1));
     }
   }
+
+  void _shiftTimelineToDateTime(DateTime targetTime) {
+    if (_timelineStart == null || _timelineEnd == null || _currentViewportWidth <= 0 || !mounted) return;
+
+    final pps = _basePps * _scale;
+    final timelineWidth = _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() * pps;
+    final visibleTimelineAreaWidth = _currentViewportWidth - kTimelineLabelWidth;
+
+    DateTime effectiveTargetTime = targetTime;
+    // Ensure target time is not before the timeline actually starts for calculation purposes
+    if (effectiveTargetTime.isBefore(_timelineStart!)) {
+      effectiveTargetTime = _timelineStart!;
+    }
+    // If effectiveTargetTime is after _timelineEnd, the subsequent panOffset calculation and clamping
+    // will correctly result in showing the very end of the timeline if possible.
+
+    final Duration durationFromStart = effectiveTargetTime.difference(_timelineStart!);
+    final double pixelOffsetFromTimelineStart = durationFromStart.inSeconds * pps;
+
+    // Calculate the new panOffset to bring the targetTime to the beginning of the visible timeline area (just after the labels)
+    double newPanOffset = -pixelOffsetFromTimelineStart;
+
+    // Clamp the newPanOffset to ensure it's within valid bounds
+    // The maximum left pan is -(timelineWidth - visibleTimelineAreaWidth)
+    // The minimum pan (i.e., maximum right pan) is 0.0
+    newPanOffset = newPanOffset.clamp(
+        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0), // Max pan value (e.g., -500 if content is 500px wider)
+        0.0 // Min pan value (timeline starts at edge)
+    );
+
+    // Only update state if there's a significant change to avoid unnecessary rebuilds
+    // Compare with a small epsilon for floating point precision
+    if ((_panOffset - newPanOffset).abs() > 0.01 || (_currentPanOffsetNotifier.value - newPanOffset).abs() > 0.01) {
+      setState(() {
+        _panOffset = newPanOffset;
+        _currentPanOffsetNotifier.value = _panOffset; // Keep notifier in sync
+      });
+    }
+  }
+
 
   void _onAddNewActivity() {
     _hideAssignmentDetailOverlay();
@@ -213,20 +317,59 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  void _zoomIn() {
+  void _zoomIn(double vpWidth, double totalSec) {
     _hideAssignmentDetailOverlay();
-    setState(() => _scale = (_scale * 1.25).clamp(0.05, 10.0));
+    if (_timelineStart == null) return;
+
+    final double oldScale = _scale;
+    final double newScale = (_scale * 1.25).clamp(0.05, 10.0);
+
+    final double oldPps = _basePps * oldScale;
+    final double newPps = _basePps * newScale;
+
+    final double visibleTimelineAreaWidth = vpWidth - kTimelineLabelWidth;
+    final double timelinePointAtViewportCenterPx = -_panOffset + (visibleTimelineAreaWidth / 2);
+    final Duration durationOffsetFromStart = Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+    final double newTimelinePointAtViewportCenterPx = durationOffsetFromStart.inSeconds * newPps;
+    double newPanOffset = (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
+
+    final double newTimelineWidth = totalSec * newPps;
+    newPanOffset = newPanOffset.clamp(
+        (vpWidth - (kTimelineLabelWidth + newTimelineWidth)).clamp(double.negativeInfinity, 0.0),
+        0.0);
+
+    setState(() {
+      _scale = newScale;
+      _panOffset = newPanOffset;
+      _currentPanOffsetNotifier.value = _panOffset;
+    });
   }
 
   void _zoomOut(double vpWidth, double totalSec) {
     _hideAssignmentDetailOverlay();
+    if (_timelineStart == null) return;
+
+    final double oldScale = _scale;
+    final double newScale = (_scale / 1.25).clamp(0.05, 10.0);
+
+    final double oldPps = _basePps * oldScale;
+    final double newPps = _basePps * newScale;
+
+    final double visibleTimelineAreaWidth = vpWidth - kTimelineLabelWidth;
+    final double timelinePointAtViewportCenterPx = -_panOffset + (visibleTimelineAreaWidth / 2);
+    final Duration durationOffsetFromStart = Duration(seconds: (timelinePointAtViewportCenterPx / oldPps).round());
+    final double newTimelinePointAtViewportCenterPx = durationOffsetFromStart.inSeconds * newPps;
+    double newPanOffset = (visibleTimelineAreaWidth / 2) - newTimelinePointAtViewportCenterPx;
+
+    final double newTimelineWidth = totalSec * newPps;
+    newPanOffset = newPanOffset.clamp(
+        (vpWidth - (kTimelineLabelWidth + newTimelineWidth)).clamp(double.negativeInfinity, 0.0),
+        0.0);
+
     setState(() {
-      _scale = (_scale / 1.25).clamp(0.05, 10.0);
-      final pps = _basePps * _scale;
-      final timelineWidth = totalSec * pps;
-      _panOffset = _panOffset.clamp(
-          (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0), 0.0);
-      _currentPanOffset = _panOffset;
+      _scale = newScale;
+      _panOffset = newPanOffset;
+      _currentPanOffsetNotifier.value = _panOffset;
     });
   }
 
@@ -279,7 +422,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (timelineAreaRenderBox == null || !timelineAreaRenderBox.hasSize) return _timelineStart!;
 
     final Offset localOffset = timelineAreaRenderBox.globalToLocal(globalOffset);
-    final double dxOnTimelineCanvas = (localOffset.dx - kTimelineLabelWidth - _currentPanOffset).clamp(0.0, timelineRenderWidth);
+    final double dxOnTimelineCanvas = (localOffset.dx - kTimelineLabelWidth - _currentPanOffsetNotifier.value).clamp(0.0, timelineRenderWidth);
     final double pct = timelineRenderWidth > 0 ? dxOnTimelineCanvas / timelineRenderWidth : 0.0;
     final int totalTimelineSeconds = _timelineEnd!.difference(_timelineStart!).inSeconds;
     DateTime calculatedTime = _timelineStart!.add(Duration(seconds: (totalTimelineSeconds * pct).round()));
@@ -540,11 +683,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
         if (overlay != null && target != null) {
           final targetGlobalCenter = target.localToGlobal(target.size.center(Offset.zero), ancestor: overlay);
+
           if (targetGlobalCenter.dx > overlay.size.width / 2) {
             targetAnchor = Alignment.topLeft;
             followerAnchor = Alignment.topRight;
             offset = const Offset(-10, 0);
           }
+
           if (targetGlobalCenter.dy + actualPopupHeight > overlay.size.height) {
             if (targetAnchor == Alignment.topRight) {
               targetAnchor = Alignment.bottomRight;
@@ -614,6 +759,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           final assignmentsForActivity = _activityAssignments[activity] ?? [];
           for (var assignment in assignmentsForActivity) {
             if (assignment.data?['isDragPreview'] == true) continue;
+
             if (Utilities.removeDiacritics(assignment.user?.toFullNameString().toLowerCase() ?? "").contains(normalizedFilter)) {
               return true;
             }
@@ -687,7 +833,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                     default: return const SizedBox();
                   }
                 });
-          } else { // area.data == 'bottom'
+          } else {
             return _buildTimelineArea();
           }
         },
@@ -776,8 +922,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    width: 28,
-                    height: 28,
+                    width: 28, height: 28,
                     margin: const EdgeInsets.only(top: 2),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -975,8 +1120,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   Widget _buildTimelineArea() {
     final isDark = isDarkMode(context);
     return LayoutBuilder(builder: (ctx, constraints) {
-      final vpWidth = constraints.maxWidth;
-      final totalSec = _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble();
+      // Update viewport width whenever layout changes.
+      // This is crucial for zoom and pan calculations, including the initial scroll.
+      if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
+        // Schedule a microtask to update state after the current build phase,
+        // if the viewport width change might affect initial scroll logic that runs post-frame.
+        // However, for general use in zoom/pan, direct update is fine.
+        _currentViewportWidth = constraints.maxWidth;
+        // If initial scroll hasn't happened and relied on this, it might need a nudge.
+        // But _performInitialTimelineScroll is called via addPostFrameCallback from _loadData's setState,
+        // so this LayoutBuilder should have run.
+      }
+      final vpWidth = _currentViewportWidth; // Use the stored/updated viewport width
+
+
+      final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
       final pps = _basePps * _scale;
       final timelineWidth = totalSec * pps;
       final bool isScrollable = timelineWidth > (vpWidth - kTimelineLabelWidth);
@@ -991,363 +1149,354 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         },
         onHorizontalDragUpdate: (d) {
           final dx = d.globalPosition.dx - _gestureDragStartX;
-          double newPanOffset = (_gesturePanOffsetStart + dx).clamp(
-              (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0), 0.0);
-
-          if ((newPanOffset - _currentPanOffset).abs() > 0.1 ) {
-            setState(() {
-              _panOffset = newPanOffset;
-              _currentPanOffset = newPanOffset;
-            });
-          } else {
-            _currentPanOffset = newPanOffset;
-          }
+          double newPanOffsetValue = (_gesturePanOffsetStart + dx).clamp(
+              (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+              0.0);
+          _currentPanOffsetNotifier.value = newPanOffsetValue;
         },
         onHorizontalDragEnd: (d) {
-          if (_panOffset != _currentPanOffset) {
+          if (_panOffset != _currentPanOffsetNotifier.value) {
             setState(() {
-              _panOffset = _currentPanOffset;
+              _panOffset = _currentPanOffsetNotifier.value;
             });
           }
         },
-        child: Column(children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 16.0, top:8.0, bottom: 4.0),
-            child: Row(
-              children: [
-                if (!_isTimelineFullscreen)
-                  IconButton(
-                    icon: const Icon(Icons.add_circle_outline),
-                    color: isDark ? Colors.white70 : Colors.black54,
-                    iconSize: 20,
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(minWidth: 36, minHeight: 36),
-                    tooltip: ActivitiesComponentStrings.tooltipAddNewActivity,
-                    onPressed: _onAddNewActivity,
-                  ),
-                if (!_isTimelineFullscreen) const SizedBox(width: 10),
-                Expanded(
-                  child: Text(ActivitiesComponentStrings.titleActivitiesTimeline, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87)),
-                ),
-                if (!_isTimelineFullscreen)
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.save_outlined, size: 14),
-                    label: Text(ActivitiesComponentStrings.buttonSave, style: TextStyle(fontSize: 11)),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: isDarkMode(context) ? Colors.black : Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        minimumSize: Size(60, 30)
-                    ),
-                    onPressed: () async {
-
-                      // Ensure activities list is not null
-                      _bundle!.activities ??= [];
-
-                      // Consolidate UI's _activityAssignments map into _bundle.activities[i].assignments
-                      // This is the critical step to ensure assignments are part of the save payload.
-                      for (var activityInBundle in _bundle!.activities!) {
-                        // Find the corresponding list of assignments from the _activityAssignments map.
-                        // This relies on the ActivityModel instances used as keys in _activityAssignments
-                        // being the same instances as those in _bundle.activities.
-                        List<ActivityAssignmentModel>? assignmentsForThisActivity = _activityAssignments[activityInBundle];
-
-                        if (assignmentsForThisActivity != null) {
-                          // Filter out any preview assignments and assign to the bundle's activity
-                          activityInBundle.assignments = assignmentsForThisActivity
-                              .where((assign) => assign.data?['isDragPreview'] != true)
-                              .toList();
-                        } else {
-                          // If there's no entry in the map (e.g., an activity with no assignments ever added/modified in UI)
-                          // ensure its assignments list is empty, not null, to match payload expectations.
-                          activityInBundle.assignments = [];
-                        }
-                      }
-
-                      try {
-                        // The DbActivities.saveActivitiesForEdit method will now receive the bundle
-                        // with correctly populated activity.assignments.
-                        await DbActivities.saveActivitiesForEdit(context, widget.occasionId, _bundle!);
-                        // If saveActivitiesForEdit is successful, it shows a success toast from within.
-                        // Reload data to reflect the saved state and get any new IDs from the database.
-                        _loadData();
-                      } catch (e) {
-                        // DbActivities.saveActivitiesForEdit throws an exception on failure and shows a NotOk Toast.
-                        // Additional error logging can be done here if needed for debugging.
-                        print("Error saving activities from UI: $e");
-                        // Optionally, show another toast or handle UI state if necessary,
-                        // though DbActivities already handles toast notifications.
-                      }
-                      // END OF MODIFICATIONS/CONFIRMATION FOR SAVE LOGIC
-                    },
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            child: Row(children: [
-              Expanded(
-                child: TextField(
-                  controller: _globalFilterController,
-                  style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black),
-                  decoration: InputDecoration(
-                    hintText: ActivitiesComponentStrings.hintGlobalFilter,
-                    hintStyle: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-                    prefixIcon: Icon(Icons.search, size: 14, color: isDark ? Colors.white54 : Colors.black54),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
-                    ),
-                    suffixIcon: _globalTimelineFilter.isNotEmpty
-                        ? IconButton(
-                      icon: Icon(Icons.clear, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+        child: Listener(
+          onPointerSignal: (pointerSignal) {
+            if (pointerSignal is PointerScrollEvent) {
+              _hideAssignmentDetailOverlay();
+              if (pointerSignal.scrollDelta.dy < 0) {
+                _zoomIn(vpWidth, totalSec);
+              } else if (pointerSignal.scrollDelta.dy > 0) {
+                _zoomOut(vpWidth, totalSec);
+              }
+            }
+          },
+          child: Column(children: [
+            Padding(
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top:8.0, bottom: 4.0),
+              child: Row(
+                children: [
+                  if (!_isTimelineFullscreen)
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      iconSize: 20,
                       padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
-                      onPressed: () {
-                        _globalFilterController.clear();
-                      },
-                    )
-                        : null,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              IconButton(
-                icon: Icon(_isTimelineFullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
-                iconSize: 20,
-                padding: EdgeInsets.zero,
-                constraints: BoxConstraints(minWidth: 36, minHeight: 36),
-                tooltip: _isTimelineFullscreen ? ActivitiesComponentStrings.tooltipExitFullscreen : ActivitiesComponentStrings.tooltipEnterFullscreen,
-                color: isDark ? Colors.white70 : Colors.black54,
-                onPressed: () {
-                  setState(() {
-                    _isTimelineFullscreen = !_isTimelineFullscreen;
-                    if (!_isTimelineFullscreen && _mainController.areas.first.size != 160) {
-                      _mainController.areas.first.size = 160;
-                    }
-                  });
-                },
-              ),
-              IconButton(icon: const Icon(Icons.zoom_in), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: _zoomIn, color: isDark ? Colors.white70 : Colors.black54),
-              IconButton(icon: const Icon(Icons.zoom_out), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: () => _zoomOut(vpWidth, totalSec), color: isDark ? Colors.white70 : Colors.black54),
-            ]),
-          ),
-          SizedBox(
-            height: kTotalTimelineRulerHeightConstant,
-            child: Row(children: [
-              SizedBox(width: kTimelineLabelWidth),
-              Expanded(
-                child: ClipRect(
-                  child: Transform.translate(
-                    offset: Offset(_currentPanOffset, 0),
-                    child: CustomPaint(
-                      size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
-                      painter: TimelinePainter(
-                        start: _timelineStart!,
-                        end: _timelineEnd!,
-                        pps: pps,
-                        isDarkMode: isDark,
-                        weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
-                        monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
-                        dateHeaderHeight: kDateHeaderHeightConstant,
-                        timeTickAreaHeight: kTimeTickAreaHeightConstant,
-                      ),
+                      constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                      tooltip: ActivitiesComponentStrings.tooltipAddNewActivity,
+                      onPressed: _onAddNewActivity,
                     ),
+                  if (!_isTimelineFullscreen) const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(ActivitiesComponentStrings.titleActivitiesTimeline, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87)),
                   ),
-                ),
-              ),
-            ]),
-          ),
-          Expanded(
-            child: Container(
-              color: isDark ? Colors.grey[900] : Colors.white,
-              child: _filteredActivities.isEmpty && _globalTimelineFilter.isNotEmpty
-                  ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    ActivitiesComponentStrings.textNoFilterMatch,
-                    style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-                  : (_bundle!.activities?.isEmpty ?? true)
-                  ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    ActivitiesComponentStrings.textNoActivitiesAvailable +
-                        (!_isTimelineFullscreen ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}" : ""),
-                    style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-                  : ReorderableListView.builder(
-                buildDefaultDragHandles: false,
-                itemCount: _filteredActivities.length,
-                onReorderStart: (_) => _hideAssignmentDetailOverlay(),
-                onReorder: (oldI, newI) {
-                  _hideAssignmentDetailOverlay();
-                  setState(() {
-                    final itemToMove = _filteredActivities[oldI];
-                    final originalList = _bundle!.activities!;
-                    int originalIndexOld = originalList.indexOf(itemToMove);
-
-                    if (originalIndexOld == -1) return;
-
-                    int targetOriginalIndexInAllActivities;
-                    if (newI >= _filteredActivities.length) {
-                      if (_filteredActivities.isNotEmpty) {
-                        final lastFilteredItem = _filteredActivities.last;
-                        targetOriginalIndexInAllActivities = originalList.indexOf(lastFilteredItem) + 1;
-                      } else {
-                        targetOriginalIndexInAllActivities = originalList.length;
-                      }
-                    } else {
-                      final itemAtNewFilteredPosition = _filteredActivities[newI];
-                      targetOriginalIndexInAllActivities = originalList.indexOf(itemAtNewFilteredPosition);
-                    }
-
-                    if (targetOriginalIndexInAllActivities == -1) {
-                      targetOriginalIndexInAllActivities = (newI > oldI) ? originalList.length : 0;
-                    }
-
-                    final item = originalList.removeAt(originalIndexOld);
-                    if (targetOriginalIndexInAllActivities > originalIndexOld) {
-                      originalList.insert(targetOriginalIndexInAllActivities -1, item);
-                    } else {
-                      originalList.insert(targetOriginalIndexInAllActivities, item);
-                    }
-
-                    for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
-                    _updateFilteredActivities();
-                  });
-                },
-                itemBuilder: (context, index) => _buildActivityWithAssignments(_filteredActivities[index], timelineWidth, vpWidth),
+                  if (!_isTimelineFullscreen)
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.save_outlined, size: 14),
+                      label: Text(ActivitiesComponentStrings.buttonSave, style: TextStyle(fontSize: 11)),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: isDarkMode(context) ? Colors.black : Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size(60, 30)
+                      ),
+                      onPressed: () async {
+                        _bundle!.activities ??= [];
+                        for (var activityInBundle in _bundle!.activities!) {
+                          List<ActivityAssignmentModel>? assignmentsForThisActivity = _activityAssignments[activityInBundle];
+                          if (assignmentsForThisActivity != null) {
+                            activityInBundle.assignments = assignmentsForThisActivity
+                                .where((assign) => assign.data?['isDragPreview'] != true)
+                                .toList();
+                          } else {
+                            activityInBundle.assignments = [];
+                          }
+                        }
+                        try {
+                          await DbActivities.saveActivitiesForEdit(context, widget.occasionId, _bundle!);
+                          _loadData();
+                        } catch (e) {
+                          print("Error saving activities from UI: $e");
+                        }
+                      },
+                    ),
+                ],
               ),
             ),
-          ),
-          if (isScrollable)
-            Container(
-              height: 10,
-              margin: EdgeInsets.only(left: kTimelineLabelWidth + 2, right: 2, top: 4, bottom: 2),
-              child: LayoutBuilder(
-                builder: (context, scrollbarConstraints) {
-                  final double trackWidth = scrollbarConstraints.maxWidth;
-                  final double visibleContentWidth = vpWidth - kTimelineLabelWidth;
-                  final double contentRatio = timelineWidth > 0 ? visibleContentWidth / timelineWidth : 1.0;
-                  final double thumbWidth = (trackWidth * contentRatio).clamp(20.0, trackWidth);
-
-                  final double maxScrollableTrackWidth = trackWidth - thumbWidth;
-                  final double maxTimelineScrollOffset = timelineWidth - visibleContentWidth;
-                  final double currentTimelineScrollOffset = -_currentPanOffset;
-
-                  final double thumbPosition = maxScrollableTrackWidth > 0 && maxTimelineScrollOffset > 0
-                      ? (currentTimelineScrollOffset / maxTimelineScrollOffset) * maxScrollableTrackWidth
-                      : 0.0;
-
-                  return Container(
-                    width: trackWidth,
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.grey.shade700.withOpacity(0.7) : Colors.grey.shade300.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(5),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(children: [
+                Expanded(
+                  child: TextField(
+                    controller: _globalFilterController,
+                    style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black),
+                    decoration: InputDecoration(
+                      hintText: ActivitiesComponentStrings.hintGlobalFilter,
+                      hintStyle: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
+                      prefixIcon: Icon(Icons.search, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: isDark ? Colors.grey.shade700 : Colors.grey.shade400, width: 0.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(color: Theme.of(context).primaryColor, width: 1),
+                      ),
+                      suffixIcon: _globalTimelineFilter.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear, size: 14, color: isDark ? Colors.white54 : Colors.black54),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                        onPressed: () {
+                          _globalFilterController.clear();
+                        },
+                      )
+                          : null,
                     ),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: (thumbPosition.isNaN || thumbPosition.isInfinite ? 0 : thumbPosition).clamp(0.0, maxScrollableTrackWidth).toDouble(),
-                          top: 0,
-                          bottom: 0,
-                          width: (thumbWidth.isNaN || thumbWidth.isInfinite ? trackWidth : thumbWidth).clamp(0.0, trackWidth),
-                          child: GestureDetector(
-                            onHorizontalDragStart: (details) {
-                              _scrollbarDragInitialPanOffset = _panOffset;
-                            },
-                            onHorizontalDragUpdate: (details) {
-                              if (maxScrollableTrackWidth <= 0 || maxTimelineScrollOffset <=0 ) return;
-                              double dx = details.delta.dx;
-                              double panDelta = (dx / maxScrollableTrackWidth) * maxTimelineScrollOffset;
-
-                              double newPanOffset = (_panOffset - panDelta).clamp(
-                                  (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
-                                  0.0
-                              );
-                              setState(() {
-                                _panOffset = newPanOffset;
-                                _currentPanOffset = newPanOffset;
-                              });
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
-                                borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: Icon(_isTimelineFullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
+                  iconSize: 20,
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+                  tooltip: _isTimelineFullscreen ? ActivitiesComponentStrings.tooltipExitFullscreen : ActivitiesComponentStrings.tooltipEnterFullscreen,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                  onPressed: () {
+                    setState(() {
+                      _isTimelineFullscreen = !_isTimelineFullscreen;
+                      if (!_isTimelineFullscreen && _mainController.areas.first.size != 160) {
+                        _mainController.areas.first.size = 160;
+                      }
+                    });
+                  },
+                ),
+                IconButton(icon: const Icon(Icons.zoom_in), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: () => _zoomIn(vpWidth, totalSec), color: isDark ? Colors.white70 : Colors.black54),
+                IconButton(icon: const Icon(Icons.zoom_out), iconSize: 20, padding: EdgeInsets.zero, constraints: BoxConstraints(minWidth: 36, minHeight: 36), onPressed: () => _zoomOut(vpWidth, totalSec), color: isDark ? Colors.white70 : Colors.black54),
+              ]),
+            ),
+            ValueListenableBuilder<double>(
+                valueListenable: _currentPanOffsetNotifier,
+                builder: (context, currentPanOffsetValue, child) {
+                  return SizedBox(
+                    height: kTotalTimelineRulerHeightConstant,
+                    child: Row(children: [
+                      SizedBox(width: kTimelineLabelWidth),
+                      Expanded(
+                        child: ClipRect(
+                          child: Transform.translate(
+                            offset: Offset(currentPanOffsetValue, 0),
+                            child: CustomPaint(
+                              size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
+                              painter: TimelinePainter(
+                                start: _timelineStart!,
+                                end: _timelineEnd!,
+                                pps: pps,
+                                isDarkMode: isDark,
+                                weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
+                                monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
+                                dateHeaderHeight: kDateHeaderHeightConstant,
+                                timeTickAreaHeight: kTimeTickAreaHeightConstant,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ]),
                   );
-                },
+                }
+            ),
+            Expanded(
+              child: Container(
+                color: isDark ? Colors.grey[900] : Colors.white,
+                child: _filteredActivities.isEmpty && _globalTimelineFilter.isNotEmpty
+                    ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      ActivitiesComponentStrings.textNoFilterMatch,
+                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+                    : (_bundle!.activities?.isEmpty ?? true)
+                    ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      ActivitiesComponentStrings.textNoActivitiesAvailable +
+                          (!_isTimelineFullscreen ? " ${ActivitiesComponentStrings.textClickPlusToAddOne}" : ""),
+                      style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 14),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                )
+                    : ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
+                  itemCount: _filteredActivities.length,
+                  onReorderStart: (_) => _hideAssignmentDetailOverlay(),
+                  onReorder: (oldI, newI) {
+                    _hideAssignmentDetailOverlay();
+                    setState(() {
+                      final itemToMove = _filteredActivities[oldI];
+                      final originalList = _bundle!.activities!;
+                      int originalIndexOld = originalList.indexOf(itemToMove);
+
+                      if (originalIndexOld == -1) return;
+
+                      int targetOriginalIndexInAllActivities;
+                      if (newI >= _filteredActivities.length) {
+                        if (_filteredActivities.isNotEmpty) {
+                          final lastFilteredItem = _filteredActivities.last;
+                          targetOriginalIndexInAllActivities = originalList.indexOf(lastFilteredItem) + 1;
+                        } else {
+                          targetOriginalIndexInAllActivities = originalList.length;
+                        }
+                      } else {
+                        final itemAtNewFilteredPosition = _filteredActivities[newI];
+                        targetOriginalIndexInAllActivities = originalList.indexOf(itemAtNewFilteredPosition);
+                      }
+
+                      if (targetOriginalIndexInAllActivities == -1) {
+                        targetOriginalIndexInAllActivities = (newI > oldI) ? originalList.length : 0;
+                      }
+
+                      final item = originalList.removeAt(originalIndexOld);
+                      if (targetOriginalIndexInAllActivities > originalIndexOld) {
+                        originalList.insert(targetOriginalIndexInAllActivities -1, item);
+                      } else {
+                        originalList.insert(targetOriginalIndexInAllActivities, item);
+                      }
+
+                      for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
+                      _updateFilteredActivities();
+                    });
+                  },
+                  itemBuilder: (context, index) => _buildActivityWithAssignments(_filteredActivities[index], timelineWidth, vpWidth, index), // Pass index
+                ),
               ),
             ),
-        ]),
+            if (isScrollable)
+              Container(
+                height: 10,
+                margin: EdgeInsets.only(left: kTimelineLabelWidth + 2, right: 2, top: 4, bottom: 2),
+                child: LayoutBuilder(
+                  builder: (context, scrollbarConstraints) {
+                    final double trackWidth = scrollbarConstraints.maxWidth;
+                    final double visibleContentWidth = vpWidth - kTimelineLabelWidth;
+                    final double contentRatio = timelineWidth > 0 ? visibleContentWidth / timelineWidth : 1.0;
+                    final double thumbWidth = (trackWidth * contentRatio).clamp(20.0, trackWidth);
+
+                    final double maxScrollableTrackWidth = trackWidth - thumbWidth;
+                    final double maxTimelineScrollOffset = timelineWidth - visibleContentWidth;
+
+                    return ValueListenableBuilder<double>(
+                      valueListenable: _currentPanOffsetNotifier,
+                      builder: (context, currentPanOffsetValue, gestureDetectorChild){
+                        final double currentTimelineScrollOffset = -currentPanOffsetValue;
+                        final double thumbPosition = maxScrollableTrackWidth > 0 && maxTimelineScrollOffset > 0
+                            ? (currentTimelineScrollOffset / maxTimelineScrollOffset) * maxScrollableTrackWidth
+                            : 0.0;
+
+                        return Container(
+                          width: trackWidth,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey.shade700.withOpacity(0.7) : Colors.grey.shade300.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Stack(
+                            children: [
+                              Positioned(
+                                left: (thumbPosition.isNaN || thumbPosition.isInfinite ? 0 : thumbPosition).clamp(0.0, maxScrollableTrackWidth).toDouble(),
+                                top: 0,
+                                bottom: 0,
+                                width: (thumbWidth.isNaN || thumbWidth.isInfinite ? trackWidth : thumbWidth).clamp(0.0, trackWidth),
+                                child: gestureDetectorChild!,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: GestureDetector(
+                        onHorizontalDragStart: (details) {
+                          _scrollbarGestureDragStartX = details.globalPosition.dx;
+                          _scrollbarGesturePanOffsetStartValue = _currentPanOffsetNotifier.value;
+                        },
+                        onHorizontalDragUpdate: (details) {
+                          if (maxScrollableTrackWidth <= 0 || maxTimelineScrollOffset <= 0) return;
+
+                          double dragDeltaX = details.globalPosition.dx - _scrollbarGestureDragStartX;
+                          double contentPanDelta = (dragDeltaX / maxScrollableTrackWidth) * maxTimelineScrollOffset;
+
+                          double newPanOffsetValue = (_scrollbarGesturePanOffsetStartValue - contentPanDelta).clamp(
+                              (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+                              0.0
+                          );
+
+                          _currentPanOffsetNotifier.value = newPanOffsetValue;
+                        },
+                        onHorizontalDragEnd: (details) {
+                          if (_panOffset != _currentPanOffsetNotifier.value) {
+                            setState(() {
+                              _panOffset = _currentPanOffsetNotifier.value;
+                            });
+                          }
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+          ]),
+        ),
       );
     });
   }
 
-  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth) {
+  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) { // Added itemIndexInFilteredList
     final allAssignmentsForActivity = _activityAssignments[a] ?? [];
-    // Ensure 'user' field is used consistently for filtering/display decisions.
-    // validAssignments already filters by assign.userInfo != null. After the fix in _loadData, assign.user should be populated.
     final validAssignments = allAssignmentsForActivity.where((assign) => assign.userInfo != null && assign.user != null && assign.data?['isDragPreview'] != true).toList();
     final isDark = isDarkMode(context);
 
     final String normalizedFilter = Utilities.removeDiacritics(_globalTimelineFilter.toLowerCase());
     bool activityTitleMatchesFilter = _globalTimelineFilter.isEmpty || Utilities.removeDiacritics(a.title?.toLowerCase() ?? "").contains(normalizedFilter);
 
-    // Group by userInfo (ID string), but ensure user object is present for subsequent operations
     Map<String?, List<ActivityAssignmentModel>> assignmentsByUser = groupBy<ActivityAssignmentModel, String?>(
         validAssignments, (assignment) => assignment.userInfo
     );
 
     List<String?> sortedUserInfos = assignmentsByUser.keys.toList();
-    // ... (sorting logic for sortedUserInfos is likely fine) ...
     sortedUserInfos.sort((userInfoA, userInfoB) {
       if (userInfoA == null || userInfoB == null) return 0;
-      // Accessing user object name for sorting if needed, or just use ID string for simplicity
-      // Example: (userMap[userInfoA]?.toFullNameString() ?? "").compareTo(userMap[userInfoB]?.toFullNameString() ?? "")
-      // Or keep existing sort if it relies on other assignment properties. The current one seems okay.
       final assignmentsA = assignmentsByUser[userInfoA] ?? [];
       final assignmentsB = assignmentsByUser[userInfoB] ?? [];
 
-      bool hasPlaceA = assignmentsA.any((assign) => (assign.places ?? []).isNotEmpty);
-      bool hasPlaceB = assignmentsB.any((assign) => (assign.places ?? []).isNotEmpty);
-
+      bool hasPlaceA = assignmentsA.any((assign) => (assign.places).isNotEmpty);
+      bool hasPlaceB = assignmentsB.any((assign) => (assign.places).isNotEmpty);
       if (hasPlaceA && !hasPlaceB) return -1;
       if (!hasPlaceA && hasPlaceB) return 1;
 
-      bool hasEventA = assignmentsA.any((assign) => (assign.events ?? []).isNotEmpty);
-      bool hasEventB = assignmentsB.any((assign) => (assign.events ?? []).isNotEmpty);
-
+      bool hasEventA = assignmentsA.any((assign) => (assign.events).isNotEmpty);
+      bool hasEventB = assignmentsB.any((assign) => (assign.events).isNotEmpty);
       if (hasEventA && !hasEventB) return -1;
       if (!hasEventA && hasEventB) return 1;
 
-      // Assuming user objects are populated to sort by name:
       final userA = assignmentsA.firstOrNull?.user?.toFullNameString().toLowerCase() ?? userInfoA.toLowerCase();
       final userB = assignmentsB.firstOrNull?.user?.toFullNameString().toLowerCase() ?? userInfoB.toLowerCase();
       return userA.compareTo(userB);
@@ -1357,13 +1506,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     List<Widget> userRowsAndPreviews = [];
     Set<String?> usersWithRenderedRows = {};
 
-    for (var userInfoId in sortedUserInfos) { // userInfoId is the String ID
+    for (var userInfoId in sortedUserInfos) {
       if (userInfoId == null) continue;
       final userAssignmentsList = assignmentsByUser[userInfoId]!;
-
-      // All assignments in userAssignmentsList should have .user populated due to 'validAssignments' filter and _loadData fix
-      // and they belong to the user identified by userInfoId.
-
       List<ActivityAssignmentModel>? assignmentsToConsiderForRendering;
 
       if (_globalTimelineFilter.isEmpty) {
@@ -1372,18 +1517,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         if (activityTitleMatchesFilter) {
           assignmentsToConsiderForRendering = List.from(userAssignmentsList);
         } else {
-          // Activity title does NOT match, so filter user assignments by user info, place, or event
           List<ActivityAssignmentModel> filteredUserAssignmentsByName = userAssignmentsList.where((assign) {
-            // assign.user should not be null here due to how validAssignments was created
             if (Utilities.removeDiacritics(assign.user!.toFullNameString().toLowerCase()).contains(normalizedFilter)) {
               return true;
             }
-            for (var place in assign.places ?? []) {
+            for (var place in assign.places) {
               if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
             }
-            for (var event in assign.events ?? []) {
+            for (var event in assign.events) {
               if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
@@ -1399,14 +1542,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
       if (assignmentsToConsiderForRendering != null && assignmentsToConsiderForRendering.isNotEmpty) {
         List<ActivityAssignmentModel> assignmentsToRender = List.from(assignmentsToConsiderForRendering);
-        // Ensure user object is non-null before passing to _buildUserRow
         final userForThisRow = assignmentsToRender[0].user;
-        if (userForThisRow == null) continue; // Should not happen if logic is correct
+        if (userForThisRow == null) continue;
 
         if (_hoveredActivityForPreview == a && _currentlyDraggedUser?.id == userInfoId && _previewStartTime != null) {
-          // ... drag preview logic ...
-          // Ensure the preview assignment also gets a .user object if it's constructed fresh.
-          // The existing preview logic seems to assign _currentlyDraggedUser to .user field, which is good.
           final draggedDuration = kDefaultUserAssignmentDuration;
           final DateTimeRange pr = TimeClampingService.clampDateTimeRange(initialStartTime: _previewStartTime!, itemDuration: draggedDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
           assignmentsToRender.add(ActivityAssignmentModel(activityId: a.id ?? -1, user: _currentlyDraggedUser, userInfo: _currentlyDraggedUser!.id, startTime: pr.start, endTime: pr.end, data: {'isDragPreview': true}, places: [], events: []));
@@ -1417,18 +1556,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       }
     }
 
-    // Handle drag preview for a user not currently assigned or rendered under this activity
     if (_hoveredActivityForPreview == a && _currentlyDraggedUser != null && _previewStartTime != null && !usersWithRenderedRows.contains(_currentlyDraggedUser!.id)) {
-      // Determine if the preview for the dragged user should be shown for THIS activity
       bool showDraggedUserPreviewForThisActivity = false;
       if (_globalTimelineFilter.isEmpty) {
-        showDraggedUserPreviewForThisActivity = true; // No filter, always show preview on hover
+        showDraggedUserPreviewForThisActivity = true;
       } else {
         if (activityTitleMatchesFilter) {
-          showDraggedUserPreviewForThisActivity = true; // Activity title matches, show preview
+          showDraggedUserPreviewForThisActivity = true;
         } else {
-          // Activity title doesn't match, but dragged user's name might match the filter
-          if (Utilities.removeDiacritics(_currentlyDraggedUser!.toFullNameString()).contains(normalizedFilter)) {
+          if (Utilities.removeDiacritics(_currentlyDraggedUser!.toFullNameString().toLowerCase()).contains(normalizedFilter)) {
             showDraggedUserPreviewForThisActivity = true;
           }
         }
@@ -1441,47 +1577,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       }
     }
 
-    // Condition to hide the entire activity row:
-    // If there's a filter, AND the activity title ITSELF does not match, AND no user/assignment content within it matches, then hide.
-    // If activityTitleMatchesFilter is true, this entire condition is false, so the activity row will render (even if empty of users).
     if (_globalTimelineFilter.isNotEmpty && !activityTitleMatchesFilter && userRowsAndPreviews.isEmpty) {
       return SizedBox.shrink(key: ObjectKey(a));
     }
 
-    int displayIndex = _filteredActivities.indexOf(a);
-    if(displayIndex == -1 && _bundle!.activities!.contains(a)) {
-      // This block attempts to find the correct display index if the activity was filtered out
-      // by the main _updateFilteredActivities but should now be shown due to internal content matching.
-      // Given the new logic above, this specific re-filtering might be less critical if _updateFilteredActivities
-      // is already robust. However, keeping it for safety or complex filter interactions.
-      var tempFiltered = List.from(_bundle!.activities!);
-      if(_globalTimelineFilter.isNotEmpty) {
-        tempFiltered.retainWhere((act) {
-          // This re-check needs to align with _updateFilteredActivities's core logic
-          bool currentActivityTitleMatches = Utilities.removeDiacritics(act.title?.toLowerCase() ?? "").contains(normalizedFilter);
-          if (currentActivityTitleMatches) return true;
-
-          final assignments = _activityAssignments[act] ?? [];
-          return assignments.any((assign) {
-            if (assign.data?['isDragPreview'] == true) return false;
-            if (Utilities.removeDiacritics(assign.user!.toFullNameString()).contains(normalizedFilter)) return true;
-            if ((assign.places.any((p) => Utilities.removeDiacritics(p.title?.toLowerCase() ?? "").contains(normalizedFilter)))) return true;
-            if ((assign.events.any((e) => Utilities.removeDiacritics(e.title?.toLowerCase() ?? "").contains(normalizedFilter)))) return true;
-            return false;
-          });
-        });
-      }
-      displayIndex = tempFiltered.indexOf(a);
-      if(displayIndex == -1 && !activityTitleMatchesFilter && userRowsAndPreviews.isEmpty) {
-        // If after all this, it's still not found and shouldn't be shown, shrink.
-        return SizedBox.shrink(key: ObjectKey(a));
-      }
-      // If displayIndex is still -1 but it *should* be shown (e.g. activityTitleMatchesFilter is true),
-      // it implies an issue with how _filteredActivities is managed vs. individual item visibility.
-      // For ReorderableListView, a valid index is crucial.
-      // A fallback or ensuring it's part of _filteredActivities if visible is important.
-      // For now, we proceed, but if errors occur, _filteredActivities update logic needs to be perfectly in sync.
-    }
+    // The `itemIndexInFilteredList` is the direct index from ReorderableListView.builder
+    // No need for the complex fallback logic for displayIndex that was here before.
+    final int displayIndex = itemIndexInFilteredList;
 
 
     return Padding(
@@ -1496,8 +1598,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             bool needsStateUpdate = false;
             DateTime snappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
             final DateTimeRange clampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: snappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
+
             if (_hoveredActivityForPreview != a) { _hoveredActivityForPreview = a; needsStateUpdate = true; }
             if (_previewStartTime != clampedRange.start) { _previewStartTime = clampedRange.start; needsStateUpdate = true; }
+
             if (needsStateUpdate) setState(() {});
             return true;
           }
@@ -1512,12 +1616,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             if (_previewStartTime != clampedRange.start) setState(() => _previewStartTime = clampedRange.start);
           }
         },
-        onLeave: (data) { if (_hoveredActivityForPreview == a) setState(() { _hoveredActivityForPreview = null; _previewStartTime = null; }); },
+        onLeave: (data) {
+          if (_hoveredActivityForPreview == a) setState(() { _hoveredActivityForPreview = null; _previewStartTime = null; });
+        },
         onAcceptWithDetails: (details) {
           if (_timelineStart == null || _timelineEnd == null || a.isHidden!) return;
+
           final draggedDataOnDrop = details.data;
           DateTime finalSnappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
           final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: finalSnappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
+
           final newAssignment = ActivityAssignmentModel(
               activityId: a.id ?? -1,
               userInfo: draggedDataOnDrop.id!,
@@ -1531,7 +1639,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           setState(() {
             _activityAssignments.putIfAbsent(a, () => []).add(newAssignment);
             _hoveredActivityForPreview = null; _previewStartTime = null;
-            _updateFilteredActivities(); // This is important to refresh the main list if counts change
+            _updateFilteredActivities();
           });
         },
         builder: (ctx, candidateData, rejectedData) {
@@ -1570,14 +1678,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   )
               );
             } else if (userRowsAndPreviews.isEmpty && _globalTimelineFilter.isNotEmpty && activityTitleMatchesFilter) {
-              // If activity title matches filter, but it has no users (yet, or none match if a secondary filter were applied, which it isn't now)
-              // Still show a placeholder or hint that it's empty but matches.
               activityContentChildren.add(Padding(
                 padding: const EdgeInsets.only(left: kTimelineLabelWidth + 8.0, top: 4, bottom: 4),
                 child: Text(ActivitiesComponentStrings.textNoUsersAssignedYet, style: TextStyle(fontSize: 10, color: (isDark? Colors.grey[500] : Colors.grey[600]), fontStyle: FontStyle.italic)),
               ));
-            } else if (userRowsAndPreviews.isEmpty && _globalTimelineFilter.isNotEmpty && !activityTitleMatchesFilter) {
-              // This case is handled by the SizedBox.shrink() earlier if no users match and title doesn't match
             }
           } else {
             activityContentChildren.add(Padding(
@@ -1585,14 +1689,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               child: Text(ActivitiesComponentStrings.textActivityHidden, style: TextStyle(fontSize: 10, color: (isDark ? Colors.grey[400] : Colors.grey[700]), fontStyle: FontStyle.italic)),
             ));
           }
-
-          // Failsafe for ReorderableListView index if it's truly not in the filtered list due to _updateFilteredActivities
-          // but this method determined it should be visible. This indicates a potential sync issue.
-          // A robust solution would ensure _filteredActivities passed to ReorderableListView accurately reflects
-          // items that _buildActivityWithAssignments will not return SizedBox.shrink() for.
-          // For now, if displayIndex is -1, we might need to skip ReorderableDragStartListener or provide a non-null key.
-          // However, ObjectKey(a) is already used.
-          // The primary guard is the `SizedBox.shrink()` at the top of the method for non-visible items.
 
           return Container(
             decoration: BoxDecoration(
@@ -1604,8 +1700,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 color: activityHeaderBgColor,
                 child: Row(children: [
                   ReorderableDragStartListener(
-                    // Ensure displayIndex is valid if item is rendered
-                      index: displayIndex >= 0 && displayIndex < _filteredActivities.length ? displayIndex : 0, // Fallback, though ideally should always be valid if item is visible
+                      index: displayIndex, // Use the passed index
                       child: SizedBox(width: kTimelineLabelWidth, height: 24, child: Row(children: [
                         IconButton(
                           icon: Icon(a.isHidden! ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 13, color: activityHeaderTextColor.withOpacity(0.8)),
@@ -1644,32 +1739,37 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         ),
                       ]))),
                   Expanded(
-                    child: ClipRect(
-                      child: Transform.translate(
-                        offset: Offset(_currentPanOffset, 0),
-                        child: SizedBox(
-                          width: timelineWidth,
-                          height: 24,
-                          child: CustomPaint(
-                            foregroundPainter: VerticalGridLinesPainter(
-                              start: _timelineStart!,
-                              end: _timelineEnd!,
-                              pps: _basePps * _scale,
-                              viewHeight: 24,
-                              isDarkMode: isDark,
-                            ),
-                            child: Container(
-                              color: a.isHidden!
-                                  ? activityHiddenOverlayColor
-                                  : (isDark
-                                  ? Colors.grey.shade700.withOpacity(0.2)
-                                  : Colors.grey.shade300.withOpacity(0.2)
+                      child: ValueListenableBuilder<double>(
+                          valueListenable: _currentPanOffsetNotifier,
+                          builder: (context, currentPanOffsetValue, child){
+                            return ClipRect(
+                              child: Transform.translate(
+                                offset: Offset(currentPanOffsetValue, 0),
+                                child: SizedBox(
+                                  width: timelineWidth,
+                                  height: 24,
+                                  child: CustomPaint(
+                                    foregroundPainter: VerticalGridLinesPainter(
+                                      start: _timelineStart!,
+                                      end: _timelineEnd!,
+                                      pps: _basePps * _scale,
+                                      viewHeight: 24,
+                                      isDarkMode: isDark,
+                                    ),
+                                    child: Container(
+                                      color: a.isHidden!
+                                          ? activityHiddenOverlayColor
+                                          : (isDark
+                                          ? Colors.grey.shade700.withOpacity(0.2)
+                                          : Colors.grey.shade300.withOpacity(0.2)
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                            );
+                          }
+                      )
                   ),
                 ]),
               ),
@@ -1718,61 +1818,74 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               _hideAssignmentOverlay();
               if (v == 'delete_user_from_activity') {
                 setState(() {
-                  _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo && assign.data?['isDragPreview'] != true);
+                  _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo.id && assign.data?['isDragPreview'] != true);
                   _updateFilteredActivities();
                 });
               }
             },
           ),
         ])),
-        ClipRect(child: Transform.translate(offset: Offset(_currentPanOffset, 0), child: SizedBox(width: timelineWidth, height: 26,
-            child: CustomPaint(
-              painter: VerticalGridLinesPainter(
-                  start: _timelineStart!,
-                  end: _timelineEnd!,
-                  pps: _basePps * _scale,
-                  viewHeight: 26,
-                  isDarkMode: isDark
-              ),
-              child: Stack(
-                children: assignments.map((u) {
-                  final bool isPreview = u.data?['isDragPreview'] == true;
-                  final itemLayerLink = LayerLink();
-                  Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
-                  if (activity.isHidden!) {
-                    itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
-                  }
+        ValueListenableBuilder<double>(
+            valueListenable: _currentPanOffsetNotifier,
+            builder: (context, currentPanOffsetValue, child){
+              return ClipRect(
+                  child: Transform.translate(
+                      offset: Offset(currentPanOffsetValue, 0),
+                      child: SizedBox(
+                          width: timelineWidth,
+                          height: 26,
+                          child: CustomPaint(
+                            painter: VerticalGridLinesPainter(
+                                start: _timelineStart!,
+                                end: _timelineEnd!,
+                                pps: _basePps * _scale,
+                                viewHeight: 26,
+                                isDarkMode: isDark
+                            ),
+                            child: Stack(
+                              children: assignments.map((u) {
+                                final bool isPreview = u.data?['isDragPreview'] == true;
+                                final itemLayerLink = LayerLink();
+                                Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
+                                if (activity.isHidden!) {
+                                  itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
+                                }
 
-                  return TimelineRow( // _TimelineRow needs its internal content sized appropriately
-                    key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
-                    layerLink: itemLayerLink,
-                    start: _timelineStart!, end: _timelineEnd!,
-                    itemStart: u.startTime!, itemEnd: u.endTime!,
-                    barColor: itemBarColor,
-                    onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
-                    onDragStart: _hideAssignmentDetailOverlay,
-                    onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
-                      if (_timelineStart == null || _timelineEnd == null) return;
-                      final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
-                          initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
-                          timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-                      if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
-                        setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
-                      }
-                    },
-                    draggable: !isPreview && !activity.isHidden!,
-                    zoomScale: _scale,
-                    onPlaceOrEventDropped: isPreview || activity.isHidden!
-                        ? null
-                        : (droppedItemData) {
-                      _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
-                    },
-                    assignment: u,
-                    isDarkMode: isDark,
-                  );
-                }).toList(),
-              ),
-            )))),
+                                return TimelineRow(
+                                  key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
+                                  layerLink: itemLayerLink,
+                                  start: _timelineStart!, end: _timelineEnd!,
+                                  itemStart: u.startTime!, itemEnd: u.endTime!,
+                                  barColor: itemBarColor,
+                                  onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
+                                  onDragStart: _hideAssignmentDetailOverlay,
+                                  onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
+                                    if (_timelineStart == null || _timelineEnd == null) return;
+                                    final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
+                                        initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
+                                        timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
+                                    if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
+                                      setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
+                                    }
+                                  },
+                                  draggable: !isPreview && !activity.isHidden!,
+                                  zoomScale: _scale,
+                                  onPlaceOrEventDropped: isPreview || activity.isHidden!
+                                      ? null
+                                      : (droppedItemData) {
+                                    _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
+                                  },
+                                  assignment: u,
+                                  isDarkMode: isDark,
+                                );
+                              }).toList(),
+                            ),
+                          )
+                      )
+                  )
+              );
+            }
+        ),
       ]),
     );
   }
