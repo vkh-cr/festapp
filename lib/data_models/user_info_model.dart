@@ -99,7 +99,7 @@ class UserInfoModel extends IHasId {
     );
   }
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
   {
     idColumn: id,
     emailReadonlyColumn: email,

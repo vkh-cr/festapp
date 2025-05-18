@@ -284,7 +284,7 @@ class EventModel extends ITrinaRowModel {
   @override
   String toBasicString() => "$title";
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
       {
         idColumn: id,
         updatedAtColumn: updatedAt?.toIso8601String(),

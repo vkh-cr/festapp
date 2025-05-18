@@ -52,7 +52,7 @@ class PlaceModel extends ITrinaRowModel {
     );
   }
 
-  Map toJson() =>
+  Map<String, dynamic> toJson() =>
   {
     Tb.places.id: id,
     Tb.places.title: title,
