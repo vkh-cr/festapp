@@ -10,7 +10,7 @@ D=c[237]
 var z=a.updateTypes([])
 A.c4(b.typeUniverse,JSON.parse('{"U4":{"bv":[],"bn":[],"e":[]}}'))
 var y={b:A.D("U4")};(function constants(){D.acS=new A.a4(!0,B.m,null,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dDT","akk",()=>{var w=A.a([],A.D("u<m>"))
+x($,"dCQ","akk",()=>{var w=A.a([],A.D("u<m>"))
 w.push("home")
 w.push("news")
 w.push("map")
@@ -18,4 +18,4 @@ w.push("more")
 w.push("user")
 return w})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_300",e:"endPart",h:b})})($__dart_deferred_initializers__,"Gs+kxN1ttYuhoYWbpfmm66hNEYk=");
+a.eventLog.push({p:"main.dart.js_300",e:"endPart",h:b})})($__dart_deferred_initializers__,"0BxF0qtoDn0h547q6+ovkQ70BVg=");
