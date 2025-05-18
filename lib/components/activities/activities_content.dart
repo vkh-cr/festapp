@@ -122,6 +122,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   static const int kTimelinePaddingDaysBefore = 1;
   static const int kTimelinePaddingDaysAfter = 1;
 
+  bool _isModifierKeyPressedForScroll = false;
+
 
   @override
   void initState() {
@@ -137,6 +139,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         });
       }
     });
+
+    _isModifierKeyPressedForScroll = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
   }
 
   @override
@@ -781,6 +785,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   KeyEventResult _handleKeyEvent(RawKeyEvent event) {
+    // This is your existing handler for delete/escape, etc.
     if (event is RawKeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.delete && _selectedActivities.isNotEmpty) {
         _deleteSelectedActivities(); return KeyEventResult.handled;
@@ -842,7 +847,18 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
     return Focus(
       autofocus: true,
-      onKey: (_, RawKeyEvent event) => _handleKeyEvent(event),
+      onKey: (_, RawKeyEvent event) { // MODIFIED onKey
+        // Update modifier key state for scroll/zoom behavior
+        // This will be called on key up and key down.
+        final bool newModifierState = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+        if (_isModifierKeyPressedForScroll != newModifierState) {
+          setState(() {
+            _isModifierKeyPressedForScroll = newModifierState;
+          });
+        }
+        // Call your existing key event handler
+        return _handleKeyEvent(event);
+      },
       child: MultiSplitViewTheme(
         data: MultiSplitViewThemeData(
             dividerThickness: _isTimelineFullscreen ? 0 : 8,
@@ -1120,19 +1136,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   Widget _buildTimelineArea() {
     final isDark = isDarkMode(context);
     return LayoutBuilder(builder: (ctx, constraints) {
-      // Update viewport width whenever layout changes.
-      // This is crucial for zoom and pan calculations, including the initial scroll.
       if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
-        // Schedule a microtask to update state after the current build phase,
-        // if the viewport width change might affect initial scroll logic that runs post-frame.
-        // However, for general use in zoom/pan, direct update is fine.
         _currentViewportWidth = constraints.maxWidth;
-        // If initial scroll hasn't happened and relied on this, it might need a nudge.
-        // But _performInitialTimelineScroll is called via addPostFrameCallback from _loadData's setState,
-        // so this LayoutBuilder should have run.
       }
-      final vpWidth = _currentViewportWidth; // Use the stored/updated viewport width
-
+      final vpWidth = _currentViewportWidth;
 
       final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
       final pps = _basePps * _scale;
@@ -1164,12 +1171,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         child: Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
-              _hideAssignmentDetailOverlay();
-              if (pointerSignal.scrollDelta.dy < 0) {
-                _zoomIn(vpWidth, totalSec);
-              } else if (pointerSignal.scrollDelta.dy > 0) {
-                _zoomOut(vpWidth, totalSec);
+              // Check for Ctrl or Meta (Cmd) key press for zooming
+              final bool canZoom = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+
+              if (canZoom) { // MODIFIED: Only zoom if Ctrl/Cmd is pressed
+                _hideAssignmentDetailOverlay();
+                if (pointerSignal.scrollDelta.dy < 0) {
+                  _zoomIn(vpWidth, totalSec);
+                } else if (pointerSignal.scrollDelta.dy > 0) {
+                  _zoomOut(vpWidth, totalSec);
+                }
+                // When zooming, we've handled the scroll event.
               }
+              // If Ctrl/Meta is not pressed, do nothing here.
+              // The event will propagate, and ReorderableListView (if applicable)
+              // will handle its scrolling based on its physics.
             }
           },
           child: Column(children: [
@@ -1342,6 +1358,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   ),
                 )
                     : ReorderableListView.builder(
+                  // MODIFIED: physics property
+                  physics: _isModifierKeyPressedForScroll ? NeverScrollableScrollPhysics() : null,
                   buildDefaultDragHandles: false,
                   itemCount: _filteredActivities.length,
                   onReorderStart: (_) => _hideAssignmentDetailOverlay(),
@@ -1382,7 +1400,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       _updateFilteredActivities();
                     });
                   },
-                  itemBuilder: (context, index) => _buildActivityWithAssignments(_filteredActivities[index], timelineWidth, vpWidth, index), // Pass index
+                  itemBuilder: (context, index) => _buildActivityWithAssignments(_filteredActivities[index], timelineWidth, vpWidth, index),
                 ),
               ),
             ),
