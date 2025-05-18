@@ -5,11 +5,12 @@ import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
 
 import 'package:fstapp/styles/styles_config.dart';
+import 'package:fstapp/theme_config.dart';
 
 @RoutePage()
 class MySchedulePage extends StatefulWidget {
@@ -48,8 +49,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     var myEvents = offlineEvents.where((e) =>
         e.isEventInMySchedule == true ||
-        (e.isGroupEvent && (userInfo?.hasGroup() ?? false)) ||
-        e.isSignedIn);
+        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
+            (e.isSignedIn ?? false));
 
     _events.clear();
     _events.addAll(myEvents);
@@ -63,8 +64,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text("My schedule").tr(),
+          title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
           leading: BackButton(
+            color: ThemeConfig.appBarColorNegative(),
             onPressed: () => RouterService.popOrHome(context),
           ),
         ),
