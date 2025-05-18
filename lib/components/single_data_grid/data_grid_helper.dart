@@ -24,11 +24,11 @@ class DataGridHelper
     required TrinaColumnRendererContext rendererContext,
     required Future<String?> Function() loadContent, // Used for both editor and potentially tooltip
     bool showTooltipWithContent = true, // Flag to enable tooltip
-    int? occasionId
+    int? occasionId,
+    String? title, // <<< New voluntary parameter for the tooltip title
   }) {
     String? textToEdit = rendererContext.row.cells[field]?.value as String?;
 
-    // Button's visual part, kept as original
     Widget buttonChild = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -43,8 +43,8 @@ class DataGridHelper
     Widget button = ElevatedButton(
       onPressed: () async {
         Map<String, dynamic> param = {
-          HtmlEditorPage.parContent: textToEdit, // Pass current cell value to editor
-          HtmlEditorPage.parLoad: loadContent, // Editor will use this if parContent is null/empty
+          HtmlEditorPage.parContent: textToEdit,
+          HtmlEditorPage.parLoad: loadContent,
         };
 
         RouterService.navigatePageInfo(context, HtmlEditorRoute(content: param, occasionId: occasionId)).then((value) async {
@@ -62,7 +62,7 @@ class DataGridHelper
       child: buttonChild,
     );
 
-    if (showTooltipWithContent) { // Use the new flag
+    if (showTooltipWithContent) {
       final tooltipTheme = TooltipTheme.of(context);
       final effectiveDecoration = tooltipTheme.decoration ?? BoxDecoration(
         color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700] : Colors.white,
@@ -77,52 +77,68 @@ class DataGridHelper
         ],
       );
       final baseTextStyle = tooltipTheme.textStyle ?? DefaultTextStyle.of(context).style;
-      final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14); // Ensure font size for tooltip
+      final effectiveTextStyle = baseTextStyle.copyWith(fontSize: 14);
 
       return Tooltip(
         showDuration: const Duration(seconds: 15),
         preferBelow: true,
-        verticalOffset: 24,
+        verticalOffset: 52,
         margin: const EdgeInsets.symmetric(horizontal: 12),
         padding: EdgeInsets.zero,
-        decoration: BoxDecoration(color: Colors.transparent),
+        decoration: const BoxDecoration(color: Colors.transparent),
         richMessage: WidgetSpan(
           alignment: PlaceholderAlignment.bottom,
           child: FutureBuilder<String?>(
-            future: loadContent(), // Use loadContent directly for the tooltip
+            future: loadContent(),
             builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(
-                  padding: const EdgeInsets.all(8.0),
-                  constraints: BoxConstraints(maxWidth: 350, maxHeight: 250),
-                  decoration: effectiveDecoration,
-                  child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+              Widget? titleWidget;
+              if (title != null && title.isNotEmpty) {
+                titleWidget = Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Text(
+                    title,
+                    style: effectiveTextStyle.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: (effectiveTextStyle.fontSize ?? 14.0) + 2, // Slightly larger for title
+                    ),
+                    textAlign: TextAlign.start,
+                  ),
                 );
               }
 
-              final htmlContent = snapshot.data;
-              if (snapshot.hasError || HtmlHelper.isHtmlEmptyOrNull(htmlContent)) {
-                return Container(
-                  padding: const EdgeInsets.all(10.0), // Slightly more padding for icon
-                  decoration: effectiveDecoration,
+              Widget mainContentArea;
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                mainContentArea = const Center(child: CircularProgressIndicator(strokeWidth: 2));
+              } else if (snapshot.hasError || HtmlHelper.isHtmlEmptyOrNull(snapshot.data)) {
+                mainContentArea = Center(
                   child: Icon(
-                    Icons.text_snippet_outlined, // Icon suggesting a document/text
+                    Icons.text_snippet_outlined,
                     size: 22,
-                    color: (effectiveTextStyle.color ?? Colors.grey).withOpacity(0.5), // Subdued color
+                    color: (effectiveTextStyle.color ?? Colors.grey).withOpacity(0.5),
+                  ),
+                );
+              } else {
+                final htmlContent = snapshot.data!;
+                mainContentArea = SingleChildScrollView(
+                  child: HtmlView(
+                    html: htmlContent,
+                    fontSize: effectiveTextStyle.fontSize!,
+                    color: effectiveTextStyle.color,
                   ),
                 );
               }
 
               return Container(
-                padding: const EdgeInsets.all(8.0),
-                constraints: BoxConstraints(maxWidth: 450, maxHeight: 300),
+                padding: const EdgeInsets.all(10.0), // Overall padding for the tooltip content
+                constraints: const BoxConstraints(maxWidth: 450, maxHeight: 300),
                 decoration: effectiveDecoration,
-                child: SingleChildScrollView(
-                  child: HtmlView(
-                    html: htmlContent!,
-                    fontSize: effectiveTextStyle.fontSize!,
-                    color: effectiveTextStyle.color, // Ensure HtmlView text color matches tooltip theme
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch, // Make title stretch if it's multi-line
+                  mainAxisSize: MainAxisSize.min, // Let column be as tall as needed, up to constraints
+                  children: [
+                    if (titleWidget != null) titleWidget,
+                    Expanded(child: mainContentArea), // Main content takes remaining space
+                  ],
                 ),
               );
             },
