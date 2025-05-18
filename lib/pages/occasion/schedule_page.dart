@@ -309,7 +309,7 @@ class _SchedulePageState extends State<SchedulePage>
                               setState(() {}); // Rebuild to reflect time travel mode if UI changes
                             }
                           },
-                          child: LogoWidget(width: 120, forceDark: true),
+                          child: LogoWidget(width: 180, forceDark: true),
                         ),
                         const Spacer(),
                         if (FeatureService.isFeatureEnabled(
