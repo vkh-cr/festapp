@@ -39,7 +39,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       super.didChangeDependencies();
       var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
       if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
-        _isAdvancedTimeline = false;
+        _isAdvancedTimeline = true;
       }
       loadData();
    }
