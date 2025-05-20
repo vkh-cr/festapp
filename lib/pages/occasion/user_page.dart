@@ -58,7 +58,7 @@ class _UserPageState extends State<UserPage> {
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: ThemeConfig.appBarColorNegative(),
+                color: Colors.black,
               ),
               onPressed: () {
                 RouterService.goBack(context);
