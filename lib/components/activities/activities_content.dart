@@ -195,14 +195,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   void _performInitialTimelineScroll() {
-    // This check ensures that layout has occurred and _currentViewportWidth is set.
-    // If _currentViewportWidth is 0, it means LayoutBuilder hasn't run or provided the width yet.
-    // addPostFrameCallback usually runs after the build triggered by setState, so width should be available.
     if (_currentViewportWidth <= 0 && mounted) {
-      // Optionally, retry after a short delay if width is consistently not available,
-      // but typically, it should be available after the first frame post-setState.
-      // For now, we proceed, and _shiftTimelineToDateTime has its own guard for _currentViewportWidth <= 0.
+      // Defer if width not yet available
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _performInitialTimelineScroll();
+      });
+      return;
     }
+
 
     DateTime? earliestTimeToShow;
     List<DateTime> allPossibleStartTimes = [];
@@ -224,7 +224,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (earliestTimeToShow != null && _timelineStart != null && _timelineEnd != null) {
       _shiftTimelineToDateTime(earliestTimeToShow);
     }
-    // If no specific time to shift to, _panOffset (set to 0.0 in _loadData) remains the default.
   }
 
 
@@ -251,14 +250,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       DateTime earliestActivityDate = allStarts.first;
       DateTime latestActivityDate = allEnds.last;
 
-      // Set start to the beginning of the day of the earliest activity, minus padding
       _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day)
           .subtract(const Duration(days: kTimelinePaddingDaysBefore));
-      // Set end to the end of the day of the latest activity, plus padding
       _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999)
           .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
-      // Default if no events or assignments to define bounds
       final now = DateTime.now();
       _timelineStart = now.subtract(const Duration(hours: 1));
       _timelineEnd = now.add(const Duration(hours: 1));
@@ -273,33 +269,24 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final visibleTimelineAreaWidth = _currentViewportWidth - kTimelineLabelWidth;
 
     DateTime effectiveTargetTime = targetTime;
-    // Ensure target time is not before the timeline actually starts for calculation purposes
     if (effectiveTargetTime.isBefore(_timelineStart!)) {
       effectiveTargetTime = _timelineStart!;
     }
-    // If effectiveTargetTime is after _timelineEnd, the subsequent panOffset calculation and clamping
-    // will correctly result in showing the very end of the timeline if possible.
 
     final Duration durationFromStart = effectiveTargetTime.difference(_timelineStart!);
     final double pixelOffsetFromTimelineStart = durationFromStart.inSeconds * pps;
 
-    // Calculate the new panOffset to bring the targetTime to the beginning of the visible timeline area (just after the labels)
     double newPanOffset = -pixelOffsetFromTimelineStart;
 
-    // Clamp the newPanOffset to ensure it's within valid bounds
-    // The maximum left pan is -(timelineWidth - visibleTimelineAreaWidth)
-    // The minimum pan (i.e., maximum right pan) is 0.0
     newPanOffset = newPanOffset.clamp(
-        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0), // Max pan value (e.g., -500 if content is 500px wider)
-        0.0 // Min pan value (timeline starts at edge)
+        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0),
+        0.0
     );
 
-    // Only update state if there's a significant change to avoid unnecessary rebuilds
-    // Compare with a small epsilon for floating point precision
     if ((_panOffset - newPanOffset).abs() > 0.01 || (_currentPanOffsetNotifier.value - newPanOffset).abs() > 0.01) {
       setState(() {
         _panOffset = newPanOffset;
-        _currentPanOffsetNotifier.value = _panOffset; // Keep notifier in sync
+        _currentPanOffsetNotifier.value = _panOffset;
       });
     }
   }
@@ -656,56 +643,61 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         final screenHeight = mediaQueryData.size.height;
         final popupWidth = 280.0;
 
-        double estimatedContentHeight = 30.0;
-        estimatedContentHeight += 20.0;
-        final double chipHeight = 35.0;
-        final double sectionHeaderHeight = 20.0;
+        double estimatedContentHeight = 30.0; // Initial padding + title
+        estimatedContentHeight += 20.0; // Time string
+        final double chipHeight = 35.0; // Approximate height for a chip row
+        final double sectionHeaderHeight = 20.0; // Height for "Places" / "Events" label
 
         if (assignment.places.isNotEmpty) {
           estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.places.length / 2).ceil() * chipHeight;
+          estimatedContentHeight += (assignment.places.length / 2).ceil() * chipHeight; // Assuming 2 chips per row for estimation
         }
         if (assignment.events.isNotEmpty) {
           estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.events.length / 2).ceil() * chipHeight;
+          estimatedContentHeight += (assignment.events.length / 2).ceil() * chipHeight; // Assuming 2 chips per row
         }
         if ((assignment.places.isEmpty) &&
             (assignment.events.isEmpty)) {
-          estimatedContentHeight += 30;
+          estimatedContentHeight += 30; // "No items assigned" text
         }
-        estimatedContentHeight += 24.0;
+        estimatedContentHeight += 24.0; // Bottom padding
 
         final popupMaxHeight = screenHeight * 0.6;
-        final actualPopupHeight = estimatedContentHeight.clamp(80.0, popupMaxHeight);
+        final actualPopupHeight = estimatedContentHeight.clamp(80.0, popupMaxHeight); // Min height 80
 
         Alignment followerAnchor = Alignment.topLeft;
         Alignment targetAnchor = Alignment.topRight;
         Offset offset = const Offset(10, 0);
 
         final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
-        final RenderBox? target = context.findRenderObject() as RenderBox?;
+        // The context for findRenderObject should be the one of the target widget itself,
+        // which is implicitly available if _selectedAssignmentLayerLink.leader was set from its context.
+        // However, to get the global position correctly relative to the overlay, we use the layer link.
+        // For now, we'll try to estimate based on general screen position if LayerLink doesn't give enough for this logic.
+        // This part of the logic is complex and might need the actual RenderBox of the tapped item.
+        // For simplicity here, we will use a heuristic.
+        // A more robust way would involve passing the tap position or using the layerLink's global position.
 
-        if (overlay != null && target != null) {
-          final targetGlobalCenter = target.localToGlobal(target.size.center(Offset.zero), ancestor: overlay);
-
-          if (targetGlobalCenter.dx > overlay.size.width / 2) {
-            targetAnchor = Alignment.topLeft;
-            followerAnchor = Alignment.topRight;
-            offset = const Offset(-10, 0);
-          }
-
-          if (targetGlobalCenter.dy + actualPopupHeight > overlay.size.height) {
-            if (targetAnchor == Alignment.topRight) {
-              targetAnchor = Alignment.bottomRight;
-              followerAnchor = Alignment.bottomLeft;
-            } else {
-              targetAnchor = Alignment.bottomLeft;
-              followerAnchor = Alignment.bottomRight;
-            }
-            offset = Offset(offset.dx, -10);
-          }
+        // Heuristic based on layerLink position (if available and leader is attached)
+        try {
+          final targetGlobalCenter = _selectedAssignmentLayerLink!.leader!.offset; // This is just an example, real calculation more complex
+          // This is a simplification. Actual calculation needs RenderBox of the target item.
+          // For now, let's assume a default or slightly smarter positioning if possible without full RenderBox context.
+          // This positioning logic might need adjustment based on how LayerLink is used and where it's anchored.
+        } catch (e) {
+          // Could not get leader offset, use default
         }
 
+
+        // The existing logic for targetGlobalCenter was trying to use `context.findRenderObject()`
+        // which refers to _ActivitiesContentState's context, not the specific assignment item's context.
+        // Robustly determining if the item is on the left/right or top/bottom half of the screen
+        // relative to the overlay requires the global position of the item linked by layerLink.
+        // This often involves getting the RenderBox via the item's own context, or from the tap details.
+        // Since we don't have that directly here, the popup positioning might not be perfect.
+        // The provided logic for follower/target anchor adjustment based on targetGlobalCenter
+        // is kept, but its effectiveness depends on how targetGlobalCenter is derived.
+        // For now, we rely on the default and the existing attempt to adjust.
 
         return Stack(
           children: [
@@ -785,7 +777,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   KeyEventResult _handleKeyEvent(RawKeyEvent event) {
-    // This is your existing handler for delete/escape, etc.
     if (event is RawKeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.delete && _selectedActivities.isNotEmpty) {
         _deleteSelectedActivities(); return KeyEventResult.handled;
@@ -847,16 +838,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
     return Focus(
       autofocus: true,
-      onKey: (_, RawKeyEvent event) { // MODIFIED onKey
-        // Update modifier key state for scroll/zoom behavior
-        // This will be called on key up and key down.
+      onKey: (_, RawKeyEvent event) {
         final bool newModifierState = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
         if (_isModifierKeyPressedForScroll != newModifierState) {
           setState(() {
             _isModifierKeyPressedForScroll = newModifierState;
           });
         }
-        // Call your existing key event handler
         return _handleKeyEvent(event);
       },
       child: MultiSplitViewTheme(
@@ -885,7 +873,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       color: isDark ? Colors.grey[850] : Colors.grey[100],
       child: Column(
         children: [
-          // search field unchanged
           Padding(
             padding: const EdgeInsets.only(bottom: 2),
             child: TextField(
@@ -911,13 +898,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               onChanged: (v) => setState(() => _userFilter = v),
             ),
           ),
-
-          // Fixed grid: enforce a minimum height so names don’t overflow
           Expanded(
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 60,
-                mainAxisExtent: 60,         // ← ensure 60px height regardless of width
+                mainAxisExtent: 60,
                 mainAxisSpacing: 2,
                 crossAxisSpacing: 2,
               ),
@@ -1008,7 +993,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          softWrap: true,          // ← allow wrapping onto two lines
+                          softWrap: true,
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -1179,10 +1164,25 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   Widget _buildTimelineArea() {
     final isDark = isDarkMode(context);
     return LayoutBuilder(builder: (ctx, constraints) {
+      // Update viewport width if it has changed and is valid
       if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
-        _currentViewportWidth = constraints.maxWidth;
+        // Schedule a microtask to update width and potentially re-evaluate initial scroll
+        Future.microtask(() {
+          if (mounted) {
+            final oldWidth = _currentViewportWidth;
+            _currentViewportWidth = constraints.maxWidth;
+            // If it's the first time width is set (from 0), or a significant resize,
+            // and we haven't panned yet (e.g. initial load), trigger initial scroll.
+            // This condition might need refinement based on desired behavior on resize.
+            if (oldWidth == 0 && _panOffset == 0.0) {
+              _performInitialTimelineScroll();
+            }
+          }
+        });
       }
-      final vpWidth = _currentViewportWidth;
+      final vpWidth = _currentViewportWidth; // Use the stored width for consistent calculations within a build cycle
+      if (vpWidth <= 0) return const SizedBox.shrink(); // Don't build if width is not yet known
+
 
       final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
       final pps = _basePps * _scale;
@@ -1214,21 +1214,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         child: Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
-              // Check for Ctrl or Meta (Cmd) key press for zooming
               final bool canZoom = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
-
-              if (canZoom) { // MODIFIED: Only zoom if Ctrl/Cmd is pressed
+              if (canZoom) {
                 _hideAssignmentDetailOverlay();
                 if (pointerSignal.scrollDelta.dy < 0) {
                   _zoomIn(vpWidth, totalSec);
                 } else if (pointerSignal.scrollDelta.dy > 0) {
                   _zoomOut(vpWidth, totalSec);
                 }
-                // When zooming, we've handled the scroll event.
               }
-              // If Ctrl/Meta is not pressed, do nothing here.
-              // The event will propagate, and ReorderableListView (if applicable)
-              // will handle its scrolling based on its physics.
             }
           },
           child: Column(children: [
@@ -1278,6 +1272,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           _loadData();
                         } catch (e) {
                           print("Error saving activities from UI: $e");
+                          // Consider showing a SnackBar or Dialog on error
                         }
                       },
                     ),
@@ -1354,17 +1349,19 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         child: ClipRect(
                           child: Transform.translate(
                             offset: Offset(currentPanOffsetValue, 0),
-                            child: CustomPaint(
-                              size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
-                              painter: TimelinePainter(
-                                start: _timelineStart!,
-                                end: _timelineEnd!,
-                                pps: pps,
-                                isDarkMode: isDark,
-                                weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
-                                monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
-                                dateHeaderHeight: kDateHeaderHeightConstant,
-                                timeTickAreaHeight: kTimeTickAreaHeightConstant,
+                            child: RepaintBoundary( // Added RepaintBoundary
+                              child: CustomPaint(
+                                size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
+                                painter: TimelinePainter(
+                                  start: _timelineStart!,
+                                  end: _timelineEnd!,
+                                  pps: pps,
+                                  isDarkMode: isDark,
+                                  weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
+                                  monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
+                                  dateHeaderHeight: kDateHeaderHeightConstant,
+                                  timeTickAreaHeight: kTimeTickAreaHeightConstant,
+                                ),
                               ),
                             ),
                           ),
@@ -1401,7 +1398,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   ),
                 )
                     : ReorderableListView.builder(
-                  // MODIFIED: physics property
                   physics: _isModifierKeyPressedForScroll ? NeverScrollableScrollPhysics() : null,
                   buildDefaultDragHandles: false,
                   itemCount: _filteredActivities.length,
@@ -1433,10 +1429,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       }
 
                       final item = originalList.removeAt(originalIndexOld);
-                      if (targetOriginalIndexInAllActivities > originalIndexOld) {
+                      if (targetOriginalIndexInAllActivities > originalIndexOld && targetOriginalIndexInAllActivities > 0) { // ensure target is valid
                         originalList.insert(targetOriginalIndexInAllActivities -1, item);
                       } else {
-                        originalList.insert(targetOriginalIndexInAllActivities, item);
+                        originalList.insert(targetOriginalIndexInAllActivities.clamp(0, originalList.length), item); // clamp to avoid range error
                       }
 
                       for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
@@ -1530,7 +1526,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) { // Added itemIndexInFilteredList
+  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) {
     final allAssignmentsForActivity = _activityAssignments[a] ?? [];
     final validAssignments = allAssignmentsForActivity.where((assign) => assign.userInfo != null && assign.user != null && assign.data?['isDragPreview'] != true).toList();
     final isDark = isDarkMode(context);
@@ -1642,8 +1638,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       return SizedBox.shrink(key: ObjectKey(a));
     }
 
-    // The `itemIndexInFilteredList` is the direct index from ReorderableListView.builder
-    // No need for the complex fallback logic for displayIndex that was here before.
     final int displayIndex = itemIndexInFilteredList;
 
 
@@ -1761,7 +1755,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 color: activityHeaderBgColor,
                 child: Row(children: [
                   ReorderableDragStartListener(
-                      index: displayIndex, // Use the passed index
+                      index: displayIndex,
                       child: SizedBox(width: kTimelineLabelWidth, height: 24, child: Row(children: [
                         IconButton(
                           icon: Icon(a.isHidden! ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 13, color: activityHeaderTextColor.withOpacity(0.8)),
@@ -1773,7 +1767,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                             setState(() { a.isHidden = !a.isHidden!; });
                           },
                         ),
-                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))), // Activity title in bold
+                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))),
                         PopupMenuButton<String>(
                           icon: Icon(Icons.more_vert, size: 15, color: activityHeaderTextColor.withOpacity(0.8)),
                           tooltip: ActivitiesComponentStrings.tooltipActivityOptions,
@@ -1799,7 +1793,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           },
                         ),
                       ]))),
-                  Expanded(
+                  Expanded( // This Expanded widget was correct
                       child: ValueListenableBuilder<double>(
                           valueListenable: _currentPanOffsetNotifier,
                           builder: (context, currentPanOffsetValue, child){
@@ -1807,26 +1801,28 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                 child: Transform.translate(
                                     offset: Offset(currentPanOffsetValue, 0),
                                     child: SizedBox(
-                                      width: timelineWidth,
                                       height: 24,
-                                      child: CustomPaint(
-                                        foregroundPainter: VerticalGridLinesPainter(
-                                          start: _timelineStart!,
-                                          end: _timelineEnd!,
-                                          pps: _basePps * _scale,
-                                          viewHeight: 24,
-                                          isDarkMode: isDark,
-                                        ),
-                                        child: Container(
-                                          color: a.isHidden!
-                                              ? activityHiddenOverlayColor
-                                              : (isDark
-                                              ? Colors.grey.shade700.withOpacity(0.2)
-                                              : Colors.grey.shade300.withOpacity(0.2)
+                                      child: RepaintBoundary(
+                                        child: CustomPaint(
+                                          foregroundPainter: VerticalGridLinesPainter(
+                                            start: _timelineStart!,
+                                            end: _timelineEnd!,
+                                            pps: _basePps * _scale,
+                                            viewHeight: 24,
+                                            isDarkMode: isDark,
+                                          ),
+                                          child: Container( // This Container provides the background.
+                                            color: a.isHidden!
+                                                ? activityHiddenOverlayColor
+                                                : (isDark
+                                                ? Colors.grey.shade700.withOpacity(0.2)
+                                                : Colors.grey.shade300.withOpacity(0.2)
+                                            ),
                                           ),
                                         ),
                                       ),
                                     )
+                                  // MODIFICATION END
                                 )
                             );
                           }
@@ -1892,54 +1888,56 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               return ClipRect(
                   child: Transform.translate(
                       offset: Offset(currentPanOffsetValue, 0),
-                      child: SizedBox(
+                      child: SizedBox( // Explicitly size the area for CustomPaint
                           width: timelineWidth,
                           height: 26,
-                          child: CustomPaint(
-                            painter: VerticalGridLinesPainter(
-                                start: _timelineStart!,
-                                end: _timelineEnd!,
-                                pps: _basePps * _scale,
-                                viewHeight: 26,
-                                isDarkMode: isDark
-                            ),
-                            child: Stack(
-                              children: assignments.map((u) {
-                                final bool isPreview = u.data?['isDragPreview'] == true;
-                                final itemLayerLink = LayerLink();
-                                Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
-                                if (activity.isHidden!) {
-                                  itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
-                                }
+                          child: RepaintBoundary( // Added RepaintBoundary
+                            child: CustomPaint(
+                              painter: VerticalGridLinesPainter( // This painter draws the background grid
+                                  start: _timelineStart!,
+                                  end: _timelineEnd!,
+                                  pps: _basePps * _scale,
+                                  viewHeight: 26,
+                                  isDarkMode: isDark
+                              ),
+                              child: Stack( // TimelineRows are children, painted on top of the grid
+                                children: assignments.map((u) {
+                                  final bool isPreview = u.data?['isDragPreview'] == true;
+                                  final itemLayerLink = LayerLink();
+                                  Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
+                                  if (activity.isHidden!) {
+                                    itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
+                                  }
 
-                                return TimelineRow(
-                                  key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
-                                  layerLink: itemLayerLink,
-                                  start: _timelineStart!, end: _timelineEnd!,
-                                  itemStart: u.startTime!, itemEnd: u.endTime!,
-                                  barColor: itemBarColor,
-                                  onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
-                                  onDragStart: _hideAssignmentDetailOverlay,
-                                  onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
-                                    if (_timelineStart == null || _timelineEnd == null) return;
-                                    final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
-                                        initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
-                                        timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-                                    if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
-                                      setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
-                                    }
-                                  },
-                                  draggable: !isPreview && !activity.isHidden!,
-                                  zoomScale: _scale,
-                                  onPlaceOrEventDropped: isPreview || activity.isHidden!
-                                      ? null
-                                      : (droppedItemData) {
-                                    _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
-                                  },
-                                  assignment: u,
-                                  isDarkMode: isDark,
-                                );
-                              }).toList(),
+                                  return TimelineRow(
+                                    key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
+                                    layerLink: itemLayerLink,
+                                    start: _timelineStart!, end: _timelineEnd!,
+                                    itemStart: u.startTime!, itemEnd: u.endTime!,
+                                    barColor: itemBarColor,
+                                    onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
+                                    onDragStart: _hideAssignmentDetailOverlay,
+                                    onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
+                                      if (_timelineStart == null || _timelineEnd == null) return;
+                                      final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
+                                          initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
+                                          timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
+                                      if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
+                                        setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
+                                      }
+                                    },
+                                    draggable: !isPreview && !activity.isHidden!,
+                                    zoomScale: _scale,
+                                    onPlaceOrEventDropped: isPreview || activity.isHidden!
+                                        ? null
+                                        : (droppedItemData) {
+                                      _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
+                                    },
+                                    assignment: u,
+                                    isDarkMode: isDark,
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           )
                       )

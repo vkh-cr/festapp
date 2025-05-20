@@ -168,9 +168,6 @@ class _ScheduleContentState extends State<ScheduleContent> {
                   child: Container(
                     // MODIFICATION: This Container will define the tappable area.
                     // It expands to fill the cell's allocated space.
-                    width: double.infinity, // Takes the full width provided by TrinaColumn (140).
-                    height: double.infinity, // Takes the full height of the cell row.
-                    alignment: Alignment.center, // Centers the content (image or icon) within the cell.
                     // Optional: Add padding if you want some space around the content.
                     // padding: const EdgeInsets.all(4.0),
                     child: imageUrl != null && imageUrl.isNotEmpty
@@ -178,7 +175,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
                       showDuration: const Duration(seconds: 0),
                       preferBelow: false,
                       padding: EdgeInsets.zero,
-                      verticalOffset: 10,
+                      verticalOffset: 52,
                       decoration: BoxDecoration(
                         color: Colors.transparent,
                       ),
@@ -198,9 +195,7 @@ class _ScheduleContentState extends State<ScheduleContent> {
                       // This is the actual image displayed in the cell.
                       child: CachedNetworkImage(
                         imageUrl: imageUrl,
-                        width: 50, // Display width of the image in the cell
-                        height: 50, // Display height of the image in the cell
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fitWidth,
                         placeholder: (context, url) => SizedBox(width: 50, height: 50, child: Center(child: CircularProgressIndicator(strokeWidth: 2.0))),
                         errorWidget: (context, url, error) => Icon(Icons.broken_image, size: 24),
                       ),
