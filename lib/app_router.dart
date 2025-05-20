@@ -29,7 +29,6 @@ import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/utility/instance_install_page.dart';
 
 import 'app_router.gr.dart';
-import 'components/features/feature_constants.dart';
 import 'pages/occasion/game_page.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)

@@ -246,7 +246,7 @@ class EditDataBundle {
   });
 }
 
-class EditDataHelper {
+class ActivityDataHelper {
   static List<ActivityModel> parseActivities(Map<String, dynamic> j) =>
       (j[Tb.activities.table] as List<dynamic>?)
           ?.map((item) => ActivityModel.fromJson(item as Map<String, dynamic>))
