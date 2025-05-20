@@ -79,12 +79,9 @@ class _SchedulePageState extends State<SchedulePage>
       await _loadFullData();
       _fullEventsLoaded = true;
     }
-    // setState is called within _loadOfflineDataThenFast and _loadFullData,
-    // which will trigger a rebuild with the new data.
   }
 
   Future<void> _loadOfflineDataThenFast() async {
-    bool needsSetState = false;
     if (_events.isEmpty) {
       final offline = await OfflineDataService.getAllEvents();
       _events = offline;
@@ -95,14 +92,17 @@ class _SchedulePageState extends State<SchedulePage>
           .filterRootEvents()
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
-      needsSetState = true;
+    }
+
+    if(mounted) {
+      setState(() {});
     }
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,
       false,
     );
-    // re-attach cached desc
+
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
         e.description = _eventDescriptions[e.id!];
@@ -121,7 +121,7 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
-    if(mounted && (needsSetState || true)) { // Ensure setState is called if data changes
+    if(mounted) {
       setState(() {});
     }
   }
