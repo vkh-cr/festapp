@@ -5,9 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
-import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:fstapp/services/utilities_all.dart';
@@ -88,9 +85,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   final double _basePps = 0.05; // Pixels per second at scale 1.0
 
-  late List<UserInfoModel> _allUsers;
-  late List<PlaceModel> _allPlaces;
-  late List<EventModel> _allEvents;
+  late List<ActivityUserInfoModel> _allUsers;
+  late List<ActivityPlaceModel> _allPlaces;
+  late List<ActivityEventModel> _allEvents;
   String _userFilter = '';
   String _placeFilter = '';
   String _eventFilter = '';
@@ -101,7 +98,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   late MultiSplitViewController _mainController;
   late MultiSplitViewController _topController;
 
-  UserInfoModel? _currentlyDraggedUser;
+  ActivityUserInfoModel? _currentlyDraggedUser;
   ActivityModel? _hoveredActivityForPreview;
   DateTime? _previewStartTime;
 
@@ -130,6 +127,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     super.initState();
     _mainController = MultiSplitViewController(areas: [Area(data: 'top', size: 160, min: 100), Area(data: 'bottom', flex: 1)]);
     _topController = MultiSplitViewController(areas: [Area(data: 'users', flex: 1), Area(data: 'places', flex: 1), Area(data: 'events', flex: 1)]);
+    _allUsers = []; // Initialize to avoid late errors before _loadData
+    _allPlaces = [];
+    _allEvents = [];
     _loadData();
     _globalFilterController.addListener(() {
       if (_globalFilterController.text != _globalTimelineFilter) {
@@ -159,9 +159,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       data.activities!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
       setState(() {
         _bundle = data;
-        _allPlaces = data.places!;
-        _allEvents = data.events!;
-        _allUsers = data.users!;
+        _allPlaces = data.places ?? []; // Use new local model list
+        _allEvents = data.events ?? []; // Use new local model list
+        _allUsers = data.users ?? [];   // Use new local model list
         _computeTimelineBounds(); // This sets _timelineStart and _timelineEnd
 
         _activityAssignments.clear();
@@ -177,16 +177,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             }
           }
         }
-        // Reset pan to default before potentially shifting
         _panOffset = 0.0;
         _currentPanOffsetNotifier.value = 0.0;
 
         _updateFilteredActivities();
 
-        // Schedule the initial scroll to occur after the current build cycle completes
-        // and layout information (like _currentViewportWidth) is available.
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if(mounted) { // Ensure the widget is still in the tree
+          if(mounted) {
             _performInitialTimelineScroll();
           }
         });
@@ -196,23 +193,22 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   void _performInitialTimelineScroll() {
     if (_currentViewportWidth <= 0 && mounted) {
-      // Defer if width not yet available
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _performInitialTimelineScroll();
       });
       return;
     }
 
-
     DateTime? earliestTimeToShow;
     List<DateTime> allPossibleStartTimes = [];
 
     if (_bundle?.events?.isNotEmpty ?? false) {
-      allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime.toLocal()));
+      // ActivityEventModel.startTime is already local
+      allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime));
     }
     _activityAssignments.values.expand((list) => list).forEach((assignment) {
-      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) { // Exclude previews for initial scroll
-        allPossibleStartTimes.add(assignment.startTime!.toLocal());
+      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) {
+        allPossibleStartTimes.add(assignment.startTime!); // Already local
       }
     });
 
@@ -231,15 +227,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final allStarts = <DateTime>[], allEnds = <DateTime>[];
     if (_bundle!.events != null) {
       for (var e in _bundle!.events!) {
-        allStarts.add(e.startTime.toLocal());
-        allEnds.add(e.endTime.toLocal());
+        // ActivityEventModel.startTime/endTime are already local
+        allStarts.add(e.startTime);
+        allEnds.add(e.endTime);
       }
     }
     if (_bundle!.activityAssignments != null) {
       for (var au in _bundle!.activityAssignments!) {
         if (au.startTime != null && au.endTime != null) {
-          allStarts.add(au.startTime!.toLocal());
-          allEnds.add(au.endTime!.toLocal());
+          allStarts.add(au.startTime!); // Already local
+          allEnds.add(au.endTime!);   // Already local
         }
       }
     }
@@ -313,7 +310,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale * 1.25).clamp(0.05, 10.0);
+    final double newScale = (_scale * 1.25).clamp(0.05, 2.0);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -341,7 +338,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale / 1.25).clamp(0.05, 10.0);
+    final double newScale = (_scale / 1.25).clamp(0.05, 2.0);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -427,13 +424,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   void _handlePlaceOrEventDropOnAssignment(ActivityAssignmentModel assignment, dynamic droppedItemData) {
     bool changed = false;
-    if (droppedItemData is PlaceModel) {
+    if (droppedItemData is ActivityPlaceModel) {
       assignment.places ??= [];
       if (!assignment.places.any((p) => p.id == droppedItemData.id)) {
         assignment.places.add(droppedItemData);
         changed = true;
       }
-    } else if (droppedItemData is EventModel) {
+    } else if (droppedItemData is ActivityEventModel) {
       assignment.events ??= [];
       if (!assignment.events.any((e) => e.id == droppedItemData.id)) {
         assignment.events.add(droppedItemData);
@@ -448,7 +445,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  void _removePlaceFromAssignment(ActivityAssignmentModel assignment, PlaceModel place) {
+  void _removePlaceFromAssignment(ActivityAssignmentModel assignment, ActivityPlaceModel place) {
     assignment.places.removeWhere((p) => p.id == place.id);
     setState(() {});
     if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
@@ -456,7 +453,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  void _removeEventFromAssignment(ActivityAssignmentModel assignment, EventModel event) {
+  void _removeEventFromAssignment(ActivityAssignmentModel assignment, ActivityEventModel event) {
     assignment.events.removeWhere((e) => e.id == event.id);
     setState(() {});
     if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
@@ -580,7 +577,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               ),
               Wrap(
                 spacing: 6, runSpacing: 4,
-                children: assignment.places.map((place) => Chip(
+                children: assignment.places.map((place) => Chip( // place is ActivityPlaceModel
                   avatar: Icon(Icons.location_pin, size: 14, color: chipTextColor),
                   label: Text(place.title ?? ActivitiesComponentStrings.textUnnamedPlace, style: TextStyle(color: chipTextColor, fontSize: 11)),
                   padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -604,7 +601,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               ),
               Wrap(
                 spacing: 6, runSpacing: 4,
-                children: assignment.events.map((event) => Chip(
+                children: assignment.events.map((event) => Chip( // event is ActivityEventModel
                   avatar: Icon(Icons.event, size: 14, color: chipTextColor),
                   label: Text(event.title ?? ActivitiesComponentStrings.textUnnamedEvent, style: TextStyle(color: chipTextColor, fontSize: 11)),
                   padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -650,54 +647,30 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
         if (assignment.places.isNotEmpty) {
           estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.places.length / 2).ceil() * chipHeight; // Assuming 2 chips per row for estimation
+          estimatedContentHeight += (assignment.places.length / 2).ceil() * chipHeight;
         }
         if (assignment.events.isNotEmpty) {
           estimatedContentHeight += sectionHeaderHeight;
-          estimatedContentHeight += (assignment.events.length / 2).ceil() * chipHeight; // Assuming 2 chips per row
+          estimatedContentHeight += (assignment.events.length / 2).ceil() * chipHeight;
         }
         if ((assignment.places.isEmpty) &&
             (assignment.events.isEmpty)) {
-          estimatedContentHeight += 30; // "No items assigned" text
+          estimatedContentHeight += 30;
         }
         estimatedContentHeight += 24.0; // Bottom padding
 
         final popupMaxHeight = screenHeight * 0.6;
-        final actualPopupHeight = estimatedContentHeight.clamp(80.0, popupMaxHeight); // Min height 80
+        final actualPopupHeight = estimatedContentHeight.clamp(80.0, popupMaxHeight);
 
         Alignment followerAnchor = Alignment.topLeft;
         Alignment targetAnchor = Alignment.topRight;
         Offset offset = const Offset(10, 0);
 
-        final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
-        // The context for findRenderObject should be the one of the target widget itself,
-        // which is implicitly available if _selectedAssignmentLayerLink.leader was set from its context.
-        // However, to get the global position correctly relative to the overlay, we use the layer link.
-        // For now, we'll try to estimate based on general screen position if LayerLink doesn't give enough for this logic.
-        // This part of the logic is complex and might need the actual RenderBox of the tapped item.
-        // For simplicity here, we will use a heuristic.
-        // A more robust way would involve passing the tap position or using the layerLink's global position.
-
-        // Heuristic based on layerLink position (if available and leader is attached)
         try {
-          final targetGlobalCenter = _selectedAssignmentLayerLink!.leader!.offset; // This is just an example, real calculation more complex
-          // This is a simplification. Actual calculation needs RenderBox of the target item.
-          // For now, let's assume a default or slightly smarter positioning if possible without full RenderBox context.
-          // This positioning logic might need adjustment based on how LayerLink is used and where it's anchored.
+          _selectedAssignmentLayerLink!.leader!.offset;
         } catch (e) {
-          // Could not get leader offset, use default
+          // Could not get leader offset
         }
-
-
-        // The existing logic for targetGlobalCenter was trying to use `context.findRenderObject()`
-        // which refers to _ActivitiesContentState's context, not the specific assignment item's context.
-        // Robustly determining if the item is on the left/right or top/bottom half of the screen
-        // relative to the overlay requires the global position of the item linked by layerLink.
-        // This often involves getting the RenderBox via the item's own context, or from the tap details.
-        // Since we don't have that directly here, the popup positioning might not be perfect.
-        // The provided logic for follower/target anchor adjustment based on targetGlobalCenter
-        // is kept, but its effectiveness depends on how targetGlobalCenter is derived.
-        // For now, we rely on the default and the existing attempt to adjust.
 
         return Stack(
           children: [
@@ -759,12 +732,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             if (Utilities.removeDiacritics(assignment.user?.toFullNameString().toLowerCase() ?? "").contains(normalizedFilter)) {
               return true;
             }
-            for (var place in assignment.places) {
+            for (var place in assignment.places) { // place is ActivityPlaceModel
               if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
             }
-            for (var event in assignment.events) {
+            for (var event in assignment.events) { // event is ActivityEventModel
               if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
@@ -861,7 +834,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   Widget _buildUsersPanel() {
-    final filtered = _allUsers
+    final filtered = _allUsers // _allUsers is List<ActivityUserInfoModel>
         .where((u) => u.toFullNameString().toLowerCase().contains(_userFilter.toLowerCase()))
         .toList();
     final isDark = isDarkMode(context);
@@ -908,7 +881,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               ),
               itemCount: filtered.length,
               itemBuilder: (context, index) {
-                final u = filtered[index];
+                final u = filtered[index]; // u is ActivityUserInfoModel
                 final initials = u
                     .toFullNameString()
                     .split(' ')
@@ -918,7 +891,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 final color = darkUserColors[u.hashCode % darkUserColors.length];
                 final avatarTextColor = Colors.white;
 
-                return Draggable<UserInfoModel>(
+                return Draggable<ActivityUserInfoModel>(
                   data: u,
                   onDragStarted: () {
                     _hideAssignmentDetailOverlay();
@@ -1009,7 +982,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   Widget _buildPlacesPanel() {
-    final filtered = _allPlaces.where((p) => (p.title ?? "").toLowerCase().contains(_placeFilter.toLowerCase())).toList();
+    final filtered = _allPlaces // _allPlaces is List<ActivityPlaceModel>
+        .where((p) => (p.title ?? "").toLowerCase().contains(_placeFilter.toLowerCase()))
+        .toList();
     final isDark = isDarkMode(context);
     final hintColor = isDark ? Colors.white54 : Colors.black54;
     final textColor = isDark ? Colors.white : Colors.black;
@@ -1050,8 +1025,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             child: Wrap(
               spacing: 3,
               runSpacing: 3,
-              children: filtered.map((p) {
-                return Draggable<PlaceModel>(
+              children: filtered.map((p) { // p is ActivityPlaceModel
+                return Draggable<ActivityPlaceModel>(
                   data: p,
                   onDragStarted: _hideAssignmentDetailOverlay,
                   feedback: Material(
@@ -1085,7 +1060,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   Widget _buildEventsPanel() {
-    final filtered = _allEvents.where((e) => (e.title ?? "").toLowerCase().contains(_eventFilter.toLowerCase())).toList();
+    final filtered = _allEvents // _allEvents is List<ActivityEventModel>
+        .where((e) => (e.title ?? "").toLowerCase().contains(_eventFilter.toLowerCase()))
+        .toList();
     final isDark = isDarkMode(context);
     final hintColor = isDark ? Colors.white54 : Colors.black54;
     final textColor = isDark ? Colors.white : Colors.black;
@@ -1126,8 +1103,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             child: Wrap(
               spacing: 3,
               runSpacing: 3,
-              children: filtered.map((e) {
-                return Draggable<EventModel>(
+              children: filtered.map((e) { // e is ActivityEventModel
+                return Draggable<ActivityEventModel>(
                   data: e,
                   onDragStarted: _hideAssignmentDetailOverlay,
                   feedback: Material(
@@ -1164,24 +1141,19 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   Widget _buildTimelineArea() {
     final isDark = isDarkMode(context);
     return LayoutBuilder(builder: (ctx, constraints) {
-      // Update viewport width if it has changed and is valid
       if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
-        // Schedule a microtask to update width and potentially re-evaluate initial scroll
         Future.microtask(() {
           if (mounted) {
             final oldWidth = _currentViewportWidth;
             _currentViewportWidth = constraints.maxWidth;
-            // If it's the first time width is set (from 0), or a significant resize,
-            // and we haven't panned yet (e.g. initial load), trigger initial scroll.
-            // This condition might need refinement based on desired behavior on resize.
             if (oldWidth == 0 && _panOffset == 0.0) {
               _performInitialTimelineScroll();
             }
           }
         });
       }
-      final vpWidth = _currentViewportWidth; // Use the stored width for consistent calculations within a build cycle
-      if (vpWidth <= 0) return const SizedBox.shrink(); // Don't build if width is not yet known
+      final vpWidth = _currentViewportWidth;
+      if (vpWidth <= 0) return const SizedBox.shrink();
 
 
       final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
@@ -1272,7 +1244,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           _loadData();
                         } catch (e) {
                           print("Error saving activities from UI: $e");
-                          // Consider showing a SnackBar or Dialog on error
                         }
                       },
                     ),
@@ -1349,7 +1320,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         child: ClipRect(
                           child: Transform.translate(
                             offset: Offset(currentPanOffsetValue, 0),
-                            child: RepaintBoundary( // Added RepaintBoundary
+                            child: RepaintBoundary(
                               child: CustomPaint(
                                 size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
                                 painter: TimelinePainter(
@@ -1429,10 +1400,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       }
 
                       final item = originalList.removeAt(originalIndexOld);
-                      if (targetOriginalIndexInAllActivities > originalIndexOld && targetOriginalIndexInAllActivities > 0) { // ensure target is valid
+                      if (targetOriginalIndexInAllActivities > originalIndexOld && targetOriginalIndexInAllActivities > 0) {
                         originalList.insert(targetOriginalIndexInAllActivities -1, item);
                       } else {
-                        originalList.insert(targetOriginalIndexInAllActivities.clamp(0, originalList.length), item); // clamp to avoid range error
+                        originalList.insert(targetOriginalIndexInAllActivities.clamp(0, originalList.length), item);
                       }
 
                       for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
@@ -1578,12 +1549,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             if (Utilities.removeDiacritics(assign.user!.toFullNameString().toLowerCase()).contains(normalizedFilter)) {
               return true;
             }
-            for (var place in assign.places) {
+            for (var place in assign.places) { // place is ActivityPlaceModel
               if (Utilities.removeDiacritics(place.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
             }
-            for (var event in assign.events) {
+            for (var event in assign.events) { // event is ActivityEventModel
               if (Utilities.removeDiacritics(event.title?.toLowerCase() ?? "").contains(normalizedFilter)) {
                 return true;
               }
@@ -1599,7 +1570,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
       if (assignmentsToConsiderForRendering != null && assignmentsToConsiderForRendering.isNotEmpty) {
         List<ActivityAssignmentModel> assignmentsToRender = List.from(assignmentsToConsiderForRendering);
-        final userForThisRow = assignmentsToRender[0].user;
+        final userForThisRow = assignmentsToRender[0].user; // user is ActivityUserInfoModel
         if (userForThisRow == null) continue;
 
         if (_hoveredActivityForPreview == a && _currentlyDraggedUser?.id == userInfoId && _previewStartTime != null) {
@@ -1644,7 +1615,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     return Padding(
       key: ObjectKey(a),
       padding: const EdgeInsets.symmetric(vertical: 0),
-      child: DragTarget<UserInfoModel>(
+      child: DragTarget<ActivityUserInfoModel>(
         onWillAcceptWithDetails: (details) {
           _hideAssignmentDetailOverlay();
           if (a.isHidden!) return false;
@@ -1677,14 +1648,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         onAcceptWithDetails: (details) {
           if (_timelineStart == null || _timelineEnd == null || a.isHidden!) return;
 
-          final draggedDataOnDrop = details.data;
+          final draggedDataOnDrop = details.data; // This is ActivityUserInfoModel
           DateTime finalSnappedStartTime = _calculateSnappedTimeFromOffset(details.offset, timelineWidth);
           final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(initialStartTime: finalSnappedStartTime, itemDuration: kDefaultUserAssignmentDuration, timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
 
           final newAssignment = ActivityAssignmentModel(
               activityId: a.id ?? -1,
-              userInfo: draggedDataOnDrop.id!,
-              user: draggedDataOnDrop,
+              userInfo: draggedDataOnDrop.id!, // Use id from ActivityUserInfoModel
+              user: draggedDataOnDrop,       // Store ActivityUserInfoModel
               startTime: finalClampedRange.start,
               endTime: finalClampedRange.end,
               data: null,
@@ -1793,7 +1764,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           },
                         ),
                       ]))),
-                  Expanded( // This Expanded widget was correct
+                  Expanded(
                       child: ValueListenableBuilder<double>(
                           valueListenable: _currentPanOffsetNotifier,
                           builder: (context, currentPanOffsetValue, child){
@@ -1811,7 +1782,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                             viewHeight: 24,
                                             isDarkMode: isDark,
                                           ),
-                                          child: Container( // This Container provides the background.
+                                          child: Container(
                                             color: a.isHidden!
                                                 ? activityHiddenOverlayColor
                                                 : (isDark
@@ -1822,7 +1793,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                         ),
                                       ),
                                     )
-                                  // MODIFICATION END
                                 )
                             );
                           }
@@ -1838,12 +1808,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     );
   }
 
-  Widget _buildUserRow(ActivityModel activity, UserInfoModel userInfo, List<ActivityAssignmentModel> assignments, double timelineWidth) {
+  Widget _buildUserRow(ActivityModel activity, ActivityUserInfoModel userInfo, List<ActivityAssignmentModel> assignments, double timelineWidth) { // userInfo is ActivityUserInfoModel
     if (assignments.isEmpty) return const SizedBox.shrink();
     final isDark = isDarkMode(context);
 
     final isHostingPreview = assignments.any((u) => u.data?['isDragPreview'] == true);
-    final color = darkUserColors[userInfo.hashCode % darkUserColors.length];
+    final color = darkUserColors[userInfo.hashCode % darkUserColors.length]; // Uses ActivityUserInfoModel.hashCode
     final avatarTextColor = Colors.white;
 
     return Container(
@@ -1875,6 +1845,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               _hideAssignmentOverlay();
               if (v == 'delete_user_from_activity') {
                 setState(() {
+                  // userInfo.id is ActivityUserInfoModel.id (String)
                   _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo.id && assign.data?['isDragPreview'] != true);
                   _updateFilteredActivities();
                 });
@@ -1888,19 +1859,19 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               return ClipRect(
                   child: Transform.translate(
                       offset: Offset(currentPanOffsetValue, 0),
-                      child: SizedBox( // Explicitly size the area for CustomPaint
+                      child: SizedBox(
                           width: timelineWidth,
                           height: 26,
-                          child: RepaintBoundary( // Added RepaintBoundary
+                          child: RepaintBoundary(
                             child: CustomPaint(
-                              painter: VerticalGridLinesPainter( // This painter draws the background grid
+                              painter: VerticalGridLinesPainter(
                                   start: _timelineStart!,
                                   end: _timelineEnd!,
                                   pps: _basePps * _scale,
                                   viewHeight: 26,
                                   isDarkMode: isDark
                               ),
-                              child: Stack( // TimelineRows are children, painted on top of the grid
+                              child: Stack(
                                 children: assignments.map((u) {
                                   final bool isPreview = u.data?['isDragPreview'] == true;
                                   final itemLayerLink = LayerLink();
@@ -1930,10 +1901,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                     zoomScale: _scale,
                                     onPlaceOrEventDropped: isPreview || activity.isHidden!
                                         ? null
-                                        : (droppedItemData) {
+                                        : (droppedItemData) { // droppedItemData can be ActivityPlaceModel or ActivityEventModel
                                       _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
                                     },
-                                    assignment: u,
+                                    assignment: u, // u is ActivityAssignmentModel
                                     isDarkMode: isDark,
                                   );
                                 }).toList(),
