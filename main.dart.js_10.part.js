@@ -1,86 +1,74 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_10",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={
-cCv(d,e,f,g,h){var x=null,w=A.j9(A.bW(x,x,x,x,x,x,A.b1(D.CY,h,x,x),x,x,x,new B.b39(e),x,x,x,x,x),d===!0)
-return A.a([w,A.j9(A.bW(x,x,x,x,x,x,A.b1(F.kq,g,x,x),x,x,x,new B.b3a(f),x,x,x,x,x),d===!1)],y.p)},
-b39:function b39(d){this.a=d},
-b3a:function b3a(d){this.a=d},
-Pj(d,e){var x=0,w=A.l(y.f),v
-var $async$Pj=A.f(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:v=$.dI()
-x=v.gdv().d!=null?2:3
-break
-case 2:x=4
-return A.d($.hO().c4("event_users_saved").iX(0).cV("event",e).cV("user",v.gdv().c.a),$async$Pj)
-case 4:case 3:x=5
-return A.d(B.aym(e),$async$Pj)
-case 5:A.bG(d,A.r("Removed from My schedule.",null),C.ac)
-return A.j(null,w)}})
-return A.k($async$Pj,w)},
-Pg(d,e){var x=0,w=A.l(y.e),v,u
-var $async$Pg=A.f(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:u=$.dI()
-x=u.gdv().d!=null?3:4
-break
-case 3:x=5
-return A.d($.hO().c4("event_users_saved").jh(0,A.z(["event",e,"user",u.gdv().c.a],y.g,y.o)),$async$Pg)
-case 5:case 4:x=6
-return A.d(B.ayj(e),$async$Pg)
-case 6:A.bG(d,A.r("Added to My schedule.",null),C.ac)
-v=!0
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B,C={
+a_s(d,e,f){return C.d9y(d,e,f)},
+d9y(d,e,f){var x=0,w=A.l(y.b),v,u,t,s,r,q,p,o,n,m,l
+var $async$a_s=A.h(function(g,h){if(g===1)return A.i(h,w)
+while(true)$async$outer:switch(x){case 0:m=f==null
+l=m?null:f.a
+if(l==null)l=$.dU().gds().c.a
+u=y.g
+t=y.b
+x=3
+return A.d($.hZ().dq("sign_user_to_event",A.z(["ev",e,"usr",l],u,t),t),$async$a_s)
+case 3:s=h
+t=J.a1(s)
+switch(t.h(s,"code")){case 200:if(m)A.bK(d,A.r(($.mu.e==="female"?"F":"M")+"You have been signed in.",null),B.ac)
+else{r=f.e==="female"?"F":"M"
+A.bK(d,A.r(r+"{user} has been signed in.",A.z(["user",f.jg()],u,u)),B.ac)}x=1
+break $async$outer
+case 100:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("Event is over.",null),B.bf)
 x=1
-break
-case 1:return A.j(v,w)}})
-return A.k($async$Pg,w)},
-ayj(d){var x=0,w=A.l(y.f),v
-var $async$ayj=A.f(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.d(A.zJ(),$async$ayj)
-case 2:v=f
-J.dQ(v,d)
-x=3
-return A.d(A.a4v(v),$async$ayj)
-case 3:return A.j(null,w)}})
-return A.k($async$ayj,w)},
-aym(d){var x=0,w=A.l(y.f),v
-var $async$aym=A.f(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.d(A.zJ(),$async$aym)
-case 2:v=f
-J.oM(v,d)
-x=3
-return A.d(A.a4v(v),$async$aym)
-case 3:return A.j(null,w)}})
-return A.k($async$aym,w)},
-aEr(d,e){switch(e){case"music":return C.cj
-case"talk":return C.aN
-case"other":return E.L3}return C.aN}},D,E,F
+break $async$outer
+case 101:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("Event is full.",null),B.bf)
+x=1
+break $async$outer
+case 102:if(m){q=A.r(($.mu.e==="female"?"F":"M")+"You are already signed in at an event of this type.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bf)}else{r=f.e==="female"?"F":"M"
+q=A.r(r+"{user} is already signed in at an event of this type.",A.z(["user",f.jg()],u,u))
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bf)}x=1
+break $async$outer
+case 103:if(m){q=A.r(($.mu.e==="female"?"F":"M")+"You are already signed in.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bf)}else{r=f.e==="female"?"F":"M"
+q=A.r(r+"{user} is already signed in.",A.z(["user",f.jg()],u,u))
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bf)}x=1
+break $async$outer
+case 107:if(m){q=A.r(($.mu.e==="female"?"F":"M")+"You are already signed in at another event at the same time.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bf)}else{r=f.e==="female"?"F":"M"
+A.bK(d,A.r(r+"{user} is already signed in at another event at the same time.",A.z(["user",f.jg()],u,u)),B.ac)}x=1
+break $async$outer
+case 104:p=A.r("It's too soon!",null)
+if(t.h(s,"events_registration_start")!=null){o=A.eA(t.h(s,"events_registration_start")).oV()
+m=y.f
+t=d.ag(m).r.a
+t===$&&A.b()
+n=C.d8H(t.geX(0)).dg(o)
+m=d.ag(m).r.a
+m===$&&A.b()
+p=A.r("You can sign in from {time}.",A.z(["time",n+" "+A.CE(m.geX(0)).dg(o)],u,u))}A.bK(d,A.r("Cannot sign in!",null)+" "+p,B.bf)
+x=1
+break $async$outer
+case 105:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("There is already the maximum of men.",null),B.bf)
+x=1
+break $async$outer
+case 106:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("There is already the maximum of women.",null),B.bf)
+x=1
+break $async$outer
+default:A.bK(d,A.r("Cannot sign in!",null),B.bf)
+x=1
+break $async$outer}case 1:return A.j(v,w)}})
+return A.k($async$a_s,w)},
+d8H(d){var x=A.nb(d,A.oW(),null)
+x.toString
+x=new A.iS(new A.m3(),x)
+x.m7("MMMMEEEEd")
+return x}}
 J=c[1]
 A=c[0]
-C=c[2]
-B=a.updateHolder(c[79],B)
-D=c[302]
-E=c[219]
-F=c[177]
+B=c[2]
+C=a.updateHolder(c[72],C)
 var z=a.updateTypes([])
-B.b39.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.f(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.d(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:2}
-B.b3a.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.f(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.d(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:2};(function inheritance(){var x=a.inheritMany
-x(A.cZ,[B.b39,B.b3a])})()
-var y={p:A.D("u<AK>"),o:A.D("G"),g:A.D("m"),e:A.D("x"),f:A.D("~")}};
+var y={g:A.C("m"),f:A.C("kD"),b:A.C("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"V0q/CDCIFL0VY+JxVEGQudZLx9g=");
+a.eventLog.push({p:"main.dart.js_10",e:"endPart",h:b})})($__dart_deferred_initializers__,"8BjMCV3K7CYr8zfwEkZVLBzKleE=");
