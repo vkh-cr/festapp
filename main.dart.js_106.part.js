@@ -8,7 +8,7 @@ while(true)switch(x){case 0:s=A.V(d).i("N<1,h?>")
 q=A
 p=J
 x=2
-return A.d($.hN().c4("events").i3(0,"id, event_users(count)").PX("id",A.E(new A.N(d,new B.b8G(),s),!0,s.i("a7.E"))),$async$Hu)
+return A.d($.hO().c4("events").i3(0,"id, event_users(count)").PX("id",A.E(new A.N(d,new B.b8G(),s),!0,s.i("a7.E"))),$async$Hu)
 case 2:r=q.aX(p.bO(f,new B.b8H(),y.b),!0,y.u)
 x=$.dI().gdv().d!=null?3:4
 break
@@ -57,7 +57,7 @@ n=t
 x=6
 return A.d(A.a_6(),$async$Ht)
 case 6:o.H(n,f)
-s=$.hN()
+s=$.hO()
 u=s.c4("events").i3(0,"id,title,start_time,end_time,places(id, title),type,max_participants,is_group_event,event_users!inner(*)").cV("event_users.user",u.gdv().c.a).cV("is_hidden",!1)
 r=A.di()
 r.toString
@@ -70,7 +70,7 @@ l=J
 x=7
 return A.d(u.cV("occasion",r).t9(0,"start_time",!0).t9(0,"max_participants",!1),$async$Ht)
 case 7:o.H(n,m.aX(l.bO(f,new B.b8x(),q),!0,p))
-x=D.cCe()?8:9
+x=D.cCh()?8:9
 break
 case 8:u=s.c4("events").i3(0,"id,title,start_time,end_time,places(id, title),type,max_participants,is_group_event").cV("is_group_event",!0).cV("is_hidden",!1)
 s=A.di()
@@ -86,7 +86,7 @@ case 9:u=A.a(t.slice(0),A.V(t))
 v=u
 x=1
 break
-case 4:u=$.hN().c4("events").i3(0,"id,title,start_time,end_time,places(id, title),type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cV("is_hidden",!1)
+case 4:u=$.hO().c4("events").i3(0,"id,title,start_time,end_time,places(id, title),type,max_participants,is_group_event, event_groups!event_groups_event_parent_fkey(event_child)").cV("is_hidden",!1)
 s=A.di()
 s.toString
 o=A
@@ -160,10 +160,10 @@ E=c[138]
 var z=a.updateTypes([])
 B.b8G.prototype={
 $1(d){return d.b},
-$S:129}
+$S:140}
 B.b8H.prototype={
 $1(d){return A.rI(d)},
-$S:91}
+$S:86}
 B.b8I.prototype={
 $1(d){return d.b==this.a.b},
 $S:44}
@@ -172,13 +172,13 @@ $1(d){return d.b==this.a.b},
 $S:44}
 B.b8x.prototype={
 $1(d){return A.rI(d)},
-$S:91}
+$S:86}
 B.b8y.prototype={
 $1(d){return A.rI(d)},
-$S:91}
+$S:86}
 B.b8z.prototype={
 $1(d){return A.rI(d)},
-$S:91}
+$S:86}
 B.b8Q.prototype={
 $1(d){return d.b==this.a.b},
 $S:44}
@@ -203,4 +203,4 @@ x(A.c8,[B.b8G,B.b8H,B.b8I,B.b8M,B.b8x,B.b8y,B.b8z,B.b8Q,B.b8R,B.b8P])
 w(B.b8S,A.ep)})()
 var y={u:A.D("cG"),F:A.D("u<cG>"),c:A.D("B<cG>"),p:A.D("dE"),b:A.D("@"),v:A.D("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_106",e:"endPart",h:b})})($__dart_deferred_initializers__,"fkkIUmBw4unuOe222PoD4L2ymqM=");
+a.eventLog.push({p:"main.dart.js_106",e:"endPart",h:b})})($__dart_deferred_initializers__,"ICUuvsKmVDhEA+0rfDLua04WDZs=");
