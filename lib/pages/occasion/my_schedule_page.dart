@@ -52,8 +52,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
     } else {
       _dots = data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
-    await DbEvents.synchronizeMySchedule();
     setState(() {});
+
+    await DbEvents.synchronizeMySchedule();
    }
 
    Future<void> loadDataOffline() async {
@@ -69,6 +70,12 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     _events.clear();
     _events.addAll(myEvents);
+
+    if (_isAdvancedTimeline??false) {
+      _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+    } else {
+      _dots = _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+    }
 
     setState(() {});
    }
