@@ -23,12 +23,12 @@ import 'package:fstapp/theme_config.dart';
 
 @RoutePage()
 class MySchedulePage extends StatefulWidget {
-   static const ROUTE = "myschedule";
+  static const ROUTE = "myschedule";
 
-   const MySchedulePage({super.key});
+  const MySchedulePage({super.key});
 
-   @override
-   _MySchedulePageState createState() => _MySchedulePageState();
+  @override
+  _MySchedulePageState createState() => _MySchedulePageState();
 }
 
 class _MySchedulePageState extends State<MySchedulePage> {
@@ -39,15 +39,15 @@ class _MySchedulePageState extends State<MySchedulePage> {
   int? _openId;
 
   @override
-   Future<void> didChangeDependencies() async {
-      super.didChangeDependencies();
-      var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
-      if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
-        _isAdvancedTimeline = true;
-      }
-      await loadDataOffline();
-      loadData();
-   }
+  Future<void> didChangeDependencies() async {
+    super.didChangeDependencies();
+    var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
+      _isAdvancedTimeline = true;
+    }
+    await loadDataOffline();
+    loadData();
+  }
 
   MyEventsBundle? _data;
 
@@ -59,20 +59,20 @@ class _MySchedulePageState extends State<MySchedulePage> {
     _fullEventsLoaded = true;
   }
 
-   Future<void> loadData() async {
+  Future<void> loadData() async {
     if(!AuthService.isLoggedIn()){
       return;
     }
-     if (!_fullEventsLoaded) {
-       await _loadFullData();
-     } else {
-       _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
-       for (var e in _data!.events) {
-         if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
-           e.description = _eventDescriptions[e.id!];
-         }
-       }
-     }
+    if (!_fullEventsLoaded) {
+      await _loadFullData();
+    } else {
+      _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
+      for (var e in _data!.events) {
+        if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
+          e.description = _eventDescriptions[e.id!];
+        }
+      }
+    }
 
     if (_isAdvancedTimeline ?? false) {
       _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
@@ -85,17 +85,17 @@ class _MySchedulePageState extends State<MySchedulePage> {
     setState(() {});
 
     await DbEvents.synchronizeMySchedule(currentIds: _data!.events.map((e)=>e.id!).toList());
-   }
+  }
 
-   Future<void> loadDataOffline() async {
+  Future<void> loadDataOffline() async {
     var offlineEvents = await OfflineDataService.getAllEvents();
     await OfflineDataService.updateEventsWithMySchedule(offlineEvents);
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
-      e.isEventInMySchedule == true ||
-      ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
+    e.isEventInMySchedule == true ||
+        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
         (e.isSignedIn ?? false));
 
     _events.clear();
@@ -108,7 +108,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
     }
 
     setState(() {});
-   }
+  }
 
   Future<void> _handleSignIn(int id) async {
     await DbEvents.signInToEvent(context, id);
@@ -141,64 +141,67 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
 
-   @override
-   Widget build(BuildContext context) {
-     Widget body = (_isAdvancedTimeline == true) ?
-     DayList(dayGroup: TimeBlockGroup(title: "", events: _dots!),
-         controller: AdvancedTimelineController(
-           events: _dots!,
-           onEventPressed: _eventPressed,
-           showAddNewEventButton: RightsService.isEditor,
-           onSignInEvent: _handleSignIn,
-           onSignOutEvent: _handleSignOut,
-           onAddToProgramEvent: _handleAdd,
-           onRemoveFromProgramEvent: _handleRemove,
-           onEditEvent: (c, ev) => RouterService
-               .navigateOccasion(
-               context, "${EventEditPage.ROUTE}/$ev")
-               .then((_) => loadData()),
-           onPlaceTap: (c, pl) => _goToMap(pl.id),
-           customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
-           animateEventRemoval: true
-         ),
-       openId: _openId,
-       onToggle: (id) => setState(
-               () => _openId = _openId == id ? null : id),) :
-     SingleChildScrollView(
-         child: ScheduleTimeline(
-           eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
-           onEventPressed: _eventPressed,
-           nodePosition: 0.3,
-           emptyContent: Center(
-             child: Padding(
-               padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-               child: const Text(
-                 "There will appear your events.",
-                 style: TextStyle(fontSize: 20),
-               ).tr(),
-             ),
-           ),
-         ));
+  @override
+  Widget build(BuildContext context) {
+    final Widget commonEmptyContent = Center(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
+        child: const Text(
+          "There will appear your events.",
+          style: TextStyle(fontSize: 20),
+        ).tr(),
+      ),
+    );
+
+    Widget body = (_isAdvancedTimeline == true) ?
+    DayList(dayGroup: TimeBlockGroup(title: "", events: _dots!),
+      controller: AdvancedTimelineController(
+        events: _dots!,
+        onEventPressed: _eventPressed,
+        showAddNewEventButton: RightsService.isEditor,
+        onSignInEvent: _handleSignIn,
+        onSignOutEvent: _handleSignOut,
+        onAddToProgramEvent: _handleAdd,
+        onRemoveFromProgramEvent: _handleRemove,
+        onEditEvent: (c, ev) => RouterService
+            .navigateOccasion(
+            context, "${EventEditPage.ROUTE}/$ev")
+            .then((_) => loadData()),
+        onPlaceTap: (c, pl) => _goToMap(pl.id),
+        customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
+        animateEventRemoval: true,
+        emptyContent: commonEmptyContent, // Used here
+      ),
+      openId: _openId,
+      onToggle: (id) => setState(
+              () => _openId = _openId == id ? null : id),) :
+    SingleChildScrollView(
+        child: ScheduleTimeline(
+          eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
+          onEventPressed: _eventPressed,
+          nodePosition: 0.3,
+          emptyContent: commonEmptyContent, // And here
+        ));
 
     return Scaffold(
-      appBar: AppBar(
-       title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
-       leading: BackButton(
-        color: ThemeConfig.appBarColorNegative(),
-        onPressed: () => RouterService.popOrHome(context),
-       ),
-      ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        child:
-         _dots == null ?
-         Center(child: CircularProgressIndicator()) :
-         ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-          child: body)));
-   }
+        appBar: AppBar(
+          title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+          leading: BackButton(
+            color: ThemeConfig.appBarColorNegative(),
+            onPressed: () => RouterService.popOrHome(context),
+          ),
+        ),
+        body: Align(
+            alignment: Alignment.topCenter,
+            child:
+            _dots == null ?
+            Center(child: CircularProgressIndicator()) :
+            ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+                child: body)));
+  }
 
-   final List<EventModel> _events = [];
-   List<TimeBlockItem>? _dots = [];
+  final List<EventModel> _events = [];
+  List<TimeBlockItem>? _dots = [];
 
 }
