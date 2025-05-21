@@ -157,7 +157,7 @@ BEGIN
     FROM public.places p
     WHERE p.id IN (SELECT place_id FROM place_ids);
 
-    -- (NEW SECTION i for event_groups) Event groups where both parent and child are user-related, non-hidden events for the occasion
+    -- (NEW SECTION i for event_groups) Event groups where either parent or child is a user-related, non-hidden event for the occasion
     SELECT jsonb_agg(jsonb_build_object(
         'event_parent', eg.event_parent,
         'event_child',  eg.event_child
@@ -168,28 +168,32 @@ BEGIN
     JOIN public.events e2 ON eg.event_child  = e2.id -- Child event
     WHERE e1.occasion   = p_occasion
       AND e1.is_hidden  = FALSE
-      AND ( -- Condition for e1 to be a "user event"
-        EXISTS (SELECT 1 FROM public.event_users eu_pg WHERE eu_pg.event = e1.id AND eu_pg."user" = current_user_id)
-        OR EXISTS (SELECT 1 FROM public.event_users_saved eus_pg WHERE eus_pg.event = e1.id AND eus_pg."user" = current_user_id)
-        OR EXISTS (
-          SELECT 1
-          FROM public.activity_assignment_events aae_pg
-          JOIN public.activity_assignments aa_pg ON aa_pg.id = aae_pg.assignment_id
-          JOIN public.activities act_pg1 ON act_pg1.id = aa_pg.activity_id
-          WHERE aae_pg.event_id = e1.id AND aa_pg."user" = current_user_id AND act_pg1.occasion = p_occasion
-        )
-      )
       AND e2.occasion   = p_occasion
       AND e2.is_hidden  = FALSE
-      AND ( -- Condition for e2 to be a "user event"
-        EXISTS (SELECT 1 FROM public.event_users eu_cg WHERE eu_cg.event = e2.id AND eu_cg."user" = current_user_id)
-        OR EXISTS (SELECT 1 FROM public.event_users_saved eus_cg WHERE eus_cg.event = e2.id AND eus_cg."user" = current_user_id)
-        OR EXISTS (
-          SELECT 1
-          FROM public.activity_assignment_events aae_cg
-          JOIN public.activity_assignments aa_cg ON aa_cg.id = aae_cg.assignment_id
-          JOIN public.activities act_pg2 ON act_pg2.id = aa_cg.activity_id
-          WHERE aae_cg.event_id = e2.id AND aa_cg."user" = current_user_id AND act_pg2.occasion = p_occasion
+      AND (
+        -- Condition for e1 to be a "user event"
+        (
+          EXISTS (SELECT 1 FROM public.event_users eu_pg WHERE eu_pg.event = e1.id AND eu_pg."user" = current_user_id)
+          OR EXISTS (SELECT 1 FROM public.event_users_saved eus_pg WHERE eus_pg.event = e1.id AND eus_pg."user" = current_user_id)
+          OR EXISTS (
+            SELECT 1
+            FROM public.activity_assignment_events aae_pg
+            JOIN public.activity_assignments aa_pg ON aa_pg.id = aae_pg.assignment_id
+            JOIN public.activities act_pg1 ON act_pg1.id = aa_pg.activity_id
+            WHERE aae_pg.event_id = e1.id AND aa_pg."user" = current_user_id AND act_pg1.occasion = p_occasion
+          )
+        )
+        OR
+        (
+          EXISTS (SELECT 1 FROM public.event_users eu_cg WHERE eu_cg.event = e2.id AND eu_cg."user" = current_user_id)
+          OR EXISTS (SELECT 1 FROM public.event_users_saved eus_cg WHERE eus_cg.event = e2.id AND eus_cg."user" = current_user_id)
+          OR EXISTS (
+            SELECT 1
+            FROM public.activity_assignment_events aae_cg
+            JOIN public.activity_assignments aa_cg ON aa_cg.id = aae_cg.assignment_id
+            JOIN public.activities act_pg2 ON act_pg2.id = aa_cg.activity_id
+            WHERE aae_cg.event_id = e2.id AND aa_cg."user" = current_user_id AND act_pg2.occasion = p_occasion
+          )
         )
       );
 

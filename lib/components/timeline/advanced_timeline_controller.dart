@@ -15,6 +15,7 @@ class AdvancedTimelineController {
   final void Function(BuildContext, TimeBlockPlace place)? onPlaceTap;
   final void Function(BuildContext, int eventId)? onEditEvent;
   final List<TimeBlockGroup> Function(Iterable<TimeBlockItem> events, BuildContext context)? customSplitter;
+  final bool animateEventRemoval; // New property
 
   AdvancedTimelineController({
     required this.events,
@@ -27,8 +28,7 @@ class AdvancedTimelineController {
     this.onRemoveFromProgramEvent,
     this.onPlaceTap,
     this.onEditEvent,
-    this.customSplitter
+    this.customSplitter,
+    this.animateEventRemoval = false,
   });
 }
-
-

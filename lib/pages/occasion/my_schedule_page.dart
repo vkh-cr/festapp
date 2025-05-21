@@ -31,30 +31,52 @@ class MySchedulePage extends StatefulWidget {
 
 class _MySchedulePageState extends State<MySchedulePage> {
 
+  bool _fullEventsLoaded = false;
   bool? _isAdvancedTimeline = false;
+  final Map<int, String?> _eventDescriptions = {};
   int? _openId;
 
   @override
-   void didChangeDependencies() {
+   Future<void> didChangeDependencies() async {
       super.didChangeDependencies();
       var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
       if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
         _isAdvancedTimeline = true;
       }
+      await loadDataOffline();
       loadData();
    }
 
+  MyEventsBundle? _data;
+
+  Future<void> _loadFullData() async {
+    _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+    for (var e in _data!.events) {
+      if (e.id != null) _eventDescriptions[e.id!] = e.description;
+    }
+    _fullEventsLoaded = true;
+  }
+
    Future<void> loadData() async {
-    await loadDataOffline();
-    var data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
-    if (_isAdvancedTimeline??false) {
-      _dots = data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+     if (!_fullEventsLoaded) {
+       await _loadFullData();
+     } else {
+       _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
+       for (var e in _data!.events) {
+         if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
+           e.description = _eventDescriptions[e.id!];
+         }
+       }
+     }
+
+    if (_isAdvancedTimeline ?? false) {
+      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots = data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
     setState(() {});
 
-    await DbEvents.synchronizeMySchedule();
+    await DbEvents.synchronizeMySchedule(currentIds: _data!.events.map((e)=>e.id!).toList());
    }
 
    Future<void> loadDataOffline() async {
@@ -128,7 +150,8 @@ class _MySchedulePageState extends State<MySchedulePage> {
                context, "${EventEditPage.ROUTE}/$ev")
                .then((_) => loadData()),
            onPlaceTap: (c, pl) => _goToMap(pl.id),
-           customSplitter: TimeBlockHelper.splitTimeBlocksByDay
+           customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
+           animateEventRemoval: true
          ),
        openId: _openId,
        onToggle: (id) => setState(
