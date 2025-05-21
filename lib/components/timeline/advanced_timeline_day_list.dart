@@ -24,6 +24,7 @@ class DayList extends StatelessWidget {
   final void Function(int) onToggle;
 
   const DayList({
+    super.key,
     required this.dayGroup,
     required this.controller,
     required this.onToggle,
@@ -44,7 +45,7 @@ class DayList extends StatelessWidget {
       if (group.title.isNotEmpty) {
         children.add(_section(group.title));
       }
-      children.addAll(group.events.map(_buildCard));
+      children.addAll(group.events.map((e) => _buildCard(e, context)));
     }
 
     if (
@@ -79,8 +80,9 @@ class DayList extends StatelessWidget {
     child: Center(child: Text(t, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
   );
 
-  Widget _buildCard(TimeBlockItem e) {
+  Widget _buildCard(TimeBlockItem e, BuildContext context) {
     return _EventCard(
+      key: ValueKey(e.id),
       event: e,
       expanded: openId == e.id,
       controller: controller,
@@ -97,18 +99,78 @@ const bool _kUsePastelBackground = false;
 
 bool isDark(context) => Theme.of(context).brightness == Brightness.dark;
 
-class _EventCard extends StatelessWidget {
+class _EventCard extends StatefulWidget {
   final TimeBlockItem event;
   final bool expanded;
   final AdvancedTimelineController controller;
   final VoidCallback onToggle;
 
   const _EventCard({
+    Key? key,
     required this.event,
     required this.expanded,
     required this.controller,
-    required this.onToggle
-  });
+    required this.onToggle,
+  }) : super(key: key);
+
+  @override
+  _EventCardState createState() => _EventCardState();
+}
+
+class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMixin {
+  late AnimationController _removeAnimationController;
+  late Animation<double> _opacityAnimation;
+  late Animation<double> _sizeAnimation;
+  bool _isDisposed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _removeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _opacityAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+        CurvedAnimation(parent: _removeAnimationController, curve: Curves.easeOut)
+    );
+    _sizeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+        CurvedAnimation(parent: _removeAnimationController, curve: Curves.easeOut)
+    );
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _removeAnimationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRemoveEvent(int eventId) async {
+    if (!mounted) return;
+
+    if (widget.controller.animateEventRemoval) {
+      await _removeAnimationController.forward(); // Corrected: await the forward() call
+      if (!mounted || _isDisposed) return;
+      await widget.controller.onRemoveFromProgramEvent?.call(eventId);
+    } else {
+      await widget.controller.onRemoveFromProgramEvent?.call(eventId);
+    }
+  }
+
+  Future<void> _handleSignOutEvent(int eventId) async {
+    if (!mounted) return;
+
+    if (widget.controller.animateEventRemoval) {
+      await _removeAnimationController.forward(); // Corrected: await the forward() call
+      if (!mounted || _isDisposed) return;
+      await widget.controller.onSignOutEvent?.call(eventId);
+      // Assuming onSignOutEvent leads to this card's removal or state change
+      // that makes it disappear from the current view.
+    } else {
+      await widget.controller.onSignOutEvent?.call(eventId);
+    }
+  }
 
   // Adjust color for pastel effect based on theme brightness
   Color _toPastel(BuildContext context, Color color) {
@@ -125,6 +187,11 @@ class _EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final event = widget.event;
+    final expanded = widget.expanded;
+    final controller = widget.controller;
+    final onToggle = widget.onToggle;
+
     //event.timeBlockType = TimeBlockType.signedIn;
     const stripeW = 6.0, stripeH = 58.0;
     final baseColor = ThemeConfig.eventTypeToColor(context, event.eventType);
@@ -148,19 +215,19 @@ class _EventCard extends StatelessWidget {
 
     // Determine button and capacity text color based on pastel background
     final buttonTextColor = _kUsePastelBackground
-        ? (isDark(context) ? Colors.white : Colors.black87) // Darker color in light mode
+        ? (isDark(context) ? Colors.white : Colors.black87)
         : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7);
 
     final selectedColor = _kUsePastelBackground
-        ? (isDark(context) ? Colors.white : Colors.black87) // Darker color in light mode
+        ? (isDark(context) ? Colors.white : Colors.black87)
         : Theme.of(context).primaryColor;
 
     final unselectedColor = _kUsePastelBackground
-        ? (isDark(context) ? Colors.white70 : Colors.black54) // Slightly lighter black for capacity in light mode
+        ? (isDark(context) ? Colors.white70 : Colors.black54)
         : Colors.grey;
 
     final signInSignOutButtonBorderColor = _kUsePastelBackground
-        ? (isDark(context) ? Colors.white30 : Colors.black26) // Adjusted border color for pastel backgrounds
+        ? (isDark(context) ? Colors.white30 : Colors.black26)
         : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3);
 
     Widget inlineActionSection;
@@ -211,7 +278,7 @@ class _EventCard extends StatelessWidget {
               const SizedBox(height: 4),
               event.isSignedIn()
                   ? OutlinedButton(
-                onPressed: () { controller.onSignOutEvent!(event.id); },
+                onPressed: () => _handleSignOutEvent(event.id), // MODIFIED for animation
                 style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                 child: Text('Sign out'.tr()),
               )
@@ -227,15 +294,15 @@ class _EventCard extends StatelessWidget {
       inlineActionSection = Row(
         children: ButtonsHelper.getAddToMyProgramButton(
           !event.isInMySchedule(),
-              () async => () { controller.onAddToProgramEvent!(event.id); }(),
-              () async => () { controller.onRemoveFromProgramEvent!(event.id); }(),
-          selectedColor, // Use adjusted color
-          unselectedColor, // Use adjusted color for outline
+              () async => await controller.onAddToProgramEvent!(event.id),
+              () => _handleRemoveEvent(event.id),
+          selectedColor,
+          unselectedColor,
         ),
       );
     }
 
-    return Center(
+    Widget cardContent = Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
         child: Padding(
@@ -304,15 +371,14 @@ class _EventCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // Image positioned after the text content
                     if (imageUrl != null)
-                      Padding( // Add padding to the left of the image
+                      Padding(
                         padding: const EdgeInsets.only(left: 8.0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
                           clipBehavior: Clip.antiAlias,
                           child: SizedBox(
-                            width: 58.0, // Keep image size consistent
+                            width: 58.0,
                             height: 58.0,
                             child: CachedNetworkImage(
                               imageUrl: imageUrl,
@@ -350,8 +416,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () => controller.onPlaceTap
                                     ?.call(context, event.timeBlockPlace!),
-                                icon: Icon(Icons.place, size: 14, color: selectedColor), // Adjusted icon color
-                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)), // Adjusted text color
+                                icon: Icon(Icons.place, size: 14, color: selectedColor),
+                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)),
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerLeft,
@@ -362,8 +428,8 @@ class _EventCard extends StatelessWidget {
                               TextButton.icon(
                                 onPressed: () =>
                                     controller.onEditEvent?.call(context, event.id),
-                                icon: Icon(Icons.edit, size: 14, color: selectedColor), // Adjusted icon color
-                                label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)), // Adjusted text color
+                                icon: Icon(Icons.edit, size: 14, color: selectedColor),
+                                label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
                                 style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero,
                                   alignment: Alignment.centerRight,
@@ -374,12 +440,11 @@ class _EventCard extends StatelessWidget {
 
                         const SizedBox(height: 8),
 
-                        // Responsive inline buttons moved here for small screens
                         if (capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
                           Center(
                             child: event.isSignedIn()
                                 ? OutlinedButton(
-                              onPressed: () { controller.onSignOutEvent!(event.id); },
+                              onPressed: () => _handleSignOutEvent(event.id), // MODIFIED for animation
                               style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                               child: Text('Sign out'.tr()),
                             )
@@ -392,7 +457,6 @@ class _EventCard extends StatelessWidget {
                           const SizedBox(height: 8),
                         ],
 
-                        // Show sign-in prompt for unauthenticated users
                         if (event.timeBlockType == TimeBlockType.canSignIn && !AuthService.isLoggedIn()) ...[
                           Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -412,7 +476,6 @@ class _EventCard extends StatelessWidget {
                           const SizedBox(height: 8),
                         ],
 
-                        // HTML description with extra horizontal padding
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: HtmlView(
@@ -434,6 +497,15 @@ class _EventCard extends StatelessWidget {
             ]),
           ),
         ),
+      ),
+    );
+
+    return SizeTransition(
+      sizeFactor: _sizeAnimation,
+      axisAlignment: -1.0,
+      child: FadeTransition(
+        opacity: _opacityAnimation,
+        child: cardContent,
       ),
     );
   }

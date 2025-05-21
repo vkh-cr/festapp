@@ -72,7 +72,7 @@ class AppRouter extends RootStackRouter {
                   getSchedulePage(),
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
-      AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE, maintainState: false),
+      AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE),
       AutoRoute(page: UnitRoute.page, path: UnitPage.ROUTE, maintainState: false),
       AutoRoute(page: MapRoute.page, path: MapPage.ROUTE, children: [
         AutoRoute(path: ':id', page: MapRoute.page,),

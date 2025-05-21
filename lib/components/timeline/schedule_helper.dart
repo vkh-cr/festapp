@@ -186,21 +186,22 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true) {
+    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {
         return TimeBlockType.signedIn;
       }
       return TimeBlockType.noAction;
-    } else if (model.currentParticipants != null &&
-        model.maxParticipants != null &&
+    } else if (EventModel.isEventSupportingSignIn(model) &&
         model.isFull()) {
       return TimeBlockType.isFull;
     } else if (EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.canSignIn;
+    } else if(model.canSaveEventToMyProgram() == true){
+      return TimeBlockType.canSave;
     }
-    return TimeBlockType.canSave;
+    return TimeBlockType.noAction;
   }
 
   static List<TimeBlockGroup> splitTimeBlockByPlace(

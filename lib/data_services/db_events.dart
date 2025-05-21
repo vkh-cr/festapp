@@ -502,39 +502,55 @@ class DbEvents {
     return true;
   }
 
-  static Future<void> synchronizeMySchedule([bool join = false])
+  static Future<void> synchronizeMySchedule({bool join = false, List<int>? currentIds})
   async {
     if(!AuthService.isLoggedIn() || !AppConfig.isOwnProgramSupported){
       return;
     }
-    HashSet<EventModel> data = EventModel.CreateEventModelSet();
+    List<int> eventIdsToSynchronize = [];
 
-    var remote = await loadAllMySchedule();
-    var local = await loadAllMyScheduleOffline();
+    if(currentIds != null){
+      eventIdsToSynchronize = currentIds;
+    } else {
+      // If currentIds are not provided, load remote events
+      var remoteEvents = await loadAllMySchedule();
+      eventIdsToSynchronize = remoteEvents.map((x) => x.id!).toList();
+    }
 
     if (join) {
-      data.addAll(remote);
-      data.addAll(local);
-    }
-    else {
-      data = remote;
+      var localEventsIds = await OfflineDataService.getMyScheduleData();
+      eventIdsToSynchronize.addAll(localEventsIds);
+      eventIdsToSynchronize = eventIdsToSynchronize.toSet().toList();
     }
 
-    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    await OfflineDataService.saveMyScheduleData(currentUserEventIds);
+    await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
 
     var values = [];
-    for(var v in currentUserEventIds)
+    for(var v in eventIdsToSynchronize)
     {
       values.add({
         EventModel.eventUsersSavedUserColumn: AuthService.currentUserId(),
         Tb.event_users_saved.event: v
       });
     }
-    if(join)
+    if(currentIds != null && !join){
+      return;
+    }
+    else if(join)
     {
       await _supabase.from(Tb.event_users_saved.table)
           .upsert(values);
+    } else {
+      // If not joining, we need to first clear existing remote entries for the user
+      // and then insert the new set of IDs.
+      await _supabase.from(Tb.event_users_saved.table)
+          .delete()
+          .eq(EventModel.eventUsersSavedUserColumn, AuthService.currentUserId());
+      if (values.isNotEmpty) {
+        await _supabase
+            .from(Tb.event_users_saved.table)
+            .insert(values);
+      }
     }
   }
 
@@ -824,7 +840,7 @@ class DbEvents {
     final groupsByParent = <int, List<EventGroupModel>>{};
     final parentsByChild = <int, List<EventGroupModel>>{};
     for (var g in groupsList) {
-      groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+        groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
       parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
     }
 
@@ -840,14 +856,17 @@ class DbEvents {
       ev.childEventIds  = groupsByParent[ev.id!]?.map((g) => g.eventChild).toList();
       ev.parentEventIds = parentsByChild[ev.id!]?.map((g) => g.eventParent).toList();
 
+      for (var e in events){
+        var children = events.where((ev) => ev.parentEventIds?.contains(e.id)??false).toList();
+        e.childEvents = children;
+      }
+
       ev.currentParticipants = usersByEvent[ev.id!];
       ev.currentUsersSaved   = savedByEvent[ev.id!];
     }
 
-    // sort by start time, for example
-    events.sort((a, b) => a.startTime.compareTo(b.startTime));
-    events = events.filterRootEvents();
-    // Link these as per your existing logic for main EventModels if needed.
+    events = events.sortEvents();
+    events = events.withoutParentEvents();
 
     // ---- ACTIVITY PROCESSING ----
     // Note: ActivityEventModel and ActivityPlaceModel are specific to activities context
