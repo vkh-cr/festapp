@@ -588,5 +588,6 @@
   "ActivitiesComponentStrings.tooltipDeleteAssignment": "Smazat přiřazení",
   "ActivitiesComponentStrings.menuRemoveUserFromActivity": "Odebrat uživatele z aktivity",
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "Možnosti přiřazení uživatele",
+  "ActivitiesComponentStrings.activity": "Aktivita",
   "_": "_"
 }

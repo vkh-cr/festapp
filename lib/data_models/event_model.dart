@@ -142,8 +142,8 @@ class EventModel extends ITrinaRowModel {
     );
   }
 
-  bool isFull() => currentParticipants !>= maxParticipants!;
-  static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null;
+  bool isFull() => currentParticipants != null && maxParticipants != null && currentParticipants! >= maxParticipants!;
+  static bool isEventSupportingSignIn(EventModel? event) => event != null && event.maxParticipants != null && event.maxParticipants! > 0;
   static bool isEventFull(EventModel? event) => isEventSupportingSignIn(event) && (event!.currentParticipants??0) >= event.maxParticipants!;
   @override
   String toString() {

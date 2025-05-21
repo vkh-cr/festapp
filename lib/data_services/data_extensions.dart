@@ -45,6 +45,10 @@ extension DataExtensions on List<EventModel> {
     return filtered;
   }
 
+  List<EventModel> withoutParentEvents() {
+    return where((element) => element.childEventIds == null || element.childEventIds!.isEmpty).toList();
+  }
+
   List<EventModel> filterNotHidden() {
     return where((e) => !(e.isHidden??false)).toList();
   }

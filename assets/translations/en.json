@@ -588,5 +588,6 @@
   "ActivitiesComponentStrings.tooltipDeleteAssignment": "Delete assignment",
   "ActivitiesComponentStrings.menuRemoveUserFromActivity": "Remove user from activity",
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "User assignment options",
+  "ActivitiesComponentStrings.activity": "Activity",
   "_":"_"
 }

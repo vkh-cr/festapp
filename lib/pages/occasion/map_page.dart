@@ -12,7 +12,8 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
-import 'package:fstapp/components/map/place_detail_dialog.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -29,6 +30,7 @@ import 'package:fstapp/data_services/db_groups.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/services/html_helper.dart';
+import '../../services/js/js_interop.dart';
 import 'package:fstapp/services/platform_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
@@ -49,7 +51,7 @@ import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart' as vmtm;
 class MapPage extends StatefulWidget {
   static const ROUTE = "map";
   int? id;
-  final PlaceModel? place;
+  PlaceModel? place;
 
   MapPage({@pathParam this.id, this.place, super.key});
 
@@ -60,6 +62,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   late final _animatedMapController = AnimatedMapController(vsync: this);
   final PopupController _popupLayerController = PopupController();
+  final JSInterop jsInterop = JSInterop();
 
   List<IconModel> _icons = [];
   final List<MapMarkerWithText> _markers = [];
@@ -96,6 +99,20 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   void initState() {
     super.initState();
     _iconScrollController = ScrollController();
+    context.tabsRouter.addListener(() async {
+      if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.map)) {
+        setState(() => _showLocation = true);
+        widget.id = null;
+        if(kIsWeb) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await Future.delayed(Duration(milliseconds: 100));
+            jsInterop.changeUrl("${RouterService.getCurrentUriWithOccasion()}${MapPage.ROUTE}");
+          });
+        }
+      } else {
+        setState(() => _showLocation = false);
+      }
+    });
   }
 
   @override
@@ -129,13 +146,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     //   _observer.subscribe(this, context.router.currentChild!);
     // }
 
-    context.tabsRouter.addListener(() {
-      if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.map)) {
-        setState(() => _showLocation = true);
-      } else {
-        setState(() => _showLocation = false);
-      }
-    });
+    if (widget.id == null && context.routeData.hasPendingChildren) {
+      widget.id = context.routeData.pendingChildren[0].params.getInt("id");
+    }
 
     final feature = FeatureService.getFeatureDetails(FeatureConstants.map);
     _mapFeature = (feature == null || feature is! MapFeature)
@@ -151,10 +164,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       _useOffline = true;
       await _initOfflineMap();
     }
-    if (widget.id == null && context.routeData.hasPendingChildren) {
-      widget.id =
-          context.routeData.pendingChildren[0].params.getInt("id");
-    }
+
     selectedMarker = null;
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
@@ -197,7 +207,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_mapFeature.offlineMapLayer.forceOfflineMap == true) {
       setState(() => _useOffline = true);
       if (!fileExists) {
-        Future.delayed(Duration(seconds: 1), () => _downloadOfflinePackage());
+        Future.delayed(const Duration(seconds: 1), () => _downloadOfflinePackage());
       }
     } else {
       List<ConnectivityResult> connectivityResult =
@@ -246,7 +256,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       _mbtiles = MbTiles(mbtilesPath: _offlinePackagePath!, gzip: true);
       ToastHelper.Show(
           context, "Offline map downloaded and ready for offline use".tr());
-      Timer(Duration(seconds: 2), () {
+      Timer(const Duration(seconds: 2), () {
         setState(() {
           _downloadCompleted = false;
           _useOffline = true;
@@ -455,7 +465,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return PlaceDetailDialog(marker: marker);
+                  return DetailDialog(title: marker.place.title, canEdit: RightsService.isEditor(), htmlDescription: marker.place.description,);
                 },
               );
             } else {
@@ -603,8 +613,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     addPlacesToMap(offlineList);
     _pathGroups = (await OfflineDataService.getAllPathGroups()).where((p)=>!p.isHidden!).toList();
     _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
-      offlineList,
-      _pathGroups
+        offlineList,
+        _pathGroups
     );
 
     var onlineIcons = await DbPlaces.getAllIcons();
@@ -693,7 +703,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
   void setMapToOnePlace(PlaceModel place) {
     _mapCenter = LatLng(place.getLat(), place.getLng());
     if (_isMapLoaded) {
-      _animatedMapController.animateTo(dest: _mapCenter!);
+      _animatedMapController.animateTo(dest: _mapCenter!, zoom: _mapOptions.maxZoom);
     }
   }
 

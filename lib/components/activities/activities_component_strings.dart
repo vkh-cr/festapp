@@ -52,6 +52,9 @@ class ActivitiesComponentStrings {
   static String textUnnamedPlace = 'Unnamed Place';
   static String textUnnamedEvent = 'Unnamed Event';
 
+  static String get activity => 'ActivitiesComponentStrings.activity'.tr();
+
+
   // Timeline Painter (Date/Time)
   // Using intl package for true localization.
   // Ensure you have added the intl package to your pubspec.yaml.

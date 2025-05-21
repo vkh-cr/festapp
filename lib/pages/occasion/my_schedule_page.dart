@@ -1,6 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
+import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/data_services/auth_service.dart';
+import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/pages/occasion/event_edit_page.dart';
+import 'package:fstapp/pages/occasion/map_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/db_events.dart';
@@ -14,100 +23,182 @@ import 'package:fstapp/theme_config.dart';
 
 @RoutePage()
 class MySchedulePage extends StatefulWidget {
-  static const ROUTE = "myschedule";
+   static const ROUTE = "myschedule";
 
-  const MySchedulePage({super.key});
+   const MySchedulePage({super.key});
 
-  @override
-  _MySchedulePageState createState() => _MySchedulePageState();
+   @override
+   _MySchedulePageState createState() => _MySchedulePageState();
 }
 
 class _MySchedulePageState extends State<MySchedulePage> {
+
+  bool _fullEventsLoaded = false;
+  bool? _isAdvancedTimeline = false;
+  final Map<int, String?> _eventDescriptions = {};
+  int? _openId;
+
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    loadData();
+   Future<void> didChangeDependencies() async {
+      super.didChangeDependencies();
+      var scheduleFeat = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+      if (scheduleFeat is ScheduleFeature && scheduleFeat.scheduleType == ScheduleFeature.scheduleTypeAdvanced){
+        _isAdvancedTimeline = true;
+      }
+      await loadDataOffline();
+      loadData();
+   }
+
+  MyEventsBundle? _data;
+
+  Future<void> _loadFullData() async {
+    _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+    for (var e in _data!.events) {
+      if (e.id != null) _eventDescriptions[e.id!] = e.description;
+    }
+    _fullEventsLoaded = true;
   }
 
-  Future<void> loadData() async {
-    await loadDataOffline();
+   Future<void> loadData() async {
+    if(!AuthService.isLoggedIn()){
+      return;
+    }
+     if (!_fullEventsLoaded) {
+       await _loadFullData();
+     } else {
+       _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
+       for (var e in _data!.events) {
+         if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
+           e.description = _eventDescriptions[e.id!];
+         }
+       }
+     }
 
-    await DbEvents.updateEvents(_events, true).whenComplete(() async {
-      _dots.clear();
-      _dots.addAll(_events.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
-      await loadEventParticipants();
-      await DbEvents.synchronizeMySchedule();
-    });
+    if (_isAdvancedTimeline ?? false) {
+      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+      var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities);
+      _dots!.addAll(actDots);
+      _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
+    } else {
+      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+    }
     setState(() {});
-  }
 
-  Future<void> loadDataOffline() async {
+    await DbEvents.synchronizeMySchedule(currentIds: _data!.events.map((e)=>e.id!).toList());
+   }
+
+   Future<void> loadDataOffline() async {
     var offlineEvents = await OfflineDataService.getAllEvents();
     await OfflineDataService.updateEventsWithMySchedule(offlineEvents);
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
     var myEvents = offlineEvents.where((e) =>
-        e.isEventInMySchedule == true ||
-        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
-            (e.isSignedIn ?? false));
+      e.isEventInMySchedule == true ||
+      ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
+        (e.isSignedIn ?? false));
 
     _events.clear();
     _events.addAll(myEvents);
 
-    _dots.clear();
-    _dots.addAll(_events.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
-          leading: BackButton(
-            color: ThemeConfig.appBarColorNegative(),
-            onPressed: () => RouterService.popOrHome(context),
-          ),
-        ),
-        body: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
-                child: SingleChildScrollView(
-                    child: ScheduleTimeline(
-                  eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots, context),
-                  onEventPressed: _eventPressed,
-                  nodePosition: 0.3,
-                  emptyContent: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
-                      child: const Text(
-                        "There will appear your events.",
-                        style: TextStyle(fontSize: 20),
-                      ).tr(),
-                    ),
-                  ),
-                )))));
-  }
-
-  final List<EventModel> _events = [];
-  final List<TimeBlockItem> _dots = [];
-
-  Future<void> loadEventParticipants() async {
-    await DbEvents.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events) {
-      var dot = _dots.singleWhere((element) => element.id == e.id!);
-      setState(() {
-        dot.data["rightText"] = e.toString();
-        dot.data["leftText"] = e.durationTimeString();
-        dot.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
-      });
+    if (_isAdvancedTimeline??false) {
+      _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+    } else {
+      _dots = _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
+
+    setState(() {});
+   }
+
+  Future<void> _handleSignIn(int id) async {
+    await DbEvents.signInToEvent(context, id);
+    await loadData(); // Reload data to reflect changes
   }
 
-  _eventPressed(int id) {
-    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
-        .then((value) => loadData());
+  Future<void> _handleSignOut(int id) async {
+    await DbEvents.signOutFromEvent(context, id);
+    await loadData(); // Reload data to reflect changes
   }
+
+  Future<void> _handleAdd(int id) async {
+    await DbEvents.addToMySchedule(context, id);
+    await loadData(); // Reload data to reflect changes
+  }
+
+  Future<void> _handleRemove(int id) async {
+    await DbEvents.removeFromMySchedule(context, id);
+    await loadData(); // Reload data to reflect changes
+  }
+
+  void _eventPressed(int id) {
+    RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
+        .then((_) => loadData());
+  }
+
+  void _goToMap(int placeId) {
+    RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId")
+        .then((_) => loadData());
+  }
+
+
+   @override
+   Widget build(BuildContext context) {
+     Widget body = (_isAdvancedTimeline == true) ?
+     DayList(dayGroup: TimeBlockGroup(title: "", events: _dots!),
+         controller: AdvancedTimelineController(
+           events: _dots!,
+           onEventPressed: _eventPressed,
+           showAddNewEventButton: RightsService.isEditor,
+           onSignInEvent: _handleSignIn,
+           onSignOutEvent: _handleSignOut,
+           onAddToProgramEvent: _handleAdd,
+           onRemoveFromProgramEvent: _handleRemove,
+           onEditEvent: (c, ev) => RouterService
+               .navigateOccasion(
+               context, "${EventEditPage.ROUTE}/$ev")
+               .then((_) => loadData()),
+           onPlaceTap: (c, pl) => _goToMap(pl.id),
+           customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
+           animateEventRemoval: true
+         ),
+       openId: _openId,
+       onToggle: (id) => setState(
+               () => _openId = _openId == id ? null : id),) :
+     SingleChildScrollView(
+         child: ScheduleTimeline(
+           eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
+           onEventPressed: _eventPressed,
+           nodePosition: 0.3,
+           emptyContent: Center(
+             child: Padding(
+               padding: const EdgeInsets.fromLTRB(24, 88, 24, 24),
+               child: const Text(
+                 "There will appear your events.",
+                 style: TextStyle(fontSize: 20),
+               ).tr(),
+             ),
+           ),
+         ));
+
+    return Scaffold(
+      appBar: AppBar(
+       title: Text("My schedule", style: TextStyle(color: ThemeConfig.appBarColorNegative())).tr(),
+       leading: BackButton(
+        color: ThemeConfig.appBarColorNegative(),
+        onPressed: () => RouterService.popOrHome(context),
+       ),
+      ),
+      body: Align(
+        alignment: Alignment.topCenter,
+        child:
+         _dots == null ?
+         Center(child: CircularProgressIndicator()) :
+         ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+          child: body)));
+   }
+
+   final List<EventModel> _events = [];
+   List<TimeBlockItem>? _dots = [];
+
 }
