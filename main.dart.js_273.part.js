@@ -1,60 +1,82 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_273",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,A={
-cET(d){var x=y.e
-return A.ava(A.ava(d,new A.b8b(),x,y.g),new A.b8c(),x,y.f)},
-b8b:function b8b(){},
-b8c:function b8c(){},
-dB_(d,e,f){var x,w,v,u=B.ft(0,null,d.length,null,null)
-if(u<2)return
-if(u<32){B.cJt(d,e,f,0,u,d,0)
-return}x=C.c.U(u,1)
-w=u-x
-v=C.b.ey(d,0,w)
-A.cAk(d,e,f,x,u,v,0)
-A.cAk(d,e,f,0,x,d,w)
-A.cY8(e,f,d,w,u,v,0,w,d,0)},
-cAk(d,e,f,g,h,i,j){var x,w,v,u=h-g
-if(u<32){B.cJt(d,e,f,g,h,i,j)
-return}x=g+C.c.U(u,1)
-w=x-g
-v=j+w
-A.cAk(d,e,f,x,h,i,v)
-A.cAk(d,e,f,g,x,d,x)
-A.cY8(e,f,d,x,x+w,i,v,v+(h-x),i,j)},
-cY8(d,e,f,g,h,i,j,k,l,m){var x,w,v,u=g+1,t=f[g],s=d.$1(t),r=j+1,q=i[j],p=d.$1(q)
-for(;!0;m=x){x=m+1
-if(e.$2(s,p)<=0){l[m]=t
-if(u===h){m=x
-break}w=u+1
-t=f[u]
-s=d.$1(t)}else{l[m]=q
-if(r!==k){v=r+1
-q=i[r]
-p=d.$1(q)
-r=v
-continue}m=x+1
-l[x]=t
-C.b.ee(l,m,m+(h-u),f,u)
-return}u=w}x=m+1
-l[m]=q
-C.b.ee(l,x,x+(k-r),i,r)},
-ava(d,e,f,g){var x=B.E(d,f)
-A.dB_(x,e,B.cZA(B.d_F(),g))
-return x}}
-B=c[0]
-C=c[2]
-A=a.updateHolder(c[125],A)
-var z=a.updateTypes([])
-A.b8b.prototype={
-$1(d){var x=d.at
-return x==null?"":x},
-$S:1178}
-A.b8c.prototype={
-$1(d){return d.dx},
-$S:1179};(function inheritance(){var x=a.inheritMany
-x(B.c6,[A.b8b,A.b8c])})()
-var y={f:B.C("aM"),e:B.C("dp"),g:B.C("m")}};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,E,F,B={
+ddP(d,e){return new B.Da(e)},
+Da:function Da(d){this.a=d},
+aNY:function aNY(d,e,f){var _=this
+_.d=$
+_.e=d
+_.fp$=e
+_.bo$=f
+_.c=_.a=null},
+c7Z:function c7Z(){},
+c8_:function c8_(){},
+aXN:function aXN(){}},C,D,G,H
+A=c[0]
+E=c[172]
+F=c[181]
+B=a.updateHolder(c[8],B)
+C=c[33]
+D=c[92]
+G=c[111]
+H=c[182]
+B.Da.prototype={
+M(){var x=null,w=A.a(["Orders"],y.h)
+if(A.fI("ticket",x))w.push("Tickets")
+if(A.fI("blueprint",x))w.push("Blueprint")
+w.push("Form")
+w.push("Products")
+w.push("Report")
+w.push("Email Templates")
+w.push("Users")
+return new B.aNY(w,x,x)}}
+B.aNY.prototype={
+aZ(){var x=0,w=A.l(y.f),v=this,u
+var $async$aZ=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=$.dO().gdl().d==null?2:3
+break
+case 2:u=v.c
+u.toString
+x=4
+return A.d(E.lE(u,"login",y.a),$async$aZ)
+case 4:case 3:v.c5()
+return A.j(null,w)}})
+return A.k($async$aZ,w)},
+T(){var x=this
+x.ah()
+x.d=G.Fp(null,0,x.e.length,x)},
+B(d){var x,w,v=null,u=this.e,t=A.V(u).i("N<1,hR>"),s=A.E(new A.N(u,new B.c7Z(),t),t.i("a6.E"))
+u=this.d
+u===$&&A.b()
+t=C.cMs(d,s,u)
+x=this.d
+w=A.V(s).i("N<1,e>")
+w=A.E(new A.N(s,new B.c8_(),w),w.i("a6.E"))
+return new D.qs(u.c,0,F.f8(t,v,D.Fo(w,x,H.dR),v,v,v,v,v),v)}}
+B.aXN.prototype={
+l(){var x=this,w=x.bo$
+if(w!=null)w.N(0,x.ghd())
+x.bo$=null
+x.al()},
+c2(){this.d3()
+this.cW()
+this.he()}}
+var z=a.updateTypes(["hR(m)","e(hR)"])
+B.c7Z.prototype={
+$1(d){var x=C.cMt().h(0,d)
+x.toString
+return x},
+$S:z+0}
+B.c8_.prototype={
+$1(d){return d.c},
+$S:z+1};(function inheritance(){var x=a.mixinHard,w=a.inherit,v=a.inheritMany
+w(B.Da,A.J)
+w(B.aXN,A.O)
+w(B.aNY,B.aXN)
+v(A.c6,[B.c7Z,B.c8_])
+x(B.aXN,A.fh)})()
+A.c5(b.typeUniverse,JSON.parse('{"Da":{"J":[],"e":[]},"aNY":{"O":["Da"]}}'))
+var y={h:A.C("t<m>"),a:A.C("G?"),f:A.C("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_273",e:"endPart",h:b})})($__dart_deferred_initializers__,"IaUJtMcO7Z1//qaqDKWkKeBxh+A=");
+a.eventLog.push({p:"main.dart.js_273",e:"endPart",h:b})})($__dart_deferred_initializers__,"OD7OViVhV6bLLDrLyOa+x0HNtd8=");
