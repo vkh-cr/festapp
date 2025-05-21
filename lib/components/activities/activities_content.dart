@@ -22,25 +22,54 @@ class TimeClampingService {
     required DateTime timelineStart,
     required DateTime timelineEnd,
     required Duration minAllowedDuration,
+    Duration snapStep = const Duration(minutes: 15), // New parameter for snapping
   }) {
+    // 1. Clamp initialStartTime to the overall timeline bounds
     DateTime newStart = initialStartTime;
-    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd;
-    if (newStart.isBefore(timelineStart)) newStart = timelineStart;
+    if (newStart.isBefore(timelineStart)) {
+      newStart = timelineStart;
+    }
+    if (newStart.isAfter(timelineEnd)) {
+      newStart = timelineEnd; // This might make newStart > newEnd temporarily
+    }
+
+    // 2. Snap newStart to the nearest snapStep
+    // Calculate the difference from timelineStart
+    final Duration diffFromTimelineStart = newStart.difference(timelineStart);
+    // Determine how many snapSteps fit into this duration
+    final int numSnapSteps = (diffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds).round();
+    // Add the snapped duration back to timelineStart
+    newStart = timelineStart.add(Duration(microseconds: numSnapSteps * snapStep.inMicroseconds));
+
+    // 3. Calculate newEnd based on snapped newStart and itemDuration
     DateTime newEnd = newStart.add(itemDuration);
+
+    // 4. Clamp newEnd to the overall timeline bounds
     if (newEnd.isAfter(timelineEnd)) {
       newEnd = timelineEnd;
+      // If newEnd was pushed back, adjust newStart to maintain itemDuration if possible,
+      // but ensure it doesn't go before timelineStart.
       if (itemDuration > Duration.zero) {
         DateTime potentialStart = newEnd.subtract(itemDuration);
         newStart = potentialStart.isBefore(timelineStart) ? timelineStart : potentialStart;
       } else {
-        newStart = newEnd;
+        newStart = newEnd; // If duration is zero, start and end should be the same
       }
     }
-    newEnd = newStart.add(itemDuration);
-    if (newEnd.isAfter(timelineEnd)) newEnd = timelineEnd;
-    if (newStart.isAfter(newEnd)) newStart = newEnd;
 
-    final Duration currentEffectiveDuration = newEnd.difference(newStart);
+    // 5. Re-snap newStart after potential adjustment from newEnd clamping
+    final Duration reDiffFromTimelineStart = newStart.difference(timelineStart);
+    final int reNumSnapSteps = (reDiffFromTimelineStart.inMicroseconds / snapStep.inMicroseconds).round();
+    newStart = timelineStart.add(Duration(microseconds: reNumSnapSteps * snapStep.inMicroseconds));
+    newEnd = newStart.add(itemDuration); // Recalculate newEnd based on the re-snapped newStart
+
+    // 6. Ensure newEnd is within timeline bounds after re-snapping newStart
+    if (newEnd.isAfter(timelineEnd)) {
+      newEnd = timelineEnd;
+    }
+
+    // 7. Handle minimum allowed duration
+    Duration currentEffectiveDuration = newEnd.difference(newStart);
     if (minAllowedDuration > Duration.zero && currentEffectiveDuration < minAllowedDuration) {
       DateTime potentialEnd = newStart.add(minAllowedDuration);
       if (potentialEnd.isAfter(timelineEnd)) {
@@ -51,15 +80,19 @@ class TimeClampingService {
         newEnd = potentialEnd;
       }
     }
+
+    // 8. Final clamping to ensure start <= end and within timeline bounds
+    if (newStart.isAfter(newEnd)) {
+      newEnd = newStart;
+    }
     if (newStart.isBefore(timelineStart)) newStart = timelineStart;
-    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd;
-    if (newEnd.isBefore(timelineStart)) newEnd = timelineStart;
     if (newEnd.isAfter(timelineEnd)) newEnd = timelineEnd;
-    if (newStart.isAfter(newEnd)) newEnd = newStart;
+    if (newEnd.isBefore(timelineStart)) newEnd = timelineStart; // Should not happen if newStart is clamped
+    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd; // Should not happen if newEnd is clamped
+
     return DateTimeRange(start: newStart, end: newEnd);
   }
 }
-
 class ActivitiesContent extends StatefulWidget {
   final int occasionId;
   const ActivitiesContent({Key? key, required this.occasionId}) : super(key: key);
@@ -92,6 +125,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   String _placeFilter = '';
   String _eventFilter = '';
   final Map<ActivityModel, List<ActivityAssignmentModel>> _activityAssignments = {};
+  final Map<String, Duration> _userAssignedHours = {}; // New map to store assigned hours
 
   final Set<ActivityModel> _selectedActivities = {};
 
@@ -165,6 +199,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         _computeTimelineBounds(); // This sets _timelineStart and _timelineEnd
 
         _activityAssignments.clear();
+        _userAssignedHours.clear(); // Clear assigned hours
         if (data.activityAssignments != null) {
           for (var assignment in data.activityAssignments!) {
             final activity = data.activities?.firstWhereOrNull((act) {
@@ -174,6 +209,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             });
             if (activity != null) {
               _activityAssignments.putIfAbsent(activity, () => []).add(assignment);
+              if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null) {
+                final duration = assignment.endTime!.difference(assignment.startTime!);
+                _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
+                    ifAbsent: () => duration);
+              }
             }
           }
         }
@@ -500,9 +540,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               assignment.data?['isDragPreview'] != true;
         });
         _updateFilteredActivities();
+        _recalculateUserAssignedHours(); // Recalculate hours after deletion
       });
     }
     _hideAssignmentDetailOverlay();
+  }
+
+  void _recalculateUserAssignedHours() {
+    _userAssignedHours.clear();
+    _activityAssignments.values.expand((list) => list).forEach((assignment) {
+      if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null && assignment.data?['isDragPreview'] != true) {
+        final duration = assignment.endTime!.difference(assignment.startTime!);
+        _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
+            ifAbsent: () => duration);
+      }
+    });
   }
 
 
@@ -875,21 +927,25 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                 maxCrossAxisExtent: 60,
-                mainAxisExtent: 60,
+                mainAxisExtent: 60, // Total height for the item
                 mainAxisSpacing: 2,
                 crossAxisSpacing: 2,
               ),
               itemCount: filtered.length,
               itemBuilder: (context, index) {
                 final u = filtered[index]; // u is ActivityUserInfoModel
-                final initials = u
-                    .toFullNameString()
-                    .split(' ')
-                    .map((w) => w.isNotEmpty ? w[0] : '')
-                    .take(2)
-                    .join();
+                final initials = u.getInitials(); // Using the new method
                 final color = darkUserColors[u.hashCode % darkUserColors.length];
                 final avatarTextColor = Colors.white;
+                final assignedHours = _userAssignedHours[u.id] ?? Duration.zero;
+                final bool hasAssignments = assignedHours.inMinutes > 0;
+                final String hoursText = hasAssignments
+                    ? '${assignedHours.inHours}h ${assignedHours.inMinutes.remainder(60)}m'
+                    : '';
+                // Assuming 'isDark' and 'textColor' are defined in your widget's scope
+                // For example: final bool isDark = Theme.of(context).brightness == Brightness.dark;
+                // final Color textColor = isDark ? Colors.white70 : Colors.black87;
+
 
                 return Draggable<ActivityUserInfoModel>(
                   data: u,
@@ -928,54 +984,87 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         const SizedBox(height: 3),
                         Text(
                           u.toFullNameString(),
-                          style: TextStyle(color: textColor, fontSize: 12, decoration: TextDecoration.none),
+                          // Ensure textColor and decoration are appropriate for Material widget
+                          style: TextStyle(color: textColor /* Placeholder, ensure textColor is defined */, fontSize: 12, decoration: TextDecoration.none),
                         ),
                       ],
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 28, height: 28,
-                        margin: const EdgeInsets.only(top: 2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: color,
-                          border: Border.all(color: color.withOpacity(0.5), width: 1.0),
-                        ),
-                        child: Center(
-                          child: Text(
-                            initials,
-                            style: TextStyle(
-                              color: avatarTextColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                  child: Padding( // <--- MODIFICATION: Added Padding here
+                    padding: const EdgeInsets.only(top: 6.0), // This provides space for the badge's top: -6
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Stack(
+                          clipBehavior: Clip.none, // Allows badge to be positioned outside Stack's bounds
+                          children: [
+                            Container( // Avatar
+                              width: 28, height: 28,
+                              margin: const EdgeInsets.only(top: 2), // Margin for the avatar itself
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: color,
+                                border: Border.all(color: color.withOpacity(0.5), width: 1.0),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  initials,
+                                  style: TextStyle(
+                                    color: avatarTextColor,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                             ),
+                            if (hasAssignments)
+                              Positioned(
+                                top: -6,   // Badge positioned relative to the Stack
+                                left: 8,   // Adjust as needed for horizontal alignment
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                  decoration: BoxDecoration(
+                                    // Assuming 'isDark' is available in your widget's scope
+                                    color: isDark /* Placeholder */ ? Colors.orange[800] : Colors.orange[100],
+                                    borderRadius: BorderRadius.circular(5),
+                                    // Optional: Add a slight border to the badge if it helps with visibility
+                                    // border: Border.all(color: Colors.black12, width: 0.5),
+                                  ),
+                                  child: Text(
+                                    hoursText,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      // Ensure badge text color contrasts with its background
+                                      // color: isDark ? Colors.white : Colors.black87, // Example
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2, left: 1, right: 1),
+                          child: Text(
+                            u.toFullNameString(),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: textColor.withOpacity(0.8), /* Placeholder, ensure textColor is defined */
+                              height: 1.1,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2, left: 1, right: 1),
-                        child: Text(
-                          u.toFullNameString(),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: textColor.withOpacity(0.8),
-                            height: 1.1,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
             ),
-          ),
+          )
         ],
       ),
     );
@@ -1666,6 +1755,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             _activityAssignments.putIfAbsent(a, () => []).add(newAssignment);
             _hoveredActivityForPreview = null; _previewStartTime = null;
             _updateFilteredActivities();
+            _recalculateUserAssignedHours(); // Recalculate hours after adding
           });
         },
         builder: (ctx, candidateData, rejectedData) {
@@ -1757,6 +1847,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                 _activityAssignments.remove(a);
                                 _selectedActivities.remove(a);
                                 _updateFilteredActivities();
+                                _recalculateUserAssignedHours(); // Recalculate hours after activity deletion
                               });
                             } else if (v == 'rename') {
                               _showRenameDialog(a);
@@ -1825,7 +1916,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       child: Row(children: [
         SizedBox(width: kTimelineLabelWidth, child: Row(children: [
           const SizedBox(width: 4),
-          Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: color.withOpacity(0.7), width: 1.0)), child: Center(child: Text(userInfo.toFullNameString().split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase(), style: TextStyle(fontSize: 9, color: avatarTextColor, fontWeight: FontWeight.bold)))),
+          Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: color.withOpacity(0.7), width: 1.0)), child: Center(child: Text(userInfo.getInitials(), style: TextStyle(fontSize: 9, color: avatarTextColor, fontWeight: FontWeight.bold)))),
           const SizedBox(width: 3),
           Expanded(child: Text(userInfo.toFullNameString(), style: TextStyle(fontSize: 11, color: isDark? Colors.white70 : Colors.black87), overflow: TextOverflow.ellipsis)),
           PopupMenuButton<String>(
@@ -1848,6 +1939,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   // userInfo.id is ActivityUserInfoModel.id (String)
                   _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo.id && assign.data?['isDragPreview'] != true);
                   _updateFilteredActivities();
+                  _recalculateUserAssignedHours(); // Recalculate hours after user removal
                 });
               }
             },
@@ -1894,7 +1986,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                           initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
                                           timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
                                       if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
-                                        setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
+                                        setState(() {
+                                          u.startTime = finalClampedRange.start;
+                                          u.endTime = finalClampedRange.end;
+                                          _updateFilteredActivities();
+                                          _recalculateUserAssignedHours(); // Recalculate hours after assignment drag
+                                        });
                                       }
                                     },
                                     draggable: !isPreview && !activity.isHidden!,
