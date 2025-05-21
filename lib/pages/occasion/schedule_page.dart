@@ -4,11 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
-// Import DayList and AdvancedTimelineController if they are indeed from advanced_timeline.dart
-// and used as controller for DayList instances here.
-// Assuming DayList used here is the one from advanced_timeline.dart,
-// and it expects an AdvancedTimelineController.
-import 'package:fstapp/components/timeline/advanced_timeline.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -51,8 +49,6 @@ class _SchedulePageState extends State<SchedulePage>
 
   // for timeline-expand state
   int? _openId;
-  final Set<int> _signedIn = {};
-  final Set<int> _inProgram = {};
 
   @override
   void initState() {
@@ -153,25 +149,21 @@ class _SchedulePageState extends State<SchedulePage>
 
   Future<void> _handleSignIn(int id) async {
     await DbEvents.signInToEvent(context, id);
-    _signedIn.add(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleSignOut(int id) async {
     await DbEvents.signOutFromEvent(context, id);
-    _signedIn.remove(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleAdd(int id) async {
     await DbEvents.addToMySchedule(context, id);
-    _inProgram.add(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleRemove(int id) async {
     await DbEvents.removeFromMySchedule(context, id);
-    _inProgram.remove(id);
     await loadData(); // Reload data to reflect changes
   }
 
