@@ -1,6 +1,6 @@
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:uuid/uuid.dart';
-
 
 
 class ActivityPlaceModel {
@@ -57,6 +57,16 @@ class ActivityUserInfoModel {
 
   String toFullNameString() {
     return "${name ?? ""} ${surname ?? ""}".trim();
+  }
+
+  String getInitials() {
+    final String fullName = toFullNameString();
+    if (fullName.isEmpty) return '';
+    return fullName
+        .split(' ')
+        .map((w) => w.isNotEmpty ? w[0].toUpperCase() : '')
+        .take(2)
+        .join();
   }
 
   @override
@@ -159,8 +169,8 @@ class ActivityAssignmentModel {
   String? userInfo;
   DateTime? startTime;
   DateTime? endTime;
-  String? title;
-  String? description;
+  String? title; // This title is specific to the assignment, if any
+  String? description; // This description is specific to the assignment, if any
   Map<String, dynamic>? data;
   List<ActivityPlaceModel> places;
   List<ActivityEventModel> events;
@@ -288,7 +298,6 @@ class ActivityDataHelper {
           ?.map((item) => ActivityUserInfoModel.fromJson(item as Map<String, dynamic>))
           .toList() ??
           [];
-  // END UPDATED
 
   static void linkAssignmentsToActivities(EditDataBundle bundle) {
     final allActivities = bundle.activities ?? [];
@@ -297,12 +306,10 @@ class ActivityDataHelper {
     final allAssignmentPlaceLinks = bundle.assignmentPlaceLinks ?? [];
     final allAssignmentEventLinks = bundle.assignmentEventLinks ?? [];
 
-    // Use new local models from bundle
     final allPlaceModels = bundle.places ?? [];
     final allEventModels = bundle.events ?? [];
     final allUserModels = bundle.users ?? [];
 
-    // Maps using new local models
     final placeModelById = <int, ActivityPlaceModel>{
       for (final p in allPlaceModels) if (p.id != null) p.id!: p
     };
@@ -367,5 +374,57 @@ class ActivityDataHelper {
       if (activityId == null) continue;
       activity.assignments = assignmentsByActivityId[activityId] ?? [];
     }
+  }
+
+  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities) {
+    final List<TimeBlockItem> timeBlocks = [];
+    // Set to keep track of processed assignment IDs to prevent duplicates
+    final Set<String> processedAssignmentIds = {};
+
+    for (final activity in activities) {
+      if (activity.assignments == null) continue;
+
+      for (final assignment in activity.assignments!) {
+        // Ensure startTime and endTime are available for the assignment
+        if (assignment.startTime == null || assignment.endTime == null) {
+          continue;
+        }
+
+        // Check if this assignment ID has already been processed
+        if (processedAssignmentIds.contains(assignment.id)) {
+          continue; // Skip this assignment if it's already been added
+        }
+
+        TimeBlockPlace? timeBlockPlace;
+        if (assignment.places.isNotEmpty) {
+          final firstPlace = assignment.places.first;
+          if (firstPlace.id != null && firstPlace.title != null) {
+            timeBlockPlace = TimeBlockPlace(
+              id: firstPlace.id!,
+              title: firstPlace.title!,
+              order: null, // ActivityPlaceModel does not have order, set to null or a default
+            );
+          }
+        }
+
+        final timeBlockId = assignment.id.hashCode;
+
+        timeBlocks.add(TimeBlockItem(
+          id: timeBlockId,
+          startTime: assignment.startTime!,
+          endTime: assignment.endTime!,
+          title: activity.title ?? '', // Title from ActivityModel
+          description: activity.description, // Description from ActivityModel
+          timeBlockType: TimeBlockType.activity, // Default type
+          data: assignment, // Store the original assignment
+          timeBlockPlace: timeBlockPlace,
+          participants: 0,
+          maxParticipants: 0,
+        ));
+        // Add the assignment ID to the set of processed IDs
+        processedAssignmentIds.add(assignment.id);
+      }
+    }
+    return timeBlocks;
   }
 }

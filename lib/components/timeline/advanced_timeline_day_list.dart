@@ -1,8 +1,10 @@
 // day_list.dart
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
 import 'package:fstapp/services/web_styles_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -35,7 +37,6 @@ class DayList extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = dayGroup.events;
 
-    // Use custom splitter if provided, otherwise default to splitTimeBlocksByTimeOfDay
     final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ??
         TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
 
@@ -91,10 +92,7 @@ class DayList extends StatelessWidget {
   }
 }
 
-// Minimum width threshold for inline buttons
 const double _kMinWidthForInlineButtons = 420.0;
-
-// Constant to control the use of pastel background color
 const bool _kUsePastelBackground = false;
 
 bool isDark(context) => Theme.of(context).brightness == Brightness.dark;
@@ -148,9 +146,8 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
 
   Future<void> _handleRemoveEvent(int eventId) async {
     if (!mounted) return;
-
     if (widget.controller.animateEventRemoval) {
-      await _removeAnimationController.forward(); // Corrected: await the forward() call
+      await _removeAnimationController.forward();
       if (!mounted || _isDisposed) return;
       await widget.controller.onRemoveFromProgramEvent?.call(eventId);
     } else {
@@ -160,28 +157,21 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
 
   Future<void> _handleSignOutEvent(int eventId) async {
     if (!mounted) return;
-
     if (widget.controller.animateEventRemoval) {
-      await _removeAnimationController.forward(); // Corrected: await the forward() call
+      await _removeAnimationController.forward();
       if (!mounted || _isDisposed) return;
       await widget.controller.onSignOutEvent?.call(eventId);
-      // Assuming onSignOutEvent leads to this card's removal or state change
-      // that makes it disappear from the current view.
     } else {
       await widget.controller.onSignOutEvent?.call(eventId);
     }
   }
 
-  // Adjust color for pastel effect based on theme brightness
   Color _toPastel(BuildContext context, Color color) {
     final HSLColor hslColor = HSLColor.fromColor(color);
-    // Reduce saturation significantly
     final double saturated = isDark(context) ? hslColor.saturation * 0.5 : hslColor.saturation * 0.9;
-    // Increase lightness, more in dark mode
     final double lightened = isDark(context)
-        ? hslColor.lightness * 0.5 + 0.0  // Lighter in dark mode
-        : hslColor.lightness * 0.35 + 0.5; // More light in light mode
-
+        ? hslColor.lightness * 0.5 + 0.0
+        : hslColor.lightness * 0.35 + 0.5;
     return hslColor.withSaturation(saturated.clamp(0.0, 1.0)).withLightness(lightened.clamp(0.0, 1.0)).toColor();
   }
 
@@ -192,28 +182,42 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final controller = widget.controller;
     final onToggle = widget.onToggle;
 
-    //event.timeBlockType = TimeBlockType.signedIn;
-    const stripeW = 6.0, stripeH = 58.0;
-    final baseColor = ThemeConfig.eventTypeToColor(context, event.eventType);
-    final cardColor = _kUsePastelBackground ? _toPastel(context, baseColor) : null;
-    final imageUrl = event.imageUrl;
-    final capEvent = event.maxParticipants > 0;
+    final bool isActivity = event.timeBlockType == TimeBlockType.activity;
 
-    // Responsive inline button logic
+    const stripeW = 6.0, stripeH = 58.0;
+    final Color eventSpecificColor = ThemeConfig.eventTypeToColor(context, event.eventType);
+    final Color effectiveBaseColor = isActivity ? Theme.of(context).primaryColor : eventSpecificColor;
+    final cardColor = _kUsePastelBackground ? _toPastel(context, effectiveBaseColor) : null;
+
+    Widget stripeWidget;
+    if (isActivity) {
+      stripeWidget = Container(width: stripeW, height: stripeH, color: Theme.of(context).primaryColor);
+    } else if (!_kUsePastelBackground) {
+      stripeWidget = Container(width: stripeW, height: stripeH, color: eventSpecificColor);
+    } else {
+      stripeWidget = const SizedBox.shrink();
+    }
+
+    final imageUrl = event.imageUrl;
+    final capEvent = event.maxParticipants > 0 && !isActivity;
     final screenWidth = MediaQuery.of(context).size.width;
     final showInlineButtons = screenWidth >= _kMinWidthForInlineButtons;
-
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
     final hasPlace = event.timeBlockPlace?.title != null;
     final isEditor = controller.showAddNewEventButton?.call() ?? false;
-    final canSignIn = event.timeBlockType == TimeBlockType.canSignIn;
+    final canSignIn = event.timeBlockType == TimeBlockType.canSignIn && !isActivity;
     final haveChildren = event.haveChildren();
-    final canExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
+
+    final bool currentCanExpand;
+    if (isActivity) {
+      currentCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (hasDescription || hasPlace);
+    } else {
+      currentCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
+    }
 
     final now = TimeHelper.now();
     final bool isCurrentEvent = event.startTime.isBefore(now) && event.endTime.isAfter(now);
 
-    // Determine button and capacity text color based on pastel background
     final buttonTextColor = _kUsePastelBackground
         ? (isDark(context) ? Colors.white : Colors.black87)
         : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.7);
@@ -230,15 +234,37 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         ? (isDark(context) ? Colors.white30 : Colors.black26)
         : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3);
 
-    Widget inlineActionSection;
-    if (capEvent) {
-      final capBackgroundColor = event.isSignedIn()
-          ? selectedColor
-          : unselectedColor;
+    final Color eventPastelColorForText = _kUsePastelBackground ? _toPastel(context, eventSpecificColor) : Colors.white;
+    final capTextColor = event.isSignedIn()
+        ? eventPastelColorForText
+        : unselectedColor;
 
-      final capTextColor = event.isSignedIn()
-          ? _kUsePastelBackground ? cardColor : Colors.white
-          : unselectedColor;
+    Widget inlineActionSection;
+    if (isActivity) {
+      // MODIFIED: Activity badge styling and placement
+      final Color activityBadgeBackgroundColor = selectedColor;
+      final Color activityBadgeForegroundColor = eventPastelColorForText;
+
+      inlineActionSection = Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: activityBadgeBackgroundColor,
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              ActivitiesComponentStrings.activity,
+              style: TextStyle(fontSize: 13, color: activityBadgeForegroundColor, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(width: 5), // Slightly increased spacing
+            Icon(Icons.groups, size: 16, color: activityBadgeForegroundColor),
+          ],
+        ),
+      );
+    } else if (capEvent) {
+      final capBackgroundColor = event.isSignedIn() ? selectedColor : unselectedColor;
 
       inlineActionSection = Column(
           mainAxisSize: MainAxisSize.min,
@@ -249,14 +275,14 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: selectedColor,
+                      color: selectedColor, // This is primary or its B/W pastel
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
                         Text(
                           '${event.participants}/${event.maxParticipants}',
-                          style: TextStyle(fontSize: 13, color: capTextColor),
+                          style: TextStyle(fontSize: 13, color: capTextColor), // capTextColor uses event's pastel color on B/W bg
                         ),
                         const SizedBox(width: 4),
                         Icon(Icons.people, size: 14, color: capTextColor),
@@ -267,9 +293,9 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   Row(
                     children: [
                       Text('${event.participants}/${event.maxParticipants}',
-                          style: TextStyle(fontSize: 13, color: capBackgroundColor)),
+                          style: TextStyle(fontSize: 13, color: capBackgroundColor)), // unselectedColor for text
                       const SizedBox(width: 4),
-                      Icon(Icons.people, size: 14, color: capBackgroundColor),
+                      Icon(Icons.people, size: 14, color: capBackgroundColor), // unselectedColor for icon
                     ],
                   ),
               ],
@@ -278,7 +304,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
               const SizedBox(height: 4),
               event.isSignedIn()
                   ? OutlinedButton(
-                onPressed: () => _handleSignOutEvent(event.id), // MODIFIED for animation
+                onPressed: () => _handleSignOutEvent(event.id),
                 style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                 child: Text('Sign out'.tr()),
               )
@@ -310,24 +336,33 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
           child: Card(
             color: cardColor,
             elevation: 0,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness)),
             clipBehavior: Clip.hardEdge,
             child: Column(children: [
               InkWell(
                 onTap: () {
-                  if (canExpand) {
+                  if (currentCanExpand) {
                     onToggle();
-                  } else {
-                    controller.onEventPressed?.call(event.id);
+                  } else if (controller.onEventPressed != null) {
+                    if (isActivity) {
+                      if(hasDescription){
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return DetailDialog(title: event.title, canEdit: false, htmlDescription: event.description,);
+                          },
+                        );
+                      }
+                    } else {
+                      controller.onEventPressed?.call(event.id);
+                    }
                   }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(children: [
-                    if (!_kUsePastelBackground) Container(width: stripeW, height: stripeH, color: baseColor),
+                    stripeWidget,
                     const SizedBox(width: 6),
-
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -345,29 +380,32 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                                   child: Text(
                                     "Right Now".tr().toUpperCase(),
                                     style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
+                                      color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5,
                                     ),
                                   ),
                                 ),
                               Text(event.durationTimeString(),
                                   style: TextStyle(
-                                    fontSize: 13,
-                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.8),
+                                    fontSize: 13, color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.8),
                                   )),
+                              // Activity Badge was here, moved to inlineActionSection
                             ],
                           ),
                           Text(event.title,
                               style: const TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600)),
-                          if (hasPlace && !expanded) ...[
-                            Text(event.timeBlockPlace!.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13)),
-                          ],
+                          // MODIFIED for consistent height when not expanded
+                          if (!expanded)
+                            (hasPlace
+                                ? Text(
+                              event.timeBlockPlace!.title,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: TextStyle(
+                                  color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13),
+                            )
+                                : const SizedBox(height: 16.0) // Approx height of one line of size 13 text + padding
+                            ),
                         ],
                       ),
                     ),
@@ -378,31 +416,30 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
                           clipBehavior: Clip.antiAlias,
                           child: SizedBox(
-                            width: 58.0,
-                            height: 58.0,
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                            ),
+                            width: 58.0, height: 58.0,
+                            child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
                           ),
                         ),
                       ),
                     const SizedBox(width: 4),
-                    inlineActionSection,
+                    inlineActionSection, // Contains Activity Badge or other buttons
                     const SizedBox(width: 4),
-                    if (canExpand)
+                    if (currentCanExpand)
                       Icon(
                         expanded ? Icons.expand_less : Icons.expand_more,
-                        size: 20,
-                        color: unselectedColor,
+                        size: 20, color: unselectedColor,
                       )
-                    else if (hasDescription || hasPlace || isEditor)
-                      Icon(Icons.chevron_right, size: 20, color: unselectedColor),
+                    else if (controller.onEventPressed != null &&
+                        ((isActivity && hasDescription) ||
+                         (!isActivity && (haveChildren || (hasDescription || hasPlace || isEditor)))
+                        ))
+                      Icon(Icons.chevron_right, size: 20, color: unselectedColor)
+                    else
+                      const SizedBox(width: 20.0),
                   ]),
                 ),
               ),
-
-              if (canExpand)
+              if (currentCanExpand)
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Padding(
@@ -414,37 +451,27 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           children: [
                             if (event.timeBlockPlace != null)
                               TextButton.icon(
-                                onPressed: () => controller.onPlaceTap
-                                    ?.call(context, event.timeBlockPlace!),
+                                onPressed: () => controller.onPlaceTap?.call(context, event.timeBlockPlace!),
                                 icon: Icon(Icons.place, size: 14, color: selectedColor),
                                 label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  alignment: Alignment.centerLeft,
-                                ),
+                                style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerLeft),
                               ),
                             const Spacer(),
-                            if (isEditor)
+                            if (isEditor && !isActivity)
                               TextButton.icon(
-                                onPressed: () =>
-                                    controller.onEditEvent?.call(context, event.id),
+                                onPressed: () => controller.onEditEvent?.call(context, event.id),
                                 icon: Icon(Icons.edit, size: 14, color: selectedColor),
                                 label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  alignment: Alignment.centerRight,
-                                ),
+                                style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerRight),
                               ),
                           ],
                         ),
-
                         const SizedBox(height: 8),
-
-                        if (capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
+                        if (!isActivity && capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
                           Center(
                             child: event.isSignedIn()
                                 ? OutlinedButton(
-                              onPressed: () => _handleSignOutEvent(event.id), // MODIFIED for animation
+                              onPressed: () => _handleSignOutEvent(event.id),
                               style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
                               child: Text('Sign out'.tr()),
                             )
@@ -456,7 +483,6 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           ),
                           const SizedBox(height: 8),
                         ],
-
                         if (event.timeBlockType == TimeBlockType.canSignIn && !AuthService.isLoggedIn()) ...[
                           Padding(
                             padding: const EdgeInsets.all(16.0),
@@ -475,24 +501,17 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           ),
                           const SizedBox(height: 8),
                         ],
-
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: HtmlView(
-                            html: event.description ?? "",
-                            isSelectable: true,
+                        if(hasDescription)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: HtmlView(html: event.description ?? "", isSelectable: true),
                           ),
-                        ),
                       ],
                     ),
                   ),
-                  crossFadeState: expanded
-                      ? CrossFadeState.showSecond
-                      : CrossFadeState.showFirst,
+                  crossFadeState: expanded && currentCanExpand ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),
-                  firstCurve: Curves.easeOut,
-                  secondCurve: Curves.easeIn,
-                  sizeCurve: Curves.easeInOut,
+                  firstCurve: Curves.easeOut, secondCurve: Curves.easeIn, sizeCurve: Curves.easeInOut,
                 ),
             ]),
           ),
@@ -503,15 +522,11 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     return SizeTransition(
       sizeFactor: _sizeAnimation,
       axisAlignment: -1.0,
-      child: FadeTransition(
-        opacity: _opacityAnimation,
-        child: cardContent,
-      ),
+      child: FadeTransition(opacity: _opacityAnimation, child: cardContent),
     );
   }
 }
 
-// Sign in/out button style (smaller)
 ButtonStyle _signButtonStyle(Color fg, Color bd) => OutlinedButton.styleFrom(
   foregroundColor: fg,
   side: BorderSide(color: bd),

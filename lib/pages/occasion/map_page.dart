@@ -12,7 +12,8 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
-import 'package:fstapp/components/map/place_detail_dialog.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
@@ -464,7 +465,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return PlaceDetailDialog(marker: marker);
+                  return DetailDialog(title: marker.place.title, canEdit: RightsService.isEditor(), htmlDescription: marker.place.description,);
                 },
               );
             } else {

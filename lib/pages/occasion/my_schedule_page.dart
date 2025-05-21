@@ -5,6 +5,8 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
+import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
 import 'package:fstapp/pages/occasion/map_page.dart';
@@ -58,6 +60,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
   }
 
    Future<void> loadData() async {
+    if(!AuthService.isLoggedIn()){
+      return;
+    }
      if (!_fullEventsLoaded) {
        await _loadFullData();
      } else {
@@ -71,6 +76,9 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     if (_isAdvancedTimeline ?? false) {
       _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+      var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities);
+      _dots!.addAll(actDots);
+      _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     } else {
       _dots = _data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }

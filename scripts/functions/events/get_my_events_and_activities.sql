@@ -262,15 +262,15 @@ BEGIN
     RETURN jsonb_build_object(
       'code', 200,
       'data', jsonb_build_object(
-        'events',             COALESCE(eventsData,           '[]'::jsonb),
-        'event_users',        COALESCE(eventUsersData,       '[]'::jsonb),
-        'event_users_saved',  COALESCE(eventUsersSavedData,  '[]'::jsonb),
-        'places',             COALESCE(placesData,           '[]'::jsonb),
-        'event_groups',       COALESCE(eventGroupsData,      '[]'::jsonb),
-        'activities',         COALESCE(activitiesData,       '[]'::jsonb),
-        'assignments',        COALESCE(assignmentsData,      '[]'::jsonb),
-        'assignment_events',  COALESCE(assignmentEventsData, '[]'::jsonb),
-        'assignment_places',  COALESCE(assignmentPlacesData, '[]'::jsonb)
+        'events',               COALESCE(eventsData,           '[]'::jsonb),
+        'event_users',          COALESCE(eventUsersData,       '[]'::jsonb),
+        'event_users_saved',    COALESCE(eventUsersSavedData,  '[]'::jsonb),
+        'places',               COALESCE(placesData,           '[]'::jsonb),
+        'event_groups',         COALESCE(eventGroupsData,      '[]'::jsonb),
+        'activities',           COALESCE(activitiesData,       '[]'::jsonb),
+        'activity_assignments', COALESCE(assignmentsData,      '[]'::jsonb),
+        'assignment_events',    COALESCE(assignmentEventsData, '[]'::jsonb),
+        'assignment_places',    COALESCE(assignmentPlacesData, '[]'::jsonb)
       )
     );
 END;

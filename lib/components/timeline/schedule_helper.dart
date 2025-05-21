@@ -14,6 +14,7 @@ enum TimeBlockType {
   signedIn,    // user is signed in
   isFull,      // event full
   canSignIn,   // can sign in
+  activity,   // can sign in
 }
 
 /// Represents an optional place or "track" for splitting.
