@@ -37,6 +37,10 @@ class DayList extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = dayGroup.events;
 
+    if (events.isEmpty && controller.emptyContent != null) {
+      return controller.emptyContent!;
+    }
+
     final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ??
         TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
 
@@ -431,7 +435,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                       )
                     else if (controller.onEventPressed != null &&
                         ((isActivity && hasDescription) ||
-                         (!isActivity && (haveChildren || (hasDescription || hasPlace || isEditor)))
+                            (!isActivity && (haveChildren || (hasDescription || hasPlace || isEditor)))
                         ))
                       Icon(Icons.chevron_right, size: 20, color: unselectedColor)
                     else
