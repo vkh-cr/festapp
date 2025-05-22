@@ -97,8 +97,8 @@ class TimeBlockItem {
   factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       eventType: model.type,
@@ -134,8 +134,8 @@ class TimeBlockItem {
   factory TimeBlockItem.fromEventModel(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       description: model.description,
