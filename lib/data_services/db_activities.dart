@@ -26,17 +26,17 @@ class DbActivities {
     final data = responseMap['data'] as Map<String, dynamic>;
 
     final bundle = EditDataBundle(
-      users: EditDataHelper.parseUsers(data),
-      events: EditDataHelper.parseEvents(data),
-      places: EditDataHelper.parsePlaces(data),
-      activities: EditDataHelper.parseActivities(data),
+      users: ActivityDataHelper.parseUsers(data),
+      events: ActivityDataHelper.parseEvents(data),
+      places: ActivityDataHelper.parsePlaces(data),
+      activities: ActivityDataHelper.parseActivities(data),
       // Use new parsing methods and field names
-      assignmentPlaceLinks: EditDataHelper.parseAssignmentPlaceLinks(data),
-      assignmentEventLinks: EditDataHelper.parseAssignmentEventLinks(data),
-      activityAssignments: EditDataHelper.parseActivityAssignments(data),
+      assignmentPlaceLinks: ActivityDataHelper.parseAssignmentPlaceLinks(data),
+      assignmentEventLinks: ActivityDataHelper.parseAssignmentEventLinks(data),
+      activityAssignments: ActivityDataHelper.parseActivityAssignments(data),
     );
 
-    EditDataHelper.linkAssignmentsToActivities(bundle);
+    ActivityDataHelper.linkAssignmentsToActivities(bundle);
     return bundle;
   }
 

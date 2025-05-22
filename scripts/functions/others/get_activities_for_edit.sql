@@ -29,12 +29,21 @@ BEGIN
     )) INTO eventsData
     FROM public.events e WHERE e.occasion = p_occasion;
 
-    -- (b) all places for this occasion
-    SELECT jsonb_agg(jsonb_build_object(
-        'id', p.id, 'title', p.title, 'description', p.description, 'type', p.type, 'created_at', p.created_at,
-        'coordinates', p.coordinates, 'is_hidden', p.is_hidden, 'updated_at', p.updated_at, 'occasion', p.occasion
-    )) INTO placesData
-    FROM public.places p WHERE p.occasion = p_occasion;
+    -- (b) all places for this occasion, sorted by places.order
+    -- The jsonb_agg function will respect the order of the rows it aggregates.
+    SELECT jsonb_agg(place_obj ORDER BY place_order ASC)
+    INTO placesData
+    FROM (
+        SELECT jsonb_build_object(
+            'id', p.id, 'title', p.title, 'description', p.description, 'type', p.type, 'created_at', p.created_at,
+            'coordinates', p.coordinates, 'is_hidden', p.is_hidden, 'updated_at', p.updated_at, 'occasion', p.occasion,
+            'order', p."order"
+        ) AS place_obj,
+        p."order" AS place_order
+        FROM public.places p
+        WHERE p.occasion = p_occasion
+    ) AS ordered_places;
+
 
     -- (c) all activities
     SELECT jsonb_agg(jsonb_build_object(
@@ -46,7 +55,7 @@ BEGIN
 
     -- (d) activity_assignment_places links (now assignment_id <-> place_id)
     SELECT jsonb_agg(jsonb_build_object(
-        'assignment_id', apl.assignment_id, -- Changed from activity_id
+        'assignment_id', apl.assignment_id,
         'place_id',      apl.place_id
     )) INTO assignmentPlaceLinksData
     FROM public.activity_assignment_places apl
@@ -56,7 +65,7 @@ BEGIN
 
     -- (e) activity_assignment_events links (now assignment_id <-> event_id)
     SELECT jsonb_agg(jsonb_build_object(
-        'assignment_id', ael.assignment_id, -- Changed from activity_id
+        'assignment_id', ael.assignment_id,
         'event_id',      ael.event_id
     )) INTO assignmentEventLinksData
     FROM public.activity_assignment_events ael

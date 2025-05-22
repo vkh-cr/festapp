@@ -5,63 +5,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
-import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
-import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'constants.dart';
+import 'time_clamping_service.dart';
 import 'timeline_painter.dart';
 import 'timeline_row.dart';
 import 'verticla_grid_lines_painter.dart';
 import 'activities_component_strings.dart';
 
+import 'activity_timeline_controller.dart';
+import 'users_panel.dart';
+import 'places_panel.dart';
+import 'events_panel.dart';
 
-class TimeClampingService {
-  static DateTimeRange clampDateTimeRange({
-    required DateTime initialStartTime,
-    required Duration itemDuration,
-    required DateTime timelineStart,
-    required DateTime timelineEnd,
-    required Duration minAllowedDuration,
-  }) {
-    DateTime newStart = initialStartTime;
-    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd;
-    if (newStart.isBefore(timelineStart)) newStart = timelineStart;
-    DateTime newEnd = newStart.add(itemDuration);
-    if (newEnd.isAfter(timelineEnd)) {
-      newEnd = timelineEnd;
-      if (itemDuration > Duration.zero) {
-        DateTime potentialStart = newEnd.subtract(itemDuration);
-        newStart = potentialStart.isBefore(timelineStart) ? timelineStart : potentialStart;
-      } else {
-        newStart = newEnd;
-      }
-    }
-    newEnd = newStart.add(itemDuration);
-    if (newEnd.isAfter(timelineEnd)) newEnd = timelineEnd;
-    if (newStart.isAfter(newEnd)) newStart = newEnd;
-
-    final Duration currentEffectiveDuration = newEnd.difference(newStart);
-    if (minAllowedDuration > Duration.zero && currentEffectiveDuration < minAllowedDuration) {
-      DateTime potentialEnd = newStart.add(minAllowedDuration);
-      if (potentialEnd.isAfter(timelineEnd)) {
-        newEnd = timelineEnd;
-        DateTime potentialStart = newEnd.subtract(minAllowedDuration);
-        newStart = potentialStart.isBefore(timelineStart) ? timelineStart : potentialStart;
-      } else {
-        newEnd = potentialEnd;
-      }
-    }
-    if (newStart.isBefore(timelineStart)) newStart = timelineStart;
-    if (newStart.isAfter(timelineEnd)) newStart = timelineEnd;
-    if (newEnd.isBefore(timelineStart)) newEnd = timelineStart;
-    if (newEnd.isAfter(timelineEnd)) newEnd = timelineEnd;
-    if (newStart.isAfter(newEnd)) newEnd = newStart;
-    return DateTimeRange(start: newStart, end: newEnd);
-  }
-}
 
 class ActivitiesContent extends StatefulWidget {
   final int occasionId;
@@ -77,8 +35,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   DateTime? _timelineStart, _timelineEnd;
 
   double _scale = 0.2;
-  double _panOffset = 0.0; // Stable pan offset
-  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(0.0); // Live pan offset for dragging
+  double _panOffset = 0.0;
+  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(0.0);
 
   double _gesturePanOffsetStart = 0.0;
   double _gestureDragStartX = 0.0;
@@ -86,22 +44,23 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   double _scrollbarGestureDragStartX = 0.0;
   double _scrollbarGesturePanOffsetStartValue = 0.0;
 
-  final double _basePps = 0.05; // Pixels per second at scale 1.0
+  final double _basePps = 0.05;
 
-  late List<UserInfoModel> _allUsers;
-  late List<PlaceModel> _allPlaces;
-  late List<EventModel> _allEvents;
+  late List<ActivityUserInfoModel> _allUsers;
+  late List<ActivityPlaceModel> _allPlaces;
+  late List<ActivityEventModel> _allEvents;
   String _userFilter = '';
   String _placeFilter = '';
   String _eventFilter = '';
   final Map<ActivityModel, List<ActivityAssignmentModel>> _activityAssignments = {};
+  final Map<String, Duration> _userAssignedHours = {};
 
   final Set<ActivityModel> _selectedActivities = {};
 
   late MultiSplitViewController _mainController;
   late MultiSplitViewController _topController;
 
-  UserInfoModel? _currentlyDraggedUser;
+  ActivityUserInfoModel? _currentlyDraggedUser;
   ActivityModel? _hoveredActivityForPreview;
   DateTime? _previewStartTime;
 
@@ -115,10 +74,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   bool _isTimelineFullscreen = false;
 
-  // Store the viewport width for zoom calculations if needed outside LayoutBuilder
   double _currentViewportWidth = 0;
 
-  // Constants for timeline date padding
   static const int kTimelinePaddingDaysBefore = 1;
   static const int kTimelinePaddingDaysAfter = 1;
 
@@ -130,6 +87,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     super.initState();
     _mainController = MultiSplitViewController(areas: [Area(data: 'top', size: 160, min: 100), Area(data: 'bottom', flex: 1)]);
     _topController = MultiSplitViewController(areas: [Area(data: 'users', flex: 1), Area(data: 'places', flex: 1), Area(data: 'events', flex: 1)]);
+    _allUsers = [];
+    _allPlaces = [];
+    _allEvents = [];
     _loadData();
     _globalFilterController.addListener(() {
       if (_globalFilterController.text != _globalTimelineFilter) {
@@ -159,12 +119,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       data.activities!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
       setState(() {
         _bundle = data;
-        _allPlaces = data.places!;
-        _allEvents = data.events!;
-        _allUsers = data.users!;
-        _computeTimelineBounds(); // This sets _timelineStart and _timelineEnd
+        _allPlaces = data.places ?? [];
+        _allEvents = data.events ?? [];
+        _allUsers = data.users ?? [];
+        _computeTimelineBounds();
 
         _activityAssignments.clear();
+        _userAssignedHours.clear();
         if (data.activityAssignments != null) {
           for (var assignment in data.activityAssignments!) {
             final activity = data.activities?.firstWhereOrNull((act) {
@@ -174,19 +135,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             });
             if (activity != null) {
               _activityAssignments.putIfAbsent(activity, () => []).add(assignment);
+              if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null) {
+                final duration = assignment.endTime!.difference(assignment.startTime!);
+                _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
+                    ifAbsent: () => duration);
+              }
             }
           }
         }
-        // Reset pan to default before potentially shifting
         _panOffset = 0.0;
         _currentPanOffsetNotifier.value = 0.0;
 
         _updateFilteredActivities();
 
-        // Schedule the initial scroll to occur after the current build cycle completes
-        // and layout information (like _currentViewportWidth) is available.
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if(mounted) { // Ensure the widget is still in the tree
+          if(mounted) {
             _performInitialTimelineScroll();
           }
         });
@@ -195,24 +158,22 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   void _performInitialTimelineScroll() {
-    // This check ensures that layout has occurred and _currentViewportWidth is set.
-    // If _currentViewportWidth is 0, it means LayoutBuilder hasn't run or provided the width yet.
-    // addPostFrameCallback usually runs after the build triggered by setState, so width should be available.
     if (_currentViewportWidth <= 0 && mounted) {
-      // Optionally, retry after a short delay if width is consistently not available,
-      // but typically, it should be available after the first frame post-setState.
-      // For now, we proceed, and _shiftTimelineToDateTime has its own guard for _currentViewportWidth <= 0.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _performInitialTimelineScroll();
+      });
+      return;
     }
 
     DateTime? earliestTimeToShow;
     List<DateTime> allPossibleStartTimes = [];
 
     if (_bundle?.events?.isNotEmpty ?? false) {
-      allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime.toLocal()));
+      allPossibleStartTimes.addAll(_bundle!.events!.map((e) => e.startTime));
     }
     _activityAssignments.values.expand((list) => list).forEach((assignment) {
-      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) { // Exclude previews for initial scroll
-        allPossibleStartTimes.add(assignment.startTime!.toLocal());
+      if (assignment.startTime != null && assignment.data?['isDragPreview'] != true) {
+        allPossibleStartTimes.add(assignment.startTime!);
       }
     });
 
@@ -224,7 +185,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (earliestTimeToShow != null && _timelineStart != null && _timelineEnd != null) {
       _shiftTimelineToDateTime(earliestTimeToShow);
     }
-    // If no specific time to shift to, _panOffset (set to 0.0 in _loadData) remains the default.
   }
 
 
@@ -232,15 +192,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final allStarts = <DateTime>[], allEnds = <DateTime>[];
     if (_bundle!.events != null) {
       for (var e in _bundle!.events!) {
-        allStarts.add(e.startTime.toLocal());
-        allEnds.add(e.endTime.toLocal());
+        allStarts.add(e.startTime);
+        allEnds.add(e.endTime);
       }
     }
     if (_bundle!.activityAssignments != null) {
       for (var au in _bundle!.activityAssignments!) {
         if (au.startTime != null && au.endTime != null) {
-          allStarts.add(au.startTime!.toLocal());
-          allEnds.add(au.endTime!.toLocal());
+          allStarts.add(au.startTime!);
+          allEnds.add(au.endTime!);
         }
       }
     }
@@ -251,14 +211,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       DateTime earliestActivityDate = allStarts.first;
       DateTime latestActivityDate = allEnds.last;
 
-      // Set start to the beginning of the day of the earliest activity, minus padding
       _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day)
           .subtract(const Duration(days: kTimelinePaddingDaysBefore));
-      // Set end to the end of the day of the latest activity, plus padding
       _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999)
           .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
-      // Default if no events or assignments to define bounds
       final now = DateTime.now();
       _timelineStart = now.subtract(const Duration(hours: 1));
       _timelineEnd = now.add(const Duration(hours: 1));
@@ -273,33 +230,24 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     final visibleTimelineAreaWidth = _currentViewportWidth - kTimelineLabelWidth;
 
     DateTime effectiveTargetTime = targetTime;
-    // Ensure target time is not before the timeline actually starts for calculation purposes
     if (effectiveTargetTime.isBefore(_timelineStart!)) {
       effectiveTargetTime = _timelineStart!;
     }
-    // If effectiveTargetTime is after _timelineEnd, the subsequent panOffset calculation and clamping
-    // will correctly result in showing the very end of the timeline if possible.
 
     final Duration durationFromStart = effectiveTargetTime.difference(_timelineStart!);
     final double pixelOffsetFromTimelineStart = durationFromStart.inSeconds * pps;
 
-    // Calculate the new panOffset to bring the targetTime to the beginning of the visible timeline area (just after the labels)
     double newPanOffset = -pixelOffsetFromTimelineStart;
 
-    // Clamp the newPanOffset to ensure it's within valid bounds
-    // The maximum left pan is -(timelineWidth - visibleTimelineAreaWidth)
-    // The minimum pan (i.e., maximum right pan) is 0.0
     newPanOffset = newPanOffset.clamp(
-        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0), // Max pan value (e.g., -500 if content is 500px wider)
-        0.0 // Min pan value (timeline starts at edge)
+        (visibleTimelineAreaWidth - timelineWidth).clamp(double.negativeInfinity, 0.0),
+        0.0
     );
 
-    // Only update state if there's a significant change to avoid unnecessary rebuilds
-    // Compare with a small epsilon for floating point precision
     if ((_panOffset - newPanOffset).abs() > 0.01 || (_currentPanOffsetNotifier.value - newPanOffset).abs() > 0.01) {
       setState(() {
         _panOffset = newPanOffset;
-        _currentPanOffsetNotifier.value = _panOffset; // Keep notifier in sync
+        _currentPanOffsetNotifier.value = _panOffset;
       });
     }
   }
@@ -326,7 +274,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale * 1.25).clamp(0.05, 10.0);
+    final double newScale = (_scale * 1.25).clamp(0.05, 2.0);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -354,7 +302,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale / 1.25).clamp(0.05, 10.0);
+    final double newScale = (_scale / 1.25).clamp(0.05, 2.0);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -440,13 +388,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   void _handlePlaceOrEventDropOnAssignment(ActivityAssignmentModel assignment, dynamic droppedItemData) {
     bool changed = false;
-    if (droppedItemData is PlaceModel) {
+    if (droppedItemData is ActivityPlaceModel) {
       assignment.places ??= [];
       if (!assignment.places.any((p) => p.id == droppedItemData.id)) {
         assignment.places.add(droppedItemData);
         changed = true;
       }
-    } else if (droppedItemData is EventModel) {
+    } else if (droppedItemData is ActivityEventModel) {
       assignment.events ??= [];
       if (!assignment.events.any((e) => e.id == droppedItemData.id)) {
         assignment.events.add(droppedItemData);
@@ -461,7 +409,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  void _removePlaceFromAssignment(ActivityAssignmentModel assignment, PlaceModel place) {
+  void _removePlaceFromAssignment(ActivityAssignmentModel assignment, ActivityPlaceModel place) {
     assignment.places.removeWhere((p) => p.id == place.id);
     setState(() {});
     if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
@@ -469,7 +417,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  void _removeEventFromAssignment(ActivityAssignmentModel assignment, EventModel event) {
+  void _removeEventFromAssignment(ActivityAssignmentModel assignment, ActivityEventModel event) {
     assignment.events.removeWhere((e) => e.id == event.id);
     setState(() {});
     if (_detailOverlayEntry != null && _selectedAssignmentForDetail == assignment) {
@@ -516,9 +464,21 @@ class _ActivitiesContentState extends State<ActivitiesContent>
               assignment.data?['isDragPreview'] != true;
         });
         _updateFilteredActivities();
+        _recalculateUserAssignedHours();
       });
     }
     _hideAssignmentDetailOverlay();
+  }
+
+  void _recalculateUserAssignedHours() {
+    _userAssignedHours.clear();
+    _activityAssignments.values.expand((list) => list).forEach((assignment) {
+      if (assignment.userInfo != null && assignment.startTime != null && assignment.endTime != null && assignment.data?['isDragPreview'] != true) {
+        final duration = assignment.endTime!.difference(assignment.startTime!);
+        _userAssignedHours.update(assignment.userInfo!, (value) => value + duration,
+            ifAbsent: () => duration);
+      }
+    });
   }
 
 
@@ -682,30 +642,11 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         Alignment targetAnchor = Alignment.topRight;
         Offset offset = const Offset(10, 0);
 
-        final RenderBox? overlay = Overlay.of(context).context.findRenderObject() as RenderBox?;
-        final RenderBox? target = context.findRenderObject() as RenderBox?;
-
-        if (overlay != null && target != null) {
-          final targetGlobalCenter = target.localToGlobal(target.size.center(Offset.zero), ancestor: overlay);
-
-          if (targetGlobalCenter.dx > overlay.size.width / 2) {
-            targetAnchor = Alignment.topLeft;
-            followerAnchor = Alignment.topRight;
-            offset = const Offset(-10, 0);
-          }
-
-          if (targetGlobalCenter.dy + actualPopupHeight > overlay.size.height) {
-            if (targetAnchor == Alignment.topRight) {
-              targetAnchor = Alignment.bottomRight;
-              followerAnchor = Alignment.bottomLeft;
-            } else {
-              targetAnchor = Alignment.bottomLeft;
-              followerAnchor = Alignment.bottomRight;
-            }
-            offset = Offset(offset.dx, -10);
-          }
+        try {
+          _selectedAssignmentLayerLink!.leader!.offset;
+        } catch (e) {
+          // Could not get leader offset
         }
-
 
         return Stack(
           children: [
@@ -785,7 +726,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   KeyEventResult _handleKeyEvent(RawKeyEvent event) {
-    // This is your existing handler for delete/escape, etc.
     if (event is RawKeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.delete && _selectedActivities.isNotEmpty) {
         _deleteSelectedActivities(); return KeyEventResult.handled;
@@ -804,12 +744,44 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     return KeyEventResult.ignored;
   }
 
+  // Callbacks for UserPanel Draggable, to be passed to the controller
+  void _handleUserDragStarted(ActivityUserInfoModel user) {
+    _hideAssignmentDetailOverlay();
+    setState(() => _currentlyDraggedUser = user);
+  }
+
+  void _handleUserDragEnd() {
+    setState(() {
+      _currentlyDraggedUser = null;
+      _hoveredActivityForPreview = null;
+      _previewStartTime = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_bundle == null || _timelineStart == null || _timelineEnd == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    final isDark = isDarkMode(context);
+    final isDarkTheme = isDarkMode(context);
+
+    // Create the controller instance
+    final timelineController = ActivityTimelineController(
+      allUsers: _allUsers,
+      allPlaces: _allPlaces,
+      allEvents: _allEvents,
+      userAssignedHours: _userAssignedHours,
+      userFilter: _userFilter,
+      placeFilter: _placeFilter,
+      eventFilter: _eventFilter,
+      onUserFilterChanged: (v) => setState(() => _userFilter = v),
+      onPlaceFilterChanged: (v) => setState(() => _placeFilter = v),
+      onEventFilterChanged: (v) => setState(() => _eventFilter = v),
+      onUserDragStarted: _handleUserDragStarted,
+      onUserDragEnd: _handleUserDragEnd,
+      hideAssignmentDetailOverlay: _hideAssignmentDetailOverlay,
+      isDark: isDarkTheme,
+    );
 
     Widget mainContent;
 
@@ -832,9 +804,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 pushDividers: true,
                 builder: (context, subArea) {
                   switch (subArea.data) {
-                    case 'users': return _buildUsersPanel();
-                    case 'places': return _buildPlacesPanel();
-                    case 'events': return _buildEventsPanel();
+                    case 'users':
+                      return UsersPanel(controller: timelineController);
+                    case 'places':
+                      return PlacesPanel(controller: timelineController);
+                    case 'events':
+                      return EventsPanel(controller: timelineController);
                     default: return const SizedBox();
                   }
                 });
@@ -847,16 +822,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
     return Focus(
       autofocus: true,
-      onKey: (_, RawKeyEvent event) { // MODIFIED onKey
-        // Update modifier key state for scroll/zoom behavior
-        // This will be called on key up and key down.
+      onKey: (_, RawKeyEvent event) {
         final bool newModifierState = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
         if (_isModifierKeyPressedForScroll != newModifierState) {
           setState(() {
             _isModifierKeyPressedForScroll = newModifierState;
           });
         }
-        // Call your existing key event handler
         return _handleKeyEvent(event);
       },
       child: MultiSplitViewTheme(
@@ -865,324 +837,33 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             dividerPainter: _isTimelineFullscreen
                 ? null
                 : DividerPainters.background(
-                color: isDark ? Colors.black54 : Colors.black12,
-                highlightedColor: isDark ? Colors.black87 : Colors.black38)),
+                color: isDarkTheme ? Colors.black54 : Colors.black12,
+                highlightedColor: isDarkTheme ? Colors.black87 : Colors.black38)),
         child: mainContent,
       ),
     );
   }
 
-  Widget _buildUsersPanel() {
-    final filtered = _allUsers
-        .where((u) => u.toFullNameString().toLowerCase().contains(_userFilter.toLowerCase()))
-        .toList();
-    final isDark = isDarkMode(context);
-    final hintColor = isDark ? Colors.white54 : Colors.black54;
-    final textColor = isDark ? Colors.white : Colors.black;
-
-    return Container(
-      padding: const EdgeInsets.all(2),
-      color: isDark ? Colors.grey[850] : Colors.grey[100],
-      child: Column(
-        children: [
-          // search field unchanged
-          Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: TextField(
-              style: TextStyle(fontSize: 12, color: textColor),
-              decoration: InputDecoration(
-                hintText: ActivitiesComponentStrings.hintSearchUsers,
-                hintStyle: TextStyle(color: hintColor, fontSize: 12),
-                isDense: true,
-                alignLabelWithHint: true,
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 4),
-                  child: Icon(Icons.search, size: 14, color: hintColor),
-                ),
-                prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-                contentPadding: const EdgeInsets.symmetric(vertical: 6),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.transparent,
-              ),
-              onChanged: (v) => setState(() => _userFilter = v),
-            ),
-          ),
-
-          // Fixed grid: enforce a minimum height so names don’t overflow
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 60,
-                mainAxisExtent: 60,         // ← ensure 60px height regardless of width
-                mainAxisSpacing: 2,
-                crossAxisSpacing: 2,
-              ),
-              itemCount: filtered.length,
-              itemBuilder: (context, index) {
-                final u = filtered[index];
-                final initials = u
-                    .toFullNameString()
-                    .split(' ')
-                    .map((w) => w.isNotEmpty ? w[0] : '')
-                    .take(2)
-                    .join();
-                final color = darkUserColors[u.hashCode % darkUserColors.length];
-                final avatarTextColor = Colors.white;
-
-                return Draggable<UserInfoModel>(
-                  data: u,
-                  onDragStarted: () {
-                    _hideAssignmentDetailOverlay();
-                    setState(() => _currentlyDraggedUser = u);
-                  },
-                  onDragEnd: (_) => setState(() {
-                    _currentlyDraggedUser = null;
-                    _hoveredActivityForPreview = null;
-                    _previewStartTime = null;
-                  }),
-                  feedback: Material(
-                    color: Colors.transparent,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 36, height: 36,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: color.withOpacity(0.8),
-                            border: Border.all(color: color, width: 1.5),
-                          ),
-                          child: Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                color: avatarTextColor,
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          u.toFullNameString(),
-                          style: TextStyle(color: textColor, fontSize: 12, decoration: TextDecoration.none),
-                        ),
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 28, height: 28,
-                        margin: const EdgeInsets.only(top: 2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: color,
-                          border: Border.all(color: color.withOpacity(0.5), width: 1.0),
-                        ),
-                        child: Center(
-                          child: Text(
-                            initials,
-                            style: TextStyle(
-                              color: avatarTextColor,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2, left: 1, right: 1),
-                        child: Text(
-                          u.toFullNameString(),
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: textColor.withOpacity(0.8),
-                            height: 1.1,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,          // ← allow wrapping onto two lines
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlacesPanel() {
-    final filtered = _allPlaces.where((p) => (p.title ?? "").toLowerCase().contains(_placeFilter.toLowerCase())).toList();
-    final isDark = isDarkMode(context);
-    final hintColor = isDark ? Colors.white54 : Colors.black54;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final chipBgColor = isDark ? Colors.blueGrey[700] : Colors.blueGrey[100];
-    final chipTextColor = isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
-
-    return Container(
-      padding: const EdgeInsets.all(2),
-      color: isDark ? Colors.grey[850] : Colors.grey[100],
-      child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: TextField(
-            style: TextStyle(fontSize: 12, color: textColor),
-            decoration: InputDecoration(
-              hintText: ActivitiesComponentStrings.hintSearchPlaces,
-              hintStyle: TextStyle(color: hintColor, fontSize: 12),
-              isDense: true,
-              alignLabelWithHint: true,
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(left: 8, right: 4),
-                child: Icon(Icons.search, size: 14, color: hintColor),
-              ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              contentPadding: const EdgeInsets.symmetric(vertical: 6),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-            onChanged: (v) => setState(() => _placeFilter = v),
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Wrap(
-              spacing: 3,
-              runSpacing: 3,
-              children: filtered.map((p) {
-                return Draggable<PlaceModel>(
-                  data: p,
-                  onDragStarted: _hideAssignmentDetailOverlay,
-                  feedback: Material(
-                    elevation: 3.0,
-                    color: Colors.transparent,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: chipBgColor!.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        p.title ?? ActivitiesComponentStrings.textUnnamedPlace,
-                        style: TextStyle(fontSize: 12, color: chipTextColor),
-                      ),
-                    ),
-                  ),
-                  child: Chip(
-                    backgroundColor: chipBgColor,
-                    label: Text(p.title ?? ActivitiesComponentStrings.textUnnamedPlace, style: TextStyle(fontSize: 11, color: chipTextColor)),
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-
-  Widget _buildEventsPanel() {
-    final filtered = _allEvents.where((e) => (e.title ?? "").toLowerCase().contains(_eventFilter.toLowerCase())).toList();
-    final isDark = isDarkMode(context);
-    final hintColor = isDark ? Colors.white54 : Colors.black54;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final chipBgColor = isDark ? Colors.orange[800] : Colors.orange[100];
-    final chipTextColor = isDark ? Colors.white.withOpacity(0.9) : Colors.black87;
-
-    return Container(
-      padding: const EdgeInsets.all(2),
-      color: isDark ? Colors.grey[850] : Colors.grey[100],
-      child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: TextField(
-            style: TextStyle(fontSize: 12, color: textColor),
-            decoration: InputDecoration(
-              hintText: ActivitiesComponentStrings.hintSearchEvents,
-              hintStyle: TextStyle(color: hintColor, fontSize: 12),
-              isDense: true,
-              alignLabelWithHint: true,
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(left: 8, right: 4),
-                child: Icon(Icons.search, size: 14, color: hintColor),
-              ),
-              prefixIconConstraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              contentPadding: const EdgeInsets.symmetric(vertical: 6),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-                borderSide: BorderSide.none,
-              ),
-              filled: true,
-              fillColor: Colors.transparent,
-            ),
-            onChanged: (v) => setState(() => _eventFilter = v),
-          ),
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Wrap(
-              spacing: 3,
-              runSpacing: 3,
-              children: filtered.map((e) {
-                return Draggable<EventModel>(
-                  data: e,
-                  onDragStarted: _hideAssignmentDetailOverlay,
-                  feedback: Material(
-                    elevation: 3.0,
-                    color: Colors.transparent,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: chipBgColor!.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        e.title ?? ActivitiesComponentStrings.textUnnamedEvent,
-                        style: TextStyle(fontSize: 12, color: chipTextColor),
-                      ),
-                    ),
-                  ),
-                  child: Chip(
-                    backgroundColor: chipBgColor,
-                    label: Text(e.title ?? ActivitiesComponentStrings.textUnnamedEvent, style: TextStyle(fontSize: 11, color: chipTextColor)),
-                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-
+  // _buildUsersPanel, _buildPlacesPanel, _buildEventsPanel are REMOVED.
+  // Their logic is now in users_panel.dart, places_panel.dart, events_panel.dart respectively.
 
   Widget _buildTimelineArea() {
-    final isDark = isDarkMode(context);
+    final isDark = isDarkMode(context); // Keep local isDark for timeline specific parts
     return LayoutBuilder(builder: (ctx, constraints) {
       if (_currentViewportWidth != constraints.maxWidth && constraints.maxWidth > 0) {
-        _currentViewportWidth = constraints.maxWidth;
+        Future.microtask(() {
+          if (mounted) {
+            final oldWidth = _currentViewportWidth;
+            _currentViewportWidth = constraints.maxWidth;
+            if (oldWidth == 0 && _panOffset == 0.0) {
+              _performInitialTimelineScroll();
+            }
+          }
+        });
       }
       final vpWidth = _currentViewportWidth;
+      if (vpWidth <= 0) return const SizedBox.shrink();
+
 
       final totalSec = _timelineStart != null && _timelineEnd != null ? _timelineEnd!.difference(_timelineStart!).inSeconds.toDouble() : 0.0;
       final pps = _basePps * _scale;
@@ -1214,21 +895,15 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         child: Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {
-              // Check for Ctrl or Meta (Cmd) key press for zooming
               final bool canZoom = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
-
-              if (canZoom) { // MODIFIED: Only zoom if Ctrl/Cmd is pressed
+              if (canZoom) {
                 _hideAssignmentDetailOverlay();
                 if (pointerSignal.scrollDelta.dy < 0) {
                   _zoomIn(vpWidth, totalSec);
                 } else if (pointerSignal.scrollDelta.dy > 0) {
                   _zoomOut(vpWidth, totalSec);
                 }
-                // When zooming, we've handled the scroll event.
               }
-              // If Ctrl/Meta is not pressed, do nothing here.
-              // The event will propagate, and ReorderableListView (if applicable)
-              // will handle its scrolling based on its physics.
             }
           },
           child: Column(children: [
@@ -1256,7 +931,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       label: Text(ActivitiesComponentStrings.buttonSave, style: TextStyle(fontSize: 11)),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
-                          foregroundColor: isDarkMode(context) ? Colors.black : Colors.white,
+                          foregroundColor: isDarkMode(context) ? Colors.black : Colors.white, // Use isDarkMode(context) here for button theme
                           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           minimumSize: Size(60, 30)
@@ -1354,17 +1029,19 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         child: ClipRect(
                           child: Transform.translate(
                             offset: Offset(currentPanOffsetValue, 0),
-                            child: CustomPaint(
-                              size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
-                              painter: TimelinePainter(
-                                start: _timelineStart!,
-                                end: _timelineEnd!,
-                                pps: pps,
-                                isDarkMode: isDark,
-                                weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
-                                monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
-                                dateHeaderHeight: kDateHeaderHeightConstant,
-                                timeTickAreaHeight: kTimeTickAreaHeightConstant,
+                            child: RepaintBoundary(
+                              child: CustomPaint(
+                                size: Size(timelineWidth, kTotalTimelineRulerHeightConstant),
+                                painter: TimelinePainter(
+                                  start: _timelineStart!,
+                                  end: _timelineEnd!,
+                                  pps: pps,
+                                  isDarkMode: isDark,
+                                  weekdays: ActivitiesComponentStrings.getWeekdayAbbreviations(context.locale.languageCode),
+                                  monthAbbreviations: ActivitiesComponentStrings.getMonthAbbreviations(context.locale.languageCode),
+                                  dateHeaderHeight: kDateHeaderHeightConstant,
+                                  timeTickAreaHeight: kTimeTickAreaHeightConstant,
+                                ),
                               ),
                             ),
                           ),
@@ -1401,7 +1078,6 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                   ),
                 )
                     : ReorderableListView.builder(
-                  // MODIFIED: physics property
                   physics: _isModifierKeyPressedForScroll ? NeverScrollableScrollPhysics() : null,
                   buildDefaultDragHandles: false,
                   itemCount: _filteredActivities.length,
@@ -1433,10 +1109,10 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       }
 
                       final item = originalList.removeAt(originalIndexOld);
-                      if (targetOriginalIndexInAllActivities > originalIndexOld) {
+                      if (targetOriginalIndexInAllActivities > originalIndexOld && targetOriginalIndexInAllActivities > 0) {
                         originalList.insert(targetOriginalIndexInAllActivities -1, item);
                       } else {
-                        originalList.insert(targetOriginalIndexInAllActivities, item);
+                        originalList.insert(targetOriginalIndexInAllActivities.clamp(0, originalList.length), item);
                       }
 
                       for (var i = 0; i < originalList.length; i++) originalList[i].order = i;
@@ -1530,7 +1206,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
-  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) { // Added itemIndexInFilteredList
+  Widget _buildActivityWithAssignments(ActivityModel a, double timelineWidth, double viewportWidth, int itemIndexInFilteredList) {
     final allAssignmentsForActivity = _activityAssignments[a] ?? [];
     final validAssignments = allAssignmentsForActivity.where((assign) => assign.userInfo != null && assign.user != null && assign.data?['isDragPreview'] != true).toList();
     final isDark = isDarkMode(context);
@@ -1642,15 +1318,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       return SizedBox.shrink(key: ObjectKey(a));
     }
 
-    // The `itemIndexInFilteredList` is the direct index from ReorderableListView.builder
-    // No need for the complex fallback logic for displayIndex that was here before.
     final int displayIndex = itemIndexInFilteredList;
 
 
     return Padding(
       key: ObjectKey(a),
       padding: const EdgeInsets.symmetric(vertical: 0),
-      child: DragTarget<UserInfoModel>(
+      child: DragTarget<ActivityUserInfoModel>(
         onWillAcceptWithDetails: (details) {
           _hideAssignmentDetailOverlay();
           if (a.isHidden!) return false;
@@ -1701,6 +1375,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             _activityAssignments.putIfAbsent(a, () => []).add(newAssignment);
             _hoveredActivityForPreview = null; _previewStartTime = null;
             _updateFilteredActivities();
+            _recalculateUserAssignedHours();
           });
         },
         builder: (ctx, candidateData, rejectedData) {
@@ -1761,7 +1436,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 color: activityHeaderBgColor,
                 child: Row(children: [
                   ReorderableDragStartListener(
-                      index: displayIndex, // Use the passed index
+                      index: displayIndex,
                       child: SizedBox(width: kTimelineLabelWidth, height: 24, child: Row(children: [
                         IconButton(
                           icon: Icon(a.isHidden! ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 13, color: activityHeaderTextColor.withOpacity(0.8)),
@@ -1773,7 +1448,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                             setState(() { a.isHidden = !a.isHidden!; });
                           },
                         ),
-                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))), // Activity title in bold
+                        Expanded(child: Padding(padding: const EdgeInsets.only(left: 1.0), child: Text(a.title ?? ActivitiesComponentStrings.textUntitledActivity, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: activityHeaderTextColor), overflow: TextOverflow.ellipsis))),
                         PopupMenuButton<String>(
                           icon: Icon(Icons.more_vert, size: 15, color: activityHeaderTextColor.withOpacity(0.8)),
                           tooltip: ActivitiesComponentStrings.tooltipActivityOptions,
@@ -1792,6 +1467,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                 _activityAssignments.remove(a);
                                 _selectedActivities.remove(a);
                                 _updateFilteredActivities();
+                                _recalculateUserAssignedHours();
                               });
                             } else if (v == 'rename') {
                               _showRenameDialog(a);
@@ -1807,22 +1483,23 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                                 child: Transform.translate(
                                     offset: Offset(currentPanOffsetValue, 0),
                                     child: SizedBox(
-                                      width: timelineWidth,
                                       height: 24,
-                                      child: CustomPaint(
-                                        foregroundPainter: VerticalGridLinesPainter(
-                                          start: _timelineStart!,
-                                          end: _timelineEnd!,
-                                          pps: _basePps * _scale,
-                                          viewHeight: 24,
-                                          isDarkMode: isDark,
-                                        ),
-                                        child: Container(
-                                          color: a.isHidden!
-                                              ? activityHiddenOverlayColor
-                                              : (isDark
-                                              ? Colors.grey.shade700.withOpacity(0.2)
-                                              : Colors.grey.shade300.withOpacity(0.2)
+                                      child: RepaintBoundary(
+                                        child: CustomPaint(
+                                          foregroundPainter: VerticalGridLinesPainter(
+                                            start: _timelineStart!,
+                                            end: _timelineEnd!,
+                                            pps: _basePps * _scale,
+                                            viewHeight: 24,
+                                            isDarkMode: isDark,
+                                          ),
+                                          child: Container(
+                                            color: a.isHidden!
+                                                ? activityHiddenOverlayColor
+                                                : (isDark
+                                                ? Colors.grey.shade700.withOpacity(0.2)
+                                                : Colors.grey.shade300.withOpacity(0.2)
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -1842,7 +1519,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     );
   }
 
-  Widget _buildUserRow(ActivityModel activity, UserInfoModel userInfo, List<ActivityAssignmentModel> assignments, double timelineWidth) {
+  Widget _buildUserRow(ActivityModel activity, ActivityUserInfoModel userInfo, List<ActivityAssignmentModel> assignments, double timelineWidth) {
     if (assignments.isEmpty) return const SizedBox.shrink();
     final isDark = isDarkMode(context);
 
@@ -1859,7 +1536,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       child: Row(children: [
         SizedBox(width: kTimelineLabelWidth, child: Row(children: [
           const SizedBox(width: 4),
-          Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: color.withOpacity(0.7), width: 1.0)), child: Center(child: Text(userInfo.toFullNameString().split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase(), style: TextStyle(fontSize: 9, color: avatarTextColor, fontWeight: FontWeight.bold)))),
+          Container(width: 18, height: 18, decoration: BoxDecoration(shape: BoxShape.circle, color: color, border: Border.all(color: color.withOpacity(0.7), width: 1.0)), child: Center(child: Text(userInfo.getInitials(), style: TextStyle(fontSize: 9, color: avatarTextColor, fontWeight: FontWeight.bold)))),
           const SizedBox(width: 3),
           Expanded(child: Text(userInfo.toFullNameString(), style: TextStyle(fontSize: 11, color: isDark? Colors.white70 : Colors.black87), overflow: TextOverflow.ellipsis)),
           PopupMenuButton<String>(
@@ -1881,6 +1558,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 setState(() {
                   _activityAssignments[activity]?.removeWhere((assign) => assign.userInfo == userInfo.id && assign.data?['isDragPreview'] != true);
                   _updateFilteredActivities();
+                  _recalculateUserAssignedHours();
                 });
               }
             },
@@ -1895,51 +1573,58 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                       child: SizedBox(
                           width: timelineWidth,
                           height: 26,
-                          child: CustomPaint(
-                            painter: VerticalGridLinesPainter(
-                                start: _timelineStart!,
-                                end: _timelineEnd!,
-                                pps: _basePps * _scale,
-                                viewHeight: 26,
-                                isDarkMode: isDark
-                            ),
-                            child: Stack(
-                              children: assignments.map((u) {
-                                final bool isPreview = u.data?['isDragPreview'] == true;
-                                final itemLayerLink = LayerLink();
-                                Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
-                                if (activity.isHidden!) {
-                                  itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
-                                }
+                          child: RepaintBoundary(
+                            child: CustomPaint(
+                              painter: VerticalGridLinesPainter(
+                                  start: _timelineStart!,
+                                  end: _timelineEnd!,
+                                  pps: _basePps * _scale,
+                                  viewHeight: 26,
+                                  isDarkMode: isDark
+                              ),
+                              child: Stack(
+                                children: assignments.map((u) {
+                                  final bool isPreview = u.data?['isDragPreview'] == true;
+                                  final itemLayerLink = LayerLink();
+                                  Color itemBarColor = isPreview ? color.withOpacity(0.6) : color;
+                                  if (activity.isHidden!) {
+                                    itemBarColor = (isDark ? Colors.grey.shade600 : Colors.grey.shade500).withOpacity(isPreview ? 0.5 : 0.7);
+                                  }
 
-                                return TimelineRow(
-                                  key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
-                                  layerLink: itemLayerLink,
-                                  start: _timelineStart!, end: _timelineEnd!,
-                                  itemStart: u.startTime!, itemEnd: u.endTime!,
-                                  barColor: itemBarColor,
-                                  onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
-                                  onDragStart: _hideAssignmentDetailOverlay,
-                                  onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
-                                    if (_timelineStart == null || _timelineEnd == null) return;
-                                    final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
-                                        initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
-                                        timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
-                                    if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
-                                      setState(() { u.startTime = finalClampedRange.start; u.endTime = finalClampedRange.end; _updateFilteredActivities(); });
-                                    }
-                                  },
-                                  draggable: !isPreview && !activity.isHidden!,
-                                  zoomScale: _scale,
-                                  onPlaceOrEventDropped: isPreview || activity.isHidden!
-                                      ? null
-                                      : (droppedItemData) {
-                                    _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
-                                  },
-                                  assignment: u,
-                                  isDarkMode: isDark,
-                                );
-                              }).toList(),
+                                  return TimelineRow(
+                                    key: ValueKey("assign_${u.userInfo}_${u.startTime?.millisecondsSinceEpoch}_${u.endTime?.millisecondsSinceEpoch}_${u.places.length}_${u.events.length}_${isPreview}_${activity.isHidden!}"),
+                                    layerLink: itemLayerLink,
+                                    start: _timelineStart!, end: _timelineEnd!,
+                                    itemStart: u.startTime!, itemEnd: u.endTime!,
+                                    barColor: itemBarColor,
+                                    onTapBar: isPreview || activity.isHidden! ? null : () => _showAssignmentDetailOverlay(u, itemLayerLink),
+                                    onDragStart: _hideAssignmentDetailOverlay,
+                                    onDragEnd: isPreview || activity.isHidden! ? (ns, ne) {} : (finalStart, finalEnd) {
+                                      if (_timelineStart == null || _timelineEnd == null) return;
+                                      final DateTimeRange finalClampedRange = TimeClampingService.clampDateTimeRange(
+                                          initialStartTime: finalStart, itemDuration: finalEnd.difference(finalStart),
+                                          timelineStart: _timelineStart!, timelineEnd: _timelineEnd!, minAllowedDuration: kMinTimeLength);
+                                      if (u.startTime != finalClampedRange.start || u.endTime != finalClampedRange.end) {
+                                        setState(() {
+                                          u.startTime = finalClampedRange.start;
+                                          u.endTime = finalClampedRange.end;
+                                          _updateFilteredActivities();
+                                          _recalculateUserAssignedHours();
+                                        });
+                                      }
+                                    },
+                                    draggable: !isPreview && !activity.isHidden!,
+                                    zoomScale: _scale,
+                                    onPlaceOrEventDropped: isPreview || activity.isHidden!
+                                        ? null
+                                        : (droppedItemData) {
+                                      _handlePlaceOrEventDropOnAssignment(u, droppedItemData);
+                                    },
+                                    assignment: u,
+                                    isDarkMode: isDark,
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           )
                       )
