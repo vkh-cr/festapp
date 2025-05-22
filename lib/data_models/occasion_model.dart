@@ -50,10 +50,10 @@ class OccasionModel {
           ? DateTime.parse(json[Tb.occasions.updated_at])
           : null,
       startTime: json[Tb.occasions.start_time] != null
-          ? DateTime.parse(json[Tb.occasions.start_time])
+          ? DateTime.parse(json[Tb.occasions.start_time]).toLocal()
           : null,
       endTime: json[Tb.occasions.end_time] != null
-          ? DateTime.parse(json[Tb.occasions.end_time])
+          ? DateTime.parse(json[Tb.occasions.end_time]).toLocal()
           : null,
       isOpen: json[Tb.occasions.is_open] ?? false,
       isHidden: json[Tb.occasions.is_hidden] ?? false,
@@ -75,8 +75,8 @@ class OccasionModel {
   Map<String, dynamic> toJson() {
     return {
       Tb.occasions.id: id,
-      Tb.occasions.start_time: startTime?.toIso8601String(),
-      Tb.occasions.end_time: endTime?.toIso8601String(),
+      Tb.occasions.start_time: startTime?.toUtc().toIso8601String(),
+      Tb.occasions.end_time: endTime?.toUtc().toIso8601String(),
       Tb.occasions.is_open: isOpen,
       Tb.occasions.is_hidden: isHidden,
       Tb.occasions.link: link,
