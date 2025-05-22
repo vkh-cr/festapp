@@ -34,9 +34,17 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   EditDataBundle? _bundle;
   DateTime? _timelineStart, _timelineEnd;
 
-  double _scale = 0.2;
-  double _panOffset = 0.0;
-  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(0.0);
+  // Constants for timeline
+  static const double kInitialScale = 0.2;
+  static const double kMinScale = 0.05;
+  static const double kMaxScale = 2.0;
+  static const double kScaleFactor = 1.25;
+  static const double kInitialPanOffset = 0.0;
+  static const double kBasePixelsPerSecond = 0.05;
+
+  double _scale = kInitialScale;
+  double _panOffset = kInitialPanOffset;
+  final ValueNotifier<double> _currentPanOffsetNotifier = ValueNotifier<double>(kInitialPanOffset);
 
   double _gesturePanOffsetStart = 0.0;
   double _gestureDragStartX = 0.0;
@@ -44,7 +52,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   double _scrollbarGestureDragStartX = 0.0;
   double _scrollbarGesturePanOffsetStartValue = 0.0;
 
-  final double _basePps = 0.05;
+  final double _basePps = kBasePixelsPerSecond;
 
   late List<ActivityUserInfoModel> _allUsers;
   late List<ActivityPlaceModel> _allPlaces;
@@ -113,7 +121,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     super.dispose();
   }
 
-  Future<void> _loadData() async {
+  Future<void> _loadData({double? initialPanOffset, double? initialScale}) async {
     final data = await DbActivities.getForEdit(widget.occasionId);
     if (data != null) {
       data.activities!.sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
@@ -143,14 +151,25 @@ class _ActivitiesContentState extends State<ActivitiesContent>
             }
           }
         }
-        _panOffset = 0.0;
-        _currentPanOffsetNotifier.value = 0.0;
+
+        // Restore pan and scale if provided, otherwise set to initial values
+        if (initialPanOffset != null && initialScale != null) {
+          _panOffset = initialPanOffset;
+          _scale = initialScale;
+        } else {
+          _panOffset = kInitialPanOffset;
+          _scale = kInitialScale; // Your default initial scale
+        }
+        _currentPanOffsetNotifier.value = _panOffset;
+
 
         _updateFilteredActivities();
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if(mounted) {
-            _performInitialTimelineScroll();
+            if (initialPanOffset == null && initialScale == null) {
+              _performInitialTimelineScroll();
+            }
           }
         });
       });
@@ -274,7 +293,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale * 1.25).clamp(0.05, 2.0);
+    final double newScale = (_scale * kScaleFactor).clamp(kMinScale, kMaxScale);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -302,7 +321,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     if (_timelineStart == null) return;
 
     final double oldScale = _scale;
-    final double newScale = (_scale / 1.25).clamp(0.05, 2.0);
+    final double newScale = (_scale / kScaleFactor).clamp(kMinScale, kMaxScale);
 
     final double oldPps = _basePps * oldScale;
     final double newPps = _basePps * newScale;
@@ -725,8 +744,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     }
   }
 
-  KeyEventResult _handleKeyEvent(RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.delete && _selectedActivities.isNotEmpty) {
         _deleteSelectedActivities(); return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.escape) {
@@ -822,7 +841,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
     return Focus(
       autofocus: true,
-      onKey: (_, RawKeyEvent event) {
+      onKeyEvent: (_, KeyEvent event) {
         final bool newModifierState = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
         if (_isModifierKeyPressedForScroll != newModifierState) {
           setState(() {
@@ -855,7 +874,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           if (mounted) {
             final oldWidth = _currentViewportWidth;
             _currentViewportWidth = constraints.maxWidth;
-            if (oldWidth == 0 && _panOffset == 0.0) {
+            if (oldWidth == 0 && _panOffset == kInitialPanOffset) {
               _performInitialTimelineScroll();
             }
           }
@@ -950,7 +969,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                         }
                         try {
                           await DbActivities.saveActivitiesForEdit(context, widget.occasionId, _bundle!);
-                          _loadData();
+                          // Pass current pan and scale to reloadData
+                          _loadData(initialPanOffset: _panOffset, initialScale: _scale);
                         } catch (e) {
                           print("Error saving activities from UI: $e");
                         }
