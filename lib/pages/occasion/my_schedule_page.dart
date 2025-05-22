@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
@@ -78,10 +79,11 @@ class _MySchedulePageState extends State<MySchedulePage> {
       _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
       var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities);
       _dots!.addAll(actDots);
-      _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     } else {
       _dots = _data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
+
+    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     setState(() {});
 
     await DbEvents.synchronizeMySchedule(currentIds: _data!.events.map((e)=>e.id!).toList());
@@ -103,9 +105,14 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
     if (_isAdvancedTimeline??false) {
       _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
+      var activities = await OfflineDataService.getAllActivities();
+      var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities);
+      _dots!.addAll(actDots);
     } else {
       _dots = _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
+
+    _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
 
     setState(() {});
   }

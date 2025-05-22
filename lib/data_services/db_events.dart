@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/activities/activity_data_helper.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/exclusive_group_model.dart';

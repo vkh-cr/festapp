@@ -11,12 +11,17 @@ import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/services/storage_helper.dart';
 
+// Assuming ActivityModel is in a file that can be imported like this.
+// You might need to adjust the path based on your project structure.
+import 'package:fstapp/data_models/activity_model.dart'; // Added import for ActivityModel
+
 import '../data_models/occasion_model.dart';
 
 class OfflineDataService {
   static const String myScheduleOffline = "mySchedule";
   static const String eventsOfflineStorage = "events";
   static const String informationOfflineStorage = "information";
+  static const String activitiesOfflineStorage = "activities";
 
   static Future<void> saveMyScheduleData(List<int> offlineData) async {
     var encoded = jsonEncode(offlineData);
@@ -34,13 +39,19 @@ class OfflineDataService {
 
   static Future<void> addToMySchedule(int id) async {
     var offlineData = await getMyScheduleData();
-    offlineData.add(id);
-    await saveMyScheduleData(offlineData);
+    if (!offlineData.contains(id)) { // Avoid duplicates
+      offlineData.add(id);
+      await saveMyScheduleData(offlineData);
+    }
   }
 
   static Future<void> addAllToMySchedule(List<int> ids) async {
     var offlineData = await getMyScheduleData();
-    offlineData.addAll(ids);
+    for (var id in ids) {
+      if (!offlineData.contains(id)) { // Avoid duplicates
+        offlineData.add(id);
+      }
+    }
     await saveMyScheduleData(offlineData);
   }
 
@@ -137,13 +148,20 @@ class OfflineDataService {
   static Future<List<InformationModel>> getAllInfo() =>
       getAllOffline(InformationModel.informationOffline, InformationModel.fromJson);
 
+  static Future<void> saveAllActivities(List<ActivityModel> toSave) =>
+      saveAllOffline(activitiesOfflineStorage, toSave);
+
+  static Future<List<ActivityModel>> getAllActivities() =>
+      getAllOffline(activitiesOfflineStorage, ActivityModel.fromJson);
+
   static Future<void> clearUserData() async {
     await deleteOffline(UserInfoModel.userInfoOffline);
     await deleteOffline(myScheduleOffline);
+    await deleteOffline(activitiesOfflineStorage);
   }
 
   static Future<void> saveAllOffline<T>(String offlineTable, List<T> toSave) async {
-    var encoded = jsonEncode(toSave);
+    var encoded = jsonEncode(toSave.map((item) => (item as dynamic).toJson()).toList());
     await StorageHelper.set(offlineTable, encoded);
   }
 
@@ -152,6 +170,7 @@ class OfflineDataService {
   }
 
   static Future<void> saveOffline<T>(String id, T toSave, [String? storage]) async {
+    // The toJson method of T will be called automatically by jsonEncode
     var encoded = jsonEncode(toSave);
     await StorageHelper.set(id, encoded, storage);
   }
@@ -163,10 +182,11 @@ class OfflineDataService {
       if (data == null) {
         return null;
       }
-      var js = json.decode(data);
+      var js = json.decode(data) as Map<String, dynamic>; // Ensure it's a Map
       return fromJson(js);
     } catch (e) {
       //catch incompatibility fails
+      print("Error in getOffline for id $id: $e");
       return null;
     }
   }
@@ -174,16 +194,16 @@ class OfflineDataService {
   static Future<List<T>> getAllOffline<T>(
       String offlineTable, T Function(Map<String, dynamic>) fromJson) async {
     List<T> toReturn = [];
-
     try {
       var data = await StorageHelper.get(offlineTable);
       if (data == null) {
         return toReturn;
       }
-      var offlineData = json.decode(data);
-      toReturn.addAll(List<T>.from(offlineData.map((o) => fromJson(o))));
+      var offlineData = json.decode(data) as List<dynamic>; // Ensure it's a List
+      toReturn.addAll(List<T>.from(offlineData.map((o) => fromJson(o as Map<String, dynamic>))));
     } catch (e) {
       //catch incompatibility fails
+      print("Error in getAllOffline for table $offlineTable: $e");
     }
     return toReturn;
   }
