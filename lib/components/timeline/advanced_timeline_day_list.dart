@@ -191,7 +191,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     const stripeW = 6.0, stripeH = 58.0;
     final Color eventSpecificColor = ThemeConfig.eventTypeToColor(context, event.eventType);
     final Color effectiveBaseColor = isActivity ? Theme.of(context).primaryColor : eventSpecificColor;
-    final cardColor = _kUsePastelBackground ? _toPastel(context, effectiveBaseColor) : null;
+    final cardColor = _kUsePastelBackground ? _toPastel(context, effectiveBaseColor) : Theme.of(context).cardColor;
 
     Widget stripeWidget;
     if (isActivity) {
@@ -238,7 +238,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         ? (isDark(context) ? Colors.white30 : Colors.black26)
         : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.3);
 
-    final Color eventPastelColorForText = _kUsePastelBackground ? _toPastel(context, eventSpecificColor) : Colors.white;
+    final Color eventPastelColorForText = _kUsePastelBackground ? _toPastel(context, eventSpecificColor) : cardColor;
     final capTextColor = event.isSignedIn()
         ? eventPastelColorForText
         : unselectedColor;
