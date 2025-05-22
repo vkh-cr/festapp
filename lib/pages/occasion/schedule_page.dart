@@ -4,11 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_constants.dart' show FeatureConstants;
 import 'package:fstapp/components/features/feature_service.dart';
-// Import DayList and AdvancedTimelineController if they are indeed from advanced_timeline.dart
-// and used as controller for DayList instances here.
-// Assuming DayList used here is the one from advanced_timeline.dart,
-// and it expects an AdvancedTimelineController.
-import 'package:fstapp/components/timeline/advanced_timeline.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
+import 'package:fstapp/components/timeline/advanced_timeline_view.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -51,8 +49,6 @@ class _SchedulePageState extends State<SchedulePage>
 
   // for timeline-expand state
   int? _openId;
-  final Set<int> _signedIn = {};
-  final Set<int> _inProgram = {};
 
   @override
   void initState() {
@@ -79,12 +75,9 @@ class _SchedulePageState extends State<SchedulePage>
       await _loadFullData();
       _fullEventsLoaded = true;
     }
-    // setState is called within _loadOfflineDataThenFast and _loadFullData,
-    // which will trigger a rebuild with the new data.
   }
 
   Future<void> _loadOfflineDataThenFast() async {
-    bool needsSetState = false;
     if (_events.isEmpty) {
       final offline = await OfflineDataService.getAllEvents();
       _events = offline;
@@ -95,14 +88,17 @@ class _SchedulePageState extends State<SchedulePage>
           .filterRootEvents()
           .map((e) => TimeBlockItem.fromEventModel(e))
           .toList();
-      needsSetState = true;
+    }
+
+    if(mounted) {
+      setState(() {});
     }
 
     final fast = await DbEvents.getAllEvents(
       RightsService.currentOccasionId()!,
       false,
     );
-    // re-attach cached desc
+
     for (var e in fast) {
       if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
         e.description = _eventDescriptions[e.id!];
@@ -121,7 +117,7 @@ class _SchedulePageState extends State<SchedulePage>
         .map((e) => TimeBlockItem.fromEventModel(e))
         .toList();
 
-    if(mounted && (needsSetState || true)) { // Ensure setState is called if data changes
+    if(mounted) {
       setState(() {});
     }
   }
@@ -153,25 +149,21 @@ class _SchedulePageState extends State<SchedulePage>
 
   Future<void> _handleSignIn(int id) async {
     await DbEvents.signInToEvent(context, id);
-    _signedIn.add(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleSignOut(int id) async {
     await DbEvents.signOutFromEvent(context, id);
-    _signedIn.remove(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleAdd(int id) async {
     await DbEvents.addToMySchedule(context, id);
-    _inProgram.add(id);
     await loadData(); // Reload data to reflect changes
   }
 
   Future<void> _handleRemove(int id) async {
     await DbEvents.removeFromMySchedule(context, id);
-    _inProgram.remove(id);
     await loadData(); // Reload data to reflect changes
   }
 

@@ -16,13 +16,14 @@ import 'package:flutter/material.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart';
 import '../utility/html_editor_page.dart';
+import 'occasion_home_page.dart';
 
 @RoutePage()
 class NewsPage extends StatefulWidget {
   static const ROUTE = "news";
-  final VoidCallback? onSetAsRead;
+  VoidCallback? onSetAsRead;
 
-  const NewsPage({super.key, this.onSetAsRead});
+  NewsPage({super.key, this.onSetAsRead});
 
   @override
   _NewsPageState createState() => _NewsPageState();
@@ -35,19 +36,18 @@ class _NewsPageState extends State<NewsPage> {
   @override
   void initState() {
     super.initState();
+    context.tabsRouter.addListener(() async {
+      if (context.tabsRouter.activeIndex == OccasionHomePage.visibleTabKeys.indexOf(OccasionTab.news)) {
+        _checkAsRead();
+        loadData();
+      }
+    });
     loadData();
   }
 
   @override
   void dispose() {
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Check visibility when dependencies change
-    _checkAsRead();
   }
 
   Future<void> _checkAsRead() async {
