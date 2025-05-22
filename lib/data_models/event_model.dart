@@ -117,8 +117,8 @@ class EventModel extends ITrinaRowModel {
     }
 
     return EventModel(
-        startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
-        endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
+        startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]).toLocal() : DateTime.fromMicrosecondsSinceEpoch(0),
+        endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]).toLocal(): DateTime.fromMicrosecondsSinceEpoch(0),
         id: json[idColumn],
         isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
         updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
@@ -288,8 +288,8 @@ class EventModel extends ITrinaRowModel {
       {
         idColumn: id,
         updatedAtColumn: updatedAt?.toIso8601String(),
-        startTimeColumn: startTime.toIso8601String(),
-        endTimeColumn: endTime.toIso8601String(),
+        startTimeColumn: startTime.toUtc().toIso8601String(),
+        endTimeColumn: endTime.toUtc().toIso8601String(),
         isHiddenColumn: isHidden,
         titleColumn: title,
         descriptionColumn: description,
