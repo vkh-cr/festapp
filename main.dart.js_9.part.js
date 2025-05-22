@@ -1,99 +1,74 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_9",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,D,E,F,G,H,B={
-cEN(d,e,f,g,h){var x=null,w=A.ji(A.bZ(x,x,x,x,x,x,A.b1(E.Di,h,x,x),x,x,x,new B.b4h(e),x,x,x,x,x),d===!0)
-return A.a([w,A.ji(A.bZ(x,x,x,x,x,x,A.b1(H.ky,g,x,x),x,x,x,new B.b4i(f),x,x,x,x,x),d===!1)],y.p)},
-b4h:function b4h(d){this.a=d},
-b4i:function b4i(d){this.a=d},
-M2(d){var x,w=null,v=d.b
-v.toString
-x=y.g
-return new D.cV(d.dx,d.dy,G.a9p(d),A.z(["leftText",d.aDO(),"rightText",d.j(0)],x,x),w,v,w,w,"",0,0,w,w)},
-HO(d,e){return B.da9(d,e)},
-da9(d,e){var x=0,w=A.l(y.f),v
-var $async$HO=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:v=$.dO()
-x=v.gdl().d!=null?2:3
-break
-case 2:x=4
-return A.d($.hO().c_("event_users_saved").iD(0).d8("event",e).d8("user",v.gdl().c.a),$async$HO)
-case 4:case 3:x=5
-return A.d(B.az3(e),$async$HO)
-case 5:A.bK(d,A.r("Removed from My schedule.",null),C.ac)
-return A.j(null,w)}})
-return A.k($async$HO,w)},
-HN(d,e){return B.d9U(d,e)},
-d9U(d,e){var x=0,w=A.l(y.e),v,u
-var $async$HN=A.h(function(f,g){if(f===1)return A.i(g,w)
-while(true)switch(x){case 0:u=$.dO()
-x=u.gdl().d!=null?3:4
-break
-case 3:x=5
-return A.d($.hO().c_("event_users_saved").iX(0,A.z(["event",e,"user",u.gdl().c.a],y.g,y.o)),$async$HN)
-case 5:case 4:x=6
-return A.d(B.az1(e),$async$HN)
-case 6:A.bK(d,A.r("Added to My schedule.",null),C.ac)
-v=!0
-x=1
-break
-case 1:return A.j(v,w)}})
-return A.k($async$HN,w)},
-az1(d){return B.dhR(d)},
-dhR(d){var x=0,w=A.l(y.f),v,u
-var $async$az1=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.d(A.xm(),$async$az1)
-case 2:v=f
-u=J.a1(v)
-x=!u.p(v,d)?3:4
-break
-case 3:u.t(v,d)
-x=5
-return A.d(A.a4U(v),$async$az1)
-case 5:case 4:return A.j(null,w)}})
-return A.k($async$az1,w)},
-az3(d){return B.dhW(d)},
-dhW(d){var x=0,w=A.l(y.f),v
-var $async$az3=A.h(function(e,f){if(e===1)return A.i(f,w)
-while(true)switch(x){case 0:x=2
-return A.d(A.xm(),$async$az3)
-case 2:v=f
-J.p1(v,d)
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B,C={
+PC(d,e,f){return C.da9(d,e,f)},
+da9(d,e,f){var x=0,w=A.l(y.b),v,u,t,s,r,q,p,o,n,m,l
+var $async$PC=A.h(function(g,h){if(g===1)return A.i(h,w)
+while(true)$async$outer:switch(x){case 0:m=f==null
+l=m?null:f.a
+if(l==null)l=$.dO().gdl().c.a
+u=y.g
+t=y.b
 x=3
-return A.d(A.a4U(v),$async$az3)
-case 3:return A.j(null,w)}})
-return A.k($async$az3,w)},
-aFf(d,e){switch(e){case"music":return C.cl
-case"talk":return C.aO
-case"other":return F.Lu}return C.aO}}
+return A.d($.hO().ds("sign_user_to_event",A.z(["ev",e,"usr",l],u,t),t),$async$PC)
+case 3:s=h
+t=J.a1(s)
+switch(t.h(s,"code")){case 200:if(m)A.bK(d,A.r(($.nf.e==="female"?"F":"M")+"You have been signed in.",null),B.ac)
+else{r=f.e==="female"?"F":"M"
+A.bK(d,A.r(r+"{user} has been signed in.",A.z(["user",f.jC()],u,u)),B.ac)}x=1
+break $async$outer
+case 100:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("Event is over.",null),B.bg)
+x=1
+break $async$outer
+case 101:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("Event is full.",null),B.bg)
+x=1
+break $async$outer
+case 102:if(m){q=A.r(($.nf.e==="female"?"F":"M")+"You are already signed in at an event of this type.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bg)}else{r=f.e==="female"?"F":"M"
+q=A.r(r+"{user} is already signed in at an event of this type.",A.z(["user",f.jC()],u,u))
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bg)}x=1
+break $async$outer
+case 103:if(m){q=A.r(($.nf.e==="female"?"F":"M")+"You are already signed in.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bg)}else{r=f.e==="female"?"F":"M"
+q=A.r(r+"{user} is already signed in.",A.z(["user",f.jC()],u,u))
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bg)}x=1
+break $async$outer
+case 107:if(m){q=A.r(($.nf.e==="female"?"F":"M")+"You are already signed in at another event at the same time.",null)
+A.bK(d,A.r("Cannot sign in!",null)+" "+q,B.bg)}else{r=f.e==="female"?"F":"M"
+A.bK(d,A.r(r+"{user} is already signed in at another event at the same time.",A.z(["user",f.jC()],u,u)),B.ac)}x=1
+break $async$outer
+case 104:p=A.r("It's too soon!",null)
+if(t.h(s,"events_registration_start")!=null){o=A.eA(t.h(s,"events_registration_start")).no()
+m=y.f
+t=d.ag(m).r.a
+t===$&&A.b()
+n=C.d9i(t.geX(0)).dg(o)
+m=d.ag(m).r.a
+m===$&&A.b()
+p=A.r("You can sign in from {time}.",A.z(["time",n+" "+A.CF(m.geX(0)).dg(o)],u,u))}A.bK(d,A.r("Cannot sign in!",null)+" "+p,B.bg)
+x=1
+break $async$outer
+case 105:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("There is already the maximum of men.",null),B.bg)
+x=1
+break $async$outer
+case 106:A.bK(d,A.r("Cannot sign in!",null)+" "+A.r("There is already the maximum of women.",null),B.bg)
+x=1
+break $async$outer
+default:A.bK(d,A.r("Cannot sign in!",null),B.bg)
+x=1
+break $async$outer}case 1:return A.j(v,w)}})
+return A.k($async$PC,w)},
+d9i(d){var x=A.nb(d,A.oV(),null)
+x.toString
+x=new A.iT(new A.m5(),x)
+x.m7("MMMMEEEEd")
+return x}}
 J=c[1]
 A=c[0]
-C=c[2]
-D=c[134]
-E=c[315]
-F=c[227]
-G=c[124]
-H=c[183]
-B=a.updateHolder(c[99],B)
+B=c[2]
+C=a.updateHolder(c[72],C)
 var z=a.updateTypes([])
-B.b4h.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.d(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:2}
-B.b4i.prototype={
-$0(){var x=0,w=A.l(y.f),v=this
-var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=2
-return A.d(v.a.$0(),$async$$0)
-case 2:return A.j(null,w)}})
-return A.k($async$$0,w)},
-$S:2};(function inheritance(){var x=a.inheritMany
-x(A.cM,[B.b4h,B.b4i])})()
-var y={p:A.C("u<B6>"),o:A.C("G"),g:A.C("m"),e:A.C("x"),f:A.C("~")}};
+var y={g:A.C("m"),f:A.C("kE"),b:A.C("@")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_9",e:"endPart",h:b})})($__dart_deferred_initializers__,"2utV4oYa3L3X5kd5X3nnmLqF/vc=");
+a.eventLog.push({p:"main.dart.js_9",e:"endPart",h:b})})($__dart_deferred_initializers__,"OZeZQW9CA/Q18iKw3kUnl0aWReg=");
