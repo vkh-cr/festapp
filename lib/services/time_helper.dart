@@ -89,14 +89,6 @@ extension DateTimeExtension on DateTime {
     return hour + minute / 60.0 + second / 3600.0;
   }
 
-  DateTime eventLocalTime() {
-    if(AppConfig.isEventTimeUtc && isUtc) {
-      const int offsetHours = AppConfig.offsetHours;
-      return add(const Duration(hours: offsetHours)).toLocal();
-    }
-    return toLocal();
-  }
-
   String weekdayToString(BuildContext context) {
     return DateFormat("EEEE", context.locale.languageCode).format(this);
   }
