@@ -1,76 +1,22 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_304",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,E,C,D,F,A={
-d6E(){return new A.C1(null)},
-C1:function C1(d){this.a=d},
-aJK:function aJK(d,e,f){var _=this
-_.d=$
-_.e=d
-_.fp$=e
-_.bo$=f
-_.c=_.a=null},
-bYv:function bYv(){},
-bYw:function bYw(){},
-aiI:function aiI(){}},G
-B=c[0]
-E=c[181]
-C=c[33]
-D=c[92]
-F=c[111]
-A=a.updateHolder(c[3],A)
-G=c[182]
-A.C1.prototype={
-M(){var x=null,w="volunteers",v=B.a(["Info"],y.d)
-v.push("Events")
-v.push("Places")
-if(B.fI("user_groups",x))v.push("Groups")
-if(B.fI("game",x))v.push("Game")
-if(B.fI("services",x))v.push("Service")
-if(B.fI(w,x))v.push(w)
-v.push("Email Templates")
-v.push("Users")
-return new A.aJK(v,x,x)}}
-A.aJK.prototype={
-T(){var x=this
-x.ah()
-x.d=F.Fp(null,0,x.e.length,x)},
-B(d){var x,w,v=null,u=this.e,t=B.V(u).i("N<1,hR>"),s=B.E(new B.N(u,new A.bYv(),t),t.i("a6.E"))
-u=this.d
-u===$&&B.b()
-t=C.cMw(d,s,u)
-x=this.d
-w=B.V(s).i("N<1,e>")
-w=B.E(new B.N(s,new A.bYw(),w),w.i("a6.E"))
-return new D.qs(u.c,0,E.f8(t,v,D.Fo(w,x,G.dR),v,v,v,v,v),v)},
-l(){var x=this.d
-x===$&&B.b()
-x.l()
-this.aWq()}}
-A.aiI.prototype={
-l(){var x=this,w=x.bo$
-if(w!=null)w.N(0,x.ghd())
-x.bo$=null
-x.al()},
-c2(){this.d3()
-this.cW()
-this.he()}}
-var z=a.updateTypes(["hR(m)","e(hR)"])
-A.bYv.prototype={
-$1(d){var x=C.cMx().h(0,d)
-x.toString
-return x},
-$S:z+0}
-A.bYw.prototype={
-$1(d){return d.c},
-$S:z+1};(function aliases(){var x=A.aiI.prototype
-x.aWq=x.l})();(function inheritance(){var x=a.mixinHard,w=a.inherit,v=a.inheritMany
-w(A.C1,B.J)
-w(A.aiI,B.O)
-w(A.aJK,A.aiI)
-v(B.c6,[A.bYv,A.bYw])
-x(A.aiI,B.fh)})()
-B.c5(b.typeUniverse,JSON.parse('{"C1":{"J":[],"e":[]},"aJK":{"O":["C1"]}}'))
-var y={d:B.C("t<m>")}};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,B={
+az4(d){return B.di0(d)},
+di0(d){var x=0,w=A.l(y.b),v,u,t,s,r
+var $async$az4=A.h(function(e,f){if(e===1)return A.i(f,w)
+while(true)switch(x){case 0:x=2
+return A.d(A.xm(),$async$az4)
+case 2:r=f
+for(v=J.aH(d),u=J.a1(r);v.q();){t=v.gL(v)
+s=t.b
+s.toString
+t.cy=u.p(r,s)}return A.j(null,w)}})
+return A.k($async$az4,w)}}
+J=c[1]
+A=c[0]
+B=a.updateHolder(c[46],B)
+var z=a.updateTypes([])
+var y={b:A.C("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_304",e:"endPart",h:b})})($__dart_deferred_initializers__,"hISuFcX0Wp+ZNozhTE7fW+z5I24=");
+a.eventLog.push({p:"main.dart.js_304",e:"endPart",h:b})})($__dart_deferred_initializers__,"5F/cOXfbSADIwIyl+vVfbArAdMI=");
