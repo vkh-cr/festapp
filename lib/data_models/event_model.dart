@@ -7,6 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_services/db_events.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:trina_grid/trina_grid.dart';
 
 class EventModel extends ITrinaRowModel {
@@ -117,8 +118,8 @@ class EventModel extends ITrinaRowModel {
     }
 
     return EventModel(
-        startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]) : DateTime.fromMicrosecondsSinceEpoch(0),
-        endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]): DateTime.fromMicrosecondsSinceEpoch(0),
+        startTime: json.containsKey(startTimeColumn) ? DateTime.parse(json[startTimeColumn]).toOccasionTime() : DateTime.fromMicrosecondsSinceEpoch(0),
+        endTime: json.containsKey(endTimeColumn) ? DateTime.parse(json[endTimeColumn]).toOccasionTime(): DateTime.fromMicrosecondsSinceEpoch(0),
         id: json[idColumn],
         isHidden: json.containsKey(isHiddenColumn) ? json[isHiddenColumn] : false,
         updatedAt: json[updatedAtColumn]!=null ? DateTime.parse(json[updatedAtColumn]) : null,
@@ -288,8 +289,8 @@ class EventModel extends ITrinaRowModel {
       {
         idColumn: id,
         updatedAtColumn: updatedAt?.toIso8601String(),
-        startTimeColumn: startTime.toIso8601String(),
-        endTimeColumn: endTime.toIso8601String(),
+        startTimeColumn: startTime.toUtcFromOccasionTime().toIso8601String(),
+        endTimeColumn: endTime.toUtcFromOccasionTime().toIso8601String(),
         isHiddenColumn: isHidden,
         titleColumn: title,
         descriptionColumn: description,

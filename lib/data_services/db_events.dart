@@ -16,6 +16,7 @@ import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -404,7 +405,7 @@ class DbEvents {
         String answerWhy = "It's too soon!".tr();
         if(result["events_registration_start"]!=null)
         {
-          var start = DateTime.parse(result["events_registration_start"]).toLocal();
+          var start = DateTime.parse(result["events_registration_start"]).toOccasionTime();
           var datePart = DateFormat.MMMMEEEEd(context.locale.languageCode).format(start);
           var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
           String startString = "$datePart $timePart";
@@ -558,8 +559,8 @@ class DbEvents {
   static Future<EventModel> updateEvent(EventModel event) async
   {
     var upsertObj = {
-      Tb.events.start_time: event.startTime.toIso8601String(),
-      Tb.events.end_time: event.endTime.toIso8601String(),
+      Tb.events.start_time: event.startTime.toUtcFromOccasionTime().toIso8601String(),
+      Tb.events.end_time: event.endTime.toUtcFromOccasionTime().toIso8601String(),
       Tb.events.title: event.title,
       Tb.events.max_participants: event.maxParticipants,
       Tb.events.place: event.place?.id,

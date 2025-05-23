@@ -31,13 +31,9 @@ class AppConfig {
   static const int imagesMaxWidth = 1200;
   static const int imagesMaxBytes = 800000;
 
-  static const bool isEventTimeUtc = true;
-
   static const int daySplitHour = 4;
 
   static const bool isSplitByPlace = false;
-
-  static const int offsetHours = -2;
 
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
