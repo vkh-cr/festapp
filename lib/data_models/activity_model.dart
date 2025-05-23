@@ -1,4 +1,5 @@
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:uuid/uuid.dart';
 
 class ActivityPlaceModel {
@@ -36,10 +37,10 @@ class ActivityEventModel {
       id: json[Tb.events.id] as int?,
       title: json[Tb.events.title] as String?,
       startTime: (json[Tb.events.start_time] != null
-          ? DateTime.parse(json[Tb.events.start_time] as String).toLocal()
+          ? DateTime.parse(json[Tb.events.start_time] as String).toOccasionTime()
           : DateTime.fromMicrosecondsSinceEpoch(0)),
       endTime: (json[Tb.events.end_time] != null
-          ? DateTime.parse(json[Tb.events.end_time] as String).toLocal()
+          ? DateTime.parse(json[Tb.events.end_time] as String).toOccasionTime()
           : DateTime.fromMicrosecondsSinceEpoch(0)),
     );
   }
@@ -233,11 +234,11 @@ class ActivityAssignmentModel {
       userInfo: j[Tb.activity_assignments.user] as String?,
       startTime: j[Tb.activity_assignments.start_time] != null
           ? DateTime.parse(j[Tb.activity_assignments.start_time] as String)
-          .toLocal()
+          .toOccasionTime()
           : null,
       endTime: j[Tb.activity_assignments.end_time] != null
           ? DateTime.parse(j[Tb.activity_assignments.end_time] as String)
-          .toLocal()
+          .toOccasionTime()
           : null,
       title: j[Tb.activity_assignments.title] as String?,
       description: j[Tb.activity_assignments.description] as String?,

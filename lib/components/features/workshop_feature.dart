@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:intl/intl.dart';
 
 import 'feature.dart';
@@ -23,7 +24,7 @@ class WorkshopsFeature extends Feature {
   factory WorkshopsFeature.fromJson(Map<String, dynamic> json) {
     DateTime? parsed;
     if (json[metaStartTime] != null) {
-      parsed = DateTime.parse(json[metaStartTime] as String).toUtc();
+      parsed = DateTime.parse(json[metaStartTime] as String).toUtcFromOccasionTime();
     }
     return WorkshopsFeature(
       code: json[FeatureConstants.metaCode] as String? ?? metaWorkshops,
@@ -52,7 +53,7 @@ class WorkshopsFeature extends Feature {
         final locale = context.locale.toString();
         final dateFmt = DateFormat.yMd(locale).add_jm();
         final display = startTime != null
-            ? dateFmt.format(startTime!.toLocal())
+            ? dateFmt.format(startTime!.toOccasionTime())
             : '';
 
         final controller = TextEditingController(text: display);
@@ -66,7 +67,7 @@ class WorkshopsFeature extends Feature {
           readOnly: true,
           onTap: () async {
             final now = DateTime.now();
-            final initial = startTime?.toLocal() ?? now;
+            final initial = startTime?.toOccasionTime() ?? now;
             final date = await showDatePicker(
               context: context,
               initialDate: initial,
@@ -90,14 +91,14 @@ class WorkshopsFeature extends Feature {
               time.minute,
             );
             setLocalState(() {
-              startTime = selectedLocal.toUtc();
+              startTime = selectedLocal.toUtcFromOccasionTime();
               controller.text = dateFmt.format(selectedLocal);
             });
           },
           onSaved: (val) {
             if (val != null && val.isNotEmpty) {
               final parsedLocal = dateFmt.parse(val);
-              startTime = parsedLocal.toUtc();
+              startTime = parsedLocal.toUtcFromOccasionTime();
             }
           },
         );
