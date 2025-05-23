@@ -92,7 +92,7 @@ class _EventPageState extends State<EventPage> {
                     },
                     icon: Icon(
                       Icons.qr_code_scanner,
-                      color: ThemeConfig.eventTypeToColor(context, _event?.type),
+                      color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),
                     )),
               ),
             ),

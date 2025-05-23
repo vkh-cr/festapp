@@ -8,6 +8,7 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_models/occasion_user_model.dart';
 import 'package:fstapp/data_services/synchro_service.dart';
 import 'package:fstapp/services/link_model.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RightsService{
@@ -42,6 +43,7 @@ class RightsService{
       if (!await RouterService.updateOccasionFromLink(model)) {
         throw Exception("Cannot continue.");
       }
+      TimeHelper.setTimeZoneLocation(RightsService.currentOccasion()?.data?["timezone"]);
 
       RouterService.currentOccasionLink = currentLink??"";
       var globalSettings = await SynchroService.loadOrInitOccasionSettings();
