@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/data_models/activity_model.dart'; // Contains all models now
@@ -67,8 +68,8 @@ class DbActivities {
           allAssignmentsPayload.add({
             'id': assignment.id, // Assignment's own UUID
             'user': assignment.userInfo, // User's UUID
-            'start_time': assignment.startTime?.toUtc().toIso8601String(),
-            'end_time': assignment.endTime?.toUtc().toIso8601String(),
+            'start_time': assignment.startTime?.toUtcFromOccasionTime().toIso8601String(),
+            'end_time': assignment.endTime?.toUtcFromOccasionTime().toIso8601String(),
             'title': assignment.title,
             'description': assignment.description,
             'data': assignment.data,

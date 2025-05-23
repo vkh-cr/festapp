@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/data_models/game_settings_model.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 
 class GameSettingsContent extends StatefulWidget {
@@ -27,8 +28,8 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
     final gameSettings = await DbOccasions.loadGameSettings();
     if (gameSettings != null) {
       setState(() {
-        _startDateTime = gameSettings.start?.toLocal();
-        _endDateTime = gameSettings.end?.toLocal();
+        _startDateTime = gameSettings.start?.toOccasionTime();
+        _endDateTime = gameSettings.end?.toOccasionTime();
       });
     }
     setState(() {
@@ -43,8 +44,8 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
     }
 
     final gameSettings = GameSettingsModel(
-      start: _startDateTime?.toUtc(),
-      end: _endDateTime?.toUtc(),
+      start: _startDateTime?.toUtcFromOccasionTime(),
+      end: _endDateTime?.toUtcFromOccasionTime(),
     );
 
     final success = await DbOccasions.updateGameSettings(gameSettings);
@@ -106,7 +107,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
               Text("Start".tr()),
               TextButton(
                 onPressed: () => _selectDateTime(context, true),
-                child: Text(_startDateTime?.toLocal().toString() ?? ""),
+                child: Text(_startDateTime?.toOccasionTime().toString() ?? ""),
               ),
             ],
           ),
@@ -116,7 +117,7 @@ class _GameSettingsContentState extends State<GameSettingsContent> {
               Text("End".tr()),
               TextButton(
                 onPressed: () => _selectDateTime(context, false),
-                child: Text(_endDateTime?.toLocal().toString() ?? ""),
+                child: Text(_endDateTime?.toOccasionTime().toString() ?? ""),
               ),
             ],
           ),
