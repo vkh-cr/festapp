@@ -13,6 +13,7 @@ import 'package:fstapp/dialogs/products_dialog.dart';
 import 'package:fstapp/dialogs/transactions_dialog.dart';
 import 'package:fstapp/services/dialog_helper.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
 
@@ -610,7 +611,7 @@ class EshopColumns {
     for (var item in history) {
       // Format the 'created_at' datetime to a more readable format
       String createdAt = item['created_at'];
-      DateTime parsedDate = DateTime.parse(createdAt).toLocal(); // Parse the string into a DateTime object
+      DateTime parsedDate = DateTime.parse(createdAt).toOccasionTime(); // Parse the string into a DateTime object
       String formattedDate = dateFormat.format(parsedDate); // Format the DateTime object
 
       prettyFormattedHistory += "$formattedDate\n";
