@@ -42,7 +42,7 @@ class OccasionModel {
   }) : features = features ?? [];
 
   factory OccasionModel.fromJson(Map<String, dynamic> json) {
-    var data = json[Tb.occasions.data] ?? {};
+    Map<String, dynamic> data = json[Tb.occasions.data] ?? {};
     return OccasionModel(
       id: json[Tb.occasions.id],
       createdAt: json[Tb.occasions.created_at] != null
