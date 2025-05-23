@@ -134,7 +134,7 @@ v.push(A.R(u+"   "+A.o(s)+"   "+t,q,q,q,q,q,q,q,F.adH,C.b0,q,q,q,q))
 x=A.a([A.bF(A.aj(v,C.j,C.f,C.i,0,q,C.m),q,q),C.am,A.b1(w,C.o,q,30),C.a4],x)
 if(r.f===D.GM)x.push(A.dv(!1,G.bu(D.bJ0,q),q,q,q,q,q,q,r.gb38(),q,q))
 return new A.a3(I.aX,A.aj(x,C.j,C.f,C.i,0,q,C.m),q)},
-B(d){var x=this,w=null,v=x.e==null?A.bOv(d):x.a3o(x.f),u=A.bW(w,w,w,w,w,w,A.b1(C.iY,C.cQ,w,w),w,w,w,new B.col(d),w,w,w,w,w),t=y.p
+B(d){var x=this,w=null,v=x.e==null?A.bOv(d):x.a3o(x.f),u=A.bW(w,w,w,w,w,w,A.b1(C.iZ,C.cQ,w,w),w,w,w,new B.col(d),w,w,w,w,w),t=y.p
 return Q.f8(w,v,A.jv(!0,new A.ch(C.ad,w,C.ab,C.v,A.a([A.aj(A.a([new A.a3(I.aX,A.at(A.a([u,A.bk(A.R("",w,w,w,w,w,w,w,A.an(w,w,C.cQ,w,w,w,w,w,w,w,w,20,w,w,C.X,w,w,!0,w,w,w,w,w,w,w,w),C.b0,w,w,w,w),1,w)],t),C.j,C.f,C.i,0,w),w),x.abF(),A.bk(E.cSS(x.x,C.Bf,new B.com(x)),1,w)],t),C.j,C.f,C.i,0,w,C.m)],t),w),!0,C.Q,!0,!0),w,w,w,w,w)},
 wg(d){return this.aR2(d)},
 aR2(d){var x=0,w=A.l(y.H),v,u=this,t,s,r
@@ -247,4 +247,4 @@ D.abp=new B.TH(3,"nothing")
 D.bJ0=new A.cn("Confirm Ticket",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJk=new A.cn("Point the camera at the attendee's code for an entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"XxpkF6vUcsgD76eqCVygAAHm01g=");
+a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"VTPGHjwfrrCmiWVM7hNLWjbv0mg=");

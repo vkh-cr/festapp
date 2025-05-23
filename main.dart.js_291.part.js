@@ -579,7 +579,7 @@ u=t.r.ch
 u.toString
 C.b.H(x,J.bA(u,new B.c1o(),y.l))
 C.b.H(v,x)}C.b.H(r,v)}return new A.a3(G.aX,A.aj(r,C.K,C.f,C.i,0,s,C.m),s)},
-B(d){var x,w=this,v=null,u=w.r==null?A.bOv(d):w.a3o(w.w),t=A.bW(v,v,v,v,v,v,A.b1(C.iY,C.cQ,v,v),v,v,v,new B.c1s(d),v,v,v,v,v),s=w.d
+B(d){var x,w=this,v=null,u=w.r==null?A.bOv(d):w.a3o(w.w),t=A.bW(v,v,v,v,v,v,A.b1(C.iZ,C.cQ,v,v),v,v,v,new B.c1s(d),v,v,v,v,v),s=w.d
 s=s==null?v:s.j(0)
 if(s==null)s=""
 x=y.p
@@ -784,4 +784,4 @@ D.abm=new B.a7B(1,"notSignedIn")
 D.abo=new B.a7B(2,"nothing")
 D.bJu=new A.cn("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"cDaxl+v4CuZov0VxsS25BvoAxv0=");
+a.eventLog.push({p:"main.dart.js_291",e:"endPart",h:b})})($__dart_deferred_initializers__,"cRcJzZ9u7ijSVrMQ2mf7Qbwa48I=");
