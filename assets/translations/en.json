@@ -551,7 +551,7 @@
   "Allows customizing event schedule display settings.": "Allows customizing event schedule display settings.",
   "Volunteer": "Volunteer",
   "Volunteers": "Volunteers",
-  "Volunteers_description": "Allows management of activities for volunteers.",
+  "Allows management of activities for volunteers.": "Allows management of activities for volunteers.",
   "Displayed rows": "Displayed rows",
   "Right Now": "Right Now",
   "ActivitiesComponentStrings.buttonCancel": "Cancel",
@@ -588,5 +588,7 @@
   "ActivitiesComponentStrings.tooltipDeleteAssignment": "Delete assignment",
   "ActivitiesComponentStrings.menuRemoveUserFromActivity": "Remove user from activity",
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "User assignment options",
+  "ActivitiesComponentStrings.activity": "Activity",
+  "Timezone": "Timezone",
   "_":"_"
 }

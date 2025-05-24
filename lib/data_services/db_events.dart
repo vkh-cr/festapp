@@ -4,8 +4,11 @@ import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/activities/activity_data_helper.dart';
+import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/exclusive_group_model.dart';
+import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
 import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
@@ -13,6 +16,7 @@ import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -401,7 +405,7 @@ class DbEvents {
         String answerWhy = "It's too soon!".tr();
         if(result["events_registration_start"]!=null)
         {
-          var start = DateTime.parse(result["events_registration_start"]).toLocal();
+          var start = DateTime.parse(result["events_registration_start"]).toOccasionTime();
           var datePart = DateFormat.MMMMEEEEd(context.locale.languageCode).format(start);
           var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
           String startString = "$datePart $timePart";
@@ -500,47 +504,63 @@ class DbEvents {
     return true;
   }
 
-  static Future<void> synchronizeMySchedule([bool join = false])
+  static Future<void> synchronizeMySchedule({bool join = false, List<int>? currentIds})
   async {
     if(!AuthService.isLoggedIn() || !AppConfig.isOwnProgramSupported){
       return;
     }
-    HashSet<EventModel> data = EventModel.CreateEventModelSet();
+    List<int> eventIdsToSynchronize = [];
 
-    var remote = await loadAllMySchedule();
-    var local = await loadAllMyScheduleOffline();
+    if(currentIds != null){
+      eventIdsToSynchronize = currentIds;
+    } else {
+      // If currentIds are not provided, load remote events
+      var remoteEvents = await loadAllMySchedule();
+      eventIdsToSynchronize = remoteEvents.map((x) => x.id!).toList();
+    }
 
     if (join) {
-      data.addAll(remote);
-      data.addAll(local);
-    }
-    else {
-      data = remote;
+      var localEventsIds = await OfflineDataService.getMyScheduleData();
+      eventIdsToSynchronize.addAll(localEventsIds);
+      eventIdsToSynchronize = eventIdsToSynchronize.toSet().toList();
     }
 
-    var currentUserEventIds = List<int>.from(data.map((x) => x.id));
-    await OfflineDataService.saveMyScheduleData(currentUserEventIds);
+    await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
 
     var values = [];
-    for(var v in currentUserEventIds)
+    for(var v in eventIdsToSynchronize)
     {
       values.add({
         EventModel.eventUsersSavedUserColumn: AuthService.currentUserId(),
         Tb.event_users_saved.event: v
       });
     }
-    if(join)
+    if(currentIds != null && !join){
+      return;
+    }
+    else if(join)
     {
       await _supabase.from(Tb.event_users_saved.table)
           .upsert(values);
+    } else {
+      // If not joining, we need to first clear existing remote entries for the user
+      // and then insert the new set of IDs.
+      await _supabase.from(Tb.event_users_saved.table)
+          .delete()
+          .eq(EventModel.eventUsersSavedUserColumn, AuthService.currentUserId());
+      if (values.isNotEmpty) {
+        await _supabase
+            .from(Tb.event_users_saved.table)
+            .insert(values);
+      }
     }
   }
 
   static Future<EventModel> updateEvent(EventModel event) async
   {
     var upsertObj = {
-      Tb.events.start_time: event.startTime.toIso8601String(),
-      Tb.events.end_time: event.endTime.toIso8601String(),
+      Tb.events.start_time: event.startTime.toUtcFromOccasionTime().toIso8601String(),
+      Tb.events.end_time: event.endTime.toUtcFromOccasionTime().toIso8601String(),
       Tb.events.title: event.title,
       Tb.events.max_participants: event.maxParticipants,
       Tb.events.place: event.place?.id,
@@ -748,10 +768,10 @@ class DbEvents {
     }
     final rolesByEvent = <int, List<int>>{};
     for (var r in rolesList) {
-      rolesByEvent.putIfAbsent(r.eventId!, () => []).add(r.roleId!);
+      rolesByEvent.putIfAbsent(r.eventId, () => []).add(r.roleId);
     }
-    final usersByEvent     = { for (var u in usersCountList)     u.eventId!: u.count! };
-    final savedByEvent     = { for (var s in usersSavedList)     s.eventId!: s.count! };
+    final usersByEvent     = { for (var u in usersCountList)     u.eventId: u.count };
+    final savedByEvent     = { for (var s in usersSavedList)     s.eventId: s.count };
 
     // instantiate and populate each EventModel
     final events = <EventModel>[];
@@ -781,4 +801,159 @@ class DbEvents {
     return events;
   }
 
+  // In YourServiceClass or relevant class containing getMyEventsAndActivities
+
+  static Future<MyEventsBundle?> getMyEventsAndActivities(
+      int occasionId,
+      bool includeDescription
+      ) async {
+    final response = await _supabase.rpc(
+      'get_my_events_and_activities', // Calling the updated SQL function
+      params: {
+        'p_occasion': occasionId,
+        'p_include_description': includeDescription,
+      },
+    );
+
+    if (response == null) {
+      print('Failed to load my events bundle. Response was null.');
+      return null;
+    }
+
+    if (response is! Map || response['code'] != 200) {
+      final code = response is Map ? response['code'] : 'N/A';
+      final message = response is Map ? response['message'] : response.toString();
+      print('Failed to load my events bundle. Code: $code, Message: $message');
+      return null;
+    }
+
+    final data = response['data'] as Map<String, dynamic>;
+
+    // ---- EVENT PROCESSING (Main events) ----
+    // This part uses GetEventsHelper and should be fine if GetEventsHelper is correct
+    List<EventModel> events = GetEventsHelper.parseEvents(data);
+    final List<PlaceModel> placesListForEvents = GetEventsHelper.parsePlaces(data);
+    final List<EventUserCount> usersCountList = GetEventsHelper.parseEventUsers(data);
+    final List<EventUserSavedCount> usersSavedList = GetEventsHelper.parseEventUsersSaved(data);
+    final List<EventGroupModel> groupsList = GetEventsHelper.parseEventGroups(data);
+
+    // build lookup maps
+    final placeById    = { for (var p in placesListForEvents) p.id!: p };
+    final groupsByParent = <int, List<EventGroupModel>>{};
+    final parentsByChild = <int, List<EventGroupModel>>{};
+    for (var g in groupsList) {
+        groupsByParent.putIfAbsent(g.eventParent, () => []).add(g);
+      parentsByChild.putIfAbsent(g.eventChild,    () => []).add(g);
+    }
+
+    final usersByEvent     = { for (var u in usersCountList)     u.eventId: u.count };
+    final savedByEvent     = { for (var s in usersSavedList)     s.eventId: s.count };
+
+    for (var ev in events) {
+      // override place with full model if available
+      if (ev.place?.id != null) {
+        ev.place = placeById[ev.place!.id];
+      }
+
+      ev.childEventIds  = groupsByParent[ev.id!]?.map((g) => g.eventChild).toList();
+      ev.parentEventIds = parentsByChild[ev.id!]?.map((g) => g.eventParent).toList();
+
+      for (var e in events){
+        var children = events.where((ev) => ev.parentEventIds?.contains(e.id)??false).toList();
+        e.childEvents = children;
+      }
+
+      ev.currentParticipants = usersByEvent[ev.id!];
+      ev.currentUsersSaved   = savedByEvent[ev.id!];
+    }
+
+    events = events.sortEvents();
+    events = events.withoutParentEvents();
+
+    // ---- ACTIVITY PROCESSING ----
+    // Note: ActivityEventModel and ActivityPlaceModel are specific to activities context
+    // SQL 'events' (for ActivityEventModel) and 'places' (for ActivityPlaceModel) are the main lists.
+    final List<ActivityEventModel> activityRelatedEvents = ActivityDataHelper.parseEvents(data); // Parsed from main 'events'
+    final List<ActivityPlaceModel> activityRelatedPlaces = ActivityDataHelper.parsePlaces(data); // Parsed from main 'places'
+
+    final List<ActivityModel> activitiesList = ActivityDataHelper.parseActivities(data); // From 'activities'
+    final List<ActivityAssignmentModel> assignmentsList = ActivityDataHelper.parseActivityAssignments(data); // From 'activity_assignments'
+
+    // User info for assignments (should now be populated from 'user_info' key)
+    final List<ActivityUserInfoModel> usersList = ActivityDataHelper.parseUsers(data);
+    final userMapById = { for (var u in usersList) if (u.id != null) u.id!: u };
+
+    // Links for assignments
+    final linkEventList = (data['assignment_events'] as List<dynamic>?)
+        ?.map((item) => AssignmentEventLinkModel.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+    final linkPlaceList = (data['assignment_places'] as List<dynamic>?)
+        ?.map((item) => AssignmentPlaceLinkModel.fromJson(item as Map<String, dynamic>))
+        .toList() ?? [];
+
+    // Create lookup maps for activity-related events and places
+    final activityEventByIdMap = { for (var e in activityRelatedEvents) if (e.id != null) e.id!: e };
+    final activityPlaceByIdMap = { for (var p in activityRelatedPlaces) if (p.id != null) p.id!: p };
+
+    final eventsByAssignmentId = <String, List<int>>{};
+    for (var link in linkEventList) {
+      if (link.assignmentId != null && link.eventId != null) {
+        eventsByAssignmentId.putIfAbsent(link.assignmentId!, () => []).add(link.eventId!);
+      }
+    }
+    final placesByAssignmentId = <String, List<int>>{};
+    for (var link in linkPlaceList) {
+      if (link.assignmentId != null && link.placeId != null) {
+        placesByAssignmentId.putIfAbsent(link.assignmentId!, () => []).add(link.placeId!);
+      }
+    }
+
+    // Link assignments with their related events, places, and user object
+    for (var assignment in assignmentsList) {
+      final eventIdsForCurrentAssignment = eventsByAssignmentId[assignment.id] ?? [];
+      assignment.events = eventIdsForCurrentAssignment
+          .map((id) => activityEventByIdMap[id])
+          .whereType<ActivityEventModel>()
+          .toList();
+
+      final placeIdsForCurrentAssignment = placesByAssignmentId[assignment.id] ?? [];
+      assignment.places = placeIdsForCurrentAssignment
+          .map((id) => activityPlaceByIdMap[id])
+          .whereType<ActivityPlaceModel>()
+          .toList();
+
+      // Link user object to assignment
+      // `assignment.userInfo` should be the user's ID string from ActivityAssignmentModel.fromJson
+      if (assignment.userInfo != null && userMapById.containsKey(assignment.userInfo)) {
+        assignment.user = userMapById[assignment.userInfo!];
+      }
+    }
+
+    // Link assignments back to their parent activities
+    final assignmentsByActivityId = <int, List<ActivityAssignmentModel>>{};
+    for (var asg in assignmentsList) {
+      final activityId = asg.activityId;
+      if (activityId != null) {
+        assignmentsByActivityId.putIfAbsent(activityId, () => []).add(asg);
+      }
+    }
+    for (var activity in activitiesList) {
+      activity.assignments = assignmentsByActivityId[activity.id] ?? [];
+    }
+
+    return MyEventsBundle(
+      events: events,
+      activities: activitiesList,
+    );
+  }
+}
+
+class MyEventsBundle {
+  final List<EventModel> events;
+  final List<ActivityModel> activities;
+
+  MyEventsBundle({
+    required this.events,
+    required this.activities,
+  });
 }

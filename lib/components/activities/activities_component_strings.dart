@@ -33,6 +33,7 @@ class ActivitiesComponentStrings {
   // Activity Options
   static String get menuRename => 'ActivitiesComponentStrings.menuRename'.tr();
   static String get menuDelete => 'ActivitiesComponentStrings.menuDelete'.tr();
+  static String get menuDetails => 'Description'.tr();
   static String get dialogRenameActivity => 'ActivitiesComponentStrings.dialogRenameActivity'.tr();
   static String get tooltipActivityOptions => 'ActivitiesComponentStrings.tooltipActivityOptions'.tr();
   static String get tooltipMarkVisible => 'ActivitiesComponentStrings.tooltipMarkVisible'.tr();
@@ -51,6 +52,9 @@ class ActivitiesComponentStrings {
   // Default/Unnamed Items
   static String textUnnamedPlace = 'Unnamed Place';
   static String textUnnamedEvent = 'Unnamed Event';
+
+  static String get activity => 'ActivitiesComponentStrings.activity'.tr();
+
 
   // Timeline Painter (Date/Time)
   // Using intl package for true localization.

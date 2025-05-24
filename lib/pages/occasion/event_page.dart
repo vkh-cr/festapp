@@ -73,7 +73,7 @@ class _EventPageState extends State<EventPage> {
       appBar: AppBar(
           backgroundColor: _event == null
               ? ThemeConfig.seed1
-              : ThemeConfig.eventTypeToColor(context, _event!.type),
+              : ThemeConfig.eventTypeToColor(context, _event?.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
             style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.eventTypeToColorNegative(context, _event?.type)),
@@ -92,7 +92,7 @@ class _EventPageState extends State<EventPage> {
                     },
                     icon: Icon(
                       Icons.qr_code_scanner,
-                      color: ThemeConfig.eventTypeToColor(context, _event!.type),
+                      color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),
                     )),
               ),
             ),
@@ -236,10 +236,12 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.topRight,
                         child: TextButton(
-                            onPressed: () => RouterService.navigateOccasion(
+                            onPressed: () {
+                              RouterService.navigateOccasion(
                                 context,
                                 "${MapPage.ROUTE}/${_event!.place!.id}")
-                                .then((value) => loadData(_event!.id!)),
+                                .then((value) => loadData(_event!.id!));
+                            },
                             child: IntrinsicWidth(
                               child: Row(
                                 children: [
