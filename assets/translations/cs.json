@@ -551,7 +551,7 @@
   "Allows customizing event schedule display settings.": "Umožní upravovat vzhled programu.",
   "Volunteer": "Dobrovolník",
   "Volunteers": "Dobrovolníci",
-  "Volunteers_description": "Umožňuje správu činností pro dobrovolníky.",
+  "Allows management of activities for volunteers.": "Umožňuje správu činností pro dobrovolníky.",
   "Displayed rows": "Zobrazeno řádků",
   "Right Now": "Právě Teď",
   "ActivitiesComponentStrings.buttonCancel": "Zrušit",
@@ -588,5 +588,7 @@
   "ActivitiesComponentStrings.tooltipDeleteAssignment": "Smazat přiřazení",
   "ActivitiesComponentStrings.menuRemoveUserFromActivity": "Odebrat uživatele z aktivity",
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "Možnosti přiřazení uživatele",
+  "ActivitiesComponentStrings.activity": "Aktivita",
+  "Timezone": "Časová zóna",
   "_": "_"
 }

@@ -20,9 +20,15 @@ class VerticalGridLinesPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) { // size.width SHOULD be the full timelineWidth
     final Paint linePaint = Paint();
-    final Color daySeparatorColor = isDarkMode ? Colors.blueGrey.shade700.withOpacity(0.6) : Colors.blueGrey.shade400.withOpacity(0.6);
-    final Color hourLineColor = isDarkMode ? Colors.white12 : Colors.black12;
-    final Color subHourLineColor = isDarkMode ? Colors.white10.withOpacity(0.7) : Colors.black12.withOpacity(0.7);
+
+    // --- MODIFIED COLORS START ---
+    final Color daySeparatorColor = isDarkMode ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.4);
+
+    // Increased opacity for hour lines to make them more distinct
+    final Color hourLineColor = isDarkMode ? Colors.white.withOpacity(0.18) : Colors.black.withOpacity(0.18);
+    // Adjusted and standardized opacity for sub-hour lines to make them more subtle
+    final Color subHourLineColor = isDarkMode ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08);
+    // --- MODIFIED COLORS END ---
 
     if (pps <= 0 || this.start.isAtSameMomentAs(this.end) || this.start.isAfter(this.end)) {
       // Avoid drawing or errors if parameters are invalid
@@ -49,8 +55,6 @@ class VerticalGridLinesPainter extends CustomPainter {
     }
 
     // Calculate the full logical width based on the painter's own start, end, and pps.
-    // This can be used as an optimization for the loop break if needed,
-    // but draw calls will be made for all dx regardless of size.width.
     final double calculatedFullLogicalWidth = (this.end.difference(this.start).inSeconds) * this.pps;
 
 
@@ -68,16 +72,16 @@ class VerticalGridLinesPainter extends CustomPainter {
         linePaint.color = daySeparatorColor;
         linePaint.strokeWidth = 0.8;
       } else if (isHourTick) {
-        linePaint.color = hourLineColor;
+        linePaint.color = hourLineColor; // Uses updated hourLineColor
         linePaint.strokeWidth = 0.6;
       } else if (show30MinTicks && isHalfHourTick) {
-        linePaint.color = subHourLineColor;
+        linePaint.color = subHourLineColor; // Uses updated subHourLineColor
         linePaint.strokeWidth = 0.5;
       } else if (show15MinTicks && isQuarterHourTick) {
-        linePaint.color = subHourLineColor;
+        linePaint.color = subHourLineColor; // Uses updated subHourLineColor
         linePaint.strokeWidth = 0.5;
       } else if (show5MinTicks) { // Other 5-minute intervals
-        linePaint.color = subHourLineColor;
+        linePaint.color = subHourLineColor; // Uses updated subHourLineColor
         linePaint.strokeWidth = 0.4;
       } else {
         currentTickTime = currentTickTime.add(tickInterval); // Move to next potential tick

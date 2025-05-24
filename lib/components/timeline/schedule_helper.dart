@@ -14,6 +14,7 @@ enum TimeBlockType {
   signedIn,    // user is signed in
   isFull,      // event full
   canSignIn,   // can sign in
+  activity,   // can sign in
 }
 
 /// Represents an optional place or "track" for splitting.
@@ -96,8 +97,8 @@ class TimeBlockItem {
   factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       eventType: model.type,
@@ -133,8 +134,8 @@ class TimeBlockItem {
   factory TimeBlockItem.fromEventModel(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       description: model.description,
@@ -186,21 +187,22 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true) {
+    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {
         return TimeBlockType.signedIn;
       }
       return TimeBlockType.noAction;
-    } else if (model.currentParticipants != null &&
-        model.maxParticipants != null &&
+    } else if (EventModel.isEventSupportingSignIn(model) &&
         model.isFull()) {
       return TimeBlockType.isFull;
     } else if (EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.canSignIn;
+    } else if(model.canSaveEventToMyProgram() == true){
+      return TimeBlockType.canSave;
     }
-    return TimeBlockType.canSave;
+    return TimeBlockType.noAction;
   }
 
   static List<TimeBlockGroup> splitTimeBlockByPlace(
