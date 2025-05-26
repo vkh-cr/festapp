@@ -48,14 +48,14 @@ class _DetailDialogState extends State<DetailDialog> {
         constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400), // Consider making these configurable if needed
         child: PinchScrollView( // PinchScrollView kept for description zooming
           builder: (onPinchStart, onPinchEnd) => Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min, // Important for Column in ScrollView
             children: [
               // Edit button, shown if canEdit is true and onEditPressed is provided
               if (widget.canEdit && widget.onEditPressed != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: ElevatedButton.icon(
+                  child: TextButton.icon(
                     onPressed: _handleEditPressed,
                     icon: const Icon(Icons.edit), // Generic edit icon
                     label: Text('Edit'.tr()), // Generic edit text

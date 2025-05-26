@@ -590,5 +590,13 @@
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "Možnosti přiřazení uživatele",
   "ActivitiesComponentStrings.activity": "Aktivita",
   "Timezone": "Časová zóna",
+  "Add Personal Info Field": "Přidat pole osobních údajů",
+  "Personal Info": "Osobní údaje",
+  "No fields available to add.": "Žádná pole nejsou k dispozici pro přidání.",
+  "ID Card / Passport Number": "Číslo OP / pasu",
+  "Expiry Date": "Datum platnosti",
+  "Expiry date cannot be in the past.": "Datum platnosti nemůže být v minulosti.",
+  "Expiry Date Label": "Popisek data platnosti",
+  "Show Expiry Date": "Zobrazit datum platnosti",
   "_": "_"
 }
