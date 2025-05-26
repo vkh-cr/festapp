@@ -4,6 +4,6 @@ a[b][c].push({p:"main.dart.js_73",e:"beginPart"})})(self,"$__dart_deferred_initi
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B
 A=c[0]
 B=c[182]
-var z=a.updateTypes([]);(function constants(){B.kA=new A.aB(57689,"MaterialIcons",null,!1)})()};
+var z=a.updateTypes([]);(function constants(){B.kD=new A.aB(57689,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_73",e:"endPart",h:b})})($__dart_deferred_initializers__,"s/JAzDvRuKXhCDlM4kQJMpPYlKg=");
+a.eventLog.push({p:"main.dart.js_73",e:"endPart",h:b})})($__dart_deferred_initializers__,"BQFJv4MT+QLmzAgAd6/Dz5/hRag=");
