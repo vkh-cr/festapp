@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'constants.dart';
@@ -19,6 +20,9 @@ import 'activity_timeline_controller.dart';
 import 'users_panel.dart';
 import 'places_panel.dart';
 import 'events_panel.dart';
+import 'package:fstapp/pages/utility/html_editor_page.dart'; // Import HtmlEditorPage
+import 'package:fstapp/router_service.dart'; // Import RouterService
+import 'package:fstapp/app_router.gr.dart'; // Import app_router.gr.dart for route
 
 
 class ActivitiesContent extends StatefulWidget {
@@ -777,6 +781,26 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
   }
 
+  // New method to show the HTML editor for an activity's description
+  void _showActivityDescriptionEditor(ActivityModel activity) {
+    RouterService.navigatePageInfo(
+      context,
+      HtmlEditorRoute(
+        content: {
+          HtmlEditorPage.parContent: activity.description,
+          HtmlEditorPage.parLoad: () async => activity.description,
+        },
+        occasionId: widget.occasionId,
+      ),
+    ).then((value) {
+      if (value != null && value is String) {
+        setState(() {
+          activity.description = value;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_bundle == null || _timelineStart == null || _timelineEnd == null) {
@@ -1477,6 +1501,13 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                           padding: EdgeInsets.zero,
                           itemBuilder: (_) => [
                             PopupMenuItem(value: 'rename', height: 30, child: Text(ActivitiesComponentStrings.menuRename, style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black))),
+                            PopupMenuItem(
+                                value: 'details',
+                                height: 30,
+                                child: Text(ActivitiesComponentStrings.menuDetails,
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: isDark ? Colors.white : Colors.black))),
                             PopupMenuItem(value: 'delete', height: 30, child: Text(ActivitiesComponentStrings.menuDelete, style: TextStyle(fontSize: 12, color: isDark ? Colors.white : Colors.black))),
                           ],
                           onSelected: (v) {
@@ -1491,6 +1522,16 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                               });
                             } else if (v == 'rename') {
                               _showRenameDialog(a);
+                            } else if (v == 'details') {
+                              showDialog(
+                                context: context,
+                                builder: (ctx) => DetailDialog(
+                                  title: a.title ?? ActivitiesComponentStrings.textUntitledActivity,
+                                  htmlDescription: a.description,
+                                  canEdit: true,
+                                  onEditPressed: () => _showActivityDescriptionEditor(a),
+                                ),
+                              );
                             }
                           },
                         ),
