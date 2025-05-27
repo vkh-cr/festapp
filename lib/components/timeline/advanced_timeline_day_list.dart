@@ -188,7 +188,6 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
   }
 
   bool _shouldShowCompanionButton(BuildContext context, TimeBlockItem event, AdvancedTimelineController controller) {
-    if (event.isCancelled) return false;
     return AuthService.isLoggedIn() &&
         event.isSupportingSignIn() &&
         FeatureService.isFeatureEnabled(FeatureConstants.companions);
