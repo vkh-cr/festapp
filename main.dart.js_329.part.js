@@ -45,7 +45,7 @@ m=A.mf(m.pn(m.qj("created_at","lt."+l.j(0))),m.$ti.c).aHY("id",v)
 l=A.df()
 l.toString
 x=2
-return A.d(m.dc("occasion",l).bQb(0,"created_at").aHe(1).QX(),$async$I7)
+return A.d(m.dc("occasion",l).bQa(0,"created_at").aHe(1).QX(),$async$I7)
 case 2:u=f
 x=u!=null?3:5
 break
@@ -180,7 +180,7 @@ if(u!=null)u.$0()
 v.e=!0
 case 5:case 3:return A.j(null,w)}})
 return A.k($async$M2,w)},
-btS(d){I.ix(d,"newsForm",y.X).aH(new B.chR(this,d),y.P)},
+btR(d){I.ix(d,"newsForm",y.X).aH(new B.chR(this,d),y.P)},
 a0t(){var x=0,w=A.l(y.H),v=this,u
 var $async$a0t=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=B
@@ -339,7 +339,7 @@ $1(d){var x=y.B
 return A.a([F.nK(E.bw(W.If,null),!0,48,D.asG,x),F.nK(E.bw(D.bIW,null),!0,48,D.LX,x)],y.h)},
 $S:z+1}
 B.chX.prototype={
-$0(){return this.a.btS(this.b)},
+$0(){return this.a.btR(this.b)},
 $S:0};(function installTearOffs(){var x=a._static_1
 x(B,"dDl","djp",2)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.Eq,A.J)
@@ -358,4 +358,4 @@ D.ayT=new A.aB(61075,"MaterialIcons",null,!1)
 D.azv=new A.d3(T.NW,null,null,null,null)
 D.bIW=new A.cr("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_329",e:"endPart",h:b})})($__dart_deferred_initializers__,"DI0CG2cQY9cuPQFcOxIemZKgBpg=");
+a.eventLog.push({p:"main.dart.js_329",e:"endPart",h:b})})($__dart_deferred_initializers__,"iS32sGNqwXBWFcsaguSaiZQcjvo=");

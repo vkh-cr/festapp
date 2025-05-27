@@ -134,7 +134,7 @@ x=v.y
 w=x==null
 if(!w||v.x!=null){if(w){x=v.x
 x=x==null?null:x.a}u.m(0,"product",x)}return u},
-bBg(d){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=null,k=m.as
+bBf(d){var x,w,v,u,t,s,r,q,p,o,n,m=this,l=null,k=m.as
 if(k==null)x=l
 else{k=k.ax
 x=k==null?l:A.dH(k,new B.b4a(m))}if(x!=null){k=m.as
@@ -177,7 +177,7 @@ gbl(d){return this.c},
 gc3(d){return this.w},
 sHx(d){return this.as=d}}
 B.ht.prototype={
-bLF(){var x,w
+bLE(){var x,w
 if(this.e==="ordered"){x=this.ay
 x=x==null||x.w==null}else x=!0
 if(x)return!1
@@ -361,4 +361,4 @@ var y={E:A.D("u<eZ>"),q:A.D("B<eZ>"),w:A.D("m"),d:A.D("h5"),b:A.D("@"),v:A.D("~"
 D.mO=A.a(x(["spot","food","others"]),A.D("u<m>"))})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dHj","Oa",()=>$.hN().gmM(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_271",e:"endPart",h:b})})($__dart_deferred_initializers__,"viLaHM7xKzR/IVAElQxZ8KspTcg=");
+a.eventLog.push({p:"main.dart.js_271",e:"endPart",h:b})})($__dart_deferred_initializers__,"GCrOyw8hxb30+7SIMGtVjH21jxY=");

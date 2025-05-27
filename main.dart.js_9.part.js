@@ -185,8 +185,8 @@ x=6
 return A.d(y.x.b(t)?t:A.c7(t,y.v),$async$BR)
 case 6:case 1:return A.j(v,w)}})
 return A.k($async$BR,w)},
-H2(d){return this.bu8(d)},
-bu8(d){var x=0,w=A.l(y.v),v,u=this,t,s,r
+H2(d){return this.bu7(d)},
+bu7(d){var x=0,w=A.l(y.v),v,u=this,t,s,r
 var $async$H2=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:s=u.a
 if(s.d){x=1
@@ -206,8 +206,8 @@ x=5
 return A.d(y.x.b(s)?s:A.c7(s,y.v),$async$H2)
 case 5:case 1:return A.j(v,w)}})
 return A.k($async$H2,w)},
-H3(d){return this.bu9(d)},
-bu9(d){var x=0,w=A.l(y.v),v=this,u,t
+H3(d){return this.bu8(d)},
+bu8(d){var x=0,w=A.l(y.v),v=this,u,t
 var $async$H3=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:u=v.c
 u.toString
@@ -282,4 +282,4 @@ D.adW=new A.cr("Sign out someone",null,null,null,null,null,null,null,null,null,n
 D.bJz=new A.cr("Create Companion",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJI=new A.cr("Companions",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_9",e:"endPart",h:b})})($__dart_deferred_initializers__,"bFgzMPhYiPTL4q5SGyhegJj8scE=");
+a.eventLog.push({p:"main.dart.js_9",e:"endPart",h:b})})($__dart_deferred_initializers__,"LyX3xNzH1+fZnpaxa7Bs+Awn0VQ=");
