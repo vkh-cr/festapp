@@ -6,7 +6,6 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
-import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
@@ -18,6 +17,10 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
+import 'package:fstapp/app_router.gr.dart'; // Added for CheckRoute
+import 'package:fstapp/dialogs/companion_dialog.dart'; // Added for CompanionDialog
+import 'package:fstapp/data_services/db_companions.dart'; // Added for DbCompanions
+import 'package:fstapp/data_models/companion_model.dart'; // Added for CompanionModel
 
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -119,22 +122,22 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   Future<void> _handleSignIn(int id) async {
     await DbEvents.signInToEvent(context, id);
-    await loadData(); // Reload data to reflect changes
+    await loadData();
   }
 
   Future<void> _handleSignOut(int id) async {
     await DbEvents.signOutFromEvent(context, id);
-    await loadData(); // Reload data to reflect changes
+    await loadData();
   }
 
   Future<void> _handleAdd(int id) async {
     await DbEvents.addToMySchedule(context, id);
-    await loadData(); // Reload data to reflect changes
+    await loadData();
   }
 
   Future<void> _handleRemove(int id) async {
     await DbEvents.removeFromMySchedule(context, id);
-    await loadData(); // Reload data to reflect changes
+    await loadData();
   }
 
   void _eventPressed(int id) {
@@ -145,6 +148,29 @@ class _MySchedulePageState extends State<MySchedulePage> {
   void _goToMap(int placeId) {
     RouterService.navigateOccasion(context, "${MapPage.ROUTE}/$placeId")
         .then((_) => loadData());
+  }
+
+  bool _isUserApprover() => RightsService.isApprover();
+
+  Future<void> _handleScanButtonPressed(BuildContext context, int eventId) async {
+    RouterService.navigatePageInfo(context, CheckRoute(id: eventId));
+  }
+
+  Future<void> _handleCompanionButtonPressed(BuildContext context, int eventId) async {
+    List<CompanionModel> companions = await DbCompanions.getAllCompanions();
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return CompanionDialog(
+          eventId: eventId,
+          maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+          companions: companions,
+          refreshData: () async {
+            await loadData();
+          },
+        );
+      },
+    );
   }
 
 
@@ -177,7 +203,10 @@ class _MySchedulePageState extends State<MySchedulePage> {
         onPlaceTap: (c, pl) => _goToMap(pl.id),
         customSplitter: TimeBlockHelper.splitTimeBlocksByDay,
         animateEventRemoval: true,
-        emptyContent: commonEmptyContent, // Used here
+        emptyContent: commonEmptyContent,
+        isUserApprover: _isUserApprover,
+        onScanButtonPressed: _handleScanButtonPressed,
+        onCompanionButtonPressed: _handleCompanionButtonPressed,
       ),
       openId: _openId,
       onToggle: (id) => setState(
@@ -187,7 +216,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
           eventGroups: TimeBlockHelper.splitTimeBlocksByDay(_dots!, context),
           onEventPressed: _eventPressed,
           nodePosition: 0.3,
-          emptyContent: commonEmptyContent, // And here
+          emptyContent: commonEmptyContent,
         ));
 
     return Scaffold(
