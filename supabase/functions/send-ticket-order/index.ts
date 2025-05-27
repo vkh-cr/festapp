@@ -2,7 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { qrcode } from "https://deno.land/x/qrcode/mod.ts";
-import { encode } from "https://deno.land/std/encoding/base64.ts";
+import { encode } "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
 import {
   getEmailTemplateAndWrapper,
@@ -204,6 +204,67 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
   return `${orderHeader}${ticketsDetails}${totalSection}${orderFooter}`;
 }
 
+async function handleSupabaseFunctionService(
+  supabaseFunctionSvc: any,
+  ticketOrder: any,
+  attachments: any[],
+) {
+  if (supabaseFunctionSvc && supabaseFunctionSvc.data && supabaseFunctionSvc.data.url) {
+    const supabaseFunctionUrl = supabaseFunctionSvc.data.url;
+    console.log(`Calling SUPABASE_FUNCTION service at: ${supabaseFunctionUrl}`);
+
+    const { data: requestSecret, error: secretGenerationError } = await supabaseAdmin.rpc(
+      "generate_request_secret",
+      { p_ttl_seconds: 300 }
+    );
+
+    if (secretGenerationError || !requestSecret) {
+      console.error("Failed to generate request secret:", secretGenerationError);
+    } else {
+      console.log("Generated request secret for SUPABASE_FUNCTION call.");
+      try {
+        const functionResponse = await fetch(supabaseFunctionUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: ticketOrder.order,
+            occasionTitle: ticketOrder.order.occasion.occasion_title,
+            requestSecret: requestSecret,
+          }),
+        });
+
+        if (functionResponse.ok) {
+          const attachmentData = await functionResponse.json();
+          if (attachmentData.data && attachmentData.contentType) {
+            const binaryString = atob(attachmentData.data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            attachments.push({
+              filename: `agreement-${ticketOrder.order.id}.pdf`,
+              content: bytes,
+              contentType: attachmentData.contentType,
+              encoding: "binary",
+            });
+            console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
+          } else {
+            console.error("SUPABASE_FUNCTION service response missing data or contentType:", attachmentData);
+          }
+        } else {
+          const errorBody = await functionResponse.text();
+          console.error(
+            `SUPABASE_FUNCTION service call failed with status: ${functionResponse.status}. Response: ${errorBody}`,
+          );
+        }
+      } catch (e) {
+        console.error("Error calling SUPABASE_FUNCTION service:", e);
+      }
+    }
+  }
+}
+
 Deno.serve(async (req) => {
   const attachments: {
     filename: string;
@@ -266,6 +327,9 @@ Deno.serve(async (req) => {
         encoding: "binary",
       });
     }
+
+    const supabaseFunctionSvc = extServices?.find((s: any) => s.type === "SUPABASE_FUNCTION");
+    await handleSupabaseFunctionService(supabaseFunctionSvc, ticketOrder, attachments);
 
     const occasion = ticketOrder.order.occasion;
     const paymentInfo = ticketOrder.order.payment_info;
