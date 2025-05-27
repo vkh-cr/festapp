@@ -598,5 +598,6 @@
   "Expiry date cannot be in the past.": "Datum platnosti nemůže být v minulosti.",
   "Expiry Date Label": "Popisek data platnosti",
   "Show Expiry Date": "Zobrazit datum platnosti",
+  "Cancelled": "Zrušeno",
   "_": "_"
 }
