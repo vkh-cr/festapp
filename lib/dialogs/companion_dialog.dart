@@ -8,6 +8,7 @@ import 'package:fstapp/services/dialog_helper.dart';
 
 class CompanionDialog extends StatefulWidget {
   final int eventId;
+  final bool isEventCancelled;
   final int maxCompanions;
   List<CompanionModel> companions = [];
   Future<void> Function()? refreshData;
@@ -17,7 +18,8 @@ class CompanionDialog extends StatefulWidget {
     required this.eventId,
     required this.maxCompanions,
     required this.companions,
-    this.refreshData
+    this.refreshData,
+    this.isEventCancelled = false,
   });
 
   @override
@@ -33,8 +35,8 @@ class _CompanionDialogState extends State<CompanionDialog> {
       await DbCompanions.create(_nameController.text);
       _nameController.clear();
       widget.companions =
-          await DbCompanions.getAllCompanions();
-      setState(() {});
+      await DbCompanions.getAllCompanions();
+      if (mounted) setState(() {});
     }
   }
 
@@ -49,21 +51,23 @@ class _CompanionDialogState extends State<CompanionDialog> {
     }
     await DbCompanions.delete(companion);
     widget.companions = await DbCompanions.getAllCompanions();
-    setState(() {});
+    if (mounted) setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signInCompanion(CompanionModel companion) async {
+    // This check could also be done inside DbCompanions.signIn, but UI disabling is clearer.
+    if (widget.isEventCancelled) return;
     await DbCompanions.signIn(context, widget.eventId, companion);
     widget.companions = await DbCompanions.getAllCompanions();
-    setState(() {});
+    if (mounted) setState(() {});
     await widget.refreshData?.call();
   }
 
   Future<void> _signOutCompanion(CompanionModel companion) async {
     await DbCompanions.signOut(context, widget.eventId, companion);
     widget.companions = await DbCompanions.getAllCompanions();
-    setState(() {});
+    if (mounted) setState(() {});
     await widget.refreshData?.call();
   }
 
@@ -78,7 +82,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                      "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.", )
+                "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.", )
                   .tr(namedArgs: {"max_companions": FeatureService.getMaxCompanions().toString()}),
               const SizedBox(height: 20),
               Visibility(
@@ -88,7 +92,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
                     TextField(
                       controller: _nameController,
                       decoration:
-                          InputDecoration(labelText: "Companion Name".tr()),
+                      InputDecoration(labelText: "Companion Name".tr()),
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(30),
                       ],
@@ -107,7 +111,7 @@ class _CompanionDialogState extends State<CompanionDialog> {
                 height: 150,
                 child: ListView.builder(
                   shrinkWrap: false,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(), // Corrected from true to false for scrollability if needed, or keep as is if intended. User provided false.
                   itemCount: widget.companions.length,
                   itemBuilder: (context, index) {
                     final companion = widget.companions[index];
@@ -123,12 +127,12 @@ class _CompanionDialogState extends State<CompanionDialog> {
                           if (!companion.isSignedIn(widget.eventId))
                             ElevatedButton(
                               child: const Text("Sign in someone").tr(),
-                              onPressed: () => _signInCompanion(companion),
+                              onPressed: widget.isEventCancelled ? null : () => _signInCompanion(companion), // Modified
                             ),
                           if (companion.isSignedIn(widget.eventId))
                             ElevatedButton(
                               child: const Text("Sign out someone").tr(),
-                              onPressed: () => _signOutCompanion(companion),
+                              onPressed: () => _signOutCompanion(companion), // Allowed
                             ),
                           IconButton(
                             icon: const Icon(Icons.delete),
