@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dialogs/standard_dialog.dart';
-import 'package:fstapp/pages/form/models/id_document_field_holder.dart'; // Updated import
+import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
 import 'package:fstapp/services/html_helper.dart';
@@ -37,6 +37,7 @@ class FormHelper {
   static const String fieldTypeSelectMany = "select_many";
   static const String fieldTypeProductType = "product_type";
   static const String fieldTypeBirthDate = "birth_date";
+  static const String fieldTypeIdDocument = "id_document";
 
   static const String fieldTypeTicket = "ticket";
 
@@ -57,7 +58,6 @@ class FormHelper {
   static const String metaForm = "form";
   static const String metaEmpty = "---";
   static const String metaProducts = "products";
-  static const String fieldTypeIdDocument = "id_document";
 
   // Labels and messages
   static String noteLabel() => "Note".tr();

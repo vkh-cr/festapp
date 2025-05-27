@@ -179,6 +179,20 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     return hslColor.withSaturation(saturated.clamp(0.0, 1.0)).withLightness(lightened.clamp(0.0, 1.0)).toColor();
   }
 
+  bool _shouldShowScanButton(BuildContext context, TimeBlockItem event, AdvancedTimelineController controller) {
+    if (event.isCancelled) return false;
+    return AuthService.isLoggedIn() &&
+        event.isSupportingSignIn() &&
+        (controller.isUserApprover?.call() ?? false) &&
+        FeatureService.isFeatureEnabled(FeatureConstants.entryCode);
+  }
+
+  bool _shouldShowCompanionButton(BuildContext context, TimeBlockItem event, AdvancedTimelineController controller) {
+    return AuthService.isLoggedIn() &&
+        event.isSupportingSignIn() &&
+        FeatureService.isFeatureEnabled(FeatureConstants.companions);
+  }
+
   @override
   Widget build(BuildContext context) {
     final event = widget.event;
@@ -194,7 +208,9 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final cardColor = _kUsePastelBackground ? _toPastel(context, effectiveBaseColor) : Theme.of(context).cardColor;
 
     Widget stripeWidget;
-    if (isActivity) {
+    if (event.isCancelled) {
+      stripeWidget = Container(width: stripeW, height: stripeH, color: Colors.grey);
+    } else if (isActivity) {
       stripeWidget = Container(width: stripeW, height: stripeH, color: Theme.of(context).primaryColor);
     } else if (!_kUsePastelBackground) {
       stripeWidget = Container(width: stripeW, height: stripeH, color: eventSpecificColor);
@@ -208,19 +224,20 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final showInlineButtons = screenWidth >= _kMinWidthForInlineButtons;
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
     final hasPlace = event.timeBlockPlace?.title != null;
-    final isEditor = controller.showAddNewEventButton?.call() ?? false;
-    final canSignIn = event.timeBlockType == TimeBlockType.canSignIn && !isActivity;
+    final isEditor = controller.showAddNewEventButton?.call() ?? false; // This might mean 'user can edit/manage ANY event' in this context
+    // final canSignIn = event.timeBlockType == TimeBlockType.canSignIn && !isActivity; // Replaced by _isEventSupportingSignIn
     final haveChildren = event.haveChildren();
 
-    final bool currentCanExpand;
+    final bool baseCanExpand;
     if (isActivity) {
-      currentCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (hasDescription || hasPlace);
+      baseCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (hasDescription || hasPlace);
     } else {
-      currentCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || canSignIn);
+      baseCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || event.isSupportingSignIn());
     }
+    final bool currentCanExpand = baseCanExpand;
 
     final now = TimeHelper.now();
-    final bool isCurrentEvent = event.startTime.isBefore(now) && event.endTime.isAfter(now);
+    final bool isCurrentEvent = !event.isCancelled && event.startTime.isBefore(now) && event.endTime.isAfter(now);
 
     final buttonTextColor = _kUsePastelBackground
         ? (isDark(context) ? Colors.white : Colors.black87)
@@ -244,8 +261,19 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         : unselectedColor;
 
     Widget inlineActionSection;
-    if (isActivity) {
-      // MODIFIED: Activity badge styling and placement
+    if (event.isCancelled && !event.isInMySchedule() && !event.isSignedIn()) {
+      inlineActionSection = Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: Text(
+          "Cancelled".tr().toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            color: ThemeConfig.redColor(context),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+    } else if (isActivity) {
       final Color activityBadgeBackgroundColor = selectedColor;
       final Color activityBadgeForegroundColor = eventPastelColorForText;
 
@@ -262,7 +290,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
               ActivitiesComponentStrings.activity,
               style: TextStyle(fontSize: 13, color: activityBadgeForegroundColor, fontWeight: FontWeight.w500),
             ),
-            const SizedBox(width: 5), // Slightly increased spacing
+            const SizedBox(width: 5),
             Icon(Icons.groups, size: 16, color: activityBadgeForegroundColor),
           ],
         ),
@@ -279,14 +307,14 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: selectedColor, // This is primary or its B/W pastel
+                      color: selectedColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
                         Text(
                           '${event.participants}/${event.maxParticipants}',
-                          style: TextStyle(fontSize: 13, color: capTextColor), // capTextColor uses event's pastel color on B/W bg
+                          style: TextStyle(fontSize: 13, color: capTextColor),
                         ),
                         const SizedBox(width: 4),
                         Icon(Icons.people, size: 14, color: capTextColor),
@@ -297,9 +325,9 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   Row(
                     children: [
                       Text('${event.participants}/${event.maxParticipants}',
-                          style: TextStyle(fontSize: 13, color: capBackgroundColor)), // unselectedColor for text
+                          style: TextStyle(fontSize: 13, color: capBackgroundColor)),
                       const SizedBox(width: 4),
-                      Icon(Icons.people, size: 14, color: capBackgroundColor), // unselectedColor for icon
+                      Icon(Icons.people, size: 14, color: capBackgroundColor),
                     ],
                   ),
               ],
@@ -338,7 +366,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
           child: Card(
-            color: cardColor,
+            color: event.isCancelled ? Theme.of(context).disabledColor.withOpacity(0.1) : cardColor,
             elevation: 0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(StylesConfig.eventItemRoundness)),
             clipBehavior: Clip.hardEdge,
@@ -373,7 +401,22 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                         children: [
                           Row(
                             children: [
-                              if (isCurrentEvent)
+                              if (event.isCancelled)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[700],
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    "Cancelled".tr().toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                )
+                              else if (isCurrentEvent)
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   margin: const EdgeInsets.only(right: 6),
@@ -390,15 +433,17 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                                 ),
                               Text(event.durationTimeString(),
                                   style: TextStyle(
-                                    fontSize: 13, color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.8),
+                                    fontSize: 13, color: event.isCancelled ? Theme.of(context).disabledColor : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.8),
                                   )),
-                              // Activity Badge was here, moved to inlineActionSection
                             ],
                           ),
                           Text(event.title,
-                              style: const TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600)),
-                          // MODIFIED for consistent height when not expanded
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                decoration: event.isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                                color: event.isCancelled ? Theme.of(context).disabledColor : null,
+                              )),
                           if (!expanded)
                             (hasPlace
                                 ? Text(
@@ -406,9 +451,9 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                               style: TextStyle(
-                                  color: ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13),
+                                  color: event.isCancelled ? Theme.of(context).disabledColor : ThemeConfig.blackColor(context).withOpacityUniversal(context, 0.96), fontSize: 13),
                             )
-                                : const SizedBox(height: 16.0) // Approx height of one line of size 13 text + padding
+                                : const SizedBox(height: 16.0)
                             ),
                         ],
                       ),
@@ -416,17 +461,20 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                     if (imageUrl != null)
                       Padding(
                         padding: const EdgeInsets.only(left: 8.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
-                          clipBehavior: Clip.antiAlias,
-                          child: SizedBox(
-                            width: 58.0, height: 58.0,
-                            child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
+                        child: Opacity(
+                          opacity: event.isCancelled ? 0.5 : 1.0,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(StylesConfig.imageRoundness),
+                            clipBehavior: Clip.antiAlias,
+                            child: SizedBox(
+                              width: 58.0, height: 58.0,
+                              child: CachedNetworkImage(imageUrl: imageUrl, fit: BoxFit.cover),
+                            ),
                           ),
                         ),
                       ),
                     const SizedBox(width: 4),
-                    inlineActionSection, // Contains Activity Badge or other buttons
+                    inlineActionSection,
                     const SizedBox(width: 4),
                     if (currentCanExpand)
                       Icon(
@@ -451,27 +499,77 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            if (event.timeBlockPlace != null)
-                              TextButton.icon(
-                                onPressed: () => controller.onPlaceTap?.call(context, event.timeBlockPlace!),
-                                icon: Icon(Icons.place, size: 14, color: selectedColor),
-                                label: Text(event.timeBlockPlace!.title, style: TextStyle(color: selectedColor)),
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerLeft),
-                              ),
-                            const Spacer(),
-                            if (isEditor && !isActivity)
-                              TextButton.icon(
-                                onPressed: () => controller.onEditEvent?.call(context, event.id),
-                                icon: Icon(Icons.edit, size: 14, color: selectedColor),
-                                label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
-                                style: TextButton.styleFrom(padding: EdgeInsets.zero, alignment: Alignment.centerRight),
-                              ),
-                          ],
-                        ),
+                        Builder(builder: (context) { // Use Builder to get context for selectedColor if needed here
+                          List<Widget> actionButtons = [];
+
+                          // Scan Button
+                          if (_shouldShowScanButton(context, event, controller)) {
+                            actionButtons.add(
+                                TextButton.icon(
+                                  onPressed: () => controller.onScanButtonPressed?.call(context, event.id),
+                                  icon: Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
+                                  label: Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
+                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                )
+                            );
+                          }
+
+                          // Companion Button
+                          if (_shouldShowCompanionButton(context, event, controller)) {
+                            actionButtons.add(
+                                TextButton.icon(
+                                  onPressed: () => controller.onCompanionButtonPressed?.call(context, event.id),
+                                  icon: Icon(Icons.people_outline, size: 14, color: selectedColor),
+                                  label: Text('Companions'.tr(), style: TextStyle(color: selectedColor)),
+                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                )
+                            );
+                          }
+
+                          // Edit Button
+                          if (isEditor && !isActivity) {
+                            actionButtons.add(
+                                TextButton.icon(
+                                  onPressed: () => controller.onEditEvent?.call(context, event.id),
+                                  icon: Icon(Icons.edit, size: 14, color: selectedColor),
+                                  label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
+                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                )
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              if (event.timeBlockPlace != null)
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton.icon(
+                                      onPressed: () => controller.onPlaceTap?.call(context, event.timeBlockPlace!),
+                                      icon: Icon(Icons.place, size: 14, color: selectedColor),
+                                      label: Text(
+                                        event.timeBlockPlace!.title,
+                                        style: TextStyle(color: selectedColor),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                                    ),
+                                  ),
+                                ),
+                              if (event.timeBlockPlace == null && actionButtons.isNotEmpty)
+                                const Spacer(), // Provides space if no place, pushing actions to right
+
+                              if (actionButtons.isNotEmpty)
+                                Wrap(
+                                  spacing: 8.0, // Horizontal spacing between buttons in the wrap
+                                  alignment: WrapAlignment.end,
+                                  children: actionButtons,
+                                )
+                            ],
+                          );
+                        }),
                         const SizedBox(height: 8),
-                        if (!isActivity && capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
+                        if (!event.isCancelled && !isActivity && capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
                           Center(
                             child: event.isSignedIn()
                                 ? OutlinedButton(
@@ -487,7 +585,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           ),
                           const SizedBox(height: 8),
                         ],
-                        if (event.timeBlockType == TimeBlockType.canSignIn && !AuthService.isLoggedIn()) ...[
+                        if (!event.isCancelled && event.isSupportingSignIn() && !AuthService.isLoggedIn()) ...[
                           Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: HtmlView(
