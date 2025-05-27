@@ -175,7 +175,7 @@ class _ScanPageState extends State<ScanPage> {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          color: ThemeConfig.seed1,
+                          color: ThemeConfig.appBarColorNegative(),
                         ),
                         onPressed: () {
                           RouterService.goBack(context);
@@ -187,7 +187,7 @@ class _ScanPageState extends State<ScanPage> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: ThemeConfig.seed1,
+                            color: ThemeConfig.appBarColorNegative(),
                           ),
                           textAlign: TextAlign.center,
                         ),
