@@ -1,150 +1,230 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_185",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,F,E,G,H,I,C={
-dhk(){return new C.DQ(null)},
-DQ:function DQ(d){this.a=d},
-aep:function aep(d,e){var _=this
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,K,E,L,M,N,B={
+dmH(){return new B.Ft(null)},
+Ft:function Ft(d){this.a=d},
+ahc:function ahc(){var _=this
 _.f=_.e=_.d=!1
-_.r=""
-_.w=d
-_.x=e
-_.c=_.a=null},
-cdR:function cdR(){},
-cdT:function cdT(d,e){this.a=d
+_.r=!0
+_.w=!1
+_.c=_.a=_.y=_.x=null},
+crv:function crv(d){this.a=d},
+crw:function crw(d,e,f,g,h){var _=this
+_.a=d
+_.b=e
+_.c=f
+_.d=g
+_.e=h},
+cru:function cru(d){this.a=d},
+cro:function cro(d,e){this.a=d
 this.b=e},
-cdS:function cdS(d){this.a=d},
-cdM:function cdM(d,e){this.a=d
+crq:function crq(d){this.a=d},
+crr:function crr(d,e){this.a=d
 this.b=e},
-cdQ:function cdQ(d){this.a=d},
-cdP:function cdP(d,e){this.a=d
-this.b=e},
-cdN:function cdN(d){this.a=d},
-cdO:function cdO(d,e){this.a=d
-this.b=e}},D,K,L,M,N,O,P,Q,R,S,T
+crs:function crs(d){this.a=d},
+crp:function crp(d){this.a=d},
+crt:function crt(d){this.a=d},
+byR(){var x=0,w=A.l(y.e),v,u,t
+var $async$byR=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:u=$.yA().Z8("getNotificationPermission",[])
+x=3
+return A.d(A.FB("NotificationAllowed",null),$async$byR)
+case 3:t=e
+v=u&&t==="true"
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$byR,w)},
+byS(){var x=0,w=A.l(y.v)
+var $async$byS=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d($.yA().OM("optIn",[]),$async$byS)
+case 2:return A.j(null,w)}})
+return A.k($async$byS,w)},
+byT(){var x=0,w=A.l(y.v)
+var $async$byT=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d($.yA().OM("optOut",[]),$async$byT)
+case 2:return A.j(null,w)}})
+return A.k($async$byT,w)},
+Sr(){var x=0,w=A.l(y.e),v,u
+var $async$Sr=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:u=$.yA().Z8("getNotificationPermission",[])
+x=!u?3:4
+break
+case 3:x=5
+return A.d(O.azr(),$async$Sr)
+case 5:u=e
+case 4:x=6
+return A.d(A.xU("NotificationAllowed",C.cb.j(u),null),$async$Sr)
+case 6:x=u?7:8
+break
+case 7:x=9
+return A.d(B.byS(),$async$Sr)
+case 9:x=10
+return A.d(A.a5a(),$async$Sr)
+case 10:case 8:v=u
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$Sr,w)},
+azs(){var x=0,w=A.l(y.v)
+var $async$azs=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d(A.xU("NotificationAllowed",String(!1),null),$async$azs)
+case 2:x=3
+return A.d(B.byT(),$async$azs)
+case 3:return A.j(null,w)}})
+return A.k($async$azs,w)}},D,O,F,P,G,I,H,Q,R
 A=c[0]
-B=c[2]
-F=c[101]
-E=c[175]
-G=c[134]
-H=c[159]
-I=c[249]
-C=a.updateHolder(c[13],C)
-D=c[299]
-K=c[244]
-L=c[279]
-M=c[187]
-N=c[278]
-O=c[301]
-P=c[300]
-Q=c[177]
-R=c[173]
-S=c[166]
-T=c[148]
-C.DQ.prototype={
-M(){var x=$.a9()
-return new C.aep(new A.cr(B.aw,x),A.a([new A.zs(x),new A.zs(x),new A.zs(x)],y.j))}}
-C.aep.prototype={
-aZ(){var x=this
-x.c8()
-x.r=$.cMP().aNx()
-x.qG()
-x.A(new C.cdR())},
-qG(){var x=0,w=A.l(y.f),v=this,u
+C=c[2]
+K=c[181]
+E=c[176]
+L=c[101]
+M=c[134]
+N=c[160]
+B=a.updateHolder(c[26],B)
+D=c[264]
+O=c[47]
+F=c[89]
+P=c[266]
+G=c[240]
+I=c[265]
+H=c[185]
+Q=c[178]
+R=c[174]
+B.Ft.prototype={
+M(){return new B.ahc()}}
+B.ahc.prototype={
+aZ(){this.c8()
+this.qG()},
+qG(){var x=0,w=A.l(y.v),v=this,u,t,s,r,q
 var $async$qG=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:u=$.uo().b.e
-v.A(new C.cdT(v,u))
+while(true)switch(x){case 0:x=2
+return A.d(B.byR(),$async$qG)
+case 2:s=e
+r=v.c.af(y.q).r.a
+r===$&&A.b()
+u=C.b.fA(A.YW(),new B.crv(r))
+t=$.up().b.e
+q=B
+x=3
+return A.d(F.alL(),$async$qG)
+case 3:v.A(new q.crw(v,e,s,u,t))
 return A.j(null,w)}})
 return A.k($async$qG,w)},
-xx(){var x=0,w=A.l(y.f),v=this,u
+xx(){var x=0,w=A.l(y.v),v=this,u
 var $async$xx=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:try{$.uo().aJa()}catch(t){v.A(new C.cdS(v))}x=2
+while(true)switch(x){case 0:try{$.up().aJd()}catch(t){v.A(new B.cru(v))}x=2
 return A.d(v.qG(),$async$xx)
 case 2:return A.j(null,w)}})
 return A.k($async$xx,w)},
-bbk(d){this.A(new C.cdM(this,d))},
-B(d){var x,w,v,u=null,t=E.bw(D.bJp,u)
-t=R.iD(u,u,u,!0,u,u,1,u,u,u,!1,u,!1,u,u,H.uv(u,new C.cdQ(d)),u,!0,u,u,u,u,u,t,u,u,u,1,u,!0)
-x=A.bG(12)
-x=A.ar(u,u,B.k,u,u,new A.b3(u,A.cPZ(B.N,B.lL,new S.Hv("assets/icons/fstappicon.png",u,u),u,B.e3),u,x,u,u,u,B.L),u,64,u,u,u,u,u,64)
-w=y.g
-w=A.r("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.z(["title","Festapp"],w,w))
-v=y.e
-return Q.f9(t,u,new A.ct(B.aX,u,u,new A.a3(K.ML,new A.cE(new A.ab(0,720,0,1/0),A.ah(A.a([A.bF(A.at(A.a([x,D.bCy,A.bj(E.bw(A.P(w,u,u,u,u,u,u,u,A.an(u,u,A.D(d).ax.a===B.t?$.dm():B.p,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.j,B.bl,B.i,0,u),u,u),L.ad1,this.bBk(d,A.r("Install for Apple",u),D.aza,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bBl(d,A.r("Install for Android",u),D.axC,"",1,A.r("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bBj(d,A.r("Install for PC/Mac",u),D.axN,"",2)],v),B.j,B.f,B.i,0,u,B.m),u),u),u),u,u,u,u,u)},
-abz(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
-if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
-else o=n
-else o=n
-n=y.e
-x=A.at(A.a([A.aY(f,q,q,24),M.iA,A.P(e,q,q,q,q,q,q,q,B.fA,q,q,q,q,q)],n),B.j,B.f,B.i,0,q)
-w=A.a([],n)
-if(j!=null){v=A.D(d).ax.a===B.t?$.dm():B.p
-B.b.H(w,A.a([new A.a3(B.cJ,E.bw(A.P(j,q,q,q,q,q,q,q,A.an(q,q,A.ch(204,v.T()>>>16&255,v.T()>>>8&255,v.T()&255),q,q,q,q,q,q,q,q,q,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),q,q,q,q,q),q),q),N.iB],n))}v=i?A.r("Download App",q):A.r("Install Now",q)
-if(i)u=new C.cdN(g)
-else u=!r.d&&!r.f&&r.e?r.gaer():q
-t=!i
-if(t)s=!r.d&&!r.f&&r.e
-else s=!0
-v=A.a([G.HE(s?B.cQ:B.av,d,50,!0,v,u,B.l,250)],n)
-if(r.d)v.push(new A.a3(B.e1,E.bw(A.P("The app is already installed.",q,q,q,q,q,q,q,A.an(q,q,B.cQ,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.b0,q,q,q,q),q),q))
-if(t&&r.f)v.push(new A.a3(B.e1,A.ah(A.a([E.bw(D.bJo,q),B.al,A.at(A.a([A.bj(A.el(q,!1,r.w,B.aAx,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.H,q,q),1,q),I.ci,T.tV(A.aY(P.t5,q,q,q),q,E.bw(A.P("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.cdO(r,d),q)],n),B.j,B.f,B.i,0,q)],n),B.j,B.f,B.i,0,q,B.m),q))
-w.push(new A.a3(B.cJ,A.ah(v,B.j,B.f,B.i,0,q,B.m),q))
-w.push(B.a2)
-return A.Dc(w,p,q,o,new C.cdP(r,h),q,q,x,q)},
-bBk(d,e,f,g,h,i){return this.abz(d,e,f,g,h,i,null)},
-bBl(d,e,f,g,h,i){return this.abz(d,e,f,g,h,!1,i)},
-bBj(d,e,f,g,h){return this.abz(d,e,f,g,h,!1,null)}}
-var z=a.updateTypes(["Y<~>()"])
-C.cdR.prototype={
-$0(){},
+a9t(d){this.A(new B.cro(this,d))},
+B(d){var x,w,v,u,t,s=this,r=null,q=4294922834,p=4292030255,o=A.bo(C.at)
+o=E.bw(A.P("Settings",r,r,r,r,r,r,r,A.al(r,r,new A.bj(o.a,o.b,o.c,0.8).bj(),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r,r,r,r),r)
+x=A.bo(C.at)
+o=R.iE(r,r,r,!0,r,r,1,r,r,r,!1,r,!1,r,r,N.uw(new A.bj(x.a,x.b,x.c,0.8).bj(),new B.crq(d)),r,!0,r,r,r,r,r,o,r,r,r,1,r,!0)
+x=y.u
+w=A.a([],x)
+if(A.YW().length>1){v=E.bw(D.bJD,r)
+u=s.x
+u=u==null?r:u.b
+if(u==null)u="---"
+t=y.w
+C.b.H(w,A.a([v,C.a2,A.at(A.a([A.P(A.r("Current Language: {language}",A.z(["language",u],t,t)),r,r,r,r,r,r,r,I.zI,r,r,r,r,r),A.bW(r,r,r,r,r,r,D.azD,r,r,r,new B.crr(s,d),r,r,r,r,r)],x),C.j,C.bX,C.i,0,r),H.ec],x))}A.b1R()
+v=A.a([E.bw(D.bJH,r),C.a2,A.at(A.a([E.bw(D.bIY,r),A.vM(r,r,r,!1,C.t,r,r,r,r,r,r,new B.crs(s),r,r,r,r,r,r,r,r,s.d)],x),C.j,C.bX,C.i,0,r)],x)
+if(s.w)v.push(new A.a3(C.e1,E.bw(A.P("Failed to enable notifications.",r,r,r,r,r,r,r,A.al(r,r,A.C(d).ax.a===C.q?A.b3(q):A.b3(p),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b0,r,r,r,r),r),r))
+C.b.H(w,v)
+w.push(H.ec)
+v=E.bw(D.bJ0,r)
+u=s.y
+u=A.a([u===C.lE,u===C.i5,u===C.iR],y.l)
+w.push(A.ah(A.a([v,C.a2,F.cWN(A.bE(8),A.a([new A.a3(new A.an(12,0,12,0),E.bw(D.bIO,r),r),new A.a3(new A.an(12,0,12,0),E.bw(A.P("Auto",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r),new A.a3(new A.an(12,0,12,0),E.bw(A.P("Light",r,r,r,r,r,r,r,r,r,r,r,r,r),r),r)],x),u,new B.crt(s)),H.ec],x),C.K,C.f,C.i,0,r,C.m))
+v=A.r("Install App",r)
+u=!s.e
+t=u&&s.r&&s.f?s.gaev():r
+if(u&&s.r&&s.f)u=A.C(d).ax.a===C.q?$.di():C.p
+else u=C.at
+x=A.a([M.HE(u,d,50,!0,v,t,A.C(d).ax.a===C.q?$.hO():C.l,250)],x)
+if(!s.r)x.push(new A.a3(C.e1,E.bw(A.P("This platform or browser does not support the PWA install prompt or the app is already installed.",r,r,r,r,r,r,r,A.al(r,r,A.C(d).ax.a===C.q?A.b3(q):A.b3(p),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b0,r,r,r,r),r),r))
+if(s.e||!s.f)x.push(new A.a3(C.e1,E.bw(A.P("The app is already installed.",r,r,r,r,r,r,r,A.al(r,r,A.C(d).ax.a===C.q?$.di():C.p,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b0,r,r,r,r),r),r))
+w.push(A.bG(A.ah(x,C.j,C.f,C.i,0,r,C.m),r,r))
+return Q.f9(o,r,new A.cp(C.aX,r,r,new A.a3(K.aT,new A.cE(new A.ab(0,720,0,1/0),A.ah(w,C.K,C.f,C.i,0,r,C.m),r),r),r),r,r,r,r,r)}}
+var z=a.updateTypes(["X<~>()"])
+B.crv.prototype={
+$1(d){return d.a.gf0(0)===this.a.gf0(0)},
+$S:429}
+B.crw.prototype={
+$0(){var x=this,w=x.a
+w.y=x.b
+w.d=x.c
+w.x=x.d
+w.e=x.e
+w.f=!0},
 $S:0}
-C.cdT.prototype={
-$0(){var x=this.a
-x.d=this.b
-x.e=!0},
+B.cru.prototype={
+$0(){this.a.r=!1},
 $S:0}
-C.cdS.prototype={
-$0(){var x=this.a
-x.f=!0
-x=x.w
-x.scn(0,A.u5().j(0))
-x.syq(A.fi(B.G,0,x.a.a.length,!1))},
+B.cro.prototype={
+$0(){var x=this.a,w=this.b
+x.y=w
+x=x.c
+x.toString
+F.cOk(x).ak0(w)},
 $S:0}
-C.cdM.prototype={
-$0(){var x,w,v,u
-for(x=this.a.x,w=this.b,v=0;v<3;++v)if(v===w){u=x[v]
-if(!u.a){u.a=!0
-u.a4()}}else{u=x[v]
-if(u.a){u.a=!1
-u.a4()}}},
+B.crq.prototype={
+$0(){return L.aCW(this.a)},
 $S:0}
-C.cdQ.prototype={
-$0(){return F.aCW(this.a)},
+B.crr.prototype={
+$0(){var x=0,w=A.l(y.v),v=this
+var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d(F.arv(v.b),$async$$0)
+case 2:x=3
+return A.d(v.a.qG(),$async$$0)
+case 3:return A.j(null,w)}})
+return A.k($async$$0,w)},
+$S:2}
+B.crs.prototype={
+$1(d){return this.aMF(d)},
+aMF(d){var x=0,w=A.l(y.v),v=this,u,t
+var $async$$1=A.h(function(e,f){if(e===1)return A.i(f,w)
+while(true)switch(x){case 0:x=d?2:4
+break
+case 2:x=5
+return A.d(B.Sr(),$async$$1)
+case 5:u=f
+x=3
+break
+case 4:x=6
+return A.d(B.azs(),$async$$1)
+case 6:u=!0
+case 3:if(!u){t=v.a
+t.A(new B.crp(t))}x=7
+return A.d(v.a.qG(),$async$$1)
+case 7:return A.j(null,w)}})
+return A.k($async$$1,w)},
+$S:1222}
+B.crp.prototype={
+$0(){this.a.w=!0},
 $S:0}
-C.cdP.prototype={
-$1(d){if(d)this.a.bbk(this.b)},
-$S:8}
-C.cdN.prototype={
-$0(){$.cMP()
-b.G.window.open(this.a,"_blank")
-return null},
-$S:0}
-C.cdO.prototype={
-$0(){A.uF(new A.od(this.a.w.a.a))
-A.bL(this.b,A.r("Copied to clipboard",null),B.ac)},
-$S:0};(function installTearOffs(){var x=a._instance_0u
-x(C.aep.prototype,"gaer","xx",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(C.DQ,A.J)
-x(C.aep,A.O)
-w(A.cL,[C.cdR,C.cdT,C.cdS,C.cdM,C.cdQ,C.cdN,C.cdO])
-x(C.cdP,A.c9)})()
-A.c7(b.typeUniverse,JSON.parse('{"DQ":{"J":[],"e":[]},"aep":{"O":["DQ"]}}'))
-var y={j:A.C("u<zs>"),e:A.C("u<e>"),g:A.C("m"),f:A.C("~")};(function constants(){D.axC=new A.aB(57477,"MaterialIcons",null,!1)
-D.axN=new A.aB(57795,"MaterialIcons",null,!1)
-D.aza=new A.aB(984254,"MaterialIcons",null,!1)
-D.bCy=new A.ao(22,null,null,null)
-D.bJo=new A.cq("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,O.adQ,null,B.b0,null,null,null,null,null,null,null,null,null,null)
-D.bJp=new A.cq("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dIq","cMP",()=>new A.RB())})()};
+B.crt.prototype={
+$1(d){if(d===0)this.a.a9t(C.lE)
+else if(d===1)this.a.a9t(C.i5)
+else if(d===2)this.a.a9t(C.iR)},
+$S:18};(function installTearOffs(){var x=a._instance_0u
+x(B.ahc.prototype,"gaev","xx",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.Ft,A.J)
+x(B.ahc,A.O)
+w(A.c9,[B.crv,B.crs,B.crt])
+w(A.cK,[B.crw,B.cru,B.cro,B.crq,B.crr,B.crp])})()
+A.c5(b.typeUniverse,JSON.parse('{"Ft":{"J":[],"e":[]},"ahc":{"O":["Ft"]}}'))
+var y={u:A.D("u<e>"),l:A.D("u<x>"),w:A.D("m"),q:A.D("kJ"),e:A.D("x"),v:A.D("~")};(function constants(){D.azD=new A.d3(P.O3,null,null,null,null)
+D.bIO=new A.cr("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bIY=new A.cr("Enable Notifications",null,I.zI,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bJ0=new A.cr("Appearance",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bJD=new A.cr("Language Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bJH=new A.cr("Notification Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_185",e:"endPart",h:b})})($__dart_deferred_initializers__,"D9XgIVXtXy4LLFoULkX4M9BhBng=");
+a.eventLog.push({p:"main.dart.js_185",e:"endPart",h:b})})($__dart_deferred_initializers__,"3PrP1yX+ndLQgNH3F3xQAdMsEbU=");
