@@ -256,6 +256,7 @@ class DbEvents {
             "${Tb.events.is_group_event},"
             "${Tb.events.is_hidden},"
             "${Tb.events.type},"
+            "${Tb.events.data},"
             "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
             + withParentSelect
         )
@@ -279,6 +280,7 @@ class DbEvents {
           "${Tb.events.start_time},"
           "${Tb.events.end_time},"
           "${Tb.events.max_participants},"
+          "${Tb.events.data},"
           "${Tb.event_users.table}(count)")
           .inFilter(Tb.events.id, event.childEventIds!)
           .eq(Tb.events.is_hidden, false);
@@ -527,49 +529,23 @@ class DbEvents {
 
     await OfflineDataService.saveMyScheduleData(eventIdsToSynchronize);
 
-    var values = [];
-    for(var v in eventIdsToSynchronize)
-    {
-      values.add({
-        EventModel.eventUsersSavedUserColumn: AuthService.currentUserId(),
-        Tb.event_users_saved.event: v
-      });
-    }
-    if(currentIds != null && !join){
+    if(!join){
       return;
     }
-    else if(join)
-    {
-      await _supabase.from(Tb.event_users_saved.table)
-          .upsert(values);
-    } else {
-      // If not joining, we need to first clear existing remote entries for the user
-      // and then insert the new set of IDs.
-      await _supabase.from(Tb.event_users_saved.table)
-          .delete()
-          .eq(EventModel.eventUsersSavedUserColumn, AuthService.currentUserId());
-      if (values.isNotEmpty) {
-        await _supabase
-            .from(Tb.event_users_saved.table)
-            .insert(values);
+
+    await _supabase.rpc(
+      'synchronize_my_schedule',
+      params: {
+        'p_event_ids': eventIdsToSynchronize,
+        'p_join_mode': join,
       }
-    }
+    );
   }
 
   static Future<EventModel> updateEvent(EventModel event) async
   {
-    var upsertObj = {
-      Tb.events.start_time: event.startTime.toUtcFromOccasionTime().toIso8601String(),
-      Tb.events.end_time: event.endTime.toUtcFromOccasionTime().toIso8601String(),
-      Tb.events.title: event.title,
-      Tb.events.max_participants: event.maxParticipants,
-      Tb.events.place: event.place?.id,
-      Tb.events.split_for_men_women: event.splitForMenWomen,
-      Tb.events.is_group_event: event.isGroupEvent,
-      Tb.events.is_hidden: event.isHidden,
-      Tb.events.type: event.type,
-      Tb.events.data: event.data,
-    };
+    var upsertObj = event.toUpsertMap();
+
     if(event.description!=null) {
       upsertObj.addAll({Tb.events.description: event.description});
     }

@@ -1,3 +1,4 @@
+// ScheduleContent.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/features/feature_service.dart';
@@ -103,6 +104,18 @@ class _ScheduleContentState extends State<ScheduleContent> {
             TrinaColumnType.number(negative: false, defaultValue: 0),
             width: 80,
           ),
+          // START OF ADDED CODE
+          TrinaColumn(
+            title: "Cancelled".tr(),
+            field: Tb.events.dataIsCancelled, // Field from EventModel.toTrinaRow
+            type: TrinaColumnType.text(), // Expected by checkBoxRenderer as "true" or "false"
+            applyFormatterInEditing: true,
+            enableEditingMode: false, // Renderer handles the toggle and state update
+            width: 85, // Adjust width as needed
+            renderer: (rendererContext) => DataGridHelper.checkBoxRenderer(
+                rendererContext, Tb.events.dataIsCancelled),
+          ),
+          // END OF ADDED CODE
           if((FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule) as ScheduleFeature?)?.scheduleType == ScheduleFeature.scheduleTypeAdvanced)
             TrinaColumn(
               title: "Intro Image".tr(),
@@ -110,14 +123,13 @@ class _ScheduleContentState extends State<ScheduleContent> {
               type: TrinaColumnType.text(defaultValue: null),
               width: 140,
               applyFormatterInEditing: true,
-              renderer: (ctx) { // ctx here is 'exampleCellContext' in this demo
-                // 'context' from the parent scope (MyTableWidget's build method) is used for showDialog, ThemeConfig
+              renderer: (ctx) {
                 final String? imageUrl = ctx.cell.value as String?;
 
                 return GestureDetector(
                   onTap: () {
                     showDialog(
-                      context: context, // This is the BuildContext of MyTableWidget
+                      context: context,
                       builder: (_) => AlertDialog(
                         insetPadding: const EdgeInsets.symmetric(
                           horizontal: 40.0,
@@ -126,9 +138,9 @@ class _ScheduleContentState extends State<ScheduleContent> {
                         title: Text("Intro Image".tr()),
                         content: SizedBox(
                           width: 200.0,
-                          height: 250.0, // Adjusted height for better layout of ImageArea
+                          height: 250.0,
                           child: ImageArea(
-                            imageUrl: imageUrl, // Pass current imageUrl to ImageArea
+                            imageUrl: imageUrl,
                             onFileSelected: (file) async {
                               final bytes = await file.readAsBytes();
                               final compressed = await ImageCompressionHelper.compress(bytes, 200);
@@ -137,18 +149,14 @@ class _ScheduleContentState extends State<ScheduleContent> {
                                 RightsService.currentOccasionId(),
                                 null,
                               );
-                              // Use ctx.stateManager from the renderer's CellContext
                               ctx.stateManager.changeCellValue(ctx.cell, publicUrl, force: true);
-                              // Use 'context' from MyTableWidget for ToastHelper
                               ToastHelper.Show(context, "Image uploaded successfully".tr());
                               return publicUrl;
                             },
                             onRemove: () async {
                               if (imageUrl != null && imageUrl.isNotEmpty) {
                                 await DbImages.removeImage(imageUrl);
-                                // Use ctx.stateManager from the renderer's CellContext
                                 ctx.stateManager.changeCellValue(ctx.cell, "", force: true);
-                                // Use 'context' from MyTableWidget for ToastHelper
                                 ToastHelper.Show(context, "Image removed".tr());
                               }
                             },
@@ -163,13 +171,8 @@ class _ScheduleContentState extends State<ScheduleContent> {
                       ),
                     );
                   },
-                  // MODIFICATION: Ensure the GestureDetector captures taps within its full bounds.
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    // MODIFICATION: This Container will define the tappable area.
-                    // It expands to fill the cell's allocated space.
-                    // Optional: Add padding if you want some space around the content.
-                    // padding: const EdgeInsets.all(4.0),
                     child: imageUrl != null && imageUrl.isNotEmpty
                         ? Tooltip(
                       showDuration: const Duration(seconds: 0),
@@ -185,14 +188,11 @@ class _ScheduleContentState extends State<ScheduleContent> {
                           padding: const EdgeInsets.all(4),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade400),
-                            // Use 'context' from MyTableWidget for ThemeConfig
                             color: ThemeConfig.whiteColor(context),
                           ),
-                          // Ensure imageUrl is non-null for CachedNetworkImage
                           child: CachedNetworkImage(imageUrl: imageUrl, width: 120, fit: BoxFit.contain),
                         ),
                       ),
-                      // This is the actual image displayed in the cell.
                       child: CachedNetworkImage(
                         imageUrl: imageUrl,
                         fit: BoxFit.fitWidth,
@@ -200,7 +200,6 @@ class _ScheduleContentState extends State<ScheduleContent> {
                         errorWidget: (context, url, error) => Icon(Icons.broken_image, size: 24),
                       ),
                     )
-                    // This is the icon displayed if there's no image.
                         : Icon(Icons.image, size: 24, color: Colors.grey.shade600),
                   ),
                 );

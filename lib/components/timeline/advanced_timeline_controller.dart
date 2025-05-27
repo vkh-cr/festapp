@@ -18,6 +18,11 @@ class AdvancedTimelineController {
   final bool animateEventRemoval;
   final Widget? emptyContent;
 
+  // New callbacks and properties
+  final void Function(BuildContext context, int eventId)? onScanButtonPressed;
+  final void Function(BuildContext context, int eventId)? onCompanionButtonPressed;
+  final bool Function()? isUserApprover;
+
   AdvancedTimelineController({
     required this.events,
     this.onEventPressed,
@@ -32,5 +37,8 @@ class AdvancedTimelineController {
     this.customSplitter,
     this.animateEventRemoval = false,
     this.emptyContent,
+    this.onScanButtonPressed,
+    this.onCompanionButtonPressed,
+    this.isUserApprover,
   });
 }

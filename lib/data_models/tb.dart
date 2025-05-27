@@ -217,6 +217,7 @@ class EventsTb{
   String get data => "data";
 
   String get dataHeaderImage => "header_image";
+  String get dataIsCancelled => "is_cancelled";
 
 
 }

@@ -1,3 +1,4 @@
+// schedule_helper.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
@@ -57,6 +58,7 @@ class TimeBlockItem {
   final int participants;
   final int maxParticipants;
   final String? imageUrl;
+  final bool isCancelled;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -74,7 +76,8 @@ class TimeBlockItem {
     this.participants = 0,
     this.maxParticipants = 0,
     this.children,
-    this.imageUrl
+    this.imageUrl,
+    this.isCancelled = false, // Added default
   });
 
   /// Duration of the block.
@@ -90,6 +93,7 @@ class TimeBlockItem {
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
   bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
+  bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
 
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
@@ -111,6 +115,7 @@ class TimeBlockItem {
       children: model.childEvents
           .map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -128,6 +133,7 @@ class TimeBlockItem {
       timeBlockPlace: model.place != null && model.place!.id != null
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -148,7 +154,8 @@ class TimeBlockItem {
       maxParticipants: model.maxParticipants ?? 0,
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
-      imageUrl:  model.data?[Tb.events.dataHeaderImage]
+      imageUrl:  model.data?[Tb.events.dataHeaderImage],
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -164,6 +171,7 @@ class TimeBlockItem {
         "rightText": model.toString()
       },
       timeBlockPlace: null,
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -178,6 +186,7 @@ class TimeBlockItem {
         "leftText": model.durationTimeString(),
         "rightText": model.toString()
       },
+      isCancelled: model.isCancelled, // Added
     );
   }
 }

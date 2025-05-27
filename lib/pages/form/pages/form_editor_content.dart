@@ -179,140 +179,82 @@ class _FormEditorContentState extends State<FormEditorContent> {
     String? finalSelectedType;
     bool isWideScreen = MediaQuery.of(context).size.width > 600;
 
-    if (isWideScreen) {
-      finalSelectedType = await showDialog<String>(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          List<Widget> resolvedItemsForDialog = [];
-          if (personalInfoTypes.isNotEmpty) {
-            resolvedItemsForDialog.add(
-                PopupMenuButton<String>(
-                  tooltip: "Personal Info".tr(),
-                  offset: const Offset(230, 0),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-                  onSelected: (String type) {
-                    Navigator.of(dialogContext).pop(type);
-                  },
-                  itemBuilder: (BuildContext popupContext) {
-                    return personalInfoTypes.map((type) {
-                      return PopupMenuItem<String>(
-                        value: type,
-                        child: Row(
-                          children: [
-                            Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                            const SizedBox(width: 12),
-                            Text(FormHelper.fieldTypeToLocale(type)),
-                          ],
-                        ),
-                      );
-                    }).toList();
-                  },
-                  child: ListTile(
-                    leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-                    title: Text("Personal Info".tr()),
-                    trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
-                    dense: true,
-                  ),
-                )
-            );
-            resolvedItemsForDialog.add(const Divider(height: 1, thickness: 0.5));
-          }
-
-          resolvedItemsForDialog.addAll(otherTypes.map((type) {
-            return ListTile(
-              leading: Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
-              title: Text(FormHelper.fieldTypeToLocale(type)),
-              dense: true,
-              onTap: () {
-                Navigator.of(dialogContext).pop(type);
-              },
-            );
-          }).toList());
-
-          return AlertDialog(
-            title: Text("Add Field".tr()),
-            contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
-            content: SizedBox(
-              width: 280,
-              child: ListView(
-                shrinkWrap: true,
-                children: resolvedItemsForDialog,
-              ),
-            ),
-          );
-        },
-      );
-    } else {
-      // Mobile / Narrow screen
-      finalSelectedType = await showDialog<String>(
-        context: context,
-        builder: (BuildContext dialogContext) {
-          List<Widget> dialogOptions = [];
-
-          if (personalInfoTypes.isNotEmpty) {
-            dialogOptions.add(SimpleDialogOption(
-              onPressed: () async {
-                final String? selectedPersonalInfoType = await showDialog<String>(
-                  context: context,
-                  builder: (BuildContext subDialogContext) {
-                    return SimpleDialog(
-                      title: Text("Add Personal Info Field".tr()),
-                      children: personalInfoTypes.map((type) {
-                        return SimpleDialogOption(
-                          onPressed: () => Navigator.of(subDialogContext).pop(type),
-                          child: Row(
-                            children: [
-                              Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined),
-                              const SizedBox(width: 12),
-                              Text(FormHelper.fieldTypeToLocale(type)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+    finalSelectedType = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        List<Widget> resolvedItemsForDialog = [];
+        if (personalInfoTypes.isNotEmpty) {
+          resolvedItemsForDialog.add(
+              PopupMenuButton<String>(
+                tooltip: "Personal Info".tr(),
+                offset: isWideScreen ? const Offset(230, 0) : Offset.zero, // Modified Offset
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                onSelected: (String type) {
+                  Navigator.of(dialogContext).pop(type);
+                },
+                itemBuilder: (BuildContext popupContext) {
+                  return personalInfoTypes.map((type) {
+                    return PopupMenuItem<String>(
+                      value: type,
+                      child: Row(
+                        children: [
+                          Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          const SizedBox(width: 12),
+                          Text(FormHelper.fieldTypeToLocale(type)),
+                        ],
+                      ),
                     );
-                  },
-                );
-                if (mounted) {
-                  Navigator.of(context).pop(selectedPersonalInfoType);
-                }
-              },
-              child: Row(
-                children: [
-                  const Icon(Icons.person_outline), // Main category icon
-                  const SizedBox(width: 12),
-                  Expanded(child: Text("Personal Info".tr())),
-                  const Icon(Icons.chevron_right),
-                ],
-              ),
-            ));
-          }
-
-          dialogOptions.addAll(otherTypes.map((type) {
-            return SimpleDialogOption(
-              onPressed: () => Navigator.of(dialogContext).pop(type),
-              child: Row(
-                children: [
-                  Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined),
-                  const SizedBox(width: 12),
-                  Text(FormHelper.fieldTypeToLocale(type)),
-                ],
-              ),
-            );
-          }).toList());
-
-          return SimpleDialog(
-            title: Text("Add Field".tr()),
-            children: dialogOptions.isEmpty
-                ? [Center(child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text("No fields available to add.".tr()),
-            ))]
-                : dialogOptions,
+                  }).toList();
+                },
+                child: ListTile(
+                  leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  title: Text("Personal Info".tr()),
+                  trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  dense: true,
+                ),
+              )
           );
-        },
-      );
-    }
+          resolvedItemsForDialog.add(const Divider(height: 1, thickness: 0.5));
+        }
+
+        resolvedItemsForDialog.addAll(otherTypes.map((type) {
+          return ListTile(
+            leading: Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+            title: Text(FormHelper.fieldTypeToLocale(type)),
+            dense: true,
+            onTap: () {
+              Navigator.of(dialogContext).pop(type);
+            },
+          );
+        }).toList());
+
+        if (resolvedItemsForDialog.isEmpty) {
+          resolvedItemsForDialog.add(
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("No fields available to add.".tr()),
+                ),
+              )
+          );
+        }
+
+
+        return AlertDialog(
+          title: Text("Add Field".tr()),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          content: SizedBox(
+            width: 280, // You might want to make this responsive or remove fixed width
+            child: ListView(
+              shrinkWrap: true,
+              children: resolvedItemsForDialog,
+            ),
+          ),
+        );
+      },
+    );
+
 
     if (finalSelectedType != null) {
       _addFieldOfType(finalSelectedType);
