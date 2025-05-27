@@ -78,7 +78,6 @@ class _TimetablePageState extends State<TimetablePage>
     _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
     setupTabController(_days);
     await loadEventParticipants();
-    await DbEvents.synchronizeMySchedule();
   }
 
   String TimetableDateFormat(DateTime e) =>
