@@ -32,6 +32,8 @@ class StylesConfig {
   static const double newsItemRoundness = 2; //10
   static const double imageRoundness = 100;
 
+  static const double commonRoundness = 10;
+
   static const EdgeInsets tabHeaderPadding = EdgeInsets.symmetric(vertical: 0); //4
   static Border? indicatorBorder() => Border.all(width: 2.5, color: ThemeConfig.appBarColor()); //null
   static Border? headerBorder() => Border.symmetric(horizontal: BorderSide(width: 2.5, color: ThemeConfig.appBarColor())); //Theme.of(context).scaffoldBackgroundColor

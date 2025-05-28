@@ -590,5 +590,17 @@
   "ActivitiesComponentStrings.tooltipUserAssignmentOptions": "User assignment options",
   "ActivitiesComponentStrings.activity": "Activity",
   "Timezone": "Timezone",
+  "Add Personal Info Field": "Add Personal Info Field",
+  "Personal Info": "Personal Info",
+  "No fields available to add.": "No fields available to add.",
+  "ID Card / Passport Number": "ID Card / Passport Number",
+  "Expiry Date": "Expiry Date",
+  "Expiry date cannot be in the past.": "Expiry date cannot be in the past.",
+  "Expiry Date Label": "Expiry Date Label",
+  "Show Expiry Date": "Show Expiry Date",
+  "Cancelled": "Cancelled",
+  "Address": "Address",
+  "Yes": "Yes",
+  "No": "No",
   "_":"_"
 }
