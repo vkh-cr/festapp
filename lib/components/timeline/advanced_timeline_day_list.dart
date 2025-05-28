@@ -502,18 +502,6 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                         Builder(builder: (context) { // Use Builder to get context for selectedColor if needed here
                           List<Widget> actionButtons = [];
 
-                          // Scan Button
-                          if (_shouldShowScanButton(context, event, controller)) {
-                            actionButtons.add(
-                                TextButton.icon(
-                                  onPressed: () => controller.onScanButtonPressed?.call(context, event.id),
-                                  icon: Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
-                                  label: Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
-                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
-                                )
-                            );
-                          }
-
                           // Companion Button
                           if (_shouldShowCompanionButton(context, event, controller)) {
                             actionButtons.add(
@@ -521,6 +509,18 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                                   onPressed: () => controller.onCompanionButtonPressed?.call(context, event.id),
                                   icon: Icon(Icons.people_outline, size: 14, color: selectedColor),
                                   label: Text('Companions'.tr(), style: TextStyle(color: selectedColor)),
+                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                                )
+                            );
+                          }
+
+                          // Scan Button
+                          if (_shouldShowScanButton(context, event, controller)) {
+                            actionButtons.add(
+                                TextButton.icon(
+                                  onPressed: () => controller.onScanButtonPressed?.call(context, event.id),
+                                  icon: Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
+                                  label: Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
                                   style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
                                 )
                             );
