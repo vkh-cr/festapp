@@ -39,6 +39,8 @@ class SynchroService {
     if(AuthService.isLoggedIn()) {
       var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
+      var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+      await OfflineDataService.saveAllActivities(bundle!.activities);
     }
     else {
       await OfflineDataService.deleteUserInfo();

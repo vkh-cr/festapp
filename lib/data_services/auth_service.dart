@@ -30,7 +30,7 @@ class AuthService {
         .signInWithPassword(email: email, password: password);
     await _secureStorage.write(
         key: REFRESH_TOKEN_KEY, value: data.session!.refreshToken.toString());
-    DbEvents.synchronizeMySchedule(true);
+    DbEvents.synchronizeMySchedule(join: true);
     SynchroService.refreshOfflineData();
     await NotificationHelper.login();
   }

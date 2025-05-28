@@ -10,6 +10,7 @@ class TextFieldBuilder extends StatelessWidget {
   final Iterable<String> autofillHints;
   final bool isEmail;
   final bool isPhone;
+  final bool isAddress;
 
   const TextFieldBuilder({
     super.key,
@@ -17,6 +18,7 @@ class TextFieldBuilder extends StatelessWidget {
     this.autofillHints = const [],
     this.isEmail = false,
     this.isPhone = false,
+    this.isAddress = false,
   });
 
   @override

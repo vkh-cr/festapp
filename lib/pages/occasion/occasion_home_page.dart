@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/router_service.dart';
@@ -44,10 +45,16 @@ class OccasionHomePage extends StatefulWidget {
 class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBindingObserver {
   String? userName;
   int _messageCount = 0;
+  late final Map<String, OccasionTab> _availableTabs;
 
   @override
   void initState() {
     super.initState();
+    _availableTabs = OccasionTab.getAvailableTabs(() {
+      setState(() {
+        _messageCount = 0;
+      });
+    });
     WidgetsBinding.instance.addObserver(this);
     loadData();
   }
@@ -83,10 +90,14 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
 
     if (AuthService.isLoggedIn()) {
       DbUsers.getCurrentUserInfo().then((user) {
-        setState(() => userName = user.name!);
+        if (mounted) {
+          setState(() => userName = user.name!);
+        }
       });
       DbNews.countNewMessages().then((count) {
-        setState(() => _messageCount = count);
+        if (mounted) {
+          setState(() => _messageCount = count);
+        }
       });
     }
 
@@ -96,18 +107,20 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
   Future<void> loadOfflineData() async {
     if (AuthService.isLoggedIn()) {
       var userInfo = await OfflineDataService.getUserInfo();
-      setState(() {
-        userName = userInfo?.occasionUser?.data?[Tb.occasion_users.data_name];
-      });
+      if (mounted) {
+        setState(() {
+          userName = userInfo?.occasionUser?.data?[Tb.occasion_users.data_name];
+        });
+      }
     }
   }
 
   String messageCountString() => _messageCount < 100 ? _messageCount.toString() : "99+";
-
+  NewsPage? np;
   @override
   Widget build(BuildContext context) {
     return AutoTabsRouter(
-      routes: OccasionTab.getTabRoutes(OccasionHomePage.visibleTabKeys),
+      routes: OccasionHomePage.visibleTabKeys.map((key) => _availableTabs[key]!.route).toList(),
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         return Scaffold(
@@ -119,17 +132,22 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
             type: BottomNavigationBarType.fixed,
             onTap: (int index) async {
               final key = OccasionHomePage.visibleTabKeys[index];
-              final tab = OccasionTab.availableTabs[key]!;
+              final tab = _availableTabs[key]!;
 
               if (tab.requiresLogin && !AuthService.isLoggedIn()) {
                 await RouterService.navigate(context, LoginPage.ROUTE);
                 await loadData();
               } else {
+                DbNews.countNewMessages().then((count) {
+                  if (mounted) {
+                    setState(() => _messageCount = count);
+                  }
+                });
                 tabsRouter.setActiveIndex(index);
               }
             },
             items: OccasionHomePage.visibleTabKeys.map((key) {
-              final tab = OccasionTab.availableTabs[key]!;
+              final tab = _availableTabs[key]!;
               return BottomNavigationBarItem(
                 icon: tab.buildIcon(context, _messageCount, messageCountString),
                 activeIcon: tab.buildActiveIcon(context, _messageCount, messageCountString),
@@ -141,14 +159,9 @@ class _OccasionHomePageState extends State<OccasionHomePage> with WidgetsBinding
           ),
           body: Builder(
             builder: (context) {
-              if (OccasionHomePage.visibleTabKeys[tabsRouter.activeIndex] == OccasionTab.news) {
-                // Inject the onDataLoaded callback into NewsPage
-                return NewsPage(onSetAsRead: () {
-                  setState(() {
-                    _messageCount = 0;
-                  });
-                });
-              }
+              // if (OccasionHomePage.visibleTabKeys[tabsRouter.activeIndex] == OccasionTab.news) {
+              //   return child;
+              // }
               return child;
             },
           ),
@@ -182,7 +195,7 @@ class OccasionTab {
   static const String more = "more";
   static const String user = "user";
 
-  static final Map<String, OccasionTab> availableTabs = {
+  static Map<String, OccasionTab> getAvailableTabs([VoidCallback? onSetAsRead]) => {
     unit: OccasionTab(
       key: unit,
       label: "Home".tr(),
@@ -202,7 +215,7 @@ class OccasionTab {
       label: "News".tr(),
       icon: Icons.notifications_none_outlined,
       activeIcon: Icons.notifications,
-      route: NewsRoute(),
+      route: NewsRoute(onSetAsRead: onSetAsRead),
     ),
     map: OccasionTab(
       key: map,
@@ -229,7 +242,9 @@ class OccasionTab {
   };
 
   static List<PageRouteInfo<dynamic>> getTabRoutes(List<String> tabKeys) {
-    return tabKeys.map((key) => availableTabs[key]!.route).toList();
+    // This method still exists but is no longer directly used by OccasionHomePage's build method
+    // for generating routes for its AutoTabsRouter, as OccasionHomePage now uses its local _availableTabs instance.
+    return tabKeys.map((key) => getAvailableTabs()[key]!.route).toList();
   }
 
   Widget buildIcon(BuildContext context, int messageCount, String Function() messageCountString) {
