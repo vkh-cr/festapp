@@ -1,3 +1,4 @@
+// schedule_helper.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
@@ -14,6 +15,7 @@ enum TimeBlockType {
   signedIn,    // user is signed in
   isFull,      // event full
   canSignIn,   // can sign in
+  activity,   // can sign in
 }
 
 /// Represents an optional place or "track" for splitting.
@@ -56,6 +58,7 @@ class TimeBlockItem {
   final int participants;
   final int maxParticipants;
   final String? imageUrl;
+  final bool isCancelled;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -73,7 +76,8 @@ class TimeBlockItem {
     this.participants = 0,
     this.maxParticipants = 0,
     this.children,
-    this.imageUrl
+    this.imageUrl,
+    this.isCancelled = false, // Added default
   });
 
   /// Duration of the block.
@@ -89,6 +93,7 @@ class TimeBlockItem {
   bool isSignedIn() => timeBlockType == TimeBlockType.signedIn;
   bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
+  bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
 
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
@@ -96,8 +101,8 @@ class TimeBlockItem {
   factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       eventType: model.type,
@@ -110,6 +115,7 @@ class TimeBlockItem {
       children: model.childEvents
           .map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -127,14 +133,15 @@ class TimeBlockItem {
       timeBlockPlace: model.place != null && model.place!.id != null
           ? TimeBlockPlace.fromPlaceModel(model.place!)
           : null,
+      isCancelled: model.isCancelled, // Added
     );
   }
 
   factory TimeBlockItem.fromEventModel(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
-      startTime: model.startTime.eventLocalTime(),
-      endTime: model.endTime.eventLocalTime(),
+      startTime: model.startTime,
+      endTime: model.endTime,
       timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
       data: model.toString(),
       description: model.description,
@@ -147,7 +154,8 @@ class TimeBlockItem {
       maxParticipants: model.maxParticipants ?? 0,
       children: model.childEvents.map((c) => TimeBlockItem.fromEventModelAsChild(c))
           .toList(),
-      imageUrl:  model.data?[Tb.events.dataHeaderImage]
+      imageUrl:  model.data?[Tb.events.dataHeaderImage],
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -163,6 +171,7 @@ class TimeBlockItem {
         "rightText": model.toString()
       },
       timeBlockPlace: null,
+      isCancelled: model.isCancelled, // Added
     );
   }
 
@@ -177,6 +186,7 @@ class TimeBlockItem {
         "leftText": model.durationTimeString(),
         "rightText": model.toString()
       },
+      isCancelled: model.isCancelled, // Added
     );
   }
 }
@@ -186,21 +196,22 @@ class TimeBlockHelper {
   static TimeBlockType getTimeBlockTypeFromModel(EventModel model) {
     if (model.isSignedIn!) {
       return TimeBlockType.signedIn;
-    } else if (model.isEventInMySchedule == true) {
+    } else if (model.isEventInMySchedule == true && !EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.saved;
     } else if (model.isGroupEvent!) {
       if (model.isMyGroupEvent!) {
         return TimeBlockType.signedIn;
       }
       return TimeBlockType.noAction;
-    } else if (model.currentParticipants != null &&
-        model.maxParticipants != null &&
+    } else if (EventModel.isEventSupportingSignIn(model) &&
         model.isFull()) {
       return TimeBlockType.isFull;
     } else if (EventModel.isEventSupportingSignIn(model)) {
       return TimeBlockType.canSignIn;
+    } else if(model.canSaveEventToMyProgram() == true){
+      return TimeBlockType.canSave;
     }
-    return TimeBlockType.canSave;
+    return TimeBlockType.noAction;
   }
 
   static List<TimeBlockGroup> splitTimeBlockByPlace(

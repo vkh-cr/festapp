@@ -160,8 +160,8 @@ class _SingleDataGridHeaderState<T extends ITrinaRowModel>
               },
             ),
 
-            // Spacer to push right actions to the end if they exist
-            if (rightActions.isNotEmpty) const Spacer(),
+            if (rightActions.isNotEmpty)
+              const SizedBox(width: 24.0), // Changed from Spacer
 
             if (rightActions.isNotEmpty)
               Wrap(

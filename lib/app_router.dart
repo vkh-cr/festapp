@@ -29,7 +29,6 @@ import 'package:fstapp/pages/form/pages/form_page.dart';
 import 'package:fstapp/pages/utility/instance_install_page.dart';
 
 import 'app_router.gr.dart';
-import 'components/features/feature_constants.dart';
 import 'pages/occasion/game_page.dart';
 
 @AutoRouterConfig(replaceInRouteName: 'Page,Route', deferredLoading: true)
@@ -73,7 +72,7 @@ class AppRouter extends RootStackRouter {
                   getSchedulePage(),
                   AutoRoute(page: EventRoute.page, path: ":id")
                   ]),
-      AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE, maintainState: false),
+      AutoRoute(page: NewsRoute.page, path: NewsPage.ROUTE),
       AutoRoute(page: UnitRoute.page, path: UnitPage.ROUTE, maintainState: false),
       AutoRoute(page: MapRoute.page, path: MapPage.ROUTE, children: [
         AutoRoute(path: ':id', page: MapRoute.page,),

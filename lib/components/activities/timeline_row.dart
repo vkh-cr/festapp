@@ -5,8 +5,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
-import 'package:fstapp/data_models/event_model.dart';
-import 'package:fstapp/data_models/place_model.dart';
 import 'constants.dart';
 
 
@@ -495,7 +493,7 @@ class _TimelineRowState extends State<TimelineRow> {
               return interactiveItemBar;
             },
             onWillAcceptWithDetails: (details) {
-              if (details.data is PlaceModel || details.data is EventModel) {
+              if (details.data is ActivityPlaceModel || details.data is ActivityEventModel) {
                 if (mounted) {
                   setState(() { _isPlaceOrEventDragOver = true; });
                 }

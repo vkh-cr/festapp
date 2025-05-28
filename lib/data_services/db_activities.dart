@@ -1,4 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/components/activities/activity_data_helper.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fstapp/data_models/activity_model.dart'; // Contains all models now
@@ -26,17 +28,17 @@ class DbActivities {
     final data = responseMap['data'] as Map<String, dynamic>;
 
     final bundle = EditDataBundle(
-      users: EditDataHelper.parseUsers(data),
-      events: EditDataHelper.parseEvents(data),
-      places: EditDataHelper.parsePlaces(data),
-      activities: EditDataHelper.parseActivities(data),
+      users: ActivityDataHelper.parseUsers(data),
+      events: ActivityDataHelper.parseEvents(data),
+      places: ActivityDataHelper.parsePlaces(data),
+      activities: ActivityDataHelper.parseActivities(data),
       // Use new parsing methods and field names
-      assignmentPlaceLinks: EditDataHelper.parseAssignmentPlaceLinks(data),
-      assignmentEventLinks: EditDataHelper.parseAssignmentEventLinks(data),
-      activityAssignments: EditDataHelper.parseActivityAssignments(data),
+      assignmentPlaceLinks: ActivityDataHelper.parseAssignmentPlaceLinks(data),
+      assignmentEventLinks: ActivityDataHelper.parseAssignmentEventLinks(data),
+      activityAssignments: ActivityDataHelper.parseActivityAssignments(data),
     );
 
-    EditDataHelper.linkAssignmentsToActivities(bundle);
+    ActivityDataHelper.linkAssignmentsToActivities(bundle);
     return bundle;
   }
 
@@ -66,8 +68,8 @@ class DbActivities {
           allAssignmentsPayload.add({
             'id': assignment.id, // Assignment's own UUID
             'user': assignment.userInfo, // User's UUID
-            'start_time': assignment.startTime?.toUtc().toIso8601String(),
-            'end_time': assignment.endTime?.toUtc().toIso8601String(),
+            'start_time': assignment.startTime?.toUtcFromOccasionTime().toIso8601String(),
+            'end_time': assignment.endTime?.toUtcFromOccasionTime().toIso8601String(),
             'title': assignment.title,
             'description': assignment.description,
             'data': assignment.data,
