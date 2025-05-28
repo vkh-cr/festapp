@@ -265,7 +265,6 @@ class _FormEditorContentState extends State<FormEditorContent> {
     if (!mounted || form == null || form!.relatedFields == null) return;
 
     final newField = FormFieldModel(
-      title: FormHelper.fieldTypeToLocale(type),
       type: type,
       order: form!.relatedFields!.length,
       isRequired: FormHelper.isAlwaysRequired(type),

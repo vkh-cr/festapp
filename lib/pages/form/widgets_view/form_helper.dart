@@ -38,10 +38,10 @@ class FormHelper {
   static const String fieldTypeProductType = "product_type";
   static const String fieldTypeBirthDate = "birth_date";
   static const String fieldTypeIdDocument = "id_document";
+  static const String fieldTypeAddress = "address";
 
   static const String fieldTypeTicket = "ticket";
 
-  // Additional constant for option delimiter
   static const String optionDelimiter = " | ";
 
   static const String metaMaxTickets = "max_tickets";
@@ -67,6 +67,7 @@ class FormHelper {
   static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
   static String phoneLabel() => "Phone".tr();
+  static String addressLabel() => "Address".tr();
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();
@@ -91,6 +92,7 @@ class FormHelper {
     FormHelper.fieldTypeSurname: Icons.person_outline,
     FormHelper.fieldTypeSex: Icons.wc,
     FormHelper.fieldTypeCity: Icons.location_city,
+    FormHelper.fieldTypeAddress: Icons.home,
     FormHelper.fieldTypeBirthYear: Icons.cake,
     FormHelper.fieldTypeBirthDate: Icons.cake,
     FormHelper.fieldTypeIdDocument: Icons.article,
@@ -105,6 +107,7 @@ class FormHelper {
     fieldTypeName,
     fieldTypeSurname,
     fieldTypeCity,
+    fieldTypeAddress,
     fieldTypeEmail,
     fieldTypePhone,
     fieldTypeSex,
@@ -128,6 +131,8 @@ class FormHelper {
         return surnameLabel();
       case fieldTypeCity:
         return cityLabel();
+      case fieldTypeAddress:
+        return addressLabel();
       case fieldTypeEmail:
         return emailLabel();
       case fieldTypeSex:
@@ -358,6 +363,9 @@ class FormHelper {
       case fieldTypeCity:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, cityLabel());
         return FormFieldBuilders.buildTextField(context, field, [AutofillHints.addressCity]);
+      case fieldTypeAddress:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, addressLabel());
+        return FormFieldBuilders.buildAddressField(context, field);
       case fieldTypeSpot:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, spotLabel());
         return FormFieldBuilders.buildSpotField(context, formKey, formHolder, field);

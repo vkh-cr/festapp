@@ -599,5 +599,8 @@
   "Expiry Date Label": "Popisek data platnosti",
   "Show Expiry Date": "Zobrazit datum platnosti",
   "Cancelled": "Zrušeno",
+  "Address": "Adresa",
+  "Yes": "Ano",
+  "No": "Ne",
   "_": "_"
 }
