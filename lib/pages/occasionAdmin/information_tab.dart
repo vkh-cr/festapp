@@ -16,11 +16,16 @@ class InformationTab extends StatefulWidget {
 
 class _InformationTabState extends State<InformationTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late int _tabLength;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabLength = 1; // InformationContent is always present
+    if (FeatureService.isFeatureEnabled(FeatureConstants.songbook)) {
+      _tabLength++; // Add SongbookContent if enabled
+    }
+    _tabController = TabController(length: _tabLength, vsync: this);
   }
 
   @override
@@ -32,7 +37,7 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: _tabController.length,
+      length: _tabLength,
       child: Column(
         children: [
           Container(
@@ -44,7 +49,7 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               tabs: [
                 DataGridHelper.buildTab(context, Icons.info, "Information".tr()),
                 if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
+                  DataGridHelper.buildTab(context, Icons.library_music, "Songbook".tr()),
               ],
             ),
           ),
@@ -55,7 +60,7 @@ class _InformationTabState extends State<InformationTab> with SingleTickerProvid
               children: [
                 InformationContent(),
                 if(FeatureService.isFeatureEnabled(FeatureConstants.songbook))
-                SongbookContent(),
+                  SongbookContent(),
               ],
             ),
           ),

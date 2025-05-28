@@ -460,17 +460,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           popupController: _popupLayerController,
           markers: selectedMarker != null ? _selectedMarkers : _markers,
           markerTapBehavior: MarkerTapBehavior.custom((space, state, controller){
-            var marker = space.marker;
-            if (marker is MapMarkerWithText && HtmlHelper.isHtmlLong(marker.place.description)) {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return DetailDialog(title: marker.place.title, canEdit: RightsService.isEditor(), htmlDescription: marker.place.description,);
-                },
-              );
-            } else {
-              controller.showPopupsOnlyFor([marker]);
-            }
+            showPopupOrDialogFor(controller, space.marker);
           }),
           popupDisplayOptions: PopupDisplayOptions(
             snap: PopupSnap.markerTop,
@@ -696,7 +686,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     _markers.remove(m);
     _markers.add(m);
     focusedMarker = m;
-    _popupLayerController.showPopupsOnlyFor([m]);
+    showPopupOrDialogFor(_popupLayerController, m);
     setMapToOnePlace(p);
   }
 
@@ -786,5 +776,29 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         ],
       ),
     );
+  }
+
+  void showPopupOrDialogFor(PopupController controller, fm.Marker marker) {
+    if(selectedMarker != null){
+      return;
+    }
+    if (marker is MapMarkerWithText && HtmlHelper.isHtmlLong(marker.place.description)) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return DetailDialog(
+            title: marker.place.title,
+            canEdit: RightsService.isEditor(),
+            onEditPressed: () {
+              selectedMarker != null
+                  ? null
+                  : runEditPositionMode(marker);
+            },
+            htmlDescription: marker.place.description,);
+        },
+      );
+    } else {
+      controller.showPopupsOnlyFor([marker]);
+    }
   }
 }

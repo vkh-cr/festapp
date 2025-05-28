@@ -103,7 +103,6 @@ class _EmailTemplateSettingsPageState extends State<EmailTemplateSettingsPage> {
             return SelectableText(
               "{{${sub.code}}}: ${sub.description}",
               style: const TextStyle(fontSize: 14),
-              maxLines: 1,
             );
           }
           return const SizedBox();
