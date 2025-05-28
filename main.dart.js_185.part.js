@@ -2,9 +2,9 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_185",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,K,E,L,M,N,B={
-dmH(){return new B.Ft(null)},
-Ft:function Ft(d){this.a=d},
-ahc:function ahc(){var _=this
+dmH(){return new B.Fs(null)},
+Fs:function Fs(d){this.a=d},
+ahd:function ahd(){var _=this
 _.f=_.e=_.d=!1
 _.r=!0
 _.w=!1
@@ -29,7 +29,7 @@ byR(){var x=0,w=A.l(y.e),v,u,t
 var $async$byR=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=$.yA().Z8("getNotificationPermission",[])
 x=3
-return A.d(A.FB("NotificationAllowed",null),$async$byR)
+return A.d(A.FA("NotificationAllowed",null),$async$byR)
 case 3:t=e
 v=u&&t==="true"
 x=1
@@ -57,13 +57,13 @@ case 3:x=5
 return A.d(O.azr(),$async$Sr)
 case 5:u=e
 case 4:x=6
-return A.d(A.xU("NotificationAllowed",C.cb.j(u),null),$async$Sr)
+return A.d(A.xW("NotificationAllowed",C.cb.j(u),null),$async$Sr)
 case 6:x=u?7:8
 break
 case 7:x=9
 return A.d(B.byS(),$async$Sr)
 case 9:x=10
-return A.d(A.a5a(),$async$Sr)
+return A.d(A.a5b(),$async$Sr)
 case 10:case 8:v=u
 x=1
 break
@@ -72,7 +72,7 @@ return A.k($async$Sr,w)},
 azs(){var x=0,w=A.l(y.v)
 var $async$azs=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.xU("NotificationAllowed",String(!1),null),$async$azs)
+return A.d(A.xW("NotificationAllowed",String(!1),null),$async$azs)
 case 2:x=3
 return A.d(B.byT(),$async$azs)
 case 3:return A.j(null,w)}})
@@ -85,18 +85,18 @@ L=c[101]
 M=c[134]
 N=c[160]
 B=a.updateHolder(c[26],B)
-D=c[264]
+D=c[265]
 O=c[47]
 F=c[89]
-P=c[266]
+P=c[267]
 G=c[240]
-I=c[265]
+I=c[266]
 H=c[185]
 Q=c[178]
 R=c[174]
-B.Ft.prototype={
-M(){return new B.ahc()}}
-B.ahc.prototype={
+B.Fs.prototype={
+M(){return new B.ahd()}}
+B.ahd.prototype={
 aZ(){this.c8()
 this.qG()},
 qG(){var x=0,w=A.l(y.v),v=this,u,t,s,r,q
@@ -110,7 +110,7 @@ u=C.b.fA(A.YW(),new B.crv(r))
 t=$.up().b.e
 q=B
 x=3
-return A.d(F.alL(),$async$qG)
+return A.d(F.alM(),$async$qG)
 case 3:v.A(new q.crw(v,e,s,u,t))
 return A.j(null,w)}})
 return A.k($async$qG,w)},
@@ -146,7 +146,7 @@ u=!s.e
 t=u&&s.r&&s.f?s.gaev():r
 if(u&&s.r&&s.f)u=A.C(d).ax.a===C.q?$.di():C.p
 else u=C.at
-x=A.a([M.HE(u,d,50,!0,v,t,A.C(d).ax.a===C.q?$.hO():C.l,250)],x)
+x=A.a([M.HD(u,d,50,!0,v,t,A.C(d).ax.a===C.q?$.hO():C.l,250)],x)
 if(!s.r)x.push(new A.a3(C.e1,E.bw(A.P("This platform or browser does not support the PWA install prompt or the app is already installed.",r,r,r,r,r,r,r,A.al(r,r,A.C(d).ax.a===C.q?A.b3(q):A.b3(p),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b0,r,r,r,r),r),r))
 if(s.e||!s.f)x.push(new A.a3(C.e1,E.bw(A.P("The app is already installed.",r,r,r,r,r,r,r,A.al(r,r,A.C(d).ax.a===C.q?$.di():C.p,r,r,r,r,r,r,r,r,16,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),C.b0,r,r,r,r),r),r))
 w.push(A.bG(A.ah(x,C.j,C.f,C.i,0,r,C.m),r,r))
@@ -180,7 +180,7 @@ B.crr.prototype={
 $0(){var x=0,w=A.l(y.v),v=this
 var $async$$0=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(F.arv(v.b),$async$$0)
+return A.d(F.arw(v.b),$async$$0)
 case 2:x=3
 return A.d(v.a.qG(),$async$$0)
 case 3:return A.j(null,w)}})
@@ -214,17 +214,17 @@ $1(d){if(d===0)this.a.a9t(C.lE)
 else if(d===1)this.a.a9t(C.i5)
 else if(d===2)this.a.a9t(C.iR)},
 $S:18};(function installTearOffs(){var x=a._instance_0u
-x(B.ahc.prototype,"gaev","xx",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
-x(B.Ft,A.J)
-x(B.ahc,A.O)
+x(B.ahd.prototype,"gaev","xx",0)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B.Fs,A.J)
+x(B.ahd,A.O)
 w(A.c9,[B.crv,B.crs,B.crt])
 w(A.cK,[B.crw,B.cru,B.cro,B.crq,B.crr,B.crp])})()
-A.c5(b.typeUniverse,JSON.parse('{"Ft":{"J":[],"e":[]},"ahc":{"O":["Ft"]}}'))
-var y={u:A.D("u<e>"),l:A.D("u<x>"),w:A.D("m"),q:A.D("kJ"),e:A.D("x"),v:A.D("~")};(function constants(){D.azD=new A.d3(P.O3,null,null,null,null)
+A.c5(b.typeUniverse,JSON.parse('{"Fs":{"J":[],"e":[]},"ahd":{"O":["Fs"]}}'))
+var y={u:A.D("u<e>"),l:A.D("u<x>"),w:A.D("m"),q:A.D("ki"),e:A.D("x"),v:A.D("~")};(function constants(){D.azD=new A.d3(P.O3,null,null,null,null)
 D.bIO=new A.cr("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bIY=new A.cr("Enable Notifications",null,I.zI,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJ0=new A.cr("Appearance",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJD=new A.cr("Language Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJH=new A.cr("Notification Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_185",e:"endPart",h:b})})($__dart_deferred_initializers__,"3PrP1yX+ndLQgNH3F3xQAdMsEbU=");
+a.eventLog.push({p:"main.dart.js_185",e:"endPart",h:b})})($__dart_deferred_initializers__,"Nwqwfom2NsRr9VEHGG3VNDqV6EM=");

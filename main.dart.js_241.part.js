@@ -4,7 +4,7 @@ a[b][c].push({p:"main.dart.js_241",e:"beginPart"})})(self,"$__dart_deferred_init
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,E,D,F,B={
 dkQ(d,e,f,g){throw A.n(A.aJ("Process.runSync"))},
 aFc:function aFc(){},
-asw:function asw(){this.c=this.b=$},
+asx:function asx(){this.c=this.b=$},
 bAW:function bAW(){},
 bAX:function bAX(){},
 bGi:function bGi(d,e){this.a=d
@@ -18,7 +18,7 @@ bAy:function bAy(d){this.a=d},
 bAz:function bAz(d){this.a=d},
 bVs:function bVs(){},
 dCq(d){var w,v=null
-try{v=C.amd.bTE("xdg-user-dir",A.a([d],x.x),E.ax)}catch(w){throw w}return D.bef(v.gbVD().oy(0,"\n").h(0,0))},
+try{v=C.amd.bTE("xdg-user-dir",A.a([d],x.x),E.ax)}catch(w){throw w}return D.bef(v.gbVE().oy(0,"\n").h(0,0))},
 c4B:function c4B(){},
 QZ(){var w=0,v=A.l(x.w),u,t=2,s=[],r,q,p,o,n,m,l,k,j,i,h
 var $async$QZ=A.h(function(d,e){if(d===1){s.push(e)
@@ -121,15 +121,15 @@ J=c[1]
 A=c[0]
 E=c[2]
 D=c[159]
-F=c[333]
+F=c[334]
 B=a.updateHolder(c[90],B)
-C=c[279]
+C=c[280]
 B.aFc.prototype={
 gd0(d){return"system"},
 kS(d){return this.glY().ci(d)},
 glY(){$.Od()
 return E.bK}}
-B.asw.prototype={
+B.asx.prototype={
 Bd(d,e,f,g){var w=null,v=null,u=null
 return this.aOb(d,e,f,g)},
 aOb(d,e,f,a0){var w=0,v=A.l(x.v),u,t=2,s=[],r=this,q,p,o,n,m,l,k,j,i,h,g
@@ -168,7 +168,7 @@ case 15:n=d
 n.toString
 l=f.d
 if(l.length===0){l=j
-l.toString}l=new B.bGi(new A.asv(a0,n,q,l),new B.bAX())
+l.toString}l=new B.bGi(new A.asw(a0,n,q,l),new B.bAX())
 r.c=l
 w=17
 return A.d(l.iA(0),$async$Bd)
@@ -250,13 +250,13 @@ B.c4B.prototype={
 bTE(d,e,f){return B.dkQ(d,e,C.alC,f)}}
 var z=a.updateTypes([]);(function inheritance(){var w=a.inherit,v=a.inheritMany
 w(B.aFc,A.pk)
-v(A.H,[B.asw,B.bAW,B.bGi,B.bVs,B.c4B])
+v(A.H,[B.asx,B.bAW,B.bGi,B.bVs,B.c4B])
 w(B.bAX,B.bAW)
 w(B.Sg,A.eS)
 v(D.aAi,[B.bAy,B.bAz])})()
 A.c5(b.typeUniverse,JSON.parse('{"aFc":{"pk":[],"pe":["m","B<f>"]}}'))
 var y={a:"Something went wrong, please report the issue https://www.github.com/incrediblezayed/file_saver/issues"}
-var x={D:A.D("Ii"),g:A.D("bc"),x:A.D("u<m>"),v:A.D("m"),o:A.D("dL"),i:A.D("Ii?"),w:A.D("m?")};(function constants(){C.alC=new B.aFc()
+var x={D:A.D("Ih"),g:A.D("bc"),x:A.D("u<m>"),v:A.D("m"),o:A.D("dL"),i:A.D("Ih?"),w:A.D("m?")};(function constants(){C.alC=new B.aFc()
 C.amd=new B.c4B()
 C.eR=new A.an(10,0,10,0)
 C.bT5=new B.Sg("Other","application/octet-stream",20,"other")
@@ -266,4 +266,4 @@ return!1})
 w($,"dK4","d3I",()=>{$.Od()
 return!1})})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_241",e:"endPart",h:b})})($__dart_deferred_initializers__,"/aBk/7J2SnwMpK+qyiCAqIPtFno=");
+a.eventLog.push({p:"main.dart.js_241",e:"endPart",h:b})})($__dart_deferred_initializers__,"LBx/xNdrFXRAwbvOqTUPKaYAbTw=");

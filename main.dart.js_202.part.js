@@ -2,9 +2,9 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_202",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,A,F,L,G,M,N,O,P,C={
-dhq(){return new C.DS(null)},
-cTV(d,e,f,g,h,i,j){return new C.a5n(j,f,d,g,e,i,h,null)},
-DS:function DS(d){this.a=d},
+dhq(){return new C.DR(null)},
+cTV(d,e,f,g,h,i,j){return new C.a5o(j,f,d,g,e,i,h,null)},
+DR:function DR(d){this.a=d},
 aPB:function aPB(d,e,f,g){var _=this
 _.d=d
 _.e=e
@@ -18,7 +18,7 @@ this.b=e},
 cdX:function cdX(d){this.a=d},
 Ad:function Ad(d,e){this.a=d
 this.b=e},
-a5n:function a5n(d,e,f,g,h,i,j,k){var _=this
+a5o:function a5o(d,e,f,g,h,i,j,k){var _=this
 _.c=d
 _.d=e
 _.e=f
@@ -27,7 +27,7 @@ _.r=h
 _.w=i
 _.x=j
 _.a=k},
-afj:function afj(d,e){var _=this
+afk:function afk(d,e){var _=this
 _.d=d
 _.e=e
 _.f=!1
@@ -44,28 +44,28 @@ B=c[0]
 A=c[2]
 F=c[192]
 L=c[181]
-G=c[297]
+G=c[298]
 M=c[249]
-N=c[265]
-O=c[280]
-P=c[305]
+N=c[266]
+O=c[281]
+P=c[306]
 C=a.updateHolder(c[14],C)
-D=c[306]
+D=c[307]
 Q=c[100]
-R=c[253]
-S=c[285]
-H=c[307]
+R=c[254]
+S=c[286]
+H=c[308]
 T=c[201]
 U=c[217]
-V=c[308]
-E=c[278]
+V=c[309]
+E=c[279]
 W=c[183]
 X=c[178]
 Y=c[174]
 I=c[147]
 K=c[144]
 Z=c[184]
-C.DS.prototype={
+C.DR.prototype={
 M(){var x=$.a9()
 return new C.aPB(new B.cs(new B.ch("https://kjdpmixlnhntmxjedpxh.supabase.co",A.au,A.ae),x),new B.cs(new B.ch("postgresql://postgres:YOUR_PASSWORD@db.kjdpmixlnhntmxjedpxh.supabase.co:5432/postgres",A.au,A.ae),x),new B.cs(new B.ch("vkh-cr/festapp",A.au,A.ae),x),B.a([new C.Ad("1. Tables","scripts/tables"),new C.Ad("2. Functions","scripts/functions"),new C.Ad("3. Policies","scripts/policies"),new C.Ad("4. Seed","scripts/seed")],y.D))}}
 C.aPB.prototype={
@@ -80,12 +80,12 @@ m=B.E(new B.M(m,new C.cdX(x),l),l.i("a6.E"))
 return X.f9(v,w,B.dD(B.ah(B.a([t,A.al,r,A.al,p,E.eb,n,E.eb,D.bJo,A.hh,B.ah(m,A.j,A.f,A.i,0,w,A.m),E.eb,D.bIZ,A.hh,C.cTV(!0,s,w,"migrations",u,q,"Migrations")],o),A.K,A.f,A.i,0,w,A.m),w,A.t,L.aT,w,w,A.I),w,w,w,w,w)}}
 C.Ad.prototype={
 gc3(d){return this.a}}
-C.a5n.prototype={
+C.a5o.prototype={
 M(){var x=$.hN().b
 x===$&&B.b()
-return new C.afj(x,new B.cs(A.aw,$.a9()))},
+return new C.afk(x,new B.cs(A.aw,$.a9()))},
 gc3(d){return this.c}}
-C.afj.prototype={
+C.afk.prototype={
 T(){var x,w=this
 w.ah()
 x=w.a
@@ -115,12 +115,12 @@ n=t.a
 if(n.d==="scripts/seed"){m=A.d.bu(t.x.a.a)
 l=A.d.bu(t.y.a.a)
 J.bY(s,"project_url",A.d.bu(n.x.a.a))
-if(m.length!==0&&l.length!==0)J.alu(s,B.z(["admin_email",m,"admin_password",l],j,o))}t.A(new C.cjA(t))
+if(m.length!==0&&l.length!==0)J.alv(s,B.z(["admin_email",m,"admin_password",l],j,o))}t.A(new C.cjA(t))
 v=3
 j=t.d.Q
 j===$&&B.b()
 x=6
-return B.d(j.mS("instance-install",s.a!==0?A.aA.xk(s,null):null),$async$Y4)
+return B.d(j.mT("instance-install",s.a!==0?A.aA.xk(s,null):null),$async$Y4)
 case 6:r=e
 if(r.b!==200)t.A(new C.cjB(t,r))
 else t.A(new C.cjC(t))
@@ -193,28 +193,28 @@ $0(){var x=this.a
 x.r="Unexpected error: "+B.o(this.b)
 x.f=x.w=!1},
 $S:0};(function installTearOffs(){var x=a._instance_0u
-x(C.afj.prototype,"gbwt","Y4",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
-x(B.J,[C.DS,C.a5n])
-x(B.O,[C.aPB,C.afj])
+x(C.afk.prototype,"gbwt","Y4",1)})();(function inheritance(){var x=a.inheritMany,w=a.inherit
+x(B.J,[C.DR,C.a5o])
+x(B.O,[C.aPB,C.afk])
 x(B.c9,[C.cdV,C.cdX])
 x(B.cK,[C.cdU,C.cdW,C.cjA,C.cjB,C.cjC,C.cjD])
 w(C.Ad,B.H)})()
-B.c5(b.typeUniverse,JSON.parse('{"a5n":{"J":[],"e":[]},"DS":{"J":[],"e":[]},"aPB":{"O":["DS"]},"afj":{"O":["a5n"]}}'))
-var y={D:B.D("u<Ad>"),u:B.D("u<e>"),w:B.D("m"),v:B.D("GT"),b:B.D("@"),q:B.D("~")};(function constants(){D.aAs=new B.pv(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
+B.c5(b.typeUniverse,JSON.parse('{"a5o":{"J":[],"e":[]},"DR":{"J":[],"e":[]},"aPB":{"O":["DR"]},"afk":{"O":["a5o"]}}'))
+var y={D:B.D("u<Ad>"),u:B.D("u<e>"),w:B.D("m"),v:B.D("GS"),b:B.D("@"),q:B.D("~")};(function constants(){D.aAs=new B.pv(null,null,null,"Admin Password",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aAu=new B.pv(null,null,null,"GitHub Repository with scripts",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aAw=new B.pv(null,null,null,"Admin Email",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aAx=new B.pv(null,null,null,"Supabase Project URL",null,null,null,null,null,null,"Enter your Supabase project URL",null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aAy=new B.pv(null,null,null,"Directory",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.aAz=new B.pv(null,null,null,"Database Connection String",null,null,null,null,null,null,null,null,null,null,null,null,!0,!0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,!0,null,null,null)
 D.bJr=new B.cr("Copied to clipboard",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bD_=new Q.Fy(D.bJr,null,null,null,null,null,null,null,null,null,null,null,null,R.Ms,null,null,null,A.v,null)
+D.bD_=new Q.Fx(D.bJr,null,null,null,null,null,null,null,null,null,null,null,null,R.Mt,null,null,null,A.v,null)
 D.bGI=new B.a5(!0,null,null,"monospace",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bIS=new B.cr("Before running seed, please ensure that you have enabled:\n - Webhooks in Supabase Dashboard (Database > Webhooks)\n - moddatetime extension (Database > Extensions)\n - unaccent extension (Database > Extensions)\n - pg_cron extension (Database > Extensions)",null,P.adT,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bIZ=new B.cr("Migrations",null,G.Ic,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bIZ=new B.cr("Migrations",null,G.Id,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJd=new B.cr("Instance Installation",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJh=new B.cr("Admin Email and Password are optional. If left blank, no new admin user will be inserted.",null,H.adP,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJl=new B.cr("Run Scripts",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.bJo=new B.cr("Initial",null,G.Ic,null,null,null,null,null,null,null,null,null,null,null,null)
+D.bJo=new B.cr("Initial",null,G.Id,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJy=new B.cr("Supabase Function Deploy Commands:",null,T.zH,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_202",e:"endPart",h:b})})($__dart_deferred_initializers__,"YliD+zZuIhnmOKJOxwP+TNjP1tk=");
+a.eventLog.push({p:"main.dart.js_202",e:"endPart",h:b})})($__dart_deferred_initializers__,"YTMiEIkf0Nd4g+wZ77E7dy9DXaU=");

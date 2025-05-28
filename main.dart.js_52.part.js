@@ -16,10 +16,10 @@ E=c[141]
 A.awx.prototype={
 B(d){var y,x=null,w=B.C(d).ax.a===C.q||this.f===!0?"assets/icons/fstapplogo.dark.svg":"assets/icons/fstapplogo.svg",v=this.d,u=this.e
 if(C.d.le(w.toLowerCase(),".svg"))y=new D.LY(u,v,C.hc,new D.Uz(w,x,x,x,x),x,!1,"Festapp logo",!1,x,x)
-else y=E.a2E(w,x,v,x,u)
+else y=E.a2F(w,x,v,x,u)
 return B.iJ(!1,x,!0,y,x,!0,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x,x)}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
 y(A.awx,B.ac)})()
 B.c5(b.typeUniverse,JSON.parse('{"awx":{"ac":[],"e":[]}}'))};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_52",e:"endPart",h:b})})($__dart_deferred_initializers__,"MSPh/X2jK4qWsyCnCli5gXfiYRc=");
+a.eventLog.push({p:"main.dart.js_52",e:"endPart",h:b})})($__dart_deferred_initializers__,"WsaP9fKy4T+72CoJgF8aV5p22J8=");

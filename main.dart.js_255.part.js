@@ -7,7 +7,7 @@ var $async$Oz=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
 return A.d(A.azq().y8(0,C.ku),$async$Oz)
 case 2:x=3
-return A.d(B.a5i(),$async$Oz)
+return A.d(B.a5j(),$async$Oz)
 case 3:x=4
 return A.d($.dC().gdm().FA(C.acv),$async$Oz)
 case 4:C.o2.ZH(0,"refresh")
@@ -19,16 +19,16 @@ if(!u)v.f=null
 if(!u)v.d=null
 return A.j(null,w)}})
 return A.k($async$Oz,w)},
-a5i(){var x=0,w=A.l(y.b)
-var $async$a5i=A.h(function(d,e){if(d===1)return A.i(e,w)
+a5j(){var x=0,w=A.l(y.b)
+var $async$a5j=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=2
-return A.d(A.Sx("user_info"),$async$a5i)
+return A.d(A.Sx("user_info"),$async$a5j)
 case 2:x=3
-return A.d(A.Sx("mySchedule"),$async$a5i)
+return A.d(A.Sx("mySchedule"),$async$a5j)
 case 3:x=4
-return A.d(A.Sx("activities"),$async$a5i)
+return A.d(A.Sx("activities"),$async$a5j)
 case 4:return A.j(null,w)}})
-return A.k($async$a5i,w)},
+return A.k($async$a5j,w)},
 bFo(){var x=$.fQ
 x=x==null?null:x.f
 x=x==null?null:x.r
@@ -39,4 +39,4 @@ B=a.updateHolder(c[91],B)
 var z=a.updateTypes([])
 var y={b:A.D("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_255",e:"endPart",h:b})})($__dart_deferred_initializers__,"cMW/s0LADrbhKTXCwp9fq5CME8s=");
+a.eventLog.push({p:"main.dart.js_255",e:"endPart",h:b})})($__dart_deferred_initializers__,"XFwMU8+MvGM/34UNfJVhPvixlmQ=");
