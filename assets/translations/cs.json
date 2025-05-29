@@ -602,5 +602,7 @@
   "Address": "Adresa",
   "Yes": "Ano",
   "No": "Ne",
+  "Early Registration Attempt Message": "Zpráva o pokusu o předčasnou registraci",
+  "Enter message for users trying to register too early": "Zadejte zprávu pro uživatele, kteří se pokoušejí registrovat příliš brzy",
   "_": "_"
 }
