@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/theme_config.dart';
-import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:intl/intl.dart';
 
 import 'timetable_controller.dart';
@@ -9,14 +8,11 @@ import 'timetable_controller.dart';
 class TimetableEventWidget extends StatefulWidget {
   final TimeBlockItem item;
   final TimetableController controller;
-  final Future<void> Function(TimeBlockItem)? addToMyProgram;
-  final Future<void> Function(TimeBlockItem)? removeFromMyProgram;
 
-  const TimetableEventWidget({super.key,
+  const TimetableEventWidget({
+    super.key,
     required this.item,
     required this.controller,
-    this.addToMyProgram,
-    this.removeFromMyProgram,
   });
 
   @override
@@ -26,168 +22,234 @@ class TimetableEventWidget extends StatefulWidget {
 class _TimetableEventWidgetState extends State<TimetableEventWidget> {
   @override
   Widget build(BuildContext context) {
-    // Assuming widget.item.isCancelled exists
-    bool isCancelled = widget.item.isCancelled;
+    final bool isCancelled = widget.item.isCancelled;
+    final bool isUserSpecific = !isCancelled && (widget.item.timeBlockType == TimeBlockType.saved ||
+        widget.item.timeBlockType == TimeBlockType.signedIn);
+
+    // --- Strip Style ---
+    final double stripWidth = isUserSpecific ? 10.0 : 5.0;
+    Color stripColor;
+    if (isCancelled) {
+      stripColor = Colors.grey.shade600;
+    } else {
+      stripColor = ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType);
+    }
+
+    // --- Main Content Background ---
+    Color contentBackgroundColor;
+    if (isCancelled) {
+      contentBackgroundColor = Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey.shade800.withOpacity(0.5)
+          : Colors.grey.shade300.withOpacity(0.5);
+    } else {
+      contentBackgroundColor = Theme.of(context).cardColor;
+    }
+
+    // --- Border Style ---
+    Color borderColor;
+    double borderWidth;
+    if (isUserSpecific) {
+      borderColor = stripColor;
+      borderWidth = 1.0;
+    } else {
+      borderColor = Theme.of(context).dividerColor.withOpacity(0.3);
+      borderWidth = 0.5;
+    }
+    if (isCancelled && isUserSpecific) {
+      borderColor = Theme.of(context).dividerColor.withOpacity(0.3);
+      borderWidth = 0.5;
+    }
+
+
+    // --- Dimensions Calculation (preserved from original) ---
+    final double actualWidth, actualHeight;
+    if (widget.controller.isTimeHorizontal) {
+      actualWidth = widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) -
+          widget.controller.minimalPadding() * 2;
+      actualHeight = widget.controller.itemStaticDimension() - widget.controller.minimalPadding() * 2;
+    } else {
+      actualWidth = widget.controller.itemStaticDimension() - widget.controller.minimalPadding() * 2;
+      actualHeight = widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) -
+          widget.controller.minimalPadding() * 2;
+    }
+
+    if (actualWidth <= 0 || actualHeight <= 0) {
+      return const SizedBox.shrink();
+    }
 
     return GestureDetector(
       onTap: () {
-        // If cancelled, perhaps tap action should also be conditional,
-        // but for now, only UI and add/remove button are modified.
-        widget.controller.onItemTap?.call(widget.item.id);
-        setState(() {});
+        if (widget.controller.onItemTap != null) {
+          widget.controller.onItemTap!(widget.item.id);
+        }
       },
       child: Container(
+        width: actualWidth,
+        height: actualHeight,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onSurface,
+          color: contentBackgroundColor,
           borderRadius: BorderRadius.circular(6),
-        ),
-        child: Container(
-          width: widget.controller.isTimeHorizontal ?
-          widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) - widget.controller.minimalPadding() * 2:
-          widget.controller.itemStaticDimension() - widget.controller.minimalPadding() * 2,
-          height:
-          widget.controller.isTimeHorizontal ?
-          widget.controller.itemStaticDimension() :
-          widget.controller.timeRangeLength(widget.item.startTime, widget.item.endTime) - widget.controller.minimalPadding() * 2,
-          decoration: BoxDecoration(
-            color: isCancelled
-                ? ThemeConfig.timetableUnselectedColor(context, Colors.white)
-                : (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                ? ThemeConfig.timetableSelectedColor(context, ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType))
-                : ThemeConfig.timetableUnselectedColor(context, ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType)),
-            borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: borderColor, // Dynamic border color
+            width: borderWidth,  // Dynamic border width
           ),
-          child: widget.controller.isTimeHorizontal ? getTimeHorizontalVersion(isCancelled) : getTimeVerticalVersion(isCancelled),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Row(
+          children: [
+            // --- Colored Strip ---
+            Container(
+              width: stripWidth, // Use dynamic stripWidth
+              color: stripColor,
+            ),
+            // --- Event Content ---
+            Expanded(
+              child: widget.controller.isTimeHorizontal
+                  ? _buildHorizontalContent(context, isUserSpecific, isCancelled, actualWidth, Theme.of(context).primaryColor)
+                  : _buildVerticalContent(context, isUserSpecific, isCancelled, actualHeight, ThemeConfig.blackColor(context)),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Stack getTimeHorizontalVersion(bool isCancelled) {
-    return Stack(
-      children: [
-        if (!isCancelled) // Only show button if not cancelled
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: ButtonsHelper.getAddToMyProgramButton(
-                TimeBlockHelper.getTimetableItemTypeAsCanSignIn(widget.item.timeBlockType), () async {
-              if (widget.addToMyProgram != null) {
-                await widget.addToMyProgram!(widget.item);
-                if (mounted) setState(() {});
-              }
-            }, () async {
-              if (widget.removeFromMyProgram != null) {
-                await widget.removeFromMyProgram!(widget.item);
-                if (mounted) setState(() {});
-              }
-            }, ThemeConfig.whiteColor(context), ThemeConfig.darkColor(context)),
-          ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(8, 8, isCancelled ? 8 : 40, 8), // Adjust right padding if button is hidden
-          child: Text(widget.item.data.toString(),
-              style: TextStyle(
-                  decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
-                  fontWeight: isCancelled
-                      ? FontWeight.normal
-                      : (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                      ? FontWeight.bold
-                      : FontWeight.normal,
-                  color: isCancelled
-                      ? ThemeConfig.blackColor(context).withOpacity(0.5)
-                      : (widget.item.timeBlockType == TimeBlockType.saved || widget.item.timeBlockType == TimeBlockType.signedIn)
-                      ? ThemeConfig.whiteColor(context)
-                      : ThemeConfig.blackColor(context)),
-              overflow: TextOverflow.fade),
-        ),
-      ],
-    );
-  }
-
-  Stack getTimeVerticalVersion(bool isCancelled) {
+  Widget _buildVerticalContent(BuildContext context, bool isUserSpecific, bool isCancelled, double itemHeight, Color iconColor) {
     final start = widget.item.startTime;
     final end = widget.item.endTime;
     final durationMins = end.difference(start).inMinutes;
+    final bool showTimeLabel = durationMins > 20 && itemHeight > 35;
 
-    final showTimeLabel = durationMins > 30;
-    final showButton    = durationMins > 50;
+    Color textColor;
+    FontWeight fontWeight;
+    TextTheme textTheme = Theme.of(context).textTheme;
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                if (showTimeLabel)
-                  Text(
+    if (isCancelled) {
+      textColor = Theme.of(context).disabledColor;
+      fontWeight = FontWeight.normal;
+    } else if (isUserSpecific) {
+      textColor = textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black);
+      fontWeight = FontWeight.bold;
+    } else {
+      textColor = textTheme.bodyMedium?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87);
+      fontWeight = FontWeight.w500;
+    }
+
+    Color timeLabelColor = (textTheme.bodySmall?.color ?? Colors.grey).withOpacity(isCancelled ? 0.6 : 0.8);
+
+    const double iconSize = 14.0;
+    const double iconTextSpacing = 5.0;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      child: Stack( // MODIFIED: Added Stack to allow positioning of the icon
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (showTimeLabel)
+                Padding( // MODIFIED: Added padding to the right of time label to make space for the icon if needed
+                  padding: EdgeInsets.only(right: isUserSpecific ? (iconSize + iconTextSpacing) : 0.0),
+                  child: Text(
                     '${DateFormat.Hm().format(start)} - ${DateFormat.Hm().format(end)}',
                     style: TextStyle(
-                      decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w300,
-                      color: isCancelled
-                          ? ThemeConfig.blackColor(context).withOpacity(0.7)
-                          : (widget.item.timeBlockType == TimeBlockType.saved ||
-                          widget.item.timeBlockType == TimeBlockType.signedIn)
-                          ? ThemeConfig.whiteColorDarker(context)
-                          : ThemeConfig.blackColor(context),
+                      color: timeLabelColor,
                     ),
-                  ),
-
-                const SizedBox(height: 4),
-
-                Flexible(
-                  fit: FlexFit.loose,
-                  child: Text(
-                    widget.item.data.toString(),
-                    overflow: TextOverflow.fade,
-                    style: TextStyle(
-                      decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
-                      fontSize: 14,
-                      fontWeight: isCancelled
-                          ? FontWeight.w500 // Maintain some visibility for cancelled items
-                          : (widget.item.timeBlockType == TimeBlockType.saved ||
-                          widget.item.timeBlockType == TimeBlockType.signedIn)
-                          ? FontWeight.bold
-                          : FontWeight.w500,
-                      color: isCancelled
-                          ? ThemeConfig.blackColor(context).withOpacity(0.7)
-                          : (widget.item.timeBlockType == TimeBlockType.saved ||
-                          widget.item.timeBlockType == TimeBlockType.signedIn)
-                          ? ThemeConfig.whiteColor(context)
-                          : ThemeConfig.blackColor(context),
-                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-
-                if (showButton)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: ButtonsHelper.getAddToMyProgramButton(
-                      TimeBlockHelper.getTimetableItemTypeAsCanSignIn(widget.item.timeBlockType),
-                          () async {
-                        if (widget.addToMyProgram != null) {
-                          await widget.addToMyProgram!(widget.item);
-                          if (mounted) setState(() {});
-                        }
-                      },
-                          () async {
-                        if (widget.removeFromMyProgram != null) {
-                          await widget.removeFromMyProgram!(widget.item);
-                          if (mounted) setState(() {});
-                        }
-                      },
-                      ThemeConfig.whiteColor(context),
-                      ThemeConfig.darkColor(context),
+              if (showTimeLabel) const SizedBox(height: 3),
+              Expanded(
+                child: Padding(
+                  // MODIFIED: Removed left padding previously used for icon next to title. Icon is now top-right.
+                  padding: EdgeInsets.only(left: 0.0), // was: isUserSpecific ? (iconSize + iconTextSpacing) : 0.0
+                  child: Text(
+                    widget.item.toString(),
+                    style: TextStyle(
+                      decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                      fontSize: 13,
+                      fontWeight: fontWeight,
+                      color: textColor,
+                      height: 1.2,
                     ),
+                    overflow: TextOverflow.fade,
                   ),
-              ],
+                ),
+              ),
+            ],
+          ),
+          if (isUserSpecific && showTimeLabel)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Icon(
+                Icons.check_circle,
+                size: iconSize,
+                color: iconColor,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHorizontalContent(BuildContext context, bool isUserSpecific, bool isCancelled, double itemWidth, Color iconColor) {
+    Color textColor;
+    FontWeight fontWeight;
+    TextTheme textTheme = Theme.of(context).textTheme;
+
+    if (isCancelled) {
+      textColor = Theme.of(context).disabledColor;
+      fontWeight = FontWeight.normal;
+    } else if (isUserSpecific) {
+      textColor = textTheme.bodyLarge?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black);
+      fontWeight = FontWeight.bold;
+    } else {
+      textColor = textTheme.bodyMedium?.color ?? (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87);
+      fontWeight = FontWeight.w500;
+    }
+
+    Widget? userSpecificIconWidget;
+    if (isUserSpecific) {
+      userSpecificIconWidget = Padding(
+        padding: const EdgeInsets.only(right: 5.0),
+        child: Icon(
+          Icons.check_circle,
+          size: 13,
+          color: iconColor,
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (userSpecificIconWidget != null) userSpecificIconWidget,
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                widget.item.data.toString(),
+                style: TextStyle(
+                  decoration: isCancelled ? TextDecoration.lineThrough : TextDecoration.none,
+                  fontSize: 12,
+                  fontWeight: fontWeight,
+                  color: textColor,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
