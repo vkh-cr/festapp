@@ -5,6 +5,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/workshop_feature.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/exclusive_group_model.dart';
@@ -344,7 +347,7 @@ class DbEvents {
     return result.count > 0;
   }
 
-  static signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
+  static Future<void> signInToEvent(BuildContext context, int eventId, [UserInfoModel? participant]) async {
     var userId = participant?.id ?? AuthService.currentUserId();
 
     var result = await _supabase.rpc("sign_user_to_event",
@@ -412,6 +415,14 @@ class DbEvents {
           var timePart = DateFormat.Hm(context.locale.languageCode).format(start);
           String startString = "$datePart $timePart";
           answerWhy = "You can sign in from {time}.".tr(namedArgs: {"time":startString});
+        }
+
+        var workshopsFeature = FeatureService.getFeatureDetails(FeatureConstants.workshops) as WorkshopsFeature;
+        var message = workshopsFeature.registrationNotOpenMessage;
+        if(message != null && message.isNotEmpty){
+          answerWhy = workshopsFeature.registrationNotOpenMessage!;
+          ToastHelper.Show(context, answerWhy,
+              severity: ToastSeverity.NotOk); return;
         }
 
         ToastHelper.Show(context, "${"Cannot sign in!".tr()} $answerWhy",
