@@ -1,19 +1,11 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_186",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-azr(){var x=0,w=A.l(y.a),v
-var $async$azr=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:x=3
-return A.d($.yA().bBT("requestNotificationPermission",[]),$async$azr)
-case 3:v=e
-x=1
-break
-case 1:return A.j(v,w)}})
-return A.k($async$azr,w)}}
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C={
+uC(d,e,f,g,h){return new A.z3(B.A0,f,g,d,e,h,null,null,null)}}
 A=c[0]
-B=a.updateHolder(c[47],B)
-var z=a.updateTypes([])
-var y={a:A.D("x")}};
+B=c[2]
+C=a.updateHolder(c[143],C)
+var z=a.updateTypes([])};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_186",e:"endPart",h:b})})($__dart_deferred_initializers__,"Fotsd8I+9i1KI2gIZngUpFiufEM=");
+a.eventLog.push({p:"main.dart.js_186",e:"endPart",h:b})})($__dart_deferred_initializers__,"uIK6m4C+3P9itqGiRNCtdVKwTnU=");

@@ -2,23 +2,41 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_257",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,C,B={
-cXn(d){var x=A.z(["id",d],y.g,y.b)
-return new B.aHi("UnitRoute",new A.Gh(d,null),x,C.c1,null,"",null)},
-aHi:function aHi(d,e,f,g,h,i,j){var _=this
-_.a=d
-_.b=e
-_.c=f
-_.d=g
-_.e=h
-_.f=i
-_.r=j}}
+Ow(){var x=0,w=A.l(y.b),v,u
+var $async$Ow=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d(A.azp().ya(0,C.kt),$async$Ow)
+case 2:x=3
+return A.d(B.a5o(),$async$Ow)
+case 3:x=4
+return A.d($.dC().gdm().FA(C.acv),$async$Ow)
+case 4:C.o1.ZI(0,"refresh")
+$.ni=null
+v=$.fQ
+u=v==null
+if(!u)v.e=null
+if(!u)v.f=null
+if(!u)v.d=null
+return A.j(null,w)}})
+return A.k($async$Ow,w)},
+a5o(){var x=0,w=A.l(y.b)
+var $async$a5o=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=2
+return A.d(A.Sw("user_info"),$async$a5o)
+case 2:x=3
+return A.d(A.Sw("mySchedule"),$async$a5o)
+case 3:x=4
+return A.d(A.Sw("activities"),$async$a5o)
+case 4:return A.j(null,w)}})
+return A.k($async$a5o,w)},
+bFn(){var x=$.fQ
+x=x==null?null:x.f
+x=x==null?null:x.r
+return x===!0}}
 A=c[0]
 C=c[2]
-B=a.updateHolder(c[87],B)
-B.aHi.prototype={}
-var z=a.updateTypes([]);(function inheritance(){var x=a.inherit
-x(B.aHi,A.jf)})()
-A.c5(b.typeUniverse,JSON.parse('{"aHi":{"jf":["Gh"]}}'))
-var y={g:A.D("m"),b:A.D("@")}};
+B=a.updateHolder(c[92],B)
+var z=a.updateTypes([])
+var y={b:A.D("~")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_257",e:"endPart",h:b})})($__dart_deferred_initializers__,"H4mMaDOgE9wBBGbrTEAxvFztgSM=");
+a.eventLog.push({p:"main.dart.js_257",e:"endPart",h:b})})($__dart_deferred_initializers__,"4qHFnNNqPVPgOaGLWoGAjpAr3aM=");
