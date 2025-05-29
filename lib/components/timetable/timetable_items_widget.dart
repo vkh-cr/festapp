@@ -100,8 +100,6 @@ class _TimetableItemsWidgetState extends State<TimetableItemsWidget> {
           child: TimetableEventWidget(
             item: item,
             controller: widget.controller,
-            addToMyProgram: widget.addToMyProgram,
-            removeFromMyProgram: widget.removeFromMyProgram,
           ),
         );
         allItems.add(timeBlock);
