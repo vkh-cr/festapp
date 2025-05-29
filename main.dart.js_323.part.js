@@ -2,18 +2,12 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_323",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-aFj(d,e){return d.hx(y.b)}}
+cV1(d,e){var x=d.af(y.a)
+x.toString
+return x}}
 A=c[0]
-B=a.updateHolder(c[75],B)
+B=a.updateHolder(c[46],B)
 var z=a.updateTypes([])
-A.c5(b.typeUniverse,JSON.parse('{"UM":{"bu":[],"bn":[],"e":[]}}'))
-var y={b:A.D("UM")};(function lazyInitializers(){var x=a.lazyFinal
-x($,"dJG","all",()=>{var w=A.a([],A.D("u<m>"))
-w.push("home")
-w.push("news")
-w.push("map")
-w.push("more")
-w.push("user")
-return w})})()};
+var y={a:A.D("a7B")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_323",e:"endPart",h:b})})($__dart_deferred_initializers__,"+DMazEm0CzjPpbpTnfkEZcVhbAs=");
+a.eventLog.push({p:"main.dart.js_323",e:"endPart",h:b})})($__dart_deferred_initializers__,"BJnMzc+EIIyWVdtRGZlXMB21yIE=");

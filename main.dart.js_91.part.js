@@ -1,11 +1,15 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_91",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,C,D
-A=c[0]
-B=c[2]
-C=c[344]
-D=c[352]
-var z=a.updateTypes([]);(function constants(){C.abs=new A.d5(D.JY,B.y)})()};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C={IL:function IL(d,e){this.a=d
+this.b=e}},A
+B=c[0]
+C=a.updateHolder(c[166],C)
+A=c[352]
+C.IL.prototype={
+I(){return"FontStyle."+this.b}}
+var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
+y(C.IL,B.eT)})();(function constants(){A.z5=new B.bf(12,12)
+A.JY=new B.dT(A.z5,A.z5,A.z5,A.z5)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_91",e:"endPart",h:b})})($__dart_deferred_initializers__,"0wFkGpj90B3psI+jNQhiYRCIsFg=");
+a.eventLog.push({p:"main.dart.js_91",e:"endPart",h:b})})($__dart_deferred_initializers__,"SqFXAMN/fPTfsuMZcUJiM53VSUE=");
