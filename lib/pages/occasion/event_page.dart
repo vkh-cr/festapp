@@ -98,7 +98,10 @@ class _EventPageState extends State<EventPage> {
                     )),
               ),
             ),
-            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) && (!isEventCancelled || (_event?.isEventInMySchedule ?? false)))
+            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+                (!(isEventCancelled && !(_event?.isEventInMySchedule ?? false)) &&
+                    (_event?.childEvents.isEmpty ?? false) &&
+                    ((_event?.maxParticipants ?? 0) == 0)))
               ...ButtonsHelper.getAddToMyProgramButton(
                   _event?.canSaveEventToMyProgram() ?? false,
                   addToMySchedule,
@@ -548,7 +551,7 @@ class _EventPageState extends State<EventPage> {
     if(mounted) setState(() {});
   }
 
-  _eventPressed(int id) {
+  void _eventPressed(int id) {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
         .then((value) => loadData(_event!.id!));
   }

@@ -94,29 +94,17 @@ class TimeBlockItem {
   bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
+  bool canSaveToMySchedule () => (!isSupportingSignIn()) && (!haveChildren());
 
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";
 
-  /// Factory from EventModel for table view (old usage).
-  factory TimeBlockItem.fromEventModelForTimeTable(EventModel model) {
-    return TimeBlockItem(
-      id: model.id!,
-      startTime: model.startTime,
-      endTime: model.endTime,
-      timeBlockType: TimeBlockHelper.getTimeBlockTypeFromModel(model),
-      data: model.toString(),
-      eventType: model.type,
-      timeBlockPlace: model.place != null && model.place!.id != null
-          ? TimeBlockPlace.fromPlaceModel(model.place!)
-          : null,
-      title: model.title!,
-      participants: model.currentParticipants ?? 0,
-      maxParticipants: model.maxParticipants ?? 0,
-      children: model.childEvents
-          .map((c) => TimeBlockItem.fromEventModelAsChild(c))
-          .toList(),
-      isCancelled: model.isCancelled, // Added
-    );
+  @override
+  String toString() {
+    String titleStr = title ?? "";
+    if (isCancelled) {
+      titleStr += " (${"Cancelled".tr()})";
+    }
+    return (maxParticipants == 0 ? titleStr : "$titleStr (${participants}/$maxParticipants)");
   }
 
   /// Factory from EventModel for schedule timeline (new usage).

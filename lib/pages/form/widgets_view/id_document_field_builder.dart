@@ -70,7 +70,7 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
       decoration: InputDecoration(
         label: FormFieldBuilders.buildTitleWidget(
           widget.fieldHolder.title!,
-          widget.fieldHolder.isRequired,
+          false,
           context,
           focusNode: _idNumberFocusNode,
         ),
@@ -92,7 +92,7 @@ class _IdDocumentFieldBuilderState extends State<IdDocumentFieldBuilder> {
         decoration: InputDecoration(
           label: FormFieldBuilders.buildTitleWidget(
             effectiveExpiryDateLabel, // Use the effective label here
-            false, // Assuming expiry date is not mandatory by default
+            false,
             context,
           ),
           suffixIcon: const Icon(Icons.calendar_today),
