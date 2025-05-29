@@ -25,13 +25,17 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
     final bool isCancelled = widget.item.isCancelled;
     final bool isUserSpecific = !isCancelled && (widget.item.timeBlockType == TimeBlockType.saved ||
         widget.item.timeBlockType == TimeBlockType.signedIn);
+    final bool isActivity = widget.item.timeBlockType == TimeBlockType.activity;
 
     // --- Strip Style ---
-    final double stripWidth = isUserSpecific ? 10.0 : 5.0;
+    final double stripWidth = 6.0;
     Color stripColor;
     if (isCancelled) {
-      stripColor = Colors.grey.shade600;
-    } else {
+      stripColor = Colors.grey;
+    } else if (isActivity) {
+      stripColor = Theme.of(context).primaryColor;
+    }
+    else {
       stripColor = ThemeConfig.eventTypeToColorTimetable(context, widget.item.eventType);
     }
 
@@ -50,7 +54,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
     double borderWidth;
     if (isUserSpecific) {
       borderColor = stripColor;
-      borderWidth = 1.0;
+      borderWidth = 1.8;
     } else {
       borderColor = Theme.of(context).dividerColor.withOpacity(0.3);
       borderWidth = 0.5;
@@ -90,8 +94,8 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           color: contentBackgroundColor,
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: borderColor, // Dynamic border color
-            width: borderWidth,  // Dynamic border width
+            color: borderColor,
+            width: borderWidth,
           ),
         ),
         clipBehavior: Clip.antiAlias,
@@ -99,7 +103,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
           children: [
             // --- Colored Strip ---
             Container(
-              width: stripWidth, // Use dynamic stripWidth
+              width: stripWidth,
               color: stripColor,
             ),
             // --- Event Content ---
@@ -142,7 +146,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-      child: Stack( // MODIFIED: Added Stack to allow positioning of the icon
+      child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,7 +154,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (showTimeLabel)
-                Padding( // MODIFIED: Added padding to the right of time label to make space for the icon if needed
+                Padding(
                   padding: EdgeInsets.only(right: isUserSpecific ? (iconSize + iconTextSpacing) : 0.0),
                   child: Text(
                     '${DateFormat.Hm().format(start)} - ${DateFormat.Hm().format(end)}',
@@ -166,8 +170,7 @@ class _TimetableEventWidgetState extends State<TimetableEventWidget> {
               if (showTimeLabel) const SizedBox(height: 3),
               Expanded(
                 child: Padding(
-                  // MODIFIED: Removed left padding previously used for icon next to title. Icon is now top-right.
-                  padding: EdgeInsets.only(left: 0.0), // was: isUserSpecific ? (iconSize + iconTextSpacing) : 0.0
+                  padding: EdgeInsets.only(left: 0.0),
                   child: Text(
                     widget.item.toString(),
                     style: TextStyle(
