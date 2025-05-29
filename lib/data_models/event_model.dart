@@ -87,8 +87,8 @@ class EventModel extends ITrinaRowModel {
 
   factory EventModel.fromJson(Map<String, dynamic> json) {
     var eventGroups = json.containsKey(eventGroupsTable) && json[eventGroupsTable] != null ? json[eventGroupsTable] : null;
-    List<int>? childEventsIds; // Renamed for clarity to avoid conflict with childEvents field
-    List<int>? parentEventsIds; // Renamed for clarity
+    List<int>? childEventsIds;
+    List<int>? parentEventsIds;
 
     if(eventGroups != null)
     {
@@ -165,7 +165,7 @@ class EventModel extends ITrinaRowModel {
     return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
   }
 
-  copyFromEvent(EventModel event)
+  void copyFromEvent(EventModel event)
   {
     startTime = event.startTime;
     endTime = event.endTime;
@@ -177,8 +177,8 @@ class EventModel extends ITrinaRowModel {
     place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
     type = event.type;
     occasionId = event.occasionId;
-    data = event.data; // This will copy the map including is_cancelled if it's there
-    isCancelled = event.isCancelled; // Explicitly copy
+    data = event.data;
+    isCancelled = event.isCancelled;
   }
 
   static const String startDateColumn = "startDate";
@@ -240,7 +240,7 @@ class EventModel extends ITrinaRowModel {
     }
 
     bool resolvedIsCancelled = false;
-    if (json.containsKey(Tb.events.dataIsCancelled)) { // Assuming Tb.events.dataIsCancelled is a direct column key from Pluto
+    if (json.containsKey(Tb.events.dataIsCancelled)) {
       final val = json[Tb.events.dataIsCancelled];
       if (val is bool) {
         resolvedIsCancelled = val;
@@ -353,11 +353,11 @@ class EventModel extends ITrinaRowModel {
       isSignedInColumn: isSignedIn,
       isEventInMyProgramColumn: isEventInMySchedule,
       isGroupEventColumn: isGroupEvent,
-      placesTable: place?.toJson(), // Assuming PlaceModel has toJson
+      placesTable: place,
       Tb.events.type: type,
       childEventsList: childEventIds,
       Tb.events.occasion: occasionId,
-      dataColumn: eventData, // data map now includes is_cancelled
+      dataColumn: eventData,
     };
   }
 

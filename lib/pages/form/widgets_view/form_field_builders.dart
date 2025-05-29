@@ -9,6 +9,9 @@ import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
+// Import for AutofillHints if not already covered by material.dart
+import 'package:flutter/services.dart';
+
 
 import '../models/field_holder.dart';
 import '../models/form_holder.dart';
@@ -235,6 +238,20 @@ class FormFieldBuilders {
       fieldHolder: fieldHolder,
       autofillHints: [AutofillHints.telephoneNumber],
       isPhone: true,
+    );
+  }
+
+  static Widget buildAddressField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [
+        AutofillHints.fullStreetAddress,
+        AutofillHints.streetAddressLevel1,
+        AutofillHints.postalCode,
+        AutofillHints.addressCity,
+        AutofillHints.countryName,
+      ],
+      isAddress: true,
     );
   }
 

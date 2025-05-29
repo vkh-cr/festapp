@@ -11,9 +11,9 @@ class TimeHelper {
 
   static DateTime now() {
     if (currentTime != null) {
-      return currentTime!;
+      return currentTime!.toOccasionTime();
     }
-    return tz.TZDateTime.now(tz.local);
+    return tz.TZDateTime.now(tz.local).native;
   }
 
   static void setTimeZoneLocation([String? location]) {
@@ -165,11 +165,11 @@ extension DateTimeExtension on DateTime {
     }
 
     if (this is tz.TZDateTime) {
-      return tz.TZDateTime.from(this, location);
+      return tz.TZDateTime.from(this, location).native;
     }
 
     if (isUtc) {
-      return tz.TZDateTime.from(this, location);
+      return tz.TZDateTime.from(this, location).native;
     } else {
       return tz.TZDateTime(
         location,
@@ -181,7 +181,7 @@ extension DateTimeExtension on DateTime {
         second,
         millisecond,
         microsecond,
-      );
+      ).native;
     }
   }
 

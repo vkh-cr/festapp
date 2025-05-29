@@ -1,7 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For DateFormat
 
-class IdDocumentData {
+abstract class IPreviewable {
+  String toPreviewString({BuildContext? context});
+}
+
+class IdDocumentData implements IPreviewable {
   final String idNumber;
   final DateTime? expiryDate;
 
@@ -31,13 +36,24 @@ class IdDocumentData {
   }
 
   @override
-  String toString() {
+  String toPreviewString({BuildContext? context}) {
     if (expiryDate != null) {
-      final formattedExpiryDate = DateFormat.yMd().format(expiryDate!);
-      return "${"ID".tr()}: $idNumber [$formattedExpiryDate]";
+      String? locale = 'cs_CZ';
+      if(context != null){
+        locale = EasyLocalization.of(context)?.locale.toString() ?? 'cs_CZ';
+      }
+      // Use the locale passed from the context by the caller
+      final DateFormat formatter = DateFormat.yMd(locale.toString());
+      final String formattedExpiryDate = formatter.format(expiryDate!);
+      return "$idNumber ($formattedExpiryDate)";
     } else {
-      return "${"ID".tr()}: $idNumber";
+      return idNumber;
     }
+  }
+
+  @override
+  String toString() {
+    return 'IdDocumentData(idNumber: $idNumber, expiryDate: $expiryDate)';
   }
 }
 
