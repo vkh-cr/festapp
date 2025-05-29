@@ -13,7 +13,6 @@ class TimeHelper {
     if (currentTime != null) {
       return currentTime!.toOccasionTime();
     }
-    return tz.TZDateTime.local(2025, 06, 20, 16, 40);
     return tz.TZDateTime.now(tz.local).native;
   }
 
