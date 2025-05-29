@@ -5,11 +5,11 @@ $__dart_deferred_initializers__.current=function(a,b,c,$){var B,C={IL:function I
 this.b=e}},A
 B=c[0]
 C=a.updateHolder(c[166],C)
-A=c[351]
+A=c[352]
 C.IL.prototype={
 I(){return"FontStyle."+this.b}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
 y(C.IL,B.eT)})();(function constants(){A.z5=new B.bf(12,12)
-A.JX=new B.dT(A.z5,A.z5,A.z5,A.z5)})()};
+A.JY=new B.dT(A.z5,A.z5,A.z5,A.z5)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_92",e:"endPart",h:b})})($__dart_deferred_initializers__,"Opr2cIFnV5vxxehlvaTpWRIkQ+o=");
+a.eventLog.push({p:"main.dart.js_92",e:"endPart",h:b})})($__dart_deferred_initializers__,"/5zs0GBIxLb+E6W8ey0xIZni+XM=");

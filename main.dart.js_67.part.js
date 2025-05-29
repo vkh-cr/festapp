@@ -10,7 +10,7 @@ B=c[0]
 A=c[2]
 C=a.updateHolder(c[86],C)
 D=c[316]
-var z=a.updateTypes([]);(function constants(){D.MT=new B.am(8,2,8,2)
+var z=a.updateTypes([]);(function constants(){D.MU=new B.am(8,2,8,2)
 D.DB=new B.aB(58094,"MaterialIcons",null,!1)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_67",e:"endPart",h:b})})($__dart_deferred_initializers__,"MMo6ttSGlgzCHwEA0zYjejplchA=");
+a.eventLog.push({p:"main.dart.js_67",e:"endPart",h:b})})($__dart_deferred_initializers__,"tjTEUimhHm9wejTNqakRaIcPMcA=");

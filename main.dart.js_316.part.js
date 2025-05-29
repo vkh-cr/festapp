@@ -216,11 +216,11 @@ if(r.z&&x)v.push(r.Vp(A.r("Game has not started yet",q)))
 if(r.z&&!x&&!w&&r.y!=null){u=A.bF(8)
 t=r.y.a
 s=y.w
-v.push(A.ec(q,A.ar(q,A.P(A.r("Time left: {time}",A.z(["time",""+C.c.aR(t,36e8)+":"+C.d.eS(C.c.j(C.c.au(C.c.aR(t,6e7),60)),2,"0")+":"+C.d.eS(C.c.j(C.c.au(C.c.aR(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,N.adV,q,q,q,q,q),C.k,q,q,new A.b4(C.ay,q,q,u,q,q,q,C.L),q,q,q,q,C.au,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Vp(A.r("Game has ended",q)))
+v.push(A.ec(q,A.ar(q,A.P(A.r("Time left: {time}",A.z(["time",""+C.c.aR(t,36e8)+":"+C.d.eS(C.c.j(C.c.au(C.c.aR(t,6e7),60)),2,"0")+":"+C.d.eS(C.c.j(C.c.au(C.c.aR(r.y.a,1e6),60)),2,"0")],s,s)),q,q,q,q,q,q,q,N.adW,q,q,q,q,q),C.k,q,q,new A.b4(C.ay,q,q,u,q,q,q,C.L),q,q,q,q,C.au,q,q,q),q,q,q,16,16,q))}if(r.z&&w)v.push(r.Vp(A.r("Game has ended",q)))
 if(r.Q)v.push(r.Vp(A.r("You are offline. Please check your internet connection.",q)))
 return O.fa(o,q,new A.cj(C.ad,q,C.ab,C.v,v,q),q,q,q,q,q)},
 Vp(d){var x=null
-return A.ar(C.N,A.bG(new A.a2(F.aT,A.P(d,x,x,x,x,x,x,x,M.adM,C.b0,x,x,x,x),x),x,x),C.k,C.an,x,x,x,x,x,x,x,x,x,x)},
+return A.ar(C.N,A.bG(new A.a2(F.aT,A.P(d,x,x,x,x,x,x,x,M.adN,C.b0,x,x,x,x),x),x,x),C.k,C.an,x,x,x,x,x,x,x,x,x,x)},
 Xy(d,e){return this.btO(d,e)},
 btO(d,e){var x=0,w=A.l(y.v),v=this,u,t
 var $async$Xy=A.h(function(f,g){if(f===1)return A.i(g,w)
@@ -285,7 +285,7 @@ $0(){return K.xS(this.a)},
 $S:0}
 B.caY.prototype={
 $2(d,e){var x,w,v,u=null,t=this.a
-if(t.e.p(0,t.d[e].a))x=A.C(d).ax.a===C.t?C.aP:Q.LG
+if(t.e.p(0,t.d[e].a))x=A.C(d).ax.a===C.t?C.aP:Q.LH
 else x=C.as
 w=A.bF(8)
 v=t.d[e].d
@@ -339,4 +339,4 @@ D.bCT=new L.tR(4,8,8,0.75)
 D.bGc=new A.a5(!0,C.l,null,null,null,null,16,C.X,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJc=new A.cs("Guess!",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cPy=null})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_316",e:"endPart",h:b})})($__dart_deferred_initializers__,"efCS/uvza+Bk8GJJ/oDkZD07RUQ=");
+a.eventLog.push({p:"main.dart.js_316",e:"endPart",h:b})})($__dart_deferred_initializers__,"+Y5Y2CemiEUpbM45vFXK5dQkQ44=");

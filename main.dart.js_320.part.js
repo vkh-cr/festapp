@@ -619,7 +619,7 @@ if(x.a.w!==d.w){x.e.W(0)
 x.amN()
 return}},
 B(d){var x=this.a,w=x.w,v=x.c
-return B.cSi(C.ad,B.pB(x.f.length,new A.ccI(this,d),!0,y.l),v,new B.cm(w,y.a),C.ade)}}
+return B.cSi(C.ad,B.pB(x.f.length,new A.ccI(this,d),!0,y.l),v,new B.cm(w,y.a),C.adf)}}
 A.aTK.prototype={
 aoY(d,e){J.cFX(this.a.r,y.x).aT(0,new A.coA(this,e,d))},
 b5p(d){return this.aoY(d,-1)},
@@ -1068,7 +1068,7 @@ a1=j+1
 k.push(new A.aLi(r,p,h,24,new A.c0F(a2,j),l,l,e,j===d,g,f,t,s,a4.aKk(a2.a.c.length,a1),!0,a0,i,!0,a5,a3))}return k},
 B(d){var x,w,v,u,t,s=this,r=null,q=A.cOS(d)
 s.a.toString
-x=B.aA(d,C.Ja,y.w).w.w.d
+x=B.aA(d,C.Jb,y.w).w.w.d
 switch(s.gBY().a){case 0:w=s.a.w
 break
 case 1:w=s.r
@@ -1078,8 +1078,8 @@ v=q.b
 if(v==null)v=8
 u=s.f.eM(0)
 t=d.af(y.I).w
-t=B.i3(B.fr(C.M,!0,r,new B.a2(new B.am(0,0,0,x),B.S8(B.cQ2(B.at(s.b4_(D.K_),C.j,C.bX,C.i,0,r),C.aG,r),d,!0,!1,!1,!1),r),C.k,r,0,r,r,r,r,r,C.hL),r,!1,r,new A.aSd(u,t,r),C.a_)
-return new B.bP(B.c4(r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,C.R,r),!1,!0,!1,!1,new A.aL5(new B.cE(new B.ab(0,1/0,56+x,1/0),t,r),D.K_,v,w,r),r)}}
+t=B.i3(B.fr(C.M,!0,r,new B.a2(new B.am(0,0,0,x),B.S8(B.cQ2(B.at(s.b4_(D.K0),C.j,C.bX,C.i,0,r),C.aG,r),d,!0,!1,!1,!1),r),C.k,r,0,r,r,r,r,r,C.hL),r,!1,r,new A.aSd(u,t,r),C.a_)
+return new B.bP(B.c4(r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,r,C.R,r),!1,!0,!1,!1,new A.aL5(new B.cE(new B.ab(0,1/0,56+x,1/0),t,r),D.K0,v,w,r),r)}}
 A.aL5.prototype={
 B(d){var x=this,w=null,v=x.c,u=y.w
 if(B.aA(d,C.fb,u).w.giJ(0)===C.fv&&x.d===D.aiv)v=new B.cq(C.cy,w,1,new B.ao(B.aA(d,C.i4,u).w.a.b,w,v,w),w)
@@ -1143,7 +1143,7 @@ s=T.cId(n)
 r=B.r("More",n)
 q=y.N
 p=B.z(["id",null],q,y.z)
-x=B.z(["unit",new A.Ab("unit",x,D.O7,F.DC,w,!1),"home",new A.Ab("home",v,D.O7,F.DC,new A.aD9("ScheduleNavigationRoute",n,C.c1,C.c1,n,"",n),!1),"news",new A.Ab("news",u,D.az1,D.ayh,new A.azi("NewsRoute",new B.Ep(n,new A.cii(o)),C.c1,C.c1,n,"",n),!1),"map",new A.Ab("map",t,D.az0,D.ayd,s,!1),"more",new A.Ab("more",r,D.ay7,S.t8,new A.avm("InfoRoute",new B.DN(n,n),p,C.c1,n,"",n),!1),"user",new A.Ab("user","",D.ayU,D.axF,new A.aHr("UserRoute",n,C.c1,C.c1,n,"",n),!0)],q,y.o)
+x=B.z(["unit",new A.Ab("unit",x,D.O8,F.DC,w,!1),"home",new A.Ab("home",v,D.O8,F.DC,new A.aD9("ScheduleNavigationRoute",n,C.c1,C.c1,n,"",n),!1),"news",new A.Ab("news",u,D.az1,D.ayh,new A.azi("NewsRoute",new B.Ep(n,new A.cii(o)),C.c1,C.c1,n,"",n),!1),"map",new A.Ab("map",t,D.az0,D.ayd,s,!1),"more",new A.Ab("more",r,D.ay7,S.t8,new A.avm("InfoRoute",new B.DN(n,n),p,C.c1,n,"",n),!1),"user",new A.Ab("user","",D.ayU,D.axF,new A.aHr("UserRoute",n,C.c1,C.c1,n,"",n),!0)],q,y.o)
 o.f!==$&&B.be()
 o.f=x
 $.au.ds$.push(o)
@@ -1195,10 +1195,10 @@ x=B.E(new B.N(x,new A.cif(this),w),w.i("a6.E"))
 return new A.ac0(new A.cig(this),x,B.d1k(),!0,-1,null)}}
 A.Ab.prototype={
 bBv(d,e,f){var x=null
-if(this.a==="news")return A.cOF(B.P(f.$0(),x,x,x,x,x,x,x,G.adR,x,x,x,x,x),B.aW(this.c,x,x,x),e>0)
+if(this.a==="news")return A.cOF(B.P(f.$0(),x,x,x,x,x,x,x,G.adS,x,x,x,x,x),B.aW(this.c,x,x,x),e>0)
 return B.aW(this.c,x,x,x)},
 bBk(d,e,f){var x=null
-if(this.a==="news")return A.cOF(B.P(f.$0(),x,x,x,x,x,x,x,G.adR,x,x,x,x,x),B.aW(this.d,x,x,x),e>0)
+if(this.a==="news")return A.cOF(B.P(f.$0(),x,x,x,x,x,x,x,G.adS,x,x,x,x,x),B.aW(this.d,x,x,x),e>0)
 return B.aW(this.d,x,x,x)},
 gcO(d){return this.a}}
 A.aYG.prototype={}
@@ -1457,7 +1457,7 @@ B.uj(b.typeUniverse,JSON.parse('{"Oy":1,"aTK":1}'))
 var y=(function rtii(){var x=B.D
 return{e:x("p8"),Y:x("iP<@>"),x:x("yN"),C:x("d9i"),L:x("qz"),I:x("ju"),m:x("jJ<O<J>>"),D:x("u<p8>"),M:x("u<iP<@>>"),_:x("u<qz>"),G:x("u<kF>"),p:x("u<e>"),A:x("aS<aed>"),v:x("b2"),w:x("hs"),P:x("aF"),o:x("Ab"),u:x("ri"),N:x("m"),T:x("cJ<x>"),q:x("cJ<~>"),J:x("aO<q>"),t:x("aO<S>"),U:x("es"),a:x("cm<f>"),l:x("e"),Q:x("em"),R:x("dM9"),y:x("x"),z:x("@"),S:x("f"),h:x("eY?"),X:x("G?"),H:x("~")}})();(function constants(){D.bSo=new A.b3l(0,"slide")
 D.ah8=new A.b3m(0,"circle")
-D.K_=new A.Zq(0,"spread")
+D.K0=new A.Zq(0,"spread")
 D.aiv=new A.Zq(1,"centered")
 D.aiw=new A.Zq(2,"linear")
 D.aiy=new A.b4j(0,"fixed")
@@ -1471,7 +1471,7 @@ D.ay7=new B.aB(58173,"MaterialIcons",null,!1)
 D.ayd=new B.aB(58312,"MaterialIcons",null,!1)
 D.ayh=new B.aB(58447,"MaterialIcons",null,!1)
 D.ayU=new B.aB(60981,"MaterialIcons",null,!1)
-D.O7=new B.aB(61703,"MaterialIcons",null,!1)
+D.O8=new B.aB(61703,"MaterialIcons",null,!1)
 D.az0=new B.aB(61870,"MaterialIcons",null,!1)
 D.az1=new B.aB(62005,"MaterialIcons",null,!1)
 D.bJy=new B.cs("Notifications will inform you about schedule changes and other selected news.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function staticFields(){$.cOl=!1
@@ -1480,4 +1480,4 @@ $.cIn=!1})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dM8","cNh",()=>B.n4(1,1.5,B.D("S")))
 x($,"dLZ","d4J",()=>new B.RB())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_320",e:"endPart",h:b})})($__dart_deferred_initializers__,"qHzZxSLSyS81Fll6A2fsu7PjgGQ=");
+a.eventLog.push({p:"main.dart.js_320",e:"endPart",h:b})})($__dart_deferred_initializers__,"vHsXr5DKZreeNUeW7ph7cDHbApU=");

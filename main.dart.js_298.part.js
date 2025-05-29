@@ -515,7 +515,7 @@ B.a7L.prototype={
 I(){return"ScanState."+this.b}}
 B.CF.prototype={
 M(){var x=$.a9()
-return new B.acr(D.abw,new A.cp(C.aw,x),new B.a0K(A.aT(y.e),x),E.cTr(F.Mi,A.a([C.nY],y.g)))},
+return new B.acr(D.abx,new A.cp(C.aw,x),new B.a0K(A.aT(y.e),x),E.cTr(F.Mj,A.a([C.nY],y.g)))},
 gbk(d){return this.c}}
 B.acr.prototype={
 T(){this.ah()
@@ -564,12 +564,12 @@ case 1:return A.j(v,w)}})
 return A.k($async$ln,w)},
 b7v(){this.A(new B.c1H(this,B.cQ8(this.x.a.a.toLowerCase())))},
 abH(){var x,w,v,u,t=this,s=null,r=t.r
-if(r==null)return A.bG(new A.a2(F.MF,N.bw(D.bJF,s),s),s,s)
+if(r==null)return A.bG(new A.a2(F.MG,N.bw(D.bJF,s),s),s,s)
 x=t.w
-if(x===D.abt)w=K.j1
-else{if(x!==D.abu)return C.a5
+if(x===D.abu)w=K.j1
+else{if(x!==D.abv)return C.a5
 w=U.Du}x=y.p
-r=A.a([A.at(A.a([A.P(r.jK(),s,s,s,s,s,s,s,F.adQ,s,s,s,s,s),H.q_,A.aW(w,C.p,s,s)],x),C.j,C.f,C.i,0,s)],x)
+r=A.a([A.at(A.a([A.P(r.jK(),s,s,s,s,s,s,s,F.adR,s,s,s,s,s),H.q_,A.aW(w,C.p,s,s)],x),C.j,C.f,C.i,0,s)],x)
 v=t.r
 if(v.CW==null){v=v.b
 v.toString
@@ -592,23 +592,23 @@ if(d===(t==null?null:t.a)){x=1
 break}t=u.e
 t=t==null?null:B.dho(t,new B.c1R(d))
 u.r=t
-if(t!=null){u.w=D.abt
+if(t!=null){u.w=D.abu
 u.A(new B.c1S())
 E.qK()
 x=1
 break}x=3
 return A.d(B.bcg(d),$async$wl)
 case 3:t=u.r=f
-if(t!=null){u.w=D.abu
+if(t!=null){u.w=D.abv
 E.qK()
 E.qK()
 u.A(new B.c1T())
 x=1
-break}u.w=D.abw
+break}u.w=D.abx
 case 1:return A.j(v,w)}})
 return A.k($async$wl,w)},
-a3r(d){switch(d.a){case 0:return X.a5P
-case 2:return F.a5Q
+a3r(d){switch(d.a){case 0:return X.a5Q
+case 2:return F.a5R
 case 1:break}return S.l4}}
 var z=a.updateTypes(["S(S)","~()","ade()"])
 B.beF.prototype={
@@ -779,9 +779,9 @@ x(B.add,A.n6)})()
 A.c5(b.typeUniverse,JSON.parse('{"a6X":{"Z":[],"bp":["Z"],"Y":[],"aN":[]},"atK":{"bB":[],"aM":[],"e":[]},"a0L":{"J":[],"e":[]},"a0K":{"ay":[]},"D0":{"n6":[]},"aNw":{"O":["a0L"]},"aNv":{"cM":[],"ay":[]},"Ne":{"iy":[],"ld":[],"ay":[]},"CF":{"J":[],"e":[]},"acr":{"O":["CF"]}}'))
 var y=(function rtii(){var x=A.D
 return{e:x("p8"),k:x("ab"),v:x("eQ"),g:x("u<jG>"),F:x("u<nm>"),t:x("u<dv>"),d:x("u<iy>"),s:x("u<m>"),Z:x("u<d7>"),p:x("u<e>"),n:x("u<S>"),X:x("u<f>"),o:x("q"),z:x("lD"),O:x("eK<S>"),f:x("bL<x>"),G:x("bL<S>"),l:x("e"),J:x("Ne"),A:x("dsb"),W:x("es?"),H:x("~")}})();(function constants(){D.azs=new A.d2(K.j1,null,C.p,null,null)
-D.abt=new B.a7L(0,"signedIn")
-D.abu=new B.a7L(1,"notSignedIn")
-D.abw=new B.a7L(2,"nothing")
+D.abu=new B.a7L(0,"signedIn")
+D.abv=new B.a7L(1,"notSignedIn")
+D.abx=new B.a7L(2,"nothing")
 D.bJF=new A.cs("Point the camera at the attendee's code for a entry verification.",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_298",e:"endPart",h:b})})($__dart_deferred_initializers__,"g+zGnsJ65/lvPa/PO5ZjJ01sTXs=");
+a.eventLog.push({p:"main.dart.js_298",e:"endPart",h:b})})($__dart_deferred_initializers__,"rqITNLvxRMcH102hvWoU+ksh6sI=");

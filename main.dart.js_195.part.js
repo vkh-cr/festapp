@@ -70,7 +70,7 @@ x=A.ar(u,u,B.k,u,u,new A.b4(u,A.cQ_(B.N,B.lM,new S.Ht("assets/icons/fstappicon.p
 w=y.g
 w=A.r("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.z(["title","Festapp"],w,w))
 v=y.e
-return Q.fa(t,u,new A.cq(B.aX,u,u,new A.a2(K.MN,new A.cE(new A.ab(0,720,0,1/0),A.ah(A.a([A.bG(A.at(A.a([x,D.bCD,A.bh(E.bw(A.P(w,u,u,u,u,u,u,u,A.al(u,u,A.C(d).ax.a===B.t?$.ds():B.p,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.j,B.bl,B.i,0,u),u,u),L.ad4,this.bBx(d,A.r("Install for Apple",u),D.azg,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bBy(d,A.r("Install for Android",u),D.axI,"",1,A.r("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bBw(d,A.r("Install for PC/Mac",u),D.axT,"",2)],v),B.j,B.f,B.i,0,u,B.m),u),u),u),u,u,u,u,u)},
+return Q.fa(t,u,new A.cq(B.aX,u,u,new A.a2(K.MO,new A.cE(new A.ab(0,720,0,1/0),A.ah(A.a([A.bG(A.at(A.a([x,D.bCD,A.bh(E.bw(A.P(w,u,u,u,u,u,u,u,A.al(u,u,A.C(d).ax.a===B.t?$.ds():B.p,u,u,u,u,u,u,u,u,16,u,u,u,u,u,!0,u,u,u,u,u,u,u,u),u,u,u,u,u),u),1,u)],v),B.j,B.bl,B.i,0,u),u,u),L.ad5,this.bBx(d,A.r("Install for Apple",u),D.azg,"https://apps.apple.com/us/app/festapp/id6474078383",0,!0),this.bBy(d,A.r("Install for Android",u),D.axI,"",1,A.r("Open this website on your Android phone in a browser like Chrome or Edge and hit the Install Now button.",u)),this.bBw(d,A.r("Install for PC/Mac",u),D.axT,"",2)],v),B.j,B.f,B.i,0,u,B.m),u),u),u),u,u,u,u,u)},
 abC(d,e,f,g,h,i,j){var x,w,v,u,t,s,r=this,q=null,p=r.x[h],o=r.r,n=!0
 if(!(o==="ios"&&h===0))if(!(o==="android"&&h===1))o=o==="web"&&h===2
 else o=n
@@ -143,8 +143,8 @@ var y={j:A.D("u<zu>"),e:A.D("u<e>"),g:A.D("m"),f:A.D("~")};(function constants()
 D.axT=new A.aB(57795,"MaterialIcons",null,!1)
 D.azg=new A.aB(984254,"MaterialIcons",null,!1)
 D.bCD=new A.ao(22,null,null,null)
-D.bJq=new A.cs("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,O.adT,null,B.b0,null,null,null,null,null,null,null,null,null,null)
+D.bJq=new A.cs("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,O.adU,null,B.b0,null,null,null,null,null,null,null,null,null,null)
 D.bJr=new A.cs("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
 x($,"dIp","cMP",()=>new A.RB())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_195",e:"endPart",h:b})})($__dart_deferred_initializers__,"1XErmLuq2w5nsCsoTwa3mK5bPVg=");
+a.eventLog.push({p:"main.dart.js_195",e:"endPart",h:b})})($__dart_deferred_initializers__,"dAyYOgu8BSH4Kf7kF/L/LEarjDo=");

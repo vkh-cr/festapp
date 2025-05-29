@@ -48,7 +48,7 @@ Jx:function Jx(d,e){this.a=d
 this.$ti=e},
 WD:function WD(){},
 cP2(d,e,f){var w=null
-return new A.HB(B.cGk(d,w,w,w,w,36,w,w,C.Ke,w,88,f,w,w,C.Bi),e,w)},
+return new A.HB(B.cGk(d,w,w,w,w,36,w,w,C.Kf,w,88,f,w,w,C.Bi),e,w)},
 HB:function HB(d,e,f){this.w=d
 this.b=e
 this.a=f},
@@ -538,7 +538,7 @@ cQz(d,e,f,g,h,i,j,k,l,m,n){var w=null
 return new B.D2(i,m,w,w,j,w,k,8,l,g,w,w,24,!0,!1,48,f,w,!1,e,w,w,w,d,w,w,!1,w,n.i("D2<0>"))},
 ZB(d,e){var w=null,v=B.bF(8)
 return new B.a2(C.au,new A.S5(d,C.ay,B.P(e,w,w,w,w,w,w,w,B.al(w,w,C.fJ,w,w,w,w,w,w,w,w,w,w,w,w,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),new B.d5(v,C.y),w),w)},
-cVQ(d){var w=C.a2l.h(0,(d==null?C.a9:d).a)
+cVQ(d){var w=C.a2m.h(0,(d==null?C.a9:d).a)
 w.toString
 return B.dr(w,"w","")},
 dn9(d){var w=B.dn(d,0,null)
@@ -557,7 +557,7 @@ return"https://player.vimeo.com/video/"+v}},D,A0,P,G,A1,F,E,A2,A3
 J=c[1]
 B=c[0]
 C=c[2]
-Q=c[327]
+Q=c[328]
 R=c[286]
 K=c[199]
 S=c[221]
@@ -569,20 +569,20 @@ N=c[282]
 V=c[202]
 H=c[319]
 I=c[117]
-W=c[328]
+W=c[329]
 X=c[139]
 O=c[172]
 Y=c[200]
 Z=c[320]
 A_=c[180]
 A=a.updateHolder(c[45],A)
-D=c[325]
-A0=c[329]
+D=c[326]
+A0=c[330]
 P=c[171]
 G=c[142]
 A1=c[127]
 F=c[162]
-E=c[326]
+E=c[327]
 A2=c[165]
 A3=c[148]
 A.px.prototype={
@@ -702,7 +702,7 @@ u===$&&B.b()
 t=B.dw([new A.uM("EditorResizeCallback",new A.bCt(q)),new A.uM("UpdateFormat",new A.bCu(q)),new A.uM("OnTextChanged",new A.bCv(q)),new A.uM("FocusChanged",new A.bCw(q,d)),new A.uM("OnEditingCompleted",new A.bCx(q)),new A.uM("OnSelectionChanged",new A.bCy(q)),new A.uM("EditorLoaded",new A.bCz(q))],x.C)
 s=q.as
 r=q.a.db.$1(d)
-return new B.cj(C.ad,null,C.ab,C.v,B.a([new A.abr(v,D.adb,e,u,new A.bCA(q),t,!1,new A.bCB(q),new A.bCC(q),D.am8,new B.cm(w,x.X)),B.jm(r,!s)],x.p),null)},
+return new B.cj(C.ad,null,C.ab,C.v,B.a([new A.abr(v,D.adc,e,u,new A.bCA(q),t,!1,new A.bCB(q),new A.bCC(q),D.am8,new B.cm(w,x.X)),B.jm(r,!s)],x.p),null)},
 Vy(){var w=0,v=B.l(x.N),u,t=this,s
 var $async$Vy=B.h(function(d,e){if(d===1)return B.i(e,v)
 while(true)switch(w){case 0:s=t.d
@@ -1290,7 +1290,7 @@ A.Mh.prototype={
 B(d){var w=this,v=null,u=w.c
 return B.hJ(B.iJ(!1,v,!0,new B.a2(w.f,new B.ao(v,v,w.b94(u),v),v),v,!0,v,v,v,v,v,v,v,v,v,v,v,w.e,v,v,v,v,v,v,v),v,v,v,u.c,v,v,v,v,v,v,E.ff)},
 b94(d){var w=this
-switch(d.a){case 0:return w.lR(D.O4)
+switch(d.a){case 0:return w.lR(D.O5)
 case 1:return w.lR(D.ayJ)
 case 2:return w.lR(D.ayQ)
 case 3:return w.lR(D.ayN)
@@ -1300,7 +1300,7 @@ case 7:return w.lR(D.ayI)
 case 6:return w.lR(D.ayH)
 case 8:return w.lR(D.ayP)
 case 9:return w.lR(D.ayO)
-case 12:return w.lR(D.O4)
+case 12:return w.lR(D.O5)
 case 14:return w.lR(D.ayF)
 case 21:return w.lR(D.ayG)
 case 15:return w.lR(D.ayL)
@@ -1308,7 +1308,7 @@ case 16:return w.lR(D.ayK)
 case 10:return w.aqq("packages/quill_html_editor/assets/h1_dark.png")
 case 11:return w.aqq("packages/quill_html_editor/assets/h2_dark.png")
 case 13:return w.lR(D.ayE)
-case 19:return w.lR(Z.NR)
+case 19:return w.lR(Z.NS)
 case 22:return w.lR(D.ayT)
 case 23:return w.lR(D.ayS)
 case 24:return w.lR(D.ayR)
@@ -1375,7 +1375,7 @@ A.t5.prototype={
 I(){return"EditTableEnum."+this.b}}
 A.a12.prototype={
 M(){var w=null,v=x.M
-return new A.a13(D.MW,new B.ty(B.a([],v),w,w),new B.ty(B.a([],v),w,w))}}
+return new A.a13(D.MX,new B.ty(B.a([],v),w,w),new B.ty(B.a([],v),w,w))}}
 A.a13.prototype={
 ZM(){},
 l(){$.au.m4(this)
@@ -1403,7 +1403,7 @@ MK(){var w,v,u=this.c
 if(u!=null){w=x.r.a(u.gan())
 v=B.dj(w.co(0,null),C.n)
 return new A.hA(w.gD(0).a,w.gD(0).b,v.a,v.b)}this.xC()
-return D.MW},
+return D.MX},
 a9y(d){return this.btS(d)},
 btS(d){var w=0,v=B.l(x.H),u=this,t,s,r,q,p
 var $async$a9y=B.h(function(e,f){if(e===1)return B.i(f,v)
@@ -1418,7 +1418,7 @@ r=x.w
 s=B.aA(s,null,r).w
 q=u.c
 q.toString
-r=B.pH(new A.bfU(u,new A.aAR(D.aw5,t,p,new A.hA(s.a.a,B.aA(q,null,r).w.a.b,0,0),u.a.f,8).bMz(0,D.MV)),!1,!1)
+r=B.pH(new A.bfU(u,new A.aAR(D.aw5,t,p,new A.hA(s.a.a,B.aA(q,null,r).w.a.b,0,0),u.a.f,8).bMz(0,D.MW)),!1,!1)
 u.f=r
 p=u.y
 p.jj(0,r)
@@ -1570,7 +1570,7 @@ t=q.c
 s=t.a
 t=t.b
 r=q.f
-return new A.nW(new A.hA(s,t,v-s*0.5,w-t-u-p),new A.hA(o,p,Math.floor(v-o*0.5),Math.floor(w-u-p)),D.MV,B.Cx(new B.bf(r,r)))},
+return new A.nW(new A.hA(s,t,v-s*0.5,w-t-u-p),new A.hA(o,p,Math.floor(v-o*0.5),Math.floor(w-u-p)),D.MW,B.Cx(new B.bf(r,r)))},
 av_(){var w,v,u,t,s,r,q=this,p=q.a,o=p.a
 p=p.b
 w=q.b
@@ -1876,7 +1876,7 @@ r.w=t
 w=r.a
 v=w.d
 u=!0
-if(v!==D.adb)if(v!==D.add)w=v===D.adc&&w.c==="about:blank"
+if(v!==D.adc)if(v!==D.ade)w=v===D.add&&w.c==="about:blank"
 else w=u
 else w=u
 if(w)r.b3f(r.gb1R())
@@ -1963,7 +1963,7 @@ v=u.e
 v===$&&B.b()
 w.srcdoc=A.cHH("<br>",!0,D.Hb,v)
 break}if(!C.d.be(t,B.bz("http[s]?://",!1,!1,!1))){u.a.toString
-return}if(w===D.adc){w=u.d
+return}if(w===D.add){w=u.d
 w===$&&B.b()
 w=B.dv5(w.contentWindow)
 w.toString
@@ -2409,10 +2409,10 @@ B.bO(this.b,!1).dM()},
 $S:449}
 A.b6C.prototype={
 $2(d,e){var w=null
-return new A.q5(B.cG(w,new B.a2(C.hk,B.ar(w,w,C.k,w,w,new B.b4(A.bmM(D.Rt[e]),w,B.fG(C.p,C.B,0.3),w,w,w,w,C.L),w,40,w,w,w,w,w,40),w),C.r,!1,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,new A.b6B(this.a,e),w,w,w,w,w,w,w,w,!1,C.aa),w)},
+return new A.q5(B.cG(w,new B.a2(C.hk,B.ar(w,w,C.k,w,w,new B.b4(A.bmM(D.Ru[e]),w,B.fG(C.p,C.B,0.3),w,w,w,w,C.L),w,40,w,w,w,w,w,40),w),C.r,!1,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,w,new A.b6B(this.a,e),w,w,w,w,w,w,w,w,!1,C.aa),w)},
 $S:z+12}
 A.b6B.prototype={
-$0(){this.a.c.$1(D.Rt[this.b])},
+$0(){this.a.c.$1(D.Ru[this.b])},
 $S:0}
 A.c6h.prototype={
 $0(){var w,v=this.b
@@ -2529,7 +2529,7 @@ if(s!=null){w=t.a.e
 v=s.a
 if(v==null)v=0
 s=s.b
-w.TD(0,v,s==null?0:s)}B.hq(W.Mp,null,x.z).aH(new A.cdF(t,u.d,u.e),x.P)}else{t.e=null
+w.TD(0,v,s==null?0:s)}B.hq(W.Mq,null,x.z).aH(new A.cdF(t,u.d,u.e),x.P)}else{t.e=null
 t.A(new A.cdG())}},
 $S:0}
 A.cdF.prototype={
@@ -2567,7 +2567,7 @@ $2(d,e){return d-e},
 $S:248}
 A.cu8.prototype={
 $2(d,e){var w=null,v=this.a.d,u=v.p(0,e)?H.C0:C.C,t=v.p(0,e)?2:1
-return new A.VS(e,B.ar(w,w,C.k,w,w,new B.b4(u,w,B.fG(v.p(0,e)?H.LL:C.lX,C.B,t),w,w,w,w,C.L),w,w,w,M.m8,w,w,w,w),w)},
+return new A.VS(e,B.ar(w,w,C.k,w,w,new B.b4(u,w,B.fG(v.p(0,e)?H.LM:C.lX,C.B,t),w,w,w,w,C.L),w,w,w,M.m8,w,w,w,w),w)},
 $S:z+15}
 A.cu5.prototype={
 $0(){this.a.d.W(0)},
@@ -2639,7 +2639,7 @@ w===$&&B.b()
 r.srcdoc=A.cHH(s,!0,D.Hb,w)
 w=u.w
 w===$&&B.b()
-w.c.bzy(new A.MX(t,D.add,v.c,v.d))
+w.c.bzy(new A.MX(t,D.ade,v.c,v.d))
 u.a.toString},
 $S:78}
 A.cA3.prototype={
@@ -2711,7 +2711,7 @@ D.amK=new B.z3(C.A0,0.4,null,null,null,null,null,null,null)
 D.amD=new B.kS(C.N,null,null,D.amK,null)
 D.ave=new B.am(10,10,0,0)
 D.avV=new A.pj(0,"topStart")
-D.MV=new A.pj(1,"topCenter")
+D.MW=new A.pj(1,"topCenter")
 D.avW=new A.pj(10,"leftCenter")
 D.avX=new A.pj(11,"leftEnd")
 D.avY=new A.pj(2,"topEnd")
@@ -2722,7 +2722,7 @@ D.aw1=new A.pj(6,"bottomStart")
 D.aw2=new A.pj(7,"bottomCenter")
 D.aw3=new A.pj(8,"bottomEnd")
 D.aw4=new A.pj(9,"leftStart")
-D.MW=new A.hA(0,0,0,0)
+D.MX=new A.hA(0,0,0,0)
 D.aw5=new A.hA(16,10,0,0)
 D.aw9=new A.a19(1,"aboveBodyCloseTag")
 D.awa=new A.a19(2,"belowHeadOpenTag")
@@ -2737,7 +2737,7 @@ D.ay2=new B.aB(58030,"MaterialIcons",null,!1)
 D.ay9=new B.aB(58240,"MaterialIcons",null,!1)
 D.ayE=new B.aB(59812,"MaterialIcons",null,!1)
 D.ayF=new B.aB(59816,"MaterialIcons",null,!1)
-D.O4=new B.aB(59818,"MaterialIcons",null,!1)
+D.O5=new B.aB(59818,"MaterialIcons",null,!1)
 D.ayG=new B.aB(59819,"MaterialIcons",null,!1)
 D.ayH=new B.aB(59823,"MaterialIcons",null,!0)
 D.ayI=new B.aB(59824,"MaterialIcons",null,!0)
@@ -2758,9 +2758,9 @@ D.az9=new B.aB(63030,"MaterialIcons",null,!1)
 D.azT=new B.d2(D.az9,null,C.e7,null,null)
 D.bSZ=new A.bq8(0,"newline")
 D.bGN=new B.a5(!0,null,null,null,null,null,10,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
-D.aAx=new B.pv(null,null,null,null,null,null,null,null,null,null," Type URL",null,D.bGN,null,null,null,!0,!0,null,null,null,null,null,null,null,C.MP,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,C.dB,null,null,null,null,C.dB,!0,null,!0,null)
+D.aAx=new B.pv(null,null,null,null,null,null,null,null,null,null," Type URL",null,D.bGN,null,null,null,!0,!0,null,null,null,null,null,null,null,C.MQ,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,C.dB,null,null,null,null,C.dB,!0,null,!0,null)
 D.bT1=new A.bqF(1,"unrestricted")
-D.Rt=B.a(w(["#000000","#FFFFFF","#F44336","#E91E63","#9C27B0","#673AB7","#3F51B5","#2196F3","#03A9F4","#00BCD4","#009688","#4CAF50","#8BC34A","#CDDC39","#FFEB3B","#FFC107","#FF9800","#FF5722","#795548"]),x.s)
+D.Ru=B.a(w(["#000000","#FFFFFF","#F44336","#E91E63","#9C27B0","#673AB7","#3F51B5","#2196F3","#03A9F4","#00BCD4","#009688","#4CAF50","#8BC34A","#CDDC39","#FFEB3B","#FFC107","#FF9800","#FF5722","#795548"]),x.s)
 D.avO=new A.t5(0,"insertRowAbove")
 D.avP=new A.t5(1,"insertRowBelow")
 D.avQ=new A.t5(2,"insertColumnLeft")
@@ -2774,13 +2774,13 @@ D.bwa=new B.a2(S.iZ,D.bJf,null)
 D.awp=new B.oj(1,C.fP,D.bwa,null)
 D.aKt=B.a(w([D.awp,A0.amO]),x.p)
 D.bzx=new B.kG(C.a7,C.f,C.i,C.j,null,C.m,null,C.k,0,D.aKt,null)
-D.Hb=new B.hn(C.db,0,B.D("hn<dHM>"))
+D.Hb=new B.hn(C.da,0,B.D("hn<dHM>"))
 D.bCy=new B.ao(0,null,null,null)
 D.bCC=new B.ao(15,null,null,null)
 D.bCS=new I.tR(4,0,0,1)
-D.adb=new A.a8Y(0,"html")
-D.adc=new A.a8Y(1,"url")
-D.add=new A.a8Y(2,"urlBypass")
+D.adc=new A.a8Y(0,"html")
+D.add=new A.a8Y(1,"url")
+D.ade=new A.a8Y(2,"urlBypass")
 D.bHa=new B.a5(!0,null,null,'"PT Sans", Calibri, Tahoma, sans-serif',null,null,16,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bIj=new B.a5(!0,C.cR,null,null,null,null,18,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bKE=new A.jQ("Add a table",25,"addTable")
@@ -2810,4 +2810,4 @@ w($,"dMj","cNi",()=>B.d0r("_$dart_dartObject"))
 w($,"dNq","cNq",()=>function DartObject(d){this.o=d})
 v($,"dOS","d6B",()=>B.cJ3(null))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_303",e:"endPart",h:b})})($__dart_deferred_initializers__,"iwFFYjNPU56CiaalQRpr2cQQ+BE=");
+a.eventLog.push({p:"main.dart.js_303",e:"endPart",h:b})})($__dart_deferred_initializers__,"Aq4ct6u99CjKEAE6rfuOlcme0w4=");

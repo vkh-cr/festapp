@@ -210,7 +210,7 @@ return A.j(null,w)}})
 return A.k($async$aZ,w)},
 B(d){var x,w,v=null,u=A.C(d).ax.a===C.t?$.ig():$.p1(),t=A.bD(C.as)
 t=A0.iE(v,v,v,!0,v,v,1,v,v,v,!1,v,!1,v,v,new Y.KK(v,v),v,!0,v,v,v,v,v,E.bw(A.P("News",v,v,v,v,v,v,v,A.al(v,v,new A.br(t.a,t.b,t.c,0.8).bp(),v,v,v,v,v,v,v,v,v,v,v,v,v,v,!0,v,v,v,v,v,v,v,v),v,v,v,v,v),v),v,v,v,1,v,!0)
-x=J.eM(this.d)?new A.a2(O.MN,A.ah(A.a([A.aW(D.ayV,A.C(d).ay,v,64),C.a2,A.P(A.Yk("No news messages yet",v,v,v,v),v,v,v,v,v,v,v,v,C.b0,v,v,v,v)],y.p),C.j,C.bl,C.i,0,v,C.m),v):new A2.EI(new B.chX(this),v)
+x=J.eM(this.d)?new A.a2(O.MO,A.ah(A.a([A.aW(D.ayV,A.C(d).ay,v,64),C.a2,A.P(A.Yk("No news messages yet",v,v,v,v),v,v,v,v,v,v,v,v,C.b0,v,v,v,v)],y.p),C.j,C.bl,C.i,0,v,C.m),v):new A2.EI(new B.chX(this),v)
 w=A.j_()
 return Z.fa(t,u,new A.cq(C.aX,v,v,new A.cE(new A.ab(0,720,0,1/0),x,v),v),v,v,A.jm(U.a1F(S.hn,V.qO,new B.chY(this,d),v),w),v,v)}}
 B.wR.prototype={
@@ -306,7 +306,7 @@ aMz(d){var x=0,w=A.l(y.H),v=this,u,t,s
 var $async$$1=A.h(function(e,f){if(e===1)return A.i(f,w)
 while(true)switch(x){case 0:t=v.b
 s=v.c
-x=d===D.LZ?2:4
+x=d===D.M_?2:4
 break
 case 2:x=5
 return A.d(B.I3(t),$async$$1)
@@ -336,7 +336,7 @@ return A.k($async$$1,w)},
 $S:111}
 B.chU.prototype={
 $1(d){var x=y.B
-return A.a([F.nK(E.bw(W.Ii,null),!0,48,D.asI,x),F.nK(E.bw(D.bIX,null),!0,48,D.LZ,x)],y.h)},
+return A.a([F.nK(E.bw(W.Ii,null),!0,48,D.asI,x),F.nK(E.bw(D.bIX,null),!0,48,D.M_,x)],y.h)},
 $S:z+1}
 B.chY.prototype={
 $0(){return this.a.btQ(this.b)},
@@ -350,12 +350,12 @@ x(B.chX,A.eg)
 x(B.wR,A.eT)})()
 A.c5(b.typeUniverse,JSON.parse('{"Eo":{"J":[],"e":[]},"aQH":{"O":["Eo"]}}'))
 var y=(function rtii(){var x=A.D
-return{B:x("wR"),_:x("X<@>"),t:x("u<A<m,@>>"),o:x("u<vn>"),h:x("u<mQ<wR>>"),p:x("u<e>"),a:x("A<m,@>"),x:x("vn"),P:x("aF"),K:x("G"),N:x("m"),g:x("ki"),z:x("@"),X:x("G?"),H:x("~")}})();(function constants(){D.LZ=new B.wR(0,"delete")
+return{B:x("wR"),_:x("X<@>"),t:x("u<A<m,@>>"),o:x("u<vn>"),h:x("u<mQ<wR>>"),p:x("u<e>"),a:x("A<m,@>"),x:x("vn"),P:x("aF"),K:x("G"),N:x("m"),g:x("ki"),z:x("@"),X:x("G?"),H:x("~")}})();(function constants(){D.M_=new B.wR(0,"delete")
 D.asI=new B.wR(1,"edit")
 D.avr=new A.am(16,8,16,0)
 D.ays=new A.aB(58652,"MaterialIcons",null,!1)
 D.ayV=new A.aB(61075,"MaterialIcons",null,!1)
-D.azx=new A.d2(T.NW,null,null,null,null)
+D.azx=new A.d2(T.NX,null,null,null,null)
 D.bIX=new A.cs("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_332",e:"endPart",h:b})})($__dart_deferred_initializers__,"A6YlZnGpd6m06jjdGTugf4PGCn0=");
+a.eventLog.push({p:"main.dart.js_332",e:"endPart",h:b})})($__dart_deferred_initializers__,"Fq0tSDGZsx/PeQ3wq1s6pw+po7k=");

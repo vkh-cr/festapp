@@ -5,10 +5,10 @@ $__dart_deferred_initializers__.current=function(a,b,c,$){var B,A={auV:function 
 this.b=e}},C
 B=c[0]
 A=a.updateHolder(c[152],A)
-C=c[350]
+C=c[351]
 A.auV.prototype={
 I(){return"IconAlignment."+this.b}}
 var z=a.updateTypes([]);(function inheritance(){var y=a.inherit
-y(A.auV,B.eT)})();(function constants(){C.NF=new A.auV(0,"start")})()};
+y(A.auV,B.eT)})();(function constants(){C.NG=new A.auV(0,"start")})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_77",e:"endPart",h:b})})($__dart_deferred_initializers__,"xO1gljm8PpagauZM1XAB8itTIAE=");
+a.eventLog.push({p:"main.dart.js_77",e:"endPart",h:b})})($__dart_deferred_initializers__,"Aj5873TiTjHtXWD9QwJJ6hGWz9w=");

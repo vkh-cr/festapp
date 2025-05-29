@@ -220,11 +220,11 @@ x(B.ahf,A.O)
 w(A.c8,[B.crw,B.crt,B.cru])
 w(A.cL,[B.crx,B.crv,B.crp,B.crr,B.crs,B.crq])})()
 A.c5(b.typeUniverse,JSON.parse('{"Fr":{"J":[],"e":[]},"ahf":{"O":["Fr"]}}'))
-var y={u:A.D("u<e>"),l:A.D("u<x>"),w:A.D("m"),q:A.D("ki"),e:A.D("x"),v:A.D("~")};(function constants(){D.azF=new A.d2(P.O3,null,null,null,null)
+var y={u:A.D("u<e>"),l:A.D("u<x>"),w:A.D("m"),q:A.D("ki"),e:A.D("x"),v:A.D("~")};(function constants(){D.azF=new A.d2(P.O4,null,null,null,null)
 D.bIP=new A.cs("Dark",null,null,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bIZ=new A.cs("Enable Notifications",null,I.zG,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJ1=new A.cs("Appearance",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJE=new A.cs("Language Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJI=new A.cs("Notification Settings",null,G.nE,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_187",e:"endPart",h:b})})($__dart_deferred_initializers__,"JjvvmITZxuj7/51aG8x6kwZIgLg=");
+a.eventLog.push({p:"main.dart.js_187",e:"endPart",h:b})})($__dart_deferred_initializers__,"QAyW+8iHP6+eAV0NNM11dy/uuXA=");
