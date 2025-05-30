@@ -11,6 +11,7 @@ class TextFieldBuilder extends StatelessWidget {
   final bool isEmail;
   final bool isPhone;
   final bool isAddress;
+  final bool isNationality;
 
   const TextFieldBuilder({
     super.key,
@@ -19,6 +20,7 @@ class TextFieldBuilder extends StatelessWidget {
     this.isEmail = false,
     this.isPhone = false,
     this.isAddress = false,
+    this.isNationality = false,
   });
 
   @override
@@ -38,7 +40,7 @@ class TextFieldBuilder extends StatelessWidget {
 
     // Add phone number validator if required.
     if (isPhone) {
-      validators.add(FormBuilderValidators.phoneNumber(regex: RegExp(r'^\+?[1-9]\d{9,12}$')));
+      validators.add(FormBuilderValidators.phoneNumber(regex: RegExp(r'^\+?[1-9]\d{9,12}$'), checkNullOrEmpty: false));
     }
 
     return FormBuilderTextField(
