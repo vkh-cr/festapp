@@ -9,7 +9,6 @@ import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/form_helper.dart';
 import 'package:fstapp/theme_config.dart';
 import 'package:fstapp/widgets/buttons_helper.dart';
-// Import for AutofillHints if not already covered by material.dart
 import 'package:flutter/services.dart';
 
 
@@ -252,6 +251,14 @@ class FormFieldBuilders {
         AutofillHints.countryName,
       ],
       isAddress: true,
+    );
+  }
+
+  static Widget buildNationalityField(BuildContext context, FieldHolder fieldHolder) {
+    return TextFieldBuilder(
+      fieldHolder: fieldHolder,
+      autofillHints: [AutofillHints.countryName],
+      isNationality: true,
     );
   }
 
