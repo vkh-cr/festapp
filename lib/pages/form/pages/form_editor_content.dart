@@ -43,10 +43,13 @@ class _FormEditorContentState extends State<FormEditorContent> {
 
   Future<void> loadData() async {
     form = await DbForms.getFormForEdit(formLink!);
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> saveChanges() async {
+    if (form == null || form!.relatedFields == null) return;
     // Update order for form fields
     form!.relatedFields!
         .sort((a, b) => (a.order ?? 0).compareTo(b.order ?? 0));
@@ -77,11 +80,9 @@ class _FormEditorContentState extends State<FormEditorContent> {
     Navigator.of(context).pop();
   }
 
-  /// Filter available field types for brand-new fields
   List<String> get _availableFieldTypes {
     final existingTypes = form?.relatedFields?.map((f) => f.type).toList() ?? [];
     return FormHelper.fieldTypeIcons.keys.where((type) {
-      // These types can appear multiple times
       if ([
         FormHelper.fieldTypeText,
         FormHelper.fieldTypeSelectOne,
@@ -89,18 +90,17 @@ class _FormEditorContentState extends State<FormEditorContent> {
       ].contains(type)) {
         return true;
       }
-      // Single-occurrence types cannot appear if they already do
       return !existingTypes.contains(type);
     }).toList();
   }
 
   Widget _buildFormOpenToggleAndOffTextEditor() {
+    if (form == null) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Center the switch + text
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -109,15 +109,16 @@ class _FormEditorContentState extends State<FormEditorContent> {
                 value: form!.isOpen ?? true,
                 onChanged: RightsService.canEditOccasion()
                     ? (value) {
-                  setState(() {
-                    form!.isOpen = value;
-                  });
+                  if (mounted) {
+                    setState(() {
+                      form!.isOpen = value;
+                    });
+                  }
                 }
                     : null,
               ),
             ],
           ),
-          // If form is off => show the red text + footer editor
           if (!(form!.isOpen ?? true)) ...[
             const SizedBox(height: 12),
             Text(
@@ -152,7 +153,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                         content: {HtmlEditorPage.parContent: form!.headerOff ?? ''},
                         occasionId: form!.occasion),
                   );
-                  if (result != null) {
+                  if (result != null && mounted) {
                     setState(() => form!.headerOff = result as String);
                   }
                 },
@@ -164,50 +165,127 @@ class _FormEditorContentState extends State<FormEditorContent> {
     );
   }
 
-  /// Adds a new field of a selected type.
   void _addNewField() async {
-    final selectedType = await showDialog<String>(
-      context: context,
-      builder: (context) => SimpleDialog(
-        title: Text("Add Field".tr()),
-        children: _availableFieldTypes.map((type) {
-          return SimpleDialogOption(
-            onPressed: () => Navigator.pop(context, type),
-            child: Row(
-              children: [
-                Icon(FormHelper.fieldTypeIcons[type]),
-                const SizedBox(width: 12),
-                Text(FormHelper.fieldTypeToLocale(type)),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    if (form == null) return;
 
-    if (selectedType != null) {
-      setState(() {
-        form!.relatedFields!.add(
-          FormFieldModel(
-            title: FormHelper.fieldTypeToLocale(selectedType),
-            type: selectedType,
-            order: form!.relatedFields!.length,
-            isRequired: false,
-            isHidden: false,
-            isTicketField: false,
-          ),
-        );
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+    final availableTypes = _availableFieldTypes;
+    final personalInfoTypes = FormHelper.personalInfoFields
+        .where((type) => availableTypes.contains(type))
+        .toList();
+    final otherTypes = availableTypes
+        .where((type) => !FormHelper.personalInfoFields.contains(type))
+        .toList();
+
+    String? finalSelectedType;
+    bool isWideScreen = MediaQuery.of(context).size.width > 600;
+
+    finalSelectedType = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        List<Widget> resolvedItemsForDialog = [];
+        if (personalInfoTypes.isNotEmpty) {
+          resolvedItemsForDialog.add(
+              PopupMenuButton<String>(
+                tooltip: "Personal Info".tr(),
+                offset: isWideScreen ? const Offset(230, 0) : Offset.zero, // Modified Offset
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+                onSelected: (String type) {
+                  Navigator.of(dialogContext).pop(type);
+                },
+                itemBuilder: (BuildContext popupContext) {
+                  return personalInfoTypes.map((type) {
+                    return PopupMenuItem<String>(
+                      value: type,
+                      child: Row(
+                        children: [
+                          Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          const SizedBox(width: 12),
+                          Text(FormHelper.fieldTypeToLocale(type)),
+                        ],
+                      ),
+                    );
+                  }).toList();
+                },
+                child: ListTile(
+                  leading: Icon(Icons.person_search_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  title: Text("Personal Info".tr()),
+                  trailing: Icon(Icons.chevron_right, color: Theme.of(context).textTheme.bodyLarge?.color),
+                  dense: true,
+                ),
+              )
+          );
+          resolvedItemsForDialog.add(const Divider(height: 1, thickness: 0.5));
+        }
+
+        resolvedItemsForDialog.addAll(otherTypes.map((type) {
+          return ListTile(
+            leading: Icon(FormHelper.fieldTypeIcons[type] ?? Icons.circle_outlined, size: 20, color: Theme.of(context).textTheme.bodyLarge?.color),
+            title: Text(FormHelper.fieldTypeToLocale(type)),
+            dense: true,
+            onTap: () {
+              Navigator.of(dialogContext).pop(type);
+            },
+          );
+        }).toList());
+
+        if (resolvedItemsForDialog.isEmpty) {
+          resolvedItemsForDialog.add(
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text("No fields available to add.".tr()),
+                ),
+              )
           );
         }
-      });
+
+
+        return AlertDialog(
+          title: Text("Add Field".tr()),
+          contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          content: SizedBox(
+            width: 280, // You might want to make this responsive or remove fixed width
+            child: ListView(
+              shrinkWrap: true,
+              children: resolvedItemsForDialog,
+            ),
+          ),
+        );
+      },
+    );
+
+
+    if (finalSelectedType != null) {
+      _addFieldOfType(finalSelectedType);
     }
+  }
+
+  void _addFieldOfType(String type) {
+    if (!mounted || form == null || form!.relatedFields == null) return;
+
+    final newField = FormFieldModel(
+      type: type,
+      order: form!.relatedFields!.length,
+      isRequired: FormHelper.isAlwaysRequired(type),
+      isHidden: false,
+      isTicketField: false,
+    );
+
+    setState(() {
+      // Create a new list instance to ensure Flutter detects the change.
+      form!.relatedFields = List.from(form!.relatedFields!)..add(newField);
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
@@ -218,6 +296,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
+            heroTag: "viewFormFab",
             onPressed: () {
               RouterService.navigate(context, "${FormPage.ROUTE}/$formLink");
             },
@@ -226,6 +305,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
           const SizedBox.square(dimension: 12),
           if (RightsService.canEditOccasion())
             FloatingActionButton(
+              heroTag: "addFieldFab",
               onPressed: _addNewField,
               tooltip: 'Add Field'.tr(),
               child: const Icon(Icons.add),
@@ -253,7 +333,8 @@ class _FormEditorContentState extends State<FormEditorContent> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HtmlView(html: form!.header ?? "", isSelectable: true),
+                      if (form!.header?.isNotEmpty ?? false)
+                        HtmlView(html: form!.header!, isSelectable: true),
                       const SizedBox(height: 16),
                       Center(
                         child: ElevatedButton.icon(
@@ -266,7 +347,7 @@ class _FormEditorContentState extends State<FormEditorContent> {
                                   content: {HtmlEditorPage.parContent: form!.header ?? ""},
                                   occasionId: form!.occasion),
                             );
-                            if (result != null) {
+                            if (result != null && mounted) {
                               setState(() => form!.header = result as String);
                             }
                           },

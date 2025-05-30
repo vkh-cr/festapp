@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:intl/intl.dart';
 
 import 'feature.dart';
@@ -9,8 +10,10 @@ import 'feature_constants.dart';
 class WorkshopsFeature extends Feature {
   static const String metaStartTime = 'start_time';
   static const String metaWorkshops = 'workshops';
+  static const String metaRegistrationNotOpenMessage = 'registration_not_open_message';
 
   DateTime? startTime;
+  String? registrationNotOpenMessage;
 
   WorkshopsFeature({
     super.code = metaWorkshops,
@@ -18,17 +21,19 @@ class WorkshopsFeature extends Feature {
     super.title,
     super.description,
     this.startTime,
+    this.registrationNotOpenMessage,
   });
 
   factory WorkshopsFeature.fromJson(Map<String, dynamic> json) {
     DateTime? parsed;
     if (json[metaStartTime] != null) {
-      parsed = DateTime.parse(json[metaStartTime] as String).toUtc();
+      parsed = DateTime.parse(json[metaStartTime] as String).toUtcFromOccasionTime();
     }
     return WorkshopsFeature(
       code: json[FeatureConstants.metaCode] as String? ?? metaWorkshops,
       isEnabled: json[FeatureConstants.metaIsEnabled] as bool? ?? true,
       startTime: parsed,
+      registrationNotOpenMessage: json[metaRegistrationNotOpenMessage] as String?,
     );
   }
 
@@ -41,6 +46,9 @@ class WorkshopsFeature extends Feature {
     if (startTime != null) {
       data[metaStartTime] = startTime!.toIso8601String();
     }
+    if (registrationNotOpenMessage != null) {
+      data[metaRegistrationNotOpenMessage] = registrationNotOpenMessage;
+    }
     return data;
   }
 
@@ -48,58 +56,74 @@ class WorkshopsFeature extends Feature {
   Widget buildFormField(BuildContext context) {
     return StatefulBuilder(
       builder: (ctx, setLocalState) {
-        // Format existing startTime for display
         final locale = context.locale.toString();
         final dateFmt = DateFormat.yMd(locale).add_jm();
-        final display = startTime != null
-            ? dateFmt.format(startTime!.toLocal())
+        final displayStartTime = startTime != null
+            ? dateFmt.format(startTime!.toOccasionTime())
             : '';
 
-        final controller = TextEditingController(text: display);
+        final startTimeController = TextEditingController(text: displayStartTime);
+        final messageController = TextEditingController(text: registrationNotOpenMessage ?? '');
 
-        return TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            labelText: 'Workshop Registration Start Time'.tr(),
-            hintText: 'Select start time'.tr(),
-          ),
-          readOnly: true,
-          onTap: () async {
-            final now = DateTime.now();
-            final initial = startTime?.toLocal() ?? now;
-            final date = await showDatePicker(
-              context: context,
-              initialDate: initial,
-              firstDate: DateTime(2000),
-              lastDate: DateTime(2100),
-              locale: context.locale,
-            );
-            if (date == null) return;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              controller: startTimeController,
+              decoration: InputDecoration(
+                labelText: 'Workshop Registration Start Time'.tr(),
+                hintText: 'Select start time'.tr(),
+              ),
+              readOnly: true,
+              onTap: () async {
+                final now = DateTime.now();
+                final initial = startTime?.toOccasionTime() ?? now;
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: initial,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                  locale: context.locale,
+                );
+                if (date == null) return;
 
-            final time = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.fromDateTime(initial),
-            );
-            if (time == null) return;
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(initial),
+                );
+                if (time == null) return;
 
-            final selectedLocal = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              time.hour,
-              time.minute,
-            );
-            setLocalState(() {
-              startTime = selectedLocal.toUtc();
-              controller.text = dateFmt.format(selectedLocal);
-            });
-          },
-          onSaved: (val) {
-            if (val != null && val.isNotEmpty) {
-              final parsedLocal = dateFmt.parse(val);
-              startTime = parsedLocal.toUtc();
-            }
-          },
+                final selectedLocal = DateTime(
+                  date.year,
+                  date.month,
+                  date.day,
+                  time.hour,
+                  time.minute,
+                );
+                setLocalState(() {
+                  startTime = selectedLocal.toUtcFromOccasionTime();
+                  startTimeController.text = dateFmt.format(selectedLocal);
+                });
+              },
+              onSaved: (val) {
+                if (val != null && val.isNotEmpty) {
+                  final parsedLocal = dateFmt.parse(val);
+                  startTime = parsedLocal.toUtcFromOccasionTime();
+                }
+              },
+            ),
+            SizedBox(height: 16.0),
+            TextFormField(
+              controller: messageController,
+              decoration: InputDecoration(
+                labelText: 'Early Registration Attempt Message'.tr(),
+                hintText: 'Enter message for users trying to register too early'.tr(),
+              ),
+              onSaved: (val) {
+                registrationNotOpenMessage = val != null && val.isNotEmpty ? val : null;
+              },
+            ),
+          ],
         );
       },
     );

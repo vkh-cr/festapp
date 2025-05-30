@@ -42,6 +42,7 @@ class _EventEditPageState extends State<EventEditPage> {
   DateTime? startDate, endDate;
   int? maxParticipants, placeId;
   bool? splitForMenWomen, isGroupEvent;
+  bool? isCancelled;
   bool isFormValid = true;
 
   DateTime? minDate;
@@ -78,6 +79,7 @@ class _EventEditPageState extends State<EventEditPage> {
       type = originalEvent!.type;
       content = originalEvent!.description;
       showInsideEvent = originalEvent!.parentEventIds?.map((e) => e.toString()).join(",") ?? "";
+      isCancelled = originalEvent!.isCancelled; // Load isCancelled status
     }
     validateForm();
     setState(() {});
@@ -122,11 +124,12 @@ class _EventEditPageState extends State<EventEditPage> {
           ..place = places!.firstWhereOrNull((p) => p.id == placeId)
           ..type = type
           ..description = content
+          ..isCancelled = isCancelled! // isCancelled status is set from form state
           ..parentEventIds = showInsideEvent != null && showInsideEvent!.isNotEmpty
               ? showInsideEvent!.split(",").map((e) => int.parse(e.trim())).toList()
               : [];
 
-        await DbEvents.updateEvent(originalEvent!);
+        await DbEvents.updateEvent(originalEvent!); // originalEvent now has the correct isCancelled field value
         ToastHelper.Show(context, "${"Saved".tr()}: ${originalEvent!.title!}");
         Navigator.of(context).pop();
       }
@@ -169,6 +172,12 @@ class _EventEditPageState extends State<EventEditPage> {
                         title: Text("Hide").tr(),
                         value: isHidden ?? false,
                         onChanged: (value) => setState(() => isHidden = value),
+                      ),
+                      SwitchListTile( // Added SwitchListTile for isCancelled
+                        title: Text("Cancelled".tr()),
+                        value: isCancelled ?? false,
+                        onChanged: (value) => setState(() => isCancelled = value),
+                        activeColor: ThemeConfig.redColor(context), // Optional: for visual distinction
                       ),
                       TextFormField(
                         initialValue: title,
@@ -374,15 +383,14 @@ class _EventEditPageState extends State<EventEditPage> {
                 ElevatedButton(
                   onPressed: isFormValid ? saveChanges : null,
                   style: ElevatedButton.styleFrom(
-                    // Use the default colors for the enabled state
                     backgroundColor: isFormValid
-                        ? null // Default background for enabled state
-                        : ThemeConfig.appBarColor().withOpacity(0.5), // Semi-transparent appBarColor for disabled state
+                        ? null
+                        : ThemeConfig.appBarColor().withOpacity(0.5),
                     foregroundColor: isFormValid
-                        ? null // Default text color for enabled state
-                        : ThemeConfig.grey600(context), // Subtle gray text for disabled state
-                    disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5), // Ensure visible disabled background
-                    disabledForegroundColor: ThemeConfig.grey600(context), // Ensure visible disabled text
+                        ? null
+                        : ThemeConfig.grey600(context),
+                    disabledBackgroundColor: ThemeConfig.appBarColor().withOpacity(0.5),
+                    disabledForegroundColor: ThemeConfig.grey600(context),
                   ),
                   child: Text("Save").tr(),
                 ),

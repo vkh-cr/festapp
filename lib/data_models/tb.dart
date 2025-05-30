@@ -74,6 +74,8 @@ class OccasionsTb {
   String get services => "services";
   String get data_features_code => "code";
   String get data_features_is_enabled => "is_enabled";
+
+  String get data_timezone => "timezone";
 }
 class OccasionUsersTb{
   const OccasionUsersTb();
@@ -215,6 +217,7 @@ class EventsTb{
   String get data => "data";
 
   String get dataHeaderImage => "header_image";
+  String get dataIsCancelled => "is_cancelled";
 
 
 }

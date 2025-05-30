@@ -32,11 +32,15 @@ class _TicketProductEditorRowState extends State<TicketProductEditorRow> {
     _titleController = TextEditingController(text: widget.product.title ?? "");
     _priceController =
         TextEditingController(text: (widget.product.price ?? 0).toString());
-    _titleController.addListener(() {
+     _titleController.addListener(() {
       widget.product.title = _titleController.text;
     });
     _priceController.addListener(() {
-      widget.product.price = double.tryParse(_priceController.text) ?? 0.0;
+      final text = _priceController.text.replaceAll(RegExp(r'\s+'), '');
+      final newPrice = double.tryParse(text);
+      if (newPrice != null) {
+        widget.product.price = newPrice;
+      }
     });
     // Initialize the selected currency from the product model or default to the first available.
     selectedCurrency = widget.product.currencyCode ??
