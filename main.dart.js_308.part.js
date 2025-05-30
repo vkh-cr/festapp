@@ -172,7 +172,7 @@ case 6:t=A.E(new A.N(t,new B.chx(),r),r.i("a6.E"))
 v.y=t
 o=B
 x=9
-return A.d(K.lA("activities",B.dy8(),y.Q),$async$jE)
+return A.d(K.lA("activities",B.dy9(),y.Q),$async$jE)
 case 9:q=o.cO7(e)
 C.b.H(v.y,q)
 x=7
@@ -253,11 +253,11 @@ return A.d(A.wT(),$async$WC)
 case 2:u.eL(null,null,t,null,new s.chp(v,r,g),d,null,!0,!0,y.z)
 return A.j(null,w)}})
 return A.k($async$WC,w)},
-B(d){var x=this,w=null,v=A.bG(new A.a2(D.avA,H.bw(D.bJ7,w),w),w,w),u=x.e,t=x.gbko(),s=x.y,r=u?new N.a_X(new P.hU("",w,s),N.d8y(!0,L.dEd(),v,s,x.gbkx(),w,x.gbkr(),x.gbks(),new B.chs(x,d),t,new B.cht(x),x.gbkt(),x.gbku(),x.gbkv(),x.gbkw(),A.Hg()),x.r,new B.chu(x),w):A.dD(R.cJd(v,L.bQ7(s,d),0.3,w,t,w,w),w,C.r,w,w,w,C.I)
+B(d){var x=this,w=null,v=A.bG(new A.a2(D.avA,H.bw(D.bJ7,w),w),w,w),u=x.e,t=x.gbko(),s=x.y,r=u?new N.a_X(new P.hU("",w,s),N.d8y(!0,L.dEe(),v,s,x.gbkx(),w,x.gbkr(),x.gbks(),new B.chs(x,d),t,new B.cht(x),x.gbkt(),x.gbku(),x.gbkv(),x.gbkw(),A.Hg()),x.r,new B.chu(x),w):A.dD(R.cJd(v,L.bQ7(s,d),0.3,w,t,w,w),w,C.r,w,w,w,C.I)
 u=A.bD(C.as)
 u=H.bw(A.P("My schedule",w,w,w,w,w,w,w,A.al(w,w,new A.br(u.a,u.b,u.c,0.8).bp(),w,w,w,w,w,w,w,w,w,w,w,w,w,w,!0,w,w,w,w,w,w,w,w),w,w,w,w,w),w)
 t=A.bD(C.as)
-u=Y.iE(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,S.ux(new A.br(t.a,t.b,t.c,0.8).bp(),new B.chv(d)),w,!0,w,w,w,w,w,u,w,w,w,1,w,!0)
+u=Y.iE(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,S.uy(new A.br(t.a,t.b,t.c,0.8).bp(),new B.chv(d)),w,!0,w,w,w,w,w,u,w,w,w,1,w,!0)
 return X.fa(u,w,new A.cq(C.aX,w,w,new A.cE(new A.ab(0,720,0,1/0),r,w),w),w,w,w,w,w)}}
 var z=a.updateTypes(["X<~>(f)","X<~>(H,f)","~(f)","x()","qx(H)","~(H,nV)","lm(A<m,@>)"])
 B.chB.prototype={
@@ -346,7 +346,7 @@ x(t,"gbko","bkp",2)
 w(t,"gbkx","bky",3)
 v(t,"gbku","a8f",1)
 v(t,"gbks","WC",1)
-u(B,"dy8","d8p",6)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+u(B,"dy9","d8p",6)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.Ei,A.J)
 x(B.af1,A.O)
 w(A.c8,[B.chB,B.chC,B.chF,B.chw,B.chx,B.chy,B.chm,B.chn,B.chp,B.chr,B.chu])
@@ -357,4 +357,4 @@ var y=(function rtii(){var x=A.D
 return{Q:x("lm"),l:x("dv"),t:x("u<dv>"),Z:x("u<d7>"),N:x("m"),U:x("es"),z:x("@"),S:x("f"),X:x("G?"),T:x("m?"),H:x("~")}})();(function constants(){D.avA=new A.am(24,88,24,24)
 D.bJ7=new A.cs("There will appear your events.",null,U.nD,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_308",e:"endPart",h:b})})($__dart_deferred_initializers__,"w3+GZcR42vtBm+o8iFTyTdxhv+8=");
+a.eventLog.push({p:"main.dart.js_308",e:"endPart",h:b})})($__dart_deferred_initializers__,"KoDNff8bjnfJp5eBs00egt0rkDA=");

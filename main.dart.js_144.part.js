@@ -50,7 +50,7 @@ l(){this.ai()},
 b_(){var x=0,w=A.l(y.v),v=this,u,t,s,r,q
 var $async$b_=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:v.c8()
-s=A.u6()
+s=A.u7()
 u=A.bz("token=(?<token>[^&]+)",!0,!1,!1).rU(s.j(0))
 if(u!=null)try{r=u.afP("token")
 r.toString
@@ -74,7 +74,7 @@ return A.d(A.atQ(B.b2T(u,v.e.a.a).aH(new B.co4(v,d),t),new B.co5(d),t,y.E),$asyn
 case 4:case 3:return A.j(null,w)}})
 return A.k($async$UC,w)},
 B(d){var x=null,w=H.bw(D.bJa,x),v=y.w
-return Q.fa(R.iE(x,x,x,!0,x,x,1,!0,x,x,!1,x,!1,x,x,L.ux(x,new B.co6(d)),x,!0,x,x,x,x,x,w,x,x,x,1,x,!0),x,new A.cq(C.N,x,x,new A.cE(new A.ab(0,720,0,1/0),A.dD(A.v1(x,x,new E.yO(A.ah(A.a([A.P(A.r("Welcome in {name}!",A.z(["name","Festapp"],v,v)),x,x,x,x,x,x,x,N.If,x,x,x,x,x),C.a2,A.P(A.r("Create a new password to continue.",x),x,x,x,x,x,x,x,G.hX,x,x,x,x,x),O.ad6,new A.a2(P.CE,new M.Kh(A.r("New Password",x),this.e,"newPassword",x),x),C.a2,K.HD(C.dE,d,50,!0,A.r("Change Password",x),new B.co7(this,d),C.l,250)],y.u),C.j,C.f,C.i,0,x,C.m),x),this.d,x),x,C.r,x,x,x,C.I),x),x),x,x,x,x,x)}}
+return Q.fa(R.iE(x,x,x,!0,x,x,1,!0,x,x,!1,x,!1,x,x,L.uy(x,new B.co6(d)),x,!0,x,x,x,x,x,w,x,x,x,1,x,!0),x,new A.cq(C.N,x,x,new A.cE(new A.ab(0,720,0,1/0),A.dD(A.v2(x,x,new E.yO(A.ah(A.a([A.P(A.r("Welcome in {name}!",A.z(["name","Festapp"],v,v)),x,x,x,x,x,x,x,N.If,x,x,x,x,x),C.a2,A.P(A.r("Create a new password to continue.",x),x,x,x,x,x,x,x,G.hX,x,x,x,x,x),O.ad6,new A.a2(P.CE,new M.Kh(A.r("New Password",x),this.e,"newPassword",x),x),C.a2,K.HD(C.dE,d,50,!0,A.r("Change Password",x),new B.co7(this,d),C.l,250)],y.u),C.j,C.f,C.i,0,x,C.m),x),this.d,x),x,C.r,x,x,x,C.I),x),x),x,x,x,x,x)}}
 var z=a.updateTypes([])
 B.co4.prototype={
 $1(d){var x=0,w=A.l(y.F),v=this,u
@@ -118,4 +118,4 @@ w(A.cL,[B.co6,B.co7])})()
 A.c5(b.typeUniverse,JSON.parse('{"F7":{"J":[],"e":[]},"aTr":{"O":["F7"]}}'))
 var y={g:A.D("bc"),u:A.D("u<e>"),o:A.D("aS<pn>"),F:A.D("aF"),E:A.D("G"),w:A.D("m"),b:A.D("@"),v:A.D("~")};(function constants(){D.bJa=new A.cs("New Password",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_144",e:"endPart",h:b})})($__dart_deferred_initializers__,"d7D+CRJDfcvRhRI3kuBJJ+SjhGk=");
+a.eventLog.push({p:"main.dart.js_144",e:"endPart",h:b})})($__dart_deferred_initializers__,"KtqL8Xq+Yai9Es7CzifM+MTwugc=");

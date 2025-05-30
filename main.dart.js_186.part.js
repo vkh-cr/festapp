@@ -107,7 +107,7 @@ case 2:s=e
 r=v.c.af(y.q).r.a
 r===$&&A.b()
 u=C.b.fA(A.Z_(),new B.crx(r))
-t=$.uq().b.e
+t=$.ur().b.e
 q=B
 x=3
 return A.d(F.alM(),$async$qH)
@@ -116,7 +116,7 @@ return A.j(null,w)}})
 return A.k($async$qH,w)},
 xA(){var x=0,w=A.l(y.v),v=this,u
 var $async$xA=A.h(function(d,e){if(d===1)return A.i(e,w)
-while(true)switch(x){case 0:try{$.uq().aJe()}catch(t){v.A(new B.crw(v))}x=2
+while(true)switch(x){case 0:try{$.ur().aJe()}catch(t){v.A(new B.crw(v))}x=2
 return A.d(v.qH(),$async$xA)
 case 2:return A.j(null,w)}})
 return A.k($async$xA,w)},
@@ -124,7 +124,7 @@ a9s(d){this.A(new B.crq(this,d))},
 B(d){var x,w,v,u,t,s=this,r=null,q=4294922834,p=4292030255,o=A.bD(C.as)
 o=E.bw(A.P("Settings",r,r,r,r,r,r,r,A.al(r,r,new A.br(o.a,o.b,o.c,0.8).bp(),r,r,r,r,r,r,r,r,r,r,r,r,r,r,!0,r,r,r,r,r,r,r,r),r,r,r,r,r),r)
 x=A.bD(C.as)
-o=R.iE(r,r,r,!0,r,r,1,r,r,r,!1,r,!1,r,r,N.ux(new A.br(x.a,x.b,x.c,0.8).bp(),new B.crs(d)),r,!0,r,r,r,r,r,o,r,r,r,1,r,!0)
+o=R.iE(r,r,r,!0,r,r,1,r,r,r,!1,r,!1,r,r,N.uy(new A.br(x.a,x.b,x.c,0.8).bp(),new B.crs(d)),r,!0,r,r,r,r,r,o,r,r,r,1,r,!0)
 x=y.u
 w=A.a([],x)
 if(A.Z_().length>1){v=E.bw(D.bJF,r)
@@ -227,4 +227,4 @@ D.bJ2=new A.cs("Appearance",null,G.nD,null,null,null,null,null,null,null,null,nu
 D.bJF=new A.cs("Language Settings",null,G.nD,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJJ=new A.cs("Notification Settings",null,G.nD,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_186",e:"endPart",h:b})})($__dart_deferred_initializers__,"yUzyujM8OGjcU3n5K2iuVAFox2o=");
+a.eventLog.push({p:"main.dart.js_186",e:"endPart",h:b})})($__dart_deferred_initializers__,"vVlo9NfBVHpo2vVTWtZcnXm+GWI=");

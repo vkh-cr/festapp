@@ -24,10 +24,10 @@ A.C7.prototype={
 M(){var x=null,w="volunteers",v=B.a(["Info"],y.d)
 v.push("Events")
 v.push("Places")
-if(B.fm("user_groups",x))v.push("Groups")
-if(B.fm("game",x))v.push("Game")
-if(B.fm("services",x))v.push("Service")
-if(B.fm(w,x))v.push(w)
+if(B.fi("user_groups",x))v.push("Groups")
+if(B.fi("game",x))v.push("Game")
+if(B.fi("services",x))v.push("Service")
+if(B.fi(w,x))v.push(w)
 v.push("Email Templates")
 v.push("Users")
 return new A.aKk(v,x,x)}}
@@ -69,8 +69,8 @@ w(A.C7,B.J)
 w(A.ajf,B.O)
 w(A.aKk,A.ajf)
 v(B.c8,[A.bZv,A.bZw])
-x(A.ajf,B.fi)})()
+x(A.ajf,B.fj)})()
 B.c5(b.typeUniverse,JSON.parse('{"C7":{"J":[],"e":[]},"aKk":{"O":["C7"]}}'))
 var y={d:B.D("u<m>")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_307",e:"endPart",h:b})})($__dart_deferred_initializers__,"oslSBqo6P72GxZ8XyrHn24r5tWI=");
+a.eventLog.push({p:"main.dart.js_307",e:"endPart",h:b})})($__dart_deferred_initializers__,"gFpvkH6NapcUavUQHd/xMz+bcQQ=");

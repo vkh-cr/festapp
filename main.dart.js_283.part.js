@@ -53,7 +53,7 @@ bV5:function bV5(){},
 bV6:function bV6(){},
 ar_(){var w=0,v=A.l(x.i),u,t,s,r,q,p
 var $async$ar_=A.h(function(d,e){if(d===1)return A.i(e,v)
-while(true)switch(w){case 0:q=$.uo().c1("occasions").ir(0,"data")
+while(true)switch(w){case 0:q=$.up().c1("occasions").ir(0,"data")
 p=A.da()
 p.toString
 w=3
@@ -106,11 +106,11 @@ $1(d){var w=d.b[0]
 w.toString
 return w},
 $S:269};(function installTearOffs(){var w=a.installStaticTearOff
-w(B,"dB6",0,function(){return[null]},["$1","$0"],["zh",function(){return B.zh(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
+w(B,"dB7",0,function(){return[null]},["$1","$0"],["zh",function(){return B.zh(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
 w(B.a2_,A.G)
 w(B.bb4,A.eg)
 v(A.c8,[B.bbd,B.bV5,B.bV6])})()
 var y={d:"id,occasion,created_at,updated_at,is_hidden,title,description,order,type,data,information_hidden(*)"}
 var x={c:A.D("eG"),l:A.D("B<eG>"),g:A.D("m"),b:A.D("@"),i:A.D("a2_?")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"rzAsx+qmRaZedjdIvbMQaFK0/gQ=");
+a.eventLog.push({p:"main.dart.js_283",e:"endPart",h:b})})($__dart_deferred_initializers__,"ybCkZl0TX8r+GZirKwaTuFrQgQ4=");

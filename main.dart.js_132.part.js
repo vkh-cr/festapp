@@ -299,9 +299,9 @@ bs9(d){var x=this.c
 x.toString
 E.ix(x,"event/"+d,y.X).aH(new B.cp1(this),y.H)},
 B(d){var x,w,v,u=this,t=null,s=y.p,r=A.a([A.cG(t,A0.awx(t,t,120),C.r,!1,t,new B.cp6(u,d),t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,t,new B.cp7(d),t,t,t,t,t,t,t,t,!1,C.aa),C.hU],s)
-if(A.fm("my_schedule",t)){x=A.bD(C.aP)
+if(A.fi("my_schedule",t)){x=A.bD(C.aP)
 x=A.bD(new A.br(x.a,x.b,0.4,x.d).bp())
-r.push(A.ah(A.a([B.cPh(new A.br(x.a,x.b,x.c,0.1).bp(),A.aW(A_.NQ,C.as,t,t),u.gbkm()),A.P(A.r("My schedule",t),t,t,t,t,t,t,t,t,t,t,t,t,t)],s),C.j,C.f,C.U,0,t,C.m))}if(A.fm("timetable",t)){x=A.bD(C.aP)
+r.push(A.ah(A.a([B.cPh(new A.br(x.a,x.b,x.c,0.1).bp(),A.aW(A_.NQ,C.as,t,t),u.gbkm()),A.P(A.r("My schedule",t),t,t,t,t,t,t,t,t,t,t,t,t,t)],s),C.j,C.f,C.U,0,t,C.m))}if(A.fi("timetable",t)){x=A.bD(C.aP)
 x=A.bD(new A.br(x.a,x.b,0.4,x.d).bp())
 r.push(A.ah(A.a([B.cPh(new A.br(x.a,x.b,x.c,0.1).bp(),A.aW(L.oN,C.as,t,t),u.gbs0()),A.P(A.r("Schedule",t),t,t,t,t,t,t,t,t,t,t,t,t,t)],s),C.j,C.f,C.U,0,t,C.m))}r=A.at(r,C.j,C.bl,C.i,0,t)
 x=u.d
@@ -454,4 +454,4 @@ D.bCr=new A.U(70,50)
 D.bCs=new A.U(80,60)
 D.bCu=new A.U(1/0,46)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_132",e:"endPart",h:b})})($__dart_deferred_initializers__,"zP3x6EJZfInmodqzpGDdx8nQEJ0=");
+a.eventLog.push({p:"main.dart.js_132",e:"endPart",h:b})})($__dart_deferred_initializers__,"DF5PiSTkYoOmFVZ0SdNbivLW90Q=");

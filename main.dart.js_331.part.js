@@ -193,7 +193,7 @@ of(){var x=0,w=A.l(y.H),v=this,u
 var $async$of=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:u=B
 x=2
-return A.d(X.lA("newsOffline",B.dDh(),y.x),$async$of)
+return A.d(X.lA("newsOffline",B.dDi(),y.x),$async$of)
 case 2:v.A(new u.ci1(v,e))
 return A.j(null,w)}})
 return A.k($async$of,w)},
@@ -341,7 +341,7 @@ $S:z+1}
 B.chZ.prototype={
 $0(){return this.a.btQ(this.b)},
 $S:0};(function installTearOffs(){var x=a._static_1
-x(B,"dDh","djl",2)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
+x(B,"dDi","djl",2)})();(function inheritance(){var x=a.inherit,w=a.inheritMany
 x(B.Eo,A.J)
 x(B.aQI,A.O)
 w(A.cL,[B.ci_,B.ci0,B.ci1,B.chZ])
@@ -358,4 +358,4 @@ D.ayW=new A.aB(61075,"MaterialIcons",null,!1)
 D.azy=new A.d2(T.NX,null,null,null,null)
 D.bIY=new A.cs("Delete",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_331",e:"endPart",h:b})})($__dart_deferred_initializers__,"Rvdn9XIF6WKhqCGAWylGPa+vAiM=");
+a.eventLog.push({p:"main.dart.js_331",e:"endPart",h:b})})($__dart_deferred_initializers__,"5X0Ouz+etmHtgTQ/Enrs8Gq7Nxw=");

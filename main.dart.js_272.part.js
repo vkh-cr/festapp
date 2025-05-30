@@ -359,6 +359,6 @@ w(A.i5,[B.hu,B.hv])})()
 A.c5(b.typeUniverse,JSON.parse('{"hu":{"i5":[]},"hv":{"i5":[]}}'))
 var y={E:A.D("u<eZ>"),q:A.D("B<eZ>"),w:A.D("m"),d:A.D("h5"),b:A.D("@"),v:A.D("~")};(function constants(){var x=a.makeConstList
 D.mN=A.a(x(["spot","food","others"]),A.D("u<m>"))})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dHf","O7",()=>$.hN().gmO(0))})()};
+x($,"dHg","O7",()=>$.hN().gmO(0))})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_272",e:"endPart",h:b})})($__dart_deferred_initializers__,"48RX/JPUEA9Xi+yqS7EavlLYT1k=");
+a.eventLog.push({p:"main.dart.js_272",e:"endPart",h:b})})($__dart_deferred_initializers__,"u9TmtxM5gT+V06UM+3Fq6+lAHa4=");
