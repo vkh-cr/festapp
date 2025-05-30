@@ -260,7 +260,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         ? eventPastelColorForText
         : unselectedColor;
 
-    Widget inlineActionSection;
+    Widget inlineActionSection = SizedBox.shrink();
     if (event.isCancelled && !event.isInMySchedule() && !event.isSignedIn()) {
       inlineActionSection = Padding(
         padding: const EdgeInsets.only(right: 8.0),
@@ -348,12 +348,12 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
             ],
           ]
       );
-    } else {
+    } else if (event.canSaveToMySchedule()){
       inlineActionSection = Row(
         children: ButtonsHelper.getAddToMyProgramButton(
           !event.isInMySchedule(),
               () async => await controller.onAddToProgramEvent!(event.id),
-              () => _handleRemoveEvent(event.id),
+              () async => await _handleRemoveEvent(event.id),
           selectedColor,
           unselectedColor,
         ),

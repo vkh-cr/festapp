@@ -39,6 +39,7 @@ class FormHelper {
   static const String fieldTypeBirthDate = "birth_date";
   static const String fieldTypeIdDocument = "id_document";
   static const String fieldTypeAddress = "address";
+  static const String fieldTypeNationality = "nationality";
 
   static const String fieldTypeTicket = "ticket";
 
@@ -68,6 +69,7 @@ class FormHelper {
   static String emailLabel() => "E-mail".tr();
   static String phoneLabel() => "Phone".tr();
   static String addressLabel() => "Address".tr();
+  static String nationalityLabel() => "Nationality".tr(); // Added nationality label
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();
@@ -93,6 +95,7 @@ class FormHelper {
     FormHelper.fieldTypeSex: Icons.wc,
     FormHelper.fieldTypeCity: Icons.location_city,
     FormHelper.fieldTypeAddress: Icons.home,
+    FormHelper.fieldTypeNationality: Icons.flag,
     FormHelper.fieldTypeBirthYear: Icons.cake,
     FormHelper.fieldTypeBirthDate: Icons.cake,
     FormHelper.fieldTypeIdDocument: Icons.article,
@@ -113,7 +116,8 @@ class FormHelper {
     fieldTypeSex,
     fieldTypeBirthYear,
     fieldTypeBirthDate,
-    fieldTypeIdDocument
+    fieldTypeIdDocument,
+    fieldTypeNationality,
   ];
 
   static bool isAlwaysRequired(String? type) {
@@ -133,6 +137,8 @@ class FormHelper {
         return cityLabel();
       case fieldTypeAddress:
         return addressLabel();
+      case fieldTypeNationality:
+        return nationalityLabel();
       case fieldTypeEmail:
         return emailLabel();
       case fieldTypeSex:
@@ -366,6 +372,9 @@ class FormHelper {
       case fieldTypeAddress:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, addressLabel());
         return FormFieldBuilders.buildAddressField(context, field);
+      case fieldTypeNationality:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, nationalityLabel());
+        return FormFieldBuilders.buildNationalityField(context, field);
       case fieldTypeSpot:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, spotLabel());
         return FormFieldBuilders.buildSpotField(context, formKey, formHolder, field);
