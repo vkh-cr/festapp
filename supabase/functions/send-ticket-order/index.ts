@@ -228,7 +228,6 @@ async function handleSupabaseFunctionService(
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             order: ticketOrder.order,
-            occasionTitle: ticketOrder.order.occasion.occasion_title,
             requestSecret: requestSecret,
           }),
         });
