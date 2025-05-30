@@ -81,7 +81,7 @@ Future<void> initializeEverything() async {
   }
 
   try {
-    await TimeHelper.initializeTimeZone();
+    await TimeHelper.initializeTimeZone().timeout(const Duration(seconds: 2));
     print('Tz setup completed');
   } catch (e) {
     print('Tz setup failed: $e');

@@ -783,6 +783,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       return;
     }
     if (marker is MapMarkerWithText && HtmlHelper.isHtmlLong(marker.place.description)) {
+      controller.hideAllPopups();
       showDialog(
         context: context,
         builder: (BuildContext context) {

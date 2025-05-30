@@ -165,7 +165,7 @@ class EventModel extends ITrinaRowModel {
     return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
   }
 
-  copyFromEvent(EventModel event)
+  void copyFromEvent(EventModel event)
   {
     startTime = event.startTime;
     endTime = event.endTime;
