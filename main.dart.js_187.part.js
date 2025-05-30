@@ -5,7 +5,7 @@ $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
 azq(){var x=0,w=A.l(y.a),v
 var $async$azq=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=3
-return A.d($.yB().bBQ("requestNotificationPermission",[]),$async$azq)
+return A.d($.yA().bBQ("requestNotificationPermission",[]),$async$azq)
 case 3:v=e
 x=1
 break
@@ -16,4 +16,4 @@ B=a.updateHolder(c[47],B)
 var z=a.updateTypes([])
 var y={a:A.D("x")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_187",e:"endPart",h:b})})($__dart_deferred_initializers__,"fGg0NcxYlY1sArvZwY9OrELqiUw=");
+a.eventLog.push({p:"main.dart.js_187",e:"endPart",h:b})})($__dart_deferred_initializers__,"AIsA79xVYO2Mdd9HF2GzendQsbY=");
