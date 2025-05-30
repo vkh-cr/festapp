@@ -51,7 +51,7 @@ class _TimetablePageState extends State<TimetablePage>
   Future<void> loadData() async {
     await loadDataOffline();
 
-    await DbEvents.updateEvents(_events);
+    _events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
 
     var placeIds = _events
         .map((e) => e.place?.id)
@@ -70,15 +70,15 @@ class _TimetablePageState extends State<TimetablePage>
 
     _items.clear();
     _items.addAll(_events
-        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)));
+        .map((e) => TimeBlockItem.fromEventModel(e)));
 
     timetableController.rebuild?.call();
 
     _days.clear();
     _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(_items, context, AppConfig.daySplitHour));
     setupTabController(_days);
-    await loadEventParticipants();
-    await DbEvents.synchronizeMySchedule();
+    setState(() {});
+    //await loadEventParticipants();
   }
 
   String TimetableDateFormat(DateTime e) =>
@@ -122,23 +122,12 @@ class _TimetablePageState extends State<TimetablePage>
 
     _items.clear();
     var items = _events
-        .map((e) => TimeBlockItem.fromEventModelForTimeTable(e)).toList();
+        .map((e) => TimeBlockItem.fromEventModel(e)).toList();
 
     _days.clear();
     _days.addAll(TimeBlockHelper.splitTimeBlocksByDate(items, context, AppConfig.daySplitHour));
     setupTabController(_days);
     setState(() {});
-  }
-
-  Future<void> loadEventParticipants() async {
-    await DbEvents.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events) {
-      var item = _items.singleWhere((element) => element.id == e.id!);
-      setState(() {
-        item.data = e.toString();
-        item.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
-      });
-    }
   }
 
   @override
@@ -177,7 +166,7 @@ class _TimetablePageState extends State<TimetablePage>
             occasionEnd: RightsService.currentOccasion()!.endTime,));
   }
 
-  final List<EventModel> _events = [];
+  List<EventModel> _events = [];
   final List<TimeBlockItem> _items = [];
   final List<TimeBlockGroup> _days = [];
 

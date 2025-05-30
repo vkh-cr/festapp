@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
       body: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
+          constraints: BoxConstraints(maxWidth: StylesConfig.formMaxWidth),
           child: SingleChildScrollView(
             child: Form(
               key: _formKey,

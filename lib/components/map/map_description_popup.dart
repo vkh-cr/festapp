@@ -53,11 +53,12 @@ class _MapDescriptionPopupState extends State<MapDescriptionPopup> {
                     (AuthService.isGroupLeader() &&
                         AuthService.currentUserGroup()!.place!.id ==
                             widget.marker.place.id),
-                child: ElevatedButton(
+                child: TextButton.icon(
+                    icon: const Icon(Icons.edit),
                     onPressed: widget.selectedMarker != null
                         ? null
                         : changePositionPressed,
-                    child: const Text("Change location").tr())),
+                    label: Text("Change location"))),
             HtmlView(html: widget.marker.place.description ?? "", isSelectable: true,),
             // if(widget.marker.place.events?.isNotEmpty??false)
             //   ConstrainedBox(

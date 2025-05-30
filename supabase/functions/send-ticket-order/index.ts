@@ -86,7 +86,7 @@ function formatDatetime(datetime: string): string {
   }).format(new Date(datetime));
 }
 
-function generateFullOrder(orderData: any, tickets: any[]): string {
+function generateFullOrder(orderData: any, tickets: any[], occasionFeatures: any[]): string {
   const { name, surname, email, phone, note } = orderData;
 
   // Build personal info section
@@ -125,6 +125,9 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
             </tr>`;
 
   let overallTotal = 0;
+  const ticketFeature = occasionFeatures?.find(f => f.code === "ticket");
+  const itemLabel = ticketFeature?.is_enabled ? "Vstupenka" : "Přihláška";
+
   const ticketsDetails = tickets.map((ticket) => {
     const ticketSymbol = ticket.ticket_symbol;
 
@@ -165,7 +168,7 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
                 <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
                   <tr>
                     <td style="padding-left:12px; padding-bottom:8px;">
-                      <strong>Vstupenka ${ticketSymbol}</strong>
+                      <strong>${itemLabel} ${ticketSymbol}</strong>
                     </td>
                   </tr>
                   ${productsRows}
@@ -202,6 +205,66 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
     </table>`;
 
   return `${orderHeader}${ticketsDetails}${totalSection}${orderFooter}`;
+}
+
+async function handleSupabaseFunctionService(
+  supabaseFunctionSvc: any,
+  ticketOrder: any,
+  attachments: any[],
+) {
+  if (supabaseFunctionSvc && supabaseFunctionSvc.data && supabaseFunctionSvc.data.url) {
+    const supabaseFunctionUrl = supabaseFunctionSvc.data.url;
+    console.log(`Calling SUPABASE_FUNCTION service at: ${supabaseFunctionUrl}`);
+
+    const { data: requestSecret, error: secretGenerationError } = await supabaseAdmin.rpc(
+      "generate_request_secret",
+      { p_ttl_seconds: 300 }
+    );
+
+    if (secretGenerationError || !requestSecret) {
+      console.error("Failed to generate request secret:", secretGenerationError);
+    } else {
+      console.log("Generated request secret for SUPABASE_FUNCTION call.");
+      try {
+        const functionResponse = await fetch(supabaseFunctionUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: ticketOrder.order,
+            requestSecret: requestSecret,
+          }),
+        });
+
+        if (functionResponse.ok) {
+          const attachmentData = await functionResponse.json();
+          if (attachmentData.data && attachmentData.contentType) {
+            const binaryString = atob(attachmentData.data);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+            }
+            attachments.push({
+              filename: `smlouva-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
+              content: bytes,
+              contentType: attachmentData.contentType,
+              encoding: "binary",
+            });
+            console.log("Successfully added attachment from SUPABASE_FUNCTION service.");
+          } else {
+            console.error("SUPABASE_FUNCTION service response missing data or contentType:", attachmentData);
+          }
+        } else {
+          const errorBody = await functionResponse.text();
+          console.error(
+            `SUPABASE_FUNCTION service call failed with status: ${functionResponse.status}. Response: ${errorBody}`,
+          );
+        }
+      } catch (e) {
+        console.error("Error calling SUPABASE_FUNCTION service:", e);
+      }
+    }
+  }
 }
 
 Deno.serve(async (req) => {
@@ -267,15 +330,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    const supabaseFunctionSvc = extServices?.find((s: any) => s.type === "SUPABASE_FUNCTION");
+    await handleSupabaseFunctionService(supabaseFunctionSvc, ticketOrder, attachments);
+
     const occasion = ticketOrder.order.occasion;
     const paymentInfo = ticketOrder.order.payment_info;
-    const { data: occasionData } = await supabaseAdmin
-      .from("occasions")
-      .select("organization,link")
-      .eq("id", occasion.id)
-      .single();
     const context = {
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     };
     const { template, wrapper } = await getEmailTemplateAndWrapper(
@@ -294,6 +355,7 @@ Deno.serve(async (req) => {
       fullOrder: generateFullOrder(
         ticketOrder.order.data,
         ticketOrder.order.data.tickets,
+        occasion.features,
       ),
     };
 
@@ -311,7 +373,7 @@ Deno.serve(async (req) => {
       from: _DEFAULT_EMAIL,
       to: ticketOrder.order.data.email,
       template: template.id,
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     });
 

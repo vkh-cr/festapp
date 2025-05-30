@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:fstapp/components/blueprint/blueprint_object_model.dart';
 import 'package:fstapp/dialogs/standard_dialog.dart';
+import 'package:fstapp/pages/form/models/id_document_field_holder.dart';
 import 'package:fstapp/pages/form/widgets_view/check_box_field_builder.dart';
 import 'package:fstapp/pages/form/widgets_view/radio_field_builder.dart';
 import 'package:fstapp/services/html_helper.dart';
@@ -18,6 +19,8 @@ import '../models/form_holder.dart';
 import '../models/ticket_holder.dart';
 import 'birth_date_field_builder.dart';
 import 'form_field_builders.dart';
+import 'id_document_field_builder.dart';
+
 
 class FormHelper {
   static const String fieldTypeName = "name";
@@ -34,10 +37,12 @@ class FormHelper {
   static const String fieldTypeSelectMany = "select_many";
   static const String fieldTypeProductType = "product_type";
   static const String fieldTypeBirthDate = "birth_date";
+  static const String fieldTypeIdDocument = "id_document";
+  static const String fieldTypeAddress = "address";
+  static const String fieldTypeNationality = "nationality";
 
   static const String fieldTypeTicket = "ticket";
 
-  // Additional constant for option delimiter
   static const String optionDelimiter = " | ";
 
   static const String metaMaxTickets = "max_tickets";
@@ -63,9 +68,12 @@ class FormHelper {
   static String spotLabel() => "Spot".tr();
   static String emailLabel() => "E-mail".tr();
   static String phoneLabel() => "Phone".tr();
+  static String addressLabel() => "Address".tr();
+  static String nationalityLabel() => "Nationality".tr(); // Added nationality label
   static String sexLabel() => "I am".tr();
   static String birthYearLabel() => "Birth year".tr();
   static String birthDateLabel() => "Birth Date".tr();
+  static String idDocumentLabel() => "ID Card / Passport Number".tr();
   static String emailInvalidMessage() => "E-mail is not valid!".tr();
   static String maleLabel() => "Male".tr();
   static String femaleLabel() => "Female".tr();
@@ -86,14 +94,31 @@ class FormHelper {
     FormHelper.fieldTypeSurname: Icons.person_outline,
     FormHelper.fieldTypeSex: Icons.wc,
     FormHelper.fieldTypeCity: Icons.location_city,
+    FormHelper.fieldTypeAddress: Icons.home,
+    FormHelper.fieldTypeNationality: Icons.flag,
     FormHelper.fieldTypeBirthYear: Icons.cake,
     FormHelper.fieldTypeBirthDate: Icons.cake,
+    FormHelper.fieldTypeIdDocument: Icons.article,
     FormHelper.fieldTypeNote: Icons.note,
     FormHelper.fieldTypeSpot: Icons.event_seat,
     FormHelper.fieldTypeProductType: Icons.category,
     FormHelper.fieldTypeTicket: Icons.confirmation_number,
     FormHelper.fieldTypePhone: Icons.phone,
   };
+
+  static const List<String> personalInfoFields = [
+    fieldTypeName,
+    fieldTypeSurname,
+    fieldTypeCity,
+    fieldTypeAddress,
+    fieldTypeEmail,
+    fieldTypePhone,
+    fieldTypeSex,
+    fieldTypeBirthYear,
+    fieldTypeBirthDate,
+    fieldTypeIdDocument,
+    fieldTypeNationality,
+  ];
 
   static bool isAlwaysRequired(String? type) {
     return const [
@@ -110,6 +135,10 @@ class FormHelper {
         return surnameLabel();
       case fieldTypeCity:
         return cityLabel();
+      case fieldTypeAddress:
+        return addressLabel();
+      case fieldTypeNationality:
+        return nationalityLabel();
       case fieldTypeEmail:
         return emailLabel();
       case fieldTypeSex:
@@ -132,6 +161,8 @@ class FormHelper {
         return productTypeLabel();
       case fieldTypeBirthDate:
         return birthDateLabel();
+      case fieldTypeIdDocument:
+        return idDocumentLabel();
       case fieldTypePhone:
         return phoneLabel();
       default:
@@ -252,62 +283,72 @@ class FormHelper {
 
   static dynamic getFieldData(GlobalKey<FormBuilderState> formKey, FieldHolder fieldHolder) {
     var fieldValue = formKey.currentState?.fields[fieldHolder.id.toString()]?.value;
-    if (fieldHolder.fieldType == fieldTypeSex) {
-      if (fieldValue == null) {
-        return null;
-      }
-      return (fieldValue as FormOptionModel).id;
-    } else if (fieldHolder.fieldType == fieldTypeBirthYear) {
-      return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue) : null;
-    } else if (fieldHolder.fieldType == fieldTypeBirthDate) {
-      return (fieldValue is DateTime) ? fieldValue.toIso8601String() : null;
-    } else if (fieldHolder.fieldType == fieldTypeSpot) {
-      if (fieldValue is SeatModel) {
-        return fieldValue.objectModel;
-      }
-      return null;
-    } else if (fieldHolder.fieldType == fieldTypeTicket) {
-      List<Map<String, dynamic>> tickets = [];
-      var ticket = fieldHolder as TicketHolder;
-      for (int i = 0; i < ticket.tickets.length; i++) {
-        final ticketKey = ticket.tickets[i].ticketKey;
-        if (ticketKey.currentState == null) continue;
-        Map<String, dynamic> ticketData = {};
-        for (var subFieldHolder in ticket.fields) {
-          if (ticketData[metaFields] == null) {
-            ticketData[metaFields] = [];
-          }
-          var value = getFieldData(ticketKey, subFieldHolder);
 
-          if (subFieldHolder.fieldType == fieldTypeProductType
-              && subFieldHolder is OptionsFieldProductHolder
-              && subFieldHolder.selectionType == OptionsFieldProductSelectionType.selectMany) {
-            for (var v in value) {
-              ticketData[metaFields].add({subFieldHolder.fieldType: v});
+    switch (fieldHolder.fieldType) {
+      case fieldTypeSex:
+        if (fieldValue == null) {
+          return null;
+        }
+        return (fieldValue as FormOptionModel).id;
+      case fieldTypeBirthYear:
+        return (fieldValue != null && fieldValue.isNotEmpty) ? int.tryParse(fieldValue.toString()) : null;
+      case fieldTypeBirthDate:
+        return (fieldValue is DateTime) ? fieldValue.toIso8601String() : null;
+      case fieldTypeIdDocument:
+        if (fieldHolder is IdDocumentFieldHolder) {
+          return fieldHolder.getIdDocumentData(formKey);
+        }
+        return null;
+      case fieldTypeSpot:
+        if (fieldValue is SeatModel) {
+          return fieldValue.objectModel;
+        }
+        return null;
+      case fieldTypeTicket:
+        List<Map<String, dynamic>> tickets = [];
+        var ticket = fieldHolder as TicketHolder;
+        for (int i = 0; i < ticket.tickets.length; i++) {
+          final ticketKey = ticket.tickets[i].ticketKey;
+          if (ticketKey.currentState == null) continue;
+          Map<String, dynamic> ticketData = {};
+          for (var subFieldHolder in ticket.fields) {
+            if (ticketData[metaFields] == null) {
+              ticketData[metaFields] = [];
             }
-          } else{
-            ticketData[metaFields].add({subFieldHolder.fieldType: value});
+            var value = getFieldData(ticketKey, subFieldHolder);
+
+            if (subFieldHolder.fieldType == fieldTypeProductType &&
+                subFieldHolder is OptionsFieldProductHolder &&
+                subFieldHolder.selectionType == OptionsFieldProductSelectionType.selectMany) {
+              if (value is List) { // Ensure value is a list before iterating
+                for (var v in value) {
+                  ticketData[metaFields].add({subFieldHolder.fieldType: v});
+                }
+              }
+            } else {
+              ticketData[metaFields].add({subFieldHolder.fieldType: value});
+            }
           }
+          if (ticket.tickets[i].seat != null) {
+            ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
+          }
+          tickets.add(ticketData);
         }
-        if (ticket.tickets[i].seat != null) {
-          ticketData[fieldTypeSpot] = ticket.tickets[i].seat!.objectModel;
+        return tickets;
+      case fieldTypeSelectMany:
+        if (fieldValue is List) {
+          return fieldValue.map((e) {
+            if (e is FormOptionModel) return e.title;
+            return e.toString();
+          }).join(optionDelimiter);
         }
-        tickets.add(ticketData);
-      }
-      return tickets;
-    } else if (fieldHolder.fieldType == fieldTypeSelectMany) {
-      if (fieldValue is List) {
-        return fieldValue.map((e) {
-          if (e is FormOptionModel) return e.title;
-          return e.toString();
-        }).join(optionDelimiter);
-      }
-      return fieldValue;
+        return fieldValue;
+      default:
+        if (fieldValue is String) {
+          return fieldValue.trim();
+        }
+        return fieldValue;
     }
-    if (fieldValue is String) {
-      return fieldValue.trim();
-    }
-    return fieldValue;
   }
 
   static Widget createFormField(BuildContext context, GlobalKey<FormBuilderState> formKey,
@@ -328,6 +369,12 @@ class FormHelper {
       case fieldTypeCity:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, cityLabel());
         return FormFieldBuilders.buildTextField(context, field, [AutofillHints.addressCity]);
+      case fieldTypeAddress:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, addressLabel());
+        return FormFieldBuilders.buildAddressField(context, field);
+      case fieldTypeNationality:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, nationalityLabel());
+        return FormFieldBuilders.buildNationalityField(context, field);
       case fieldTypeSpot:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, spotLabel());
         return FormFieldBuilders.buildSpotField(context, formKey, formHolder, field);
@@ -362,10 +409,18 @@ class FormHelper {
       case fieldTypeBirthDate:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthDateLabel());
         return BirthDateFieldBuilder.buildBirthDateField(
-            context: context,
-            formHolder: formHolder,
-            fieldHolder: field as BirthDateFieldHolder,
-            formKey: formHolder.controller!.globalKey,
+          context: context,
+          formHolder: formHolder,
+          fieldHolder: field as BirthDateFieldHolder,
+          formKey: formHolder.controller!.globalKey,
+        );
+      case fieldTypeIdDocument:
+        field.title = Utilities.replaceIfNullOrEmpty(field.title, idDocumentLabel());
+        return IdDocumentFieldBuilder.buildIdDocumentField(
+          context: context,
+          fieldHolder: field as IdDocumentFieldHolder,
+          formKey: formHolder.controller!.globalKey,
+          formHolder: formHolder,
         );
       case fieldTypeBirthYear:
         field.title = Utilities.replaceIfNullOrEmpty(field.title, birthYearLabel());

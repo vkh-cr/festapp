@@ -69,11 +69,13 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isEventCancelled = _event?.isCancelled ?? false;
+
     return Scaffold(
       appBar: AppBar(
           backgroundColor: _event == null
               ? ThemeConfig.seed1
-              : ThemeConfig.eventTypeToColor(context, _event!.type),
+              : ThemeConfig.eventTypeToColor(context, _event?.type),
           title: Text(
             _event == null ? "Event".tr() : _event.toString(),
             style: TextStyle(fontWeight: FontWeight.bold, color: ThemeConfig.eventTypeToColorNegative(context, _event?.type)),
@@ -92,13 +94,16 @@ class _EventPageState extends State<EventPage> {
                     },
                     icon: Icon(
                       Icons.qr_code_scanner,
-                      color: ThemeConfig.eventTypeToColor(context, _event!.type),
+                      color: ThemeConfig.eventTypeToColorNegative(context, _event?.type),
                     )),
               ),
             ),
-            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
+            if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule) &&
+                (!(isEventCancelled && !(_event?.isEventInMySchedule ?? false)) &&
+                    (_event?.childEvents.isEmpty ?? false) &&
+                    ((_event?.maxParticipants ?? 0) == 0)))
               ...ButtonsHelper.getAddToMyProgramButton(
-                  _event?.canSaveEventToMyProgram(),
+                  _event?.canSaveEventToMyProgram() ?? false,
                   addToMySchedule,
                   removeFromMySchedule,
                   ThemeConfig.eventTypeToColorNegative(context, _event?.type),
@@ -110,6 +115,34 @@ class _EventPageState extends State<EventPage> {
           child: PinchScrollView(
             builder: (onPinchStart, onPinchEnd) => Column(
               children: [
+                if (isEventCancelled) // Using local variable for clarity
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 0),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: ThemeConfig.grey700(context),
+                        borderRadius: BorderRadius.circular(StylesConfig.commonRoundness),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.cancel_outlined, color: ThemeConfig.whiteColor(context), size: 22),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Cancelled".tr().toUpperCase(),
+                            style: TextStyle(
+                              color: ThemeConfig.whiteColor(context),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: LayoutBuilder(
@@ -126,14 +159,15 @@ class _EventPageState extends State<EventPage> {
                                 children: [
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
+                                          !isEventCancelled && // Modified
                                           !(_event?.isSignedIn??false) &&
                                           !EventModel.isEventFull(_event),
                                       child: ElevatedButton(
-                                          onPressed: () => signIn(),
+                                          onPressed: () => signIn(context), // signIn itself might also check, but button hidden
                                           child: const Text("Sign in").tr())),
                                   Visibility(
                                       visible: showLoginLogoutButton() &&
-                                          (_event?.isSignedIn??false),
+                                          (_event?.isSignedIn??false), // Sign out always possible if signed in
                                       child: ElevatedButton(
                                           onPressed: () => signOut(),
                                           child: const Text("Sign out").tr())),
@@ -236,10 +270,12 @@ class _EventPageState extends State<EventPage> {
                         padding: const EdgeInsets.all(8.0),
                         alignment: Alignment.topRight,
                         child: TextButton(
-                            onPressed: () => RouterService.navigateOccasion(
-                                context,
-                                "${MapPage.ROUTE}/${_event!.place!.id}")
-                                .then((value) => loadData(_event!.id!)),
+                            onPressed: () {
+                              RouterService.navigateOccasion(
+                                  context,
+                                  "${MapPage.ROUTE}/${_event!.place!.id}")
+                                  .then((value) => loadData(_event!.id!));
+                            },
                             child: IntrinsicWidth(
                               child: Row(
                                 children: [
@@ -252,7 +288,7 @@ class _EventPageState extends State<EventPage> {
                               ),
                             )))),
                 Visibility(
-                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn(),
+                  visible: EventModel.isEventSupportingSignIn(_event) && !AuthService.isLoggedIn() && !isEventCancelled, // Hide if cancelled
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: HtmlView(
@@ -273,7 +309,7 @@ class _EventPageState extends State<EventPage> {
                 ),
                 Visibility(
                     visible: EventModel.isEventFull(_event) &&
-                        AuthService.isLoggedIn(),
+                        AuthService.isLoggedIn() && !isEventCancelled,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: const Text(
@@ -402,16 +438,20 @@ class _EventPageState extends State<EventPage> {
     if (!await DbEvents.addToMySchedule(context, _event!.id!)) {
       return;
     }
-    setState(() {
-      _event!.isEventInMySchedule = true;
-    });
+    if (mounted) {
+      setState(() {
+        _event!.isEventInMySchedule = true;
+      });
+    }
   }
 
   Future<void> removeFromMySchedule() async {
     await DbEvents.removeFromMySchedule(context, _event!.id!);
-    setState(() {
-      _event!.isEventInMySchedule = false;
-    });
+    if (mounted) {
+      setState(() {
+        _event!.isEventInMySchedule = false;
+      });
+    }
   }
 
   bool showLoginLogoutButton() {
@@ -424,7 +464,12 @@ class _EventPageState extends State<EventPage> {
     await loadOfflineData(widget.id!);
 
     await loadEvent(id);
-    isLoadingEvent = false;
+    if(mounted) { // isLoadingEvent should be set after loadEvent completes
+      setState(() {
+        isLoadingEvent = false;
+      });
+    }
+
 
     if (RightsService.isEditor()) {
       await loadParticipants(id);
@@ -464,15 +509,17 @@ class _EventPageState extends State<EventPage> {
       _childDots.addAll(
           event.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
 
-      setState(() {
-        _event = event;
-      });
+      if(mounted) {
+        setState(() {
+          _event = event;
+        });
+      }
     }
   }
 
   Future<void> loadParticipants(int id) async {
     _participants = await DbEvents.getParticipantsPerEvent(id);
-    setState(() => {});
+    if(mounted) setState(() => {});
   }
 
   Future<void> loadEvent(int eventId) async {
@@ -482,7 +529,7 @@ class _EventPageState extends State<EventPage> {
       var group = await DbGroups.getUserGroupInfo(
           AuthService.currentUserGroup()!.id!);
       if (group == null) {
-        RouterService.goBack(context);
+        if (mounted) RouterService.goBack(context);
         return;
       }
       event.description = group.description;
@@ -490,7 +537,7 @@ class _EventPageState extends State<EventPage> {
       event.place = group.place;
       _groupInfoModel = group;
       _event = event;
-      setState(() {});
+      if(mounted) setState(() {});
       return;
     }
 
@@ -501,31 +548,33 @@ class _EventPageState extends State<EventPage> {
     _childDots.clear();
     _childDots.addAll(
         _event!.childEvents.map((e) => TimeBlockItem.fromEventModelAsChild(e)));
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
-  _eventPressed(int id) {
+  void _eventPressed(int id) {
     RouterService.navigateOccasion(context, "${EventPage.ROUTE}/$id")
         .then((value) => loadData(_event!.id!));
   }
 
-  Future<void> signIn([UserInfoModel? participant]) async {
+  Future<void> signIn(BuildContext context, [UserInfoModel? participant]) async {
     await DbEvents.signInToEvent(context, _event!.id!, participant);
     await loadData(_event!.id!);
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut() async { // Allowed for cancelled events if already signed in
     await DbEvents.signOutFromEvent(context, _event!.id!);
     await loadData(_event!.id!);
   }
 
   Future<void> signInCompanion() async {
     _companions = await DbCompanions.getAllCompanions();
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return CompanionDialog(
           eventId: _event!.id!,
+          isEventCancelled: _event?.isCancelled ?? false, // Pass cancellation status
           maxCompanions: FeatureService.getMaxCompanions()??0,
           companions: _companions,
           refreshData: () async {
@@ -536,7 +585,7 @@ class _EventPageState extends State<EventPage> {
     );
   }
 
-  Future<String?> signOutOther(UserInfoModel participant) {
+  Future<String?> signOutOther(UserInfoModel participant) { // Allowed for cancelled events
     return showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(

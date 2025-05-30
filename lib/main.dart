@@ -23,6 +23,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:pwa_install/pwa_install.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+
 Future<void> main() async {
   debugProfileBuildsEnabled = true;
   await initializeEverything();
@@ -77,6 +78,13 @@ Future<void> initializeEverything() async {
     }
   } catch (e) {
     print('Supabase initialization failed: $e');
+  }
+
+  try {
+    await TimeHelper.initializeTimeZone().timeout(const Duration(seconds: 2));
+    print('Tz setup completed');
+  } catch (e) {
+    print('Tz setup failed: $e');
   }
 
   try {

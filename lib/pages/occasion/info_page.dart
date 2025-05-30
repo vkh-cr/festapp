@@ -13,6 +13,7 @@ import 'package:fstapp/components/features/feature_constants.dart';
 import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/pages/occasion/game_page.dart';
 import 'package:fstapp/pages/occasion/song_page.dart';
+import 'package:fstapp/services/js/js_stub.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,6 @@ import 'package:fstapp/widgets/buttons_helper.dart';
 import 'package:fstapp/widgets/pop_button.dart';
 import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart';
 import '../../services/toast_helper.dart';
-import '../../services/js/js_interop.dart';
 import '../../widgets/html_view.dart';
 import '../utility/html_editor_page.dart';
 
