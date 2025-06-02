@@ -350,6 +350,7 @@ Deno.serve(async (req) => {
       currencyCode: paymentInfo.currency_code,
       amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       accountNumber: paymentInfo.account_number_human_readable,
+      iban: paymentInfo.account_number,
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formatDatetime(paymentInfo.deadline),
       fullOrder: generateFullOrder(

@@ -118,7 +118,7 @@ class DbUsers {
         });
   }
 
-  static updateOccasionUser(OccasionUserModel oum) async {
+  static Future<void> updateOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     if (oum.user == null) {
       oum.user = await unsafeCreateUser(oum.occasion!, oum.data?[Tb.occasion_users.data_email], "", oum.data);
@@ -153,7 +153,7 @@ class DbUsers {
         });
   }
 
-  static updateExistingImportedOccasionUser(OccasionUserModel oum) async {
+  static Future<void> updateExistingImportedOccasionUser(OccasionUserModel oum) async {
     await AuthService.ensureCanUpdateUsers(oum);
     await _supabase.from(Tb.occasion_users.table).upsert(
         oum.toImportedUpdateJson()
