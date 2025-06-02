@@ -19,6 +19,7 @@ DECLARE
     occasion_id BIGINT;
     organization_id BIGINT;
     occasion_title TEXT;
+    occasion_features JSONB;
     account_number TEXT;
     account_number_human_readable TEXT;
     ticket_details JSONB := '[]'::JSONB;
@@ -63,8 +64,8 @@ BEGIN
         END IF;
 
         -- Fetch organization and occasion title from the occasion
-        SELECT organization, title
-        INTO organization_id, occasion_title
+        SELECT organization, title, features
+        INTO organization_id, occasion_title, occasion_features
         FROM public.occasions
         WHERE id = occasion_id;
         IF organization_id IS NULL THEN
@@ -414,7 +415,9 @@ BEGIN
                 ),
                 'occasion', JSONB_BUILD_OBJECT(
                     'id', occasion_id,
-                    'occasion_title', occasion_title
+                    'organization', organization_id,
+                    'occasion_title', occasion_title,
+                    'features', occasion_features
                 )
             )
         );
