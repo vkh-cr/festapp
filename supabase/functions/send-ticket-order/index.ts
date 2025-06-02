@@ -2,7 +2,7 @@ import { sendEmailWithSubs } from "../_shared/emailClient.ts";
 import { formatCurrency } from "../_shared/utilities.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { qrcode } from "https://deno.land/x/qrcode/mod.ts";
-import { encode } "https://deno.land/std/encoding/base64.ts";
+import { encode } from "https://deno.land/std/encoding/base64.ts";
 import { createCanvas, loadImage } from "https://deno.land/x/canvas/mod.ts";
 import {
   getEmailTemplateAndWrapper,
@@ -86,7 +86,7 @@ function formatDatetime(datetime: string): string {
   }).format(new Date(datetime));
 }
 
-function generateFullOrder(orderData: any, tickets: any[]): string {
+function generateFullOrder(orderData: any, tickets: any[], occasionFeatures: any[]): string {
   const { name, surname, email, phone, note } = orderData;
 
   // Build personal info section
@@ -125,6 +125,9 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
             </tr>`;
 
   let overallTotal = 0;
+  const ticketFeature = occasionFeatures?.find(f => f.code === "ticket");
+  const itemLabel = ticketFeature?.is_enabled ? "Vstupenka" : "Přihláška";
+
   const ticketsDetails = tickets.map((ticket) => {
     const ticketSymbol = ticket.ticket_symbol;
 
@@ -165,7 +168,7 @@ function generateFullOrder(orderData: any, tickets: any[]): string {
                 <table cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse;">
                   <tr>
                     <td style="padding-left:12px; padding-bottom:8px;">
-                      <strong>Vstupenka ${ticketSymbol}</strong>
+                      <strong>${itemLabel} ${ticketSymbol}</strong>
                     </td>
                   </tr>
                   ${productsRows}
@@ -242,7 +245,7 @@ async function handleSupabaseFunctionService(
               bytes[i] = binaryString.charCodeAt(i);
             }
             attachments.push({
-              filename: `agreement-${ticketOrder.order.id}.pdf`,
+              filename: `smlouva-${ticketOrder.order.payment_info.variable_symbol}.pdf`,
               content: bytes,
               contentType: attachmentData.contentType,
               encoding: "binary",
@@ -332,13 +335,8 @@ Deno.serve(async (req) => {
 
     const occasion = ticketOrder.order.occasion;
     const paymentInfo = ticketOrder.order.payment_info;
-    const { data: occasionData } = await supabaseAdmin
-      .from("occasions")
-      .select("organization,link")
-      .eq("id", occasion.id)
-      .single();
     const context = {
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     };
     const { template, wrapper } = await getEmailTemplateAndWrapper(
@@ -357,6 +355,7 @@ Deno.serve(async (req) => {
       fullOrder: generateFullOrder(
         ticketOrder.order.data,
         ticketOrder.order.data.tickets,
+        occasion.features,
       ),
     };
 
@@ -374,7 +373,7 @@ Deno.serve(async (req) => {
       from: _DEFAULT_EMAIL,
       to: ticketOrder.order.data.email,
       template: template.id,
-      organization: occasionData.organization,
+      organization: occasion.organization,
       occasion: occasion.id,
     });
 
