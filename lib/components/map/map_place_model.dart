@@ -29,7 +29,7 @@ class MapPlaceModel {
       type: place.type,
       latLng: LatLng(place.getLat(), place.getLng()),
       icon: place.icon,
-      events: List<TimeBlockItem>.from(place.events.map((e)=>TimeBlockItem.fromEventModelTimeline(e)))
+      events: List<TimeBlockItem>.from(place.events.map((e)=>TimeBlockItem.fromEventModelBasicTimeline(e)))
     );
   }
 }
