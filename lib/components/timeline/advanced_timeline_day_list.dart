@@ -505,7 +505,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           if (_shouldShowCompanionButton(context, event, controller)) {
                             actionButtons.add(
                                 TextButton.icon(
-                                  onPressed: () => controller.onCompanionButtonPressed?.call(context, event.id),
+                                  onPressed: () => controller.onCompanionButtonPressed?.call(context, event),
                                   icon: Icon(Icons.people_outline, size: 14, color: selectedColor),
                                   label: Text('Companions'.tr(), style: TextStyle(color: selectedColor)),
                                   style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),

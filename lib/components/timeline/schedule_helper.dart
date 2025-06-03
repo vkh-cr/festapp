@@ -96,6 +96,7 @@ class TimeBlockItem {
   bool isInMySchedule() => timeBlockType == TimeBlockType.saved;
   bool haveChildren() => children?.isNotEmpty ?? false;
   bool isSupportingSignIn() => !isCancelled && maxParticipants > 0;
+  bool canSignIn() => isSupportingSignIn() && maxParticipants > participants;
   bool canSaveToMySchedule () => (!isSupportingSignIn()) && (!haveChildren());
 
   String durationTimeString() => "${DateFormat.Hm().format(startTime)} - ${DateFormat.Hm().format(endTime)}";

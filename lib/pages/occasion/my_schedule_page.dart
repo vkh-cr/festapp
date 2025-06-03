@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
@@ -156,19 +157,31 @@ class _MySchedulePageState extends State<MySchedulePage> {
     RouterService.navigatePageInfo(context, CheckRoute(id: eventId));
   }
 
-  Future<void> _handleCompanionButtonPressed(BuildContext context, int eventId) async {
+  Future<void> _handleCompanionButtonPressed(BuildContext context, TimeBlockItem timeBlockItem) async {
     List<CompanionModel> companions = await DbCompanions.getAllCompanions();
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
-        return CompanionDialog(
-          eventId: eventId,
-          maxCompanions: FeatureService.getMaxCompanions() ?? 0,
-          companions: companions,
-          refreshData: () async {
-            await loadData();
-          },
-        );
+        return StatefulBuilder(builder: (bCtx, setDialogState) {
+          return CompanionDialog(
+            eventId: timeBlockItem.id,
+            maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+            companions: companions,
+            refreshData: () async {
+              await loadData();
+              var refreshedCompanions = await DbCompanions.getAllCompanions();
+              if (mounted) {
+                setDialogState(() {
+                  companions = refreshedCompanions;
+                });
+              }
+            },
+            canSignIn: () {
+              final currentItem = _dots?.firstWhereOrNull((element) => element.id == timeBlockItem.id);
+              return currentItem?.canSignIn() ?? false;
+            },
+          );
+        });
       },
     );
   }
