@@ -187,7 +187,6 @@
   "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.",
   "Companion Name": "Companion Name",
   "Create Companion": "Create Companion",
-  "Sign in companion": "Sign in companion",
   "Show Code": "Show Code",
   "Show my code": "Show my code",
   "Create news": "Create news",
@@ -605,5 +604,15 @@
   "Early Registration Attempt Message": "Early Registration Attempt Message",
   "Enter message for users trying to register too early": "Enter message for users trying to register too early",
   "Nationality": "Nationality",
+  "Registration": "Registration",
+  "FeaturesStrings.labelScheduleType": "Schedule Type",
+  "FeaturesStrings.optionBasic": "basic",
+  "FeaturesStrings.optionAdvanced": "advanced",
+  "FeaturesStrings.labelBreakDefinition": "Break Definition",
+  "FeaturesStrings.optionTime": "time",
+  "FeaturesStrings.optionPlace": "place",
+  "FeaturesStrings.titleTimeBasedBreaks": "Time-based Breaks",
+  "FeaturesStrings.labelAfternoonTime": "Afternoon starts at",
+  "FeaturesStrings.labelEveningTime": "Evening starts at",
   "_":"_"
 }

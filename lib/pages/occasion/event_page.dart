@@ -180,7 +180,7 @@ class _EventPageState extends State<EventPage> {
                                         child: ElevatedButton(
                                             onPressed: () => signInCompanion(),
                                             child:
-                                            const Text("Sign in companion")
+                                            const Text("Companions")
                                                 .tr()),
                                       )),
                                   Visibility(
@@ -569,16 +569,24 @@ class _EventPageState extends State<EventPage> {
   Future<void> signInCompanion() async {
     _companions = await DbCompanions.getAllCompanions();
     if (!mounted) return;
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
-        return CompanionDialog(
-          eventId: _event!.id!,
-          isEventCancelled: _event?.isCancelled ?? false, // Pass cancellation status
-          maxCompanions: FeatureService.getMaxCompanions()??0,
-          companions: _companions,
-          refreshData: () async {
-            await loadData(widget.id!);
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return CompanionDialog(
+              eventId: _event!.id!,
+              canSignIn: () => _event!.canSignIn(),
+              maxCompanions: FeatureService.getMaxCompanions() ?? 0,
+              companions: _companions,
+              refreshData: () async {
+                await loadData(widget.id!);
+                _companions = await DbCompanions.getAllCompanions();
+                if (mounted) {
+                  setState(() {});
+                }
+              },
+            );
           },
         );
       },
