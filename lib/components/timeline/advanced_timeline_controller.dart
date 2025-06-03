@@ -20,7 +20,7 @@ class AdvancedTimelineController {
 
   // New callbacks and properties
   final void Function(BuildContext context, int eventId)? onScanButtonPressed;
-  final void Function(BuildContext context, int eventId)? onCompanionButtonPressed;
+  final void Function(BuildContext context, TimeBlockItem timeBlockItem)? onCompanionButtonPressed;
   final bool Function()? isUserApprover;
 
   AdvancedTimelineController({
