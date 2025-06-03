@@ -57,6 +57,10 @@ class EventModel extends ITrinaRowModel {
     return isEventInMySchedule == false;
   }
 
+  bool canSignIn() {
+    return isEventSupportingSignIn(this) && currentParticipants! < maxParticipants!;
+  }
+
   DateTime startTime;
   DateTime endTime;
 

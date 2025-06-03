@@ -117,6 +117,13 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         },
         contentsBuilder: (_, index) {
           final event = events[index];
+          TextStyle eventTitleStyle = StylesConfig.timeLineSmallTextStyle;
+          if (event.isCancelled == true) {
+            eventTitleStyle = eventTitleStyle.copyWith(
+              decoration: TextDecoration.lineThrough,
+              color: ThemeConfig.grey600(context),
+            );
+          }
           return TextButton(
             onPressed: () => widget.onEventPressed?.call(event.id),
             style: TextButton.styleFrom(
@@ -125,7 +132,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             ),
             child: Text(
               StylesConfig.formatTimelineRightText(event.data["rightText"]),
-              style: StylesConfig.timeLineSmallTextStyle,
+              style: eventTitleStyle,
             ),
           );
         },

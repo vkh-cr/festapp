@@ -165,11 +165,12 @@ extension DateTimeExtension on DateTime {
     }
 
     if (this is tz.TZDateTime) {
-      return tz.TZDateTime.from(this, location).native;
+      return tz.TZDateTime.from(this, location);
     }
 
     if (isUtc) {
-      return tz.TZDateTime.from(this, location).native;
+      var ntv = tz.TZDateTime.from(this, location);
+      return ntv;
     } else {
       return tz.TZDateTime(
         location,
@@ -181,7 +182,7 @@ extension DateTimeExtension on DateTime {
         second,
         millisecond,
         microsecond,
-      ).native;
+      );
     }
   }
 

@@ -187,7 +187,6 @@
   "If you have a child, partner or friend without a phone, you can sign them in as a companion. They will need a festival band to enter the event. Maximal number of companions is {max_companions}.": "Pokud máte dítě, partnera nebo kamaráda bez telefonu, můžete je přihlásit jako společníka. K vstupu na akci budou potřebovat festivalový náramek. Maximální počet společníků je {max_companions}.",
   "Companion Name": "Jméno společníka",
   "Create Companion": "Vytvořit společníka",
-  "Sign in companion": "Přihlásit společníka",
   "Show Code": "Zobrazit kód",
   "Show my code": "Zobrazit můj kód",
   "Create news": "Vytvořit novinku",
@@ -605,5 +604,15 @@
   "Early Registration Attempt Message": "Zpráva o pokusu o předčasnou registraci",
   "Enter message for users trying to register too early": "Zadejte zprávu pro uživatele, kteří se pokoušejí registrovat příliš brzy",
   "Nationality": "Státní příslušnost",
+  "Registration": "Přihláška",
+  "FeaturesStrings.labelScheduleType": "Typ zobrazení programu",
+  "FeaturesStrings.optionBasic": "základní",
+  "FeaturesStrings.optionAdvanced": "pokročilý",
+  "FeaturesStrings.labelBreakDefinition": "Definice rozdělení",
+  "FeaturesStrings.optionTime": "čas",
+  "FeaturesStrings.optionPlace": "místo",
+  "FeaturesStrings.titleTimeBasedBreaks": "Časově definované rozdělení",
+  "FeaturesStrings.labelAfternoonTime": "Odpoledne začíná v",
+  "FeaturesStrings.labelEveningTime": "Večer začíná v",
   "_": "_"
 }
