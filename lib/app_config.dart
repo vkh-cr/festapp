@@ -32,8 +32,6 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
-  static const bool isSplitByPlace = false;
-
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;

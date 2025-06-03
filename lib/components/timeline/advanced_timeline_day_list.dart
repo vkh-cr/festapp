@@ -41,8 +41,7 @@ class DayList extends StatelessWidget {
       return controller.emptyContent!;
     }
 
-    final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ??
-        TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
+    final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ?? TimeBlockHelper.groupEventsByFeatureSettings(events);
 
     final children = <Widget>[];
 

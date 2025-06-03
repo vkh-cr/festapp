@@ -606,5 +606,14 @@
   "Enter message for users trying to register too early": "Enter message for users trying to register too early",
   "Nationality": "Nationality",
   "Registration": "Registration",
+  "FeaturesStrings.labelScheduleType": "Schedule Type",
+  "FeaturesStrings.optionBasic": "basic",
+  "FeaturesStrings.optionAdvanced": "advanced",
+  "FeaturesStrings.labelBreakDefinition": "Break Definition",
+  "FeaturesStrings.optionTime": "time",
+  "FeaturesStrings.optionPlace": "place",
+  "FeaturesStrings.titleTimeBasedBreaks": "Time-based Breaks",
+  "FeaturesStrings.labelAfternoonTime": "Afternoon starts at",
+  "FeaturesStrings.labelEveningTime": "Evening starts at",
   "_":"_"
 }

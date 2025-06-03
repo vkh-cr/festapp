@@ -1,7 +1,9 @@
 // schedule_helper.dart
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:fstapp/app_config.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_models/tb.dart';
@@ -108,7 +110,7 @@ class TimeBlockItem {
   }
 
   /// Factory from EventModel for schedule timeline (new usage).
-  factory TimeBlockItem.fromEventModelTimeline(EventModel model) {
+  factory TimeBlockItem.fromEventModelBasicTimeline(EventModel model) {
     return TimeBlockItem(
       id: model.id!,
       startTime: model.startTime,
@@ -202,25 +204,63 @@ class TimeBlockHelper {
     return TimeBlockType.noAction;
   }
 
+  static List<TimeBlockGroup> groupEventsByFeatureSettings(Iterable<TimeBlockItem> events) {
+    final feature = FeatureService.getFeatureDetails(ScheduleFeature.metaSchedule);
+    if (feature is ScheduleFeature) {
+      if (feature.breakDefinition == ScheduleFeature.breakDefinitionPlace) {
+        return TimeBlockHelper.splitTimeBlockByPlace(events);
+      }
+      // Default to time-based
+      return TimeBlockHelper.splitTimeBlocksByTimeOfDay(
+        events,
+        afternoonStartTime: feature.afternoonBreakTime,
+        eveningStartTime: feature.eveningBreakTime,
+      );
+    }
+    // Fallback to original hardcoded behavior
+    return TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
+  }
+
   static List<TimeBlockGroup> splitTimeBlockByPlace(
       Iterable<TimeBlockItem> events) {
-    Map<int?, List<TimeBlockItem>> grouped = {};
+    Map<int?, List<TimeBlockItem>> groupedByPlaceId = {};
     for (var event in events) {
-      grouped.putIfAbsent(event.timeBlockPlace?.id, () => []).add(event);
+      groupedByPlaceId.putIfAbsent(event.timeBlockPlace?.id, () => []).add(event);
     }
-    var groups = grouped.entries.map((entry) {
+
+    List<TimeBlockGroup> allGroups = groupedByPlaceId.entries.map((entry) {
+      // For entries where key is null (no place), place will be null.
+      // For other entries, place will be derived from the first event in that group.
       var place = entry.value.first.timeBlockPlace;
       return TimeBlockGroup(
-        title: place?.title ?? '',
+        title: place?.title ?? "---",
         events: entry.value,
       );
     }).toList();
-    groups.sort((a, b) {
-      var oa = a.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
-      var ob = b.events.first.timeBlockPlace?.order ?? double.maxFinite.toInt();
+
+    // Separate the group with no specific place
+    final noPlaceGroup = allGroups.firstWhereOrNull(
+            (group) => group.events.isNotEmpty && group.events.first.timeBlockPlace == null
+    );
+
+    // Get groups that have a specific place and sort them
+    List<TimeBlockGroup> placedGroups = allGroups.where(
+            (group) => group.events.isNotEmpty && group.events.first.timeBlockPlace != null
+    ).toList();
+
+    placedGroups.sort((a, b) {
+      // Since these are placedGroups, timeBlockPlace is guaranteed to be non-null.
+      var oa = a.events.first.timeBlockPlace!.order ?? double.maxFinite.toInt();
+      var ob = b.events.first.timeBlockPlace!.order ?? double.maxFinite.toInt();
       return oa.compareTo(ob);
     });
-    return groups;
+
+    // Add the no-place group at the end, if it exists
+    if (noPlaceGroup != null) {
+      placedGroups.add(noPlaceGroup);
+    }
+
+    return placedGroups;
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDay(
@@ -235,16 +275,6 @@ class TimeBlockHelper {
     return map.entries.map((en) {
       return TimeBlockGroup(title: en.key, events: en.value);
     }).toList();
-  }
-
-  static List<TimeBlockGroup> splitTimeBlocks(
-      Iterable<TimeBlockItem> events) {
-    if (AppConfig.isSplitByPlace) {
-      return splitTimeBlockByPlace(
-          events.where((e) => e.timeBlockPlace != null));
-    } else {
-      return splitTimeBlocksByTimeOfDay(events);
-    }
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByDate(
@@ -272,14 +302,15 @@ class TimeBlockHelper {
   }
 
   static List<TimeBlockGroup> splitTimeBlocksByTimeOfDay(
-      Iterable<TimeBlockItem> events) {
-    List<TimeBlockItem> morning =
-    events.where((e) => e.startTime.hour <= 12).toList();
+      Iterable<TimeBlockItem> events, {
+        TimeOfDay afternoonStartTime = const TimeOfDay(hour: 12, minute: 0),
+        TimeOfDay eveningStartTime = const TimeOfDay(hour: 18, minute: 0),
+      }) {
+    List<TimeBlockItem> morning = events.where((e) => e.startTime.hour < afternoonStartTime.hour).toList();
     List<TimeBlockItem> afternoon = events
-        .where((e) => e.startTime.hour > 12 && e.startTime.hour < 18)
+        .where((e) => e.startTime.hour >= afternoonStartTime.hour && e.startTime.hour < eveningStartTime.hour)
         .toList();
-    List<TimeBlockItem> evening =
-    events.where((e) => e.startTime.hour >= 18).toList();
+    List<TimeBlockItem> evening = events.where((e) => e.startTime.hour >= eveningStartTime.hour).toList();
 
     bool multi = [morning, afternoon, evening]
         .where((g) => g.isNotEmpty)
@@ -289,7 +320,7 @@ class TimeBlockHelper {
         TimeBlockGroup(title: multi ? t.tr() : '', events: ev);
 
     return [
-      make('', morning),
+      if (morning.isNotEmpty) make('', morning),
       if (afternoon.isNotEmpty) make('Afternoon', afternoon),
       if (evening.isNotEmpty) make('Evening', evening),
     ];
