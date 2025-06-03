@@ -133,19 +133,27 @@ class TimeHelper {
 
 extension DateTimeExtension on DateTime {
   DateTime roundDown({Duration delta = const Duration(hours: 1)}) {
-    return DateTime.fromMillisecondsSinceEpoch(
-        millisecondsSinceEpoch - millisecondsSinceEpoch % delta.inMilliseconds, isUtc: isUtc);
+    final ms = millisecondsSinceEpoch;
+    final roundedMs = ms - ms % delta.inMilliseconds;
+    if (this is tz.TZDateTime) {
+      return tz.TZDateTime.fromMillisecondsSinceEpoch(
+          (this as tz.TZDateTime).location, roundedMs);
+    }
+    return DateTime.fromMillisecondsSinceEpoch(roundedMs, isUtc: isUtc);
   }
 
   DateTime roundUp({Duration delta = const Duration(hours: 1)}) {
-    int mod = millisecondsSinceEpoch % delta.inMilliseconds;
+    final ms = millisecondsSinceEpoch;
+    final mod = ms % delta.inMilliseconds;
     if (mod == 0) {
       return this;
-    } else {
-      return DateTime.fromMillisecondsSinceEpoch(
-          millisecondsSinceEpoch - mod + delta.inMilliseconds,
-          isUtc: isUtc);
     }
+    final roundedMs = ms - mod + delta.inMilliseconds;
+    if (this is tz.TZDateTime) {
+      return tz.TZDateTime.fromMillisecondsSinceEpoch(
+          (this as tz.TZDateTime).location, roundedMs);
+    }
+    return DateTime.fromMillisecondsSinceEpoch(roundedMs, isUtc: isUtc);
   }
 
   double get hourInDouble {
