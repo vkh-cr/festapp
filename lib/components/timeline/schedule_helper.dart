@@ -17,7 +17,6 @@ enum TimeBlockType {
   signedIn,    // user is signed in
   isFull,      // event full
   canSignIn,   // can sign in
-  activity,   // can sign in
 }
 
 /// Represents an optional place or "track" for splitting.
@@ -61,6 +60,7 @@ class TimeBlockItem {
   final int maxParticipants;
   final String? imageUrl;
   final bool isCancelled;
+  final bool isActivity;
   /// Nested child time blocks
   List<TimeBlockItem>? children;
 
@@ -79,7 +79,8 @@ class TimeBlockItem {
     this.maxParticipants = 0,
     this.children,
     this.imageUrl,
-    this.isCancelled = false, // Added default
+    this.isCancelled = false,
+    this.isActivity = false
   });
 
   /// Duration of the block.
@@ -161,7 +162,9 @@ class TimeBlockItem {
         "leftText": model.durationTimeString(),
         "rightText": model.toString()
       },
-      timeBlockPlace: null,
+      timeBlockPlace: model.place != null && model.place!.id != null
+          ? TimeBlockPlace.fromPlaceModel(model.place!)
+          : null,
       isCancelled: model.isCancelled, // Added
     );
   }

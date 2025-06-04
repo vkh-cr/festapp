@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/app_config.dart';
 import 'package:fstapp/data_services/db_occasions.dart';
 import 'package:fstapp/data_services/db_users.dart';
 import 'package:fstapp/data_services/rights_service.dart';
@@ -49,20 +50,26 @@ class OccasionUserModel extends ITrinaRowModel {
     );
   }
 
-  dynamic toUpdateJson() => {
-    Tb.occasion_users.occasion: RightsService.currentOccasionId(),
-    Tb.occasion_users.user: user,
-    Tb.occasion_users.is_editor: isEditor ?? false,
-    Tb.occasion_users.is_editor_view: isEditorView ?? false,
-    Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
-    Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
-    Tb.occasion_users.is_approver: isApprover ?? false,
-    Tb.occasion_users.is_approved: isApproved ?? false,
-    Tb.occasion_users.is_manager: isManager ?? false,
-    Tb.occasion_users.role: role,
-    Tb.occasion_users.data: data,
-    Tb.occasion_users.services: services,
-  };
+  dynamic toUpdateJson() {
+      if (AppConfig.areAllVolunteersApprovers && data![Tb.occasion_users.data_is_volunteer] == true) {
+        isApprover = true;
+      }
+
+      return {
+        Tb.occasion_users.occasion: RightsService.currentOccasionId(),
+        Tb.occasion_users.user: user,
+        Tb.occasion_users.is_editor: isEditor ?? false,
+        Tb.occasion_users.is_editor_view: isEditorView ?? false,
+        Tb.occasion_users.is_editor_order: isEditorOrder ?? false,
+        Tb.occasion_users.is_editor_order_view: isEditorOrderView ?? false,
+        Tb.occasion_users.is_approver: isApprover ?? false,
+        Tb.occasion_users.is_approved: isApproved ?? false,
+        Tb.occasion_users.is_manager: isManager ?? false,
+        Tb.occasion_users.role: role,
+        Tb.occasion_users.data: data,
+        Tb.occasion_users.services: services,
+    };
+  }
 
   factory OccasionUserModel.fromImportedJson(Map<String, dynamic> json, [OccasionUserModel? original]) {
     return OccasionUserModel(
