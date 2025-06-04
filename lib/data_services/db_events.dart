@@ -1,6 +1,5 @@
 import 'dart:collection';
 
-import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/app_config.dart';
@@ -27,139 +26,6 @@ import 'get_events_helper.dart';
 
 class DbEvents {
   static final _supabase = Supabase.instance.client;
-
-  static Future<void> loadEventsParticipantsAndStatus(List<EventModel> events)
-  async {
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select("${Tb.events.id}, ${Tb.event_users.table}(count)")
-        .inFilter(Tb.events.id, events.map((e)=>e.id).toList());
-
-    var eventList = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    if(AuthService.isLoggedIn())
-    {
-      await DbEvents.loadIsCurrentUserSignedIn(eventList);
-    }
-
-    for(var e in events)
-    {
-      var eq = eventList.firstWhere((element) => element.id == e.id);
-      e.currentParticipants = eq.currentParticipants;
-      e.isSignedIn = eq.isSignedIn;
-    }
-
-    if(AppConfig.isOwnProgramSupported)
-    {
-      await loadIsInMySchedule(events);
-    }
-  }
-
-  static Future<void> loadIsInMySchedule(List<EventModel> events) async {
-    var set = EventModel.CreateEventModelSet();
-    var local = await loadAllMyScheduleOffline();
-    set.addAll(local);
-    if(AuthService.isLoggedIn())
-    {
-      var remote = await loadAllMySchedule();
-      set.addAll(remote);
-    }
-
-    for(var e in set)
-    {
-      var eq = events.firstWhereOrNull((element) => element.id == e.id);
-      if(eq == null) {
-        continue;
-      }
-      eq.isEventInMySchedule = e.isEventInMySchedule;
-    }
-  }
-
-  static Future<List<EventModel>> getEventsForTimeline([bool onlyForSignedIn = false]) async {
-    if(onlyForSignedIn)
-    {
-      List<EventModel> data = [];
-      if(AppConfig.isOwnProgramSupported)
-      {
-        data = (await loadAllMyScheduleOffline()).toList();
-
-        if(!AuthService.isLoggedIn()) {
-          return data.toList();
-        }
-
-        var remote = await loadAllMySchedule();
-        data.addAll(remote);
-      } else if(!AuthService.isLoggedIn()) {
-        return data;
-      }
-
-      var dataSignedIn = await _supabase
-          .from(Tb.events.table)
-          .select("${Tb.events.id},"
-          "${Tb.events.title},"
-          "${Tb.events.start_time},"
-          "${Tb.events.end_time},"
-          "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-          "${Tb.events.type},"
-          "${Tb.events.max_participants},"
-          "${Tb.events.is_group_event},"
-          "${Tb.event_users.table}!inner(*)")
-          .eq("${Tb.event_users.table}.${Tb.event_users.user}", AuthService.currentUserId())
-          .eq(Tb.events.is_hidden, false)
-          .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
-          .order(Tb.events.start_time, ascending: true)
-          .order(Tb.events.max_participants, ascending: false);
-
-      data.addAll(List<EventModel>.from(
-          dataSignedIn.map((x) => EventModel.fromJson(x))));
-
-      //join group events
-      if(AuthService.hasGroup())
-      {
-        var groupData = await _supabase
-            .from(Tb.events.table)
-            .select(
-            "${Tb.events.id},"
-                "${Tb.events.title},"
-                "${Tb.events.start_time},"
-                "${Tb.events.end_time},"
-                "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-                "${Tb.events.type},"
-                "${Tb.events.max_participants},"
-                "${Tb.events.is_group_event}")
-            .eq(EventModel.isGroupEventColumn, true)
-            .eq(Tb.events.is_hidden, false)
-            .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
-            .order(Tb.events.start_time, ascending: true);
-        data.addAll(List<EventModel>.from(
-            groupData.map((x) => EventModel.fromJson(x))));
-      }
-
-      return data.toList();
-    }
-    var data = await _supabase
-        .from(Tb.events.table)
-        .select(
-        "${Tb.events.id},"
-            "${Tb.events.title},"
-            "${Tb.events.start_time},"
-            "${Tb.events.end_time},"
-            "${Tb.places.table}(${Tb.places.id}, ${Tb.places.title}),"
-            "${Tb.events.type},"
-            "${Tb.events.max_participants},"
-            "${Tb.events.is_group_event}, "
-            "${Tb.event_groups.table}!${Tb.event_groups.table}_${Tb.event_groups.event_parent}_fkey(${Tb.event_groups.event_child})")
-        .eq(Tb.events.is_hidden, false)
-        .eq(Tb.events.occasion, RightsService.currentOccasionId()!)
-        .order(Tb.events.start_time, ascending: true)
-        .order(Tb.events.max_participants, ascending: false);
-
-    var events = List<EventModel>.from(
-        data.map((x) => EventModel.fromJson(x)));
-
-    return events;
-  }
 
   static Future<HashSet<EventModel>> loadAllMySchedule() async {
     var dataEventUsersSaved = await _supabase
@@ -435,49 +301,6 @@ class DbEvents {
         ToastHelper.Show(context, "Cannot sign in!".tr(), severity: ToastSeverity.NotOk);
         return;
     }
-  }
-
-  //avoid loosing participant count by updating each event individually
-  static Future<void> updateEvents(List<EventModel> events, [bool onlyForSignedIn = false]) async {
-    var updatedEvents = await getEventsForTimeline(onlyForSignedIn);
-    for (var e in updatedEvents) {
-      var eventToChange =
-      events.firstWhereOrNull((eve) => eve.id == e.id);
-      if (eventToChange != null) {
-        eventToChange.copyFromEvent(e);
-      } else {
-        events.add(e);
-      }
-    }
-    var remove = events.where((d) => !updatedEvents.any((e)=>d.id == e.id)).toList();
-    for(var r in remove)
-    {
-      events.remove(r);
-    }
-
-    //rewrite group names for group events
-    for(var e in events)
-    {
-      if((e.isGroupEvent ?? false) && AuthService.hasGroup())
-      {
-        e.title = AuthService.currentUserGroup()!.title;
-        e.isMyGroupEvent = true;
-      }
-    }
-
-    events.sort((a, b)
-    {
-      var cmp = a.startTime.compareTo(b.startTime);
-      if (cmp == 0)
-      {
-        cmp = b.maxParticipantsNumber().compareTo(a.maxParticipantsNumber());
-      }
-      if (cmp == 0)
-      {
-        cmp = a.title!.compareTo(b.title!);
-      }
-      return cmp;
-    });
   }
 
   static Future<bool> isEventSaved(int id) async {
