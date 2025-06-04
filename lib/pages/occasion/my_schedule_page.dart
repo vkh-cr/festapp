@@ -7,6 +7,7 @@ import 'package:fstapp/components/features/feature_service.dart';
 import 'package:fstapp/components/features/schedule_feature.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_controller.dart';
 import 'package:fstapp/components/timeline/advanced_timeline_day_list.dart';
+import 'package:fstapp/data_models/user_info_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/event_edit_page.dart';
@@ -18,10 +19,10 @@ import 'package:fstapp/data_services/offline_data_service.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
 import 'package:fstapp/pages/occasion/event_page.dart';
-import 'package:fstapp/app_router.gr.dart'; // Added for CheckRoute
-import 'package:fstapp/dialogs/companion_dialog.dart'; // Added for CompanionDialog
-import 'package:fstapp/data_services/db_companions.dart'; // Added for DbCompanions
-import 'package:fstapp/data_models/companion_model.dart'; // Added for CompanionModel
+import 'package:fstapp/app_router.gr.dart';
+import 'package:fstapp/dialogs/companion_dialog.dart';
+import 'package:fstapp/data_services/db_companions.dart';
+import 'package:fstapp/data_models/companion_model.dart';
 
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -40,7 +41,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   bool _fullEventsLoaded = false;
   bool? _isAdvancedTimeline = false;
-  final Map<int, String?> _eventDescriptions = {};
+  final Map<int, String?> _eventAndActivitiesDescriptions = {};
   int? _openId;
 
   @override
@@ -58,8 +59,13 @@ class _MySchedulePageState extends State<MySchedulePage> {
 
   Future<void> _loadFullData() async {
     _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+
+    // init _eventAndActivitiesDescriptions
     for (var e in _data!.events) {
-      if (e.id != null) _eventDescriptions[e.id!] = e.description;
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
+    }
+    for (var e in _data!.activities) {
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
     _fullEventsLoaded = true;
   }
@@ -73,24 +79,39 @@ class _MySchedulePageState extends State<MySchedulePage> {
     } else {
       _data = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, false);
       for (var e in _data!.events) {
-        if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
-          e.description = _eventDescriptions[e.id!];
+        if (e.id != null && _eventAndActivitiesDescriptions.containsKey(e.id!)) {
+          e.description = _eventAndActivitiesDescriptions[e.id!];
+        }
+      }
+      for (var e in _data!.activities) {
+        if (e.id != null && _eventAndActivitiesDescriptions.containsKey(e.id!)) {
+          e.description = _eventAndActivitiesDescriptions[e.id!];
         }
       }
     }
+    
+    var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities, _data!.events);
 
+    var events = _data!.events.where((e) => canBeShownInMySchedule(RightsService.currentUser(), e));
     if (_isAdvancedTimeline ?? false) {
-      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
-      var actDots = ActivityDataHelper.activitiesToTimeBlocks(_data!.activities);
-      _dots!.addAll(actDots);
+      _dots = events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
     } else {
-      _dots = _data!.events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
+      _dots = events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
+
+    _dots!.addAll(actDots);
 
     _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
     setState(() {});
 
-    await DbEvents.synchronizeMySchedule(currentIds: _data!.events.map((e)=>e.id!).toList());
+    await DbEvents.synchronizeMySchedule(currentIds: events.where((e)=>e.isEventInMySchedule == true).map((e)=>e.id!).toList());
+  }
+  
+  bool canBeShownInMySchedule(UserInfoModel? userInfo, EventModel e) {
+    return
+    e.isEventInMySchedule == true ||
+        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
+        (e.isSignedIn ?? false);
   }
 
   Future<void> loadDataOffline() async {
@@ -99,22 +120,32 @@ class _MySchedulePageState extends State<MySchedulePage> {
     await OfflineDataService.updateEventsWithGroupName(offlineEvents);
     var userInfo = await OfflineDataService.getUserInfo();
 
-    var myEvents = offlineEvents.where((e) =>
-    e.isEventInMySchedule == true ||
-        ((e.isGroupEvent ?? false) && (userInfo?.hasGroup() ?? false)) ||
-        (e.isSignedIn ?? false));
+    var myEvents = offlineEvents.where((e) => canBeShownInMySchedule(userInfo, e));
+
+
 
     _events.clear();
     _events.addAll(myEvents);
+    
+    var activities = await OfflineDataService.getAllActivities();
 
+    // init _eventAndActivitiesDescriptions
+    for (var e in myEvents) {
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
+    }
+    for (var e in activities) {
+      if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
+    }
+
+    var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, _events);
+    
     if (_isAdvancedTimeline??false) {
       _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();
-      var activities = await OfflineDataService.getAllActivities();
-      var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities);
-      _dots!.addAll(actDots);
     } else {
       _dots = _events.map((e) => TimeBlockItem.fromEventModelAsChild(e)).toList();
     }
+
+    _dots!.addAll(actDots);
 
     _dots!.sort((a, b) => a.startTime.compareTo(b.startTime));
 
@@ -244,7 +275,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
             alignment: Alignment.topCenter,
             child:
             _dots == null ?
-            Center(child: CircularProgressIndicator()) :
+            const Center(child: CircularProgressIndicator()) :
             ConstrainedBox(
                 constraints: BoxConstraints(maxWidth: StylesConfig.appMaxWidth),
                 child: body)));

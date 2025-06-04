@@ -1,8 +1,12 @@
+// schedule_timeline.dart
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
+import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/services/html_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
+import 'package:fstapp/widgets/html_view.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 class ScheduleTimeline extends StatefulWidget {
@@ -13,6 +17,7 @@ class ScheduleTimeline extends StatefulWidget {
   final Function(BuildContext, List<TimeBlockGroup>, TimeBlockItem? parentEventId)? onAddNewEvent;
   final bool Function()? showAddNewEventButton;
   final TimeBlockItem? parentEvent;
+  final bool isGroupTitleShown;
 
   const ScheduleTimeline({
     super.key,
@@ -22,7 +27,8 @@ class ScheduleTimeline extends StatefulWidget {
     this.emptyContent,
     this.onAddNewEvent,
     this.showAddNewEventButton,
-    this.parentEvent
+    this.parentEvent,
+    this.isGroupTitleShown = true
   });
 
   @override
@@ -41,7 +47,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       var timeLineItems = group.events.toList();
       children.add(
         Visibility(
-          visible: group.title.isNotEmpty,
+          visible: group.title.isNotEmpty && widget.isGroupTitleShown,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
             child: Text(
@@ -125,7 +131,21 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             );
           }
           return TextButton(
-            onPressed: () => widget.onEventPressed?.call(event.id),
+            onPressed: () {
+              if (event.isActivity) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DetailDialog(
+                      title: "${event.title} ${event.durationTimeString()}",
+                      customContentWidget: activityContent(event),
+                    );
+                  },
+                );
+              } else {
+                widget.onEventPressed?.call(event.id);
+              }
+            },
             style: TextButton.styleFrom(
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
@@ -163,5 +183,30 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         },
       ),
     );
+  }
+
+  Widget activityContent(TimeBlockItem event) {
+      return Column(
+        children: [
+          if (event.haveChildren())
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: ScheduleTimeline(
+              eventGroups: TimeBlockHelper.splitTimeBlockByPlace(event.children!),
+              onEventPressed: widget.onEventPressed,
+              showAddNewEventButton: () {return ((widget.showAddNewEventButton?.call() ?? false) && !event.isActivity);},
+              onAddNewEvent: widget.onAddNewEvent,
+              parentEvent: event,
+              nodePosition: 0.35,
+              isGroupTitleShown: false,
+            ),
+          ),
+          if (!HtmlHelper.isHtmlEmptyOrNull(event.description))
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HtmlView(html: event.description ?? "", isSelectable: true),
+            ),
+        ],
+      );
   }
 }

@@ -1,6 +1,9 @@
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/data_services/db_events.dart';
+import 'package:intl/intl.dart';
 
 class ActivityDataHelper {
   static List<ActivityModel> parseActivities(Map<String, dynamic> j) =>
@@ -122,7 +125,7 @@ class ActivityDataHelper {
     }
   }
 
-  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities) {
+  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities, List<EventModel> events) {
     final List<TimeBlockItem> timeBlocks = [];
     // Set to keep track of processed assignment IDs to prevent duplicates
     final Set<String> processedAssignmentIds = {};
@@ -153,19 +156,40 @@ class ActivityDataHelper {
           }
         }
 
+        List<TimeBlockItem> children = [];
+
+        if (timeBlockPlace != null) {
+          children = events
+              .where((event) =>
+          // Check if the event is at the same place
+          event.place?.id == timeBlockPlace!.id &&
+              // Check for overlap:
+              // The event must end after or at the assignment's start, AND
+              // the event must start before or at the assignment's end.
+              !event.endTime.isBefore(assignment.startTime!) &&
+              !event.startTime.isAfter(assignment.endTime!))
+              .map((event) => TimeBlockItem.fromEventModelAsChild(event))
+              .toList();
+        }
+
         final timeBlockId = assignment.id.hashCode;
 
         timeBlocks.add(TimeBlockItem(
           id: timeBlockId,
           startTime: assignment.startTime!,
           endTime: assignment.endTime!,
-          title: activity.title ?? '', // Title from ActivityModel
-          description: activity.description, // Description from ActivityModel
-          timeBlockType: TimeBlockType.activity, // Default type
-          data: assignment, // Store the original assignment
+          title: activity.title ?? '',
+          description: activity.description,
+          timeBlockType: TimeBlockType.signedIn,
+          isActivity: true,
+          data: {
+            "leftText": "${DateFormat.Hm().format(assignment.startTime!)} - ${DateFormat.Hm().format(assignment.endTime!)}",
+            "rightText": activity.title
+          },
           timeBlockPlace: timeBlockPlace,
           participants: 0,
           maxParticipants: 0,
+          children: children,
         ));
         // Add the assignment ID to the set of processed IDs
         processedAssignmentIds.add(assignment.id);
@@ -173,4 +197,5 @@ class ActivityDataHelper {
     }
     return timeBlocks;
   }
+
 }

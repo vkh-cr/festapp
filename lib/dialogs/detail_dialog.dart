@@ -35,7 +35,7 @@ class _DetailDialogState extends State<DetailDialog> {
         children: [
           Expanded(
             child: SelectableText(
-              widget.title, // Use the passed-in title
+              widget.title,
             ),
           ),
           IconButton(
@@ -45,51 +45,55 @@ class _DetailDialogState extends State<DetailDialog> {
         ],
       ),
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400), // Consider making these configurable if needed
-        child: PinchScrollView( // PinchScrollView kept for description zooming
-          builder: (onPinchStart, onPinchEnd) => Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min, // Important for Column in ScrollView
-            children: [
-              // Edit button, shown if canEdit is true and onEditPressed is provided
-              if (widget.canEdit && widget.onEditPressed != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: TextButton.icon(
-                    onPressed: _handleEditPressed,
-                    icon: const Icon(Icons.edit), // Generic edit icon
-                    label: Text('Edit'.tr()), // Generic edit text
+        constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400),
+        child: SizedBox(
+          height: widget.customContentWidget != null ? 400 : null,
+          width: widget.customContentWidget != null ? 350 : null,
+          child: PinchScrollView( // PinchScrollView kept for description zooming
+            builder: (onPinchStart, onPinchEnd) => Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min, // Important for Column in ScrollView
+              children: [
+                // Edit button, shown if canEdit is true and onEditPressed is provided
+                if (widget.canEdit && widget.onEditPressed != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: TextButton.icon(
+                      onPressed: _handleEditPressed,
+                      icon: const Icon(Icons.edit), // Generic edit icon
+                      label: Text('Edit'.tr()), // Generic edit text
+                    ),
                   ),
-                ),
 
-              if(widget.htmlDescription != null)
-                HtmlView(
-                  html: widget.htmlDescription!, // Use the passed-in HTML description
-                  isSelectable: true,
-                  twoFingersOn: onPinchStart,
-                  twoFingersOff: onPinchEnd,
-                ),
+                // (Optional) Custom widget slot below description
+                if (widget.customContentWidget != null) ...[
+                  const SizedBox(height: 16),
+                  widget.customContentWidget!,
+                ],
 
-              // (Optional) Custom widget slot below description
-              if (widget.customContentWidget != null) ...[
-                const SizedBox(height: 16),
-                widget.customContentWidget!,
+                if(widget.htmlDescription != null)
+                  HtmlView(
+                    html: widget.htmlDescription!, // Use the passed-in HTML description
+                    isSelectable: true,
+                    twoFingersOn: onPinchStart,
+                    twoFingersOff: onPinchEnd,
+                  ),
+
+                // (Optional) upcoming events timeline - Preserved comment block
+                // if (place.events?.isNotEmpty ?? false) ...[
+                //   const SizedBox(height: 16),
+                //   Text('Upcoming events'.tr(), style: Theme.of(context).textTheme.subtitle1),
+                //   const SizedBox(height: 8),
+                //   ConstrainedBox(
+                //     constraints: const BoxConstraints(maxHeight: 200),
+                //     child: ScheduleTimeline(
+                //       eventGroups: ScheduleTimelineHelper.splitEventsByDay(
+                //         place.events!, context),
+                //     ),
+                //   ),
+                // ],
               ],
-
-              // (Optional) upcoming events timeline - Preserved comment block
-              // if (place.events?.isNotEmpty ?? false) ...[
-              //   const SizedBox(height: 16),
-              //   Text('Upcoming events'.tr(), style: Theme.of(context).textTheme.subtitle1),
-              //   const SizedBox(height: 8),
-              //   ConstrainedBox(
-              //     constraints: const BoxConstraints(maxHeight: 200),
-              //     child: ScheduleTimeline(
-              //       eventGroups: ScheduleTimelineHelper.splitEventsByDay(
-              //         place.events!, context),
-              //     ),
-              //   ),
-              // ],
-            ],
+            ),
           ),
         ),
       ),
