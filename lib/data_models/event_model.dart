@@ -169,22 +169,6 @@ class EventModel extends ITrinaRowModel {
     return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
   }
 
-  void copyFromEvent(EventModel event)
-  {
-    startTime = event.startTime;
-    endTime = event.endTime;
-    title = event.title;
-    description = event.description;
-    maxParticipants = event.maxParticipants;
-    isGroupEvent = event.isGroupEvent;
-    childEventIds = event.childEventIds;
-    place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
-    type = event.type;
-    occasionId = event.occasionId;
-    data = event.data;
-    isCancelled = event.isCancelled;
-  }
-
   static const String startDateColumn = "startDate";
   static const String startTimeColumn = "start_time";
   static const String endDateColumn = "endDate";
