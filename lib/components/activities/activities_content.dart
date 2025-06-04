@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'constants.dart';
@@ -234,12 +235,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       DateTime earliestActivityDate = allStarts.first;
       DateTime latestActivityDate = allEnds.last;
 
-      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day)
+      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day).toOccasionTime()
           .subtract(const Duration(days: kTimelinePaddingDaysBefore));
-      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999)
+      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999).toOccasionTime()
           .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
-      final now = DateTime.now();
+      final now = TimeHelper.now();
       _timelineStart = now.subtract(const Duration(hours: 1));
       _timelineEnd = now.add(const Duration(hours: 1));
     }
@@ -392,7 +393,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   DateTime _calculateSnappedTimeFromOffset(Offset globalOffset, double timelineRenderWidth) {
-    if (_timelineStart == null || _timelineEnd == null || !mounted) return _timelineStart ?? DateTime.now();
+    if (_timelineStart == null || _timelineEnd == null || !mounted) return _timelineStart ?? TimeHelper.now();
     final RenderBox? timelineAreaRenderBox = context.findRenderObject() as RenderBox?;
     if (timelineAreaRenderBox == null || !timelineAreaRenderBox.hasSize) return _timelineStart!;
 
