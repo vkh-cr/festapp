@@ -1,28 +1,19 @@
 ((a,b,c)=>{a[b]=a[b]||{}
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_170",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
-$__dart_deferred_initializers__.current=function(a,b,c,$){var B,C,D,A={Pp:function Pp(d,e,f,g){var _=this
-_.c=d
-_.a=e
-_.b=f
-_.$ti=g},
-b_n(d){var y=C.d.bu(d),x=B.ft(y,null)
-return x==null?B.lG(y):x},
-QP(d,e){return new A.Pp(d,null,!1,e.i("Pp<0>")).gSu()}},E
-B=c[0]
-C=c[2]
-D=c[120]
-A=a.updateHolder(c[105],A)
-E=c[333]
-A.Pp.prototype={
-Sv(d){return this.Sw(d)},
-Sw(d){var y,x,w,v
-for(y=this.c,x=y.length,w=0;w<y.length;y.length===x||(0,B.M)(y),++w){v=y[w].$1(d)
-if(v!=null)return v}return null}}
-var z=a.updateTypes(["m?(H?)"]);(function installTearOffs(){var y=a._instance_1u
-y(A.Pp.prototype,"gSu","Sv",0)})();(function inheritance(){var y=a.inherit
-y(A.Pp,D.m4)})()
-B.c5(b.typeUniverse,JSON.parse('{"Pp":{"m4":["1"],"m4.T":"1"}}'));(function constants(){var y=a.makeConstList
-E.E3=B.a(y(["male","female",""]),B.D("u<m>"))})()};
+$__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
+azl(){var x=0,w=A.l(y.a),v
+var $async$azl=A.h(function(d,e){if(d===1)return A.i(e,w)
+while(true)switch(x){case 0:x=3
+return A.d($.yy().bC_("requestNotificationPermission",[]),$async$azl)
+case 3:v=e
+x=1
+break
+case 1:return A.j(v,w)}})
+return A.k($async$azl,w)}}
+A=c[0]
+B=a.updateHolder(c[47],B)
+var z=a.updateTypes([])
+var y={a:A.E("x")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_170",e:"endPart",h:b})})($__dart_deferred_initializers__,"Q7G2bgH5nji186S37zNuCSm+vYM=");
+a.eventLog.push({p:"main.dart.js_170",e:"endPart",h:b})})($__dart_deferred_initializers__,"FZaZ0KvdyzP8yxtJvxpeb4y0neA=");
