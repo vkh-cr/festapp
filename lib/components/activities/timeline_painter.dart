@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'activities_component_strings.dart'; // Import the strings file
 
 class TimelinePainter extends CustomPainter {
@@ -41,29 +42,29 @@ class TimelinePainter extends CustomPainter {
     final Color weekendBgColor = isDarkMode ? Colors.grey.shade800.withOpacity(0.3) : Colors.grey.shade200.withOpacity(0.5);
 
 
-    if (pps <= 0 || this.start.isAtSameMomentAs(this.end) || this.start.isAfter(this.end)) {
+    if (pps <= 0 || start.isAtSameMomentAs(end) || start.isAfter(end)) {
       canvas.drawLine(Offset(0, dateHeaderHeight - 0.5), Offset(size.width, dateHeaderHeight - 0.5), linePaint..color = daySeparatorColor);
       canvas.drawLine(Offset(0, dateHeaderHeight + timeTickAreaHeight -1), Offset(size.width, dateHeaderHeight + timeTickAreaHeight -1), linePaint..color = linePrimaryColor);
       return;
     }
 
-    final double calculatedFullLogicalWidth = (this.end.difference(this.start).inSeconds) * this.pps;
+    final double calculatedFullLogicalWidth = (end.difference(start).inSeconds) * pps;
 
     // --- 1. Draw Date Header ---
-    DateTime currentDayIter = DateTime(this.start.year, this.start.month, this.start.day);
-    double iterDayStartX = currentDayIter.difference(this.start).inSeconds * pps;
+    DateTime currentDayIter = DateTime(start.year, start.month, start.day).toOccasionTime();
+    double iterDayStartX = currentDayIter.difference(start).inSeconds * pps;
 
     // Adjust if currentDayIter (midnight) is before the actual timeline start time (e.g. 10 AM)
-    if (iterDayStartX < 0 && currentDayIter.add(const Duration(days:1)).isAfter(this.start)) {
+    if (iterDayStartX < 0 && currentDayIter.add(const Duration(days:1)).isAfter(start)) {
       // No specific adjustment needed here for label logic, iterDayStartX correctly reflects the logical start.
     }
 
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, 0, calculatedFullLogicalWidth, dateHeaderHeight));
 
-    while (currentDayIter.isBefore(this.end)) {
+    while (currentDayIter.isBefore(end)) {
       DateTime nextDayIter = currentDayIter.add(const Duration(days: 1));
-      double iterDayEndX = nextDayIter.difference(this.start).inSeconds * pps;
+      double iterDayEndX = nextDayIter.difference(start).inSeconds * pps;
       double logicalDayWidth = iterDayEndX - iterDayStartX;
 
       // Ensure iterDayEndX does not exceed the total logical width if the last day is partial.
@@ -176,18 +177,18 @@ class TimelinePainter extends CustomPainter {
     else if (show15MinTicks) tickInterval = const Duration(minutes: 15);
     else if (show30MinTicks) tickInterval = const Duration(minutes: 30);
 
-    DateTime currentTickTime = this.start.subtract(Duration(
-        minutes: this.start.minute % tickInterval.inMinutes, seconds: this.start.second,
-        milliseconds: this.start.millisecond, microseconds: this.start.microsecond));
-    if (currentTickTime.isBefore(this.start)) {
+    DateTime currentTickTime = start.subtract(Duration(
+        minutes: start.minute % tickInterval.inMinutes, seconds: start.second,
+        milliseconds: start.millisecond, microseconds: start.microsecond));
+    if (currentTickTime.isBefore(start)) {
       currentTickTime = currentTickTime.add(tickInterval);
     }
 
     canvas.save();
     canvas.clipRect(Rect.fromLTWH(0, timeTicksAreaTopY, calculatedFullLogicalWidth, timeTickAreaHeight));
 
-    while (currentTickTime.isBefore(this.end) || currentTickTime.isAtSameMomentAs(this.end)) {
-      final double dx = currentTickTime.difference(this.start).inSeconds * pps;
+    while (currentTickTime.isBefore(end) || currentTickTime.isAtSameMomentAs(end)) {
+      final double dx = currentTickTime.difference(start).inSeconds * pps;
       if (dx >= calculatedFullLogicalWidth + 1 && calculatedFullLogicalWidth > 0) break; // Optimization: if dx is clearly out of bounds
 
       bool isHourTick = currentTickTime.minute == 0;

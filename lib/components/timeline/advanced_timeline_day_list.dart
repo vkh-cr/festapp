@@ -260,6 +260,8 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         : unselectedColor;
 
     Widget buildSharedContent() {
+      var eventGroups = TimeBlockHelper.splitTimeBlockByPlace(event.children!);
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -302,7 +304,6 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   )
               );
             }
-
             return Row(
               children: [
                 if (event.timeBlockPlace != null)
@@ -370,15 +371,15 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
           ],
           if (haveChildren)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: const EdgeInsets.fromLTRB(0,0,0,24),
               child: ScheduleTimeline(
-                eventGroups: TimeBlockHelper.splitTimeBlockByPlace(event.children!),
+                eventGroups: eventGroups,
                 onEventPressed: controller.onEventPressed,
                 showAddNewEventButton: () {return ((controller.showAddNewEventButton?.call() ?? false) && !isActivity);},
                 onAddNewEvent: controller.onAddNewEvent,
                 parentEvent: event,
                 nodePosition: 0.35,
-                isGroupTitleShown: false,
+                isGroupTitleShown: eventGroups.length > 1,
               ),
             ),
           if(hasDescription)
@@ -506,7 +507,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   if (currentCanExpand) {
                     onToggle();
                   } else if (controller.onEventPressed != null) {
-                    if (isActivity) {
+                    if (isActivity && (hasDescription || hasPlace || haveChildren)) {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {

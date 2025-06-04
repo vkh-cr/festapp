@@ -79,7 +79,7 @@ dependencies:
   form_builder_validators: ^11.1.2
   qr_flutter: ^4.1.0
   screenshot: ^3.0.0
-  mobile_scanner: ^7.0.0
+  mobile_scanner: ^7.0.1
   flutter_map_animations: ^0.8.0
   auto_route: ^10.1.0
   adaptive_theme: ^3.7.0
