@@ -33,6 +33,8 @@ class AppConfig {
 
   static const int daySplitHour = 4;
 
+  static const bool areAllVolunteersApprovers = false;
+
   static bool isNotificationsCurrentlySupported() {
     if(kIsWeb) {
       return isNotificationsSupported && isWebNotificationsSupported;
