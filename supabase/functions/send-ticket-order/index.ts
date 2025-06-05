@@ -267,6 +267,26 @@ async function handleSupabaseFunctionService(
   }
 }
 
+// Formats an IBAN string by inserting spaces for readability, e.g., "CZ59 2010 0000 0020 0280 8176"
+function formatIBAN(iban: string | undefined | null): string {
+  if (!iban || typeof iban !== 'string' || iban.length < 4) {
+    // Return original value or empty string if it's not a valid string or too short
+    return iban || "";
+  }
+  // Takes the first 4 characters (e.g., "CZ59")
+  const firstPart = iban.substring(0, 4);
+  // Takes the rest of the IBAN string
+  const rest = iban.substring(4);
+
+  const chunks = [firstPart]; // Start with the first part
+  // Loop through the rest of the IBAN string and split it into 4-character chunks
+  for (let i = 0; i < rest.length; i += 4) {
+    chunks.push(rest.substring(i, i + 4));
+  }
+  // Join all chunks with a space
+  return chunks.join(" ");
+}
+
 Deno.serve(async (req) => {
   const attachments: {
     filename: string;
@@ -315,19 +335,24 @@ Deno.serve(async (req) => {
         attachments,
       );
     } else {
+      // Check if the payment amount is greater than zero before generating the QR code
       const occasion = ticketOrder.order.occasion;
       const paymentInfo = ticketOrder.order.payment_info;
-      const qr = await generateQrCode(
-        paymentInfo,
-        ticketOrder.order.data,
-        occasion.occasion_title,
-      );
-      attachments.push({
-        filename: `qr-payment.${occasion.occasion_title}.png`,
-        content: qr,
-        contentType: "image/png",
-        encoding: "binary",
-      });
+      if (paymentInfo.amount > 0) {
+        const qr = await generateQrCode(
+          paymentInfo,
+          ticketOrder.order.data,
+          occasion.occasion_title,
+        );
+        attachments.push({
+          filename: `qr-payment.${occasion.occasion_title}.png`,
+          content: qr,
+          contentType: "image/png",
+          encoding: "binary",
+        });
+      } else {
+        console.log("Payment amount is zero or less, skipping QR code generation.");
+      }
     }
 
     const supabaseFunctionSvc = extServices?.find((s: any) => s.type === "SUPABASE_FUNCTION");
@@ -350,6 +375,7 @@ Deno.serve(async (req) => {
       currencyCode: paymentInfo.currency_code,
       amount: formatCurrency(paymentInfo.amount, paymentInfo.currency_code),
       accountNumber: paymentInfo.account_number_human_readable,
+      iban: formatIBAN(paymentInfo.account_number),
       variableSymbol: paymentInfo.variable_symbol,
       deadline: formatDatetime(paymentInfo.deadline),
       fullOrder: generateFullOrder(

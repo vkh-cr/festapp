@@ -45,7 +45,7 @@ class _ScheduleTabViewState extends State<ScheduleTabView> {
     }
 
     for (var eventsByDay in datedEvents) {
-      var eventGroups = TimeBlockHelper.splitTimeBlocks(eventsByDay.events);
+      var eventGroups = TimeBlockHelper.groupEventsByFeatureSettings(eventsByDay.events);
       var timeline = ScheduleTimeline(
         eventGroups: eventGroups,
         onEventPressed: widget.onEventPressed,

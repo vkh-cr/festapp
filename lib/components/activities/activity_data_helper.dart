@@ -1,6 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/activity_model.dart';
+import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/tb.dart';
+import 'package:fstapp/data_services/db_events.dart';
+import 'package:intl/intl.dart';
 
 class ActivityDataHelper {
   static List<ActivityModel> parseActivities(Map<String, dynamic> j) =>
@@ -122,34 +126,64 @@ class ActivityDataHelper {
     }
   }
 
-  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities) {
+  static List<TimeBlockItem> activitiesToTimeBlocks(List<ActivityModel> activities, List<EventModel> events) {
     final List<TimeBlockItem> timeBlocks = [];
-    // Set to keep track of processed assignment IDs to prevent duplicates
     final Set<String> processedAssignmentIds = {};
 
     for (final activity in activities) {
       if (activity.assignments == null) continue;
 
       for (final assignment in activity.assignments!) {
-        // Ensure startTime and endTime are available for the assignment
         if (assignment.startTime == null || assignment.endTime == null) {
           continue;
         }
 
-        // Check if this assignment ID has already been processed
         if (processedAssignmentIds.contains(assignment.id)) {
-          continue; // Skip this assignment if it's already been added
+          continue;
         }
 
         TimeBlockPlace? timeBlockPlace;
-        if (assignment.places.isNotEmpty) {
+        if (assignment.places.length == 1) {
           final firstPlace = assignment.places.first;
           if (firstPlace.id != null && firstPlace.title != null) {
             timeBlockPlace = TimeBlockPlace(
               id: firstPlace.id!,
               title: firstPlace.title!,
-              order: null, // ActivityPlaceModel does not have order, set to null or a default
+              order: null,
             );
+          }
+        }
+
+        List<TimeBlockItem> children = [];
+
+        if (timeBlockPlace != null) {
+          children = events
+              .where((event) =>
+          event.place?.id == timeBlockPlace!.id &&
+              !event.endTime.isBefore(assignment.startTime!) &&
+              !event.startTime.isAfter(assignment.endTime!))
+              .map((event) => TimeBlockItem.fromEventModelAsChild(event))
+              .toList();
+        } else if(assignment.places.isNotEmpty){
+          children = events
+              .where((event) =>
+          assignment.places.any((p)=>p.id == event.place?.id) &&
+              !event.endTime.isBefore(assignment.startTime!) &&
+              !event.startTime.isAfter(assignment.endTime!))
+              .map((event) => TimeBlockItem.fromEventModelAsChild(event))
+              .toList();
+        }
+
+        final Set<int> existingChildrenIds = children.map((child) => child.id).toSet();
+
+        for (final assignmentEvent in assignment.events) {
+          if (!existingChildrenIds.contains(assignmentEvent.id)) {
+            var event = events.firstWhereOrNull((e)=>e.id == assignmentEvent.id);
+            if(event == null){
+              continue;
+            }
+            final eventAsChild = TimeBlockItem.fromEventModelAsChild(event);
+            children.add(eventAsChild);
           }
         }
 
@@ -159,18 +193,21 @@ class ActivityDataHelper {
           id: timeBlockId,
           startTime: assignment.startTime!,
           endTime: assignment.endTime!,
-          title: activity.title ?? '', // Title from ActivityModel
-          description: activity.description, // Description from ActivityModel
-          timeBlockType: TimeBlockType.activity, // Default type
-          data: assignment, // Store the original assignment
+          title: activity.title ?? '',
+          description: activity.description,
+          timeBlockType: TimeBlockType.signedIn,
+          isActivity: true,
+          data: {
+            "leftText": "${DateFormat.Hm().format(assignment.startTime!)} - ${DateFormat.Hm().format(assignment.endTime!)}",
+            "rightText": activity.title
+          },
           timeBlockPlace: timeBlockPlace,
           participants: 0,
           maxParticipants: 0,
+          children: children,
         ));
-        // Add the assignment ID to the set of processed IDs
         processedAssignmentIds.add(assignment.id);
       }
     }
     return timeBlocks;
-  }
-}
+  }}
