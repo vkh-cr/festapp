@@ -43,16 +43,33 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
     }
 
     List<Widget> children = [];
+    bool firstVisibleGroupTitleRendered = false; // Flag to track the first visible title
+
     for (var group in widget.eventGroups) {
       var timeLineItems = group.events.toList();
+      EdgeInsets titlePadding;
+
+      bool isCurrentTitleVisible = group.title.isNotEmpty && widget.isGroupTitleShown;
+
+      if (isCurrentTitleVisible && !firstVisibleGroupTitleRendered) {
+        // Special padding for the first visible group title
+        titlePadding = const EdgeInsets.only(top: 0, bottom: 18);
+        firstVisibleGroupTitleRendered = true; // Mark as rendered
+      } else {
+        // Normal padding for subsequent or non-visible (though Visibility handles actual hide)
+        titlePadding = const EdgeInsets.only(top: 32, bottom: 18);
+      }
+
       children.add(
         Visibility(
-          visible: group.title.isNotEmpty && widget.isGroupTitleShown,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(36, 18, 0, 12),
-            child: Text(
-              StylesConfig.formatTimelineSplit(group.title),
-              style: StylesConfig.timeLineSplitTextStyle(context),
+          visible: isCurrentTitleVisible, // Use the pre-calculated visibility
+          child: Center( // Horizontally center the group title
+            child: Padding(
+              padding: titlePadding, // Apply conditional padding
+              child: Text(
+                StylesConfig.formatTimelineSplit(group.title),
+                style: StylesConfig.timeLineSplitTextStyle(context),
+              ),
             ),
           ),
         ),
@@ -131,7 +148,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             );
           }
           return TextButton(
-            onPressed: () {
+            onPressed: widget.onEventPressed == null && !event.isActivity ? null : () {
               if (event.isActivity) {
                 showDialog(
                   context: context,
@@ -147,12 +164,16 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               }
             },
             style: TextButton.styleFrom(
+              disabledForegroundColor: ThemeConfig.blackColor(context),
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
             ),
-            child: Text(
-              StylesConfig.formatTimelineRightText(event.data["rightText"]),
-              style: eventTitleStyle,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6),
+              child: Text(
+                StylesConfig.formatTimelineRightText(event.data["rightText"]),
+                style: eventTitleStyle,
+              ),
             ),
           );
         },
@@ -186,9 +207,9 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
   }
 
   Widget activityContent(TimeBlockItem event) {
-      return Column(
-        children: [
-          if (event.haveChildren())
+    return Column(
+      children: [
+        if (event.haveChildren())
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: ScheduleTimeline(
@@ -201,12 +222,12 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               isGroupTitleShown: false,
             ),
           ),
-          if (!HtmlHelper.isHtmlEmptyOrNull(event.description))
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: HtmlView(html: event.description ?? "", isSelectable: true),
-            ),
-        ],
-      );
+        if (!HtmlHelper.isHtmlEmptyOrNull(event.description))
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: HtmlView(html: event.description ?? "", isSelectable: true),
+          ),
+      ],
+    );
   }
 }
