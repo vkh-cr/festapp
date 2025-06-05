@@ -334,7 +334,7 @@ class _SchedulePageState extends State<SchedulePage>
                           },
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: LogoWidget(width: 64, forceDark: true),
+                            child: LogoWidget(height: 64, forceDark: true),
                           ),
                         ),
                         const Spacer(),
