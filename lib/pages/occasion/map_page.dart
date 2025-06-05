@@ -698,6 +698,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     );
 
     bool isPlaceSetToOnePlace = false;
+
+    // Update polylines based on current selection
+    if (_selectedGroupId == null) {
+      if (_showAllPathsWhenNoGroupSelected) {
+        _polylines = _allGroupPolylines.values.expand((list) => list).toList();
+      } else {
+        _polylines = [];
+      }
+    } else {
+      _polylines = _allGroupPolylines[_selectedGroupId!] ?? [];
+    }
+
     if(mounted) setState(() {});
     if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
       var p = offlineList.firstWhereOrNull((p) => p.id == placeId);
