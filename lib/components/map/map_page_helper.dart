@@ -242,6 +242,7 @@ class MapPageHelper {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
+                color: Colors.black,
                 fontSize: 11,
                 fontWeight: isSelected
                     ? FontWeight.bold
@@ -283,7 +284,7 @@ class MapPageHelper {
           child: Text(
             selectedGroup.title!,
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),
           ),
         ),
       ),

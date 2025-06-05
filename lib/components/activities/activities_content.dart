@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:fstapp/data_models/activity_model.dart';
 import 'package:fstapp/data_services/db_activities.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'constants.dart';
@@ -93,6 +94,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   bool _isModifierKeyPressedForScroll = false;
 
+  late AnimationController _animationController;
+  late Animation<double> _animationX;
 
   @override
   void initState() {
@@ -113,6 +116,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
 
     _isModifierKeyPressedForScroll = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animationController.addListener(() {
+      _currentPanOffsetNotifier.value = _animationX.value;
+    });
   }
 
   @override
@@ -122,6 +133,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     _topController.dispose();
     _globalFilterController.dispose();
     _currentPanOffsetNotifier.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -234,12 +246,12 @@ class _ActivitiesContentState extends State<ActivitiesContent>
       DateTime earliestActivityDate = allStarts.first;
       DateTime latestActivityDate = allEnds.last;
 
-      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day)
+      _timelineStart = DateTime(earliestActivityDate.year, earliestActivityDate.month, earliestActivityDate.day).toOccasionTime()
           .subtract(const Duration(days: kTimelinePaddingDaysBefore));
-      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999)
+      _timelineEnd = DateTime(latestActivityDate.year, latestActivityDate.month, latestActivityDate.day, 23, 59, 59, 999).toOccasionTime()
           .add(const Duration(days: kTimelinePaddingDaysAfter));
     } else {
-      final now = DateTime.now();
+      final now = TimeHelper.now();
       _timelineStart = now.subtract(const Duration(hours: 1));
       _timelineEnd = now.add(const Duration(hours: 1));
     }
@@ -392,7 +404,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
   }
 
   DateTime _calculateSnappedTimeFromOffset(Offset globalOffset, double timelineRenderWidth) {
-    if (_timelineStart == null || _timelineEnd == null || !mounted) return _timelineStart ?? DateTime.now();
+    if (_timelineStart == null || _timelineEnd == null || !mounted) return _timelineStart ?? TimeHelper.now();
     final RenderBox? timelineAreaRenderBox = context.findRenderObject() as RenderBox?;
     if (timelineAreaRenderBox == null || !timelineAreaRenderBox.hasSize) return _timelineStart!;
 
@@ -918,8 +930,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         behavior: HitTestBehavior.opaque,
         onHorizontalDragStart: (d) {
           _gestureDragStartX = d.globalPosition.dx;
-          _gesturePanOffsetStart = _panOffset;
+          _gesturePanOffsetStart = _currentPanOffsetNotifier.value;
           _hideAssignmentDetailOverlay();
+          _animationController.stop();
         },
         onHorizontalDragUpdate: (d) {
           final dx = d.globalPosition.dx - _gestureDragStartX;
@@ -929,11 +942,18 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           _currentPanOffsetNotifier.value = newPanOffsetValue;
         },
         onHorizontalDragEnd: (d) {
-          if (_panOffset != _currentPanOffsetNotifier.value) {
-            setState(() {
-              _panOffset = _currentPanOffsetNotifier.value;
-            });
+          if (d.primaryVelocity != null && d.primaryVelocity!.abs() > 100) {
+            final double start = _currentPanOffsetNotifier.value;
+            final double end = (start + d.primaryVelocity! * 0.1).clamp(
+                (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+                0.0
+            );
+            _animationX = Tween<double>(begin: start, end: end).animate(
+                CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
+            _animationController.reset();
+            _animationController.forward();
           }
+          _panOffset = _currentPanOffsetNotifier.value;
         },
         child: Listener(
           onPointerSignal: (pointerSignal) {
@@ -946,6 +966,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 } else if (pointerSignal.scrollDelta.dy > 0) {
                   _zoomOut(vpWidth, totalSec);
                 }
+              } else {
+                _animationController.stop();
+                double newPanOffsetValue = (_currentPanOffsetNotifier.value - pointerSignal.scrollDelta.dx).clamp(
+                    (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+                    0.0
+                );
+                _currentPanOffsetNotifier.value = newPanOffsetValue;
+                _panOffset = newPanOffsetValue;
               }
             }
           },

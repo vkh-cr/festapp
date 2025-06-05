@@ -57,6 +57,10 @@ class EventModel extends ITrinaRowModel {
     return isEventInMySchedule == false;
   }
 
+  bool canSignIn() {
+    return isEventSupportingSignIn(this) && currentParticipants! < maxParticipants!;
+  }
+
   DateTime startTime;
   DateTime endTime;
 
@@ -162,23 +166,7 @@ class EventModel extends ITrinaRowModel {
     if (isCancelled) {
       titleStr += " (${"Cancelled".tr()})";
     }
-    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
-  }
-
-  void copyFromEvent(EventModel event)
-  {
-    startTime = event.startTime;
-    endTime = event.endTime;
-    title = event.title;
-    description = event.description;
-    maxParticipants = event.maxParticipants;
-    isGroupEvent = event.isGroupEvent;
-    childEventIds = event.childEventIds;
-    place = PlaceModel(id: event.place?.id, title: event.place?.title, description: null, type: null);
-    type = event.type;
-    occasionId = event.occasionId;
-    data = event.data;
-    isCancelled = event.isCancelled;
+    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??0}/$maxParticipants)");
   }
 
   static const String startDateColumn = "startDate";
