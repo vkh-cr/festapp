@@ -166,7 +166,7 @@ class EventModel extends ITrinaRowModel {
     if (isCancelled) {
       titleStr += " (${"Cancelled".tr()})";
     }
-    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??"-"}/$maxParticipants)");
+    return (maxParticipants==null ? titleStr : "$titleStr (${currentParticipants??0}/$maxParticipants)");
   }
 
   static const String startDateColumn = "startDate";

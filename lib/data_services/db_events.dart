@@ -678,7 +678,6 @@ class DbEvents {
     }
 
     events = events.sortEvents();
-    events = events.withoutParentEvents();
 
     // ---- ACTIVITY PROCESSING ----
     // Note: ActivityEventModel and ActivityPlaceModel are specific to activities context

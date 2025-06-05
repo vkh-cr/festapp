@@ -137,7 +137,7 @@ class _MySchedulePageState extends State<MySchedulePage> {
       if (e.id != null) _eventAndActivitiesDescriptions[e.id!] = e.description;
     }
 
-    var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, _events);
+    var actDots = ActivityDataHelper.activitiesToTimeBlocks(activities, offlineEvents);
     
     if (_isAdvancedTimeline??false) {
       _dots = _events.map((e) => TimeBlockItem.fromEventModel(e)).toList();

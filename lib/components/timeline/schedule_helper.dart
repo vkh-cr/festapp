@@ -104,7 +104,7 @@ class TimeBlockItem {
 
   @override
   String toString() {
-    String titleStr = title ?? "";
+    String titleStr = title;
     if (isCancelled) {
       titleStr += " (${"Cancelled".tr()})";
     }
