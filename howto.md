@@ -63,6 +63,10 @@ supabase secrets set --env-file ./supabase/.env --project-ref yoursupabaseid
 - Remove unused localizations:
     - In `appConfig`
     - In iOS `plist`
+- If you make changes to Pages, run:
+```
+fvm dart run build_runner build
+```
 
 ##### Logos & Icons
 - Use SVG inside the app.

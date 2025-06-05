@@ -3,6 +3,8 @@ class FeatureConstants {
   // Core keys
   static const String metaIsEnabled = "is_enabled";
   static const String metaCode = "code";
+  static const String metaTitle = "title";
+  static const String metaDescription = "description";
 
   // Feature codes
   static const String ticket = "ticket";
@@ -19,17 +21,14 @@ class FeatureConstants {
   static const String map = "map";
   static const String quotes = "quotes";
   static const String workshops = "workshops";
+  static const String volunteers = "volunteers";
+  static const String schedule = "schedule";
 
   // Extra fields for ticket feature
   static const String ticketLightColor = "lightColor";
   static const String ticketDarkColor = "darkColor";
   static const String ticketBackground = "background";
   static const String ticketType = "ticket_type";
-
-  static const String scheduleType = "schedule_type";
-  static const String schedule = "schedule";
-  static const String scheduleTypeBasic = "basic";
-  static const String scheduleTypeAdvanced = "advanced";
 
   // Extra fields for form feature
   static const String formUseExternal = "use_external_form";

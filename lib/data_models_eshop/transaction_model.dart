@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:fstapp/components/single_data_grid/pluto_abstract.dart';
 import 'package:fstapp/data_models_eshop/tb_eshop.dart';
+import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/utilities_all.dart';
 import 'package:trina_grid/trina_grid.dart';
 import 'package:intl/intl.dart';
@@ -88,7 +89,7 @@ class TransactionModel extends ITrinaRowModel {
       bankAccountId: json[TbEshop.transactions.bank_account_id],
       paymentInfo: json[TbEshop.transactions.payment_info],
       createdAt: json[TbEshop.transactions.created_at] != null
-          ? DateTime.parse(json[TbEshop.transactions.created_at]).toLocal()
+          ? DateTime.parse(json[TbEshop.transactions.created_at]).toOccasionTime()
           : null,
       messageForRecipient: json[TbEshop.transactions.message_for_recipient],
       counterAccountName: json[TbEshop.transactions.counter_account_name],

@@ -1,14 +1,15 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:collection/collection.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:fstapp/router_service.dart';
 import 'package:fstapp/app_config.dart';
 import 'package:fstapp/components/timeline/schedule_tab_view.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/data_models/event_model.dart';
 import 'package:fstapp/data_models/place_model.dart';
 import 'package:fstapp/data_services/auth_service.dart';
-import 'package:fstapp/data_services/DataExtensions.dart';
+import 'package:fstapp/data_services/data_extensions.dart';
 import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/data_services/db_places.dart';
 import 'package:fstapp/data_services/offline_data_service.dart';
@@ -39,9 +40,9 @@ class ScheduleBasicPage extends StatefulWidget {
 
 class _ScheduleBasicPageState extends State<ScheduleBasicPage>
     with WidgetsBindingObserver {
-  final List<TimeBlockItem> _dots = [];
-  final List<EventModel> _events = [];
-
+  List<TimeBlockItem> _dots = [];
+  List<EventModel> _events = [];
+  final Map<int, String?> _eventDescriptions = {};
   String? userName;
 
   @override
@@ -65,52 +66,54 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
   }
 
   Future<void> loadData() async {
-    await loadOfflineData();
-
-    await DbEvents.updateEvents(_events).whenComplete(() async {
-      if (AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(_events, DbPlaces.getPlacesIn);
-      }
-      _dots.clear();
-      _dots.addAll(_events
-          .filterRootEvents()
-          .map((e) => TimeBlockItem.fromEventModelTimeline(e)));
-    });
-    await loadEventParticipants();
-    await OfflineDataService.saveAllEvents(_events);
+    await _loadOfflineDataThenFast();
   }
 
-  Future<void> loadEventParticipants() async {
-    await DbEvents.loadEventsParticipantsAndStatus(_events);
-    for (var e in _events.filterRootEvents()) {
-      var dot = _dots.singleWhere((element) => element.id == e.id!);
-      setState(() {
-        dot.data["rightText"] = e.toString();
-        dot.timeBlockType = TimeBlockHelper.getTimeBlockTypeFromModel(e);
-      });
-    }
-  }
-
-  Future<void> loadOfflineData() async {
+  Future<void> _loadOfflineDataThenFast() async {
     if (_events.isEmpty) {
-      var offlineEvents = await OfflineDataService.getAllEvents();
-      await OfflineDataService.updateEventsWithGroupName(offlineEvents);
-      if (AppConfig.isSplitByPlace) {
-        await loadPlacesForEvents(offlineEvents,
-                (ids) async => (await OfflineDataService.getAllPlaces()));
+      final offline = await OfflineDataService.getAllEvents();
+      await OfflineDataService.updateEventsWithGroupName(offline);
+      await loadPlacesForEvents(offline,
+              (ids) async => (await OfflineDataService.getAllPlaces()));
+
+      if (AuthService.isLoggedIn()) {
+        var userInfo = await OfflineDataService.getUserInfo();
+        userName = userInfo?.name ?? "";
       }
-      _events.addAll(offlineEvents);
-      _dots.clear();
-      _dots.addAll(_events
+      _events = offline;
+      for (var e in _events) {
+        if (e.id != null) _eventDescriptions[e.id!] = e.description;
+      }
+      _dots = _events
           .filterRootEvents()
-          .map((e) => TimeBlockItem.fromEventModelTimeline(e)));
+          .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
+          .toList();
+    }
+
+    if(mounted) {
       setState(() {});
     }
-    if (AuthService.isLoggedIn()) {
-      var userInfo = await OfflineDataService.getUserInfo();
-      setState(() {
-        userName = userInfo?.name ?? "";
-      });
+
+    final fast = await DbEvents.getAllEvents(
+      RightsService.currentOccasionId()!,
+      false,
+    );
+
+    for (var e in fast) {
+      if (e.id != null && _eventDescriptions.containsKey(e.id!)) {
+        e.description = _eventDescriptions[e.id!];
+      }
+    }
+
+    _events = fast;
+
+    _dots = _events
+        .filterRootEvents()
+        .map((e) => TimeBlockItem.fromEventModelBasicTimeline(e))
+        .toList();
+
+    if(mounted) {
+      setState(() {});
     }
   }
 
@@ -176,7 +179,7 @@ class _ScheduleBasicPageState extends State<ScheduleBasicPage>
                         });
                       }
                     },
-                    child: LogoWidget(width: 140,),
+                    child: LogoWidget(width: 120,),
                   ),
                   const Spacer(),
                   if(FeatureService.isFeatureEnabled(FeatureConstants.mySchedule))
