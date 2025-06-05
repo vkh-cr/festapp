@@ -332,7 +332,10 @@ class _SchedulePageState extends State<SchedulePage>
                               setState(() {});
                             }
                           },
-                          child: LogoWidget(width: 120, forceDark: true),
+                          child: Padding(
+                            padding: const EdgeInsets.all(0.0),
+                            child: LogoWidget(width: 120, forceDark: true),
+                          ),
                         ),
                         const Spacer(),
                         if (FeatureService.isFeatureEnabled(
