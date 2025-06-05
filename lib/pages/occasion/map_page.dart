@@ -873,9 +873,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     setMapToOnePlace(p);
   }
 
-  void setMapToOnePlace(PlaceModel place) {
+  void setMapToOnePlace(PlaceModel place) async {
     _mapCenter = LatLng(place.getLat(), place.getLng());
-    if (_isMapLoaded) {
+    int i = 0;
+    while (!_isMapLoaded && mounted && i < 50) { // Poll with 5-second timeout
+      await Future.delayed(const Duration(milliseconds: 100));
+      i++;
+    }
+    if (_isMapLoaded && mounted) {
       _animatedMapController.animateTo(dest: _mapCenter!, zoom: _mapOptions.maxZoom);
     }
   }
@@ -1025,6 +1030,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     setState(() {
       final placeIdToFocus = markerToFocus.place.id;
       bool newFocusSet = false;
+      MapMarkerWithText? markerToBringToTop;
 
       for (int i = 0; i < _markers.length; i++) {
         // Do not change focus state of the marker currently being edited
@@ -1041,6 +1047,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
             _markers[i] = _markers[i].cloneWithFocus(context, true);
           }
           focusedMarker = _markers[i];
+          markerToBringToTop = _markers[i];
           newFocusSet = true;
         } else {
           if (_markers[i].showTitle) {
@@ -1060,6 +1067,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       }
       if (!newFocusSet) {
         focusedMarker = null;
+      }
+
+      if (markerToBringToTop != null) {
+        _markers.removeWhere((m) => m.place.id == markerToBringToTop!.place.id);
+        _markers.add(markerToBringToTop!);
       }
     });
   }
