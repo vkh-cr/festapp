@@ -2,18 +2,18 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_169",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-azl(){var x=0,w=A.l(y.a),v
-var $async$azl=A.h(function(d,e){if(d===1)return A.i(e,w)
+azm(){var x=0,w=A.l(y.a),v
+var $async$azm=A.h(function(d,e){if(d===1)return A.i(e,w)
 while(true)switch(x){case 0:x=3
-return A.d($.yz().bC4("requestNotificationPermission",[]),$async$azl)
+return A.d($.yz().bC6("requestNotificationPermission",[]),$async$azm)
 case 3:v=e
 x=1
 break
 case 1:return A.j(v,w)}})
-return A.k($async$azl,w)}}
+return A.k($async$azm,w)}}
 A=c[0]
 B=a.updateHolder(c[46],B)
 var z=a.updateTypes([])
 var y={a:A.E("w")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_169",e:"endPart",h:b})})($__dart_deferred_initializers__,"mhwmBM/wvjy12iFsgLfAU9AYOs8=");
+a.eventLog.push({p:"main.dart.js_169",e:"endPart",h:b})})($__dart_deferred_initializers__,"VTKTarWEog+l1kb68vsjtgd0VUk=");
