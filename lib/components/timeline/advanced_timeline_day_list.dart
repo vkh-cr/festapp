@@ -227,13 +227,26 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final isEditor = controller.showAddNewEventButton?.call() ?? false; // This might mean 'user can edit/manage ANY event' in this context
     final haveChildren = event.haveChildren();
 
-    final bool baseCanExpand;
+    final hasDetails = hasDescription || hasPlace || haveChildren;
+
+    // An event is interactive if it has details or special actions.
+    final bool isInteractive;
     if (isActivity) {
-      baseCanExpand = !HtmlHelper.isHtmlLong(event.description, lengthThreshold: 250) && (hasDescription || hasPlace || haveChildren);
+      isInteractive = hasDetails;
     } else {
-      baseCanExpand = !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || haveChildren || event.isSupportingSignIn());
+      isInteractive = hasDetails || isEditor || event.isSupportingSignIn();
     }
-    final bool currentCanExpand = baseCanExpand;
+
+    // It can expand inline if it's interactive and the description isn't too long.
+    final bool canExpandInline;
+    if (isActivity) {
+      canExpandInline = isInteractive && !HtmlHelper.isHtmlLong(event.description, lengthThreshold: 250);
+    } else {
+      canExpandInline = isInteractive && !HtmlHelper.isHtmlLong(event.description);
+    }
+
+    // A chevron is shown if it's interactive but can't expand inline (implying a detail page/dialog).
+    final bool showChevronRight = isInteractive && !canExpandInline && controller.onEventPressed != null;
 
     final now = TimeHelper.now();
     final bool isCurrentEvent = !event.isCancelled && event.startTime.isBefore(now) && event.endTime.isAfter(now);
@@ -503,11 +516,11 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
             clipBehavior: Clip.hardEdge,
             child: Column(children: [
               InkWell(
-                onTap: () {
-                  if (currentCanExpand) {
+                onTap: !isInteractive ? null : () {
+                  if (canExpandInline) {
                     onToggle();
-                  } else if (controller.onEventPressed != null) {
-                    if (isActivity && (hasDescription || hasPlace || haveChildren)) {
+                  } else {
+                    if (isActivity) {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -517,7 +530,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                           );
                         },
                       );
-                    } else {
+                    } else if (controller.onEventPressed != null) {
                       controller.onEventPressed?.call(event.id);
                     }
                   }
@@ -608,29 +621,26 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                     const SizedBox(width: 4),
                     inlineActionSection,
                     const SizedBox(width: 4),
-                    if (currentCanExpand)
+                    if (canExpandInline)
                       Icon(
                         expanded ? Icons.expand_less : Icons.expand_more,
                         size: 20, color: unselectedColor,
                       )
-                    else if (controller.onEventPressed != null &&
-                        ((isActivity) ||
-                            (!isActivity && (haveChildren || (hasDescription || hasPlace || isEditor)))
-                        ))
+                    else if (showChevronRight)
                       Icon(Icons.chevron_right, size: 20, color: unselectedColor)
                     else
                       const SizedBox(width: 20.0),
                   ]),
                 ),
               ),
-              if (currentCanExpand)
+              if (canExpandInline)
                 AnimatedCrossFade(
                   firstChild: const SizedBox.shrink(),
                   secondChild: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
                     child: buildSharedContent(),
                   ),
-                  crossFadeState: expanded && currentCanExpand ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                  crossFadeState: expanded && canExpandInline ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),
                   firstCurve: Curves.easeOut, secondCurve: Curves.easeIn, sizeCurve: Curves.easeInOut,
                 ),
