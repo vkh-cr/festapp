@@ -1,4 +1,5 @@
 import 'package:fstapp/components/features/feature.dart';
+import 'package:fstapp/components/features/ticket_feature.dart';
 import 'package:fstapp/data_models/game_settings_model.dart';
 import 'package:fstapp/data_models/image_model.dart';
 import 'package:fstapp/data_models/occasion_model.dart';

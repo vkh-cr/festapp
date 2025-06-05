@@ -111,6 +111,12 @@ class EmailTemplateModel {
     defaultValue: '2502719268/2010',
   );
 
+  static EmailTemplateSub ibanSub = EmailTemplateSub(
+    code: 'iban',
+    description: 'IBAN'.tr(),
+    defaultValue: 'CZ4520100000002502719268',
+  );
+
   static EmailTemplateSub variableSymbolSub = EmailTemplateSub(
     code: 'variableSymbol',
     description: 'Variable symbol'.tr(),
@@ -147,6 +153,7 @@ class EmailTemplateModel {
       occasionTitleSub,
       amountSub,
       accountNumberSub,
+      ibanSub,
       variableSymbolSub,
       deadlineSub,
       fullOrderSub,

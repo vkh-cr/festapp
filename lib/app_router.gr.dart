@@ -40,8 +40,8 @@ import 'package:fstapp/pages/unit/unit_admin_page.dart' deferred as _i28;
 import 'package:fstapp/pages/unit/unit_page.dart' deferred as _i29;
 import 'package:fstapp/pages/user/forgot_password_page.dart' deferred as _i5;
 import 'package:fstapp/pages/user/login_page.dart' deferred as _i13;
+import 'package:fstapp/pages/user/reset_password_page.dart' deferred as _i19;
 import 'package:fstapp/pages/user/signup_page.dart' deferred as _i25;
-import 'package:fstapp/pages/user/signup_password_page.dart' deferred as _i19;
 import 'package:fstapp/pages/utility/html_editor_page.dart' deferred as _i9;
 import 'package:fstapp/pages/utility/install_page.dart' deferred as _i11;
 import 'package:fstapp/pages/utility/instance_install_page.dart'

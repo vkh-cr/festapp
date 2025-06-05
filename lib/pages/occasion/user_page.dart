@@ -21,7 +21,7 @@ import 'package:fstapp/pages/occasion/settings_page.dart';
 import 'package:fstapp/pages/occasionAdmin/admin_page.dart';
 import 'package:fstapp/pages/user/login_page.dart';
 import 'package:fstapp/services/dialog_helper.dart';
-import 'package:fstapp/components/timeline/schedule_timeline_helper.dart';
+import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/theme_config.dart';
@@ -58,7 +58,7 @@ class _UserPageState extends State<UserPage> {
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: ThemeConfig.appBarColorNegative(),
+                color: Colors.black,
               ),
               onPressed: () {
                 RouterService.goBack(context);

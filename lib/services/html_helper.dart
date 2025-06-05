@@ -216,6 +216,21 @@ class HtmlHelper {
     return plainText.length > lengthThreshold;
   }
 
+  static String htmlTrim(String htmlText) {
+    // Remove leading <p> and <br> tags
+    String result = htmlText.replaceAll(
+      RegExp(r'^(?:\s*(?:<p\b[^>]*>|\s*<br\s*/?>))*', caseSensitive: false),
+      '',
+    );
+    // Remove trailing <p>, </p> and <br> tags
+    result = result.replaceAll(
+      RegExp(r'(?:<\/?p\b[^>]*>|\s*<br\s*\/?>\s*)*$', caseSensitive: false),
+      '',
+    );
+    return result;
+  }
+
+
   static Future<String> storeImagesToOccasion(
       String oldHtml,
       String newHtml,

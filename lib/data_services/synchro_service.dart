@@ -39,6 +39,8 @@ class SynchroService {
     if(AuthService.isLoggedIn()) {
       var userInfo = await AuthService.getFullUserInfo();
       await OfflineDataService.saveUserInfo(userInfo);
+      var bundle = await DbEvents.getMyEventsAndActivities(RightsService.currentOccasionId()!, true);
+      await OfflineDataService.saveAllActivities(bundle!.activities);
     }
     else {
       await OfflineDataService.deleteUserInfo();
@@ -61,7 +63,8 @@ class SynchroService {
 
     if (PlatformHelper.isPwaInstalledOrNative())
     {
-      await DbEvents.updateEventDescriptions();
+      var events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, true);
+      await OfflineDataService.saveAllEvents(events);
     }
 
     await DbEvents.synchronizeMySchedule();

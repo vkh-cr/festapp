@@ -1,4 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/components/features/feature_constants.dart';
+import 'package:fstapp/components/features/feature_service.dart';
+import 'package:fstapp/components/features/schedule_feature.dart';
 
 class ThemeConfig {
   static bool isDarkMode(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
@@ -137,16 +141,29 @@ class ThemeConfig {
   static Color correctGuessColor(BuildContext context) => isDarkMode(context) ? seed3 : seed4;
 
   // Function for eventTypeColor
-  static Color eventTypeToColor(BuildContext context, String? type) {
-    switch (type) {
-      case "music":
-        return seed2;
-      case "talk":
-        return seed3;
-      case "other":
-        return seed4;
+  static Color eventTypeToColor(BuildContext context, String? typeCode) {
+    if (typeCode == null) {
+      return appBarColor();
     }
-    return seed3;
+
+    final feature = FeatureService.getFeatureDetails(FeatureConstants.schedule);
+
+    if (feature is ScheduleFeature) {
+      final scheduleFeature = feature;
+      // Find the event type by its code
+      final eventType = scheduleFeature.eventTypes.firstWhereOrNull((et) => et.code == typeCode);
+
+      if (eventType != null) {
+        return eventType.getColor();
+      }
+    }
+
+    return appBarColor();
+  }
+
+  static Color eventTypeToColorNegative(BuildContext context, String? type) {
+    final Color backgroundColor = eventTypeToColor(context, type);
+    return backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white;
   }
 
   static Color eventTypeToColorTimetable(BuildContext context, String? type) {
