@@ -131,7 +131,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
             );
           }
           return TextButton(
-            onPressed: () {
+            onPressed: widget.onEventPressed == null && !event.isActivity ? null : () {
               if (event.isActivity) {
                 showDialog(
                   context: context,
@@ -147,6 +147,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
               }
             },
             style: TextButton.styleFrom(
+              disabledForegroundColor: ThemeConfig.blackColor(context),
               foregroundColor: ThemeConfig.timelineTextColor(context),
               alignment: Alignment.centerLeft,
             ),

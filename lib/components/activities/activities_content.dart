@@ -94,6 +94,8 @@ class _ActivitiesContentState extends State<ActivitiesContent>
 
   bool _isModifierKeyPressedForScroll = false;
 
+  late AnimationController _animationController;
+  late Animation<double> _animationX;
 
   @override
   void initState() {
@@ -114,6 +116,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     });
 
     _isModifierKeyPressedForScroll = HardwareKeyboard.instance.isControlPressed || HardwareKeyboard.instance.isMetaPressed;
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _animationController.addListener(() {
+      _currentPanOffsetNotifier.value = _animationX.value;
+    });
   }
 
   @override
@@ -123,6 +133,7 @@ class _ActivitiesContentState extends State<ActivitiesContent>
     _topController.dispose();
     _globalFilterController.dispose();
     _currentPanOffsetNotifier.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -919,8 +930,9 @@ class _ActivitiesContentState extends State<ActivitiesContent>
         behavior: HitTestBehavior.opaque,
         onHorizontalDragStart: (d) {
           _gestureDragStartX = d.globalPosition.dx;
-          _gesturePanOffsetStart = _panOffset;
+          _gesturePanOffsetStart = _currentPanOffsetNotifier.value;
           _hideAssignmentDetailOverlay();
+          _animationController.stop();
         },
         onHorizontalDragUpdate: (d) {
           final dx = d.globalPosition.dx - _gestureDragStartX;
@@ -930,11 +942,18 @@ class _ActivitiesContentState extends State<ActivitiesContent>
           _currentPanOffsetNotifier.value = newPanOffsetValue;
         },
         onHorizontalDragEnd: (d) {
-          if (_panOffset != _currentPanOffsetNotifier.value) {
-            setState(() {
-              _panOffset = _currentPanOffsetNotifier.value;
-            });
+          if (d.primaryVelocity != null && d.primaryVelocity!.abs() > 100) {
+            final double start = _currentPanOffsetNotifier.value;
+            final double end = (start + d.primaryVelocity! * 0.1).clamp(
+                (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+                0.0
+            );
+            _animationX = Tween<double>(begin: start, end: end).animate(
+                CurvedAnimation(parent: _animationController, curve: Curves.easeOutQuad));
+            _animationController.reset();
+            _animationController.forward();
           }
+          _panOffset = _currentPanOffsetNotifier.value;
         },
         child: Listener(
           onPointerSignal: (pointerSignal) {
@@ -947,6 +966,14 @@ class _ActivitiesContentState extends State<ActivitiesContent>
                 } else if (pointerSignal.scrollDelta.dy > 0) {
                   _zoomOut(vpWidth, totalSec);
                 }
+              } else {
+                _animationController.stop();
+                double newPanOffsetValue = (_currentPanOffsetNotifier.value - pointerSignal.scrollDelta.dx).clamp(
+                    (vpWidth - (kTimelineLabelWidth + timelineWidth)).clamp(double.negativeInfinity, 0.0),
+                    0.0
+                );
+                _currentPanOffsetNotifier.value = newPanOffsetValue;
+                _panOffset = newPanOffsetValue;
               }
             }
           },
