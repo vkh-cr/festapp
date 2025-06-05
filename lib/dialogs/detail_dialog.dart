@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:fstapp/styles/styles_config.dart';
 import 'package:fstapp/widgets/html_view.dart';
 import 'package:fstapp/widgets/zoomable_image/zoomable_image.dart'; // For PinchScrollView
 
@@ -45,10 +46,10 @@ class _DetailDialogState extends State<DetailDialog> {
         ],
       ),
       content: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 350, maxHeight: 400),
+        constraints: const BoxConstraints(maxWidth: StylesConfig.formMaxWidthMid, maxHeight: 500),
         child: SizedBox(
-          height: widget.customContentWidget != null ? 400 : null,
-          width: widget.customContentWidget != null ? 350 : null,
+          height: widget.customContentWidget != null ? 500 : null,
+          width: widget.customContentWidget != null ? StylesConfig.formMaxWidthMid : null,
           child: PinchScrollView( // PinchScrollView kept for description zooming
             builder: (onPinchStart, onPinchEnd) => Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -78,20 +79,6 @@ class _DetailDialogState extends State<DetailDialog> {
                     twoFingersOn: onPinchStart,
                     twoFingersOff: onPinchEnd,
                   ),
-
-                // (Optional) upcoming events timeline - Preserved comment block
-                // if (place.events?.isNotEmpty ?? false) ...[
-                //   const SizedBox(height: 16),
-                //   Text('Upcoming events'.tr(), style: Theme.of(context).textTheme.subtitle1),
-                //   const SizedBox(height: 8),
-                //   ConstrainedBox(
-                //     constraints: const BoxConstraints(maxHeight: 200),
-                //     child: ScheduleTimeline(
-                //       eventGroups: ScheduleTimelineHelper.splitEventsByDay(
-                //         place.events!, context),
-                //     ),
-                //   ),
-                // ],
               ],
             ),
           ),
