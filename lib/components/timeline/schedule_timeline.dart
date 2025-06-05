@@ -63,15 +63,19 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       children.add(
         Visibility(
           visible: isCurrentTitleVisible, // Use the pre-calculated visibility
-          child: Center( // Horizontally center the group title
-            child: Padding(
-              padding: titlePadding, // Apply conditional padding
+          child: LayoutBuilder(builder: (context, constraints) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) - 94,
+                top: titlePadding.top,
+                bottom: titlePadding.bottom,
+              ),
               child: Text(
                 StylesConfig.formatTimelineSplit(group.title),
                 style: StylesConfig.timeLineSplitTextStyle(context),
               ),
-            ),
-          ),
+            );
+          }),
         ),
       );
       children.add(createTimeline(timeLineItems));

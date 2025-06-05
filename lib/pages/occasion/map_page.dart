@@ -63,6 +63,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
+  static const bool _showAllPathsWhenNoGroupSelected = true;
   late final _animatedMapController = AnimatedMapController(vsync: this);
   final PopupController _popupLayerController = PopupController();
   final JSInterop jsInterop = JSInterop();
@@ -753,9 +754,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
     // Update polylines based on current selection
     if (_selectedGroupId == null) {
+      if (_showAllPathsWhenNoGroupSelected) {
+        _polylines = _allGroupPolylines.values.expand((list) => list).toList();
+      } else {
         _polylines = [];
+      }
     } else {
-        _polylines = _allGroupPolylines[_selectedGroupId!] ?? [];
+      _polylines = _allGroupPolylines[_selectedGroupId!] ?? [];
     }
 
     // This setState call was inside addPlacesToMap, moved here for clarity after all data processing
@@ -868,9 +873,14 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     setMapToOnePlace(p);
   }
 
-  void setMapToOnePlace(PlaceModel place) {
+  void setMapToOnePlace(PlaceModel place) async {
     _mapCenter = LatLng(place.getLat(), place.getLng());
-    if (_isMapLoaded) {
+    int i = 0;
+    while (!_isMapLoaded && mounted && i < 50) { // Poll with 5-second timeout
+      await Future.delayed(const Duration(milliseconds: 100));
+      i++;
+    }
+    if (_isMapLoaded && mounted) {
       _animatedMapController.animateTo(dest: _mapCenter!, zoom: _mapOptions.maxZoom);
     }
   }
@@ -885,14 +895,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
     if (_selectedGroupId == groupId) {
       _selectedGroupId = null;
-      // newLines is already []
+      if (_showAllPathsWhenNoGroupSelected) {
+        newLines = _allGroupPolylines.values.expand((list) => list).toList();
+        allPoints = [];
+      }
+      // else newLines is already [], allPoints is already []
     } else {
       _selectedGroupId = groupId;
       newLines = _allGroupPolylines[groupId] ?? [];
       allPoints = newLines.expand((pl) => pl.points).toList();
     }
 
-    final List<MapMarkerWithText> updatedMarkers = [];
+    final List<MapMarkerWithText> groupMarkers = [];
+    final List<MapMarkerWithText> otherMarkers = [];
     Set<int> placeIdsInSelectedGroup = {};
     if (_selectedGroupId != null) {
       final group = _pathGroups.firstWhereOrNull((g) => g.id == _selectedGroupId);
@@ -912,8 +927,9 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           placeIdsInSelectedGroup
       );
 
+      var updatedMarker = oldMarker;
       if (oldMarker.showTitle != newShowTitleState) {
-        updatedMarkers.add(MapMarkerWithText(
+        updatedMarker = MapMarkerWithText(
           context: context,
           place: oldMarker.place,
           point: oldMarker.point,
@@ -923,26 +939,31 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
           alignment: oldMarker.alignment,
           editAction: oldMarker.editAction,
           showTitle: newShowTitleState,
-        ));
+        );
+      }
+
+      if (placeIdsInSelectedGroup.contains(oldMarker.place.id!)) {
+        groupMarkers.add(updatedMarker);
       } else {
-        updatedMarkers.add(oldMarker);
+        otherMarkers.add(updatedMarker);
       }
     }
 
     _markers.clear();
-    _markers.addAll(updatedMarkers);
+    _markers.addAll(otherMarkers);
+    _markers.addAll(groupMarkers);
 
     if (allPoints.isNotEmpty) {
       setState(() {
         _polylines = newLines;
       });
-      await _animatedMapController.centerOnPoints(
-        allPoints,
+      await _animatedMapController.animatedFitCamera(
+        cameraFit: fm.CameraFit.coordinates(coordinates: allPoints, padding: EdgeInsets.fromLTRB(32, 160, 84, 12)),
         curve: Curves.easeInOut,
       );
     } else {
       setState(() {
-        _polylines = newLines; // Will be [] if deselected
+        _polylines = newLines; // Will be [] if deselected (and not _showAllPathsWhenNoGroupSelected) or if selected group has no lines
       });
     }
   }
@@ -1009,6 +1030,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     setState(() {
       final placeIdToFocus = markerToFocus.place.id;
       bool newFocusSet = false;
+      MapMarkerWithText? markerToBringToTop;
 
       for (int i = 0; i < _markers.length; i++) {
         // Do not change focus state of the marker currently being edited
@@ -1025,6 +1047,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
             _markers[i] = _markers[i].cloneWithFocus(context, true);
           }
           focusedMarker = _markers[i];
+          markerToBringToTop = _markers[i];
           newFocusSet = true;
         } else {
           if (_markers[i].showTitle) {
@@ -1044,6 +1067,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       }
       if (!newFocusSet) {
         focusedMarker = null;
+      }
+
+      if (markerToBringToTop != null) {
+        _markers.removeWhere((m) => m.place.id == markerToBringToTop!.place.id);
+        _markers.add(markerToBringToTop!);
       }
     });
   }
