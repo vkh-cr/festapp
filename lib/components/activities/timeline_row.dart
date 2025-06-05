@@ -395,8 +395,14 @@ class _TimelineRowState extends State<TimelineRow> {
       }
 
       // 4. Detail Text (Place/Event Title)
-      String? placeTitle = widget.assignment?.places.firstOrNull?.title;
-      String? eventTitle = widget.assignment?.events.firstOrNull?.title;
+      String? placeTitle;
+      if(placeCount == 1){
+        placeTitle = widget.assignment?.places.firstOrNull?.title;
+      }
+      String? eventTitle;
+      if(eventCount == 1){
+        eventTitle = widget.assignment?.events.firstOrNull?.title;
+      }
       String detailText = placeTitle ?? eventTitle ?? "";
       bool detailTextExpanded = false;
 

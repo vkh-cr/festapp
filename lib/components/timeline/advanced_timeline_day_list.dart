@@ -17,6 +17,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'schedule_helper.dart';
 import 'advanced_timeline_controller.dart';
 import 'package:fstapp/app_config.dart';
+import 'schedule_timeline.dart';
 
 
 class DayList extends StatelessWidget {
@@ -41,8 +42,7 @@ class DayList extends StatelessWidget {
       return controller.emptyContent!;
     }
 
-    final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ??
-        TimeBlockHelper.splitTimeBlocksByTimeOfDay(events);
+    final List<TimeBlockGroup> groupedEvents = controller.customSplitter?.call(events, context) ?? TimeBlockHelper.groupEventsByFeatureSettings(events);
 
     final children = <Widget>[];
 
@@ -200,7 +200,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final controller = widget.controller;
     final onToggle = widget.onToggle;
 
-    final bool isActivity = event.timeBlockType == TimeBlockType.activity;
+    final bool isActivity = event.isActivity;
 
     const stripeW = 6.0, stripeH = 58.0;
     final Color eventSpecificColor = ThemeConfig.eventTypeToColor(context, event.eventType);
@@ -225,14 +225,13 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
     final hasDescription = !HtmlHelper.isHtmlEmptyOrNull(event.description);
     final hasPlace = event.timeBlockPlace?.title != null;
     final isEditor = controller.showAddNewEventButton?.call() ?? false; // This might mean 'user can edit/manage ANY event' in this context
-    // final canSignIn = event.timeBlockType == TimeBlockType.canSignIn && !isActivity; // Replaced by _isEventSupportingSignIn
     final haveChildren = event.haveChildren();
 
     final bool baseCanExpand;
     if (isActivity) {
-      baseCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (hasDescription || hasPlace);
+      baseCanExpand = !HtmlHelper.isHtmlLong(event.description, lengthThreshold: 250) && (hasDescription || hasPlace || haveChildren);
     } else {
-      baseCanExpand = !haveChildren && !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || event.isSupportingSignIn());
+      baseCanExpand = !HtmlHelper.isHtmlLong(event.description) && (isEditor || hasDescription || hasPlace || haveChildren || event.isSupportingSignIn());
     }
     final bool currentCanExpand = baseCanExpand;
 
@@ -260,7 +259,139 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
         ? eventPastelColorForText
         : unselectedColor;
 
-    Widget inlineActionSection = SizedBox.shrink();
+    Widget buildSharedContent() {
+      var eventGroups = TimeBlockHelper.splitTimeBlockByPlace(event.children!);
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Builder(builder: (context) { // Use Builder to get context for selectedColor if needed here
+            List<Widget> actionButtons = [];
+
+            // Companion Button
+            if (_shouldShowCompanionButton(context, event, controller)) {
+              actionButtons.add(
+                  TextButton.icon(
+                    onPressed: () => controller.onCompanionButtonPressed?.call(context, event),
+                    icon: Icon(Icons.people_outline, size: 14, color: selectedColor),
+                    label: Text('Companions'.tr(), style: TextStyle(color: selectedColor)),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                  )
+              );
+            }
+
+            // Scan Button
+            if (_shouldShowScanButton(context, event, controller)) {
+              actionButtons.add(
+                  TextButton.icon(
+                    onPressed: () => controller.onScanButtonPressed?.call(context, event.id),
+                    icon: Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
+                    label: Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                  )
+              );
+            }
+
+            // Edit Button
+            if (isEditor && !isActivity) {
+              actionButtons.add(
+                  TextButton.icon(
+                    onPressed: () => controller.onEditEvent?.call(context, event.id),
+                    icon: Icon(Icons.edit, size: 14, color: selectedColor),
+                    label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
+                    style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
+                  )
+              );
+            }
+            return Row(
+              children: [
+                if (event.timeBlockPlace != null)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => controller.onPlaceTap?.call(context, event.timeBlockPlace!),
+                        icon: Icon(Icons.place, size: 14, color: selectedColor),
+                        label: Text(
+                          event.timeBlockPlace!.title,
+                          style: TextStyle(color: selectedColor),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                      ),
+                    ),
+                  ),
+                if (event.timeBlockPlace == null && actionButtons.isNotEmpty)
+                  const Spacer(), // Provides space if no place, pushing actions to right
+
+                if (actionButtons.isNotEmpty)
+                  Wrap(
+                    spacing: 8.0, // Horizontal spacing between buttons in the wrap
+                    alignment: WrapAlignment.end,
+                    children: actionButtons,
+                  )
+              ],
+            );
+          }),
+          const SizedBox(height: 8),
+          if (!event.isCancelled && !isActivity && capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
+            Center(
+              child: event.isSignedIn()
+                  ? OutlinedButton(
+                onPressed: () => _handleSignOutEvent(event.id),
+                style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
+                child: Text('Sign out'.tr()),
+              )
+                  : OutlinedButton(
+                onPressed: () { controller.onSignInEvent!(event.id); },
+                style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
+                child: Text('Sign in'.tr()),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (!event.isCancelled && event.isSupportingSignIn() && !AuthService.isLoggedIn()) ...[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: HtmlView(
+                html: '''
+                                <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
+                                  <div>${"An account is required to join this event.".tr()}</div>
+                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
+                                    ${"Click here to sign in.".tr()}
+                                  </a>
+                                </div>
+                              ''',
+                isSelectable: true,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          if (haveChildren)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0,0,0,24),
+              child: ScheduleTimeline(
+                eventGroups: eventGroups,
+                onEventPressed: controller.onEventPressed,
+                showAddNewEventButton: () {return ((controller.showAddNewEventButton?.call() ?? false) && !isActivity);},
+                onAddNewEvent: controller.onAddNewEvent,
+                parentEvent: event,
+                nodePosition: 0.35,
+                isGroupTitleShown: eventGroups.length > 1,
+              ),
+            ),
+          if(hasDescription)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: HtmlView(html: event.description ?? "", isSelectable: true),
+            ),
+        ],
+      );
+    }
+
+    Widget inlineActionSection = const SizedBox.shrink();
     if (event.isCancelled && !event.isInMySchedule() && !event.isSignedIn()) {
       inlineActionSection = Padding(
         padding: const EdgeInsets.only(right: 8.0),
@@ -376,15 +507,16 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   if (currentCanExpand) {
                     onToggle();
                   } else if (controller.onEventPressed != null) {
-                    if (isActivity) {
-                      if(hasDescription){
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return DetailDialog(title: event.title, canEdit: false, htmlDescription: event.description,);
-                          },
-                        );
-                      }
+                    if (isActivity && (hasDescription || hasPlace || haveChildren)) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return DetailDialog(
+                            title: "${event.title} ${event.durationTimeString()}",
+                            customContentWidget: buildSharedContent(),
+                          );
+                        },
+                      );
                     } else {
                       controller.onEventPressed?.call(event.id);
                     }
@@ -482,7 +614,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                         size: 20, color: unselectedColor,
                       )
                     else if (controller.onEventPressed != null &&
-                        ((isActivity && hasDescription) ||
+                        ((isActivity) ||
                             (!isActivity && (haveChildren || (hasDescription || hasPlace || isEditor)))
                         ))
                       Icon(Icons.chevron_right, size: 20, color: unselectedColor)
@@ -496,120 +628,7 @@ class _EventCardState extends State<_EventCard> with SingleTickerProviderStateMi
                   firstChild: const SizedBox.shrink(),
                   secondChild: Padding(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Builder(builder: (context) { // Use Builder to get context for selectedColor if needed here
-                          List<Widget> actionButtons = [];
-
-                          // Companion Button
-                          if (_shouldShowCompanionButton(context, event, controller)) {
-                            actionButtons.add(
-                                TextButton.icon(
-                                  onPressed: () => controller.onCompanionButtonPressed?.call(context, event.id),
-                                  icon: Icon(Icons.people_outline, size: 14, color: selectedColor),
-                                  label: Text('Companions'.tr(), style: TextStyle(color: selectedColor)),
-                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
-                                )
-                            );
-                          }
-
-                          // Scan Button
-                          if (_shouldShowScanButton(context, event, controller)) {
-                            actionButtons.add(
-                                TextButton.icon(
-                                  onPressed: () => controller.onScanButtonPressed?.call(context, event.id),
-                                  icon: Icon(Icons.qr_code_scanner, size: 14, color: selectedColor),
-                                  label: Text('Scan'.tr(), style: TextStyle(color: selectedColor)),
-                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
-                                )
-                            );
-                          }
-
-                          // Edit Button
-                          if (isEditor && !isActivity) {
-                            actionButtons.add(
-                                TextButton.icon(
-                                  onPressed: () => controller.onEditEvent?.call(context, event.id),
-                                  icon: Icon(Icons.edit, size: 14, color: selectedColor),
-                                  label: Text('Edit'.tr(), style: TextStyle(color: selectedColor)),
-                                  style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4)),
-                                )
-                            );
-                          }
-
-                          return Row(
-                            children: [
-                              if (event.timeBlockPlace != null)
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: TextButton.icon(
-                                      onPressed: () => controller.onPlaceTap?.call(context, event.timeBlockPlace!),
-                                      icon: Icon(Icons.place, size: 14, color: selectedColor),
-                                      label: Text(
-                                        event.timeBlockPlace!.title,
-                                        style: TextStyle(color: selectedColor),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                    ),
-                                  ),
-                                ),
-                              if (event.timeBlockPlace == null && actionButtons.isNotEmpty)
-                                const Spacer(), // Provides space if no place, pushing actions to right
-
-                              if (actionButtons.isNotEmpty)
-                                Wrap(
-                                  spacing: 8.0, // Horizontal spacing between buttons in the wrap
-                                  alignment: WrapAlignment.end,
-                                  children: actionButtons,
-                                )
-                            ],
-                          );
-                        }),
-                        const SizedBox(height: 8),
-                        if (!event.isCancelled && !isActivity && capEvent && AuthService.isLoggedIn() && (event.isSignedIn() || event.participants < event.maxParticipants) && !showInlineButtons) ...[
-                          Center(
-                            child: event.isSignedIn()
-                                ? OutlinedButton(
-                              onPressed: () => _handleSignOutEvent(event.id),
-                              style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
-                              child: Text('Sign out'.tr()),
-                            )
-                                : OutlinedButton(
-                              onPressed: () { controller.onSignInEvent!(event.id); },
-                              style: _signButtonStyle(buttonTextColor, signInSignOutButtonBorderColor),
-                              child: Text('Sign in'.tr()),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        if (!event.isCancelled && event.isSupportingSignIn() && !AuthService.isLoggedIn()) ...[
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: HtmlView(
-                              html: '''
-                                <div style="color: ${ThemeConfig.redColor(context).toHexString()}; text-align: center;">
-                                  <div>${"An account is required to join this event.".tr()}</div>
-                                  <a href="${AppConfig.webLink}/#/login" style="color: ${ThemeConfig.redColor(context).toHexString()};">
-                                    ${"Click here to sign in.".tr()}
-                                  </a>
-                                </div>
-                              ''',
-                              isSelectable: true,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                        ],
-                        if(hasDescription)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: HtmlView(html: event.description ?? "", isSelectable: true),
-                          ),
-                      ],
-                    ),
+                    child: buildSharedContent(),
                   ),
                   crossFadeState: expanded && currentCanExpand ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                   duration: const Duration(milliseconds: 200),

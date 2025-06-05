@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fstapp/services/time_helper.dart';
 
 class VerticalGridLinesPainter extends CustomPainter {
   final DateTime start, end;
@@ -30,7 +31,7 @@ class VerticalGridLinesPainter extends CustomPainter {
     final Color subHourLineColor = isDarkMode ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08);
     // --- MODIFIED COLORS END ---
 
-    if (pps <= 0 || this.start.isAtSameMomentAs(this.end) || this.start.isAfter(this.end)) {
+    if (pps <= 0 || start.isAtSameMomentAs(end) || start.isAfter(end)) {
       // Avoid drawing or errors if parameters are invalid
       return;
     }
@@ -45,22 +46,22 @@ class VerticalGridLinesPainter extends CustomPainter {
     else if (show15MinTicks) tickInterval = const Duration(minutes: 15);
     else if (show30MinTicks) tickInterval = const Duration(minutes: 30);
 
-    DateTime currentTickTime = this.start.subtract(Duration( // Align to previous tick interval before start
-        minutes: this.start.minute % tickInterval.inMinutes,
-        seconds: this.start.second,
-        milliseconds: this.start.millisecond,
-        microseconds: this.start.microsecond));
-    if (currentTickTime.isBefore(this.start)) { // Ensure first tick is at or after start
+    DateTime currentTickTime = start.subtract(Duration( // Align to previous tick interval before start
+        minutes: start.minute % tickInterval.inMinutes,
+        seconds: start.second,
+        milliseconds: start.millisecond,
+        microseconds: start.microsecond));
+    if (currentTickTime.isBefore(start)) { // Ensure first tick is at or after start
       currentTickTime = currentTickTime.add(tickInterval);
     }
 
     // Calculate the full logical width based on the painter's own start, end, and pps.
-    final double calculatedFullLogicalWidth = (this.end.difference(this.start).inSeconds) * this.pps;
+    final double calculatedFullLogicalWidth = (end.difference(start).inSeconds) * pps;
 
 
     // Iterate for every tick within the logical start/end of the timeline
-    while (currentTickTime.isBefore(this.end) || currentTickTime.isAtSameMomentAs(this.end)) {
-      final double dx = currentTickTime.difference(this.start).inSeconds * pps;
+    while (currentTickTime.isBefore(end) || currentTickTime.isAtSameMomentAs(end)) {
+      final double dx = currentTickTime.difference(start).inSeconds * pps;
 
       bool isHourTick = currentTickTime.minute == 0;
       bool isMidnight = isHourTick && currentTickTime.hour == 0;
