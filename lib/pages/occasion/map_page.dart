@@ -167,7 +167,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     selectedMarker = null;
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
-      loadPlaces(placeId: widget.id);
+      loadData(placeId: widget.id);
     } else {
       if (placeModel.latLng.toString().isEmpty) {
         placeModel.latLng = {
@@ -602,7 +602,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         // For now, we just reload places and exit edit mode.
       }
       selectedMarker = null; // Exit edit mode
-      await loadPlaces(); // Reload default places and polylines
+      await loadData(); // Reload default places and polylines
     } else {
       // Original logic for updating _markers when not in _isShowingGroupsInEditMode
       var markerToRemove = _markers.firstWhereOrNull((m) => m.place.id == savedMarkerPlaceId);
@@ -629,7 +629,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_isShowingGroupsInEditMode) {
       _isShowingGroupsInEditMode = false;
       selectedMarker = null; // Exit edit mode first
-      loadPlaces().then((_) { // Reload default places
+      loadData().then((_) { // Reload default places
         // If we need to restore focus or re-select the original marker:
         if (originalPlaceId != null) {
           var originalMarkerInNewList = _markers.firstWhereOrNull((m) => m.place.id == originalPlaceId);
@@ -667,11 +667,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     // loadPlaces will repopulate _markers with group places
     // addPlacesToMap will use _isShowingGroupsInEditMode to set titles
     // _getDisplayedMarkers will combine _markers (groups) and _selectedMarkers (edited one)
-    loadPlaces(loadOtherGroups: true);
+    loadData(loadOtherGroups: true);
   }
 
 
-  Future<void> loadPlaces(
+  Future<void> loadData(
       {int? placeId, bool loadOtherGroups = false}) async {
     // Preserve selected marker's ID if in edit mode to potentially re-apply state later if needed,
     // though current logic replaces _markers list entirely.
@@ -696,11 +696,13 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         _pathGroups
     );
 
+    bool isPlaceSetToOnePlace = false;
     if(mounted) setState(() {});
     if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
       var p = offlineList.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
+        isPlaceSetToOnePlace = true;
       }
     }
 
@@ -760,7 +762,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if(mounted) setState(() {});
 
 
-    if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
+    if (placeId != null && !isOnlyEditMode && selectedMarker == null && !isPlaceSetToOnePlace) { // Avoid auto-focusing if in edit mode already
       var p = onlineList.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
