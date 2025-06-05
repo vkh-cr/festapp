@@ -614,5 +614,16 @@
   "FeaturesStrings.titleTimeBasedBreaks": "Time-based Breaks",
   "FeaturesStrings.labelAfternoonTime": "Afternoon starts at",
   "FeaturesStrings.labelEveningTime": "Evening starts at",
+  "FeaturesStrings.titleEventTypes": "Event Types",
+  "FeaturesStrings.emptyEventTypes": "No event types defined yet. Click 'Add Event Type' to create one.",
+  "FeaturesStrings.buttonAddEventType": "Add Event Type",
+  "FeaturesStrings.eventTypeDefaultTitle": "New Event Type",
+  "FeaturesStrings.labelEventTypeCode": "Code",
+  "FeaturesStrings.labelEventTypeTitle": "Title",
+  "FeaturesStrings.labelColorSource": "Color Source",
+  "FeaturesStrings.optionCustomColor": "Custom",
+  "FeaturesStrings.labelCustomColorHex": "Custom Color (Hex e.g., #RRGGBB)",
+  "FeaturesStrings.tooltipRemoveEventType": "Remove Event Type",
+  "FeaturesStrings.noType": "No Type",
   "_":"_"
 }
