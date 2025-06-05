@@ -14,6 +14,7 @@ import 'package:fstapp/components/features/map_feature.dart';
 import 'package:fstapp/components/map/map_page_helper.dart';
 import 'package:fstapp/components/timeline/schedule_helper.dart';
 import 'package:fstapp/components/timeline/schedule_timeline.dart';
+import 'package:fstapp/data_services/db_events.dart';
 import 'package:fstapp/dialogs/detail_dialog.dart';
 import 'package:fstapp/data_services/rights_service.dart';
 import 'package:fstapp/pages/occasion/occasion_home_page.dart';
@@ -166,7 +167,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     selectedMarker = null;
     var placeModel = widget.place;
     if (placeModel == null || placeModel.latLng == null) {
-      loadPlaces(placeId: widget.id);
+      loadData(placeId: widget.id);
     } else {
       if (placeModel.latLng.toString().isEmpty) {
         placeModel.latLng = {
@@ -601,7 +602,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         // For now, we just reload places and exit edit mode.
       }
       selectedMarker = null; // Exit edit mode
-      await loadPlaces(); // Reload default places and polylines
+      await loadData(); // Reload default places and polylines
     } else {
       // Original logic for updating _markers when not in _isShowingGroupsInEditMode
       var markerToRemove = _markers.firstWhereOrNull((m) => m.place.id == savedMarkerPlaceId);
@@ -628,7 +629,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     if (_isShowingGroupsInEditMode) {
       _isShowingGroupsInEditMode = false;
       selectedMarker = null; // Exit edit mode first
-      loadPlaces().then((_) { // Reload default places
+      loadData().then((_) { // Reload default places
         // If we need to restore focus or re-select the original marker:
         if (originalPlaceId != null) {
           var originalMarkerInNewList = _markers.firstWhereOrNull((m) => m.place.id == originalPlaceId);
@@ -666,11 +667,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     // loadPlaces will repopulate _markers with group places
     // addPlacesToMap will use _isShowingGroupsInEditMode to set titles
     // _getDisplayedMarkers will combine _markers (groups) and _selectedMarkers (edited one)
-    loadPlaces(loadOtherGroups: true);
+    loadData(loadOtherGroups: true);
   }
 
 
-  Future<void> loadPlaces(
+  Future<void> loadData(
       {int? placeId, bool loadOtherGroups = false}) async {
     // Preserve selected marker's ID if in edit mode to potentially re-apply state later if needed,
     // though current logic replaces _markers list entirely.
@@ -686,9 +687,8 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
       var p = offlinePlaces.firstWhereOrNull((p) => p.id == placeId);
       if (p != null && !offlineList.any((item) => item.id == p.id)) offlineList.add(p);
     }
-    await addEventsToPlace(offlineList);
-    // Temporarily add places to map for offline data if needed, or merge before one call to addPlacesToMap
-    // addPlacesToMap(offlineList); // This might cause a quick flash if online data is different
+    await addOfflineEventsToPlace(offlineList);
+    addPlacesToMap(offlineList);
 
     _pathGroups = (await OfflineDataService.getAllPathGroups()).where((p)=> !(p.isHidden??false)).toList();
     _allGroupPolylines = await MapPageHelper.loadGroupPolylines(
@@ -696,7 +696,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
         _pathGroups
     );
 
+    bool isPlaceSetToOnePlace = false;
+    if(mounted) setState(() {});
+    if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
+      var p = offlineList.firstWhereOrNull((p) => p.id == placeId);
+      if (p != null) {
+        setMapToOnePlaceAndShowPopup(placeId, p);
+        isPlaceSetToOnePlace = true;
+      }
+    }
 
+
+    // online part
     var onlineIcons = await DbPlaces.getAllIcons();
     _icons = onlineIcons; // Prefer online icons
 
@@ -742,20 +753,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
 
     // Update polylines based on current selection
     if (_selectedGroupId == null) {
-      setState(() {
         _polylines = [];
-      });
     } else {
-      setState(() {
         _polylines = _allGroupPolylines[_selectedGroupId!] ?? [];
-      });
     }
 
     // This setState call was inside addPlacesToMap, moved here for clarity after all data processing
     if(mounted) setState(() {});
 
 
-    if (placeId != null && !isOnlyEditMode && selectedMarker == null) { // Avoid auto-focusing if in edit mode already
+    if (placeId != null && !isOnlyEditMode && selectedMarker == null && !isPlaceSetToOnePlace) { // Avoid auto-focusing if in edit mode already
       var p = onlineList.firstWhereOrNull((p) => p.id == placeId);
       if (p != null) {
         setMapToOnePlaceAndShowPopup(placeId, p);
@@ -763,8 +770,18 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin  {
     }
   }
 
-  Future<void> addEventsToPlace(List<PlaceModel> places) async {
+  Future<void> addOfflineEventsToPlace(List<PlaceModel> places) async {
     var events = await OfflineDataService.getAllEvents();
+    events = events.filterRootEvents().sortEvents();
+    for (var p in places) {
+      var matches = events.where((e) => e.place?.id == p.id);
+      p.events.clear();
+      p.events.addAll(matches);
+    }
+  }
+
+  Future<void> addEventsToPlace(List<PlaceModel> places) async {
+    var events = await DbEvents.getAllEvents(RightsService.currentOccasionId()!, false);
     events = events.filterRootEvents().sortEvents();
     for (var p in places) {
       var matches = events.where((e) => e.place?.id == p.id);
