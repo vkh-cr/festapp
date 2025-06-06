@@ -60,13 +60,13 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   /// Handles viewing an occasion.
   Future<void> _handleView(OccasionModel occasion) async {
-    await RightsService.updateOccasionData(occasion.link!);
+    await RightsService.updateOccasionData(link: occasion.link!, force: true);
     RouterService.navigateOccasion(context, "");
   }
 
   /// Handles the reservation action.
   Future<void> _handleReservation(OccasionModel occasion) async {
-    await RightsService.updateOccasionData(occasion.link!);
+    await RightsService.updateOccasionData(link: occasion.link!, force: true);
     RouterService.navigate(
       context,
       "${FormPage.ROUTE}/${occasion.form!.link!}/edit",
@@ -81,7 +81,7 @@ class _OccasionsScreenState extends State<OccasionsScreen> {
 
   /// Handles administration navigation.
   Future<void> _handleAdmin(OccasionModel occasion) async {
-    await RightsService.updateOccasionData(occasion.link!);
+    await RightsService.updateOccasionData(link: occasion.link!, force: true);
     RouterService.navigateOccasion(context, AdminPage.ROUTE);
   }
 

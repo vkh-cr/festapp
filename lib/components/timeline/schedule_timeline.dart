@@ -49,7 +49,7 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
       var timeLineItems = group.events.toList();
       EdgeInsets titlePadding;
 
-      bool isCurrentTitleVisible = group.title.isNotEmpty && widget.isGroupTitleShown;
+      bool isCurrentTitleVisible = widget.isGroupTitleShown;
 
       if (isCurrentTitleVisible && !firstVisibleGroupTitleRendered) {
         // Special padding for the first visible group title
@@ -64,9 +64,29 @@ class _ScheduleTimelineState extends State<ScheduleTimeline> {
         Visibility(
           visible: isCurrentTitleVisible, // Use the pre-calculated visibility
           child: LayoutBuilder(builder: (context, constraints) {
+            double shift = 94.0; // Default to original value as a fallback.
+
+            String longestLeftText = group.events
+                .map((e) => e.data['leftText'] as String? ?? '')
+                .fold('', (prev, element) => element.length > prev.length ? element : prev);
+
+            if (longestLeftText.isNotEmpty) {
+              final style = StylesConfig.timeLineSmallTextStyle.copyWith(
+                color: ThemeConfig.timelineTextColor(context),
+              );
+              final textPainter = TextPainter(
+                text: TextSpan(text: longestLeftText, style: style),
+                maxLines: 1,
+                textDirection: Directionality.of(context),
+              )..layout(minWidth: 0, maxWidth: double.infinity);
+
+              const double rightPadding = 8.0; // from EdgeInsets.all(8.0) in oppositeContentsBuilder
+              shift = textPainter.width + rightPadding;
+            }
+
             return Padding(
               padding: EdgeInsets.only(
-                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) - 94,
+                left: constraints.maxWidth * (widget.nodePosition ?? 0.24) - shift,
                 top: titlePadding.top,
                 bottom: titlePadding.bottom,
               ),
