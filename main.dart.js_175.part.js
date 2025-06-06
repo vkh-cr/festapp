@@ -2,8 +2,8 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_175",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,B,A,F,I,K,L,C={
-diH(){return new C.DV(null)},
-cVc(d,e,f,g,h,i,j){return new C.a5q(j,f,d,g,e,i,h,null)},
+diJ(){return new C.DV(null)},
+cVe(d,e,f,g,h,i,j){return new C.a5q(j,f,d,g,e,i,h,null)},
 DV:function DV(d){this.a=d},
 aPD:function aPD(d,e,f,g){var _=this
 _.d=d
@@ -68,13 +68,13 @@ return new C.aPD(new B.co(new B.cf("https://kjdpmixlnhntmxjedpxh.supabase.co",A.
 C.aPD.prototype={
 gbpV(){var x,w,v,u=A.d.bu(this.d.a.a)
 try{x=B.du(u,0,null)
-if(A.d.lc(J.cPj(x),".supabase.co")){w=A.b.gT(J.cPj(x).split("."))
+if(A.d.lc(J.cPl(x),".supabase.co")){w=A.b.gT(J.cPl(x).split("."))
 return w}}catch(v){}return u},
 gap_(){var x=this.gbpV()
 return"supabase functions deploy notify --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy register --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-custom-email --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-sign-in-code --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-reset-password-link --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-ticket-order --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy send-tickets --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-transactions --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy instance-install --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy synchronize-orders --no-verify-jwt --project-ref "+x+"\nsupabase functions deploy fetch-http-data --no-verify-jwt --project-ref "+x+"\n"},
 B(d){var x=this,w=null,v=U.iE(w,w,w,!0,w,w,1,w,w,w,!1,w,!1,w,w,w,w,!0,w,w,w,w,w,D.bJn,w,w,w,1,w,!0),u=x.d,t=B.fF(!0,A.aR,!1,w,!0,A.v,w,B.fT(),u,w,w,w,w,w,2,D.aAI,A.t,!0,w,!0,w,!1,w,A.aM,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,new C.cee(x),w,w,w,!1,w,w,!1,w,!0,w,A.b2,w,w,A.aQ,A.aN,w,w,w,w,w,w,w,!0,A.F,w,A.b4,w,w,w,w),s=x.e,r=B.fF(!0,A.aR,!1,w,!0,A.v,w,B.fT(),s,w,w,w,w,w,2,D.aAK,A.t,!0,w,!0,w,!1,w,A.aM,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b2,w,w,A.aQ,A.aN,w,w,w,w,w,w,w,!0,A.F,w,A.b4,w,w,w,w),q=x.f,p=B.fF(!0,A.aR,!1,w,!0,A.v,w,B.fT(),q,w,w,w,w,w,2,D.aAF,A.t,!0,w,!0,w,!1,w,A.aM,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b2,w,w,A.aQ,A.aN,w,w,w,w,w,w,w,!0,A.F,w,A.b4,w,w,w,w),o=y.u,n=B.mC(new B.a0(A.bj,B.af(B.a([B.at(B.a([D.bJI,B.bU(w,w,w,w,w,w,Q.Om,w,w,w,new C.cef(x,d),w,w,w,w,w)],o),A.j,A.bX,A.i,0,w),A.ak,H.fa(x.gap_(),w,D.bGT)],o),A.J,A.f,A.i,0,w,A.l),w),w,w,2,w,w),m=x.r,l=B.U(m).i("M<1,a0>")
 m=B.D(new B.M(m,new C.ceg(x),l),l.i("a6.E"))
-return T.f9(v,w,B.dE(B.af(B.a([t,A.ak,r,A.ak,p,E.ed,n,E.ed,D.bJy,A.hl,B.af(m,A.j,A.f,A.i,0,w,A.l),E.ed,D.bJ8,A.hl,C.cVc(!0,s,w,"migrations",u,q,"Migrations")],o),A.J,A.f,A.i,0,w,A.l),w,A.t,W.aT,w,w,A.I),w,w,w,w,w)}}
+return T.f9(v,w,B.dE(B.af(B.a([t,A.ak,r,A.ak,p,E.ed,n,E.ed,D.bJy,A.hl,B.af(m,A.j,A.f,A.i,0,w,A.l),E.ed,D.bJ8,A.hl,C.cVe(!0,s,w,"migrations",u,q,"Migrations")],o),A.J,A.f,A.i,0,w,A.l),w,A.t,W.aT,w,w,A.I),w,w,w,w,w)}}
 C.Ag.prototype={
 gc0(d){return this.a}}
 C.a5q.prototype={
@@ -88,7 +88,7 @@ w.ah()
 x=w.a
 if(x.e){x=x.f
 if(x==null)x=""
-w.e.scl(0,x)}if(w.a.d==="scripts/seed"){x=$.a9()
+w.e.scm(0,x)}if(w.a.d==="scripts/seed"){x=$.a9()
 w.x=new B.co(A.aw,x)
 w.y=new B.co(A.aw,x)}},
 l(){var x=this,w=x.e,v=w.a7$=$.a9()
@@ -117,7 +117,7 @@ v=3
 j=t.d.Q
 j===$&&B.b()
 x=6
-return B.d(j.mV("instance-install",s.a!==0?A.aC.xs(s,null):null),$async$Yf)
+return B.d(j.mV("instance-install",s.a!==0?A.aD.xs(s,null):null),$async$Yf)
 case 6:r=e
 if(r.b!==200)t.A(new C.ckp(t,r))
 else t.A(new C.ckq(t))
@@ -141,7 +141,7 @@ if(v){v=B.bs(A.e9)
 v=B.bs(new B.bm(v.a,v.b,v.c,0.3).bl())
 v=B.aW(S.j2,new B.bm(v.a,v.b,0.5,v.d).bl(),w,w)}else{v=this.c
 v.toString
-x=B.aW(V.tc,B.C(v).ax.a===A.q?B.b1(4294922834):B.b1(4292030255),w,w)
+x=B.aW(V.td,B.C(v).ax.a===A.q?B.b1(4294922834):B.b1(4292030255),w,w)
 v=x}return v},
 B(d){var x=this,w=null,v=y.u,u=B.at(B.a([B.O(x.a.c,w,w,w,w,w,w,w,O.adW,w,w,w,w,w),I.cj,x.b1K()],v),A.j,A.f,A.i,0,w),t=x.a
 u=B.a([u,A.h7,t.e?B.fF(!0,A.aR,!1,w,!0,A.v,w,B.fT(),x.e,w,w,w,w,w,2,D.aAJ,A.t,!0,w,!0,w,!1,w,A.aM,w,w,w,w,w,w,w,1,w,w,!1,"\u2022",w,w,w,w,w,!1,w,w,!1,w,!0,w,A.b2,w,w,A.aQ,A.aN,w,w,w,w,w,w,w,!0,A.F,w,A.b4,w,w,w,w):new B.a0(A.e3,B.O("Directory: "+B.o(t.d),w,w,w,w,w,w,w,w,w,w,w,w,w),w)],v)
@@ -162,11 +162,11 @@ $0(){},
 $S:0}
 C.cef.prototype={
 $0(){B.uM(new B.of(this.a.gap_()))
-this.b.af(y.v).f.akn(D.bD9)},
+this.b.ae(y.v).f.akn(D.bD9)},
 $S:0}
 C.ceg.prototype={
 $1(d){var x=this.a
-return new B.a0(R.CC,C.cVc(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
+return new B.a0(R.CC,C.cVe(!1,x.e,d.b,null,x.d,x.f,d.a),null)},
 $S:z+0}
 C.cko.prototype={
 $0(){var x=this.a
@@ -214,4 +214,4 @@ D.bJv=new B.cx("Run Scripts",null,null,null,null,null,null,null,null,null,null,n
 D.bJy=new B.cx("Initial",null,F.Ij,null,null,null,null,null,null,null,null,null,null,null,null)
 D.bJI=new B.cx("Supabase Function Deploy Commands:",null,P.zK,null,null,null,null,null,null,null,null,null,null,null,null)})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_175",e:"endPart",h:b})})($__dart_deferred_initializers__,"tSDJ9lMIXVciGPgY00MWGhulStc=");
+a.eventLog.push({p:"main.dart.js_175",e:"endPart",h:b})})($__dart_deferred_initializers__,"OmWVMcJA6vJwoFHRC/xP8ltr/c8=");

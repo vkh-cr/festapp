@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_307",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B={
-cKy(){var y,x,w="/offlineOccasion/"
+cKA(){var y,x,w="/offlineOccasion/"
 if(A.ub().giA()==="http"||A.ub().giA()==="https"){y=A.ub()
 y=y.gJL(y)
 x=$.TL
@@ -15,4 +15,4 @@ A=c[0]
 B=a.updateHolder(c[39],B)
 var z=a.updateTypes([])};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_307",e:"endPart",h:b})})($__dart_deferred_initializers__,"qEC4mRNiqxSsx5pC3CZxHYHqLKI=");
+a.eventLog.push({p:"main.dart.js_307",e:"endPart",h:b})})($__dart_deferred_initializers__,"e7Dh6nQH1j9BKcJhYUbyynoxZDQ=");

@@ -2,7 +2,7 @@
 a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_168",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var A,B,F,G,H,E,I,C={
-diG(){return new C.DU(null)},
+diI(){return new C.DU(null)},
 DU:function DU(d){this.a=d},
 aer:function aer(d,e){var _=this
 _.f=_.e=_.d=!1
@@ -45,7 +45,7 @@ return new C.aer(new A.co(B.aw,x),A.a([new A.zu(x),new A.zu(x),new A.zu(x)],y.j)
 C.aer.prototype={
 b_(){var x=this
 x.c9()
-x.r=$.cOa().aNQ()
+x.r=$.cOc().aNQ()
 x.qH()
 x.A(new C.cea())},
 qH(){var x=0,w=A.l(y.f),v=this,u
@@ -64,7 +64,7 @@ bbL(d){this.A(new C.ce5(this,d))},
 B(d){var x,w,v,u=null,t=E.bw(D.bJA,u)
 t=P.iE(u,u,u,!0,u,u,1,u,u,u,!1,u,!1,u,u,H.uD(u,new C.ce9(d)),u,!0,u,u,u,u,u,t,u,u,u,1,u,!0)
 x=A.bF(12)
-x=A.aq(u,u,B.k,u,u,new A.b3(u,A.cRm(B.N,B.lP,new Q.HA("assets/icons/fstappicon.png",u,u),u,B.e5),u,x,u,u,u,B.L),u,64,u,u,u,u,u,64)
+x=A.aq(u,u,B.k,u,u,new A.b3(u,A.cRo(B.N,B.lP,new Q.HA("assets/icons/fstappicon.png",u,u),u,B.e5),u,x,u,u,u,B.L),u,64,u,u,u,u,u,64)
 w=y.g
 w=A.q("Install {title} to get notifications, offline functionality, and a quick launch icon.",A.z(["title","Festapp"],w,w))
 v=y.e
@@ -85,7 +85,7 @@ if(t)s=!r.d&&!r.f&&r.e
 else s=!0
 v=A.a([G.HI(s?B.dl:B.as,d,50,!0,v,u,B.m,250)],n)
 if(r.d)v.push(new A.a0(B.e2,E.bw(A.O("The app is already installed.",q,q,q,q,q,q,q,A.al(q,q,B.dl,q,q,q,q,q,q,q,q,16,q,q,q,q,q,!0,q,q,q,q,q,q,q,q),B.b0,q,q,q,q),q),q))
-if(t&&r.f)v.push(new A.a0(B.e2,A.af(A.a([E.bw(D.bJz,q),B.ak,A.at(A.a([A.bg(A.ea(q,!1,r.w,B.aAL,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.F,q,q),1,q),I.cj,R.q0(A.aW(N.t8,q,q,q),q,E.bw(A.O("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.ce7(r,d),q)],n),B.j,B.f,B.i,0,q)],n),B.j,B.f,B.i,0,q,B.l),q))
+if(t&&r.f)v.push(new A.a0(B.e2,A.af(A.a([E.bw(D.bJz,q),B.ak,A.at(A.a([A.bg(A.ea(q,!1,r.w,B.aAL,!1,q,q,q,q,1,q,!1,q,q,q,q,q,!0,q,q,B.F,q,q),1,q),I.cj,R.q0(A.aW(N.t9,q,q,q),q,E.bw(A.O("Copy Link",q,q,q,q,q,q,q,q,q,q,q,q,q),q),new C.ce7(r,d),q)],n),B.j,B.f,B.i,0,q)],n),B.j,B.f,B.i,0,q,B.l),q))
 w.push(new A.a0(B.cL,A.af(v,B.j,B.f,B.i,0,q,B.l),q))
 w.push(B.a1)
 return A.zv(w,q,p,q,o,new C.ce8(r,h),q,q,q,x,q)},
@@ -105,7 +105,7 @@ C.ceb.prototype={
 $0(){var x=this.a
 x.f=!0
 x=x.w
-x.scl(0,A.ub().j(0))
+x.scm(0,A.ub().j(0))
 x.suS(A.fj(B.H,0,x.a.a.length,!1))},
 $S:0}
 C.ce5.prototype={
@@ -123,7 +123,7 @@ C.ce8.prototype={
 $1(d){if(d)this.a.bbL(this.b)},
 $S:8}
 C.ce6.prototype={
-$0(){$.cOa()
+$0(){$.cOc()
 b.G.window.open(this.a,"_blank")
 return null},
 $S:0}
@@ -143,6 +143,6 @@ D.azq=new A.aB(984254,"MaterialIcons",null,!1)
 D.bCM=new A.ao(22,null,null,null)
 D.bJz=new A.cx("Installation failed. Please open this link in your device's default system browser (e.g., Mi Browser or Chrome). Note: Some devices may not support installing web applications.",null,M.adX,null,B.b0,null,null,null,null,null,null,null,null,null,null)
 D.bJA=new A.cx("Install App",null,null,null,null,null,null,null,null,null,null,null,null,null,null)})();(function lazyInitializers(){var x=a.lazyFinal
-x($,"dJM","cOa",()=>new A.RH())})()};
+x($,"dJP","cOc",()=>new A.RH())})()};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_168",e:"endPart",h:b})})($__dart_deferred_initializers__,"kyqDqe/6CidFVtBFUlsWe9UcQoY=");
+a.eventLog.push({p:"main.dart.js_168",e:"endPart",h:b})})($__dart_deferred_initializers__,"t18drvmBqzQIgBk1R0tDG2B4C2o=");

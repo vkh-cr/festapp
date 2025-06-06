@@ -3,10 +3,10 @@ a[b][c]=a[b][c]||[]
 a[b][c].push({p:"main.dart.js_256",e:"beginPart"})})(self,"$__dart_deferred_initializers__","eventLog")
 $__dart_deferred_initializers__.current=function(a,b,c,$){var J,A,C,B={a20:function a20(d,e){this.a=d
 this.b=e},
-ddy(d){C.b.e3(d,new B.bb4())
+ddA(d){C.b.e3(d,new B.bb4())
 return d},
-zi(d){return B.ddC(d)},
-ddC(d){var w=0,v=A.l(x.l),u,t,s,r
+zi(d){return B.ddE(d)},
+ddE(d){var w=0,v=A.l(x.l),u,t,s,r
 var $async$zi=A.h(function(e,f){if(e===1)return A.i(f,v)
 while(true)switch(w){case 0:w=d!=null?3:5
 break
@@ -24,7 +24,7 @@ s.toString
 w=7
 return A.d(t.dk("occasion",s).aIy("type.eq.,type.is.null"),$async$zi)
 case 7:r=f
-case 4:u=B.ddy(A.b4(J.bA(r,new B.bbd(),x.b),!0,x.c))
+case 4:u=B.ddA(A.b4(J.bA(r,new B.bbd(),x.b),!0,x.c))
 w=1
 break
 case 1:return A.j(u,v)}})
@@ -95,7 +95,7 @@ return B.bVf(u,w==null?"":w)},
 $S:210}
 B.bbd.prototype={
 $1(d){return A.avm(d)},
-$S:137}
+$S:138}
 B.bVg.prototype={
 $1(d){var w=d.b[0]
 w.toString
@@ -106,11 +106,11 @@ $1(d){var w=d.b[0]
 w.toString
 return w},
 $S:454};(function installTearOffs(){var w=a.installStaticTearOff
-w(B,"dCq",0,function(){return[null]},["$1","$0"],["zi",function(){return B.zi(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
+w(B,"dCt",0,function(){return[null]},["$1","$0"],["zi",function(){return B.zi(null)}],0,0)})();(function inheritance(){var w=a.inherit,v=a.inheritMany
 w(B.a20,A.H)
 w(B.bb4,A.er)
 v(A.cd,[B.bbd,B.bVg,B.bVh])})()
 var y={d:"id,occasion,created_at,updated_at,is_hidden,title,description,order,type,data,information_hidden(*)"}
 var x={c:A.E("eG"),l:A.E("B<eG>"),g:A.E("m"),b:A.E("@"),i:A.E("a20?")}};
 ((a,b)=>{a[b]=a.current
-a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"Ze9EbEFLge3DiAs299KwzTXF0Gk=");
+a.eventLog.push({p:"main.dart.js_256",e:"endPart",h:b})})($__dart_deferred_initializers__,"5JJEiTF788J6mdD9ZSBJEv0dKxE=");
