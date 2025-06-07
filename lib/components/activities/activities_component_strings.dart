@@ -5,13 +5,29 @@ class ActivitiesComponentStrings {
   // General
   static String get buttonCancel => 'ActivitiesComponentStrings.buttonCancel'.tr();
   static String get buttonOK => 'ActivitiesComponentStrings.buttonOK'.tr();
-  static String get buttonSave => 'ActivitiesComponentStrings.buttonSave'.tr();
+  static String get buttonPublish => 'ActivitiesComponentStrings.buttonPublish'.tr();
   static String get labelTitle => 'ActivitiesComponentStrings.labelTitle'.tr();
   static String get tooltipRemovePlace => 'ActivitiesComponentStrings.tooltipRemovePlace'.tr();
   static String get tooltipRemoveEvent => 'ActivitiesComponentStrings.tooltipRemoveEvent'.tr();
   static String get tooltipExitFullscreen => 'ActivitiesComponentStrings.tooltipExitFullscreen'.tr();
   static String get tooltipEnterFullscreen => 'ActivitiesComponentStrings.tooltipEnterFullscreen'.tr();
   static String get tooltipAddNewActivity => 'ActivitiesComponentStrings.tooltipAddNewActivity'.tr();
+  static String get tooltipUndo => 'ActivitiesComponentStrings.tooltipUndo'.tr();
+  static String get tooltipRedo => 'ActivitiesComponentStrings.tooltipRedo'.tr();
+  static String get buttonClose => 'ActivitiesComponentStrings.buttonClose'.tr();
+  static String get buttonRestore => 'ActivitiesComponentStrings.buttonRestore'.tr();
+  static String get tooltipZoomIn => 'ActivitiesComponentStrings.tooltipZoomIn'.tr();
+  static String get tooltipZoomOut => 'ActivitiesComponentStrings.tooltipZoomOut'.tr();
+
+  // Autosave status
+  static String get textSaving => 'ActivitiesComponentStrings.textSaving'.tr();
+  static String get textAutosaved => 'ActivitiesComponentStrings.textAutosaved'.tr();
+  static String get loadedAutosave => 'ActivitiesComponentStrings.loadedAutosave'.tr();
+
+  // Publish Button Tooltips
+  static String get textPublishing => 'ActivitiesComponentStrings.textPublishing'.tr();
+  static String get tooltipClickToPublish => 'ActivitiesComponentStrings.tooltipClickToPublish'.tr();
+  static String get textEverythingIsPublished => 'ActivitiesComponentStrings.textEverythingIsPublished'.tr();
 
   // Search/Filter
   static String get hintSearchUsers => 'ActivitiesComponentStrings.hintSearchUsers'.tr();
@@ -54,6 +70,7 @@ class ActivitiesComponentStrings {
   static String textUnnamedEvent = 'Unnamed Event';
 
   static String get activity => 'ActivitiesComponentStrings.activity'.tr();
+  static String publishWithCount(int count) => 'ActivitiesComponentStrings.publishWithCount'.tr(namedArgs: {"count": count.toString()});
 
 
   // Timeline Painter (Date/Time)
