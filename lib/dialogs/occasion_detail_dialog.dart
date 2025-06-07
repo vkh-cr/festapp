@@ -135,7 +135,7 @@ class OccasionDetailDialog extends StatelessWidget {
                             child: OutlinedButton(
                               onPressed: () async {
                                 await RightsService.updateOccasionData(
-                                    occasion.link!);
+                                    link: occasion.link!, force: true);
                                 await RouterService.navigateOccasion(context, "");
                               },
                               style: unifiedButtonStyle,
