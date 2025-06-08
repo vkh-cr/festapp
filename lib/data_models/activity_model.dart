@@ -70,6 +70,14 @@ class ActivityUserInfoModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      Tb.user_info.id: id,
+      Tb.user_info.name: name,
+      Tb.user_info.surname: surname,
+    };
+  }
+
   String toFullNameString() {
     return "${name ?? ""} ${surname ?? ""}".trim();
   }
@@ -164,7 +172,7 @@ class ActivityModel {
       Tb.activities.is_hidden: isHidden,
       Tb.activities.order: order,
       Tb.activities.data: data,
-      Tb.activity_assignments.table: assignments,
+      Tb.activity_assignments.table: assignments?.map((e) => e.toJson()).toList(),
     };
   }
 }
@@ -181,6 +189,13 @@ class AssignmentPlaceLinkModel {
       placeId: j[Tb.activity_assignment_places.place_id] as int?,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      Tb.activity_assignment_places.assignment_id: assignmentId,
+      Tb.activity_assignment_places.place_id: placeId,
+    };
+  }
 }
 
 class AssignmentEventLinkModel {
@@ -194,6 +209,13 @@ class AssignmentEventLinkModel {
       assignmentId: j[Tb.activity_assignment_events.assignment_id] as String?,
       eventId: j[Tb.activity_assignment_events.event_id] as int?,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      Tb.activity_assignment_events.assignment_id: assignmentId,
+      Tb.activity_assignment_events.event_id: eventId,
+    };
   }
 }
 
@@ -254,7 +276,7 @@ class ActivityAssignmentModel {
           ActivityEventModel.fromJson(e as Map<String, dynamic>))
           .toList() ??
           [],
-      user: null, // Populated by EditDataHelper
+      user: j[Tb.user_info.table] != null ? ActivityUserInfoModel.fromJson(j[Tb.user_info.table] as Map<String, dynamic>) : null,
     );
   }
 
@@ -268,8 +290,9 @@ class ActivityAssignmentModel {
       Tb.activity_assignments.title: title,
       Tb.activity_assignments.description: description,
       Tb.activity_assignments.data: data,
-      Tb.activity_assignment_places.table: places,
-      Tb.activity_assignment_events.table: events,
+      Tb.activity_assignment_places.table: places.map((e) => e.toJson()).toList(),
+      Tb.activity_assignment_events.table: events.map((e) => e.toJson()).toList(),
+      Tb.user_info.table: user?.toJson(),
     };
   }
 
@@ -302,4 +325,42 @@ class EditDataBundle {
     this.assignmentEventLinks,
     this.activityAssignments,
   });
+
+  factory EditDataBundle.fromJson(Map<String, dynamic> j) {
+    return EditDataBundle(
+      events: (j['events'] as List<dynamic>?)
+          ?.map((e) => ActivityEventModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      places: (j['places'] as List<dynamic>?)
+          ?.map((p) => ActivityPlaceModel.fromJson(p as Map<String, dynamic>))
+          .toList(),
+      activities: (j[Tb.activities.table] as List<dynamic>?)
+          ?.map((a) => ActivityModel.fromJson(a as Map<String, dynamic>))
+          .toList(),
+      users: (j[Tb.user_info.table] as List<dynamic>?)
+          ?.map((u) => ActivityUserInfoModel.fromJson(u as Map<String, dynamic>))
+          .toList(),
+      assignmentPlaceLinks: (j['assignmentPlaceLinks'] as List<dynamic>?)
+          ?.map((l) => AssignmentPlaceLinkModel.fromJson(l as Map<String, dynamic>))
+          .toList(),
+      assignmentEventLinks: (j['assignmentEventLinks'] as List<dynamic>?)
+          ?.map((l) => AssignmentEventLinkModel.fromJson(l as Map<String, dynamic>))
+          .toList(),
+      activityAssignments: (j[Tb.activity_assignments.table] as List<dynamic>?)
+          ?.map((a) => ActivityAssignmentModel.fromJson(a as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'events': events?.map((e) => e.toJson()).toList(),
+      'places': places?.map((p) => p.toJson()).toList(),
+      Tb.activities.table: activities?.map((a) => a.toJson()).toList(),
+      Tb.user_info.table: users?.map((u) => u.toJson()).toList(),
+      'assignmentPlaceLinks': assignmentPlaceLinks?.map((l) => l.toJson()).toList(),
+      'assignmentEventLinks': assignmentEventLinks?.map((l) => l.toJson()).toList(),
+      Tb.activity_assignments.table: activityAssignments?.map((a) => a.toJson()).toList(),
+    };
+  }
 }
