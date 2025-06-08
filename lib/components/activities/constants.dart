@@ -18,7 +18,7 @@ class ActivityConstants {
   static const double kInitialPanOffset = 0.0;
   static const double kBasePixelsPerSecond = 0.05;
 
-  static const double kDateHeaderHeightConstant = 28.0;
+  static const double kDateHeaderHeightConstant = 30.0;
   static const double kTimeTickAreaHeightConstant = 28.0;
   static const double kTotalTimelineRulerHeightConstant = kDateHeaderHeightConstant + kTimeTickAreaHeightConstant;
 

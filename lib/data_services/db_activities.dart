@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
+import 'package:fstapp/components/activities/activities_component_strings.dart';
 import 'package:fstapp/components/activities/activity_data_helper.dart';
-import 'package:fstapp/components/activities/constants.dart';
 import 'package:fstapp/services/time_helper.dart';
 import 'package:fstapp/services/toast_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -100,27 +100,30 @@ class DbActivities {
     return activitiesPayload;
   }
 
-  static Future<void> autosaveActivities(int occasionId, EditDataBundle bundle) async {
-    final historyPayload = bundle.toJson();
-    if ((historyPayload['activities'] as List?)?.isEmpty ?? true) return;
+  static Future<Map<String, dynamic>?> autosaveActivities(int occasionId, EditDataBundle bundle) async {
+    final historyPayload = bundle.toJsonEditor();
+    if ((historyPayload['activities'] as List?)?.isEmpty ?? true) return null;
 
     try {
-      await _supabase.rpc(
+      final response = await _supabase.rpc(
         'save_activity_history',
         params: {
           'p_occasion_id': occasionId,
           'p_activities_data': historyPayload,
           'p_history_type': 'AUTOSAVE',
+          'p_parent_history_id': bundle.parentHistoryId,
         },
       );
+      return response as Map<String, dynamic>?;
     } catch (e) {
-      print("Autosave failed: $e");
+      print("Exception during autosave RPC: $e");
+      return {'code': 500, 'message': 'An unexpected error occurred.'};
     }
   }
 
   static Future<void> saveActivitiesForEdit(
       BuildContext context, int occasionId, EditDataBundle bundle) async {
-    final historyPayload = bundle.toJson();
+    final historyPayload = bundle.toJsonEditor();
     final updatePayload = _buildUpdatePayload(bundle);
 
     try {
@@ -128,6 +131,7 @@ class DbActivities {
         'p_occasion_id': occasionId,
         'p_activities_data': historyPayload,
         'p_history_type': 'PUBLISH',
+        'p_parent_history_id': bundle.parentHistoryId,
         'p_note': 'Published via application',
       });
       if (historyResponse is Map<String, dynamic> && historyResponse['code'] != 200) {
@@ -149,7 +153,7 @@ class DbActivities {
 
     if (response is Map<String, dynamic> && response['code'] != null) {
       if (response['code'] == 200) {
-        ToastHelper.Show(context, response["message"] as String? ?? "Activities published successfully!", severity: ToastSeverity.Ok);
+        ToastHelper.Show(context, ActivitiesComponentStrings.publishedSuccessfully, severity: ToastSeverity.Ok);
       } else {
         final errorMessage = response["message"] as String? ?? "Failed to publish activities.";
         ToastHelper.Show(context, errorMessage, severity: ToastSeverity.NotOk);
@@ -161,20 +165,28 @@ class DbActivities {
     }
   }
 
-  static Future<EditDataBundle?> getLatestAutosavedVersion(int occasionId) async {
+  static Future<AutosaveInfo> getAutosaveAndPublishInfo(int occasionId) async {
     final resp = await _supabase.rpc(
-      'get_latest_autosave',
+      'get_latest_autosave', // This now calls the combined SQL function
       params: {'p_occasion_id': occasionId},
     );
 
     final responseMap = resp as Map<String, dynamic>?;
     if (responseMap == null || responseMap['code'] != 200 || responseMap['data'] == null) {
-      return null;
+      return AutosaveInfo(); // Return empty object on failure
     }
 
-    final historyData = responseMap['data'] as Map<String, dynamic>;
-    final bundleJson = historyData['activities_data'] as Map<String, dynamic>;
-    return EditDataBundle.fromJson(bundleJson);
+    final data = responseMap['data'] as Map<String, dynamic>;
+    final latestPublishId = data['latest_publish_id'] as int?;
+    final autosaveData = data['autosave'] as Map<String, dynamic>?;
+
+    EditDataBundle? bundle;
+    if (autosaveData != null) {
+      final bundleJson = autosaveData['activities_data'] as Map<String, dynamic>;
+      bundle = EditDataBundle.fromJson(bundleJson);
+    }
+
+    return AutosaveInfo(autosavedBundle: bundle, latestPublishId: latestPublishId);
   }
 
   static Future<List<ActivityHistoryInfo>> listActivityHistory(int occasionId) async {
@@ -206,8 +218,11 @@ class DbActivities {
 
     final historyData = responseMap['data'] as Map<String, dynamic>;
     final bundleJson = historyData['activities_data'] as Map<String, dynamic>;
-    return EditDataBundle.fromJson(bundleJson);
+    final bundle = EditDataBundle.fromJson(bundleJson);
+    return bundle;
   }
+
+
 
   static Future<void> deleteAutosave(int occasionId) async {
     try {
@@ -221,4 +236,11 @@ class DbActivities {
       print("Could not delete autosave history for occasion $occasionId: $e");
     }
   }
+}
+
+class AutosaveInfo {
+  final EditDataBundle? autosavedBundle;
+  final int? latestPublishId;
+
+  AutosaveInfo({this.autosavedBundle, this.latestPublishId});
 }
